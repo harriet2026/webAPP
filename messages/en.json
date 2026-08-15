@@ -6381,7 +6381,8 @@
         "noAiData": "No data available",
         "recipientGroupsBadge": "{n} groups",
         "recipientScopeLine": "{recipients} ({count})",
-        "recipientGroupLine": "{recipients} ({count})"
+        "recipientGroupLine": "{recipients} ({count})",
+        "multiBasisSummaryLabel": "{recipients} recipients · {groups} disposal groups"
       },
       "features": {
         "basicInfo": "Basic Information",

@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测���������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1014,7 +1014,7 @@
           "header": "命中规则《{name}》",
           "channel": "投递通道：{channel}",
           "proxy": "代理 IP：{name}（出口：{egress}）",
-          "helo": "HELO ����：{helo}",
+          "helo": "HELO �����：{helo}",
           "tls": "TLS ��略：{level}",
           "response": "预计对端响应：250 2.0.0 Ok"
         },
@@ -2211,7 +2211,7 @@
     "batchDisableTitle": "批量停用",
     "batchDisableDescription": "确定批量停用选中的 {count} 个账号？停用后将立即终止其登录会话。",
     "batchDeleteTitle": "批量删除",
-    "batchDeleteDescription": "确定批量删除选中的 {count} 个账号？此���作不可撤销。",
+    "batchDeleteDescription": "确定批��删除选中的 {count} 个账号？此���作不可撤销。",
     "batchSuccess": "批量操���成功",
     "rbac": {
       "searchPlaceholder": "搜索角色名��…",
@@ -2723,7 +2723,7 @@
       "logoutOthersConfirm": "确认下线除当前设备外���所有其他设备（共 {n} 台）？",
       "loggedOutDevice": "已下线设备 {name}",
       "loggedOutOthers": "已下线 {n} 台设备",
-      "loggedOut": "已退出登录",
+      "loggedOut": "已退出登���",
       "onlineCount": "当前在线设备（{n}）"
     },
     "trustedDevices": {
@@ -3524,7 +3524,7 @@
     "expiresHeader": "到期时间",
     "reasonHeader": "原因",
     "preview": {
-      "title": "当前配置效果",
+      "title": "当前配���效果",
       "allUnlimited": "当前规则未���置任何��制条件，建议至少配置一项阈值，否则规则无实际作用。",
       "whenIP": "当 IP 地��",
       "allIP": "���部 IP",
@@ -3862,7 +3862,7 @@
     "presetBarracuda": "Barracuda",
     "presetBarracudaTip": "Barracuda Central IP ���名单",
     "presetSorbs": "SORBS",
-    "presetSorbsTip": "垃圾邮件和开放中继阻止系统",
+    "presetSorbsTip": "垃圾邮件和开放中继���止系统",
     "manualQuery": "手动查询",
     "queryIP": "IP 地��",
     "queryButton": "查询",
@@ -3945,7 +3945,7 @@
     "greylistExemptions": "豁免设置",
     "greylistExemptAuth": "已认证发件人（SPF/DKIM通过）自动豁免",
     "greylistExemptWhitelist": "白名单 IP / 域自动豁免",
-    "greylistExemptInternal": "内部域名互发豁免",
+    "greylistExemptInternal": "内部域名��发豁免",
     "greylistDelayInvalid": "延迟秒数必须��少于 10 秒",
     "greylistWindowInvalid": "频率窗口���须不少于 10 秒",
     "greylistWindowBeforeDelay": "延迟模式下，频率窗口不能短于延迟时间",
@@ -4421,7 +4421,7 @@
     "editorSubtitle": "配置内容关键词/正则规���，识别并处置含敏感信息的邮件",
     "cardTooltipStrategy": "策略：内容规则",
     "cardTooltipActions": "动作：隔离、投递",
-    "cardTooltipEffect": "影响：命中则隔离，邮���保留至隔离区",
+    "cardTooltipEffect": "影响：命中则���离，邮���保留至隔离区",
     "cardTooltipQuarantineHint": "被隔离邮件可在邮件隔离模块查看"
   },
   "authSpoofing": {
@@ -4883,7 +4883,7 @@
     },
     "closeConfirm": {
       "title": "确认离开",
-      "body": "当前配置未保存，是否放弃修改？",
+      "body": "当前配置��保存，是否放弃修改？",
       "stay": "继续编辑",
       "discard": "放弃并关闭"
     },
@@ -5067,7 +5067,7 @@
       "platformManagedHint": "反病毒服务器与病毒库由平台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
       "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
       "updateSuccess": "病毒库更新请求已提交",
-      "updateFailed": "病毒库更新失败",
+      "updateFailed": "病毒库更新失��",
       "receiveDefault": "收信方向默认：发现病毒后隔离；扫描超时继续流水线"
     },
     "imageDetect": {
@@ -5359,7 +5359,7 @@
         "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
       },
       "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险链接，展示提示页。",
-      "desc": "终端用户点击改写后的链接时，网关按下列已启用项对该 URL 做实时复检",
+      "desc": "终端用户点击改写后的链接时，网���按下列已启用项对该 URL 做实时复检",
       "engineAi": "钓鱼邮件智能体",
       "engineLegacy": "URL 沙箱",
       "timeoutPolicy": {
@@ -5681,7 +5681,7 @@
     "eyebrow": "高级规则设置",
     "title": "配置管理",
     "description": "查看各服务的配置文件内容，并通过数据库覆盖配置项",
-    "noFiles": "未找到配置文件",
+    "noFiles": "未找到配置���件",
     "key": "配置键",
     "fileValue": "文件值",
     "overrideValue": "覆盖值",
@@ -6024,7 +6024,7 @@
       "confirmRelease": "确认放行选中邮件？",
       "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
-      "releaseAuditHint": "放行与类型改判都��写入审计记录。",
+      "releaseAuditHint": "放行��类型改判都��写入审计记录。",
       "recallDescription": "尝������收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件系统限制；操��结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
@@ -6376,7 +6376,8 @@
         "noAiData": "暂无数据",
         "recipientGroupsBadge": "{n} 组",
         "recipientScopeLine": "{recipients}（{count} 人）",
-        "recipientGroupLine": "{recipients}（{count} 人）"
+        "recipientGroupLine": "{recipients}（{count} 人）",
+        "multiBasisSummaryLabel": "{recipients} 位收件人 · {groups} 类处置依据"
       },
       "features": {
         "basicInfo": "邮件基本信息",
@@ -7146,7 +7147,7 @@
       "desc_comprehensiveEngineResult": {
         "source": "AI意图分类引擎",
         "usage": "根据AI意图分类结果过滤",
-        "note": "支持置信度阈值，可识别钓鱼、垃圾、涉政等"
+        "note": "支持置信度阈值，可识��钓鱼、垃圾、涉政等"
       },
       "desc_senderIpCount15Min": {
         "source": "发信行为统计",
@@ -7478,7 +7479,7 @@
     "categoryHint": "选择哪些类别的隔离邮件会触发用户通知",
     "category_spam": "垃圾邮件",
     "category_advertising": "广告邮件",
-    "category_suspicious": "可疑邮件",
+    "category_suspicious": "可疑���件",
     "category_sensitive": "敏感内容",
     "category_phishing": "钓鱼邮件",
     "category_virus": "病毒邮件",
@@ -7691,7 +7692,7 @@
   "passwordPolicy": {
     "title": "密码策略",
     "minLength": "密码最小长度",
-    "minCharClasses": "最少字符类别数",
+    "minCharClasses": "��少字符类别数",
     "classesHint": "字符类别：大写字母、小写字母、数字、特殊符号（共 4 类）"
   },
   "securityOverview": {
@@ -9178,7 +9179,7 @@
       "sectionDetectionDescription": "设定置信度阈值，决定命中判定的严格程度",
       "sectionDisposition": "处置策略",
       "sectionDispositionDescription": "命中仿冒后如何处理邮件与通知",
-      "brandName": "品牌名称",
+      "brandName": "���牌名称",
       "brandNamePlaceholder": "CACTER科技",
       "brandNameHint": "最多 30 字符",
       "keywords": "品牌关键词",
@@ -10093,7 +10094,7 @@
       "senderName": "显示名称",
       "testRecipient": "测试收件人",
       "sendTest": "发送测试邮件",
-      "saveClose": "保存并关闭",
+      "saveClose": "���存并关闭",
       "saved": "配置已保存",
       "saveFailed": "保存失败",
       "testFailed": "测试失败",
@@ -10776,7 +10777,7 @@
         "timeout_mark_positions_empty": "选择「打标记」时，至少要指定一个标记位置",
         "timeout_mark_text_empty": "标记文本不能为空",
         "timeout_mark_text_too_long": "标记文本不能超过 {max} 个字符",
-        "timeout_temp_disposal_invalid": "超时临时处置「{value}」无效，只能是：{allowed}"
+        "timeout_temp_disposal_invalid": "超时临时处置「{value}」无效，��能是：{allowed}"
       },
       "timezone_invalid": "时区「{value}」无效，请填写标准的 IANA 时区名（如 Asia/Shanghai）",
       "too_many_items": "一次最多处理 {max} 项，请减少选择后重试"
@@ -11018,7 +11019,7 @@
       "no_rule_drafts_in_session": "该会话中没有可用的规则草稿"
     },
     "security_overview": {
-      "date_range_required": "请选择开始日期与结束日期",
+      "date_range_required": "请选择开始日期与结束日��",
       "date_required": "请选择日期",
       "date_format_invalid": "日期格式不正确，请使用 YYYY-MM-DD",
       "view_by_required": "请选择统计视角",
@@ -11164,7 +11165,7 @@
     },
     "delivery_traffic": {
       "end_date_in_future": "结束日期不能晚于今天",
-      "ai_interpretation_disabled": "AI 解读功能未启用",
+      "ai_interpretation_disabled": "AI 解读功能���启用",
       "too_many_concurrent_ai_requests_please": "当前 AI 请求过多，请稍后重试"
     },
     "link_attachment_security": {

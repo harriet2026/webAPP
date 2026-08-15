@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import {
   CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown,
-  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User, Layers,
+  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User, Layers, Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -118,6 +118,19 @@ function connectorArrowClass(i: number, hitIndex: number): string {
 }
 
 const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
+
+// 检测流程的阶段 key（connection/identity/…）与 disposal-basis-config.ts
+// 里 PolicyMeta.stage（1-5）的固定映射——两套体系描述的是同一条策略流水
+// 线，编号语义完全一致（stage 4 = AI 智能分析，与 STAGE_DEFS 一致）。用来
+// 把"处置依据按 policy_key 分组"的结果归属到对应的检测流程阶段卡片，从
+// 而在阶段卡片上标出"这一阶段的结果因收件人而分叉"。
+const STAGE_KEY_TO_NUM: Record<string, number> = {
+  connection: 1,
+  identity: 2,
+  content: 3,
+  ai: 4,
+  comprehensive: 5,
+};
 
 // aiEnabled defaults to false (fail-closed): this is an entitlement gate for
 // the AI verdict block (spec §5.4/§4.4 CapAI), so a future call site that
@@ -234,6 +247,41 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   // 下方渲染分支与改造前完全一致。
   const basisGroups = useMemo(() => groupRecipientBasisByPolicy(basis), [basis]);
 
+  // 同一策略模块下，不同收件人仍可能命中不同的具体规则——按"模块 + 具体
+  // 规则"再分一层，这是"处置依据"区块实际渲染的卡片粒度，也是检测流程
+  // 阶段卡片"N组"徽标应该对齐的粒度（否则"阶段3命中2组"却在下面只看到
+  // 1张卡片，两处数字对不上）。之前 recipientGroups 徽标只依赖
+  // matched_action_rules/matched_tag_rules 按 check 交叉推导——但 SPF/DKIM/
+  // IP 策略等大多数检测项是对整封邮件评估一次、不分收件人，实际数据里几
+  // 乎不会出现按 ruleId 分叉，导致群发多结果邮件在"安全分析"里完全看不
+  // 出差异（用户反馈的问题）。disposal_basis.per_recipient 才是"最终裁决
+  // 按收件人分叉"的权威信号，这里补一路基于它的分组，与原有 check 级分组
+  // 信号取并集，两者都可能命中。
+  const basisSplitGroups = useMemo(() => {
+    const out: { policyKey: string; entry: DisposalBasis; recipients: string[] }[] = [];
+    for (const group of basisGroups) {
+      const subGroups = new Map<string, { entry: DisposalBasis; recipients: string[] }>();
+      for (const entry of group.entries) {
+        const subKey = `${entry.rule_id ?? ''}|${entry.rule_name ?? ''}`;
+        const existing = subGroups.get(subKey);
+        if (existing) {
+          existing.recipients.push(entry.recipient ?? '—');
+        } else {
+          subGroups.set(subKey, { entry, recipients: [entry.recipient ?? '—'] });
+        }
+      }
+      for (const sub of subGroups.values()) {
+        out.push({ policyKey: group.policyKey, entry: sub.entry, recipients: sub.recipients });
+      }
+    }
+    return out;
+  }, [basisGroups]);
+  const isMultiBasis = basisSplitGroups.length > 1;
+  const totalBasisRecipients = useMemo(
+    () => basisSplitGroups.reduce((sum, g) => sum + g.recipients.length, 0),
+    [basisSplitGroups],
+  );
+
   // 单张处置依据卡片渲染——非群发/单一依据场景直接传 basis 本身
   // （scope 不传，不新增"适用范围"行，DOM 结构与改造前逐字节一致）；
   // 群发多依据场景每个"模块+具体规则"组合各渲染一张卡，附带
@@ -343,18 +391,63 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             {t('totalElapsed', { ms: totalElapsedMs })}
           </span>
         </div>
+
+        {/* 群发结果摘要：不同收件人最终命中不同处置依据（isMultiBasis）时，
+            在阶段卡片行之前先给一眼可见的"这是一封多结果群发邮件"信号——
+            此前只有下方"处置依据"多卡片能体现分叉，运营必须滚动到底部才
+            会发现，检测流程区域看起来跟单收件人邮件一模一样。 */}
+        {isMultiBasis && (
+          <div
+            className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-violet-200 bg-violet-50/60 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/20"
+            data-testid="analysis-multi-basis-summary"
+          >
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Users className="h-4 w-4 shrink-0 text-violet-600" />
+              {t('multiBasisSummaryLabel', { recipients: totalBasisRecipients, groups: basisSplitGroups.length })}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {basisSplitGroups.map((g, i) => (
+                <span
+                  key={i}
+                  className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(g.entry.action))}
+                >
+                  {getActionLabel(g.entry.action, disposalLang)}（{g.recipients.length}）
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-start gap-0 overflow-x-auto pb-2">
           {stages.map((st, i) => {
             const isExpanded = expandedStages.includes(st.stage);
-            // 群发邮件多依据支撑：本阶段内任意一个 check 的收件人命中结果
-            // 出现分歧（recipientGroups.length > 1）时，卡片右上角提示
-            // "N组"，与列表页处置依据列的多依据文案（"等 N 项"）呼应，
-            // 提前告知运营"这个阶段不同收件人结果不一致，需要点开看明细"。
-            const maxRecipientGroupCount = Math.max(
+            // 群发邮件多依据支撑（信号一）：本阶段内任意一个 check 的收件
+            // 人命中结果出现分歧（matched_action_rules/matched_tag_rules
+            // 按 ruleId 交叉推导），卡片右上角提示"N组"。但 SPF/DKIM/IP 等
+            // 多数检测项是对整封邮件评估一次、不分收件人，这一信号在实际
+            // 数据里很少触发。
+            const maxCheckRecipientGroupCount = Math.max(
               0,
               ...st.checks.map((c) => c.recipientGroups?.length ?? 0),
             );
-            const hasRecipientSplit = maxRecipientGroupCount > 1;
+            // 信号二（GT-12946 详情页落地补充）：本阶段是否是"处置依据"分
+            // 组里某一组/某几组策略命中所在的阶段（按 policy_key 对应的
+            // PolicyMeta.stage 归属）。这是"最终裁决按收件人分叉"的权威
+            // 信号，能覆盖信号一覆盖不到的大多数真实场景——群发邮件的分
+            // 叉几乎总是发生在"哪条策略最终判定了这个收件人"，而不是某个
+            // 检测项内部命中的具体规则 ID 不同。
+            const stageBasisGroups = isMultiBasis
+              ? basisSplitGroups.filter((g) => getPolicyMeta(g.policyKey)?.stage === STAGE_KEY_TO_NUM[st.key])
+              : [];
+            const stageBasisSplitCount = stageBasisGroups.length;
+            // 注意阈值不对称：信号一（check 内规则分叉）本身就得 >1 组才算
+            // "分叉"；信号二哪怕本阶段只归属 1 组处置依据，只要整体
+            // isMultiBasis 成立，也代表"这个阶段是决定了一部分收件人命运
+            // 的阶段"——如果两组处置依据分别落在阶段3和阶段5（各 1 组），
+            // 用 >1 的统一阈值会让两个阶段都拿不到徽标，群发多结果邮件又
+            // 变回"看起来跟普通邮件一样"。
+            const recipientSplitCount = Math.max(maxCheckRecipientGroupCount, stageBasisSplitCount);
+            const hasRecipientSplit = maxCheckRecipientGroupCount > 1 || stageBasisSplitCount >= 1;
             return (
               <div key={st.stage} className="flex items-start">
                 <InteractiveSurface
@@ -378,7 +471,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                         className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-full border border-violet-300 bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
                       >
                         <Layers className="h-3 w-3" />
-                        {t('recipientGroupsBadge', { n: maxRecipientGroupCount })}
+                        {t('recipientGroupsBadge', { n: recipientSplitCount })}
                       </span>
                     )}
                     <div className="text-center">
@@ -457,6 +550,38 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                                 );
                               })}
                             </div>
+
+                            {/* 处置依据分组明细（GT-12946 详情页落地）：这个阶段
+                                是"处置依据"分组归属的阶段之一时，直接在展开区
+                                内列出"哪些收件人 · 命中哪条规则 · 最终动作"，
+                                不强制运营再滚到下方"处置依据"区块去对照——
+                                下方仍保留完整卡片（含规则跳转链接等），这里
+                                只是提前给一份摘要。 */}
+                            {stageBasisGroups.length > 0 && (
+                              <div
+                                className="mt-2 space-y-1.5 rounded-md border border-violet-200 bg-violet-50/50 p-2 dark:border-violet-900 dark:bg-violet-950/20"
+                                data-testid={`analysis-stage-${st.stage}-basis-groups`}
+                              >
+                                {stageBasisGroups.map((g, gi) => (
+                                  <div key={gi} className="flex items-center justify-between gap-2 text-xs">
+                                    <span className="min-w-0 truncate text-muted-foreground">
+                                      {t('recipientGroupLine', {
+                                        recipients: g.recipients.join('、'),
+                                        count: g.recipients.length,
+                                      })}
+                                      {g.entry.rule_name && g.entry.rule_name !== '—' && (
+                                        <span className="ml-1 text-foreground">「{g.entry.rule_name}」</span>
+                                      )}
+                                    </span>
+                                    {g.entry.action && (
+                                      <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium', getActionColor(g.entry.action))}>
+                                        {getActionLabel(g.entry.action, disposalLang)}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </>
                         )}
                       </div>
@@ -519,33 +644,20 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
         </div>
       )}
 
-      {/* 处置依据（gap 2.7）—— 非群发/单一依据场景（basisGroups.length <= 1）
+      {/* 处置依据（gap 2.7）—— 非群发/单一依据场景（basisSplitGroups.length <= 1）
           渲染与改造前逐字节一致的单卡；群发邮件因不同收件人命中不同策略
           模块/规则而产生多条依据时（GT-12946 详情页落地），按"模块 + 具体
-          规则"组合各渲染一张卡片，附带"适用范围"行标明命中人群。 */}
+          规则"组合各渲染一张卡片，附带"适用范围"行标明命中人群。
+          basisSplitGroups 与上方检测流程阶段卡片"N组"徽标共享同一份分组
+          计算，两处数字始终一致（阶段卡片说"命中2组"，这里就正好有2张
+          卡片），不会出现"上面说2组、下面只看到1张卡"的数字不对齐。 */}
       {basis?.policy_key && (
-        basisGroups.length <= 1 ? (
+        !isMultiBasis ? (
           renderDisposalBasisCard(basis)
         ) : (
           <div className="space-y-3" data-testid="analysis-disposal-basis-groups">
-            {basisGroups.flatMap((group, gi) => {
-              // 同一策略模块下，不同收件人仍可能命中不同的具体规则——按
-              // "规则 id + 规则名"再分一层，确保"适用范围"始终精确对应
-              // 真正命中同一条规则的收件人，不会把命中不同规则的人混进
-              // 同一行"适用范围"文案里。
-              const subGroups = new Map<string, { entry: DisposalBasis; recipients: string[] }>();
-              for (const entry of group.entries) {
-                const subKey = `${entry.rule_id ?? ''}|${entry.rule_name ?? ''}`;
-                const existing = subGroups.get(subKey);
-                if (existing) {
-                  existing.recipients.push(entry.recipient ?? '—');
-                } else {
-                  subGroups.set(subKey, { entry, recipients: [entry.recipient ?? '—'] });
-                }
-              }
-              return [...subGroups.values()].map((sub, si) =>
-                renderDisposalBasisCard(sub.entry, { scope: sub.recipients, idSuffix: `${gi}-${si}` }));
-            })}
+            {basisSplitGroups.map((sub, i) =>
+              renderDisposalBasisCard(sub.entry, { scope: sub.recipients, idSuffix: `${i}` }))}
           </div>
         )
       )}
