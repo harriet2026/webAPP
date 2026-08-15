@@ -406,7 +406,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
               {t('multiBasisSummaryLabel', { recipients: totalBasisRecipients, groups: basisSplitGroups.length })}
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              {basisSplitGroups.map((g, i) => (
+              {basisSplitGroups.map((g, i) => g.entry.action && (
                 <span
                   key={i}
                   className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(g.entry.action))}
