@@ -32,6 +32,25 @@ describe('content_rules mock routes', () => {
     expect((groups.data as { items: Array<{ metadata?: string }> }).items[0].metadata).toContain('content');
   });
 
+  it('surfaces metadata.source=email_disposal_center for rules created via 域名/URL/哈希加黑', () => {
+    const list = dispatch({
+      method: 'GET',
+      path: '/unified-rules?rule_page=content_rules&page=1&page_size=100',
+    });
+    const items = (list.data as { items: Array<{ name: string; metadata: string }> }).items;
+    const sourced = items.filter((rule) => JSON.parse(rule.metadata).source === 'email_disposal_center');
+
+    // 域名加黑 + URL加黑 + 哈希加黑 三条演示数据（fixtures.ts 的
+    // emailDisposalFixtureRule），ContentRulesTable 据此渲染
+    // "来源：邮件处置中心" 徽章，与手工创建的规则区分。
+    expect(sourced).toHaveLength(3);
+    expect(sourced.map((rule) => rule.name).sort()).toEqual([
+      'URL加黑 http://malicious-tracker.io/click?id=8842',
+      '域名加黑 phishing-bank-login.com',
+      '附件哈希加黑 e99a18c428cb38d5f260853678922e03',
+    ]);
+  });
+
   it('keeps expired rules out of enabled and disabled status filters', () => {
     const enabled = dispatch({ method: 'GET', path: '/unified-rules?rule_page=content_rules&status=enabled&page=1&page_size=100' });
     const disabled = dispatch({ method: 'GET', path: '/unified-rules?rule_page=content_rules&status=disabled&page=1&page_size=100' });
