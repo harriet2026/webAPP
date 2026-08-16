@@ -3,6 +3,7 @@ import type {
   MailLogDetail, DetectionStage, DetectionCheckItem, CheckStatus, FinalVerdict,
   RecipientRuleGroup, MatchedRulesByStage,
 } from '@/types/email-disposal-detail';
+import { derivePhishAgentThreatLevel } from '../lib/detail-helpers';
 
 const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: string[] }[] }[] = [
   { stage: 1, key: 'connection', checks: [
@@ -18,24 +19,32 @@ const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: st
     { key: 'recipientCheck',  pages: ['recipient_check'] },
     { key: 'personalList',    pages: ['user_list'] },
   ]},
+  // intentEngine 从阶段5（综合层）搬到这里：它是基于 pages: ['intent_engine']
+  // 的真实规则命中检测（跟 attachmentSecurity/urlProtection 同一套
+  // checkStatus() 机制，不是 AI 智能体），语义上本来就属于"内容风险"判定，
+  // 归到内容层比归到综合层更贴切。
   { stage: 3, key: 'content', checks: [
     { key: 'attachmentSecurity', pages: ['attachment_security'] },
     { key: 'urlProtection',      pages: ['url_protection'] },
     { key: 'contentRules',       pages: ['content_rules'] },
+    { key: 'intentEngine',       pages: ['intent_engine'] },
   ]},
   // GT-12575: 阶段4/5 顺序与安全策略流水线对齐（阶段4=智能分析、阶段5=综合，
   // 见 policyPipeline.stages 与 disposal-basis-config 的 stage 赋值）。非 AI
   // 形态过滤掉 ai 阶段后由消费方重编号（综合显示为阶段4），与策略页 F10 的
   // 「综合是阶段4还是阶段5取决于智能分析层是否展示」语义一致。
+  // 阶段4 收窄为 Agent Center 里真实存在的 3 个智能体（pipelineKey：
+  // phishingAgent/spoofingAgent/threatRetroAgent，见
+  // src/lib/agent-center/presentation.ts）——此前这里列了5个 check，其中
+  // senderBehaviorAgent/intentRecognitionAgent/marketingEmailAgent 是产品里
+  // 根本不存在的虚构智能体，aiCheckStatus() 也从未给它们写判定逻辑（永远
+  // skipped），纯粹是摆设。
   { stage: 4, key: 'ai', checks: [
-    { key: 'senderBehaviorAgent',     pages: [] },
-    { key: 'intentRecognitionAgent',  pages: [] },
-    { key: 'marketingEmailAgent',     pages: [] },
-    { key: 'phishingDetectionAgent',  pages: [] },
-    { key: 'retrospectiveAgent',      pages: [] },
+    { key: 'phishingAgent',   pages: [] },
+    { key: 'spoofingAgent',   pages: [] },
+    { key: 'threatRetroAgent', pages: [] },
   ]},
   { stage: 5, key: 'comprehensive', checks: [
-    { key: 'intentEngine',        pages: ['intent_engine'] },
     { key: 'similarityDetection', pages: ['similar_detection'] },
     { key: 'advancedRules',       pages: ['advanced_rules'] },
   ]},
@@ -125,24 +134,27 @@ function checkStatus(
   return { status: 'pass', ruleIds: [], recipientGroups: [] };
 }
 
+// AI 阶段没有 ruleIds（研判结论不是规则命中），天然没有分组归因。
 function aiCheckStatus(
   ml: MailLogDetail,
   key: string,
 ): { status: CheckStatus; ruleIds: number[]; recipientGroups: RecipientRuleGroup[] } {
-  const tag = (ml.cac_result?.tag ?? '').toLowerCase();
-  const intTag = ml.cac_result?.int_tag ?? 0;
-  // AI 阶段没有 ruleIds（研判结论不是规则命中），天然没有分组归因。
-  if (key === 'intentRecognitionAgent') {
-    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [], recipientGroups: [] };
-    if (intTag >= 5) return { status: 'threat', ruleIds: [], recipientGroups: [] };
-    if (intTag >= 3) return { status: 'suspicious', ruleIds: [], recipientGroups: [] };
-    return { status: 'pass', ruleIds: [], recipientGroups: [] };
+  if (key !== 'phishingAgent') {
+    // spoofingAgent（阶段4.1 仿冒检测）/ threatRetroAgent（阶段4.8 异步威胁
+    // 回溯）：后端目前没有针对这封邮件返回专属判定数据，诚实展示"未接入"
+    // （UI 侧 c.status === 'skipped' 统一渲染成 notIntegrated 文案），不编
+    // 造一个看起来像结论的假状态。
+    return { status: 'skipped', ruleIds: [], recipientGroups: [] };
   }
-  if (key === 'phishingDetectionAgent') {
-    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [], recipientGroups: [] };
-    return { status: tag.includes('phish') ? 'threat' : 'pass', ruleIds: [], recipientGroups: [] };
-  }
-  return { status: 'skipped', ruleIds: [], recipientGroups: [] };
+  const agent = ml.phish_agent_check;
+  if (!agent?.checked) return { status: 'skipped', ruleIds: [], recipientGroups: [] };
+  // 复用 derivePhishAgentThreatLevel——与本阶段展开区内嵌的研判明细（原
+  // 独立"AI 智能研判"卡片、现已合并进阶段4展开区）共用同一份 risk_level
+  // 映射规则，阶段卡片状态与展开区里的"风险等级"不会各自读出不同结论。
+  const level = derivePhishAgentThreatLevel(agent.risk_level);
+  if (level === 'high') return { status: 'threat', ruleIds: [], recipientGroups: [] };
+  if (level === 'medium') return { status: 'suspicious', ruleIds: [], recipientGroups: [] };
+  return { status: 'pass', ruleIds: [], recipientGroups: [] };
 }
 
 // 导出给 analysis-section.tsx 的"按收件人切换"视图复用——收件人被选中

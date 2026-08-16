@@ -264,18 +264,11 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   const direction = deriveDirection(detail.authenticated, detail.smtp_user);
   const ipLocation = [detail.geo_region_name, detail.geo_city].filter(Boolean).join(' / ') || '—';
 
-  // --- Step 3: AI-gated verdict block (genuinely new) ---
-  const [aiDetailExpanded, setAiDetailExpanded] = useState(false);
+  // --- 钓鱼检测智能体研判明细的展开状态：内嵌在阶段4卡片的
+  // phishingAgent 检测行下方（不再是独立的底部大卡片）。 ---
+  const [phishAgentDetailExpanded, setPhishAgentDetailExpanded] = useState(false);
   const phishAgent = detail.phish_agent_check;
   const hasPhishAgentData = !!phishAgent?.checked;
-  // Prefer the phish agent's OWN risk_level for the headline threat badge
-  // when real AI-verdict data is available -- falling back to the
-  // cac_result-derived threat only when there's no agent verdict to show
-  // (review finding: this badge used to always read cac_result, which could
-  // silently disagree with what the AI agent itself concluded).
-  const threat = (hasPhishAgentData && derivePhishAgentThreatLevel(phishAgent?.risk_level))
-    || deriveThreatLevel(detail.cac_result);
-  const ts = THREAT_STYLES[threat];
   const confidencePct = phishAgent?.confidence != null ? Math.round(phishAgent.confidence * 100) : null;
   const steps = phishAgent?.steps ?? [];
   const recommendedActions = phishAgent?.recommended_actions ?? [];
@@ -572,7 +565,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
           {displayStages.map((st, i) => {
             const isExpanded = expandedStages.includes(st.stage);
             // 群发邮件多依据支撑（信号一）：本阶段内任意一个 check 的收件
-            // 人命中结果出现分歧（matched_action_rules/matched_tag_rules
+            // 人命中结��出现分歧（matched_action_rules/matched_tag_rules
             // 按 ruleId 交叉推导），卡片右上角提示"N组"。但 SPF/DKIM/IP 等
             // 多数检测项是对整封邮件评估一次、不分收件人，这一信号在实际
             // 数据里很少触发。单人视图下 displayStages 已经把每个 check 的
@@ -587,7 +580,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             // PolicyMeta.stage 归属）。这是"最终裁决按收件人分叉"的权威
             // 信号，能覆盖信号一覆盖不到的大多数真实场景——群发邮件的分
             // 叉几乎总是发生在"哪条策略最终判定了这个收件人"，而不是某个
-            // 检测项���部命中的具体规则 ID 不同。单人视图下已经在看某一个
+            // 检测项内部命中的具体规则 ID 不同。单人视图下已经在看某一个
             // 人专属的一条链路，不需要"这个阶段命中了几组"的信号。
             const stageBasisGroups = isMultiBasis && selectedRecipient === ALL_RECIPIENTS
               ? basisSplitGroups.filter((g) => getPolicyMeta(g.policyKey)?.stage === STAGE_KEY_TO_NUM[st.key])
@@ -667,20 +660,60 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                                 // 营看到 "#101, #102" 时无法判断到底是谁命中
                                 // 了哪一条。
                                 const isSplit = (c.recipientGroups?.length ?? 0) > 1;
+                                // 钓鱼检测智能体命中真实数据时，点击这一行展
+                                // 开完整研判明细（结论/风险等级/置信度/威胁
+                                // 溯源时间线/处置建议）。此前这份内容单独占了
+                                // 页面最下方一张独立紫色大卡片，跟这里的阶段
+                                // 卡片体系完全割裂，运营要滚很远才能发现同一
+                                // 封邮件还有另一份 AI 结论；现在直接内嵌在这
+                                // 一行下面，配色也统一成中性色系。
+                                const canExpandPhishAgent = c.key === 'phishingAgent' && hasPhishAgentData;
+                                const rowInner = (
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-1 min-w-0">
+                                      {STATUS_ICON[c.status]}
+                                      <span className="truncate">{t(`check.${c.key}`)}</span>
+                                    </div>
+                                    <span className={cn('shrink-0 flex items-center gap-1 text-right', CHECK_RESULT_COLOR[c.status])}>
+                                      {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
+                                      {!isSplit && c.ruleIds.length > 0 && (
+                                        <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
+                                      )}
+                                      {canExpandPhishAgent && confidencePct != null && (
+                                        <span className="ml-1 text-muted-foreground">
+                                          {t('aiVerdict.confidence', { pct: confidencePct })}
+                                        </span>
+                                      )}
+                                      {canExpandPhishAgent && (
+                                        <ChevronDown
+                                          className={cn(
+                                            'h-3 w-3 shrink-0 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+                                            phishAgentDetailExpanded && 'rotate-180',
+                                          )}
+                                        />
+                                      )}
+                                    </span>
+                                  </div>
+                                );
                                 return (
                                   <div key={c.key} className="text-xs">
-                                    <div className="flex items-center justify-between gap-2">
-                                      <div className="flex items-center gap-1 min-w-0">
-                                        {STATUS_ICON[c.status]}
-                                        <span className="truncate">{t(`check.${c.key}`)}</span>
-                                      </div>
-                                      <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
-                                        {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
-                                        {!isSplit && c.ruleIds.length > 0 && (
-                                          <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
-                                        )}
-                                      </span>
-                                    </div>
+                                    {canExpandPhishAgent ? (
+                                      <InteractiveSurface
+                                        asChild
+                                        variant="control"
+                                        className="-mx-1 rounded px-1 data-[hovered=true]:bg-muted/40"
+                                      >
+                                        <button
+                                          type="button"
+                                          className="w-full text-left"
+                                          data-testid="analysis-check-phishingAgent-toggle"
+                                          aria-expanded={phishAgentDetailExpanded}
+                                          onClick={() => setPhishAgentDetailExpanded((v) => !v)}
+                                        >
+                                          {rowInner}
+                                        </button>
+                                      </InteractiveSurface>
+                                    ) : rowInner}
                                     {isSplit && (
                                       <div
                                         className="mt-1 space-y-1 rounded-md bg-background/60 p-1.5"
@@ -699,6 +732,72 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                                         ))}
                                       </div>
                                     )}
+                                    {canExpandPhishAgent && phishAgentDetailExpanded && (
+                                      <div
+                                        className="mt-2 space-y-3 rounded-md bg-background/60 p-3"
+                                        data-testid="analysis-check-phishingAgent-detail"
+                                      >
+                                        <KV label={t('aiVerdict.verdictLabel')} value={phishAgent!.verdict || '—'} />
+                                        <KV label={t('aiVerdict.riskLevelLabel')} value={phishAgent!.risk_level || '—'} />
+                                        {phishAgent!.summary && (
+                                          <div className="rounded border bg-card p-2.5 text-sm">{phishAgent!.summary}</div>
+                                        )}
+                                        {phishAgent!.details && Object.keys(phishAgent!.details).length > 0 && (
+                                          <div className="space-y-1">
+                                            <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.detailsLabel')}</p>
+                                            {Object.entries(phishAgent!.details).map(([k, v]) => (
+                                              <KV key={k} label={k} value={typeof v === 'string' ? v : JSON.stringify(v)} mono />
+                                            ))}
+                                          </div>
+                                        )}
+
+                                        <div className="space-y-1">
+                                          <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.timelineLabel')}</p>
+                                          {steps.length > 0 ? (
+                                            <ol className="space-y-2 border-l-2 border-border pl-3">
+                                              {steps.map((step, i) => (
+                                                <li key={i} className="text-sm">
+                                                  <div className="flex items-center gap-1.5">
+                                                    <span className="font-medium">{step.name}</span>
+                                                    <span className="text-xs text-muted-foreground">({step.status})</span>
+                                                  </div>
+                                                  {step.message && <p className="text-xs text-muted-foreground">{step.message}</p>}
+                                                </li>
+                                              ))}
+                                            </ol>
+                                          ) : (
+                                            <p className="text-xs text-muted-foreground">{t('aiVerdict.noTimeline')}</p>
+                                          )}
+                                        </div>
+
+                                        <div className="space-y-1">
+                                          <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.recommendedActionsLabel')}</p>
+                                          {recommendedActions.length > 0 ? (
+                                            <ul className="space-y-1.5">
+                                              {recommendedActions.map((action, i) => (
+                                                <li key={i} className="rounded border bg-card p-2 text-sm">
+                                                  <div className="flex items-center gap-1.5 font-medium">
+                                                    <span>{action.type}</span>
+                                                    {action.scope && (
+                                                      <span className="text-xs text-muted-foreground">
+                                                        ({action.scope}{action.target_count != null ? ` × ${action.target_count}` : ''})
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                  {action.reason && <p className="text-xs text-muted-foreground">{action.reason}</p>}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          ) : (
+                                            <p className="text-xs text-muted-foreground">{t('aiVerdict.noRecommendedActions')}</p>
+                                          )}
+                                        </div>
+
+                                        {phishAgent!.error && (
+                                          <p className="text-xs text-destructive">{phishAgent!.error}</p>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })}
@@ -707,7 +806,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             {/* 处置依据分组明细（GT-12946 详情页落地）：这个阶段
                                 是"处置依据"分组归属的阶段之一时，直接在展开区
                                 内列出"哪些收件人 · 命中哪条规则 · 最终动作"，
-                                不强制运营再滚到下方"处置依据"区块去对照—��
+                                不强制运营再滚到下方"处置依据"区块去对照——
                                 下方仍保留完整卡片（含规则跳转链接等），这里
                                 只是提前给一份摘要。 */}
                             {stageBasisGroups.length > 0 && (
@@ -1125,108 +1224,6 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
         )}
       </div>
 
-      {/* Step 3: AI-gated phishing-agent-verdict block */}
-      {aiEnabled && (
-        <div className="overflow-hidden rounded-lg border border-purple-200 bg-purple-50">
-          <div className="flex items-center gap-3 p-4">
-            <ShieldQuestion className={cn('h-6 w-6', ts.text)} />
-            <div className="flex-1">
-              <p className="text-xs font-medium text-purple-700">{t('aiVerdict.title')}</p>
-              <p className={cn('text-lg font-bold', ts.text)}>{t(`aiVerdict.threat.${threat}`)}</p>
-            </div>
-            {confidencePct != null && (
-              <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
-                {t('aiVerdict.confidence', { pct: confidencePct })}
-              </span>
-            )}
-          </div>
-          <div className="border-t border-purple-100">
-            <InteractiveSurface
-              asChild
-              variant="control"
-              className="flex w-full items-center justify-between rounded-none px-4 py-2 text-sm text-purple-700 data-[hovered=true]:bg-muted/35"
-            >
-              <button
-                type="button"
-                aria-expanded={aiDetailExpanded}
-                onClick={() => setAiDetailExpanded((v) => !v)}
-              >
-                <span>{aiDetailExpanded ? t('aiVerdict.hideDetails') : t('aiVerdict.viewDetails')}</span>
-                <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', aiDetailExpanded && 'rotate-180')} />
-              </button>
-            </InteractiveSurface>
-            {aiDetailExpanded && (
-              <div className="border-t border-purple-100 p-4">
-                {hasPhishAgentData ? (
-                  <div className="space-y-3">
-                    <KV label={t('aiVerdict.verdictLabel')} value={phishAgent!.verdict || '—'} />
-                    <KV label={t('aiVerdict.riskLevelLabel')} value={phishAgent!.risk_level || '—'} />
-                    {phishAgent!.summary && (
-                      <div className="rounded border bg-background p-3 text-sm">{phishAgent!.summary}</div>
-                    )}
-                    {phishAgent!.details && Object.keys(phishAgent!.details).length > 0 && (
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.detailsLabel')}</p>
-                        {Object.entries(phishAgent!.details).map(([k, v]) => (
-                          <KV key={k} label={k} value={typeof v === 'string' ? v : JSON.stringify(v)} mono />
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.timelineLabel')}</p>
-                      {steps.length > 0 ? (
-                        <ol className="space-y-2 border-l-2 border-purple-200 pl-3">
-                          {steps.map((step, i) => (
-                            <li key={i} className="text-sm">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-medium">{step.name}</span>
-                                <span className="text-xs text-muted-foreground">({step.status})</span>
-                              </div>
-                              {step.message && <p className="text-xs text-muted-foreground">{step.message}</p>}
-                            </li>
-                          ))}
-                        </ol>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">{t('aiVerdict.noTimeline')}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.recommendedActionsLabel')}</p>
-                      {recommendedActions.length > 0 ? (
-                        <ul className="space-y-1.5">
-                          {recommendedActions.map((action, i) => (
-                            <li key={i} className="rounded border bg-background p-2 text-sm">
-                              <div className="flex items-center gap-1.5 font-medium">
-                                <span>{action.type}</span>
-                                {action.scope && <span className="text-xs text-muted-foreground">({action.scope}{action.target_count != null ? ` × ${action.target_count}` : ''})</span>}
-                              </div>
-                              {action.reason && <p className="text-xs text-muted-foreground">{action.reason}</p>}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">{t('aiVerdict.noRecommendedActions')}</p>
-                      )}
-                    </div>
-
-                    {phishAgent!.error && (
-                      <p className="text-xs text-destructive">{phishAgent!.error}</p>
-                    )}
-                  </div>
-                ) : (
-                  // The phish agent either never ran for this message (delivered
-                  // directly, never entered the sideline pipeline) or hasn't
-                  // completed yet -- degrade to an honest "no data" state rather
-                  // than fabricating placeholder numbers or fake timeline entries.
-                  <Empty text={t('noAiData')} />
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
