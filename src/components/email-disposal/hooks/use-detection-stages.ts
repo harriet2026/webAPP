@@ -145,7 +145,11 @@ function aiCheckStatus(
   return { status: 'skipped', ruleIds: [], recipientGroups: [] };
 }
 
-function aggregate(checks: DetectionCheckItem[]): CheckStatus {
+// 导出给 analysis-section.tsx 的"按收件人切换"视图复用——收件人被选中
+// 且某个 check 内部按人分叉（recipientGroups.length > 1）时，需要用该收件
+// 人专属的 checks 重新聚合出这个阶段对这个人而言的整体状态，不能直接沿用
+// 全员合并视图算出的阶段状态。
+export function aggregate(checks: DetectionCheckItem[]): CheckStatus {
   if (checks.some((c) => c.status === 'threat')) return 'threat';
   if (checks.some((c) => c.status === 'suspicious')) return 'suspicious';
   if (checks.some((c) => c.status === 'pass')) return 'pass';

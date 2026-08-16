@@ -6383,7 +6383,10 @@
         "recipientScopeLine": "{recipients} ({count})",
         "recipientGroupLine": "{recipients} ({count})",
         "moreBasisGroups": "+{n} more",
-        "multiBasisSummaryLabel": "{recipients} recipients · {groups} disposal groups"
+        "multiBasisSummaryLabel": "{recipients} recipients · {groups} disposal groups",
+        "recipientSwitcher": {
+          "allRecipients": "All recipients ({count})"
+        }
       },
       "features": {
         "basicInfo": "Basic Information",

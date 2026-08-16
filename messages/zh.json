@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�����������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�������������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -579,7 +579,7 @@
       "changeConn": "环比上周期连接数变化",
       "changeAuth": "环比上周期认证次数变化",
       "changeSend": "环比上周期发信数变化",
-      "changeSubject": "环比上周期出���次数变化",
+      "changeSubject": "环比上周���出���次数变化",
       "changeSender": "环比上周期发信数变化",
       "changeRecipient": "环比上周期��信数变化",
       "authAccount": "被认证的账号（用户名）",
@@ -705,7 +705,7 @@
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编��转发规��",
-      "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤策略",
+      "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤��略",
       "sectionBasic": "�����础信息",
       "sectionMatch": "匹配��件",
       "sectionSimulator": "规���模拟器",
@@ -1019,7 +1019,7 @@
           "response": "预计对端响应：250 2.0.0 Ok"
         },
         "toasts": {
-          "created": "路��规��已����",
+          "created": "路��规���已����",
           "updated": "���由���则已��新",
           "deleted": "��由规则已删除",
           "saveError": "请修正表单中的校验错误",
@@ -1185,7 +1185,7 @@
     "discard": "丢弃",
     "audit": "审核",
     "timeoutMinutes": "超时(分钟)",
-    "globalRule": "全局规则",
+    "globalRule": "全局���则",
     "systemRule": "系统�����则",
     "systemRuleTooltip": "该规则由系统提供，无法删除��只有系统管理员可编辑部分字段",
     "systemRuleEditBanner": "��在编��系统��线规则��只允许修改 action / priority / 条��阈值��其��字段已锁定。",
@@ -1334,7 +1334,7 @@
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
-    "priorityHintAria": "优先级说明",
+    "priorityHintAria": "优先级���明",
     "name": "名���",
     "targetGroups": "适�������������",
     "policyConfig": "策略配置",
@@ -1653,7 +1653,7 @@
     "delete": "删除",
     "confirmDelete": "确定要删除此旁路邮件吗？",
     "noItems": "无旁路邮件",
-    "statusPending": "待处理",
+    "statusPending": "待处��",
     "statusProcessing": "处理��",
     "statusQuarantined": "已隔�������",
     "statusFailed": "失败",
@@ -2722,7 +2722,7 @@
       "logoutOthersTitle": "下线其他所有设备",
       "logoutOthersConfirm": "确认下线除当前设备外���所有其他设备（共 {n} 台）？",
       "loggedOutDevice": "已下线设备 {name}",
-      "loggedOutOthers": "已下线 {n} 台设备",
+      "loggedOutOthers": "已下线 {n} 台设��",
       "loggedOut": "已退出登���",
       "onlineCount": "当前在线设备（{n}）"
     },
@@ -2831,7 +2831,7 @@
     "deleteGroup": "删除分组",
     "endpointRequiredFields": "名称、主机、License ID 为必填",
     "groupNameRequired": "请输入分组名称",
-    "groupMembersRequired": "请至少添加一个成员���理��务器",
+    "groupMembersRequired": "���至少添加一个成员���理��务器",
     "eyebrow": "proxysvr"
   },
   "advancedFilter": {
@@ -3944,7 +3944,7 @@
     "greylistWhitelistTTLTip": "通过灰名单验证的发件人将被记住该时长，有效期内再次发信无需重新验证。",
     "greylistExemptions": "豁免设置",
     "greylistExemptAuth": "已认证发件人（SPF/DKIM通过）自动豁免",
-    "greylistExemptWhitelist": "白名单 IP / 域自动豁免",
+    "greylistExemptWhitelist": "白��单 IP / 域自动豁免",
     "greylistExemptInternal": "内部域名��发豁免",
     "greylistDelayInvalid": "延迟秒数必须��少于 10 秒",
     "greylistWindowInvalid": "频率窗口���须不少于 10 秒",
@@ -4240,7 +4240,7 @@
   },
   "contentRules": {
     "title": "内容规则",
-    "description": "通过关键词、正则表达式或内容组匹配邮件内容",
+    "description": "通过关键词、正则表达式或内容��匹配邮件内容",
     "ruleDescription": "规则描述",
     "basicSettings": "基础设置",
     "ruleName": "规则名称",
@@ -4398,7 +4398,7 @@
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
     "keywordPlaceholder": "例如：机密|绝密|内部资料",
-    "keywordDividerHint": "多个关键词用竖线 | 分隔",
+    "keywordDividerHint": "多个���键词用竖线 | 分隔",
     "regexPlaceholder": "输入兼容 Go 的正则表达式",
     "invalidRegex": "正则表达式无效",
     "runTest": "运行测试",
@@ -4420,7 +4420,7 @@
     "currentEffect": "当前配置效果",
     "editorSubtitle": "配置内容关键词/正则规���，识别并处置含敏感信息的邮件",
     "cardTooltipStrategy": "策略：内容规则",
-    "cardTooltipActions": "动作：隔离、投递",
+    "cardTooltipActions": "��作：隔离、投递",
     "cardTooltipEffect": "影响：命中则���离，邮���保留至隔离区",
     "cardTooltipQuarantineHint": "被隔离邮件可在邮件隔离模块查看"
   },
@@ -4513,7 +4513,7 @@
       "templateConfirmDesc": "切换到「{template}」模板将覆盖当前所有协议检查的配置，是否继续？",
       "templateCancel": "取消",
       "templateApply": "应用",
-      "ptrReadonlyNotice": "PTR 设置由系统管理员管理",
+      "ptrReadonlyNotice": "PTR 设置由系统管���员管理",
       "dmarc_no_record": "DMARC无记录",
       "dmarc_no_recordDesc": "发信域未发布DMARC记录",
       "dmarc_query_fail": "DMARC查询失败",
@@ -4766,7 +4766,7 @@
         "detection": "检测条件",
         "action": "执行动作"
       },
-      "name": "规则名称",
+      "name": "规则名���",
       "priority": "优先级",
       "priorityTooltip": "数值越大越优先，范围 {min}-{max}",
       "validFrom": "有效期开��",
@@ -5129,7 +5129,7 @@
       "mode_none": "禁用",
       "mode_light": "轻度",
       "mode_deep": "深度",
-      "pending": "敬请期待",
+      "pending": "���请期待",
       "exceedActionHint_pass": "超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段��理。",
       "exceedActionHint_quarantine": "超出检测数量上限的二维码图片将直接隔离，不再进入后续检测阶段。"
     },
@@ -5358,7 +5358,7 @@
         "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
         "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
       },
-      "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险链接，展示提示页。",
+      "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险���接，展示提示页。",
       "desc": "终端用户点击改写后的链接时，网���按下列已启用项对该 URL 做实时复检",
       "engineAi": "钓鱼邮件智能体",
       "engineLegacy": "URL 沙箱",
@@ -5680,7 +5680,7 @@
   "configManagement": {
     "eyebrow": "高级规则设置",
     "title": "配置管理",
-    "description": "查看各服务的配置文件内容，并通过数据库覆盖配置项",
+    "description": "查��各服务的配置文件内容，并通过数据库覆盖配置项",
     "noFiles": "未找到配置���件",
     "key": "配置键",
     "fileValue": "文件值",
@@ -6378,8 +6378,11 @@
         "recipientScopeLine": "{recipients}（{count} 人）",
         "recipientGroupLine": "{recipients}（{count} 人）",
         "moreBasisGroups": "及其他 {n} 项",
-        "multiBasisSummaryLabel": "{recipients} 位收件人 · {groups} 类处置依据"
-      },
+    "multiBasisSummaryLabel": "{recipients} 位收件人 · {groups} 类处置依据",
+    "recipientSwitcher": {
+      "allRecipients": "全部收件人（{count}）"
+    }
+  },
       "features": {
         "basicInfo": "邮件基本信息",
         "tid": "TID",
@@ -6801,7 +6804,7 @@
       "scope": "请至少选择一个范围",
       "priority": "优先级需在 1–100 之间",
       "actionOrAddon": "请选择一个主动作或至少启用一个附加项",
-      "tagDeliverEmailTag": "「标记后投递」需要启用「邮件标记」附加项",
+      "tagDeliverEmailTag": "「标记后投递」需��启用「邮件标记」附加项",
       "incompleteCondition": "有一个或多个条件尚未配置完整"
     },
     "outgoingGatedByAction": "当前主动作不支持发件范围",
@@ -7063,7 +7066,7 @@
       },
       "desc_imageQrCodeResult": {
         "source": "附件图片识别引擎（OCR/二维码）",
-        "usage": "判断图片识别处理是否成功完成：成功=识别步骤正常跑完（即使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
+        "usage": "判断图片识别处理是否成功完成：成功=识��步骤正常跑完（即使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
         "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
       },
       "desc_qrCodeCount": {
@@ -7142,7 +7145,7 @@
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
-        "usage": "根据病毒扫描结果过滤邮件",
+        "usage": "根据病毒扫描结果过��邮件",
         "note": "支持多引擎联合检测"
       },
       "desc_comprehensiveEngineResult": {
@@ -7475,7 +7478,7 @@
     "tabQuarantine": "隔离区设���",
     "tabReview": "审核设置",
     "tabRecall": "召回策略设置",
-    "notificationSettings": "通知设置",
+    "notificationSettings": "通知���置",
     "classificationControl": "分类通知控制",
     "categoryHint": "选择哪些类别的隔离��件会触发用户通知",
     "category_spam": "垃圾邮件",
@@ -7521,7 +7524,7 @@
     "searchDepts": "搜索部门",
     "noMatch": "无���配结果",
     "noGroupsHint": "暂无收信人组，请��到「群组管理」创建",
-    "noDeptsHint": "组织通讯录暂未同步���请先到「组织通讯录」配置数据源",
+    "noDeptsHint": "组织通���录暂未同步���请先到「组织通讯录」配置数据源",
     "invalidRef": "已失效",
     "clearAll": "清空",
     "userPermissionSettings": "用户权限设置",
@@ -8315,7 +8318,7 @@
       "connections": "活跃连接",
       "avgLatency": "平均���迟",
       "slowQuery": "慢查询 Top5",
-      "lockWait": "锁���待",
+      "lockWait": "锁�����",
       "execCount": "执行次数",
       "query": "查询语句",
       "avgMs": "平均(ms)",
@@ -8528,7 +8531,7 @@
       "noUrlFindings": "暂无链接研判数据",
       "agentRounds": "调查轮次",
       "roundUnit": "轮",
-      "confidence": "置信度",
+      "confidence": "置信���",
       "detectionMode": "运行模式",
       "disposition": "执行动作",
       "mailStatus": "邮件状���",
@@ -8657,7 +8660,7 @@
       "colEnabled": "状态",
       "colActions": "操作",
       "colScope": "检测范围",
-      "colRecipients": "收件人",
+      "colRecipients": "��件人",
       "colRisk": "风险信号",
       "statusEnabled": "已启用",
       "statusDisabled": "已禁用",
@@ -8835,7 +8838,7 @@
         "mustStartAt0": "置信度区间必须从 0 开始",
         "mustEndAt100": "置信度区间必须覆盖到 100",
         "minLtMax": "区间非法：min({min}) 必须小于 max({max})",
-        "contiguous": "置信度区间必须连续覆盖 0-100，不可重叠、不可留空"
+        "contiguous": "置信度区间必须连续覆盖 0-100，不可重叠、不可留���"
       }
     }
   },
@@ -9037,7 +9040,7 @@
       "namePlaceholder": "请输入保护���象姓名",
       "email": "真实邮箱",
       "emailPlaceholder": "请输入合法邮箱地址",
-      "jobTitlePlaceholder": "请输入岗位，如 CEO、财务总监",
+      "jobTitlePlaceholder": "请输入��位，如 CEO、财务总监",
       "category": "分类",
       "protectionLevel": "保护等级",
       "legitEmail": "合法邮箱绑定",
@@ -10306,7 +10309,7 @@
       "password": "密码策略",
       "loginControl": "登录控制",
       "ipControl": "IP 访问控制",
-      "sso": "单点登录限制",
+      "sso": "单���登录限制",
       "twoFactor": "���次认证"
     },
     "fields": {
@@ -10688,7 +10691,7 @@
     "auth_attempt": {
       "data_format_invalid": "认证记录数据格式不正确",
       "data_required": "未提供认证记录数据",
-      "request_body_read_failed": "读取请求内容失败，请重试",
+      "request_body_read_failed": "读取请求内容��败，请重试",
       "success_value_invalid": "认证结果取值无效，只能是：{allowed}"
     },
     "contact_source": {
@@ -11001,7 +11004,7 @@
     "spoofing_log": {
       "page_too_large": "页码不能超过 {max}",
       "category_must_be_single": "只能指定一个 KPI 下钻类别",
-      "category_invalid": "无效的下钻类别",
+      "category_invalid": "无效��下钻类别",
       "time_range_too_long": "查询时间范围不能超过 {max_days} 天",
       "not_found": "仿冒检测记录不存���"
     },
@@ -11158,7 +11161,7 @@
       "sync_log_not_found": "同步日志不存在"
     },
     "contacts": {
-      "contact_not_found": "联系人不存在",
+      "contact_not_found": "联系人���存在",
       "tag_invalid": "标签只能是高管或关键岗位"
     },
     "delivery_stats": {

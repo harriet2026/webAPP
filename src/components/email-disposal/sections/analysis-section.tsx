@@ -14,10 +14,11 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { MailLogDetail, CheckStatus, FinalVerdict, MailChildEvent } from '@/types/email-disposal-detail';
 import type { DisposalBasis } from '@/types/email-disposal';
 import { formatTimestamp } from '@/lib/format-time';
-import { useDetectionStages } from '../hooks/use-detection-stages';
+import { useDetectionStages, aggregate, deriveFinalVerdict } from '../hooks/use-detection-stages';
 import {
   deriveThreatLevel, derivePhishAgentThreatLevel, THREAT_STYLES, formatBytes, tidOf, deriveDirection,
 } from '../lib/detail-helpers';
@@ -119,6 +120,12 @@ function connectorArrowClass(i: number, hitIndex: number): string {
 
 const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
 
+// 收件人筛选器的"全部收件人"哨兵值——用户反馈：群发邮件里不同收件人的
+// 安全分析过程/处置依据可能不同，希望能按收件人切换查看专属结果，而不是
+// 只在合并视图里靠就地标注去猜"谁跟谁不一样"。默认停在这个哨兵值上，即
+// 现有的合并视图（就地标注 + 折叠列表）。
+const ALL_RECIPIENTS = '__all__';
+
 // 检测流程的阶段 key（connection/identity/…）与 disposal-basis-config.ts
 // 里 PolicyMeta.stage（1-5）的固定映射——两套体系描述的是同一条策略流水
 // 线，编号语义完全一致（stage 4 = AI 智能分析，与 STAGE_DEFS 一致）。用来
@@ -153,7 +160,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     : 'zh';
 
   // --- Step 1: 5-stage detection pipeline (ported from tabs/analysis-tab.tsx) ---
-  const { stages: allStages, verdict } = useDetectionStages(detail);
+  const { stages: allStages, verdict: baseVerdict } = useDetectionStages(detail);
   // GT-12575: 非 AI 形态滤掉 ai 阶段后重编号（综合显示为阶段4），与策略
   // 流水线的动态阶段号语义一致。
   const stages = useMemo(() => {
@@ -168,7 +175,44 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   const toggleStage = (s: number) =>
     setExpandedStages((p) => (p.includes(s) ? p.filter((x) => x !== s) : [...p, s]));
 
-  const hitIndex = stages.findIndex((s) => s.status === 'threat');
+  // 收件人切换器：默认合并视图（ALL_RECIPIENTS），运营可切到单个收件人
+  // 专属视图。只在群发（recipients.length > 1）时才需要渲染这个控件——
+  // 单收件人邮件永远只有一种结果，没有"切换"的意义。
+  const [selectedRecipient, setSelectedRecipient] = useState<string>(ALL_RECIPIENTS);
+  const mailRecipients = detail.recipients ?? [];
+  const showRecipientSwitcher = mailRecipients.length > 1;
+
+  // 单人视图下，把每个 check 重新聚合成"这个收件人专属的结果"：
+  // - check 内部没有按人分叉（recipientGroups.length <= 1）：对所有人一
+  //   视同仁（SPF/DKIM/IP 频率限制等大多数检测项属于这种情况），原样展示，
+  //   不加任何提示（v0之前已确认：不分歧的检测项不需要额外标注）。
+  // - check 内部分叉了：选中人命中了某个分组 → ruleIds 收窄成那个分组的
+  //   规则集合，沿用该 check 原本算出的整体 status（现有数据模型里，某个
+  //   check 是否 threat/suspicious 取决于邮件级别的 matched_action_rules
+  //   是否命中 + ml.action，并不区分"这条规则对谁生效"，因此无法比整体
+  //   状态更精确；分组只能证明"这个人命中了这些规则 ID"）；选中人不在任
+  //   何命中分组里 → 这个 check 对这个人而言没有触发，状态收窄为 pass。
+  // 阶段整体状态用 aggregate() 基于收窄后的 checks 重新计算，与合并视图
+  // 共用同一份聚合规则。
+  const displayStages = useMemo(() => {
+    if (selectedRecipient === ALL_RECIPIENTS) return stages;
+    return stages.map((st) => {
+      const checks = st.checks.map((c) => {
+        const groups = c.recipientGroups ?? [];
+        if (groups.length <= 1) return c;
+        const mine = groups.find((g) => g.recipients.includes(selectedRecipient));
+        if (mine) return { ...c, ruleIds: mine.ruleIds, recipientGroups: undefined };
+        return { ...c, status: 'pass' as CheckStatus, ruleIds: [], recipientGroups: undefined };
+      });
+      return { ...st, status: aggregate(checks), checks };
+    });
+  }, [stages, selectedRecipient]);
+
+  const hitIndex = displayStages.findIndex((s) => s.status === 'threat');
+  // 单人视图下"最终判定"徽标也要换成这个人专属的结论——否则合并视图判
+  // 为 malicious（因为有人命中了威胁）时，切到一个实际只是 pass 的收件人
+  // 也会一直显示"恶意"，跟下方重新聚合出的阶段卡片自相矛盾。
+  const verdict = selectedRecipient === ALL_RECIPIENTS ? baseVerdict : deriveFinalVerdict(displayStages);
 
   // 总耗时（gap 2.3）：优先对各阶段 stage_timings 求和，为 0/缺失时落回
   // processing_time_ms。
@@ -196,8 +240,17 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   // 这样任何非 postfix 来源（含未来新增的 workflow.* 变体、以及本组件测试夹具
   // 里的 'admin_api'）都天然落入"处置相关"一侧，不需要跟着后端新增来源同步改这里。
   const disposalEvents = useMemo(
-    () => events.filter((ev) => ev.event_source !== 'postfix'),
-    [events],
+    () => events.filter((ev) => {
+      if (ev.event_source === 'postfix') return false;
+      // 单人视图：按 recipient 过滤——事件没有任何收件人信息（既非单个
+      // recipient 也没有 recipients 列表）时视为"整封邮件级别的动作"，不
+      // 因为切到某个人就消失；有收件人信息但不含选中人的事件才隐藏。
+      if (selectedRecipient === ALL_RECIPIENTS) return true;
+      const evRecipients = (ev.recipients ?? '').split(',').map((r) => r.trim()).filter(Boolean);
+      if (!ev.recipient && evRecipients.length === 0) return true;
+      return ev.recipient === selectedRecipient || evRecipients.includes(selectedRecipient);
+    }),
+    [events, selectedRecipient],
   );
   const sortedEvents = useMemo(
     () => [...disposalEvents].sort((a, b) => (a.event_time || '').localeCompare(b.event_time || '')),
@@ -294,6 +347,28 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
       if (next.has(i)) next.delete(i); else next.add(i);
       return next;
     });
+
+  // 收件人选择器下拉项的处置动作标签："user@x.com · 隔离"——直接复用
+  // basisSplitGroups 里已经算好的分组（与下方处置依据卡片、阶段卡片的
+  // "N组"徽标同一份数据源，动作徽标的颜色/文案也走同一套 getActionColor/
+  // getActionLabel，不会出现下拉选项和详情卡片对同一个人说法不一致）。
+  const recipientActionMap = useMemo(() => {
+    const map = new Map<string, string | undefined>();
+    for (const g of basisSplitGroups) {
+      for (const r of g.recipients) map.set(r, g.entry.action);
+    }
+    return map;
+  }, [basisSplitGroups]);
+
+  // 单人视图下"处置依据"区块要渲染的那一条：优先取该收件人在
+  // basisSplitGroups 里所属的分组（这正是分叉发生的地方）；群发但全员
+  // 结果一致（basisSplitGroups 长度 <= 1）时退回 basis 本身，与合并视图
+  // 单卡场景完全一致。
+  const effectiveBasisEntry = useMemo(() => {
+    if (selectedRecipient === ALL_RECIPIENTS) return basis;
+    const match = basisSplitGroups.find((g) => g.recipients.includes(selectedRecipient));
+    return match?.entry ?? basis;
+  }, [selectedRecipient, basis, basisSplitGroups]);
 
   // 处置依据卡片内容体（不含外层卡片边框）——单卡场景（renderDisposalBasisCard）
   // 与折叠列表展开态（下方 basisSplitGroups 折叠行）共用同一份字段渲染，避免
@@ -415,9 +490,38 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     <div className="space-y-5">
       {/* 检测流程：5 个阶段卡片，默认全部展开，命中策略明细内联在卡片内 */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-sm font-semibold">{t('detectionPipeline')}</h4>
-          <span data-testid="analysis-total-elapsed" className="text-xs text-muted-foreground">
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <h4 className="text-sm font-semibold shrink-0">{t('detectionPipeline')}</h4>
+            {/* 收件人切换器：群发邮件的安全分析/处置依据/事后处置时间线可能
+                因人而异，默认合并视图（就地标注 + 折叠列表），切到某个人后
+                下方内容重新聚合成那个人专属的一条链路。单收件人邮件不渲染
+                这个控件——没有"切换"的意义。 */}
+            {showRecipientSwitcher && (
+              <Select value={selectedRecipient} onValueChange={(v) => setSelectedRecipient(v ?? ALL_RECIPIENTS)}>
+                <SelectTrigger
+                  data-testid="analysis-recipient-switcher"
+                  className="h-7 w-auto max-w-[240px] text-xs"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_RECIPIENTS}>
+                    {t('recipientSwitcher.allRecipients', { count: mailRecipients.length })}
+                  </SelectItem>
+                  {mailRecipients.map((r) => {
+                    const action = recipientActionMap.get(r);
+                    return (
+                      <SelectItem key={r} value={r}>
+                        {action ? `${r} · ${getActionLabel(action, disposalLang)}` : r}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+          <span data-testid="analysis-total-elapsed" className="text-xs text-muted-foreground shrink-0">
             {t('totalElapsed', { ms: totalElapsedMs })}
           </span>
         </div>
@@ -425,8 +529,9 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
         {/* 群发结果摘要：不同收件人最终命中不同处置依据（isMultiBasis）时，
             在阶段卡片行之前先给一眼可见的"这是一封多结果群发邮件"信号——
             此前只有下方"处置依据"多卡片能体现分叉，运营必须滚动到底部才
-            会发现，检测流程区域看起来跟单收件人邮件一模一样。 */}
-        {isMultiBasis && (
+            会发现，检测流程区域看起来跟单收件人邮件一模一样。切到某个人的
+            专属视图后已经不需要这条"有分叉"的整体摘要了。 */}
+        {isMultiBasis && selectedRecipient === ALL_RECIPIENTS && (
           <div
             className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-violet-200 bg-violet-50/60 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/20"
             data-testid="analysis-multi-basis-summary"
@@ -449,13 +554,15 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
         )}
 
         <div className="flex items-start gap-0 overflow-x-auto pb-2">
-          {stages.map((st, i) => {
+          {displayStages.map((st, i) => {
             const isExpanded = expandedStages.includes(st.stage);
             // 群发邮件多依据支撑（信号一）：本阶段内任意一个 check 的收件
             // 人命中结果出现分歧（matched_action_rules/matched_tag_rules
             // 按 ruleId 交叉推导），卡片右上角提示"N组"。但 SPF/DKIM/IP 等
             // 多数检测项是对整封邮件评估一次、不分收件人，这一信号在实际
-            // 数据里很少触发。
+            // 数据里很少触发。单人视图下 displayStages 已经把每个 check 的
+            // recipientGroups 收窄成 undefined（不再是"多组"），这里天然
+            // 算出 0，不需要额外判断就会隐藏"N组"徽标。
             const maxCheckRecipientGroupCount = Math.max(
               0,
               ...st.checks.map((c) => c.recipientGroups?.length ?? 0),
@@ -465,8 +572,9 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             // PolicyMeta.stage 归属）。这是"最终裁决按收件人分叉"的权威
             // 信号，能覆盖信号一覆盖不到的大多数真实场景——群发邮件的分
             // 叉几乎总是发生在"哪条策略最终判定了这个收件人"，而不是某个
-            // 检测项内部命中的具体规则 ID 不同。
-            const stageBasisGroups = isMultiBasis
+            // 检测项内部命中的具体规则 ID 不同。单人视图下已经在看某一个
+            // 人专属的一条链路，不需要"这个阶段命中了几组"的信号。
+            const stageBasisGroups = isMultiBasis && selectedRecipient === ALL_RECIPIENTS
               ? basisSplitGroups.filter((g) => getPolicyMeta(g.policyKey)?.stage === STAGE_KEY_TO_NUM[st.key])
               : [];
             const stageBasisSplitCount = stageBasisGroups.length;
@@ -629,7 +737,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                     )}
                   </button>
                 </InteractiveSurface>
-                {i < stages.length - 1 && (
+                {i < displayStages.length - 1 && (
                   <div className="flex items-center px-1 mt-12">
                     <div className={cn('w-4 h-0.5', connectorLineClass(i, hitIndex))} />
                     <ArrowRight className={cn('w-3 h-3 -ml-0.5', connectorArrowClass(i, hitIndex))} />
@@ -695,8 +803,11 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
           计算，两处数字始终一致（阶段卡片说"命中2组"，这里就正好有2行
           摘要），不会出现"上面说2组、下面看不出对应关系"的数字不对齐。 */}
       {basis?.policy_key && (
-        !isMultiBasis ? (
-          renderDisposalBasisCard(basis)
+        // 单人视图：这个人的最终依据本来就只有一条，直接渲染单卡——不需要
+        // 折叠列表（折叠列表是给"一次性看全貌"用的，单人视图已经是"看一
+        // 条链路"，两者不会同时出现）。
+        (!isMultiBasis || selectedRecipient !== ALL_RECIPIENTS) ? (
+          renderDisposalBasisCard(effectiveBasisEntry ?? basis)
         ) : (
           <div className="rounded-lg border bg-card scroll-mt-4" id="disposal-basis" data-testid="analysis-disposal-basis-groups">
             <div className="flex items-center gap-2 border-b px-4 py-3">
