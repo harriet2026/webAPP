@@ -1086,7 +1086,7 @@
             <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
             <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
             <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
-            <p>预览可交互（Tab/库切换）· ���态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+            <p>预览可交互（Tab/库切���）· ���态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1500,7 +1500,7 @@
     </div>
   </details>
 
-  <!-- ==================== 迭代：GT-126811【0731】RBL 优化 · 灰名单从执行动作���离 ==================== -->
+  <!-- ==================== 迭代：GT-126811【0731】RBL 优化 · 灰名单���执行动作���离 ==================== -->
   <details class="l1-section iteration" open>
     <summary>
       <div class="l1-header">
@@ -1755,7 +1755,7 @@
           </summary>
           <div class="card-detail">
             <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
-            <p>变更类型: 功能新增 + 缺陷修正（分组展示逻辑 + 筛选逻辑）· 收录于 GT-12923 文档内的同名二级章节</p>
+            <p>变更类型: 功能新增 + 缺陷修正（分组展示逻辑 + 筛选逻辑）· 收录于 GT-12923 文档内��同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a></p>
             <p>内含: ① 新增按 `policy_key` 对 mixed 记录 `per_recipient` 分组的模型，"处置依���"列多模块命中时主文案取优先桶摘要 + "等 N 项"，hover 按模块分组展开逐收件人明细 ② 命中当前"处置依据"筛选值的分组在主文案与 Tooltip 展开顺序中优先展示，与 GT-12931/GT-12934 的高亮机制对称但独立实现 ③ 关联修正 mixed 记录在"处置依据"筛选下的漏项缺陷（`disposal_policy_keys` 改为对 `per_recipient` 取交集匹配）</p>
           </div>
@@ -1809,6 +1809,56 @@
             <p>变更类型: 功能新增（二次确认交互 + 规则来源标识）· 收录于 GT-12923 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详情·概览与处置层级，即 <a href="email-handling-disposal-center/layer-10-detail-overview-single.html">layer-10-detail-overview-single.html</a>）；<a href="filter-rules-pipeline-content-rules/index.html">内容规则</a>（规则来源徽章展示）</p>
             <p>内含: ① "域名加黑""URL加黑""哈希加黑"三个按钮由直接调用 API 改为先弹出单例复用的二次确认弹窗，确认后才写入内容规则 ② mock 数据层新增 3 条 `metadata.source=email_disposal_center` 演示规则，使内容规则列表已有的"来源：邮件处置中心"徽章渲染逻辑首次在验证环境下可见 ③ 四语言 i18n 词表同步新增确认弹窗文案</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-12970【0816】邮件处置中心「优化」 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🛠️</span>
+        <h2>GT-12970【0816】邮件处置中心「优化」</h2>
+        <span class="l1-stats"><span class="done-count">2</span> 已完成 / 2 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md" target="_blank" rel="noopener noreferrer">GT-12970 · 邮件处置中心优化（增量变更规格 · Markdown）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-08-16</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（与既有「邮件处置中心」模块共用同一套路由，本工单为其 0816 批次的增量优化）</p>
+            <p>变更类型: 总优化工单（增量规格）· Markdown 需求文档，由 MD-spec-PM-version 技能生成，延续 GT-12923【0813】的记录方式</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详见其现有 HTML Spec；本工单只记录本次优化范围内的增量变更）</p>
+            <p>内含: 变更清单总览 · 产品形态 × 角色矩阵 · 交互与状态变更明细 · 差异 / 待确认事项</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md#gt-12936群发邮件安全分析模块" target="_blank" rel="noopener noreferrer">GT-12936 · 群发邮件：安全分析模块</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-08-16</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
+            <p>变更类型: 功能重构（检测项重新分配为真实智能体）+ 交互优化（详情内嵌研判）· 收录于 GT-12970 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（安全分析阶段面板）</p>
+            <p>内含: ① 阶段3新增「意图引擎」（从阶段5移入），阶段4「AI 智能分析」由5个虚构检测项收窄为3个与智能体中心对应的真实智能体——钓鱼检测/仿冒检测/威胁回溯，阶段5移除「意图引擎」；aiCheckStatus 改为读取 phish_agent_check.risk_level 判定钓鱼检测智能体状态，其余两个智能体诚实返回「未接入」 ② 钓鱼检测智能体行改为可展开，内嵌原独立紫色「AI 智能研判」卡片的全部研判明细，移除该独立卡片及 aiVerdict.title/viewDetails/hideDetails/threat.*/顶层 noAiData 共8个 i18n key</p>
           </div>
         </details>
       </div>
