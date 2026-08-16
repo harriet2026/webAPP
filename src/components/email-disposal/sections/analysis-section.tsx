@@ -283,7 +283,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   // --- 处置依据（gap 2.7）---
   const basis = detail.disposal_basis;
 
-  // 方案A：多租户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
+  // 方案A：多���户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
   // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
   const isPlatformPolicyContext =
     viewer === 'tenant' &&
@@ -348,17 +348,25 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
       return next;
     });
 
-  // 收件人选择器下拉项的处置动作标签："user@x.com · 隔离"——直接复用
-  // basisSplitGroups 里已经算好的分组（与下方处置依据卡片、阶段卡片的
-  // "N组"徽标同一份数据源，动作徽标的颜色/文案也走同一套 getActionColor/
-  // getActionLabel，不会出现下拉选项和详情卡片对同一个人说法不一致）。
+  // 收件人选择器下拉项的处置动作标签："user@x.com · 隔离"——优先取
+  // detail.recipient_dispositions（final_action，与顶部"放行(3) 隔离(1)
+  // 丢弃(1)"摘要徽标同一份数据源，见 threat-summary-card.tsx +
+  // recipient-status-badges.tsx）：这份数据只要是群发就一定按收件人逐条
+  // 存在，不依赖 disposal_basis.per_recipient 是否命中过分叉的策略（后者
+  // 常见于"全员结果一致，本来就没必要分组"的场景，届时 basisSplitGroups
+  // 是空的，之前直接用它会导致下拉项完全没有动作标签）。找不到对应
+  // disposition 时才退回 basisSplitGroups 兜底。
   const recipientActionMap = useMemo(() => {
     const map = new Map<string, string | undefined>();
+    for (const d of detail.recipient_dispositions ?? []) {
+      const action = (d.final_action || d.original_action || '').toLowerCase();
+      if (action) map.set(d.recipient, action);
+    }
     for (const g of basisSplitGroups) {
-      for (const r of g.recipients) map.set(r, g.entry.action);
+      for (const r of g.recipients) if (!map.has(r)) map.set(r, g.entry.action);
     }
     return map;
-  }, [basisSplitGroups]);
+  }, [detail.recipient_dispositions, basisSplitGroups]);
 
   // 单人视图下"处置依据"区块要渲染的那一条：优先取该收件人在
   // basisSplitGroups 里所属的分组（这正是分叉发生的地方）；群发但全员
@@ -505,7 +513,12 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                 >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                {/* SelectContent 默认 `w-(--anchor-width)` 会跟随上面被压窄
+                    的触发器宽度，导致弹出层里的邮箱地址（本身就比"检测流
+                    程"标题旁留给触发器的空间长很多）被截断——这里改成按最
+                    长选项自适应宽度（w-max），并保留 --anchor-width 作为下
+                    限，避免触发器比选项本身还宽时弹出层反而变窄。 */}
+                <SelectContent className="w-max min-w-(--anchor-width) max-w-[360px]">
                   <SelectItem value={ALL_RECIPIENTS}>
                     {t('recipientSwitcher.allRecipients', { count: mailRecipients.length })}
                   </SelectItem>
@@ -513,7 +526,9 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                     const action = recipientActionMap.get(r);
                     return (
                       <SelectItem key={r} value={r}>
-                        {action ? `${r} · ${getActionLabel(action, disposalLang)}` : r}
+                        <span className="block max-w-[320px] truncate">
+                          {action ? `${r} · ${getActionLabel(action, disposalLang)}` : r}
+                        </span>
                       </SelectItem>
                     );
                   })}
@@ -572,7 +587,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             // PolicyMeta.stage 归属）。这是"最终裁决按收件人分叉"的权威
             // 信号，能覆盖信号一覆盖不到的大多数真实场景——群发邮件的分
             // 叉几乎总是发生在"哪条策略最终判定了这个收件人"，而不是某个
-            // 检测项内部命中的具体规则 ID 不同。单人视图下已经在看某一个
+            // 检测项���部命中的具体规则 ID 不同。单人视图下已经在看某一个
             // 人专属的一条链路，不需要"这个阶段命中了几组"的信号。
             const stageBasisGroups = isMultiBasis && selectedRecipient === ALL_RECIPIENTS
               ? basisSplitGroups.filter((g) => getPolicyMeta(g.policyKey)?.stage === STAGE_KEY_TO_NUM[st.key])
@@ -692,7 +707,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             {/* 处置依据分组明细（GT-12946 详情页落地）：这个阶段
                                 是"处置依据"分组归属的阶段之一时，直接在展开区
                                 内列出"哪些收件人 · 命中哪条规则 · 最终动作"，
-                                不强制运营再滚到下方"处置依据"区块去对照——
+                                不强制运营再滚到下方"处置依据"区块去对照—��
                                 下方仍保留完整卡片（含规则跳转链接等），这里
                                 只是提前给一份摘要。 */}
                             {stageBasisGroups.length > 0 && (
