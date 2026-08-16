@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测���������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�����������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -579,7 +579,7 @@
       "changeConn": "环比上周期连接数变化",
       "changeAuth": "环比上周期认证次数变化",
       "changeSend": "环比上周期发信数变化",
-      "changeSubject": "环比上周期出现次数变化",
+      "changeSubject": "环比上周期出���次数变化",
       "changeSender": "环比上周期发信数变化",
       "changeRecipient": "环比上周期��信数变化",
       "authAccount": "被认证的账号（用户名）",
@@ -1014,12 +1014,12 @@
           "header": "命中规则《{name}》",
           "channel": "投递通道：{channel}",
           "proxy": "代理 IP：{name}（出口：{egress}）",
-          "helo": "HELO �����：{helo}",
+          "helo": "HELO ������：{helo}",
           "tls": "TLS ��略：{level}",
           "response": "预计对端响应：250 2.0.0 Ok"
         },
         "toasts": {
-          "created": "路��规��已��加",
+          "created": "路��规��已����",
           "updated": "���由���则已��新",
           "deleted": "��由规则已删除",
           "saveError": "请修正表单中的校验错误",
@@ -1627,7 +1627,7 @@
     "quarantinedAt": "隔离时间",
     "expiresAt": "过期时间",
     "released": "已释放",
-    "releasedAt": "释放时间",
+    "releasedAt": "释放���间",
     "releasedBy": "释放人",
     "batchRelease": "批量释����",
     "releaseTo": "释放���",
@@ -2090,7 +2090,7 @@
         "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS 校验",
         "activeKeys": "已启用密钥 {count} 个",
         "smtpTitle": "SMTP 凭证",
-        "smtpDescription": "管理发信认证账号、后端路由与锁定状态",
+        "smtpDescription": "��理发信认证账号、后端路由与锁定状态",
         "smtpLink": "前往 SMTP 凭证管理"
       }
     },
@@ -2831,7 +2831,7 @@
     "deleteGroup": "删除分组",
     "endpointRequiredFields": "名称、主机、License ID 为必填",
     "groupNameRequired": "请输入分组名称",
-    "groupMembersRequired": "请至少添加一个成员代理��务器",
+    "groupMembersRequired": "请至少添加一个成员���理��务器",
     "eyebrow": "proxysvr"
   },
   "advancedFilter": {
@@ -3683,7 +3683,7 @@
     "selectIpGroup": "选择IP组...",
     "ipGroupRequired": "请选择一个IP组",
     "ipGroupMembersUnit": "个IP",
-    "ruleNameTip": "为规则添加描述性名称���便于管理识别",
+    "ruleNameTip": "为规则���加描述性名称���便于管理识别",
     "ruleNamePlaceholder": "如：恶意攻击来���、合作伙伴IP等",
     "ipAddressTip": "支持单个IP地址、CIDR网段或IP组",
     "ipAddressRequired": "请输入IP地址/段",
@@ -3948,7 +3948,7 @@
     "greylistExemptInternal": "内部域名��发豁免",
     "greylistDelayInvalid": "延迟秒数必须��少于 10 秒",
     "greylistWindowInvalid": "频率窗口���须不少于 10 秒",
-    "greylistWindowBeforeDelay": "延迟模式下，频率窗口不能短于延迟时间",
+    "greylistWindowBeforeDelay": "延��模式下，频率窗口不能短于延迟时间",
     "greylistMaxRequestsInvalid": "最大请求数必须不少于 1",
     "greylistTTLInvalid": "白名���有效期必须不少于 1 小时",
     "greylistDelayShortWarning": "延迟时��过短可能无法有效过滤",
@@ -5103,7 +5103,7 @@
       "mediumRisk": "中危（垃圾）",
       "lowRisk": "低危（订阅）",
       "advancedRule": "高级规则",
-      "advancedRuleHint": "需配合「策略流水线-阶段5-高级规则」模块启用",
+      "advancedRuleHint": "需配合「策略流水��-阶段5-高级规则」模块启用",
       "detectLimit": "检测数量上限",
       "items": "个",
       "exceedAction": "超限处置",
@@ -5397,7 +5397,7 @@
     "highRiskWarning": "高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险",
     "panel": {
       "high": "高危意图",
-      "medium": "中危意图",
+      "medium": "中���意图",
       "low": "低危意图",
       "highHint": "建议阻断或隔离",
       "mediumHint": "建议审核",
@@ -5738,7 +5738,7 @@
     "search": {
       "placeholder": "描述邮件特征，例如：上周伪装成微软的钓鱼邮件",
       "aiParse": "AI 解析",
-      "search": "搜索",
+      "search": "��索",
       "searchApplied": "已应用搜索条件",
       "reset": "重置",
       "resetDone": "已重置全��筛选",
@@ -6023,7 +6023,7 @@
       "export": "导出",
       "confirmRelease": "确认放行选中邮件？",
       "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
-      "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
+      "releaseDescription": "将选中邮件恢复投递，并可同步��判邮件类型。",
       "releaseAuditHint": "放行��类型改判都��写入审计记录。",
       "recallDescription": "尝������收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件系统限制；操��结果与类型改判会写入审计记录。",
@@ -6377,6 +6377,7 @@
         "recipientGroupsBadge": "{n} 组",
         "recipientScopeLine": "{recipients}（{count} 人）",
         "recipientGroupLine": "{recipients}（{count} 人）",
+        "moreBasisGroups": "及其他 {n} 项",
         "multiBasisSummaryLabel": "{recipients} 位收件人 · {groups} 类处置依据"
       },
       "features": {
@@ -6548,7 +6549,7 @@
     "operations": "操作",
     "edit": "编辑",
     "delete": "删除",
-    "deleteConfirm": "确定要删除这条规则吗？",
+    "deleteConfirm": "确定要删除这���规则吗？",
     "saveSuccess": "规则保存成功",
     "deleteSuccess": "规则删除成功",
     "keywords": "关键字",
@@ -7476,7 +7477,7 @@
     "tabRecall": "召回策略设置",
     "notificationSettings": "通知设置",
     "classificationControl": "分类通知控制",
-    "categoryHint": "选择哪些类别的隔离邮件会触发用户通知",
+    "categoryHint": "选择哪些类别的隔离��件会触发用户通知",
     "category_spam": "垃圾邮件",
     "category_advertising": "广告邮件",
     "category_suspicious": "可疑���件",
@@ -8530,7 +8531,7 @@
       "confidence": "置信度",
       "detectionMode": "运行模式",
       "disposition": "执行动作",
-      "mailStatus": "邮件状态",
+      "mailStatus": "邮件状���",
       "riskLevel": "风险",
       "recallStatus": "召回/通知",
       "evidenceBasis": "判定依据",
@@ -8840,7 +8841,7 @@
   },
   "spoofingDetection": {
     "eyebrow": "AI 检测层",
-    "title": "仿冒邮件检测智能体",
+    "title": "仿冒邮件检���智能体",
     "description": "识别冒充重点人员与相似域名仿冒的社工攻击邮件",
     "navSpoofingAgent": "仿冒邮件检测",
     "collapseMenu": "收起菜单",
@@ -9176,7 +9177,7 @@
       "sectionIdentity": "品牌身份",
       "sectionIdentityDescription": "品牌名称与受保护域名",
       "sectionDetection": "检测规则",
-      "sectionDetectionDescription": "设定置信度阈值，决定命中判定的严格程度",
+      "sectionDetectionDescription": "设定置信度阈值，决定命中判定的��格程度",
       "sectionDisposition": "处置策略",
       "sectionDispositionDescription": "命中仿冒后如何处理邮件与通知",
       "brandName": "���牌名称",
@@ -9712,7 +9713,7 @@
     "csvEmailColMissing": "无法自动识别邮箱列，请确认 CSV 表头",
     "csvUploadFailed": "CSV 文件处理失败：{reason}",
     "deleteConfirm": "确认删除",
-    "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略将受影响（引用人员降级为未匹配）。是否继续？",
+    "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略将受影响（引用人员降级��未匹配）。是否继续？",
     "deleteTitle": "删除数据源「{name}」？",
     "detailAlias": "邮箱别名",
     "detailCurrentTag": "当前标记",
@@ -10309,7 +10310,7 @@
       "twoFactor": "���次认证"
     },
     "fields": {
-      "minLength": "最小密码长度",
+      "minLength": "最小密码长��",
       "minCharClasses": "密码复杂度要求",
       "historyLimit": "历史密码限制",
       "passwordMaxAgeDays": "密码有效期",
@@ -10769,7 +10770,7 @@
         "custom_minutes_out_of_range": "自定义审核时长需在 {min}–{max} 分钟之间",
         "duration_mode_invalid": "审核时长模式取值无效，只能是：{allowed}",
         "max_recheck_minutes_out_of_range": "最长复检时间需在 {min}–{max} 分钟之间",
-        "reviewer_active_end_format_invalid": "审核人值班结束时间格式不正确，应为 HH:MM:SS",
+        "reviewer_active_end_format_invalid": "审核人值班结束��间格式不正确，应为 HH:MM:SS",
         "reviewer_active_start_format_invalid": "审核人值班开始时间格式不正确，应为 HH:MM:SS",
         "reviewer_email_invalid": "审核人邮箱「{value}」格式不正确",
         "reviewer_notify_interval_out_of_range": "审核人提醒���隔需在 {min}–{max} 分钟之间",
@@ -11002,7 +11003,7 @@
       "category_must_be_single": "只能指定一个 KPI 下钻类别",
       "category_invalid": "无效的下钻类别",
       "time_range_too_long": "查询时间范围不能超过 {max_days} 天",
-      "not_found": "仿冒检测记录不存在"
+      "not_found": "仿冒检测记录不存���"
     },
     "inbound_audit": {
       "item_id_invalid": "审核条目 ID 无效",
@@ -11161,7 +11162,7 @@
       "tag_invalid": "标签只能是高管或关键岗位"
     },
     "delivery_stats": {
-      "too_many_items_one_batch": "单次批量处理的条目过多"
+      "too_many_items_one_batch": "单次��量处理的条目过多"
     },
     "delivery_traffic": {
       "end_date_in_future": "结束日期不能晚于今天",
@@ -11312,7 +11313,7 @@
     },
     "spoofing_whitelist": {
       "not_found": "记录不存在",
-      "match_type_invalid": "匹配类型只能是邮箱或域名",
+      "match_type_invalid": "���配类型只能是邮箱或域名",
       "value_required": "值不能为空",
       "whitelist_entry_exists": "该白名单条目已存在"
     },
@@ -11323,7 +11324,7 @@
     },
     "portal_quarantine_listadd": {
       "quarantine_item_has_no_tenant_cannot": "该隔离邮件没有归属租户，无法加入用户名单",
-      "quarantined_mail_has_no_usable_sender": "该隔离邮件没有可��于添加的发件人"
+      "quarantined_mail_has_no_usable_sender": "该隔离邮件没有可��于添加的发件���"
     },
     "portal_quarantine_release": {
       "quarantine_item_not_found": "隔离邮件不存在",

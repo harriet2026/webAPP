@@ -282,13 +282,27 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     [basisSplitGroups],
   );
 
-  // 单张处置依据卡片渲染——非群发/单一依据场景直接传 basis 本身
-  // （scope 不传，不新增"适用范围"行，DOM 结构与改造前逐字节一致）；
-  // 群发多依据场景每个"模块+具体规则"组合各渲染一张卡，附带
-  // "适用范围：收件人列表（N人）"。
-  const renderDisposalBasisCard = (
+  // 群发多依据折叠列表（用户反馈：N 张完整卡片纵向堆叠占用空间过多，N=100
+  // 时会变成几十屏——尤其在这种量级下，运营真正需要的是先扫一眼"有哪些
+  // 分组、各自命中什么、影响多少人"，而不是每组都展开的完整字段）。默认全
+  // 部收起为一行摘要，点击某一行才展开该组完整详情（模块/规则跳转/命中详
+  // 情/检测标签），空间占用从 O(N)×180px 降到 O(N)×40px。
+  const [expandedBasisRows, setExpandedBasisRows] = useState<Set<number>>(new Set());
+  const toggleBasisRow = (i: number) =>
+    setExpandedBasisRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i); else next.add(i);
+      return next;
+    });
+
+  // 处置依据卡片内容体（不含外层卡片边框）——单卡场景（renderDisposalBasisCard）
+  // 与折叠列表展开态（下方 basisSplitGroups 折叠行）共用同一份字段渲染，避免
+  // 两处各维护一份"模块/规则跳转/命中详情/检测标签"逻辑。opts.hideHeader 用
+  // 于折叠行展开态：该场景下折叠行本身已经显示了模块名+动作徽标，这里的
+  // "处置依据"标题+图标+动作徽标会与折叠行重复，跳过即可。
+  const renderDisposalBasisCardBody = (
     entry: DisposalBasis,
-    opts: { scope?: string[]; idSuffix?: string } = {},
+    opts: { scope?: string[]; idSuffix?: string; hideHeader?: boolean } = {},
   ) => {
     const meta = entry.policy_key ? getPolicyMeta(entry.policy_key) : undefined;
     const route = entry.policy_key ? getPolicyRoute(entry.policy_key) : undefined;
@@ -299,24 +313,21 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     const isPlatform = isTenantPlatformViewer && isStage1Policy(entry.policy_key);
     const testIdSuffix = opts.idSuffix ? `-${opts.idSuffix}` : '';
     return (
-      <div
-        key={opts.idSuffix ?? 'primary'}
-        id={opts.idSuffix ? undefined : 'disposal-basis'}
-        data-testid={`analysis-disposal-basis${testIdSuffix}`}
-        className="rounded-lg border bg-card p-4 scroll-mt-4"
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <ShieldAlert className="h-4 w-4 text-orange-600" />
-          <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
-          {entry.action && (
-            <span
-              data-testid={`analysis-disposal-basis-action${testIdSuffix}`}
-              className={cn('text-xs font-medium px-2 py-0.5 rounded ml-auto', getActionColor(entry.action))}
-            >
-              {getActionLabel(entry.action, disposalLang)}
-            </span>
-          )}
-        </div>
+      <>
+        {!opts.hideHeader && (
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldAlert className="h-4 w-4 text-orange-600" />
+            <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
+            {entry.action && (
+              <span
+                data-testid={`analysis-disposal-basis-action${testIdSuffix}`}
+                className={cn('text-xs font-medium px-2 py-0.5 rounded ml-auto', getActionColor(entry.action))}
+              >
+                {getActionLabel(entry.action, disposalLang)}
+              </span>
+            )}
+          </div>
+        )}
         <div className="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2.5 text-sm">
           {opts.scope && (
             <>
@@ -377,6 +388,25 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             </>
           )}
         </div>
+      </>
+    );
+  };
+
+  // 单张处置依据卡片渲染——非群发/单一依据场景直接传 basis 本身
+  // （scope 不传，不新增"适用范围"行，DOM 结构与改造前逐字节一致）。
+  const renderDisposalBasisCard = (
+    entry: DisposalBasis,
+    opts: { scope?: string[]; idSuffix?: string } = {},
+  ) => {
+    const testIdSuffix = opts.idSuffix ? `-${opts.idSuffix}` : '';
+    return (
+      <div
+        key={opts.idSuffix ?? 'primary'}
+        id={opts.idSuffix ? undefined : 'disposal-basis'}
+        data-testid={`analysis-disposal-basis${testIdSuffix}`}
+        className="rounded-lg border bg-card p-4 scroll-mt-4"
+      >
+        {renderDisposalBasisCardBody(entry, opts)}
       </div>
     );
   };
@@ -562,7 +592,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                                 className="mt-2 space-y-1.5 rounded-md border border-violet-200 bg-violet-50/50 p-2 dark:border-violet-900 dark:bg-violet-950/20"
                                 data-testid={`analysis-stage-${st.stage}-basis-groups`}
                               >
-                                {stageBasisGroups.map((g, gi) => (
+                                {stageBasisGroups.slice(0, 3).map((g, gi) => (
                                   <div key={gi} className="flex items-center justify-between gap-2 text-xs">
                                     <span className="min-w-0 truncate text-muted-foreground">
                                       {t('recipientGroupLine', {
@@ -580,6 +610,17 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                                     )}
                                   </div>
                                 ))}
+                                {/* 超过3组时不再逐条铺开，避免阶段卡片本身跟着被
+                                    撑高——完整明细已经能在下方折叠列表按需展开
+                                    查看，这里只需要一个"还有多少"的信号。 */}
+                                {stageBasisGroups.length > 3 && (
+                                  <div
+                                    className="text-xs text-muted-foreground/80"
+                                    data-testid={`analysis-stage-${st.stage}-basis-groups-overflow`}
+                                  >
+                                    {t('moreBasisGroups', { n: stageBasisGroups.length - 3 })}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </>
@@ -646,18 +687,67 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
 
       {/* 处置依据（gap 2.7）—— 非群发/单一依据场景（basisSplitGroups.length <= 1）
           渲染与改造前逐字节一致的单卡；群发邮件因不同收件人命中不同策略
-          模块/规则而产生多条依据时（GT-12946 详情页落地），按"模块 + 具体
-          规则"组合各渲染一张卡片，附带"适用范围"行标明命中人群。
+          模块/规则而产生多条依据时（GT-12946 详情页落地 + 用户反馈的空间
+          占用问题），改为折叠列表：每组默认只占一行摘要（模块 + 规则 +
+          适用范围人数 + 动作徽标），点击才展开该组完整详情——N=100 时也
+          只占 100 行摘要，而不是 100 张展开的完整卡片。
           basisSplitGroups 与上方检测流程阶段卡片"N组"徽标共享同一份分组
-          计算，两处数字始终一致（阶段卡片说"命中2组"，这里就正好有2张
-          卡片），不会出现"上面说2组、下面只看到1张卡"的数字不对齐。 */}
+          计算，两处数字始终一致（阶段卡片说"命中2组"，这里就正好有2行
+          摘要），不会出现"上面说2组、下面看不出对应关系"的数字不对齐。 */}
       {basis?.policy_key && (
         !isMultiBasis ? (
           renderDisposalBasisCard(basis)
         ) : (
-          <div className="space-y-3" data-testid="analysis-disposal-basis-groups">
-            {basisSplitGroups.map((sub, i) =>
-              renderDisposalBasisCard(sub.entry, { scope: sub.recipients, idSuffix: `${i}` }))}
+          <div className="rounded-lg border bg-card scroll-mt-4" id="disposal-basis" data-testid="analysis-disposal-basis-groups">
+            <div className="flex items-center gap-2 border-b px-4 py-3">
+              <ShieldAlert className="h-4 w-4 text-orange-600" />
+              <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
+            </div>
+            <div className="divide-y">
+              {basisSplitGroups.map((sub, i) => {
+                const isOpen = expandedBasisRows.has(i);
+                const meta = sub.entry.policy_key ? getPolicyMeta(sub.entry.policy_key) : undefined;
+                const isPlatform = isTenantPlatformViewer && isStage1Policy(sub.entry.policy_key);
+                const moduleLabel = isPlatform
+                  ? tFeatures('platformPolicyModule')
+                  : (sub.entry.policy_key ? (getModuleName(sub.entry.policy_key, disposalLang) || '—') : '—');
+                const ruleHasName = !isPlatform && !!sub.entry.rule_name && sub.entry.rule_name !== '—';
+                const ruleLabel = isPlatform
+                  ? tFeatures('platformPolicyRuleName')
+                  : (ruleHasName ? sub.entry.rule_name! : (sub.entry.rule_id || '—'));
+                return (
+                  <div key={i}>
+                    <InteractiveSurface asChild variant="control" className="w-full data-[hovered=true]:bg-muted/40">
+                      <button
+                        type="button"
+                        data-testid={`analysis-disposal-basis-row-${i}`}
+                        aria-expanded={isOpen}
+                        onClick={() => toggleBasisRow(i)}
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm"
+                      >
+                        <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
+                        {!isPlatform && <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(meta?.stage ?? 0))} />}
+                        <span className="min-w-0 shrink-0 basis-32 truncate font-medium">{moduleLabel}</span>
+                        <span className="min-w-0 flex-1 truncate text-muted-foreground">{ruleLabel}</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {t('recipientScopeLine', { recipients: sub.recipients.join('、'), count: sub.recipients.length })}
+                        </span>
+                        {sub.entry.action && (
+                          <span className={cn('shrink-0 rounded px-2 py-0.5 text-xs font-medium', getActionColor(sub.entry.action))}>
+                            {getActionLabel(sub.entry.action, disposalLang)}
+                          </span>
+                        )}
+                      </button>
+                    </InteractiveSurface>
+                    {isOpen && (
+                      <div className="border-t bg-muted/20 px-4 py-3" data-testid={`analysis-disposal-basis-${i}`}>
+                        {renderDisposalBasisCardBody(sub.entry, { scope: sub.recipients, idSuffix: `${i}`, hideHeader: true })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )
       )}

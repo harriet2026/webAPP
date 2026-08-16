@@ -179,4 +179,76 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     fireEvent.click(ruleLink);
     expect(routerPush).toHaveBeenCalledWith('/agent-center/overview');
   });
+
+  it('群发多处置依据默认渲染为折叠行，点击后才展开完整详情', () => {
+    render(wrap(<AnalysisSection
+      detail={baseDetail({
+        disposal_basis: {
+          policy_key: 'ATT-AV',
+          rule_name: '恶意附件哈希黑名单',
+          rule_id: 'ATT-AV-001',
+          action: 'discard',
+          per_recipient: [
+            { policy_key: 'ATT-BASIC', rule_name: '附件类型策略', rule_id: 'ATT-BASIC-001', action: 'accept', recipient: 'a@company.com' },
+            { policy_key: 'ATT-AV', rule_name: '恶意附件哈希黑名单', rule_id: 'ATT-AV-001', action: 'discard', recipient: 'b@company.com' },
+            { policy_key: 'ATT-QR', rule_name: '二维码风险识别', rule_id: 'ATT-QR-001', action: 'quarantine', recipient: 'c@company.com' },
+            { policy_key: 'ATT-ENC', rule_name: '加密附件策略', rule_id: 'ATT-ENC-001', action: 'sideline', recipient: 'd@company.com' },
+          ],
+        },
+      })}
+      aiEnabled
+      events={[]}
+    />));
+
+    // 不再是逐条铺开的完整卡片：单卡专用 testid（无 groups 容器）不存在。
+    expect(screen.queryByTestId('analysis-disposal-basis')).not.toBeInTheDocument();
+    const container = screen.getByTestId('analysis-disposal-basis-groups');
+    expect(container).toBeInTheDocument();
+
+    // 4 组都渲染为一行摘要，默认全部收起——完整详情（规则跳转按钮）尚未出现。
+    for (const i of [0, 1, 2, 3]) {
+      expect(screen.getByTestId(`analysis-disposal-basis-row-${i}`)).toBeInTheDocument();
+      expect(screen.queryByTestId(`analysis-disposal-basis-${i}`)).not.toBeInTheDocument();
+    }
+    expect(screen.getByTestId('analysis-disposal-basis-row-1').textContent).toContain('丢弃');
+
+    // 点击一行后才展开该组完整详情，其余行仍保持收起。
+    fireEvent.click(screen.getByTestId('analysis-disposal-basis-row-1'));
+    expect(screen.getByTestId('analysis-disposal-basis-1')).toBeInTheDocument();
+    expect(screen.getByTestId('analysis-disposal-basis-1').textContent).toContain('恶意附件哈希黑名单');
+    expect(screen.queryByTestId('analysis-disposal-basis-0')).not.toBeInTheDocument();
+
+    // 再次点击收起。
+    fireEvent.click(screen.getByTestId('analysis-disposal-basis-row-1'));
+    expect(screen.queryByTestId('analysis-disposal-basis-1')).not.toBeInTheDocument();
+  });
+
+  it('阶段卡片内分组明细最多展示3条，超出部分收进"及其他N项"提示', () => {
+    render(wrap(<AnalysisSection
+      detail={baseDetail({
+        disposal_basis: {
+          policy_key: 'ATT-AV',
+          rule_name: '恶意附件哈希黑名单',
+          rule_id: 'ATT-AV-001',
+          action: 'discard',
+          per_recipient: [
+            { policy_key: 'ATT-BASIC', rule_name: '附件类型策略', rule_id: 'ATT-BASIC-001', action: 'accept', recipient: 'a@company.com' },
+            { policy_key: 'ATT-AV', rule_name: '恶意附件哈希黑名单', rule_id: 'ATT-AV-001', action: 'discard', recipient: 'b@company.com' },
+            { policy_key: 'ATT-QR', rule_name: '二维码风险识别', rule_id: 'ATT-QR-001', action: 'quarantine', recipient: 'c@company.com' },
+            { policy_key: 'ATT-ENC', rule_name: '加密附件策略', rule_id: 'ATT-ENC-001', action: 'sideline', recipient: 'd@company.com' },
+          ],
+        },
+      })}
+      aiEnabled
+      events={[]}
+    />));
+
+    // 4组全部归属阶段3（内容层）：明细只展示前3条，第4条收进溢出提示。
+    const stage3Groups = screen.getByTestId('analysis-stage-3-basis-groups');
+    expect(stage3Groups.textContent).toContain('附件类型策略');
+    expect(stage3Groups.textContent).toContain('恶意附件哈希黑名单');
+    expect(stage3Groups.textContent).toContain('二维码风险识别');
+    expect(stage3Groups.textContent).not.toContain('加密附件策略');
+    expect(screen.getByTestId('analysis-stage-3-basis-groups-overflow')).toHaveTextContent('及其他 1 项');
+  });
 });

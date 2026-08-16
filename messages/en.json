@@ -6382,6 +6382,7 @@
         "recipientGroupsBadge": "{n} groups",
         "recipientScopeLine": "{recipients} ({count})",
         "recipientGroupLine": "{recipients} ({count})",
+        "moreBasisGroups": "+{n} more",
         "multiBasisSummaryLabel": "{recipients} recipients · {groups} disposal groups"
       },
       "features": {
