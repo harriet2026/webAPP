@@ -6337,11 +6337,9 @@
           "intentEngine": "Intent Engine",
           "similarityDetection": "Similarity Detection",
           "advancedRules": "Advanced Rules",
-          "senderBehaviorAgent": "Sender Behavior Agent",
-          "intentRecognitionAgent": "Intent Recognition Agent",
-          "marketingEmailAgent": "Marketing Email Agent",
-          "phishingDetectionAgent": "Phishing Detection Agent",
-          "retrospectiveAgent": "Retrospective Agent"
+          "phishingAgent": "Phishing Detection Agent",
+          "spoofingAgent": "Spoofing Detection Agent",
+          "threatRetroAgent": "Threat Retro Agent"
         },
         "contentDetails": "Content Details",
         "detectionPipeline": "Detection Pipeline",
@@ -6360,15 +6358,6 @@
         "viewRecallLog": "View Recall Log",
         "noEvents": "No Events",
         "aiVerdict": {
-          "title": "AI Verdict",
-          "viewDetails": "View Details",
-          "hideDetails": "Hide Details",
-          "threat": {
-            "high": "High",
-            "medium": "Medium",
-            "low": "Low",
-            "none": "None"
-          },
           "confidence": "Confidence {pct}%",
           "verdictLabel": "Verdict",
           "riskLevelLabel": "Risk Level",
@@ -6378,7 +6367,6 @@
           "recommendedActionsLabel": "Recommended Actions",
           "noRecommendedActions": "No recommendations available"
         },
-        "noAiData": "No data available",
         "recipientGroupsBadge": "{n} groups",
         "recipientScopeLine": "{recipients} ({count})",
         "recipientGroupLine": "{recipients} ({count})",

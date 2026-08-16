@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import {
   CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown,
-  Clock, ShieldQuestion, ShieldAlert, ExternalLink, ArrowRight, User, Layers, Users,
+  Clock, ShieldAlert, ExternalLink, ArrowRight, User, Layers, Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ import type { DisposalBasis } from '@/types/email-disposal';
 import { formatTimestamp } from '@/lib/format-time';
 import { useDetectionStages, aggregate, deriveFinalVerdict } from '../hooks/use-detection-stages';
 import {
-  deriveThreatLevel, derivePhishAgentThreatLevel, THREAT_STYLES, formatBytes, tidOf, deriveDirection,
+  formatBytes, tidOf, deriveDirection,
 } from '../lib/detail-helpers';
 import {
   formatHitDetail, getModuleName, getActionLabel, getActionColor, getPolicyRoute, getPolicyMeta,
@@ -277,7 +277,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   const basis = detail.disposal_basis;
 
   // 方案A：多���户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
-  // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
+  // 不暴露策略模���细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
   const isPlatformPolicyContext =
     viewer === 'tenant' &&
     capabilities?.multiTenant === true &&

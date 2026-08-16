@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�������������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测���������������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -534,7 +534,7 @@
       "failReason": "失败原因",
       "bruteForce": "暴力破解",
       "firstAuth": "首次认证",
-      "sendCount": "发信量",
+      "sendCount": "发信��",
       "threatCount": "���胁量",
       "blockRate": "拦截率",
       "bounceCount": "���信量",
@@ -701,11 +701,11 @@
         "statusDisabled": "禁用"
       },
       "simulateButton": "模拟测试",
-      "editButton": "编辑",
+      "editButton": "���辑",
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编��转发规��",
-      "drawerDescription": "在 SMTP 握手阶段决定连接的接入与过滤��略",
+      "drawerDescription": "在 SMTP 握手阶段决定连接的接��与过滤��略",
       "sectionBasic": "�����础信息",
       "sectionMatch": "匹配��件",
       "sectionSimulator": "规���模拟器",
@@ -3545,7 +3545,7 @@
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
       "conditionAuthFail": "每小时认证失败超过 {count} 次",
       "conditionCmdError": "单连接命令错误超过 {count} 次",
-      "conditionConnAuthFail": "单连接认证失��超过 {count} 次",
+      "conditionConnAuthFail": "单连接���证失��超过 {count} 次",
       "suspend15minText": "15分钟",
       "suspend30minText": "30分钟",
       "suspend1hourText": "1小时",
@@ -3676,7 +3676,7 @@
     "actionDropListTip": "该 IP 命中后静默丢弃，无退信",
     "actionReviewListTip": "该 IP 命中后邮件进入人工审核队列",
     "actionDeliverListTip": "该 IP 命中后直接放行投递",
-    "actionTagDeliverListTip": "该 IP 命中后放行并添加标记，继续内容层检测",
+    "actionTagDeliverListTip": "该 IP 命中后放��并添加标记，继续内容层检测",
     "ipConfigTypeSingle": "单IP",
     "ipConfigTypeRange": "IP段",
     "ipConfigTypeGroup": "IP组",
@@ -3823,7 +3823,7 @@
     "all": "全部",
     "sender": "发件人",
     "subject": "主题",
-    "rule": "触发规则",
+    "rule": "触发规���",
     "triggeredAt": "触发时间",
     "status": "状态",
     "approve": "放行",
@@ -4114,7 +4114,7 @@
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
     "senderPlaceholder_domain": "如 example.com 或 evil.com",
     "noTenantDomains": "该租户暂无接收域名，请先在『接收域名』中配置",
-    "domainSuggestions": "本租户接收域名（快捷选择）",
+    "domainSuggestions": "本租户接收域名���快捷选择）",
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
     "currentEffect": "当前配置效果",
@@ -4419,7 +4419,7 @@
     "remarkPlaceholder": "添加规则说明，最多200字",
     "currentEffect": "当前配置效果",
     "editorSubtitle": "配置内容关键词/正则规���，识别并处置含敏感信息的邮件",
-    "cardTooltipStrategy": "策略：内容规则",
+    "cardTooltipStrategy": "策���：内容规则",
     "cardTooltipActions": "��作：隔离、投递",
     "cardTooltipEffect": "影响：命中则���离，邮���保留至隔离区",
     "cardTooltipQuarantineHint": "被隔离邮件可在邮件隔离模块查看"
@@ -4878,7 +4878,7 @@
       "button": "导出"
     },
     "toast": {
-      "saveOk": "规则已保存",
+      "saveOk": "规则���保存",
       "deleteOk": "规则已删除"
     },
     "closeConfirm": {
@@ -5127,7 +5127,7 @@
       "qrOverflowAction": "二维码溢出处理动作",
       "overflow_pass_alert": "放行+告警",
       "mode_none": "禁用",
-      "mode_light": "轻度",
+      "mode_light": "轻���",
       "mode_deep": "深度",
       "pending": "���请期待",
       "exceedActionHint_pass": "超出检测数量上限的二维码图片将跳过深度检测，直接进入下一检测阶段��理。",
@@ -5419,7 +5419,7 @@
       "political": "检测涉及政治敏感、反动内容的邮件",
       "phishing": "检测伪装身份诱骗用户信息的钓鱼邮件",
       "spam": "检测垃圾邮件、骚扰邮件、广告邮件",
-      "subscription": "检测新闻订阅、通知邮件、营销推送"
+      "subscription": "检测新闻订阅、通知邮件、���销推送"
     },
     "riskBadge": {
       "high": "高危",
@@ -6332,11 +6332,9 @@
           "intentEngine": "意图引擎",
           "similarityDetection": "相似检测",
           "advancedRules": "高级规则",
-          "senderBehaviorAgent": "发信人行为智能体",
-          "intentRecognitionAgent": "意图识别智能体",
-          "marketingEmailAgent": "营销邮件智能体",
-          "phishingDetectionAgent": "钓鱼邮件检测智能体",
-          "retrospectiveAgent": "回溯检测智能体"
+          "phishingAgent": "钓鱼邮件检测智能体",
+          "spoofingAgent": "仿冒邮件检测智能体",
+          "threatRetroAgent": "威胁回溯智能体"
         },
         "contentDetails": "内容详情",
         "detectionPipeline": "检测流程",
@@ -6355,15 +6353,6 @@
         "viewRecallLog": "查看召回日志",
         "noEvents": "暂无事件",
         "aiVerdict": {
-          "title": "AI 智能研判",
-          "viewDetails": "查看详情",
-          "hideDetails": "收起详情",
-          "threat": {
-            "high": "高危",
-            "medium": "中危",
-            "low": "低危",
-            "none": "无威胁"
-          },
           "confidence": "置信度 {pct}%",
           "verdictLabel": "研判结论",
           "riskLevelLabel": "风险等级",
@@ -6373,7 +6362,6 @@
           "recommendedActionsLabel": "处置建议",
           "noRecommendedActions": "暂无建议"
         },
-        "noAiData": "暂无数据",
         "recipientGroupsBadge": "{n} 组",
         "recipientScopeLine": "{recipients}（{count} 人）",
         "recipientGroupLine": "{recipients}（{count} 人）",
@@ -7833,7 +7821,7 @@
       "col": {
         "sender": "发件人",
         "recipients": "收件人",
-        "recalledAt": "召回时间",
+        "recalledAt": "召回时��",
         "reason": "召回原因"
       }
     },
@@ -8655,7 +8643,7 @@
       "createTitle": "新建准入规则",
       "editTitle": "编辑准入规则",
       "sheetDescription": "配置该规则的检测范围与风险信号。命中本规则范围、含 URL 且命中任一风险信号的邮件将进入钓鱼检测。",
-      "colName": "规则名称",
+      "colName": "���则名称",
       "colDirection": "方向",
       "colEnabled": "状态",
       "colActions": "操作",
@@ -9175,7 +9163,7 @@
     },
     "brandForm": {
       "addTitle": "添加保护品牌",
-      "addDescription": "配置需要保护的品牌域名和相关检测参数。",
+      "addDescription": "配置���要保护的品牌域名和相关检测参数。",
       "editTitle": "编辑保护品牌",
       "sectionIdentity": "品牌身份",
       "sectionIdentityDescription": "品牌名称与受保护域名",
@@ -9713,7 +9701,7 @@
     "colSyncStatus": "同步状态",
     "colTag": "标记",
     "corpDomainPlaceholder": "如 corp.cn",
-    "csvEmailColMissing": "无法自动识别邮箱列，请确认 CSV 表头",
+    "csvEmailColMissing": "无法自动识别邮��列，请确认 CSV 表头",
     "csvUploadFailed": "CSV 文件处理失败：{reason}",
     "deleteConfirm": "确认删除",
     "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略将受影响（引用人员降级��未匹配）。是否继续？",
@@ -10124,7 +10112,7 @@
       "24h": "过去 24 小时",
       "today": "今日",
       "7d": "最近 7 天",
-      "30d": "最近 30 天"
+      "30d": "最��� 30 天"
     },
     "refresh": "刷新",
     "health": {
@@ -10488,7 +10476,7 @@
     "errorDesc": "请稍后重试或联系管理员。",
     "confirmTitle": "确认将发件人加入白名单",
     "confirmHint": "加入后��该发件人发给您的邮件将不再被隔离。",
-    "confirmButton": "确认加白",
+    "confirmButton": "��认加白",
     "addedTitle": "已加��白名单",
     "addedDesc": "该发件人已加入您的白名单。"
   },
@@ -10899,11 +10887,11 @@
       "date_range_required": "请指定统计的起止日期",
       "interval_invalid": "统计粒度无效，只能是：{allowed}",
       "limit_out_of_range": "返回条数需在 {min}–{max} 之间",
-      "params_invalid": "查询参数不正确，请检查筛选条件后重试"
+      "params_invalid": "查询参数不正确，���检查筛选条件后重试"
     },
     "unified_rule": {
       "access_denied": "没���权限访问该规则",
-      "action_required": "动作类规则必须指定一个执行动作",
+      "action_required": "动作类规��必须指定一个执行动作",
       "advanced_rules_need_tenant": "高级过滤规则不在平台视角下提供，请先选择租户",
       "bulk_action_invalid": "批量操作无效，只能是：{allowed}",
       "condition_tree_invalid": "规则条件配置不正确，请检查各条件是否填写完整",
@@ -11029,7 +11017,7 @@
       "view_by_required": "请选择统计视角",
       "series_required": "请选择数据系列",
       "dimension_invalid": "无效的统计维度，可选：{allowed}",
-      "interpret_disabled": "AI 解读功能未启用",
+      "interpret_disabled": "AI 解���功能未启用",
       "interpret_too_many_concurrent": "当前 AI 请求过多，请稍后重试"
     },
     "quarantine": {

@@ -127,18 +127,26 @@ const STRING_PATHS: string[][] = [
   ['emailDisposal', 'detail', 'analysis', 'status', 'pass'],
   ['emailDisposal', 'detail', 'analysis', 'status', 'skipped'],
   ['emailDisposal', 'detail', 'analysis', 'check', 'ipRateLimit'],
-  ['emailDisposal', 'detail', 'analysis', 'check', 'retrospectiveAgent'],
+  ['emailDisposal', 'detail', 'analysis', 'check', 'threatRetroAgent'],
 
   // analysis.* -- genuinely NEW keys (DD-12, analysis-section.tsx)
   ['emailDisposal', 'detail', 'analysis', 'contentDetails'],
-  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'title'],
-  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'viewDetails'],
-  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'hideDetails'],
-  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'threat', 'high'],
-  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'threat', 'medium'],
-  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'threat', 'low'],
-  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'threat', 'none'],
-  ['emailDisposal', 'detail', 'analysis', 'noAiData'],
+  // check.phishingAgent/spoofingAgent/threatRetroAgent -- stage 4 was
+  // narrowed to the 3 agents that actually exist in Agent Center (see
+  // src/lib/agent-center/presentation.ts); the old 5-check list included
+  // 3 fictional agents (senderBehaviorAgent/intentRecognitionAgent/
+  // marketingEmailAgent) that aiCheckStatus() never implemented judgement
+  // logic for.
+  ['emailDisposal', 'detail', 'analysis', 'check', 'phishingAgent'],
+  ['emailDisposal', 'detail', 'analysis', 'check', 'spoofingAgent'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'confidence'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'verdictLabel'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'riskLevelLabel'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'detailsLabel'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'timelineLabel'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'noTimeline'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'recommendedActionsLabel'],
+  ['emailDisposal', 'detail', 'analysis', 'aiVerdict', 'noRecommendedActions'],
 
   // features.* -- pre-DD-12 keys (sampled)
   ['emailDisposal', 'detail', 'features', 'basicInfo'],
