@@ -276,8 +276,8 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   // --- 处置依据（gap 2.7）---
   const basis = detail.disposal_basis;
 
-  // 方案A：多���户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
-  // 不暴露策略模���细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
+  // 方案A：多租户产品形态 + 租户管理员视角 + 阶段1（连接层/IP策略）→ 显示"平台策略"，
+  // 不暴露策略模块细节、规则名、命中详情，也不提供"前往策略配置页"跳转。
   const isPlatformPolicyContext =
     viewer === 'tenant' &&
     capabilities?.multiTenant === true &&
@@ -565,7 +565,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
           {displayStages.map((st, i) => {
             const isExpanded = expandedStages.includes(st.stage);
             // 群发邮件多依据支撑（信号一）：本阶段内任意一个 check 的收件
-            // 人命中结��出现分歧（matched_action_rules/matched_tag_rules
+            // 人命中结果出现分歧（matched_action_rules/matched_tag_rules
             // 按 ruleId 交叉推导），卡片右上角提示"N组"。但 SPF/DKIM/IP 等
             // 多数检测项是对整封邮件评估一次、不分收件人，这一信号在实际
             // 数据里很少触发。单人视图下 displayStages 已经把每个 check 的
