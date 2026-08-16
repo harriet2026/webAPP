@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+ import { render, screen, fireEvent } from '@testing-library/react';
+ import userEvent from '@testing-library/user-event';
+ import { describe, it, expect, vi } from 'vitest';
 import { NextIntlClientProvider } from 'next-intl';
 import zh from '@/../messages/zh.json';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
@@ -250,5 +251,68 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(stage3Groups.textContent).toContain('二维码风险识别');
     expect(stage3Groups.textContent).not.toContain('加密附件策略');
     expect(screen.getByTestId('analysis-stage-3-basis-groups-overflow')).toHaveTextContent('及其他 1 项');
+  });
+
+  describe('收件人切换器（多投信按人切换安全分析/处置依据）', () => {
+    const multiRecipientDetail = () => baseDetail({
+      recipients: ['a@company.com', 'b@company.com', 'c@company.com', 'd@company.com'],
+      disposal_basis: {
+        policy_key: 'ATT-AV',
+        rule_name: '恶意附件哈希黑名单',
+        rule_id: 'ATT-AV-001',
+        action: 'discard',
+        per_recipient: [
+          { policy_key: 'ATT-BASIC', rule_name: '附件类型策略', rule_id: 'ATT-BASIC-001', action: 'accept', recipient: 'a@company.com' },
+          { policy_key: 'ATT-AV', rule_name: '恶意附件哈希黑名单', rule_id: 'ATT-AV-001', action: 'discard', recipient: 'b@company.com' },
+          { policy_key: 'ATT-QR', rule_name: '二维码风险识别', rule_id: 'ATT-QR-001', action: 'quarantine', recipient: 'c@company.com' },
+          { policy_key: 'ATT-ENC', rule_name: '加密附件策略', rule_id: 'ATT-ENC-001', action: 'sideline', recipient: 'd@company.com' },
+        ],
+      },
+    });
+
+    it('单收件人邮件不渲染切换器；群发邮件默认停在"全部收件人"', () => {
+      render(wrap(<AnalysisSection detail={baseDetail()} aiEnabled events={[]} />));
+      expect(screen.queryByTestId('analysis-recipient-switcher')).not.toBeInTheDocument();
+    });
+
+    it('群发邮件渲染切换器，默认全部收件人视图仍是折叠列表', () => {
+      render(wrap(<AnalysisSection detail={multiRecipientDetail()} aiEnabled events={[]} />));
+      expect(screen.getByTestId('analysis-recipient-switcher')).toBeInTheDocument();
+      expect(screen.getByTestId('analysis-disposal-basis-groups')).toBeInTheDocument();
+      expect(screen.queryByTestId('analysis-disposal-basis')).not.toBeInTheDocument();
+    });
+
+    it('切到某个收件人后，处置依据变为该人专属单卡，且不再是折叠列表', async () => {
+      const user = userEvent.setup();
+      render(wrap(<AnalysisSection detail={multiRecipientDetail()} aiEnabled events={[]} />));
+
+      await user.click(screen.getByTestId('analysis-recipient-switcher'));
+      await user.click(screen.getByRole('option', { name: 'c@company.com · 隔离' }));
+
+      expect(screen.queryByTestId('analysis-disposal-basis-groups')).not.toBeInTheDocument();
+      const card = screen.getByTestId('analysis-disposal-basis');
+      expect(card.textContent).toContain('二维码风险识别');
+      expect(card.textContent).not.toContain('恶意附件哈希黑名单');
+    });
+
+    it('切到收件人后，事后处置时间线只保留该收件人相关事件', async () => {
+      const user = userEvent.setup();
+      const events = [
+        { id: 601, event_source: 'quarantine', event_type: 'quarantine', event_result: 'completed', event_time: '2024-01-01T00:00:00Z', recipient: 'b@company.com' },
+        { id: 602, event_source: 'quarantine', event_type: 'quarantine', event_result: 'completed', event_time: '2024-01-01T00:00:01Z', recipient: 'c@company.com' },
+      ] as unknown as MailChildEvent[];
+
+      render(wrap(<AnalysisSection detail={multiRecipientDetail()} aiEnabled events={events} />));
+
+      fireEvent.click(screen.getByTestId('analysis-timeline-toggle'));
+      expect(screen.getByTestId('analysis-timeline-event-601')).toBeInTheDocument();
+      expect(screen.getByTestId('analysis-timeline-event-602')).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('analysis-recipient-switcher'));
+      await user.click(screen.getByRole('option', { name: 'b@company.com · 丢弃' }));
+
+      expect(screen.getByTestId('analysis-timeline-event-601')).toBeInTheDocument();
+      expect(screen.queryByTestId('analysis-timeline-event-602')).not.toBeInTheDocument();
+    });
   });
 });
