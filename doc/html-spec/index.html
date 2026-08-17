@@ -1086,7 +1086,7 @@
             <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
             <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
             <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
-            <p>预览可交互（Tab/库切�����）· ���态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+            <p>预览可交互��Tab/库切�����）· ���态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1276,7 +1276,7 @@
     </div>
   </details>
 
-  <!-- ==================== 一级：版本变更记录 ==================== -->
+  <!-- ==================== 一级：版本变更记��� ==================== -->
   <details class="l1-section" open>
     <summary>
       <div class="l1-header">
@@ -1822,7 +1822,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🛠️</span>
         <h2>GT-12970【0816】邮件处置中心「优化」</h2>
-        <span class="l1-stats"><span class="done-count">3</span> 已完成 / 3 总计</span>
+        <span class="l1-stats"><span class="done-count">4</span> 已完成 / 4 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -1876,6 +1876,23 @@
             <p>变更类型: 缺陷修复（判定文案同源）· 收录于 GT-12970 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（安全分析「最终判定」横条 + 概览与处置「邮件类型」徽标）</p>
             <p>内含: "安全分析"标签底部"最终判定"横条文案由原三档通用严重度文案（恶意邮件/可疑邮件/正常邮件）改为直接复用"概览与处置"标签"邮件类型"徽标同一份 mailTypeConfig label，消除同一封邮件在两个标签下判定结论字面不一致的问题；判定横条图标/配色仍按三档严重度渲染，仅替换文字部分，email_type 缺失时回退原文案</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md#gt-12978邮件处置中心查看去掉内容详情" target="_blank" rel="noopener noreferrer">GT-12978 · 查看：去掉"内容详情"</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-08-16</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
+            <p>变更类型: 功能精简（删除重复展示区块）· 收录于 GT-12970 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（安全分析「事后处置时间线」下方「内容详情」+ 详情页共用页头）</p>
+            <p>内含: 删除"安全分析"标签"事后处置时间线"下方的"内容详情"折叠区块（基本信息/发送接收方信息/URL检测/附件安全4个子区块，URL/附件信息与"概览与处置"标签"内容实体检测"卡片重复）；其中"邮件ID"字段单独挪至详情页三个标签共用页头（邮件主题下方），改为常驻可见，不再需要点开折叠条查看</p>
           </div>
         </details>
       </div>
