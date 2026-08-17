@@ -345,7 +345,7 @@
             </div>
           </summary>
           <div class="card-detail">
-            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独���������������页）</p>
+            <p>路由: /filter-rules/pipeline（抽屉嵌入） / /filter-rules/connection（独�����������������页）</p>
             <p>spec: IP黑白名单需求文档.md</p>
             <p>组件: connection-layer-page.tsx (renderIpFilterConfig)</p>
             <p>v2: 黑/白名�����独立选中、跨页全选、行高亮、删除选中（N）与批量删除确认；<a href="filter-rules-pipeline-ip-filter/layer-7-batch-delete.html">查看可交互层级 7</a></p>
@@ -871,7 +871,7 @@
           </div></summary>
           <div class="card-detail">
             <p>路由: /logs/ai-url-logs（仅传统版形态可见）</p>
-            <p>spec: 无独立 PRD；关联钓��邮��智��体�� URL 检测需求</p>
+            <p>spec: 无独立 PRD；关��钓��邮��智��体�� URL 检测需求</p>
             <p>组件: ai-url-logs-page.tsx + search-filters + table + detail-modal/detail-content</p>
             <p>子文件: <a href="logs-ai-url-logs/layer-1-detail-modal.html">5-Tab ���箱���判详情弹窗（6 态可交互）</a></p>
           </div>
@@ -1086,7 +1086,7 @@
             <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
             <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
             <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
-            <p>预览可交互��Tab/库切�����）· ���态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
+            <p>预览可交互���Tab/库切�����）· ���态×��色 5×2 矩��实��� · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需确认均逐项标注复核状态</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1821,8 +1821,8 @@
       <div class="l1-header">
         <span class="chevron"></span>
         <span class="l1-icon">🛠️</span>
-        <h2>GT-12970【0816】邮件处置中心「优化」</h2>
-        <span class="l1-stats"><span class="done-count">4</span> 已完成 / 4 总计</span>
+  <h2>GT-12970【0816】邮件处置中心「优化」</h2>
+  <span class="l1-stats"><span class="done-count">5</span> 已完成 / 5 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -1833,8 +1833,8 @@
               <span class="chevron"></span>
               <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md" target="_blank" rel="noopener noreferrer">GT-12970 · 邮件处置中心优化（增量变更规格 · Markdown）</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v1</span>
-              <span class="card-generated-at">2026-08-16</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-08-17</span>
             </div>
           </summary>
           <div class="card-detail">
@@ -1865,7 +1865,7 @@
           <summary>
             <div class="card-summary">
               <span class="chevron"></span>
-              <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md#gt-12977邮件处置中心查看页面最终判定邮件类型需要与概览与处置模块的邮件类型保持一致" target="_blank" rel="noopener noreferrer">GT-12977 · 查看页面："最终判定邮件类型"与"邮件类型"保持一致</a>
+              <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md#gt-12977邮件处置中心查看页面最终判定邮件类型需要与概览与处置模块的邮件类型���持一致" target="_blank" rel="noopener noreferrer">GT-12977 · 查看页面："最终判定邮件类型"与"邮件类型"保持一致</a>
               <span class="badge badge-done">✅</span>
               <span class="card-version-badge">v1</span>
               <span class="card-generated-at">2026-08-16</span>
@@ -1893,6 +1893,23 @@
             <p>变更类型: 功能精简（删除重复展示区块）· 收录于 GT-12970 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（安全分析「事后处置时间线」下方「内容详情」+ 详情页共用页头）</p>
             <p>内含: 删除"安全分析"标签"事后处置时间线"下方的"内容详情"折叠区块（基本信息/发送接收方信息/URL检测/附件安全4个子区块，URL/附件信息与"概览与处置"标签"内容实体检测"卡片重复）；其中"邮件ID"字段单独挪至详情页三个标签共用页头（邮件主题下方），改为常驻可见，不再需要点开折叠条查看</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md#gt-12979邮件状态以及可以支持的后续操作" target="_blank" rel="noopener noreferrer">GT-12979 · 邮件状态以及可以支持的后续操作</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-08-17</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
+            <p>变更类型: 测试数据补全 + 缺陷预防（状态×操作矩阵梳理）· 收录于 GT-12970 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（列表页批量工具栏 + 详情页收件人级对象模式操作）</p>
+            <p>内含: ① 梳理 13 个 DisplayStatus 邮件状态与列表页批量工具栏5个操作（查找相似/投递/取消投递/召回/丢弃）之间的完整可用性矩阵；② 补齐 mock 测试数据集此前完全无样例覆盖的 6 个状态（检测中/投递已中止/已过期/召回中/召回成功/召回失败），新增 MIC056-MIC061 及对应 mock 推导函数修正；③ 梳理详情页收件人级状态×对象模式操作矩阵（与邮件级状态是两套不同值域）</p>
           </div>
         </details>
       </div>
