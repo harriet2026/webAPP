@@ -72,6 +72,7 @@ import type {
   DisposalQuickFilter,
   AICondition,
   DisposalMailItem,
+  DisposalListResponse,
 } from "@/types/email-disposal";
 import type { AdvancedFilter } from "@/types/log";
 import { pendingViewFilter } from "./lib/pending-filter";
@@ -210,6 +211,11 @@ export function EmailDisposalCenterPage({
   >(null);
   const [reclassifyBusy, setReclassifyBusy] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  // 产品决策（本轮）：投递中/重试中(delivering)支持"取消投递"——暂无真实
+  // 后端接口，先做本地乐观更新（把选中邮件的展示状态改写成
+  // delivery_cancelled 并写回 react-query 缓存），风格与批量隔离/阻断等
+  // demo-parity 按钮一致，不落库、刷新页面即恢复原状。
+  const [cancelDeliveryConfirmOpen, setCancelDeliveryConfirmOpen] = useState(false);
   const [headerFilters, setHeaderFilters] = useState<TableHeaderFilters>({
     directions: [],
     emailTypes: [],
@@ -658,7 +664,13 @@ export function EmailDisposalCenterPage({
 
   const handleBatchAction = useCallback(
     async (
-      action: "find_similar" | "release" | "delete" | "export" | "recall",
+      action:
+        | "find_similar"
+        | "release"
+        | "delete"
+        | "export"
+        | "recall"
+        | "cancel_delivery",
     ) => {
       if (action === "export") {
         if (selectedIds.size === 0) {
@@ -694,12 +706,41 @@ export function EmailDisposalCenterPage({
         return;
       }
 
+      if (action === "cancel_delivery") {
+        setCancelDeliveryConfirmOpen(true);
+        return;
+      }
+
       if (action !== "delete") return;
 
       setDeleteConfirmOpen(true);
     },
     [selectedIds, selectedItemMap, t, runFindSimilar, exportToCsv, exportAllFiltered],
   );
+
+  // executeCancelDelivery -- 本地乐观更新：无真实后端接口，直接改写
+  // react-query 缓存里选中邮件的 displayStatus 为 delivery_cancelled（与
+  // canRelease 已经识别的"可重新投递"状态一致），不发起任何网络请求。
+  const executeCancelDelivery = useCallback(() => {
+    const ids = Array.from(selectedIds);
+    queryClient.setQueriesData(
+      { queryKey: ["email-disposal"] },
+      (old: DisposalListResponse | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          items: old.items.map((item) =>
+            ids.includes(item.id)
+              ? { ...item, displayStatus: "delivery_cancelled" as const, action: "accept" }
+              : item,
+          ),
+        };
+      },
+    );
+    toast.success(t("batch.cancelDeliverySuccess", { n: ids.length }));
+    setSelectedItemMap(new Map());
+    setCancelDeliveryConfirmOpen(false);
+  }, [selectedIds, t, queryClient]);
 
   const executeDelete = useCallback(async () => {
     const ids = Array.from(selectedIds);
@@ -1054,6 +1095,31 @@ export function EmailDisposalCenterPage({
               }}
             >
               {t("batch.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={cancelDeliveryConfirmOpen} onOpenChange={setCancelDeliveryConfirmOpen}>
+        <AlertDialogContent
+          className="data-[size=default]:sm:max-w-md"
+          data-testid="disposal-cancel-delivery-dialog"
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("batch.cancelDelivery")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("batch.confirmCancelDelivery")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("detail.overview.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                executeCancelDelivery();
+              }}
+            >
+              {t("batch.cancelDelivery")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

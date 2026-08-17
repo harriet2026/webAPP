@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
@@ -323,6 +323,13 @@ export function MailListTable({
         <Button data-testid="disposal-batch-release" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onBatchAction('release')} disabled={!canRelease}>
           <CheckCircle className="mr-1 h-3 w-3" />
           {t('batch.release')}
+        </Button>
+        {/* 产品决策（本轮）：投递中/重试中支持"取消投递" -- 先实现前端，
+            本地乐观更新状态（无真实后端接口），风格与批量隔离/阻断等
+            demo-parity 按钮一致。仅整批全部为 delivering 时可点击。 */}
+        <Button data-testid="disposal-batch-cancel-delivery" variant="outline" size="sm" className="h-7 text-xs" onClick={() => onBatchAction('cancel_delivery')} disabled={!canCancelDelivery}>
+          <XCircle className="mr-1 h-3 w-3" />
+          {t('batch.cancelDelivery')}
         </Button>
         <Tooltip>
           <TooltipTrigger render={<span />}>

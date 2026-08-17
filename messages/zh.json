@@ -1331,7 +1331,7 @@
     "selectGroupPlaceholder": "选择组",
     "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可填范围见新建/编辑抽屉）。",
     "stagePrefix": "【阶段{stage}】",
-    "expandConfig": "查看完整配置",
+    "expandConfig": "查看���整配置",
     "collapseConfig": "收起完整配置",
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级���明",
@@ -1652,7 +1652,7 @@
     "retryCount": "重试次数",
     "delete": "删除",
     "confirmDelete": "确定要删除此旁路邮件吗？",
-    "noItems": "无旁路邮件",
+    "noItems": "无��路邮件",
     "statusPending": "待处��",
     "statusProcessing": "处理��",
     "statusQuarantined": "已隔�������",
@@ -2064,7 +2064,7 @@
       "relay": {
         "description": "将已校验的发信域绑定到集群出口 IP",
         "add": "添加绑定",
-        "edit": "编辑绑定",
+        "edit": "编辑���定",
         "empty": "暂无出口绑定",
         "domainRequired": "请选择发信域"
       },
@@ -2830,7 +2830,7 @@
     "editGroup": "编辑分组",
     "deleteGroup": "删除分组",
     "endpointRequiredFields": "名称、主机、License ID 为必填",
-    "groupNameRequired": "请输入分组名称",
+    "groupNameRequired": "请��入分组名称",
     "groupMembersRequired": "���至少添加一个成员���理��务器",
     "eyebrow": "proxysvr"
   },
@@ -5733,7 +5733,7 @@
       "discarded": "丢弃",
       "audit": "审核",
       "other": "其他",
-      "mixedMailHint": "本页结果中有 {count} 封多收件人邮件，同一封邮件的不同收件人执行了不同处置动作，命中的收件人已在\"执行动作\"列中高亮（仅统计当前页，其他分页可能还有更多）"
+      "mixedMailHint": "本页结果中有 {count} 封多收件人邮件，同一封邮件的不同收件人执行了不同处置动作，命中的收件人已在\"执行动作\"列中高亮（仅统计当前页，其他分页可能���有更多）"
     },
     "search": {
       "placeholder": "描述邮件特征，例如：上周伪装成微软的钓鱼邮件",
@@ -6035,6 +6035,9 @@
       "failed": "批量处置失败，请稍后重试",
       "recall": "召回",
       "recallLimit": "单次召回最多 10 封",
+      "cancelDelivery": "取消投递",
+      "confirmCancelDelivery": "确认取消投递选中邮件？取消后邮件将停留在网关，可稍后重新投递。",
+      "cancelDeliverySuccess": "已取消投递 {n} 封邮件",
       "reclassifyPartial": "{n} 封邮件已处置，但改判失败",
       "exportSelected": "导出已选 {n} 条",
       "exportAll": "导出全部筛选（{n} 条）",
@@ -6463,7 +6466,7 @@
       },
       "rawLogs": {
         "title": "原始日志",
-        "entriesBadge": "{count} 条",
+        "entriesBadge": "{count} ��",
         "groupsBadge": "{count} 个组件分组",
         "notLoaded": "未加载",
         "loadingBadge": "加载中",
@@ -7139,7 +7142,7 @@
       "desc_comprehensiveEngineResult": {
         "source": "AI意图分类引擎",
         "usage": "根据AI意图分类结果过滤",
-        "note": "支持置信度阈值，可识��钓鱼、垃圾、涉政等"
+        "note": "支持置信度阈���，可识��钓鱼、垃圾、涉政等"
       },
       "desc_senderIpCount15Min": {
         "source": "发信行为统计",
@@ -8250,7 +8253,7 @@
       "hardware": "硬件资源",
       "processes": "服务进程",
       "database": "数据库与缓存",
-      "storage": "存储与备份"
+      "storage": "存储与备��"
     },
     "range": {
       "1h": "近1小时",
@@ -9330,7 +9333,7 @@
       "confidence": "置信度",
       "status": "任务状态",
       "disposition": "最终处置",
-      "basis": "判定依据",
+      "basis": "判定��据",
       "dispositionValue": {
         "no_need": "无需处置",
         "pending_recall": "���确认召回",
@@ -10767,7 +10770,7 @@
         "reviewer_notify_interval_out_of_range": "审核人提醒���隔需在 {min}–{max} 分钟之间",
         "timeout_mark_position_invalid": "不支持的标记位置「{value}」，只能是：{allowed}",
         "timeout_mark_positions_empty": "选择「打标记」时，至少要指定一个标记位置",
-        "timeout_mark_text_empty": "标记文本不能为空",
+        "timeout_mark_text_empty": "标记文本不能为���",
         "timeout_mark_text_too_long": "标记文本不能超过 {max} 个字符",
         "timeout_temp_disposal_invalid": "超时临时处置「{value}」无效，��能是：{allowed}"
       },
@@ -10779,7 +10782,7 @@
       "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用���一个密钥或停用当前密钥",
       "algorithm_unsupported": "不支持的签名���法「{value}」，只能是���{allowed}",
       "cross_tenant_manage_denied": "无权管理��他租户的签名密钥",
-      "cross_tenant_read_denied": "无权查看其他租户的签名域名",
+      "cross_tenant_read_denied": "无权查看其他租户的签��域名",
       "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域��服务商处添加 TXT 记录并完成验证，���启用它",
       "forbidden": "没有权限执行此操��",
       "key_not_found": "签名密钥不存在，可���已被删除",
