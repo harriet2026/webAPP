@@ -312,14 +312,18 @@ export function recipientActionsForStatus(status: string, hasObjectId: boolean):
     // already implement the same release/delete object-mode contract as
     // quarantine/sideline, so it belongs in the same operable bucket.
     //
-    // 待审核(pending_review/audited) additionally exposes 隔离/阻断
-    // (demo-parity, task RA-5): DEMO-PARITY buttons -- functional in MOCK
+    // 待审核(pending_review/audited) additionally exposes 隔离
+    // (demo-parity, task RA-5): DEMO-PARITY button -- functional in MOCK
     // mode (immediate state change), gracefully degrading to a toast in
     // REAL mode since the backend action enum is only release|delete|recall
     // (see hooks/use-recipient-disposition.tsx's dispatchQuarantineOrBlock).
+    // 阻断(block) intentionally removed here per product decision -- a
+    // pending-review recipient no longer surfaces a 阻断 button (only
+    // 投递/隔离/丢弃); 'block' stays a valid ActionKey/dispatch path for any
+    // other future caller, it's just never produced by this status.
     case 'pending_review':
     case 'audited':
-      return hasObjectId ? ['deliver', 'quarantine', 'block', 'discard'] : [];
+      return hasObjectId ? ['deliver', 'quarantine', 'discard'] : [];
     default:
       // blocked/rejected/discarded (no original content) -- not operable,
       // per spec §5.3's canOperate=✗ row.

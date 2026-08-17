@@ -237,7 +237,7 @@ describe('RecipientStatus dispatch flow', () => {
   // additionally exposes 隔离/阻断, and clicking either fires
   // dispatchQuarantineOrBlock IMMEDIATELY -- no ReclassifyDialog
   // ("mock-reclassify-confirm" mock) is ever shown for these two actions.
-  it('RA-5: pending_review row renders 隔离/阻断 and clicking 隔离 dispatches disposeObjectAction(quarantine) immediately with no dialog', async () => {
+  it('RA-5: pending_review row renders 隔离 (no 阻断) and clicking 隔离 dispatches disposeObjectAction(quarantine) immediately with no dialog', async () => {
     const user = userEvent.setup();
     const dispositions: RecipientDisposition[] = [
       { recipient: 'pending@test.local', final_action: 'sideline', status: 'pending_review', object_kind: 'quarantine', object_id: 'obj-pending' },
@@ -247,7 +247,9 @@ describe('RecipientStatus dispatch flow', () => {
     render(<RecipientStatus {...baseProps(dispositions)} />);
 
     expect(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.quarantine')).toBeInTheDocument();
-    expect(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.block')).toBeInTheDocument();
+    // 阻断 removed from pending_review/audited per product decision --
+    // a pending-review recipient no longer offers a 阻断 button.
+    expect(screen.queryByText('emailDisposal.detail.overview.recipientStatus.action.block')).not.toBeInTheDocument();
 
     await user.click(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.quarantine'));
 
@@ -256,24 +258,6 @@ describe('RecipientStatus dispatch flow', () => {
     ));
     expect(screen.queryByText('mock-reclassify-confirm')).not.toBeInTheDocument();
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('emailDisposal.detail.overview.recipientStatus.actionSuccess'));
-  });
-
-  // Real-mode degrade: disposeObjectAction rejecting (the real backend's 400
-  // for any non release/delete action) must never be silently swallowed --
-  // it surfaces the explicit unsupported-action toast.
-  it('RA-5: 阻断 surfaces the unsupported toast when disposeObjectAction rejects', async () => {
-    const user = userEvent.setup();
-    const dispositions: RecipientDisposition[] = [
-      { recipient: 'pending@test.local', final_action: 'sideline', status: 'pending_review', object_kind: 'quarantine', object_id: 'obj-pending' },
-    ];
-    mockDisposeObjectAction.mockRejectedValue(new Error('action must be release or delete'));
-
-    render(<RecipientStatus {...baseProps(dispositions)} />);
-    await user.click(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.block'));
-
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(
-      'emailDisposal.detail.overview.recipientStatus.quarantineBlockUnsupported',
-    ));
   });
 
   // G6: a batch action that partially succeeds must open the "操作完成"
@@ -413,11 +397,13 @@ describe('RecipientStatus matrix presentation (D1/D3/D4)', () => {
     }
   });
 
-  // RA-5 (demo parity): the batch bar always renders 批量隔离/批量阻断
-  // buttons too (they're notApplicable-and-skipped for groups whose status
-  // doesn't support them, same as any other batch action mixed into a
-  // multi-status selection).
-  it('RA-5: batch bar includes 批量隔离/批量阻断 buttons', async () => {
+  // RA-5 (demo parity): the batch bar always renders a 批量隔离 button too
+  // (it's notApplicable-and-skipped for groups whose status doesn't support
+  // it, same as any other batch action mixed into a multi-status
+  // selection). 批量阻断 was removed -- 'block' is no longer produced by any
+  // recipientActionsForStatus case, so a batch 阻断 button would always be
+  // notApplicable and never fire.
+  it('RA-5: batch bar includes a 批量隔离 button (no 批量阻断)', async () => {
     const user = userEvent.setup();
     render(<RecipientStatus {...baseProps(dispositionsOf(3))} />);
     const groupCheckboxes = screen.getAllByRole('checkbox').filter(
@@ -426,7 +412,7 @@ describe('RecipientStatus matrix presentation (D1/D3/D4)', () => {
     await user.click(groupCheckboxes[0]);
 
     expect(screen.getByTestId('email-disposal-recipient-batch-quarantine')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-recipient-batch-block')).toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-recipient-batch-block')).not.toBeInTheDocument();
   });
 
   // RA-5: clicking 批量隔离 dispatches disposeObjectAction(quarantine) for

@@ -43,7 +43,7 @@ interface MailListTableProps {
   selectedIds: Set<number>;
   onSelectionChange: (ids: Set<number>) => void;
   onItemClick: (id: number) => void;
-  onBatchAction: (action: 'find_similar' | 'release' | 'delete' | 'export' | 'recall') => void;
+  onBatchAction: (action: 'find_similar' | 'release' | 'delete' | 'export' | 'recall' | 'cancel_delivery') => void;
   onFindSimilar?: (id: number) => void;
   aiEnabled?: boolean;
   similarMode?: boolean;
@@ -145,13 +145,24 @@ export function MailListTable({
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
   const hasSelection = selectedIds.size > 0;
   const selectedItems = items.filter((item) => selectedIds.has(item.id));
+  // 产品决策（本轮）：投递中止(delivery_cancelled)/投递失败(delivery_failed)
+  // 都是"曾经没能成功投递、原文仍在"的邮件，重新触发一次真实投递（复用既有
+  // release 链路）应当放行，不再局限于三个待处置态。
   const canRelease = hasSelection && selectedItems.every((item) =>
-    ['quarantine_pending', 'sideline_pending', 'audit_pending'].includes(item.displayStatus),
+    ['quarantine_pending', 'sideline_pending', 'audit_pending', 'delivery_cancelled', 'delivery_failed'].includes(item.displayStatus),
   );
   // GT-12923 阶段三：partial_delivered 不再是独立的邮件状态（位置维度下未
   // 完全确定去向的邮件统一归入「投递中」），已投递完成才允许召回。
+  // 产品决策（本轮）：召回失败(recall_failed)允许重新发起召回（复用既有
+  // recall 链路），与已投递(delivered)共享同一放行条件。
   const canRecall = hasSelection && selectedIds.size <= 10 && selectedItems.every((item) =>
-    ['delivered'].includes(item.displayStatus),
+    ['delivered', 'recall_failed'].includes(item.displayStatus),
+  );
+  // 产品决策（本轮）：投递中/重试中(delivering)的邮件支持"取消投递"——先
+  // 实现前端（本地乐观更新，暂无真实的取消接口），只在整批全是 delivering
+  // 时才放行，避免误取消其他态的邮件。
+  const canCancelDelivery = hasSelection && selectedItems.every((item) =>
+    item.displayStatus === 'delivering',
   );
 
   // GT-11580: per-browser column show/hide preference. Initialised empty (all

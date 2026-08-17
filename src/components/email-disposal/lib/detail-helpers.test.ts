@@ -142,18 +142,19 @@ describe('recipientActionsForStatus', () => {
     expect(recipientActionsForStatus('sidelined', false)).toEqual([]);
   });
   // task RA-5 (demo parity): 待审核(pending_review) additionally exposes
-  // 隔离/阻断, matching the demo's single-recipient drawer order
-  // (投递·隔离·阻断·丢弃).
-  test('pending_review status with an object_id exposes deliver/quarantine/block/discard', () => {
+  // 隔离, matching the demo's single-recipient drawer order
+  // (投递·隔离·丢弃). 阻断 was removed from this status per product
+  // decision -- a pending-review recipient no longer offers a 阻断 button.
+  test('pending_review status with an object_id exposes deliver/quarantine/discard', () => {
     expect(recipientActionsForStatus('pending_review', true))
-      .toEqual(['deliver', 'quarantine', 'block', 'discard']);
+      .toEqual(['deliver', 'quarantine', 'discard']);
   });
   // review Medium-1: inbound_audit's real recipient status is "audited" (see
   // milter.go's "audit" branch), and its object-mode backend (approve/reject
   // by object_key) is already wired -- the detail drawer must expose the
   // same action set as pending_review, not treat it as non-operable.
-  test('audited status with an object_id exposes deliver/quarantine/block/discard', () => {
-    expect(recipientActionsForStatus('audited', true)).toEqual(['deliver', 'quarantine', 'block', 'discard']);
+  test('audited status with an object_id exposes deliver/quarantine/discard', () => {
+    expect(recipientActionsForStatus('audited', true)).toEqual(['deliver', 'quarantine', 'discard']);
   });
   test('audited status without an object_id exposes no actions', () => {
     expect(recipientActionsForStatus('audited', false)).toEqual([]);

@@ -110,6 +110,33 @@ describe("MailListTable toolbar (GT-11580)", () => {
     ).toBeEnabled();
   });
 
+  // 产品决策（本轮）：投递中止/投递失败允许重新触发真实投递（复用 release
+  // 链路），召回失败允许重新发起召回（复用 recall 链路） -- 不再局限于三个
+  // 待处置态 / 已投递态。
+  it("enables 投递 for delivery_cancelled/delivery_failed rows, and 召回 for recall_failed rows", () => {
+    const cancelled = { ...makeItem(1), displayStatus: "delivery_cancelled" as const };
+    renderTable({ items: [cancelled], selectedIds: new Set<number>([1]) });
+    expect(
+      screen.getByRole("button", { name: /emailDisposal\.batch\.release/ }),
+    ).toBeEnabled();
+  });
+
+  it("enables 投递 for a delivery_failed row", () => {
+    const failed = { ...makeItem(1), displayStatus: "delivery_failed" as const };
+    renderTable({ items: [failed], selectedIds: new Set<number>([1]) });
+    expect(
+      screen.getByRole("button", { name: /emailDisposal\.batch\.release/ }),
+    ).toBeEnabled();
+  });
+
+  it("enables 召回 for a recall_failed row", () => {
+    const recallFailed = { ...makeItem(1), displayStatus: "recall_failed" as const };
+    renderTable({ items: [recallFailed], selectedIds: new Set<number>([1]) });
+    expect(
+      screen.getByRole("button", { name: /emailDisposal\.batch\.recall/ }),
+    ).toBeEnabled();
+  });
+
   it('shows the total count ("共 N 条")', () => {
     renderTable({ total: 42 });
     expect(

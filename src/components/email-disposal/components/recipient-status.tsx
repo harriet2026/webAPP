@@ -340,9 +340,13 @@ export function RecipientStatus({
         >
           <span className="text-sm font-medium">{t('recipientStatus.selected', { n: selectedCount })}</span>
           <div className="flex items-center gap-2 ml-auto">
-            {/* RA-5: 批量隔离/批量阻断 added between deliver and discard,
-                matching the single-recipient header's action order. */}
-            {(['deliver', 'quarantine', 'block', 'discard', 'recall', 'notify'] as ActionKey[]).map((action) => {
+            {/* RA-5: 批量隔离 added between deliver and discard, matching the
+                single-recipient header's action order. 批量阻断 removed --
+                'block' is no longer produced by any recipientActionsForStatus
+                case (阻断 was dropped from pending_review/audited per
+                product decision), so a batch 阻断 button would always be
+                notApplicable and never fire. */}
+            {(['deliver', 'quarantine', 'discard', 'recall', 'notify'] as ActionKey[]).map((action) => {
               const Icon = ACTION_ICONS[action];
               const btn = (
                 <Button
