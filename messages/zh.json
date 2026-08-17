@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�������������������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测���������������������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1333,7 +1333,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看�����整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置���。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承���局」，彩色为「另行配置���。",
     "priorityHintAria": "优先级���明",
     "name": "名���",
     "targetGroups": "适�������������",
@@ -1651,7 +1651,7 @@
     "reinject": "重新注入",
     "retryCount": "重试次数",
     "delete": "删除",
-    "confirmDelete": "确定要删除此旁路邮��吗？",
+    "confirmDelete": "确定��删除此旁路邮��吗？",
     "noItems": "无��路邮件",
     "statusPending": "待处��",
     "statusProcessing": "处理��",
@@ -2030,7 +2030,7 @@
     },
     "detail": {
       "primaryAdmin": "主管理员",
-      "primaryAdminNone": "未设置",
+      "primaryAdminNone": "���设置",
       "viewInUserManagement": "在用户管理中查看"
     },
     "routing": {
@@ -2087,7 +2087,7 @@
       },
       "auth": {
         "dkimTitle": "DKIM 签名",
-        "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS 校验",
+        "dkimDescription": "为每个发信域生成或导入 DKIM 密钥��完成 DNS 校验",
         "activeKeys": "已启用密钥 {count} 个",
         "smtpTitle": "SMTP 凭证",
         "smtpDescription": "��理发信认证账号、后端路由与锁定状态",
@@ -2209,7 +2209,7 @@
     "batchEnableTitle": "批量启用",
     "batchEnableDescription": "确定批量启用选中的 {count} 个账号？",
     "batchDisableTitle": "批量停用",
-    "batchDisableDescription": "确定批量停用选中的 {count} 个账���？停用后将立即终止其登录会话。",
+    "batchDisableDescription": "确定批量停���选中的 {count} 个账���？停用后将立即终止其登录会话。",
     "batchDeleteTitle": "批量删除",
     "batchDeleteDescription": "确定批��删除选中的 {count} 个账号？此���作不可撤销。",
     "batchSuccess": "批量操���成功",
@@ -2617,7 +2617,7 @@
     "subtitle": "管理当前账号的安全信息与登录状态",
     "tabs": {
       "account": "账号信息",
-      "password": "密码修改",
+      "password": "密码修��",
       "twoFactor": "二���认证",
       "sessions": "登录会话",
       "devices": "授信终端",
@@ -2720,7 +2720,7 @@
       "logoutCurrentConfirm": "下线当前设备将退出本会话，确定继续？",
       "logoutOthers": "下线���他所有设备",
       "logoutOthersTitle": "下线其他所有设备",
-      "logoutOthersConfirm": "确认下线除当前设备外���所有其他设备（共 {n} 台）？",
+      "logoutOthersConfirm": "确认下线除当前设备外���所有��他设备（共 {n} 台）？",
       "loggedOutDevice": "已下线设备 {name}",
       "loggedOutOthers": "已下线 {n} 台设��",
       "loggedOut": "已退出登���",
@@ -2804,7 +2804,7 @@
   },
   "proxysvr": {
     "title": "代理服务器管理",
-    "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分组」投递通道引用。",
+    "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分组」投递通道���用。",
     "endpointsTab": "��理服务器目录",
     "groupsTab": "代理服务器分组",
     "name": "名称",
@@ -2978,7 +2978,7 @@
     "emptyTopSimilarMessages": "暂无相似邮件",
     "tabs": {
       "overview": "概览",
-      "steps": "步骤",
+      "steps": "��骤",
       "actions": "动作",
       "raw": "原始数据"
     },
@@ -3170,7 +3170,7 @@
       "cancelled": "已取消"
     },
     "severities": {
-      "low": "低",
+      "low": "���",
       "medium": "中",
       "high": "高"
     },
@@ -3674,7 +3674,7 @@
     "actionBlockListTip": "该 IP 命中后直接拒绝连接",
     "actionQuarantineListTip": "该 IP 命中后邮件进入隔离区",
     "actionDropListTip": "该 IP 命中后静默丢弃，无退信",
-    "actionReviewListTip": "该 IP 命中后邮件进入人工审核队列",
+    "actionReviewListTip": "该 IP 命中后邮件进入人工审核���列",
     "actionDeliverListTip": "该 IP 命中后直接放行投递",
     "actionTagDeliverListTip": "该 IP 命中后放��并添加标记，继续内容层检测",
     "ipConfigTypeSingle": "单IP",
@@ -3941,7 +3941,7 @@
     "greylistMaxRequests": "最大请求数",
     "greylistWhitelistTTL": "白名单有效期",
     "greylistHours": "小时",
-    "greylistWhitelistTTLTip": "通过灰名单验证的发件人将被记住该时长，有效期内再次发信无需重新验证。",
+    "greylistWhitelistTTLTip": "通过灰名单验证的发件人将被记住该时长，有效期内��次发信无需重新验证。",
     "greylistExemptions": "豁免设置",
     "greylistExemptAuth": "已认证发件人（SPF/DKIM通过）自动豁免",
     "greylistExemptWhitelist": "白��单 IP / 域自动豁免",
@@ -4394,7 +4394,7 @@
     "attachmentContentUnavailable": "附件内容匹配仅由旁路扫描器提供，当前编辑器暂不能配置。",
     "legacyScopesPreserved": "此规则保留了 {count} 个简化编辑器未展示的兼容作用域。",
     "headerOnlyTagHint": "标记仅添加邮件头，不会修改邮件主题。",
-    "headerRequired": "请同时填写邮件头名称和值",
+    "headerRequired": "请同时���写邮件头名称和值",
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
     "keywordPlaceholder": "例如：机密|绝密|内部资料",
@@ -5064,7 +5064,7 @@
       "configured": "已配置",
       "notConfigured": "未配置",
       "hostRequired": "请填写杀毒引擎服务器地址",
-      "platformManagedHint": "反病毒服务器与病毒库由平台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
+      "platformManagedHint": "反病毒服务器与病毒库由��台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
       "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
       "updateSuccess": "病毒库更新请求已提交",
       "updateFailed": "病毒库更新失��",
@@ -5215,7 +5215,7 @@
       "emptyPassword": "密码不能为空"
     },
     "activeContent": {
-      "vbaSection": "VBA 宏检测",
+      "vbaSection": "VBA 宏���测",
       "vbaEnabled": "启用 VBA 宏检测",
       "vbaToKeyword": "将宏源码发送到关键词评估",
       "vbaAction": "VBA 宏触发动作",
@@ -6001,7 +6001,7 @@
       "operations": "操作",
       "view": "查看",
       "findSimilar": "找相似",
-      "findSimilarTooltip": "以该邮件为样本，基于内容���义查找相似邮件",
+      "findSimilarTooltip": "以该邮件为样本，基于内容语义查找相似邮件",
       "download": "下载",
       "loading": "加载中...",
       "empty": "暂无数据",
@@ -7211,7 +7211,7 @@
       "groupSelectPlaceholder": "请选择群组",
       "orgDeptSelectLabel": "选择部门",
       "orgDeptSelectedCount": "已选 {n} 个",
-      "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
+      "orgDeptHint": "从组织通讯录选择���门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
       "orgDeptSearchPlaceholder": "搜索部门…",
       "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
       "orgDeptNoMatch": "未找到匹配的部门",
@@ -7466,7 +7466,7 @@
     }
   },
   "disposalSettings": {
-    "pageTitle": "处置设置",
+    "pageTitle": "处置设���",
     "pageDescription": "配置邮件隔离区、审核流程和召回策略的相关设置",
     "selectTenantEmpty": "请先选择租户以管理其处置��置",
     "save": "保存设置",
@@ -7510,7 +7510,7 @@
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
     "tzComputedIn": "通知时间以 {tz} ���算",
-    "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
+    "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间���",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
     "tzKeepCurrent": "保持当前时区（{tz}）",
     "range": "通知范围",
@@ -7823,7 +7823,7 @@
       "title": "漏网之鱼追踪",
       "warning": "检测到 {count} 封漏网邮件，请及时处理",
       "viewDetails": "查看详情",
-      "drawerTitle": "漏网邮件明细",
+      "drawerTitle": "漏网邮件���细",
       "truncated": "仅展示前 {shown} 条，共 {total} 条",
       "prev": "上一页",
       "next": "下一页",
@@ -8155,7 +8155,7 @@
       "urlReputationDistribution": "URL信誉分布",
       "clickOverview": "链接保护点击概览",
       "clickOverviewMetrics": {
-        "clickRate": "点击率",
+        "clickRate": "点击���",
         "threatClicks": "拦��点击",
         "totalClicks": "总点击"
       },
@@ -8240,7 +8240,7 @@
       "noMaliciousAttachment": "该时段无恶意附件"
     },
     "bottomActions": {
-      "exportCsv": "导出 CSV",
+      "exportCsv": "���出 CSV",
       "generateReport": "生成报告",
       "aiAnalysis": "AI 分析"
     },
@@ -8515,7 +8515,7 @@
       "sender": "发件人",
       "subject": "主题",
       "urlRisk": "URL检测",
-      "urlPhishing": "钓鱼",
+      "urlPhishing": "钓��",
       "urlSuspicious": "可疑",
       "urlNormal": "正常",
       "urlFindings": "链接研判明细",
@@ -9554,7 +9554,7 @@
       "overlapWarn": "与策略「{name}」存在时间点重叠，仍可保存。",
       "lookbackWindow": "单次回溯窗",
       "lookbackRange": "回溯窗范围 30–1440 分钟",
-      "weekdays": "按周几执行（可选）",
+      "weekdays": "按周��执行（可选）",
       "weekdaysHint": "不选=每天执行",
       "monthDays": "按每月日期执行（可选）",
       "monthDaysHint": "不选=不限制每月日期；与周几同时选择时���同时满足。",
@@ -9702,7 +9702,7 @@
     "colLastSync": "最后同步时间",
     "colLineNo": "行号",
     "colLogId": "日志 ID",
-    "colName": "数据源名称",
+    "colName": "数据源名���",
     "colRawValue": "原始值",
     "colResultSummary": "结果摘要",
     "colSource": "数据源",
@@ -9731,7 +9731,7 @@
     "emptyText": "暂无数据",
     "errBaseDnRequired": "请输入 Base DN",
     "errBindDnRequired": "请输入 Bind DN",
-    "errBindPasswordRequired": "请输入绑定密码",
+    "errBindPasswordRequired": "请输入绑定���码",
     "errNameDup": "数据源名称已存在",
     "errNameMax": "不能超过 64 个字符",
     "errNameRequired": "数据源名称不能为空",
@@ -9900,7 +9900,7 @@
       "source": "来源",
       "node": "节点",
       "metric": "指标",
-      "currentValue": "���前值",
+      "currentValue": "����前值",
       "threshold": "阈值",
       "firstSeen": "首次发生",
       "lastSeen": "最近发生",
@@ -10435,7 +10435,7 @@
         "stale": "通讯录数据已超过 24 小时未更新"
       }
     },
-    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
+    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收���」全链路防护。阈值范围：1-1000，-1 表示无限制。"
   },
   "userList": {
     "blacklistRules": "黑名单规则",
@@ -10478,7 +10478,7 @@
     "deleteFailed": "删除失败"
   },
   "portalWhitelist": {
-    "loading": "加载中...",
+    "loading": "加载��...",
     "senderLabel": "发件人",
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的链接。",

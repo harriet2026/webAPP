@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown, ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
@@ -176,8 +176,9 @@ export function MailListTable({
         if (raw) {
           setHiddenColumns(new Set(JSON.parse(raw) as string[]));
         } else {
-          // 默认隐藏"处置依据"列，首次访问时生效
-          const defaults = new Set(['disposalBasis']);
+          // 默认隐藏"处置依据""执行动作""发信 IP"三列，首次访问时生效——
+          // 均为低频排障字段，不影响日常巡查判断，可在"设置"里随时打开。
+          const defaults = new Set(['disposalBasis', 'action', 'senderIp']);
           setHiddenColumns(defaults);
           localStorage.setItem(COLUMN_PREF_KEY, JSON.stringify([...defaults]));
         }
@@ -206,9 +207,16 @@ export function MailListTable({
   );
 
   const directionOptions = ['incoming', 'outgoing', 'internal'];
+  // 阶段一列宽优化：收发类型列由 Badge 文案改为图标+Tooltip，压缩列宽；
+  // 图标与颜色不承载额外语义，仅用于快速视觉区分，完整文案仍在 Tooltip 中。
+  const directionIconConfig: Record<string, { icon: typeof ArrowDownToLine; className: string }> = {
+    incoming: { icon: ArrowDownToLine, className: 'text-blue-600 dark:text-blue-400' },
+    outgoing: { icon: ArrowUpFromLine, className: 'text-emerald-600 dark:text-emerald-400' },
+    internal: { icon: ArrowLeftRight, className: 'text-muted-foreground' },
+  };
   const emailTypeOptions = ['normal', 'subscription', 'advertising', 'spam', 'harmful', 'phishing', 'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive'];
   // 与 quick-filters.tsx 的 statuses 数组、DisplayStatus 类型保持同一套位置
-  // 维度枚举，避免同一页面出现两份不一致的「邮件状��」选项列表。
+  // 维度枚举，避免同一页面出现两份不一致的「邮件状态」选项列表。
   const statusOptions: DisplayStatus[] = ['delivering', 'quarantine_pending', 'sideline_pending', 'audit_pending', 'rejected', 'discarded', 'delivery_cancelled', 'delivered', 'delivery_failed', 'recall_pending', 'recall_success', 'recall_failed', 'expired'];
 
   const updateHeaderFilter = useCallback((key: keyof TableHeaderFilters, option: string, checked: boolean) => {
@@ -585,7 +593,7 @@ export function MailListTable({
       )}
 
       {/* GT-12423: min-w 使 1024px 视口下产生横向滚动（原型行为，配合
-          sticky 操作列），800px 在 ≥1280 视口（容器 ≥868px）不触发滚动 */}
+          sticky 操作列宽，800px 在 ≥1280 视口（容器 ≥868px）不触发滚动 */}
       <div className="rounded-lg border" data-testid="disposal-mail-table">
         <Table className="min-w-[800px]">
           <TableHeader>
@@ -649,11 +657,27 @@ export function MailListTable({
                   {formatDate(item.timestamp)}
                 </TableCell>
                 )}
-                {isColVisible('direction') && (
-                <TableCell className="text-xs">
-                  <Badge variant="outline">{localizeEnum(`filters.${item.direction}` as const, item.direction)}</Badge>
-                </TableCell>
-                )}
+  {isColVisible('direction') && (
+  <TableCell className="text-xs">
+    {(() => {
+      const directionLabel = localizeEnum(`filters.${item.direction}` as const, item.direction);
+      const config = directionIconConfig[item.direction];
+      const DirectionIcon = config?.icon ?? ArrowLeftRight;
+      return (
+        <Tooltip>
+          <TooltipTrigger render={<span className="inline-flex" />}>
+            <DirectionIcon
+              className={cn('size-4', config?.className ?? 'text-muted-foreground')}
+              aria-hidden="true"
+            />
+            <span className="sr-only">{directionLabel}</span>
+          </TooltipTrigger>
+          <TooltipContent>{directionLabel}</TooltipContent>
+        </Tooltip>
+      );
+    })()}
+  </TableCell>
+  )}
                 {isColVisible('subject') && (
                 <TableCell className="text-xs max-w-[300px] truncate">
                   {item.subject}
