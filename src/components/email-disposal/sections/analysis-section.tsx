@@ -19,9 +19,7 @@ import type { MailLogDetail, CheckStatus, FinalVerdict, MailChildEvent } from '@
 import type { DisposalBasis } from '@/types/email-disposal';
 import { formatTimestamp } from '@/lib/format-time';
 import { useDetectionStages, aggregate, deriveFinalVerdict } from '../hooks/use-detection-stages';
-import {
-  formatBytes, tidOf, deriveDirection, mailTypeConfig, stripDetailPrefix,
-} from '../lib/detail-helpers';
+import { mailTypeConfig, stripDetailPrefix } from '../lib/detail-helpers';
 import {
   formatHitDetail, getModuleName, getActionLabel, getActionColor, getPolicyRoute, getPolicyMeta,
   getStageColor, isStage1Policy, groupRecipientBasisByPolicy, type DisposalLang,
@@ -272,13 +270,6 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     [disposalEvents],
   );
 
-  // --- Step 2: content-layer expandable area (ported from tabs/features-tab.tsx) ---
-  const [contentExpanded, setContentExpanded] = useState(false);
-  const suspiciousUrls = new Set(detail.cac_result?.suspicious_urls ?? []);
-  const scans = detail.scan_results ?? [];
-  const direction = deriveDirection(detail.authenticated, detail.smtp_user);
-  const ipLocation = [detail.geo_region_name, detail.geo_city].filter(Boolean).join(' / ') || '—';
-
   // --- 钓鱼检测智能体研判明细的展开状态：内嵌在阶段4卡片的
   // phishingAgent 检测行下方（不再是独立的底部大卡片）。 ---
   const [phishAgentDetailExpanded, setPhishAgentDetailExpanded] = useState(false);
@@ -298,7 +289,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     capabilities?.multiTenant === true &&
     isStage1Policy(basis?.policy_key);
   // 复用同一个租户判断，用于下方处置依据多卡片场景——每张卡片按自己的
-  // policy_key 独立判���是否命中阶段1平台策略，不能整体沿用上面按顶层
+  // policy_key 独立判断是否命中阶段1平台策略，不能整体沿用上面按顶层
   // basis.policy_key 算出的 isPlatformPolicyContext。
   const isTenantPlatformViewer = viewer === 'tenant' && capabilities?.multiTenant === true;
 
@@ -582,10 +573,10 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             // 群发邮件多依据支撑（信号一）：本阶段内任意一个 check 的收件
             // 人命中结果出现分歧（matched_action_rules/matched_tag_rules
             // 按 ruleId 交叉推导），卡片右上角提示"N组"。但 SPF/DKIM/IP 等
-            // 多数检测项是对整封邮件评估一次、不分���件人，这一信号在实际
+            // 多数检测项是对整封邮件评估一次、不分收件人，这一信号在实际
             // 数据里很少触发。单人视图下 displayStages 已经把每个 check 的
             // recipientGroups 收窄成 undefined（不再是"多组"），这里天然
-            // 算出 0，不需要额外判断��会隐藏"N组"徽标。
+            // 算出 0，不需要额外判断就会隐藏"N组"徽标。
             const maxCheckRecipientGroupCount = Math.max(
               0,
               ...st.checks.map((c) => c.recipientGroups?.length ?? 0),
@@ -1118,145 +1109,17 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
         )}
       </div>
 
-      {/* Step 2: content-layer expandable area -- URL + attachment tables */}
-      <div className="rounded-lg border overflow-hidden">
-        <InteractiveSurface
-          asChild
-          variant="control"
-          className="flex w-full items-center justify-between rounded-none p-3 data-[hovered=true]:bg-muted/50"
-        >
-          <button
-            type="button"
-            aria-expanded={contentExpanded}
-            onClick={() => setContentExpanded((v) => !v)}
-          >
-            <span className="font-medium">{t('contentDetails')}</span>
-            <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', !contentExpanded && '-rotate-90')} />
-          </button>
-        </InteractiveSurface>
-        {contentExpanded && (
-          <div className="border-t p-4 space-y-4">
-            <Section title={tFeatures('basicInfo')}>
-              <KV label={tFeatures('tid')} value={tidOf(detail.message_uuid)} mono />
-              <KV label={tFeatures('emailId')} value={detail.message_id || '—'} mono />
-              {/* 完整关联键：用于在后端服务器日志中对应检索（GT-12651）。
-                  message_uuid 贯穿组件 JSONL，session_id 是 milter 运行日志的
-                  sid，queue_id 对应 Postfix mail.log。 */}
-              <KV label={tFeatures('messageUuid')} value={detail.message_uuid || '—'} mono />
-              <KV label={tFeatures('sessionId')} value={detail.session_id || '—'} mono />
-              <KV label={tFeatures('queueId')} value={detail.queue_id || '—'} mono />
-              <KV label={tFeatures('receiveTime')} value={detail.received_at} />
-              <KV label={tFeatures('direction')} value={tFeatures(`directionValue.${direction}`)} />
-              <KV label={tFeatures('emailSize')} value={formatBytes(detail.storage_size)} />
-              <KV label={tFeatures('action')} value={detail.action} />
-              <KV label={tFeatures('reason')} value={detail.reason || '—'} />
-            </Section>
-
-            <Section title={tFeatures('senderRecipientInfo')}>
-              <KV label={tFeatures('envelopeFrom')} value={detail.sender} mono />
-              <KV label={tFeatures('envelopeTo')} value={detail.recipients?.join(', ') || '—'} mono />
-              <KV label={tFeatures('senderIp')} value={detail.client_ip || '—'} mono />
-              <KV label={tFeatures('ipLocation')} value={ipLocation} />
-              <KV label={tFeatures('senderDomain')} value={detail.sender_domain || '—'} />
-            </Section>
-
-            <Section title={tFeatures('urlDetection')}>
-              {(detail.urls ?? []).length === 0 ? (
-                <Empty text={tFeatures('noData')} />
-              ) : (
-                <table className="w-full text-xs">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('urlIndex')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('originalUrl')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('securityStatus')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(detail.urls ?? []).map((u, i) => (
-                      <tr key={i} className="border-b">
-                        <td className="px-2 py-1.5">{i + 1}</td>
-                        <td className="px-2 py-1.5 truncate max-w-lg">{u}</td>
-                        <td className="px-2 py-1.5">
-                          <span className={suspiciousUrls.has(u)
-                            ? 'rounded bg-red-100 px-2 py-0.5 text-red-700'
-                            : 'rounded bg-emerald-100 px-2 py-0.5 text-emerald-700'}>
-                            {suspiciousUrls.has(u) ? tFeatures('urlSuspicious') : tFeatures('urlSafe')}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </Section>
-
-            <Section title={tFeatures('attachmentSecurity')}>
-              {(detail.attachments ?? []).length === 0 ? (
-                <Empty text={tFeatures('noData')} />
-              ) : (
-                <table className="w-full text-xs">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('attIndex')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('filename')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('contentType')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('size')}</th>
-                      <th className="px-2 py-1.5 text-left">MD5</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('encrypted')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('containsQr')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('virusScan')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(detail.attachments ?? []).map((a, i) => {
-                      const scan = scans.find((s) => s.attachment_md5 && a.md5sum && s.attachment_md5 === a.md5sum);
-                      const virus = !scan ? 'unknown' : scan?.virus_name ? 'detected'
-                        : scan?.antivirus_result === 'error' ? 'error' : 'clean';
-                      return (
-                        <tr key={i} className="border-b">
-                          <td className="px-2 py-1.5">{i + 1}</td>
-                          <td className="px-2 py-1.5 truncate max-w-[16rem]">{a.filename}</td>
-                          <td className="px-2 py-1.5 truncate max-w-[14rem]">{a.content_type || '—'}</td>
-                          <td className="px-2 py-1.5">{formatBytes(a.size)}</td>
-                          <td className="px-2 py-1.5 font-mono">{a.md5sum || scan?.attachment_md5 || '—'}</td>
-                          <td className="px-2 py-1.5">{scan ? (scan.is_encrypted ? tFeatures('yes') : tFeatures('no')) : '—'}</td>
-                          <td className="px-2 py-1.5">{scan ? ((scan.qr_code_count ?? 0) > 0 ? tFeatures('yes') : tFeatures('no')) : '—'}</td>
-                          <td className="px-2 py-1.5">
-                            <span className={
-                              virus === 'unknown' ? 'text-muted-foreground'
-                              : virus === 'detected' ? 'rounded bg-red-100 px-2 py-0.5 text-red-700'
-                              : virus === 'error' ? 'rounded bg-gray-100 px-2 py-0.5 text-gray-700'
-                              : 'rounded bg-emerald-100 px-2 py-0.5 text-emerald-700'}>
-                              {virus === 'unknown' ? '—' : tFeatures(`virus.${virus}`)}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </Section>
-          </div>
-        )}
-      </div>
-
+      {/* GT-12977 变更1：原「内容详情」折叠区块（基本信息/发送接收方信息/URL
+          检测/附件安全4个子区块）已删除——URL/附件详情与「概览与处置」标签
+          「内容实体检测」卡片重复展示；message_uuid/session_id/queue_id 三个
+          后端日志关联键，以及 sender_domain/action/reason 字段暂无其他 UI
+          入口，评估后确认不影响运营排障路径；「邮件ID」单独挪到本详情页三个
+          标签共用的页头（detail-modal.tsx，紧贴邮件主题下方），常驻可见，
+          见该文件同一批次改动的说明注释。i18n key 未删除（analysis-
+          section.test.tsx 与 email-disposal-detail-i18n-parity.test.ts 均无
+          断言依赖本次移除的 JSX，无需同步改测试）。 */}
     </div>
   );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-lg border overflow-hidden">
-      <div className="border-b bg-muted/50 px-4 py-2 text-sm font-semibold">{title}</div>
-      <div className="p-4">{children}</div>
-    </div>
-  );
-}
-
-function Empty({ text }: { text: string }) {
-  return <p className="py-4 text-center text-sm text-muted-foreground">{text}</p>;
 }
 
 function KV({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
