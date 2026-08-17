@@ -248,7 +248,7 @@ function mailMarkingRule(o: {
 let mockMailMarkingRules: Rule[] = [
   mailMarkingRule({
     id: 5101,
-    name: "高管��站警示",
+    name: "高管���站警示",
     direction: "receive",
     priority: 1,
     active: true,
@@ -470,7 +470,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ──────────────────�������������──������──────────────────────────���──────────��─────────
+// ─── 租户 ──────────────────�������������──������──────────────────────────���─────────����─────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -4156,7 +4156,7 @@ export function mockDeleteGeoIpRule(id: number): void {
   if (idx !== -1) mockGeoIpRules.splice(idx, 1);
 }
 
-// ════════════════════════════════════════════════════════════════��═══════════════
+// ════════════════════════════════════════════════════════════════����═══════════════
 // 发信人黑���名��（sender_filter，mock）
 // ���据结构对齐统一规则系统 `Rule`���webapp/src/types/unified-rules.ts）：
 //   - condition_tree 由 `buildConditionTree`（src/lib/api/sender-filter.ts）生成，
@@ -6242,6 +6242,16 @@ interface MockDisposalSeed {
   // 展示字段，缺省沿用原有的 "partial_delivered" / "released"。
   mixedDeliveryStatusSummary?: string;
   mixedWorkflowOutcomeSummary?: string;
+  // workflowOutcomeOverride -- 非 mixed 种子专用，覆盖 workflow_outcome_summary
+  // 展示字段（如 "expired"），与 deliveryStatus/action 派生逻辑解耦：既能保留
+  // deliveryStatus 决定的"底层原始状态"（用于收件人级 recipientDisposalStatus
+  // 映射），又能让邮件级位置态单独展示成过期/其它不依赖 action 派生的值。
+  workflowOutcomeOverride?: string;
+  // recallStatusOverride -- 非 mixed 种子专用，直接写入 recall_status_summary
+  // （召回中/召回成功/召回失败），在 mapToDisplayStatus 里优先级最高，会覆盖
+  // deliveryStatus/action 派生的位置态。只应搭配 deliveryStatus: "delivered"
+  // 使用（只有已送达的邮件才谈得上"召回"）。
+  recallStatusOverride?: "recall_pending" | "recall_success" | "recall_failed";
 }
 
 // DEFAULT_MIXED_BREAKDOWN -- MIC053 原有的硬编码分布（3 投递白名单 + 1 隔离
@@ -7192,7 +7202,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     attachmentCount: 0,
     hasQrCode: false,
     score: 82,
-    basis: ["AI-PHISH", "仿冒代码托管平台", "AI-015"],
+    basis: ["AI-PHISH", "仿冒代��托管平台", "AI-015"],
   },
   {
     tid: "MIC040",
@@ -7445,13 +7455,145 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     senderIsNewOnThisMail: true,
     domainAgeDays: 3,
   },
+  // MIC056-MIC061：补齐 DisplayStatus 枚举里此前无任何 mock 记录覆盖的 6
+  // 个位置态（sideline_pending/delivery_cancelled/expired/recall_pending/
+  // recall_success/recall_failed），让列表页「投递/隔离/丢弃/取消投递/召回」
+  // 等操作按钮的启用规则（mail-list-table.tsx 的 canRelease/canRecall/
+  // canCancelDelivery）在每一种邮件状态下都至少有一行真实数据可以手动验证，
+  // 而不是只能靠代码审查确认逻辑正确。
+  {
+    tid: "MIC056",
+    time: "2026-06-15 09:10:00",
+    direction: "incoming",
+    sender: "newsletter@partner-updates.com",
+    recipients: "sales@company.com",
+    subject: "合作伙伴月度动态（旁路放行待处理）",
+    action: "deliver",
+    reason: "低置信度营销邮件，旁路放行观察",
+    mailType: "spam",
+    deliveryStatus: "sideline_pending",
+    sourceIp: "198.51.100.22",
+    ipLocation: "新加坡",
+    cluster: "Node 2",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 58,
+    basis: ["规则引擎", "低置信度旁路观察", "R-081"],
+  },
+  {
+    tid: "MIC057",
+    time: "2026-06-15 09:40:00",
+    direction: "outgoing",
+    sender: "finance@company.com",
+    recipients: "vendor@external-billing.com",
+    subject: "发票信息更正（投递已中止）",
+    action: "deliver",
+    reason: "发件人主动撤回，投递队列内中止转发",
+    mailType: "normal",
+    deliveryStatus: "delivery_cancelled",
+    sourceIp: "10.20.30.40",
+    ipLocation: "中国",
+    cluster: "Node 1",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 12,
+  },
+  {
+    tid: "MIC058",
+    time: "2026-06-10 08:00:00",
+    direction: "incoming",
+    sender: "unclaimed-report@vendor-invoices.net",
+    recipients: "ap@company.com",
+    subject: "待审核发票（超时未处理已过期）",
+    action: "deliver",
+    reason: "待审核队列超时未处理，系统自动归档",
+    mailType: "suspicious",
+    deliveryStatus: "audit_pending",
+    workflowOutcomeOverride: "expired",
+    sourceIp: "203.0.113.77",
+    ipLocation: "越南",
+    cluster: "Node 3",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 65,
+    basis: ["规则引擎", "待审核队列", "R-045"],
+  },
+  {
+    tid: "MIC059",
+    time: "2026-06-16 10:05:00",
+    direction: "incoming",
+    sender: "hr-notice@company-internal-mail.com",
+    recipients: "employee01@company.com",
+    subject: "员工手册更新通知（召回中）",
+    action: "deliver",
+    reason: "已送达后发现仿冒特征，召回处理中",
+    mailType: "phishing",
+    deliveryStatus: "delivered",
+    recallStatusOverride: "recall_pending",
+    sourceIp: "192.0.2.150",
+    ipLocation: "美国",
+    cluster: "Node 2",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 72,
+    basis: ["AI-PHISH", "事后复核命中", "AI-031"],
+  },
+  {
+    tid: "MIC060",
+    time: "2026-06-16 10:35:00",
+    direction: "incoming",
+    sender: "it-support@company-secure-portal.com",
+    recipients: "employee02@company.com",
+    subject: "账户安全验证（召回成功）",
+    action: "deliver",
+    reason: "已送达后发现仿冒特征，已成功从收件箱召回",
+    mailType: "phishing",
+    deliveryStatus: "delivered",
+    recallStatusOverride: "recall_success",
+    sourceIp: "192.0.2.151",
+    ipLocation: "美国",
+    cluster: "Node 2",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 75,
+    basis: ["AI-PHISH", "事后复核命中", "AI-032"],
+  },
+  {
+    tid: "MIC061",
+    time: "2026-06-16 11:05:00",
+    direction: "incoming",
+    sender: "billing@company-secure-portal.com",
+    recipients: "employee03@company.com",
+    subject: "账单异常提醒（召回失败）",
+    action: "deliver",
+    reason: "已送达后发现仿冒特征，收件人已读取，召回失败",
+    mailType: "phishing",
+    deliveryStatus: "delivered",
+    recallStatusOverride: "recall_failed",
+    sourceIp: "192.0.2.152",
+    ipLocation: "美国",
+    cluster: "Node 2",
+    attachmentCount: 0,
+    hasQrCode: false,
+    score: 78,
+    basis: ["AI-PHISH", "事后复核命中", "AI-033"],
+  },
 ];
 
 function disposalAction(seed: MockDisposalSeed): string {
   if (seed.deliveryStatus === "audit_pending") return "audit";
+  // sideline_pending 是与 quarantine/audit 平级的独立执行动作（旁路放行待
+  // 处理），不是 seed.action 枚举（quarantine|block|discard|deliver|mixed）
+  // 里的值，必须像 audit_pending 一样单独按 deliveryStatus 分支，不能指望
+  // 落到下面按 seed.action 查表的默认分支。
+  if (seed.deliveryStatus === "sideline_pending") return "sideline";
   if (
     seed.deliveryStatus === "delivery_failed" ||
-    seed.deliveryStatus === "partial_delivered"
+    seed.deliveryStatus === "partial_delivered" ||
+    // delivery_cancelled（场景 B：已进入投递队列被我方主动中止转发，未离开
+    // 网关）底层动作仍是 accept——真正的"已中止"语义由 disposalDelivery()
+    // 写进 delivery_status_summary=cancelled 表达。
+    seed.deliveryStatus === "delivery_cancelled"
   )
     return "accept";
   return {
@@ -7471,12 +7613,19 @@ function disposalDelivery(seed: MockDisposalSeed): string | undefined {
       delivered: "delivered",
       delivery_failed: "failed",
       partial_delivered: "partial_delivered",
+      delivery_cancelled: "cancelled",
     } as Record<string, string>
   )[seed.deliveryStatus];
 }
 
 function disposalWorkflow(seed: MockDisposalSeed): string | undefined {
-  return seed.deliveryStatus === "discarded" ? "discarded" : undefined;
+  if (seed.deliveryStatus === "discarded") return "discarded";
+  // seed.workflowOutcomeOverride 让单封（非 mixed）种子表达"已过期"等不依赖
+  // action/deliveryStatus 派生的 workflow_outcome_summary 值——与 mixed 种子
+  // 已有的 mixedWorkflowOutcomeSummary 是同一种覆盖机制，只是作用在非 mixed
+  // 路径上。
+  if (seed.workflowOutcomeOverride) return seed.workflowOutcomeOverride;
+  return undefined;
 }
 
 function recipientDisposalStatus(seed: MockDisposalSeed): string {
@@ -7487,6 +7636,11 @@ function recipientDisposalStatus(seed: MockDisposalSeed): string {
         delivery_failed: "rejected",
         partial_delivered: "delivered",
         quarantine_pending: "quarantined",
+        // 与 quarantine_pending -> "quarantined" 同理：sideline_pending
+        // 在收件人处置状态词表里对应"sidelined"（OPERABLE_RECIPIENT_STATUSES
+        // 已包含该值），否则收件人会拿不到 object_id，详情页也就渲染不出
+        // recipientActionsForStatus('sidelined', ...) 应有的 投递/丢弃 按钮。
+        sideline_pending: "sidelined",
       } as Record<string, string>
     )[seed.deliveryStatus] ?? seed.deliveryStatus
   );
@@ -7670,7 +7824,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     workflow_outcome_summary: seed.isMixed
       ? seed.mixedWorkflowOutcomeSummary ?? "released"
       : disposalWorkflow(seed),
-    recall_status_summary: "none",
+    recall_status_summary: seed.recallStatusOverride ?? "none",
     received_at: seed.time.replace(" ", "T") + "+08:00",
     processed_at: seed.time.replace(" ", "T") + "+08:00",
     email_type: seed.finalType ?? seed.mailType,
@@ -7851,6 +8005,10 @@ function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
   // deleted / rejected_after_review：均已"停在网关"，归并为「已丢弃」。
   if (item.workflow_outcome_summary === "deleted") return "discarded";
   if (item.workflow_outcome_summary === "rejected_after_review") return "discarded";
+  // expired：与 mapToDisplayStatus 保持一致，独立于底层 action 派生（一封
+  // 待审核/隔离中的邮件超时未处理都可能落到这个终态），必须在 action 分支
+  // 之前判断，否则会被 item.action === "audit" 抢先命中成 audit_pending。
+  if (item.workflow_outcome_summary === "expired") return "expired";
   if (item.action === "quarantine") return "quarantine_pending";
   if (item.action === "sideline") return "sideline_pending";
   if (item.action === "audit") return "audit_pending";
@@ -8172,7 +8330,7 @@ export function mockEmailDisposalList(path: string) {
   // GT-12923 阶段三：执行动作从 AdvancedFilter 的 action eq/in 条件挪到顶层
   // 查询参数 action=deliver,quarantine（与 email_type/disposal_policy_keys
   // 处理方式一致，OR 语义）。非 mixed 记录按归一化后的单一动作精确匹配；
-  // mixed 记录改为对 disposition_actions 数组做归一化后取交集——只要邮件里
+  // mixed 记录改为对 disposition_actions 数组做归一化后取交集—��只要邮件里
   // 任一收件人的最终动作命中筛选值就算命中，而不是要求恒为 'mixed' 的整体
   // action 字符串精确等于筛选值。
   const executionActions = query.get("action")?.split(",").filter(Boolean);
@@ -8742,7 +8900,7 @@ const mockLinkClickLogs: LinkClickLog[] = [
 ];
 
 // GET /link-click-logs：多条件 AND（文本子串、枚举精确、时间区间）+ 分页 +
-// X-Tenant-ID 租户作用域，与网关 handler 的查询参数一一对应（html_spec §4.3）。
+// X-Tenant-ID 租户作用域���与网关 handler 的查询参数一一对应（html_spec §4.3）。
 export function mockLinkClickLogsList(
   query: string,
   headers?: Record<string, string>,
@@ -8927,7 +9085,7 @@ const contactSources: MockContactSourceRow[] = [
   { id: 5, tenant_id: 1, name: '邮件系统', source_type: 'coremail', priority: 80, auto_sync_enabled: false, cron_expr: '', sync_mode: 'full', conflict_policy: 'priority', sync_status: 'success', last_sync_time: '2026-06-18T08:55:00', updated_at: '2026-06-18T08:55:00Z', secret_present: true, config: { server_url: 'https://api.coremail.cn', account: 'admin', password: '********' } },
   { id: 11, tenant_id: 1, name: '网易企邮', source_type: 'neteml', priority: 60, auto_sync_enabled: true, cron_expr: '0 0 * * *', sync_mode: 'full', conflict_policy: 'priority', sync_status: 'partial', abnormal_count: 2, last_sync_time: '2026-06-18T07:30:00', updated_at: '2026-06-18T07:30:00Z', secret_present: true, config: { server_url: 'https://api.qiye.163.com', corp_domain: 'corp.cn', app_id: 'app-8821', open_id: 'open-3391', auth_code: '********' } },
   { id: 13, tenant_id: 1, name: '研发 CSV', source_type: 'csv', priority: 40, auto_sync_enabled: false, cron_expr: '', sync_mode: 'full', conflict_policy: 'priority', sync_status: 'unsynced', last_sync_time: null, updated_at: '2026-06-17T10:00:00Z', secret_present: false, config: { org_id: 'RD-001' } },
-  { id: 15, tenant_id: 1, name: '分支机构 LDAP', source_type: 'ldap', priority: 30, auto_sync_enabled: false, cron_expr: '', sync_mode: 'full', conflict_policy: 'priority', sync_status: 'failed', last_sync_time: '2026-06-17T22:01:00', updated_at: '2026-06-17T22:01:00Z', secret_present: true, config: { server: 'ldap.branch.com', port: 636, base_dn: 'dc=branch,dc=com', bind_dn: 'cn=svc,dc=branch,dc=com', bind_password: '********' } },
+  { id: 15, tenant_id: 1, name: '分支��构 LDAP', source_type: 'ldap', priority: 30, auto_sync_enabled: false, cron_expr: '', sync_mode: 'full', conflict_policy: 'priority', sync_status: 'failed', last_sync_time: '2026-06-17T22:01:00', updated_at: '2026-06-17T22:01:00Z', secret_present: true, config: { server: 'ldap.branch.com', port: 636, base_dn: 'dc=branch,dc=com', bind_dn: 'cn=svc,dc=branch,dc=com', bind_password: '********' } },
 ];
 let contactSourceNextId = 21; // demo genId 序列从 21 起
 
