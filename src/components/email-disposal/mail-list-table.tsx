@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown, ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight, ArrowRight } from 'lucide-react';
+import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Inbox, Send, ArrowLeftRight, ArrowRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
@@ -271,9 +271,12 @@ export function MailListTable({
   const directionOptions = ['incoming', 'outgoing', 'internal'];
   // 阶段一列宽优化：收发类型列由 Badge 文案改为图标+Tooltip，压缩列宽；
   // 图标与颜色不承载额外语义，仅用于快速视觉区分，完整文案仍在 Tooltip 中。
-  const directionIconConfig: Record<string, { icon: typeof ArrowDownToLine; className: string }> = {
-    incoming: { icon: ArrowDownToLine, className: 'text-blue-600 dark:text-blue-400' },
-    outgoing: { icon: ArrowUpFromLine, className: 'text-emerald-600 dark:text-emerald-400' },
+  // 后续反馈：初版用通用的上传/下载箭头（ArrowDownToLine/ArrowUpFromLine），
+  // 在邮件场景下容易被误读成"下载"操作按钮，语义不形象；改用邮件场景专属的
+  // 收件箱/发送图标（Inbox/Send），"内部"仍用双向箭头表示收发双向流转。
+  const directionIconConfig: Record<string, { icon: typeof Inbox; className: string }> = {
+    incoming: { icon: Inbox, className: 'text-blue-600 dark:text-blue-400' },
+    outgoing: { icon: Send, className: 'text-emerald-600 dark:text-emerald-400' },
     internal: { icon: ArrowLeftRight, className: 'text-muted-foreground' },
   };
   const emailTypeOptions = ['normal', 'subscription', 'advertising', 'spam', 'harmful', 'phishing', 'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive'];
