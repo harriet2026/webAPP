@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Search, Loader2, AlertCircle, AlertTriangle, PanelLeftIcon, Inbox, ShieldAlert, ScrollText } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 import { getMailLifecycleLogs, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
@@ -82,6 +82,13 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   });
   const [activeSection, setActiveSection] = useState<SectionKey>('overview');
   const [rawLogsExpanded, setRawLogsExpanded] = useState(false);
+  // Icon-only collapse for the desktop (>=1024px) vertical nav rail only --
+  // the <1024px horizontal anchor bar it collapses into (spec §5.2) is
+  // already compact and never competes with the content pane for width, so
+  // this toggle has no mobile equivalent and intentionally isn't reset by
+  // resetKey below: it's a layout preference, not something tied to which
+  // mail is open.
+  const [navCollapsed, setNavCollapsed] = useState(false);
 
   // Reset to the overview section whenever the drawer (re)opens for a mail log,
   // including reopening for the same id. Adjusting state during render (the
@@ -248,11 +255,15 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     (lifecycleLogsQ.data?.partial ?? false) || (lifecycleLogsQ.data?.failed_nodes?.length ?? 0) > 0
   );
 
-  const navItems: { key: SectionKey; label: string; dotClassName?: string; dotTooltip?: string; warning?: boolean; warningTooltip?: string }[] = [
-    { key: 'overview', label: t('overviewAndHandle') },
+  // Each item's icon is what's left visible once the label collapses to
+  // icon-only width (below) -- without a per-item icon, a collapsed rail
+  // would just be 3 identically-blank 48px slots.
+  const navItems: { key: SectionKey; label: string; icon: typeof Inbox; dotClassName?: string; dotTooltip?: string; warning?: boolean; warningTooltip?: string }[] = [
+    { key: 'overview', label: t('overviewAndHandle'), icon: Inbox },
     {
       key: 'analysis',
       label: t('securityAnalysis'),
+      icon: ShieldAlert,
       dotClassName: finalVerdictTypeCfg ? riskDotClass[finalVerdictTypeCfg.tone] : undefined,
       dotTooltip: finalVerdictTypeCfg
         ? `${t('nav.finalVerdict')}：${t(stripDetailPrefix(finalVerdictTypeCfg.labelKey))}`
@@ -261,6 +272,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     {
       key: 'rawlogs',
       label: t('originalLog'),
+      icon: ScrollText,
       warning: rawLogsPartial,
       warningTooltip: rawLogsPartial ? t('nav.rawLogsPartial') : undefined,
     },
@@ -351,9 +363,46 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
               {/* Below 1024px the vertical anchor column collapses into a
                   horizontal, horizontally-scrollable bar (spec §5.2) so the
                   content pane isn't squeezed by a fixed-width side column on
-                  narrow/fullscreen viewports. */}
-              <nav className="w-[200px] shrink-0 border-r py-3 max-lg:flex max-lg:w-full max-lg:overflow-x-auto max-lg:border-r-0 max-lg:border-b max-lg:py-0">
-                {navItems.map(({ key, label, dotClassName, dotTooltip, warning, warningTooltip }) => {
+                  narrow/fullscreen viewports. The icon-only collapse toggle
+                  below is a *separate*, desktop-only affordance on top of
+                  that -- it only ever changes the `w-[200px]`/`w-12` desktop
+                  width; the max-lg: horizontal-bar classes are unaffected by
+                  navCollapsed so mobile always shows full labels. */}
+              <nav
+                className={cn(
+                  'shrink-0 border-r py-3 transition-[width] duration-150',
+                  navCollapsed ? 'w-12' : 'w-[200px]',
+                  'max-lg:flex max-lg:w-full max-lg:overflow-x-auto max-lg:border-r-0 max-lg:border-b max-lg:py-0',
+                )}
+              >
+                {/* Toggle only rendered where it's meaningful: the
+                    horizontal mobile bar is already compact and has no
+                    competing content-width to reclaim, so this is hidden
+                    there rather than offering a control with no real effect. */}
+                <div className="hidden justify-end px-2 pb-2 lg:flex">
+                  <Tooltip>
+                    <TooltipTrigger render={<span />}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground"
+                        aria-expanded={!navCollapsed}
+                        data-testid="disposal-detail-nav-toggle"
+                        onClick={() => setNavCollapsed((collapsed) => !collapsed)}
+                      >
+                        <PanelLeftIcon className="h-4 w-4" />
+                        <span className="sr-only">
+                          {navCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {navCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                {navItems.map(({ key, label, icon: Icon, dotClassName, dotTooltip, warning, warningTooltip }) => {
                   const indicator = dotClassName ? (
                     <span aria-hidden="true" className={cn('inline-block h-2 w-2 shrink-0 rounded-full', dotClassName)} />
                   ) : warning ? (
@@ -391,14 +440,34 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                         type="button"
                         aria-current={activeSection === key ? 'location' : undefined}
                         onClick={() => scrollToSection(key)}
-                        className="flex w-full items-center gap-2"
+                        className={cn(
+                          'flex w-full items-center gap-2',
+                          // Centers the icon+indicator once the label is
+                          // gone -- `max-lg:justify-start` because the label
+                          // (below) always stays visible on mobile via
+                          // not-sr-only, regardless of navCollapsed.
+                          navCollapsed && 'justify-center max-lg:justify-start',
+                        )}
                       >
-                        <span className="truncate">{label}</span>
+                        <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                        {/* `sr-only` removes the label from the collapsed
+                            desktop rail's flow/paint while keeping it for
+                            screen readers; `max-lg:not-sr-only` (a real
+                            Tailwind utility, not a typo of `sr-only`) undoes
+                            that below 1024px so the mobile horizontal bar is
+                            never affected by this desktop-only toggle. */}
+                        <span className={cn('truncate', navCollapsed && 'sr-only max-lg:not-sr-only')}>{label}</span>
                         {indicator}
                       </button>
                     </InteractiveSurface>
                   );
-                  const tooltipText = dotTooltip || warningTooltip;
+                  // Collapsed rail has no visible label, so every item needs
+                  // its tooltip to *include* the label (not just the
+                  // optional status suffix) -- otherwise a collapsed icon
+                  // with no dot/warning would have no way to identify itself
+                  // at all short of un-collapsing.
+                  const statusText = dotTooltip || warningTooltip;
+                  const tooltipText = navCollapsed ? [label, statusText].filter(Boolean).join(' · ') : statusText;
                   if (!tooltipText) return surface;
                   return (
                     <Tooltip key={key}>

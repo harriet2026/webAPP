@@ -6094,7 +6094,9 @@
       "nav": {
         "currentlyViewing": "Currently viewing",
         "finalVerdict": "Final verdict",
-        "rawLogsPartial": "Some node logs could not be retrieved; results may be incomplete"
+        "rawLogsPartial": "Some node logs could not be retrieved; results may be incomplete",
+        "collapseSidebar": "Collapse navigation",
+        "expandSidebar": "Expand navigation"
       },
       "errors": {
         "loadFailed": "Failed to load details, please retry",

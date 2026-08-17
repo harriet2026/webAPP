@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�����������������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�������������������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -643,7 +643,7 @@
       "top": "TOP",
       "generatedAt": "生成时间",
       "noData": "暂无数据",
-      "topSection": "TOP 排名",
+      "topSection": "TOP ��名",
       "printHint": "提示：使用浏��器的��印功能可保存为 PDF"
     },
     "connCaliberTip": "按 SMTP 会话计数。成功指服务器对 EHLO/HELO 回了 250；投递结果不影响连接判定。",
@@ -705,7 +705,7 @@
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编��转发规��",
-      "drawerDescription": "在 SMTP 握手阶段决��连接的接��与过滤��略",
+      "drawerDescription": "在 SMTP 握��阶段决��连接的接��与过滤��略",
       "sectionBasic": "�����础信息",
       "sectionMatch": "匹配��件",
       "sectionSimulator": "规���模拟器",
@@ -1410,7 +1410,7 @@
       "mailMarking": "邮件标记"
     },
     "policyDesc": {
-      "ipFrequency": "限制单个 IP 的连接频率与认证失败次数",
+      "ipFrequency": "限制单个 IP 的连接频率与认���失败次数",
       "ipFilter": "基于 IP 地址的黑白名单过滤",
       "rbl": "基于公共 RBL 名单过滤",
       "overseas": "识别海外邮件并按策略处置",
@@ -1624,7 +1624,7 @@
     "sender": "发件人",
     "recipients": "收件人",
     "reason": "原因",
-    "quarantinedAt": "隔离时间",
+    "quarantinedAt": "隔离��间",
     "expiresAt": "过期时间",
     "released": "已释放",
     "releasedAt": "释放���间",
@@ -1651,7 +1651,7 @@
     "reinject": "重新注入",
     "retryCount": "重试次数",
     "delete": "删除",
-    "confirmDelete": "确定要删除此旁路邮件吗？",
+    "confirmDelete": "确定要删除此旁路邮��吗？",
     "noItems": "无��路邮件",
     "statusPending": "待处��",
     "statusProcessing": "处理��",
@@ -2063,7 +2063,7 @@
       },
       "relay": {
         "description": "将已校验的发信域绑定到集群出口 IP",
-        "add": "添加绑定",
+        "add": "添��绑定",
         "edit": "编辑���定",
         "empty": "暂无出口绑定",
         "domainRequired": "请选择发信域"
@@ -2209,7 +2209,7 @@
     "batchEnableTitle": "批量启用",
     "batchEnableDescription": "确定批量启用选中的 {count} 个账号？",
     "batchDisableTitle": "批量停用",
-    "batchDisableDescription": "确定批量停用选中的 {count} 个账号？停用后将立即终止其登录会话。",
+    "batchDisableDescription": "确定批量停用选中的 {count} 个账���？停用后将立即终止其登录会话。",
     "batchDeleteTitle": "批量删除",
     "batchDeleteDescription": "确定批��删除选中的 {count} 个账号？此���作不可撤销。",
     "batchSuccess": "批量操���成功",
@@ -2618,7 +2618,7 @@
     "tabs": {
       "account": "账号信息",
       "password": "密码修改",
-      "twoFactor": "二次认证",
+      "twoFactor": "二���认证",
       "sessions": "登录会话",
       "devices": "授信终端",
       "trustedDevices": "授信终端",
@@ -2805,7 +2805,7 @@
   "proxysvr": {
     "title": "代理服务器管理",
     "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分组」投递通道引用。",
-    "endpointsTab": "代理服务器目录",
+    "endpointsTab": "��理服务器目录",
     "groupsTab": "代理服务器分组",
     "name": "名称",
     "host": "主机",
@@ -3212,7 +3212,7 @@
     },
     "targetTypes": {
       "mail": "邮件",
-      "mail_batch": "��件批次",
+      "mail_batch": "���件批次",
       "account": "账��",
       "cluster": "簇"
     },
@@ -3544,7 +3544,7 @@
       "conditionConcurrent": "并发连接超过 {count} 个",
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
       "conditionAuthFail": "每小时认证失败超过 {count} 次",
-      "conditionCmdError": "单连接命令错误超过 {count} 次",
+      "conditionCmdError": "单连接命令错误��过 {count} 次",
       "conditionConnAuthFail": "单连接���证失��超过 {count} 次",
       "suspend15minText": "15分钟",
       "suspend30minText": "30分钟",
@@ -3796,7 +3796,7 @@
     "importDupStrategy": "对「已存在」的 IP：",
     "importDupSkip": "跳过（保留原规则）",
     "importDupOverwrite": "覆盖（更新原规则）",
-    "importEmptyIp": "IP 为空",
+    "importEmptyIp": "IP ���空",
     "importInvalidIp": "IP 或 CIDR 格式错误",
     "importInvalidRange": "IP 区间格式错误",
     "importActionListMismatch": "动作与当前名单不符",
@@ -4089,7 +4089,7 @@
     "action_reject": "拒收",
     "action_reject_desc": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
     "action_discard": "丢弃",
-    "action_discard_desc": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃",
+    "action_discard_desc": "静默丢弃邮件，发信方收到投递成功响应但邮件实���被丢弃",
     "action_quarantine": "隔离",
     "action_quarantine_desc": "邮件进入隔离区，管理员可审阅后决定是否放行",
     "action_audit": "审核",
@@ -4113,7 +4113,7 @@
     "drawerSubtitleWhitelist": "��置发信人白名单规则，信��的发信人直接放行",
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
     "senderPlaceholder_domain": "如 example.com 或 evil.com",
-    "noTenantDomains": "该租户暂无接收域名，请先在『接收域名』中配置",
+    "noTenantDomains": "该租户暂无接收域名，请先在��接收域名』中配置",
     "domainSuggestions": "本租户接收域名���快捷选择）",
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
@@ -4236,7 +4236,7 @@
     "anyPlaceholder": "—",
     "createRuleTyped": "新建{type}规则",
     "editRuleTyped": "编辑{type}规则",
-    "importSuccess": "成功导入 {count} 条"
+    "importSuccess": "成功��入 {count} 条"
   },
   "contentRules": {
     "title": "内容规则",
@@ -4418,7 +4418,7 @@
     "remarkTitle": "备注说明",
     "remarkPlaceholder": "添加规则说明，最多200字",
     "currentEffect": "当前配置效果",
-    "editorSubtitle": "配置内容关键词/正则规���，识别并处置含敏���信息的邮件",
+    "editorSubtitle": "配置内容关键词/正则规�����，识别并处置含敏���信息的邮件",
     "cardTooltipStrategy": "策���：内容规则",
     "cardTooltipActions": "��作：隔离、投递",
     "cardTooltipEffect": "影响：命中则���离，邮���保留至隔离区",
@@ -4510,7 +4510,7 @@
         "custom": "自定义"
       },
       "templateConfirmTitle": "确认切换模板",
-      "templateConfirmDesc": "切换到「{template}」模板将覆盖当前所有协议检查的配置，是否继续？",
+      "templateConfirmDesc": "切换到「{template}」模板将覆盖当前所有协���检查的配置，是否继续？",
       "templateCancel": "取消",
       "templateApply": "应用",
       "ptrReadonlyNotice": "PTR 设置由系统管���员管理",
@@ -5356,7 +5356,7 @@
       "skip": {
         "title": "允许用户跳过深度检测",
         "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
-        "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
+        "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问��完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
       },
       "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险���接，展示提示页。",
       "desc": "终端用户点击改写后的链接时，网���按下列已启用项对该 URL 做实时复检",
@@ -6001,7 +6001,7 @@
       "operations": "操作",
       "view": "查看",
       "findSimilar": "找相似",
-      "findSimilarTooltip": "以该邮件为样本，基于内容语义查找相似邮件",
+      "findSimilarTooltip": "以该邮件为样本，基于内容���义查找相似邮件",
       "download": "下载",
       "loading": "加载中...",
       "empty": "暂无数据",
@@ -6089,7 +6089,9 @@
       "nav": {
         "currentlyViewing": "当前查看",
         "finalVerdict": "最终判定",
-        "rawLogsPartial": "部分节点日志未能获取，可能不完整"
+        "rawLogsPartial": "部分节点日志未能获取，可能不完整",
+        "collapseSidebar": "收起导航栏",
+        "expandSidebar": "展开导航栏"
       },
       "errors": {
         "loadFailed": "详情加载失败，请重试",
@@ -6456,7 +6458,7 @@
         "accountCompromised": "账号被盗",
         "spoofing": "仿冒邮件",
         "harmful": "有害内容邮件",
-        "spam": "垃圾邮件",
+        "spam": "垃��邮件",
         "advertising": "广告邮件",
         "suspicious": "可疑邮件",
         "sensitive": "敏感内容邮件",
@@ -6538,7 +6540,7 @@
     "priority": "优先级",
     "priorityHint": "范围 {min}–{max}，数值越大优先级越高",
     "scopeLabel": "适用范围",
-    "expiresAt": "到期时间",
+    "expiresAt": "到��时间",
     "emailType": "邮件类型",
     "emailTypeNotSet": "不设置",
     "emailTypeHint": "命中此规则的邮件将被标记��该邮件类型",
@@ -7137,7 +7139,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真��以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
+        "note": "钓鱼邮件常伪造信头From以冒充领导或合��伙伴，但信封层MAIL FROM保持真��以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -8605,7 +8607,7 @@
       "phishing": "钓鱼链接",
       "suspicious": "可疑链接",
       "malicious": "恶意链接",
-      "benign": "安全链接"
+      "benign": "安��链接"
     },
     "urlEvidence": {
       "title": "链接证据",
@@ -8650,7 +8652,7 @@
       "confirmDelete": "确认删除准入规则「{name}」？",
       "createTitle": "新建准入规则",
       "editTitle": "编辑准入规则",
-      "sheetDescription": "配置该规则的检测范围与风险信号。命中本规则范围、含 URL 且命中任一风险信号的邮件将进入钓鱼检测。",
+      "sheetDescription": "配置该规则的检测���围与风险信号。命中本规则范围、含 URL 且命中任一风险信号的邮件将进入钓鱼检测。",
       "colName": "���则名称",
       "colDirection": "方向",
       "colEnabled": "状态",
@@ -9360,7 +9362,7 @@
       "batchRecall": "批量召回（{count}）",
       "selectedRuns": "已选择 {count} 个任务",
       "batchExport": "批量导出报告",
-      "batchCancel": "批量取消任务",
+      "batchCancel": "批量取��任务",
       "bulkCancelDescription": "取消后不可恢复。已完成或失败的任务会跳过，其余任务将逐项取消。",
       "viewEml": "查看原文",
       "recall": "确认召回",
@@ -9555,7 +9557,7 @@
       "weekdays": "按周几执行（可选）",
       "weekdaysHint": "不选=每天执行",
       "monthDays": "按每月日期执行（可选）",
-      "monthDaysHint": "不选=不限制每月日期；与周几同时选择时需同时满足。",
+      "monthDaysHint": "不选=不限制每月日期；与周几同时选择时���同时满足。",
       "weekdayShort": {
         "1": "一",
         "2": "二",
@@ -9733,7 +9735,7 @@
     "errNameDup": "数据源名称已存在",
     "errNameMax": "不能超过 64 个字符",
     "errNameRequired": "数据源名称不能为空",
-    "errPortRange": "端口必须为 1-65535 之间的数字",
+    "errPortRange": "端口必须为 1-65535 之���的数字",
     "errPriorityRange": "优先级需为 0-9999 的整数",
     "errServerRequired": "服务器地址不能为空",
     "errUrlInvalid": "请输入正确的 URL 地址",
@@ -10115,7 +10117,7 @@
   },
   "systemStatus": {
     "title": "系统状态",
-    "subtitle": "全站安全态势聚合入口，3 秒掌握系统健康度",
+    "subtitle": "全���安全态势聚合入口，3 秒掌握系统健康度",
     "range": {
       "24h": "过去 24 小时",
       "today": "今日",
@@ -10481,7 +10483,7 @@
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的链接。",
     "errorTitle": "操作失败",
-    "errorDesc": "请稍后重试或联系管理员。",
+    "errorDesc": "请稍后���试或联系管理员。",
     "confirmTitle": "确认将发件人加入白名单",
     "confirmHint": "加入后��该发件人发给您的邮件将不再被隔离。",
     "confirmButton": "��认加白",
@@ -10761,7 +10763,7 @@
         "notify_email_invalid": "召回通知邮箱「{value}」格式不正确",
         "notify_frequency_invalid": "召回通知频率取值无效，只能是：{allowed}",
         "policy_invalid": "召回策略「{value}」无效，只能是：{allowed}",
-        "task_timeout_out_of_range": "召回任务超时需在 {min}–{max} 秒之间"
+        "task_timeout_out_of_range": "召回任务超时需在 {min}–{max} ��之间"
       },
       "recipient_not_in_mail": "该收件人不属于这封邮件",
       "recipient_required": "请指定收件人",
