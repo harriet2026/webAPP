@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown, ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight } from 'lucide-react';
+import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown, ArrowDownToLine, ArrowUpFromLine, ArrowLeftRight, ArrowRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
@@ -97,12 +97,20 @@ export interface TableHeaderFilters {
 // GT-11580: columns the operator can show/hide via the toolbar 设置 button.
 // The leading select checkbox and the trailing operations column are
 // structural and always rendered.
+// 阶段三列宽优化：'sender' + 'recipient' 合并为单个 'senderRecipient' 列
+// （"发件人 → 收件人"），省去一整列的表头/边框结构开销。仅影响本文件的列表
+// 展示；csv-export.ts、similar-results-sheet.tsx 等其他功能仍各自使用独立的
+// table.sender / table.recipient 文案键，未受影响。
 const TOGGLEABLE_COLUMNS = [
-  'time', 'direction', 'subject', 'senderIp', 'sender', 'recipient',
+  'time', 'direction', 'subject', 'senderIp', 'senderRecipient',
   'disposalBasis', 'mailType', 'similarity', 'action', 'status',
 ] as const;
 type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
 const COLUMN_PREF_KEY = 'osg.disposal.hiddenColumns';
+// 阶段三密度模式：紧凑/舒适两档行高，与列显隐用同一套 localStorage 持久化
+// 思路，但是单独的 key（不影响 hiddenColumns 的既有存储结构）。
+const DENSITY_PREF_KEY = 'osg.disposal.density';
+type TableDensity = 'comfortable' | 'compact';
 
 export function MailListTable({
   items,
@@ -226,6 +234,39 @@ export function MailListTable({
     (key: ToggleableColumn) => !hiddenColumns.has(key),
     [hiddenColumns],
   );
+
+  // 阶段三密度模式：默认"舒适"，SSR 与首次客户端渲染保持一致，挂载后再从
+  // localStorage 读取用户偏好，避免 hydration 不一致（与 hiddenColumns 同一
+  // 思路）。
+  const [density, setDensity] = useState<TableDensity>('comfortable');
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        const raw = localStorage.getItem(DENSITY_PREF_KEY);
+        if (raw === 'compact' || raw === 'comfortable') setDensity(raw);
+      } catch {
+        /* ignore malformed preference */
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const toggleDensity = useCallback(() => {
+    setDensity((prev) => {
+      const next: TableDensity = prev === 'compact' ? 'comfortable' : 'compact';
+      try {
+        localStorage.setItem(DENSITY_PREF_KEY, next);
+      } catch {
+        /* ignore persistence failure */
+      }
+      return next;
+    });
+  }, []);
+  const isCompact = density === 'compact';
+  // 紧凑模式仅收紧行高/内边距，不缩小字号（沿用 Gmail/Notion 一类产品的密度
+  // 惯例），避免影响可读性；与 TableHead/TableCell 组件自身的基础类
+  // （h-11/py-3）用同一 padding-y、height 轴，靠 cn()->twMerge 覆盖生效。
+  const headDensityClass = isCompact ? 'h-8' : '';
+  const cellDensityClass = isCompact ? 'py-1.5' : '';
 
   const directionOptions = ['incoming', 'outgoing', 'internal'];
   // 阶段一列宽优化：收发类型列由 Badge 文案改为图标+Tooltip，压缩列宽；
@@ -422,6 +463,21 @@ export function MailListTable({
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuGroup>
+            {/* 阶段三密度模式：与列显隐同一套设置菜单，不减列，仅收紧行高/
+                内边距，一键多显示若干行；沿用列显隐已验证的 checkbox 交互
+                模式，未引入未经验证的组件。 */}
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{t('table.densitySettings')}</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem
+                checked={isCompact}
+                onCheckedChange={toggleDensity}
+                onSelect={(e) => e.preventDefault()}
+                data-testid="disposal-density-toggle"
+              >
+                {t('table.compactDensity')}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -434,7 +490,7 @@ export function MailListTable({
       const nextSort: TimeSortOrder = timeSort === 'none' ? 'asc' : timeSort === 'asc' ? 'desc' : 'none';
       const SortIcon = timeSort === 'asc' ? ArrowUp : timeSort === 'desc' ? ArrowDown : ArrowUpDown;
       return (
-        <TableHead className="text-xs">
+        <TableHead className={cn('text-xs', headDensityClass)}>
           <Button
             type="button"
             variant="ghost"
@@ -448,10 +504,10 @@ export function MailListTable({
         </TableHead>
       );
     }
-    if (key === 'direction') return <TableHead className="text-xs">{headerFilter(t('table.direction'), 'directions', directionOptions, (option) => localizeEnum(`filters.${option}`, option))}</TableHead>;
-    if (key === 'mailType') return <TableHead className="text-xs">{headerFilter(t('table.mailType'), 'emailTypes', emailTypeOptions, (option) => t(`filters.mailTypes.${option}`))}</TableHead>;
-    if (key === 'status') return <TableHead className="text-xs">{headerFilter(t('table.status'), 'statuses', statusOptions, (option) => t(`filters.statuses.${option}`))}</TableHead>;
-    return <TableHead className="text-xs">{t(`table.${key}`)}</TableHead>;
+    if (key === 'direction') return <TableHead className={cn('text-xs', headDensityClass)}>{headerFilter(t('table.direction'), 'directions', directionOptions, (option) => localizeEnum(`filters.${option}`, option))}</TableHead>;
+    if (key === 'mailType') return <TableHead className={cn('text-xs', headDensityClass)}>{headerFilter(t('table.mailType'), 'emailTypes', emailTypeOptions, (option) => t(`filters.mailTypes.${option}`))}</TableHead>;
+    if (key === 'status') return <TableHead className={cn('text-xs', headDensityClass)}>{headerFilter(t('table.status'), 'statuses', statusOptions, (option) => t(`filters.statuses.${option}`))}</TableHead>;
+    return <TableHead className={cn('text-xs', headDensityClass)}>{t(`table.${key}`)}</TableHead>;
   };
 
   // colSpan for the loading / empty message row: 1 select column + visible
@@ -467,7 +523,7 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r">
+                <TableHead className={cn('sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r', headDensityClass)}>
                   <div className="flex items-center justify-center h-full w-10">
                     <Checkbox checked={false} disabled aria-label="Select all" />
                   </div>
@@ -476,14 +532,13 @@ export function MailListTable({
                 {colHead('direction')}
                 {colHead('subject')}
                 {colHead('senderIp')}
-                {colHead('sender')}
-                {colHead('recipient')}
+                {colHead('senderRecipient')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
                 {colHead('action')}
                 {colHead('status')}
-                <TableHead className="sticky right-0 z-20 min-w-20 border-l bg-card text-xs">{t('table.operations')}</TableHead>
+                <TableHead className={cn('sticky right-0 z-20 min-w-20 border-l bg-card text-xs', headDensityClass)}>{t('table.operations')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -508,7 +563,7 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r">
+                <TableHead className={cn('sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r', headDensityClass)}>
                   <div className="flex items-center justify-center h-full w-10">
                     <Checkbox checked={false} disabled aria-label="Select all" />
                   </div>
@@ -517,14 +572,13 @@ export function MailListTable({
                 {colHead('direction')}
                 {colHead('subject')}
                 {colHead('senderIp')}
-                {colHead('sender')}
-                {colHead('recipient')}
+                {colHead('senderRecipient')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
                 {colHead('action')}
                 {colHead('status')}
-                <TableHead className="sticky right-0 z-20 min-w-20 border-l bg-card text-xs">{t('table.operations')}</TableHead>
+                <TableHead className={cn('sticky right-0 z-20 min-w-20 border-l bg-card text-xs', headDensityClass)}>{t('table.operations')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -620,7 +674,7 @@ export function MailListTable({
           <TableHeader>
             <TableRow>
               <TableHead
-                className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r"
+                className={cn('sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r', headDensityClass)}
                 data-testid="disposal-select-column"
               >
                 <div className="flex items-center justify-center h-full w-10">
@@ -631,14 +685,13 @@ export function MailListTable({
               {colHead('direction')}
               {colHead('subject')}
               {colHead('senderIp')}
-              {colHead('sender')}
-              {colHead('recipient')}
+              {colHead('senderRecipient')}
               {colHead('disposalBasis')}
               {colHead('mailType')}
               {aiEnabled && similarMode && colHead('similarity')}
               {colHead('action')}
               {colHead('status')}
-              <TableHead className="sticky right-0 z-20 min-w-20 border-l bg-card text-xs" data-testid="disposal-operations-column">{t('table.operations')}</TableHead>
+              <TableHead className={cn('sticky right-0 z-20 min-w-20 border-l bg-card text-xs', headDensityClass)} data-testid="disposal-operations-column">{t('table.operations')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -674,7 +727,7 @@ export function MailListTable({
                   </div>
                 </TableCell>
                 {isColVisible('time') && (
-                <TableCell className="text-xs whitespace-nowrap">
+                <TableCell className={cn('text-xs whitespace-nowrap', cellDensityClass)}>
                   <Tooltip>
                     <TooltipTrigger render={<span className="cursor-default" />}>
                       {formatRelativeTime(item.timestamp)}
@@ -684,7 +737,7 @@ export function MailListTable({
                 </TableCell>
                 )}
   {isColVisible('direction') && (
-  <TableCell className="text-xs">
+  <TableCell className={cn('text-xs', cellDensityClass)}>
     {(() => {
       const directionLabel = localizeEnum(`filters.${item.direction}` as const, item.direction);
       const config = directionIconConfig[item.direction];
@@ -705,36 +758,41 @@ export function MailListTable({
   </TableCell>
   )}
                 {isColVisible('subject') && (
-                <TableCell className="text-xs max-w-[300px] truncate">
+                <TableCell className={cn('text-xs max-w-[300px] truncate', cellDensityClass)}>
                   {item.subject}
                 </TableCell>
                 )}
                 {isColVisible('senderIp') && (
-                <TableCell className="text-xs max-w-[160px] truncate font-mono">
+                <TableCell className={cn('text-xs max-w-[160px] truncate font-mono', cellDensityClass)}>
                   <Tooltip>
                     <TooltipTrigger render={<span className="cursor-default" />}>{item.clientIp || '—'}</TooltipTrigger>
                     <TooltipContent className="max-w-md text-xs">{item.clientIp || '—'}</TooltipContent>
                   </Tooltip>
                 </TableCell>
                 )}
-                {isColVisible('sender') && (
-                <TableCell className="text-xs max-w-[200px] truncate">
-                  <Tooltip>
-                    <TooltipTrigger render={<span className="cursor-default" />}>{item.sender}</TooltipTrigger>
-                    <TooltipContent className="max-w-md text-xs">{item.sender}</TooltipContent>
-                  </Tooltip>
-                </TableCell>
-                )}
-                {isColVisible('recipient') && (
-                <TableCell className="text-xs max-w-[200px] truncate">
-                  <Tooltip>
-                    <TooltipTrigger render={<span className="cursor-default" />}>{(item.recipientList ?? (item.recipient ? [item.recipient] : [])) .join(', ') || '—'}</TooltipTrigger>
-                    <TooltipContent className="max-w-md text-xs">{(item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—'}</TooltipContent>
-                  </Tooltip>
+                {/* 阶段三列宽优化：发件人/收件人合并为一列，"发件人 → 收件人"
+                    结构，箭头图标仅作视觉分隔（装饰性，aria-hidden），不承载
+                    语义；Tooltip 展示完整文案，与合并前的两列信息量一致。 */}
+                {isColVisible('senderRecipient') && (
+                <TableCell className={cn('text-xs max-w-[320px] truncate', cellDensityClass)}>
+                  {(() => {
+                    const recipients = (item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—';
+                    const full = `${item.sender} → ${recipients}`;
+                    return (
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="inline-flex items-center gap-1 cursor-default" />}>
+                          <span className="truncate">{item.sender}</span>
+                          <ArrowRight className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          <span className="truncate">{recipients}</span>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-md text-xs">{full}</TooltipContent>
+                      </Tooltip>
+                    );
+                  })()}
                 </TableCell>
                 )}
                 {isColVisible('disposalBasis') && (
-                <TableCell className="text-xs max-w-[280px] truncate">
+                <TableCell className={cn('text-xs max-w-[280px] truncate', cellDensityClass)}>
                   <DisposalBasisCell
                     basis={item.disposalBasis}
                     reason={item.reason}
@@ -745,7 +803,7 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('mailType') && (
-                <TableCell className="text-xs whitespace-nowrap">
+                <TableCell className={cn('text-xs whitespace-nowrap', cellDensityClass)}>
                   {item.emailType ? (
                     <span className="inline-flex items-center gap-1">
                       <span>{t(mailTypeLabelKey(item.emailType))}</span>
@@ -772,12 +830,12 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {aiEnabled && similarMode && isColVisible('similarity') && (
-                  <TableCell className="text-xs whitespace-nowrap">
+                  <TableCell className={cn('text-xs whitespace-nowrap', cellDensityClass)}>
                     {item.similarity != null ? `${item.similarity}%` : '—'}
                   </TableCell>
                 )}
                 {isColVisible('action') && (
-                <TableCell className="text-xs">
+                <TableCell className={cn('text-xs', cellDensityClass)}>
                   {/* mixed + 有逐收件人明细时，用单一"主要类别"Badge + hover 明细
                       （见 recipient-status-badges.tsx 顶部注释），否则走原 badge
                       路径（单一动作展开） */}
@@ -808,7 +866,7 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('status') && (
-                <TableCell className="text-xs">
+                <TableCell className={cn('text-xs', cellDensityClass)}>
                   {/* mixed + 有逐收件人明细时用 status 维度的单一"主要类别"Badge；
                       传入 activeDisplayStatuses 让命中"邮件状态"筛选的收件人
                       徽章优先展示为主类别（如筛"投递成功"命中的群发邮件，主
@@ -830,6 +888,7 @@ export function MailListTable({
                   className={cn(
                     'sticky right-0 z-10 min-w-20 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
                     selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
+                    cellDensityClass,
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >

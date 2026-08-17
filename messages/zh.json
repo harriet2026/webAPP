@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�����������������������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�������������������������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1333,7 +1333,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看�����整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「���承���局」，彩色为「另行配置���。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色���「���承���局」，彩色为「另行配置���。",
     "priorityHintAria": "优先级���明",
     "name": "名���",
     "targetGroups": "适�������������",
@@ -2062,11 +2062,11 @@
         "noNexthop": "暂���下一跳"
       },
       "relay": {
-        "description": "将已校验的发信域绑定��集群出口 IP",
+        "description": "将已校验的发��域绑定��集群出口 IP",
         "add": "添��绑定",
         "edit": "编辑���定",
         "empty": "暂无出口绑定",
-        "domainRequired": "请选择发信域"
+        "domainRequired": "请选择发���域"
       },
       "egress": {
         "senderDomain": "发信域",
@@ -2087,7 +2087,7 @@
       },
       "auth": {
         "dkimTitle": "DKIM 签名",
-        "dkimDescription": "为每个发信域生成或导入 DKIM 密钥��完成 DNS 校验",
+        "dkimDescription": "为每个��信域生成或导入 DKIM 密钥��完成 DNS 校验",
         "activeKeys": "已启用密钥 {count} 个",
         "smtpTitle": "SMTP 凭证",
         "smtpDescription": "��理发信认证账号、后端路由与锁定状态",
@@ -3011,7 +3011,7 @@
       "targetIds": "目标 ID",
       "scope": "范围",
       "confirm": "确认执行",
-      "matched": "匹配数",
+      "matched": "匹配��",
       "eligible": "可执行数",
       "submitted": "已提交",
       "skipped": "已跳过",
@@ -3543,7 +3543,7 @@
       "conditionDaily": "当日连接超过 {count} 次",
       "conditionConcurrent": "并发连接超过 {count} 个",
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
-      "conditionAuthFail": "每小时认证失败超过 {count} 次",
+      "conditionAuthFail": "���小时认证失败超过 {count} 次",
       "conditionCmdError": "单连接命令错误��过 {count} 次",
       "conditionConnAuthFail": "单连接���证失��超过 {count} 次",
       "suspend15minText": "15分钟",
@@ -3673,7 +3673,7 @@
     "actionTagDeliver": "标记投递",
     "actionBlockListTip": "该 IP 命中后直接拒绝连接",
     "actionQuarantineListTip": "该 IP 命中后邮件进入隔离区",
-    "actionDropListTip": "该 IP 命中后静默丢弃，无退信",
+    "actionDropListTip": "该 IP 命中后��默丢弃，无退信",
     "actionReviewListTip": "该 IP 命中后邮件进入人工审核���列",
     "actionDeliverListTip": "该 IP 命中后直接放行投递",
     "actionTagDeliverListTip": "该 IP 命中后放��并添加标记，继续内容层检测",
@@ -3793,7 +3793,7 @@
     "importRowValid": "可导入",
     "importDupInBatch": "批内重复",
     "importDupExisting": "已存在",
-    "importDupStrategy": "对「已存在」的 IP：",
+    "importDupStrategy": "对「��存在」的 IP：",
     "importDupSkip": "跳过（保留原规则）",
     "importDupOverwrite": "覆盖（更新原规则）",
     "importEmptyIp": "IP ���空",
@@ -3816,7 +3816,7 @@
     "importExpressionUnsupported": "表达式规则不支持批量导入，请手动创建"
   },
   "inboundAudit": {
-    "title": "入站审核",
+    "title": "入站���核",
     "pending": "待审���",
     "approved": "已放行",
     "rejected": "已拒绝",
@@ -4415,7 +4415,7 @@
     "actionSection": "执行动作",
     "actionTip": "选择规则命中后执行的处置动作",
     "actionHint": "���用于所有勾选的生效范围",
-    "remarkTitle": "备注说明",
+    "remarkTitle": "备���说明",
     "remarkPlaceholder": "添加规则说明，最多200字",
     "currentEffect": "当前配置效果",
     "editorSubtitle": "配置内容关键词/正则规�����，识别并处置含敏���信息的邮件",
@@ -5062,7 +5062,7 @@
       "antivirusServerHost": "AV 服务器地址",
       "antivirusServerPort": "AV 服务器端口",
       "configured": "已配置",
-      "notConfigured": "未配置",
+      "notConfigured": "��配置",
       "hostRequired": "请填写杀毒引擎服务��地址",
       "platformManagedHint": "反病毒服务器与病毒库由��台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
       "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
@@ -5517,7 +5517,7 @@
     "syncToOthers": "同步到其他方向",
     "exemptionNote": "豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口",
     "tooltipWindow": "统计相似邮件的时间范围,单位为分钟",
-    "tooltipThreshold": "邮件内容相似度达到此百分比时被视为相似邮件",
+    "tooltipThreshold": "邮件内容相似度达到此百分比时被视为相��邮件",
     "tooltipMinCount": "相似邮件数量达到此阈值后才触���动作",
     "errorMinCountRange": "触发次数必须在1到9999之间",
     "errorVersionConflict": "配置已被他人修改,请刷新后重试",
@@ -5730,7 +5730,7 @@
       "sideline": "旁路",
       "quarantine": "隔离",
       "rejected": "拒收",
-      "discarded": "丢弃",
+      "discarded": "丢��",
       "audit": "审核",
       "other": "其他",
       "mixedMailHint": "本页结果中有 {count} 封多收件人邮件，同一封邮件的不同收件人执行了不同处置动作，命中的收件人已在\"执行动作\"列中高亮（仅统计当前页，其他分页可能还有更多）"
@@ -5992,6 +5992,7 @@
       "senderIp": "发信 IP",
       "sender": "发信人",
       "recipient": "收信人",
+      "senderRecipient": "发件人 → 收件人",
       "subject": "主题",
       "mailType": "邮件类型",
       "corrected": "已纠正",
@@ -6013,6 +6014,8 @@
       "total": "共 {n} 条",
       "settings": "设置",
       "columnSettings": "列设置",
+      "densitySettings": "显示密度",
+      "compactDensity": "紧凑模式",
       "headerFilters": "表头筛选",
       "clearFilter": "清除筛选"
     },
@@ -6454,7 +6457,7 @@
       },
       "mailType": {
         "phishing": "钓鱼邮件",
-        "virus": "病毒邮件",
+        "virus": "病毒邮��",
         "accountCompromised": "账号被盗",
         "spoofing": "仿冒邮件",
         "harmful": "有害内容邮件",
@@ -6536,7 +6539,7 @@
     "scopeInternal": "域内",
     "reset": "重置",
     "newRule": "新建规则",
-    "name": "规则名称",
+    "name": "规则��称",
     "priority": "优先级",
     "priorityHint": "范围 {min}–{max}，数值越大优先级越高",
     "scopeLabel": "适用范围",
@@ -6688,7 +6691,7 @@
       "tagStyleHtmlRed": "HTML红色",
       "tagStyleHtmlYellow": "HTML黄色",
       "tagStylePlainText": "纯文本",
-      "disclaimerContentSourceHint": "声明正文取自系统统一配置的免责声明文案，此处只需选择插入位置；正文内容请联系管理员在系统配置中修改。"
+      "disclaimerContentSourceHint": "声明正文取自系统统一配置的免责声明文案，此处只需选择插入位置；正文内容请��系管理员在系统配置中修改。"
     },
     "block": {
       "paramsTitle": "阻断参数",
@@ -6793,7 +6796,7 @@
       "descriptionPlaceholder": "输入规则描述（最多500字）",
       "sectionBasicInfo": "基础信息",
       "sectionScope": "生效范围",
-      "sectionValidity": "有效��设置",
+      "sectionValidity": "有效�����置",
       "sectionDescription": "备注说明",
       "expiresAtHint": "留空=永���有效"
     },
@@ -7211,7 +7214,7 @@
       "groupSelectPlaceholder": "请选择群组",
       "orgDeptSelectLabel": "选择部门",
       "orgDeptSelectedCount": "已选 {n} 个",
-      "orgDeptHint": "从组织通讯录选择���门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
+      "orgDeptHint": "从组织通讯录选择���门���选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
       "orgDeptSearchPlaceholder": "搜索部门…",
       "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
       "orgDeptNoMatch": "未找到匹配的部门",
@@ -7510,7 +7513,7 @@
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
     "tzComputedIn": "通知时间以 {tz} ���算",
-    "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计��时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间���",
+    "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计��时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间�����",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
     "tzKeepCurrent": "保持当前时区（{tz}）",
     "range": "通知范围",
@@ -7823,7 +7826,7 @@
       "title": "漏网之鱼追踪",
       "warning": "检测到 {count} 封漏网邮件，请及时处理",
       "viewDetails": "查看详情",
-      "drawerTitle": "漏网邮件���细",
+      "drawerTitle": "漏网邮件�����细",
       "truncated": "仅展示前 {shown} 条，共 {total} 条",
       "prev": "上一页",
       "next": "下一页",
@@ -8688,7 +8691,7 @@
       "basicScreen": "基础筛查条件",
       "noBasicScreen": "无基础筛查条件",
       "requireUrl": "邮件包含 URL",
-      "maxSize": "邮件大��� ≤",
+      "maxSize": "邮件大����� ≤",
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
@@ -8976,7 +8979,7 @@
       "error": "放行失败"
     },
     "person": {
-      "title": "保护对象",
+      "title": "保护���象",
       "subtitle": "每个对象独立维护合法邮箱、灵敏度、阈值与处置策略",
       "add": "添加保护对象",
       "searchPlaceholder": "按姓名、邮箱搜索",
@@ -9312,7 +9315,7 @@
       "expanded": "等待执行",
       "pending": "等待执行",
       "success": "召回成功",
-      "failed": "召回失败"
+      "failed": "召回失��"
     },
     "riskLevel": {
       "high": "高危",
@@ -10127,7 +10130,7 @@
     "refresh": "刷新",
     "health": {
       "danger": "检测到 {n} 项紧急事件待处理��请立即查看待办与告警面板",
-      "warning": "���测到 {n} 项警告事项����请及时处理",
+      "warning": "���测到 {n} 项警告事项�����请及时处理",
       "normal": "系统运行正常，{range}已拦截 {n} 封威胁邮件，无待处理告警",
       "error": "系统���态数据加载失败，请刷新后重试"
     },
@@ -10435,7 +10438,7 @@
         "stale": "通讯录数据已超过 24 小时未更新"
       }
     },
-    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收���」全链路防护。阈值范围：1-1000，-1 表示无限制。"
+    "footerNote": "收信人检测在 RCPT TO 阶段执行，��发信行为管控形成「发信+收���」全链路防护。阈值范围：1-1000，-1 表示无限制。"
   },
   "userList": {
     "blacklistRules": "黑名单规则",
@@ -10689,7 +10692,7 @@
     "auth_attempt": {
       "data_format_invalid": "认证记录数据格式不正确",
       "data_required": "未提供认证记录数据",
-      "request_body_read_failed": "读取请求内容��败，请重试",
+      "request_body_read_failed": "���取请求内容��败，请重试",
       "success_value_invalid": "认证结果取值无效，只能是：{allowed}"
     },
     "contact_source": {
@@ -10760,7 +10763,7 @@
         "valid_days_out_of_range": "「{permission}」的链接有效期需在 {min}–{max} 天之间"
       },
       "recall": {
-        "notify_email_invalid": "召回通知邮箱「{value}」格式不正确",
+        "notify_email_invalid": "召回通知邮箱「{value}」格��不正确",
         "notify_frequency_invalid": "召回通知频率取值无效，只能是：{allowed}",
         "policy_invalid": "召回策略「{value}」无效，只能是：{allowed}",
         "task_timeout_out_of_range": "召回任务超时需在 {min}–{max} ��之间"
@@ -10874,7 +10877,7 @@
       "status_invalid": "角色���态无效，只能是：{allowed}",
       "super_admin_required": "管理平台级角色需要超级管理员权限",
       "system_default_cannot_delete": "系统内置角色不能删除",
-      "system_default_cannot_disable": "系统内置角色与超级管理员角色不能停用",
+      "system_default_cannot_disable": "系���内置角色与超级管理员角色不能停用",
       "system_default_cannot_edit": "系统内置角��不能编辑"
     },
     "rule_analytics": {
@@ -11141,7 +11144,7 @@
     },
     "antispam_queue": {
       "notification_message_uuid_accepted_by_atomic": "通知邮件 UUID 仅原子通知跟踪接口接��",
-      "invalid_quarantine_notification_tracking_request": "隔离通知跟踪请求无效"
+      "invalid_quarantine_notification_tracking_request": "隔离���知跟踪请求无效"
     },
     "auth_spoofing": {
       "no_tenant_context": "请先选择租户",
@@ -11308,7 +11311,7 @@
     },
     "spoofing_persons": {
       "not_found": "记录不存在",
-      "protection_level_invalid": "防护级别只能是高/���/低",
+      "protection_level_invalid": "防护级别只能��高/���/低",
       "observe_mode_invalid": "观察模式只能是开或关",
       "email_already_protected": "邮箱 {email} 已作为保护对象存在"
     },
