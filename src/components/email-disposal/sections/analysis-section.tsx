@@ -20,7 +20,7 @@ import type { DisposalBasis } from '@/types/email-disposal';
 import { formatTimestamp } from '@/lib/format-time';
 import { useDetectionStages, aggregate, deriveFinalVerdict } from '../hooks/use-detection-stages';
 import {
-  formatBytes, tidOf, deriveDirection,
+  formatBytes, tidOf, deriveDirection, mailTypeConfig, stripDetailPrefix,
 } from '../lib/detail-helpers';
 import {
   formatHitDetail, getModuleName, getActionLabel, getActionColor, getPolicyRoute, getPolicyMeta,
@@ -151,6 +151,13 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   // Reuses §9-A's existing "暂未实现" copy (send-receive-context-card.tsx)
   // rather than adding a fourth duplicate translation of the same string.
   const tSenderActions = useTranslations('emailDisposal.detail.overview.senderActions');
+  // GT-12970 变更3：「最终判定」需要与「概览与处置」模块的「邮件类型」徽标
+  // 保持同一份文案来源——两者此前各算各的（这里读三档通用严重度 verdict，
+  // 概览页读细分类型 email_type），字面上"最终判定：恶意邮件"与"邮件类型：
+  // 钓鱼邮件"看似矛盾。tDetail 与 threat-summary-card.tsx 共用同一套
+  // mailTypeConfig/stripDetailPrefix（emailDisposal.detail 命名空间），
+  // 保证两处渲染同一个 label key。
+  const tDetail = useTranslations('emailDisposal.detail');
   const rawLocale = useLocale();
   const router = useRouter();
   // Same locale mapping pattern as mail-list-table.tsx; the disposal-basis
@@ -213,6 +220,14 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   // 为 malicious（因为有人命中了威胁）时，切到一个实际只是 pass 的收件人
   // 也会一直显示"恶意"，跟下方重新聚合出的阶段卡片自相矛盾。
   const verdict = selectedRecipient === ALL_RECIPIENTS ? baseVerdict : deriveFinalVerdict(displayStages);
+  // 「最终判定」文案与「概览与处置」模块的「邮件类型」同源：detail.email_type
+  // 是邮件级别的分类结果（若曾被人工改判，这里已经是改判后的值——
+  // email_type_overridden 只影响概览页要不要额外展示"已纠正"角标，不影响
+  // email_type 本身取哪份值），不随收件人切换器变化（与概览页行为一致，
+  // 邮件类型是整封邮件级别的判定，不是按收件人分叉的结果）。判定卡的图
+  // 标/配色仍按 verdict 三档严重度渲染，仅替换文字部分；email_type 缺失
+  // （历史数据/异常情况）时回退到原有三档通用文案，不出现空白。
+  const finalVerdictTypeCfg = detail.email_type ? mailTypeConfig[detail.email_type] : null;
 
   // 总耗时（gap 2.3）：优先对各阶段 stage_timings 求和，为 0/缺失时落回
   // processing_time_ms。
@@ -283,7 +298,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
     capabilities?.multiTenant === true &&
     isStage1Policy(basis?.policy_key);
   // 复用同一个租户判断，用于下方处置依据多卡片场景——每张卡片按自己的
-  // policy_key 独立判断是否命中阶段1平台策略，不能整体沿用上面按顶层
+  // policy_key 独立判���是否命中阶段1平台策略，不能整体沿用上面按顶层
   // basis.policy_key 算出的 isPlatformPolicyContext。
   const isTenantPlatformViewer = viewer === 'tenant' && capabilities?.multiTenant === true;
 
@@ -567,10 +582,10 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             // 群发邮件多依据支撑（信号一）：本阶段内任意一个 check 的收件
             // 人命中结果出现分歧（matched_action_rules/matched_tag_rules
             // 按 ruleId 交叉推导），卡片右上角提示"N组"。但 SPF/DKIM/IP 等
-            // 多数检测项是对整封邮件评估一次、不分收件人，这一信号在实际
+            // 多数检测项是对整封邮件评估一次、不分���件人，这一信号在实际
             // 数据里很少触发。单人视图下 displayStages 已经把每个 check 的
             // recipientGroups 收窄成 undefined（不再是"多组"），这里天然
-            // 算出 0，不需要额外判断就会隐藏"N组"徽标。
+            // 算出 0，不需要额外判断��会隐藏"N组"徽标。
             const maxCheckRecipientGroupCount = Math.max(
               0,
               ...st.checks.map((c) => c.recipientGroups?.length ?? 0),
@@ -871,7 +886,10 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             {VERDICT_ICON[verdict]}
             <div>
               <div className={cn('font-medium text-sm', VERDICT_TEXT_STYLE[verdict])}>
-                {t('finalVerdict')}：{t(`verdict.${verdict}`)}
+                {t('finalVerdict')}：
+                {finalVerdictTypeCfg
+                  ? tDetail(stripDetailPrefix(finalVerdictTypeCfg.labelKey))
+                  : t(`verdict.${verdict}`)}
               </div>
               <div className="text-xs text-muted-foreground">{t('elapsed', { ms: totalElapsedMs })}</div>
             </div>
