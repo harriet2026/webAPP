@@ -1822,7 +1822,7 @@
         <span class="chevron"></span>
         <span class="l1-icon">🛠️</span>
   <h2>GT-12970【0816】邮件处置中心「优化」</h2>
-  <span class="l1-stats"><span class="done-count">6</span> 已完成 / 6 总计</span>
+  <span class="l1-stats"><span class="done-count">7</span> 已完成 / 7 总计</span>
       </div>
     </summary>
     <div class="l1-body">
@@ -1833,7 +1833,7 @@
               <span class="chevron"></span>
               <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md" target="_blank" rel="noopener noreferrer">GT-12970 · 邮件处置中心优化（增量变更规格 · Markdown）</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v3</span>
+              <span class="card-version-badge">v4</span>
               <span class="card-generated-at">2026-08-17</span>
             </div>
           </summary>
@@ -1924,9 +1924,26 @@
           </summary>
           <div class="card-detail">
             <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
-            <p>变更类型: 缺陷修复（滚动定位精确性 + 提示气泡定位坍缩）+ 功能新增（导航图标/风险与异常提示/可收起窄栏）· 收录于 GT-12970 文档内的同名二级章节</p>
+            <p>变更类型: 缺���修复（滚动定位精确性 + 提示气泡定位坍缩）+ 功能新增（导航图标/风险与异常提示/可收起窄栏）· 收录于 GT-12970 文档内的同名二级章节</p>
             <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（详情页左侧导航栏：概览与处置/安全分析/原始日志）</p>
             <p>内含: ① 滚动定位由像素阈值比较改为 IntersectionObserver，页头新增"当前查看：×××"面包屑分段与导航高亮同步；② 导航三项新增图标，"安全分析"项新增风险点圆点（悬停显示"最终判定"）、"原始日志"项新增部分节点缺失黄色警告三角，激活态高亮改为品牌主色；③ 桌面视口导航栏可收起为48px纯图标窄栏，折叠态提示气泡改为"标签 · 状态"组合文案，并修复因触发器包裹层 `display:contents` 导致的气泡定位坍缩至页面左上角缺陷</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12970【0816】邮件处置中心「优化」.md#gt-12984邮件处置中心日志列表ui优化" target="_blank" rel="noopener noreferrer">GT-12984 · 邮件处置中心：日志列表UI优化</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v1</span>
+              <span class="card-generated-at">2026-08-17</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /email-handling/disposal-center（同属邮件处置中心模块，深链跳转至本工单文档内的对应章节）</p>
+            <p>变更类型: 列宽/信息密度优化（列合并 + 展示方式两轮用户反馈迭代）+ 功能新增（可选紧凑显示密度）· 收录于 GT-12970 文档内的同名二级章节</p>
+            <p>关联模块: <a href="email-handling-disposal-center/index.html">邮件处置中心</a>（日志列表页）</p>
+            <p>内含: ① "发信人""收信人"两列合并为一列"发件人 → 收件人"，箭头图标为纯装饰分隔，完整信息通过悬停 Tooltip 展示；② "收发类型"列展示方式两轮迭代——原通用上传/下载箭头图标因易被误读为"下载"按钮被反馈，第一轮改用邮件场景专属图标（收件箱/发送），因语义仍不够直观被再次反馈，最终改回彩色文字徽标（复用既有"接收/外发/域内"文案）；③ 列表设置菜单新增"显示密度"分组与"紧凑模式"开关，开启后表头/单元格高度收紧（44px→32px），不缩小字号，独立本地存储持久化</p>
           </div>
         </details>
       </div>
