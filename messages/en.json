@@ -6091,6 +6091,11 @@
       "findSimilar": "Find Similar Emails",
       "findSimilarTooltip": "Find emails similar to this one",
       "close": "Close",
+      "nav": {
+        "currentlyViewing": "Currently viewing",
+        "finalVerdict": "Final verdict",
+        "rawLogsPartial": "Some node logs could not be retrieved; results may be incomplete"
+      },
       "errors": {
         "loadFailed": "Failed to load details, please retry",
         "retry": "Retry"

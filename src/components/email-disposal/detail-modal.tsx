@@ -7,10 +7,11 @@ import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, Loader2, AlertCircle } from 'lucide-react';
+import { Search, Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 import { getMailLifecycleLogs, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
+import { mailTypeConfig, mailTypeTone, stripDetailPrefix } from './lib/detail-helpers';
 import { OverviewSection } from './sections/overview-section';
 import { AnalysisSection } from './sections/analysis-section';
 import { RawLogsSection } from './sections/raw-logs-section';
@@ -225,11 +226,46 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     sectionRefs.current[key]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const navItems: { key: SectionKey; label: string }[] = [
+  // Risk dot on the "安全分析" nav item: lets the user see the mail's final
+  // verdict severity (malicious/graymail/normal) without scrolling down to
+  // it first, reusing the same tone that already colors the verdict badge
+  // inside AnalysisSection itself (mailTypeConfig/mailTypeTone) rather than
+  // introducing a second, possibly-drifting severity classification.
+  const riskDotClass: Record<ReturnType<typeof mailTypeTone>, string> = {
+    malicious: 'bg-red-500',
+    graymail: 'bg-amber-500',
+    normal: 'bg-emerald-500',
+  };
+  const finalVerdictTypeCfg = detail?.email_type ? mailTypeConfig[detail.email_type] : null;
+
+  // Warning icon on "原始日志" once we know (from an already-completed
+  // fetch) that some gateway nodes' logs couldn't be retrieved -- surfaces
+  // the same signal RawLogsSection shows inline (raw-logs-partial-warning)
+  // one level up, so it's visible without expanding+scrolling to that
+  // section first. Stays silent before the first expand/fetch (no log
+  // fetch has been attempted yet, so there's nothing yet to warn about).
+  const rawLogsPartial = lifecycleLogsQ.isSuccess && (
+    (lifecycleLogsQ.data?.partial ?? false) || (lifecycleLogsQ.data?.failed_nodes?.length ?? 0) > 0
+  );
+
+  const navItems: { key: SectionKey; label: string; dotClassName?: string; dotTooltip?: string; warning?: boolean; warningTooltip?: string }[] = [
     { key: 'overview', label: t('overviewAndHandle') },
-    { key: 'analysis', label: t('securityAnalysis') },
-    { key: 'rawlogs', label: t('originalLog') },
+    {
+      key: 'analysis',
+      label: t('securityAnalysis'),
+      dotClassName: finalVerdictTypeCfg ? riskDotClass[finalVerdictTypeCfg.tone] : undefined,
+      dotTooltip: finalVerdictTypeCfg
+        ? `${t('nav.finalVerdict')}：${t(stripDetailPrefix(finalVerdictTypeCfg.labelKey))}`
+        : undefined,
+    },
+    {
+      key: 'rawlogs',
+      label: t('originalLog'),
+      warning: rawLogsPartial,
+      warningTooltip: rawLogsPartial ? t('nav.rawLogsPartial') : undefined,
+    },
   ];
+  const activeSectionLabel = navItems.find((item) => item.key === activeSection)?.label ?? '';
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -241,8 +277,24 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
       >
         <div className="flex items-start justify-between gap-4 border-b py-4 pl-6 pr-14 shrink-0">
           <div className="min-w-0">
-            <div className="text-xs text-muted-foreground mb-1">
-              {t('breadcrumb')}
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+              <span>{t('breadcrumb')}</span>
+              {/* Long-page scroll-spy has no other on-screen indicator of
+                  which of the 3 stacked sections is currently in view --
+                  particularly disorienting once "安全分析" (5 detection-
+                  stage cards, all expanded by default) makes the page much
+                  taller than its two neighboring sections. Mirrors
+                  activeSection 1:1 (same state scroll-spy already drives the
+                  nav-rail highlight from), so this never needs its own
+                  tracking logic. */}
+              {detailQ.isSuccess && detail ? (
+                <>
+                  <span aria-hidden="true" className="text-muted-foreground/50">·</span>
+                  <span data-testid="disposal-detail-current-section" className="truncate">
+                    {t('nav.currentlyViewing')}：{activeSectionLabel}
+                  </span>
+                </>
+              ) : null}
             </div>
             <SheetTitle ref={titleRef} tabIndex={-1} className="text-lg font-semibold truncate outline-none">
               {detail?.subject || (mailLogId ? `Email #${mailLogId}` : '')}
@@ -301,30 +353,69 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                   content pane isn't squeezed by a fixed-width side column on
                   narrow/fullscreen viewports. */}
               <nav className="w-[200px] shrink-0 border-r py-3 max-lg:flex max-lg:w-full max-lg:overflow-x-auto max-lg:border-r-0 max-lg:border-b max-lg:py-0">
-                {navItems.map(({ key, label }) => (
-                  <InteractiveSurface
-                    key={key}
-                    asChild
-                    variant="control"
-                    className={cn(
-                      'w-full rounded-none border-l-2 px-4 py-2 text-left text-sm',
-                      'max-lg:w-auto max-lg:shrink-0 max-lg:whitespace-nowrap max-lg:border-l-0 max-lg:border-b-2',
-                      activeSection === key
-                        ? 'border-foreground/40 bg-muted font-medium text-foreground data-[hovered=true]:bg-muted/80'
-                        : 'border-transparent text-muted-foreground data-[hovered=true]:bg-muted/50 data-[hovered=true]:text-foreground',
-                    )}
-                  >
-                    <button
-                      ref={(el) => { navButtonRefs.current[key] = el; }}
-                      data-testid={`disposal-detail-nav-${key}`}
-                      type="button"
-                      aria-current={activeSection === key ? 'location' : undefined}
-                      onClick={() => scrollToSection(key)}
+                {navItems.map(({ key, label, dotClassName, dotTooltip, warning, warningTooltip }) => {
+                  const indicator = dotClassName ? (
+                    <span aria-hidden="true" className={cn('inline-block h-2 w-2 shrink-0 rounded-full', dotClassName)} />
+                  ) : warning ? (
+                    <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                  ) : null;
+                  // Single InteractiveSurface->Slot merge target (the
+                  // <button> itself) regardless of whether a tooltip wraps
+                  // it below -- Slot only merges cleanly onto one real DOM
+                  // element, and InteractiveSurface's own hover/focus
+                  // treatment (data-hovered, focus ring) depends on that
+                  // merge landing on the <button>, not on an intermediate
+                  // non-DOM component like <Tooltip>.
+                  const surface = (
+                    <InteractiveSurface
+                      key={key}
+                      asChild
+                      variant="control"
+                      className={cn(
+                        'w-full rounded-none border-l-2 px-4 py-2 text-left text-sm',
+                        'max-lg:w-auto max-lg:shrink-0 max-lg:whitespace-nowrap max-lg:border-l-0 max-lg:border-b-2',
+                        // Stronger, brand-colored active state (matches the
+                        // selected/active-filter convention used elsewhere in
+                        // this module, e.g. search-bar.tsx's expanded-filters
+                        // button) -- the previous neutral-gray highlight
+                        // (border-foreground/40 bg-muted) was easy to lose
+                        // track of while scrolling a long page.
+                        activeSection === key
+                          ? 'border-primary bg-primary/10 font-medium text-primary data-[hovered=true]:bg-primary/15'
+                          : 'border-transparent text-muted-foreground data-[hovered=true]:bg-muted/50 data-[hovered=true]:text-foreground',
+                      )}
                     >
-                      {label}
-                    </button>
-                  </InteractiveSurface>
-                ))}
+                      <button
+                        ref={(el) => { navButtonRefs.current[key] = el; }}
+                        data-testid={`disposal-detail-nav-${key}`}
+                        type="button"
+                        aria-current={activeSection === key ? 'location' : undefined}
+                        onClick={() => scrollToSection(key)}
+                        className="flex w-full items-center gap-2"
+                      >
+                        <span className="truncate">{label}</span>
+                        {indicator}
+                      </button>
+                    </InteractiveSurface>
+                  );
+                  const tooltipText = dotTooltip || warningTooltip;
+                  if (!tooltipText) return surface;
+                  return (
+                    <Tooltip key={key}>
+                      {/* `render` as a plain <span> (not asChild-merged onto
+                          `surface`) keeps the tooltip's own trigger-ref
+                          plumbing on a guaranteed-forwardRef intrinsic
+                          element, independent of InteractiveSurface's own
+                          Slot merge above. `display:contents` makes the
+                          span invisible to the flex/width layout of `surface`
+                          and its horizontal-bar siblings. */}
+                      <TooltipTrigger render={<span className="contents" />}>
+                        {surface}
+                      </TooltipTrigger>
+                      <TooltipContent>{tooltipText}</TooltipContent>
+                    </Tooltip>
+                  );
+                })}
               </nav>
               <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto p-6 space-y-8">
                 <section
