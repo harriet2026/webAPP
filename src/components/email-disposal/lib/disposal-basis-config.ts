@@ -158,7 +158,7 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       const ip = val(v, 'source_ip');
       switch (lang) {
         case 'en': return `${ip} flagged by RBL`;
-        case 'th': return `${ip} ถูก��ำเครื่องหมายโดย RBL`;
+        case 'th': return `${ip} ถูกทำเครื่องหมายโดย RBL`;
         case 'ru': return `${ip} помечен RBL`;
         default: return `${ip} 被RBL标记`;
       }
