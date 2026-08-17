@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测�������������������������������������������能�������������",
+    "spoofingDetection": "仿冒邮件检测���������������������������������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1183,7 +1183,7 @@
     "accept": "接收",
     "reject": "拒绝",
     "discard": "丢弃",
-    "audit": "审核",
+    "audit": "审���",
     "timeoutMinutes": "超时(分��)",
     "globalRule": "全局���则",
     "systemRule": "系统�����则",
@@ -1330,10 +1330,10 @@
     "targetNone": "不限",
     "selectGroupPlaceholder": "选择组",
     "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可填范围见新建/编辑抽屉）。",
-    "stagePrefix": "【阶段{stage}】",
+    "stagePrefix": "【阶���{stage}】",
     "expandConfig": "查看�����整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色���「���承���局」，彩色为「另行配置���。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，���色���「���承���局」，彩色为「另行配置���。",
     "priorityHintAria": "优先级���明",
     "name": "名���",
     "targetGroups": "适�������������",
@@ -2062,7 +2062,7 @@
         "noNexthop": "暂���下一跳"
       },
       "relay": {
-        "description": "将已校验的发��域绑定��集群出口 IP",
+        "description": "将已��验的发��域绑定��集群出口 IP",
         "add": "添��绑定",
         "edit": "编辑���定",
         "empty": "暂无出口绑定",
@@ -2442,7 +2442,7 @@
     "viewDetails": "查看",
     "location": "归属地",
     "stats": {
-      "total": "认证总次数",
+      "total": "认证总���数",
       "successRate": "认���成功率",
       "failed": "认证失败数"
     },
@@ -2804,7 +2804,7 @@
   },
   "proxysvr": {
     "title": "代理服务器管理",
-    "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分组」投递通道���用。",
+    "pageDescription": "管理代理服务��目录与故障转移分组，供路由规则的「代理服务器分组」投递通道���用。",
     "endpointsTab": "��理服务器目录",
     "groupsTab": "代理服务器分组",
     "name": "名称",
@@ -3542,7 +3542,7 @@
       "permanent": "永久有效",
       "conditionDaily": "当日连接超过 {count} 次",
       "conditionConcurrent": "并发连接超过 {count} 个",
-      "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
+      "conditionWindow": "每 {minutes} ��钟超过 {count} 次",
       "conditionAuthFail": "���小时认证失败超过 {count} 次",
       "conditionCmdError": "单连接命令错误��过 {count} 次",
       "conditionConnAuthFail": "单连接���证失��超过 {count} 次",
@@ -3939,7 +3939,7 @@
     "greylistDelayDesc": "秒内，阻断第一封邮件请求，发信重投则正常收信",
     "greylistRateDesc": "秒内，正常接收请求，阻断超过限制的请求",
     "greylistMaxRequests": "最大请求数",
-    "greylistWhitelistTTL": "白名单有效期",
+    "greylistWhitelistTTL": "白��单有效期",
     "greylistHours": "小时",
     "greylistWhitelistTTLTip": "通过���名单验证的发件人将被记住该时长，有效期内��次发信无需重新验证。",
     "greylistExemptions": "豁免设置",
@@ -4086,7 +4086,7 @@
     "ipType_range": "IP范围(CIDR)",
     "ipType_ipGroup": "IP组",
     "action": "执行动作",
-    "action_reject": "拒收",
+    "action_reject": "拒��",
     "action_reject_desc": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
     "action_discard": "丢弃",
     "action_discard_desc": "静默丢弃邮件，发信方收到投递成功响应但邮件实���被丢弃",
@@ -4231,7 +4231,7 @@
     "statusAll": "全部",
     "statusEnabled": "已启用",
     "statusDisabled": "已禁用",
-    "unsavedChanges": "有未保存的修改，确定要关闭吗？所有修改将丢失。",
+    "unsavedChanges": "有未保存的修改，确定要关闭吗？所���修改将丢失。",
     "unsavedChangesTitle": "放弃未保存的修改？",
     "anyPlaceholder": "—",
     "createRuleTyped": "新建{type}规则",
@@ -4414,7 +4414,7 @@
     "jumpToPage": "跳至页码",
     "actionSection": "执行动作",
     "actionTip": "选择规则命中后执行的处置动作",
-    "actionHint": "���用于所有勾选的生效范围",
+    "actionHint": "���用于所有勾选��生效范围",
     "remarkTitle": "备���说明",
     "remarkPlaceholder": "添加规则说明，最多200字",
     "currentEffect": "当前配置效果",
@@ -4662,7 +4662,7 @@
     "protocolActionDesc": {
       "accept": "不做处理，传递给下一个协议检查",
       "reject": "向发信方返回 SMTP 5xx 拒绝响应",
-      "quarantine": "移入隔离区，等待管理员审阅",
+      "quarantine": "���入隔离区，等待管理员审阅",
       "audit": "添加标记头后正常投递",
       "discard": "静默丢弃，发信方收到投递成功响应"
     }
@@ -5042,7 +5042,7 @@
       "primaryEngine": "主引擎",
       "backupEngine": "备引擎",
       "engineQianxin": "奇安信（国内病毒库覆盖好）",
-      "engineKaspersky": "卡巴斯基（国际病毒库覆盖好）",
+      "engineKaspersky": "��巴斯基（国际病毒库覆盖好）",
       "engineQianxinShort": "奇安信",
       "engineKasperskyShort": "卡巴斯基",
       "engineNone": "无",
@@ -5210,7 +5210,7 @@
     "validation": {
       "attachmentCountMin": "附件数量上限最小为 1",
       "attachmentSizeMin": "附件大小上限最小为 1 KB",
-      "dangerExtListEmpty": "危险扩展名列表为空，建议添加常见危险扩展名",
+      "dangerExtListEmpty": "危险扩展名列表为空��建议添加常见危险扩展名",
       "duplicatePassword": "该密码已存在",
       "emptyPassword": "密码不能���空"
     },
@@ -5355,7 +5355,7 @@
       "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链接后需等待，请结合下方超时策略配置。",
       "skip": {
         "title": "允许用户跳过深度检测",
-        "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使���。",
+        "desc": "允许终端用户在等��期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使���。",
         "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问��完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
       },
       "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险���接，展示提示页。",
@@ -5412,7 +5412,7 @@
       "political": "涉政/反动",
       "phishing": "钓鱼",
       "spam": "垃圾",
-      "subscription": "订阅"
+      "subscription": "订���"
     },
     "intentDesc": {
       "porn_gambling": "检测色情、赌博等违规内容邮件",
@@ -5730,7 +5730,7 @@
       "sideline": "旁路",
       "quarantine": "隔离",
       "rejected": "拒收",
-      "discarded": "丢��",
+      "discarded": "丢弃",
       "audit": "审核",
       "other": "其他",
       "mixedMailHint": "本页结果中有 {count} 封多收件人邮件，同一封邮件的不同收件人执行了不同处置动作，命中的收件人已在\"执行动作\"列中高亮（仅统计当前页，其他分页可能还有更多）"
@@ -6457,7 +6457,7 @@
       },
       "mailType": {
         "phishing": "钓鱼邮件",
-        "virus": "病毒邮��",
+        "virus": "病毒邮件",
         "accountCompromised": "账号被盗",
         "spoofing": "仿冒邮件",
         "harmful": "有害内容邮件",
@@ -7237,7 +7237,7 @@
       "descObjectLabel": "对象含义",
       "descOperatorsLabel": "支持运算符",
       "descExampleLabel": "有效示例",
-      "descRecommendedLabel": "推荐配置",
+      "descRecommendedLabel": "推��配置",
       "descFormatLabel": "格式与示例",
       "descStepGuideLabel": "配置步骤",
       "applyRecommended": "应用推荐配置",
@@ -7512,7 +7512,7 @@
     "weekday_6": "周六",
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
-    "tzComputedIn": "通知时间以 {tz} ���算",
+    "tzComputedIn": "��知时间以 {tz} ���算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计��时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间�����",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
     "tzKeepCurrent": "保持当前时区（{tz}）",
@@ -7885,7 +7885,7 @@
     },
     "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制���胁曲线，可点���图例展开",
     "deliveryResults": {
-      "delivered": "已投递",
+      "delivered": "���投递",
       "success_rate": "投递成功率",
       "failed": "失败",
       "cancelled": "已取消",
@@ -9026,7 +9026,7 @@
     "personForm": {
       "addTitle": "添加保���对象",
       "addDescription": "仅添加的保���对象会纳入显示名仿冒检测���围。请配置该对象的检���与处置策略。",
-      "editTitle": "编辑保护���象",
+      "editTitle": "编辑保护�����",
       "modeSingle": "单个录入",
       "modePaste": "批量粘贴",
       "modeContacts": "从组��架构导入",
@@ -9551,7 +9551,7 @@
       "quickAdd": "快捷添加",
       "quick": {
         "every30": "每 30 分钟",
-        "everyHour": "每小时",
+        "everyHour": "每��时",
         "every2Hours": "每 2 小时"
       },
       "overlapWarn": "与策略「{name}」存在时间点重叠，仍可保存。",
@@ -10293,7 +10293,7 @@
     "systemAdminOnly": "仅超级管理员可修改模块总开关",
     "platformManaged": "阶段 1 IP 策略由平台管理员全局管控",
     "selectTenantFirst": "请先选择租户，再修改此模块",
-    "adminOnly": "仅系统管理员或租户管��员可修改此模块",
+    "adminOnly": "仅系统管理员��租户管��员可修改此模块",
     "disableWarning": "关闭本模块后，其全部规则停止生效，该模块的拦截能力将不再起作用。",
     "whitelistWarning": "注意：本模块的白名单 / 放行规则也会一并停用，原本��放行的邮件将继续走后续检测。",
     "saveFailed": "保存失败，请重试",
@@ -10471,7 +10471,7 @@
     "confirmDeleteBatch": "确认删除选中的",
     "rulesText": "条规则",
     "cannotUndo": "此操作不可撤销",
-    "cancel": "取消",
+    "cancel": "取���",
     "confirm": "确认",
     "moduleEnabled": "���启用",
     "moduleDisabled": "已禁用",
@@ -10998,7 +10998,7 @@
       "export_format_unsupported": "不支持的导出格式，请使用 json 或 csv",
       "import_data_format_invalid": "邮件日志数据格式不正确",
       "import_data_missing": "未提供邮件日志数据",
-      "interpret_rate_limited": "请求过于频繁，请稍后重试",
+      "interpret_rate_limited": "请求过于频繁���请稍后重试",
       "interpret_too_many_concurrent": "当前 AI 解读任务过多，请稍后重试",
       "interpret_disabled": "AI 日志解读功能未启用"
     },

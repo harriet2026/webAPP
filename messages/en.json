@@ -6019,6 +6019,8 @@
       "total": "Total {n}",
       "settings": "Settings",
       "columnSettings": "Columns",
+      "densitySettings": "Row density",
+      "compactDensity": "Compact mode",
       "headerFilters": "Header filters",
       "clearFilter": "Clear filters"
     },
