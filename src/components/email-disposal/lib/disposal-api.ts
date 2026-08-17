@@ -199,7 +199,7 @@ export async function getDisposalList(
     emailTypes?: string[];
     disposalPolicyKeys?: string[];
     // GT-12923 阶段三：执行动作筛选值，与 emailTypes/disposalPolicyKeys 一样
-    // 序列化为逗号分隔的顶层查���参数 action=deliver,quarantine（OR 语义）。
+    // 序列化为逗号分隔的顶层查询参数 action=deliver,quarantine（OR 语义）。
     // 之所以不再走 advanced 里的 FilterCondition，是因为该字段在后端需要
     // 对 mixed 记录（同一封邮件不同收件人执行了不同动作）做 disposition_
     // actions 数组交集匹配，这跟通用高级筛选引擎的 eq/in 精确匹配语义不

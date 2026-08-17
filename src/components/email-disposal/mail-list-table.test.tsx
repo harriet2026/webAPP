@@ -16,7 +16,12 @@ vi.mock("next-intl", () => {
     (fn as unknown as { has: () => boolean }).has = () => true;
     return fn;
   };
-  return { useTranslations, useLocale: () => "zh" };
+  // mail-list-table 的时间列相对时间依赖 useFormatter().relativeTime；测试
+  // 环境不关心具体文案，只需返回一个可调用的占位实现。
+  const useFormatter = () => ({
+    relativeTime: (date: Date | number) => `relativeTime:${new Date(date).toISOString()}`,
+  });
+  return { useTranslations, useLocale: () => "zh", useFormatter };
 });
 
 vi.mock("./lib/disposal-api", () => ({

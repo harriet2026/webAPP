@@ -311,10 +311,10 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
             <SheetTitle ref={titleRef} tabIndex={-1} className="text-lg font-semibold truncate outline-none">
               {detail?.subject || (mailLogId ? `Email #${mailLogId}` : '')}
             </SheetTitle>
-            {/* GT-12977 ��更2：邮件ID原展示于"安全分析"标���下已删除的"内容
+            {/* GT-12977 变更2：邮件ID原展示于"安全分析"标签下已删除的"内容
                 详情"折叠区块内，需二次点开才可见；现挪到三个标签共用的页头，
                 常驻可见，便于排障时直接核对/复制，不再依赖任何折叠状态。
-                复用既��� emailDisposal.detail.features.emailId key（原
+                复用既有 emailDisposal.detail.features.emailId key（原
                 "内容详情"区块的同一份翻译），不新增 i18n key。 */}
             {detail?.message_id ? (
               <div className="mt-0.5 truncate text-xs text-muted-foreground">

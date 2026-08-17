@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -127,6 +127,17 @@ export function MailListTable({
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
   const rawLocale = useLocale();
+  // 阶段二时间列相对时间：next-intl 的 useFormatter().relativeTime() 按当前
+  // locale 用 Intl.RelativeTimeFormat 输出"3 分钟前"/"3 minutes ago"等文案，
+  // 复用项目既有国际化框架，不新增第三方时间库。
+  const format = useFormatter();
+  // 服务端渲染与首次客户端渲染的"现在"时刻不同，直接用相对时间可能产生
+  // hydration 不一致；沿用本文件 hiddenColumns 的同类做法——挂载前展示绝对
+  // 时间（与 SSR 一致），挂载后再切换为相对时间。
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   // Map next-intl locale to one of the disposal-basis dictionary's supported
   // langs; unknown locales fall back to zh (the dictionary's primary language).
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
@@ -141,6 +152,16 @@ export function MailListTable({
   const localizeEnum = useCallback((key: string, fallback: string) => {
     return t.has(key as never) ? t(key as never) : fallback;
   }, [t]);
+
+  // 阶段二时间列相对时间：mounted 前（含 SSR）与非法/缺失时间戳时都回退到
+  // 绝对时间，避免 hydration 不一致或 Intl.RelativeTimeFormat 抛错。
+  const formatRelativeTime = useCallback((timestamp: string | undefined | null) => {
+    if (!timestamp) return formatDate(timestamp);
+    const d = new Date(timestamp);
+    if (Number.isNaN(d.getTime())) return formatDate(timestamp);
+    if (!mounted) return formatDate(timestamp);
+    return format.relativeTime(d);
+  }, [format, mounted]);
 
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
   const hasSelection = selectedIds.size > 0;
@@ -462,7 +483,7 @@ export function MailListTable({
                 {aiEnabled && similarMode && colHead('similarity')}
                 {colHead('action')}
                 {colHead('status')}
-                <TableHead className="sticky right-0 z-20 min-w-32 border-l bg-card text-xs">{t('table.operations')}</TableHead>
+                <TableHead className="sticky right-0 z-20 min-w-20 border-l bg-card text-xs">{t('table.operations')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -503,7 +524,7 @@ export function MailListTable({
                 {aiEnabled && similarMode && colHead('similarity')}
                 {colHead('action')}
                 {colHead('status')}
-                <TableHead className="sticky right-0 z-20 min-w-32 border-l bg-card text-xs">{t('table.operations')}</TableHead>
+                <TableHead className="sticky right-0 z-20 min-w-20 border-l bg-card text-xs">{t('table.operations')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -617,7 +638,7 @@ export function MailListTable({
               {aiEnabled && similarMode && colHead('similarity')}
               {colHead('action')}
               {colHead('status')}
-              <TableHead className="sticky right-0 z-20 min-w-32 border-l bg-card text-xs" data-testid="disposal-operations-column">{t('table.operations')}</TableHead>
+              <TableHead className="sticky right-0 z-20 min-w-20 border-l bg-card text-xs" data-testid="disposal-operations-column">{t('table.operations')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -654,7 +675,12 @@ export function MailListTable({
                 </TableCell>
                 {isColVisible('time') && (
                 <TableCell className="text-xs whitespace-nowrap">
-                  {formatDate(item.timestamp)}
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="cursor-default" />}>
+                      {formatRelativeTime(item.timestamp)}
+                    </TooltipTrigger>
+                    <TooltipContent>{formatDate(item.timestamp)}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
                 )}
   {isColVisible('direction') && (
@@ -802,22 +828,32 @@ export function MailListTable({
                 )}
                 <TableCell
                   className={cn(
-                    'sticky right-0 z-10 min-w-32 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
+                    'sticky right-0 z-10 min-w-20 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
                     selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
+                  {/* 阶段二列宽优化：操作列由"图标+文字"按钮改为纯图标按钮
+                      +Tooltip——该列为 sticky 常驻列，每行都固定占用这份宽度，
+                      压缩收益随行数放大；文案不丢失，仅从常驻可见改为悬停可见。 */}
                   <div className="flex items-center justify-end gap-1">
-                    <Button
-                      data-testid={`disposal-view-${item.id}`}
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 gap-1 px-2 text-sm text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
-                      onClick={() => onItemClick(item.id)}
-                    >
-                      <Eye />
-                      {t('table.view')}
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            data-testid={`disposal-view-${item.id}`}
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={t('table.view')}
+                            className="text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
+                            onClick={() => onItemClick(item.id)}
+                          >
+                            <Eye />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>{t('table.view')}</TooltipContent>
+                    </Tooltip>
                     {aiEnabled && (
                       <Tooltip>
                         <TooltipTrigger
@@ -825,12 +861,12 @@ export function MailListTable({
                             <Button
                               data-testid={`disposal-find-similar-${item.id}`}
                               variant="ghost"
-                              size="sm"
-                              className="h-7 gap-1 px-2 text-sm text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
+                              size="icon-xs"
+                              aria-label={t('table.findSimilar')}
+                              className="text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
                               onClick={() => onFindSimilar?.(item.id)}
                             >
                               <Search />
-                              {t('table.findSimilar')}
                             </Button>
                           }
                         />
