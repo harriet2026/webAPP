@@ -74,6 +74,11 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     analysis: null,
     rawlogs: null,
   });
+  const navButtonRefs = useRef<Record<SectionKey, HTMLButtonElement | null>>({
+    overview: null,
+    analysis: null,
+    rawlogs: null,
+  });
   const [activeSection, setActiveSection] = useState<SectionKey>('overview');
   const [rawLogsExpanded, setRawLogsExpanded] = useState(false);
 
@@ -133,41 +138,90 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     void queryClient.invalidateQueries({ queryKey: ['email-disposal'] });
   }, [queryClient, mailLogId]);
 
-  const handleScroll = useCallback(() => {
-    const container = contentRef.current;
-    if (!container) return;
-    const containerTop = container.getBoundingClientRect().top;
-    const threshold = container.clientHeight * 0.3;
-    let current: SectionKey = 'overview';
-    for (const key of ['overview', 'analysis', 'rawlogs'] as const) {
-      const el = sectionRefs.current[key];
-      if (!el) continue;
-      const top = el.getBoundingClientRect().top - containerTop;
-      if (top <= threshold) current = key;
-    }
-    setActiveSection(current);
-  }, []);
-
+  // IntersectionObserver-based scroll-spy instead of comparing each section's
+  // bounding-rect top against a fixed-pixel threshold: a pixel comparison
+  // has to pick one fixed trigger line, and once "安全分析" is expanded
+  // (5 detection-stage cards, all open by default) its content towers over
+  // the other two sections -- the previous single-threshold math could keep
+  // reporting a stale active section for a long stretch of that scroll
+  // distance. Observing each <section> against a thin trigger band pinned to
+  // the top of the content pane (via rootMargin) stays accurate regardless
+  // of how tall any individual section's expanded content grows.
   useEffect(() => {
     const container = contentRef.current;
     if (!container || !open) return;
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+
+    // Local to this effect run (a fresh observer + fresh set every time it
+    // re-attaches), not a ref -- there's nothing to preserve across renders.
+    const intersecting = new Set<SectionKey>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const key = entry.target.getAttribute('data-section-key') as SectionKey | null;
+          if (!key) continue;
+          if (entry.isIntersecting) intersecting.add(key);
+          else intersecting.delete(key);
+        }
+        // Prefer whichever section furthest down in reading order is still
+        // crossing the trigger band -- mirrors "the section the user has
+        // most recently scrolled into", not one barely still peeking out
+        // at the very bottom of the trigger band from the section above it.
+        for (const key of ['rawlogs', 'analysis', 'overview'] as const) {
+          if (intersecting.has(key)) {
+            setActiveSection(key);
+            return;
+          }
+        }
+      },
+      {
+        root: container,
+        // Only the top ~20% band of the content pane counts as the
+        // "current section" trigger line.
+        rootMargin: '0px 0px -80% 0px',
+        threshold: 0,
+      },
+    );
+
+    for (const key of ['overview', 'analysis', 'rawlogs'] as const) {
+      const el = sectionRefs.current[key];
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
     // `detail` is intentionally in the deps even though it's otherwise unused
-    // in this effect: the content pane (and contentRef itself) only mounts
-    // once detailQ resolves -- while the query is loading, the "isLoading"
-    // branch below renders a spinner instead, so contentRef.current is still
-    // null on the FIRST run of this effect (when `open` first flips true).
-    // Without `detail` here, the effect's deps never change again once that
-    // early, no-op run happens, so the scroll listener would never actually
-    // get attached to the real container -- permanently breaking scroll-spy.
-    // Found while writing DD-14's e2e smoke test (a manually-dispatched
-    // 'scroll' event on the content pane never reached this listener because
-    // it was simply never registered).
-  }, [open, handleScroll, detail]);
+    // in this effect: the content pane (and contentRef itself, and each
+    // <section> ref) only mounts once detailQ resolves -- while the query is
+    // loading, the "isLoading" branch below renders a spinner instead, so
+    // every ref is still null on the FIRST run of this effect (when `open`
+    // first flips true). Without `detail` here, the effect's deps never
+    // change again once that early, no-op run happens, so the observer would
+    // never actually get attached to the real sections -- permanently
+    // breaking scroll-spy. (Same root cause as the pixel-based version this
+    // replaced, found while writing DD-14's e2e smoke test.)
+  }, [open, detail]);
+
+  // Keep the active item visible in the horizontally-scrollable anchor bar
+  // that the vertical nav collapses into below 1024px (spec §5.2). Without
+  // this, once there are enough nav items to overflow that bar, scrolling
+  // into a later section (or navigating there via scroll-spy) can leave its
+  // corresponding tab scrolled out of view with no way to tell "where am I"
+  // short of scrolling the bar itself. No-op on the desktop vertical nav,
+  // which never overflows.
+  useEffect(() => {
+    navButtonRefs.current[activeSection]?.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest',
+    });
+  }, [activeSection]);
 
   const scrollToSection = (key: SectionKey) => {
     setActiveSection(key); // immediate feedback on click, ahead of the scroll-spy catching up
+    // Navigating to "原始日志" via the nav rail (or the overview section's
+    // "查看原始日志" link) should surface its data, not just scroll to an
+    // empty collapsed placeholder the user then has to expand by hand.
+    if (key === 'rawlogs') setRawLogsExpanded(true);
     sectionRefs.current[key]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -193,7 +247,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
             <SheetTitle ref={titleRef} tabIndex={-1} className="text-lg font-semibold truncate outline-none">
               {detail?.subject || (mailLogId ? `Email #${mailLogId}` : '')}
             </SheetTitle>
-            {/* GT-12977 变更2：邮件ID原展示于"安全分析"标签下已删除的"内容
+            {/* GT-12977 ��更2：邮件ID原展示于"安全分析"标签下已删除的"内容
                 详情"折叠区块内，需二次点开才可见；现挪到三个标签共用的页头，
                 常驻可见，便于排障时直接核对/复制，不再依赖任何折叠状态。
                 复用既有 emailDisposal.detail.features.emailId key（原
@@ -261,6 +315,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                     )}
                   >
                     <button
+                      ref={(el) => { navButtonRefs.current[key] = el; }}
                       data-testid={`disposal-detail-nav-${key}`}
                       type="button"
                       aria-current={activeSection === key ? 'location' : undefined}
@@ -274,6 +329,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
               <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto p-6 space-y-8">
                 <section
                   data-testid="disposal-detail-overview"
+                  data-section-key="overview"
                   ref={(el) => { sectionRefs.current.overview = el; }}
                   className="scroll-mt-4"
                 >
@@ -290,6 +346,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                 </section>
                 <section
                   data-testid="disposal-detail-analysis"
+                  data-section-key="analysis"
                   ref={(el) => { sectionRefs.current.analysis = el; }}
                   className="scroll-mt-4"
                 >
@@ -298,6 +355,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                 </section>
                 <section
                   data-testid="disposal-detail-rawlogs"
+                  data-section-key="rawlogs"
                   ref={(el) => { sectionRefs.current.rawlogs = el; }}
                   className="scroll-mt-4"
                 >
