@@ -291,23 +291,24 @@ describe('ThreatSummaryCard single-recipient dispose buttons (Task 11b)', () => 
     }];
   }
 
-  // RA-5 (demo parity): 待审核(pending_review) now renders all FOUR dispose
-  // buttons -- 投递·隔离·阻断·丢弃 -- matching the demo's single-recipient
-  // drawer, not just deliver/discard.
-  it('an operable (pending_review, object_id) single recipient renders deliver/quarantine/block/discard buttons, not recall/notify', () => {
+  // RA-5 (demo parity): 待审核(pending_review) renders THREE dispose
+  // buttons -- 投递·隔离·丢弃 -- matching the demo's single-recipient
+  // drawer, not just deliver/discard. 阻断 was removed per product
+  // decision -- a pending-review recipient no longer offers a 阻断 button.
+  it('an operable (pending_review, object_id) single recipient renders deliver/quarantine/discard buttons, not block/recall/notify', () => {
     renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
     expect(screen.getByTestId('email-disposal-overview-recipient-action-deliver')).toBeInTheDocument();
     expect(screen.getByTestId('email-disposal-overview-recipient-action-quarantine')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-recipient-action-block')).toBeInTheDocument();
     expect(screen.getByTestId('email-disposal-overview-recipient-action-discard')).toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-overview-recipient-action-block')).not.toBeInTheDocument();
     expect(screen.queryByTestId('email-disposal-overview-recipient-action-recall')).not.toBeInTheDocument();
     expect(screen.queryByTestId('email-disposal-overview-recipient-action-notify')).not.toBeInTheDocument();
   });
 
-  // RA-5: buttons render in demo order 投递·隔离·阻断·丢弃.
-  it('renders 投递·隔离·阻断·丢弃 in that DOM order (RA-5)', () => {
+  // RA-5: buttons render in demo order 投递·隔离·丢弃.
+  it('renders 投递·隔离·丢弃 in that DOM order (RA-5)', () => {
     renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
-    const order = ['deliver', 'quarantine', 'block', 'discard'].map(
+    const order = ['deliver', 'quarantine', 'discard'].map(
       (a) => screen.getByTestId(`email-disposal-overview-recipient-action-${a}`),
     );
     for (let i = 0; i < order.length - 1; i += 1) {
@@ -315,7 +316,7 @@ describe('ThreatSummaryCard single-recipient dispose buttons (Task 11b)', () => 
     }
   });
 
-  // RA-5: 隔离/阻断 fire IMMEDIATELY on click, no confirm/reclassify dialog
+  // RA-5: 隔离 fires IMMEDIATELY on click, no confirm/reclassify dialog
   // (unlike deliver/recall which open ReclassifyDialog, and discard which
   // opens an AlertDialog).
   it('clicking 隔离 dispatches disposeObjectAction(quarantine) immediately with no dialog', async () => {
@@ -330,19 +331,6 @@ describe('ThreatSummaryCard single-recipient dispose buttons (Task 11b)', () => 
     ));
     expect(screen.queryByTestId('disposal-reclassify-dialog')).not.toBeInTheDocument();
     expect(screen.queryByText('确认丢弃邮件')).not.toBeInTheDocument();
-  });
-
-  it('clicking 阻断 dispatches disposeObjectAction(block) immediately with no dialog', async () => {
-    const user = userEvent.setup();
-    mockDisposeObjectAction.mockResolvedValue({ results: [{ mail_log_id: 1, object_id: 'obj-1', status: 'succeeded' }] });
-    renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
-
-    await user.click(screen.getByTestId('email-disposal-overview-recipient-action-block'));
-
-    await waitFor(() => expect(mockDisposeObjectAction).toHaveBeenCalledWith(
-      1, 'obj-1', 'block', expect.anything(),
-    ));
-    expect(screen.queryByTestId('disposal-reclassify-dialog')).not.toBeInTheDocument();
   });
 
   // REAL-mode degrade: the real backend's bulk-dispose handler rejects any
