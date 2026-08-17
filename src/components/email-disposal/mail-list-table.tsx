@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown, Inbox, Send, ArrowLeftRight, ArrowRight } from 'lucide-react';
+import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, XCircle, ArrowUpDown, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
@@ -269,15 +269,15 @@ export function MailListTable({
   const cellDensityClass = isCompact ? 'py-1.5' : '';
 
   const directionOptions = ['incoming', 'outgoing', 'internal'];
-  // 阶段一列宽优化：收发类型列由 Badge 文案改为图标+Tooltip，压缩列宽；
-  // 图标与颜色不承载额外语义，仅用于快速视觉区分，完整文案仍在 Tooltip 中。
-  // 后续反馈：初版用通用的上传/下载箭头（ArrowDownToLine/ArrowUpFromLine），
-  // 在邮件场景下容易被误读成"下载"操作按钮，语义不形象；改用邮件场景专属的
-  // 收件箱/发送图标（Inbox/Send），"内部"仍用双向箭头表示收发双向流转。
-  const directionIconConfig: Record<string, { icon: typeof Inbox; className: string }> = {
-    incoming: { icon: Inbox, className: 'text-blue-600 dark:text-blue-400' },
-    outgoing: { icon: Send, className: 'text-emerald-600 dark:text-emerald-400' },
-    internal: { icon: ArrowLeftRight, className: 'text-muted-foreground' },
+  // 阶段一曾把收发类型的 Badge 文案改成图标+Tooltip 以压缩列宽，
+  // 后又改成图标语义仍不直观；两轮反馈后确认：这一列是高频扫读列，
+  // 文字的零歧义、零 hover 成本比省下的几像素列宽更重要——改回彩色
+  // 文字 Badge，复用 filters.incoming/outgoing/internal 已有的中文
+  // 文案（接收/外发/域内，均 2 字），配色沿用状态列 outline Badge 的写法。
+  const directionBadgeConfig: Record<string, string> = {
+    incoming: 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400',
+    outgoing: 'border-emerald-500 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400',
+    internal: 'border-border text-muted-foreground',
   };
   const emailTypeOptions = ['normal', 'subscription', 'advertising', 'spam', 'harmful', 'phishing', 'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive'];
   // 与 quick-filters.tsx 的 statuses 数组、DisplayStatus 类型保持同一套位置
@@ -743,19 +743,11 @@ export function MailListTable({
   <TableCell className={cn('text-xs', cellDensityClass)}>
     {(() => {
       const directionLabel = localizeEnum(`filters.${item.direction}` as const, item.direction);
-      const config = directionIconConfig[item.direction];
-      const DirectionIcon = config?.icon ?? ArrowLeftRight;
+      const badgeClassName = directionBadgeConfig[item.direction] ?? 'border-border text-muted-foreground';
       return (
-        <Tooltip>
-          <TooltipTrigger render={<span className="inline-flex" />}>
-            <DirectionIcon
-              className={cn('size-4', config?.className ?? 'text-muted-foreground')}
-              aria-hidden="true"
-            />
-            <span className="sr-only">{directionLabel}</span>
-          </TooltipTrigger>
-          <TooltipContent>{directionLabel}</TooltipContent>
-        </Tooltip>
+        <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal', badgeClassName)}>
+          {directionLabel}
+        </Badge>
       );
     })()}
   </TableCell>
