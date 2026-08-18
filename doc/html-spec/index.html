@@ -99,6 +99,31 @@
     .l1-stats .done-count { color: oklch(0.45 0.12 150); font-weight: 600; }
     .l1-body { padding: 1.25rem; }
 
+    /* -- 全量目录 / 版本增量双栏 -- */
+    .spec-columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.85fr);
+      gap: 1.5rem;
+      align-items: start;
+    }
+    .spec-column { min-width: 0; }
+    .spec-column-title {
+      color: var(--primary);
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+      padding: 0 0.25rem;
+    }
+    .incremental-column {
+      position: sticky;
+      top: 1rem;
+    }
+    .incremental-column .l1-section { margin-bottom: 0; }
+    @media (max-width: 900px) {
+      .spec-columns { grid-template-columns: 1fr; }
+      .incremental-column { position: static; }
+    }
+
     /* -- 二级功能区 (可折叠) -- */
     details.l2-group {
       margin-bottom: 1rem;
@@ -187,6 +212,10 @@
     <div class="overview-item"><div class="num">85%</div><div class="label">完成率</div></div>
   </div>
 
+  <div class="spec-columns">
+    <section class="spec-column full-catalog" aria-labelledby="full-catalog-title">
+      <h2 id="full-catalog-title" class="spec-column-title">全量功能模块需求文档</h2>
+
   <!-- ==================== 一级：系统状态（首页） ==================== -->
   <details class="l1-section" open>
     <summary>
@@ -221,102 +250,6 @@
     </div>
   </details>
 
-  <!-- ==================== 一级：全局外壳 / 导航 ==================== -->
-  <details class="l1-section" open>
-    <summary>
-      <div class="l1-header">
-        <span class="chevron"></span>
-        <span class="l1-icon">🧭</span>
-        <h2>全局外壳 / 导航</h2>
-        <span class="l1-stats"><span class="done-count">2</span> 已完成 / 2 总计</span>
-      </div>
-    </summary>
-    <div class="l1-body">
-      <div class="grid">
-        <details class="spec-card status-done">
-          <summary>
-            <div class="card-summary">
-              <span class="chevron"></span>
-              <a class="card-title" href="component-sidebar-nav/index.html">侧边菜单栏 SidebarNav（后台外壳全局导航）</a>
-              <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v1</span>
-              <span class="card-generated-at">2026-07-25</span>
-            </div>
-          </summary>
-          <div class="card-detail">
-            <p>组件级: components/sidebar-nav.tsx（在 app-shell.tsx 中挂载，/login 等全屏路由不渲染）</p>
-            <p>可见性数据源: lib/product-profiles.ts（FEATURE_MAP / resolveAccess）+ contexts/product-profile-context.tsx</p>
-            <p>子文件: <a href="component-sidebar-nav/layer-1-expand-collapse.html">展开收起</a> / <a href="component-sidebar-nav/layer-2-nested-subgroup.html">三级嵌套</a> / <a href="component-sidebar-nav/layer-3-active-state.html">激活高亮</a> / <a href="component-sidebar-nav/layer-4-profile-visibility.html">形态×视角可见性矩阵</a> / <a href="component-sidebar-nav/layer-5-theme-color.html">主题色</a></p>
-            <p>预览可交互（本地复刻 navItems + FEATURE_MAP 逻辑）· 4 组件 · 6 交互层级 · 5×2 形态×视角实测 · zh/en/th 国际化 · 5 项差异 / 5 项需确认</p>
-          </div>
-        </details>
-        <details class="spec-card status-done">
-          <summary>
-            <div class="card-summary">
-              <span class="chevron"></span>
-              <a class="card-title" href="/html-spec/version/GT-12649.html" target="_blank" rel="noopener noreferrer">GT-12649 · SidebarNav 移除 VersionFooter（增量变更规格）</a>
-              <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v1</span>
-              <span class="card-generated-at">2026-07-30</span>
-            </div>
-          </summary>
-          <div class="card-detail">
-            <p>路由: /zh/dashboard 及所有挂载全局侧边栏的后台路由</p>
-            <p>组件: src/components/layout/sidebar-nav.tsx（移除 &lt;VersionFooter /&gt; 及其 import）</p>
-            <p>变更类型: 功能移除（增量规格）· commit c481bf6</p>
-            <p>内含: 变更前/后对比 · QC 2026-07-28 复查记录 · S-1 历史态（QC 截图占位）/ S-2 目标态（截图占位）· D-1~D-2 / Q-1~Q-2</p>
-            <p>关联: GT-11459（VersionFooter 组件保留，待产品确认合规入口）</p>
-          </div>
-        </details>
-        <details class="spec-card status-done">
-          <summary>
-            <div class="card-summary">
-              <span class="chevron"></span>
-              <a class="card-title" href="/html-spec/version/GT-13017.html" target="_blank" rel="noopener noreferrer">GT-13017【0818】处理问题总工单</a>
-              <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v1</span>
-              <span class="card-generated-at">2026-08-18</span>
-            </div>
-          </summary>
-          <div class="card-detail">
-            <p>需求总工单：阶段3内容层 / 内容规则</p>
-            <p>需求文档：<a href="/html-spec/version/GT-13017.html#gt-12888" target="_blank" rel="noopener noreferrer">GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</a></p>
-            <p>变更：规则列表新增优先级列，位置在状态列之前；复用现有国际化文案。</p>
-          </div>
-        </details>
-      </div>
-    </div>
-  </details>
-
-  <!-- ==================== 一级：GT-13017【0818】处理问题总工单 ==================== -->
-  <details class="l1-section" open>
-    <summary>
-      <div class="l1-header">
-        <span class="chevron"></span>
-        <span class="l1-icon">🧾</span>
-        <h2>GT-13017【0818】处理问题总工单</h2>
-        <span class="l1-stats"><span class="done-count">1</span> 个需求文档</span>
-      </div>
-    </summary>
-    <div class="l1-body">
-      <div class="grid">
-        <details class="spec-card status-done">
-          <summary>
-            <div class="card-summary">
-              <span class="chevron"></span>
-              <a class="card-title" href="/html-spec/version/GT-13017.html#gt-12888" target="_blank" rel="noopener noreferrer">GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</a>
-              <span class="badge badge-done">✅</span>
-              <span class="card-generated-at">2026-08-18</span>
-            </div>
-          </summary>
-          <div class="card-detail">
-            <p>归属工单：GT-13017【0818】处理问题总工单</p>
-            <p>内容规则列表新增优先级列，位置在状态列之前；列标题使用 contentRules.priority 国际化键。</p>
-          </div>
-        </details>
-      </div>
-    </div>
-  </details>
 
   <!-- ==================== 一级：过滤规则 ==================== -->
   <details class="l1-section" open>
@@ -592,7 +525,7 @@
             <p>路由: /filter-rules/pipeline（阶段3内容层抽屉，priority 3000）</p>
             <p>spec: 附件安全检测模块 - 需求文档.md / 链接与附件安全 功能需求文档.md</p>
             <p>组件: strategy-pipeline-page.tsx + content-strategy-page.tsx + attachment-security-module.tsx</p>
-            <p>子文件: <a href="filter-rules-pipeline-attachment-security/layer-1-antivirus-tab.html">反病毒引擎</a> / <a href="filter-rules-pipeline-attachment-security/layer-2-image-detect-tab.html">图片识别</a> / <a href="filter-rules-pipeline-attachment-security/layer-3-encrypted-tab.html">加密附件</a> / <a href="filter-rules-pipeline-attachment-security/layer-4-disabled-tenant-states.html">禁用/租户态</a></p>
+            <p>子文件: <a href="filter-rules-pipeline-attachment-security/layer-1-antivirus-tab.html">反病毒引擎</a> / <a href="filter-rules-pipeline-attachment-security/layer-2-image-detect-tab.html">图片识���</a> / <a href="filter-rules-pipeline-attachment-security/layer-3-encrypted-tab.html">加密附件</a> / <a href="filter-rules-pipeline-attachment-security/layer-4-disabled-tenant-states.html">禁用/租户态</a></p>
             <p>预览可交互 · 6 交互层级 · 22 截图 · 14 项差异 / 8 项需确认</p>
           </div>
         </details>
@@ -819,7 +752,7 @@
             <p>路由: /statistics/ops-top-trend（六维度 TOP 富列表 + 行展开下钻）</p>
             <p>spec: (多租户视角)运营 TOP 与趋势 PRD.md + 连接成功和连接失败的定义.md</p>
             <p>组件: ops-top-trend-page.tsx（1138 行）</p>
-            <p>子文件: <a href="statistics-ops-top-trend/layer-1-dimensions.html">六维度列集</a> / <a href="statistics-ops-top-trend/layer-2-row-drilldown.html">行展开下钻</a> / <a href="statistics-ops-top-trend/layer-3-top-count.html">TOP 数量</a> / <a href="statistics-ops-top-trend/layer-4-narrow-screen.html">小屏</a></p>
+            <p>子文件: <a href="statistics-ops-top-trend/layer-1-dimensions.html">六维度列集</a> / <a href="statistics-ops-top-trend/layer-2-row-drilldown.html">行展开下���</a> / <a href="statistics-ops-top-trend/layer-3-top-count.html">TOP 数量</a> / <a href="statistics-ops-top-trend/layer-4-narrow-screen.html">小屏</a></p>
             <p>预览可交互 · 4 交互层级 · 20 截图 · <b>修复 14 条损坏中文</b> · 10 项差异（含连接失败未按子类归因）/ 6 项需确认</p>
           </div>
         </details>
@@ -1290,7 +1223,7 @@
             <p>组件: phishing-detection-agent-v1.tsx（两 Tab：检测总览/检测引擎配置）+ phishing-url-evidence-drawer.tsx + 外套启用开关与关闭二次确认</p>
             <p>子文件: <a href="component-phishing-detection-agent/layer-1-detail-drawer.html">检测详情抽屉(680px)</a> / <a href="component-phishing-detection-agent/layer-2-rule-drawer.html">准入规则抽屉+收件人树</a> / <a href="component-phishing-detection-agent/layer-3-mode-drawer.html">运行模式+分级策略表</a> / <a href="component-phishing-detection-agent/layer-4-band-edit.html">区间编辑弹窗(80vw)</a> / <a href="component-phishing-detection-agent/layer-5-url-evidence.html">URL透视证据(5Tab)</a> / <a href="component-phishing-detection-agent/layer-6-action-dialogs.html">处置确认对话框</a> / <a href="component-phishing-detection-agent/layer-7-disable-confirm.html">关闭确认</a></p>
             <p>预览可交互 · 7 交互层级子文件 · 6 项差异（主组件未国际化 · enabled 兼表仅审计只读 · traceback 无UI · 异步模式入口缺失 · mark 动作等）/ 7 项需确认（召回状态机 · 误报样本回流 · 准入规则映射统一规则系统 · 配置快照落库等）</p>
-            <p>增量需求文档：<a href="/html-spec/version/GT-12841.html" target="_blank" rel="noopener noreferrer">GT-12841 · GT-12859 检测配置模块前端优化</a>（运行模式说明、风险等级徽章、置信度数字显示、准入规则与截图参考）/ <a href="/html-spec/version/GT-12865.html" target="_blank" rel="noopener noreferrer">GT-12865 · GT-12514 缺少智能体总开关及关闭生命周期交互</a>（详情页顶部新增总开关、关闭二次确认+禁用横幅、重新开启前的准入规则门禁与「前往配置」直达新增规则联动）</p>
+            <p>增量需求文档：<a href="/html-spec/version/GT-12841.html" target="_blank" rel="noopener noreferrer">GT-12841 · GT-12859 检测配置模块前端优化</a>（运行模式说明、风���等级徽章、置信度数字显示、准入规则与截图参考）/ <a href="/html-spec/version/GT-12865.html" target="_blank" rel="noopener noreferrer">GT-12865 · GT-12514 缺少智能体总开关及关闭生命周期交互</a>（详情页顶部新增总开关、关闭二次确认+禁用横幅、重新开启前的准入规则门禁与「前往配置」直达新增规则联动）</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1498,6 +1431,40 @@
 
     </div>
   </details>
+    </section>
+
+    <aside class="spec-column incremental-column" aria-labelledby="incremental-title">
+      <h2 id="incremental-title" class="spec-column-title">版本增量需求文档</h2>
+      <details class="l1-section" open>
+        <summary>
+          <div class="l1-header">
+            <span class="chevron"></span>
+            <span class="l1-icon">🧾</span>
+            <h2>GT-13017【0818】处理问题总工单</h2>
+            <span class="l1-stats"><span class="done-count">1</span> 个需求文档</span>
+          </div>
+        </summary>
+        <div class="l1-body">
+          <div class="grid">
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-12888" target="_blank" rel="noopener noreferrer">GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>内容规则列表新增优先级列，位置在状态列之前；列标题使用 contentRules.priority 国际化键。</p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </details>
+    </aside>
+  </div>
 
 </body>
 </html>
