@@ -11,7 +11,6 @@ import {
   Upload,
   TestTube,
   Ban,
-  FlaskConical,
   HelpCircle,
   AlertCircle,
   AlertTriangle,
@@ -1244,15 +1243,6 @@ export function IPFrequencyPage({
                   {t('ipFrequency.description')}
                 </p>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setTestDialogOpen(true)}
-              >
-                <FlaskConical className="h-4 w-4 mr-2" />
-                {t('ipFrequency.test')}
-              </Button>
             </div>
           </SheetHeader>
 
