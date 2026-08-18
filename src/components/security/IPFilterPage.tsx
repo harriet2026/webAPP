@@ -628,7 +628,6 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                   {t(listTypeTab === 'blacklist' ? 'ipFilter.blacklistRuleDesc' : 'ipFilter.whitelistRuleDesc')}
                 </p>
               </div>
-            </div>
           </SheetHeader>
 
           <div className="flex flex-1 overflow-hidden">
