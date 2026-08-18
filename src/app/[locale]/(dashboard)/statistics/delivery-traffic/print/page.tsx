@@ -14,6 +14,9 @@ const COLUMNS: Record<Direction, string[]> = {
 };
 
 const TABLE_LABEL_KEYS: Record<string, string> = {
+  // GT-11990：屏幕表格把「延迟投递」改称「检测中」并删掉了 table.deferred，
+  // 打印页是同一份数据的另一种呈现，必须跟着映射，否则表头渲染出原始 key。
+  deferred: 'detecting',
   success_rate: 'successRate',
   user_not_exist: 'userNotExist',
   mailbox_full: 'mailboxFull',

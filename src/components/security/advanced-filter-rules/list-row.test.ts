@@ -3,8 +3,8 @@ import { getRulePrimaryAction, getRuleScope, parseRuleMetadata } from './list-ro
 
 describe('list-row metadata readers', () => {
   it('parses well-formed JSON metadata', () => {
-    expect(parseRuleMetadata('{"primary_action":"block","scope":["incoming"]}')).toEqual({
-      primary_action: 'block',
+    expect(parseRuleMetadata('{"primary_action":"discard","scope":["incoming"]}')).toEqual({
+      primary_action: 'discard',
       scope: ['incoming'],
     });
   });

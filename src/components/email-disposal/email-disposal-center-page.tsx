@@ -3,13 +3,14 @@
 import {
   useState,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Search, X, Inbox as InboxIcon } from "lucide-react";
+import { Search, X, Inbox as InboxIcon, Info } from "lucide-react";
 import { useScopedApiRequest } from "@/lib/api/client";
 import { useTenant } from "@/hooks/use-tenant";
 import { useProductForm } from "@/contexts/product-form-context";
@@ -18,6 +19,7 @@ import { resolveSecurityScope } from "@/lib/security-scope";
 import { TenantSelector } from "@/components/layout/tenant-selector";
 import {
   getDisposalList,
+  getDisposalRuleOptions,
   bulkDispose,
   findSimilar,
   recallMails,
@@ -35,7 +37,10 @@ import {
   getApplicableAiConditions,
   getDisposalFilterSignature,
   hasSavableDisposalFilters,
+  resolvePositiveEnumFilterValues,
 } from "./lib/filter-state";
+import { resolveDisplayStatusHighlightKeys } from "@/lib/display-status";
+import { formatRecipientDetail } from "./lib/csv-export";
 import { SearchBar } from "./search-bar";
 import { SaveTemplateDialog } from "./save-template-dialog";
 import { QuickFilters } from "./quick-filters";
@@ -73,6 +78,8 @@ import type {
 } from "@/types/email-disposal";
 import type { AdvancedFilter } from "@/types/log";
 import { pendingViewFilter } from "./lib/pending-filter";
+import { mailTypeLabelKey } from "./lib/detail-helpers";
+import { deliveryStatusLabel } from "@/components/logs/status-labels";
 import { toast } from "sonner";
 
 function getDefaultQuickFilter(): DisposalQuickFilter {
@@ -90,11 +97,14 @@ export function EmailDisposalCenterPage({
   mode = "disposal",
 }: { mode?: "disposal" | "investigation" } = {}) {
   const t = useTranslations("emailDisposal");
+  // GT-12763：导出 CSV 时状态翻译需要 logs 命名空间的 key，
+  // emailDisposal 命名空间下没有 deliveryStatusValue.*。
+  const tLogs = useTranslations("logs");
   const { effectiveTenantId } = useTenant();
   const { merge } = useFilterMerger();
   const { templates, saveTemplate, deleteTemplate, renameTemplate } = useSearchTemplates();
   const queryClient = useQueryClient();
-  const { capabilities, viewer } = useProductForm();
+  const { capabilities, viewer, switcherEnabled } = useProductForm();
   const { features, isSystemAdmin, isTenantAdmin, user, demoAuthBypassEnabled } = useAuth();
   const { selectedTenantId } = useTenant();
   const { effectiveViewer } = resolveSecurityScope({
@@ -151,9 +161,9 @@ export function EmailDisposalCenterPage({
   // GT-12423: html_spec（index「按 demo（默认展开）落地」）要求高级筛选默认
   // 展开；「更多筛选条件」(AdvancedFilters) 仍默认折叠（PRD 口径）。
   const [quickFilterCollapsed, setQuickFilterCollapsed] = useState(false);
-  // GT-12608：系统状态「待处置邮件 → 去处置」深链。?view=pending 时首载即
-  // 应用与 KPI 卡同一口径的待处置筛选（action ∈ quarantine|sideline），
-  // 落地列表与卡片数字一致；无参数时维持 V2 默认全部邮件。
+  // GT-12608/GT-12818：系统状态「待处置邮件 → 去处置」深链。?view=pending 时首载
+  // 即应用与 KPI 卡同一口径的待处置筛选（display_status ∈ 隔离中 quarantine_pending
+  // | 待审核 audit_pending），落地列表与卡片数字一致；无参数时维持 V2 默认全部邮件。
   const initialView = useSearchParams().get('view');
   const [advancedFilter, setAdvancedFilter] = useState<AdvancedFilter>(
     () => pendingViewFilter(initialView) ?? DEFAULT_ADVANCED,
@@ -163,8 +173,12 @@ export function EmailDisposalCenterPage({
   // copies that draft into these applied states and changes the list query.
   const [appliedQuickFilter, setAppliedQuickFilter] =
     useState<DisposalQuickFilter>(getDefaultQuickFilter);
+  // GT-12608/GT-12818：applied 状态也须从 ?view=pending 深链初始化，否则列表查询
+  // 仍用空的 DEFAULT_ADVANCED（= 全部邮件），只有 draft 筛选 UI 被填充、列表却没
+  // 真正过滤，导致「默认展示待审核+隔离中」失效。其他入口 pendingViewFilter 返回
+  // null，回落 DEFAULT_ADVANCED，行为不变。
   const [appliedAdvancedFilter, setAppliedAdvancedFilter] =
-    useState<AdvancedFilter>(DEFAULT_ADVANCED);
+    useState<AdvancedFilter>(() => pendingViewFilter(initialView) ?? DEFAULT_ADVANCED);
   const [appliedAiConditions, setAppliedAiConditions] = useState<AICondition[]>(
     [],
   );
@@ -187,6 +201,13 @@ export function EmailDisposalCenterPage({
   // 筛选条件变更时通过 resetSelection() 清空，避免导出与当前筛选不相关的历史选中。
   const [selectedItemMap, setSelectedItemMap] = useState<Map<number, DisposalMailItem>>(new Map());
   const selectedIds = useMemo(() => new Set(selectedItemMap.keys()), [selectedItemMap]);
+  const mixedSelectionCount = useMemo(
+    () =>
+      Array.from(selectedItemMap.values()).filter(
+        (item) => item.action === "mixed",
+      ).length,
+    [selectedItemMap],
+  );
   const [exportLoading, setExportLoading] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -207,6 +228,17 @@ export function EmailDisposalCenterPage({
     statuses: [],
   });
   const [timeSort, setTimeSort] = useState<TimeSortOrder>("none");
+  const [disposalRuleSearch, setDisposalRuleSearch] = useState("");
+  const [debouncedDisposalRuleSearch, setDebouncedDisposalRuleSearch] =
+    useState("");
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setDebouncedDisposalRuleSearch(disposalRuleSearch),
+      250,
+    );
+    return () => window.clearTimeout(timer);
+  }, [disposalRuleSearch]);
 
   const activeFilterCount = useMemo(
     () =>
@@ -345,14 +377,47 @@ export function EmailDisposalCenterPage({
     queryFn: () => getDisposalList(searchParams, apiRequest),
   });
 
-  const disposalRuleOptions = useMemo(() => {
-    const unique = new Map<string, string>();
-    for (const item of data?.items ?? []) {
-      const ruleId = item.disposalBasis?.rule_id;
-      if (ruleId) unique.set(ruleId, item.disposalBasis?.rule_name || ruleId);
-    }
-    return Array.from(unique, ([id, name]) => ({ id, name })).slice(0, 12);
-  }, [data?.items]);
+  const { data: disposalRuleOptions = [] } = useQuery({
+    queryKey: [
+      "email-disposal-rule-options",
+      debouncedDisposalRuleSearch,
+      disposalScopeTenantId,
+    ],
+    queryFn: () => getDisposalRuleOptions(debouncedDisposalRuleSearch, apiRequest),
+    staleTime: 60 * 1000,
+  });
+
+  const activeExecutionActions = useMemo(
+    () => resolvePositiveEnumFilterValues(mergedFilter, "action"),
+    [mergedFilter],
+  );
+  const activeDisplayStatuses = useMemo(
+    () =>
+      resolveDisplayStatusHighlightKeys(
+        new Set([
+          ...(headerFilters.statuses.length > 0
+            ? headerFilters.statuses
+            : (appliedQuickFilter.emailStatuses ??
+              (appliedQuickFilter.emailStatus
+                ? [appliedQuickFilter.emailStatus]
+                : []))),
+          ...resolvePositiveEnumFilterValues(
+            mergedFilter,
+            "display_status",
+          ),
+        ]),
+      ),
+    [
+      appliedQuickFilter.emailStatus,
+      appliedQuickFilter.emailStatuses,
+      headerFilters.statuses,
+      mergedFilter,
+    ],
+  );
+  const mixedMailCountInResults = useMemo(() => {
+    if (activeExecutionActions.length === 0) return 0;
+    return (data?.items ?? []).filter((item) => item.action === "mixed").length;
+  }, [activeExecutionActions, data?.items]);
 
   // AI 解析结果三级回填（design spec §7）：quick 控件覆盖式合并、advanced 构建
   // 器组追加（受 5 组上限约束）、其余条件落回 aiConditions 兜底 chips。summary
@@ -578,20 +643,36 @@ export function EmailDisposalCenterPage({
       [
         "ID",
         t("table.time"),
+        t("table.direction"),
         t("table.sender"),
         t("table.recipient"),
         t("table.subject"),
+        t("table.senderIp"),
+        t("table.disposalBasis"),
         t("table.mailType"),
+        t("table.action"),
         t("table.status"),
+        t("batch.csvRecipientDetail"),
       ],
       ...items.map((item) => [
         item.id,
         item.timestamp,
+        item.direction ?? "",
         item.sender,
         item.recipientList?.join("; ") ?? item.recipient,
         item.subject,
-        item.emailType ?? "",
-        item.displayStatus,
+        item.clientIp ?? "",
+        item.disposalBasis?.policy_key ?? item.disposalBasis?.action ?? "",
+        // GT-12763：邮件类型翻译为当前语言
+        item.emailType ? t(mailTypeLabelKey(item.emailType)) : "",
+        item.action ?? "",
+        // GT-12763：状态翻译为当前语言
+        (item.displayStatuses ?? []).length === 1
+          ? deliveryStatusLabel(item.displayStatuses[0].status, (k: string) => tLogs(k))
+          : (item.displayStatuses ?? [])
+              .map((entry) => `${deliveryStatusLabel(entry.status, (k: string) => tLogs(k))}×${entry.count}`)
+              .join("; "),
+        formatRecipientDetail(item, (key) => t(key as never)),
       ]),
     ];
     const blob = new Blob(
@@ -604,7 +685,7 @@ export function EmailDisposalCenterPage({
     anchor.download = `email-disposal-${new Date().toISOString().slice(0, 10)}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
-  }, [t]);
+  }, [t, tLogs]);
 
   // 导出全量筛选结果（无选中时）
   const EXPORT_MAX = 5000;
@@ -704,7 +785,17 @@ export function EmailDisposalCenterPage({
       const successCount = result.succeeded.length;
       const failCount = result.failed.length;
       const naCount = result.not_applicable.length;
-      if (failCount > 0 || naCount > 0) {
+      const partialCount = result.partial?.length ?? 0;
+      if (partialCount > 0) {
+        toast.warning(
+          t("batch.partialRecipientResult", {
+            succeeded: successCount,
+            partial: partialCount,
+            failed: failCount,
+            notApplicable: naCount,
+          }),
+        );
+      } else if (failCount > 0 || naCount > 0) {
         toast.warning(
           t("batch.partialResult", {
             succeeded: successCount,
@@ -750,7 +841,20 @@ export function EmailDisposalCenterPage({
           "not_applicable" in result && Array.isArray(result.not_applicable)
             ? result.not_applicable.length
             : 0;
-        if (failCount > 0 || naCount > 0) {
+        const partialCount =
+          "partial" in result && Array.isArray(result.partial)
+            ? result.partial.length
+            : 0;
+        if (partialCount > 0) {
+          toast.warning(
+            t("batch.partialRecipientResult", {
+              succeeded: successCount,
+              partial: partialCount,
+              failed: failCount,
+              notApplicable: naCount,
+            }),
+          );
+        } else if (failCount > 0 || naCount > 0) {
           toast.warning(
             t("batch.partialResult", {
               succeeded: successCount,
@@ -843,6 +947,7 @@ export function EmailDisposalCenterPage({
               value={quickFilter}
               onChange={setQuickFilter}
               disposalRuleOptions={disposalRuleOptions}
+              onDisposalRuleSearchChange={setDisposalRuleSearch}
               tenantSelector={
                 showTenant ? (
                   <TenantSelector
@@ -889,6 +994,19 @@ export function EmailDisposalCenterPage({
       />
 
       <PageSurface className="space-y-4">
+        {!similarMode && mixedMailCountInResults > 0 && (
+          <div
+            data-testid="disposal-mixed-mail-hint"
+            className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+          >
+            <Info className="h-4 w-4 shrink-0" />
+            <span>
+              {t("recipientStatusBar.mixedMailHint", {
+                count: mixedMailCountInResults,
+              })}
+            </span>
+          </div>
+        )}
         {similarMode && (
           <div
             data-testid="disposal-similar-mode-banner"
@@ -918,6 +1036,19 @@ export function EmailDisposalCenterPage({
           items={similarMode ? similarItems : (data?.items ?? [])}
           total={similarMode ? similarTotal : (data?.total ?? 0)}
           loading={similarMode ? similarLoading : isLoading}
+          activeExecutionActions={
+            similarMode ? undefined : activeExecutionActions
+          }
+          activeDisplayStatuses={
+            similarMode ? undefined : activeDisplayStatuses
+          }
+          activeDisposalPolicyKeys={
+            similarMode ? undefined : appliedQuickFilter.disposalPolicyKeys
+          }
+          activeDisposalRuleIds={
+            similarMode ? undefined : appliedQuickFilter.disposalRuleIds
+          }
+          requestFn={apiRequest}
           selectedIds={selectedIds}
           onSelectionChange={(newPageIds) => {
             // 跨页追加/移除：以当前页 items 的 id 集合作为"当前页范围"
@@ -976,6 +1107,7 @@ export function EmailDisposalCenterPage({
         aiEnabled={aiEnabled}
         aiInterpretEnabled={aiInterpretEnabled}
         readOnly={detailReadOnly}
+        showSecurityAnalysis={switcherEnabled}
         onFindSimilar={async (id) => {
           void runFindSimilar([id]);
         }}
@@ -988,6 +1120,7 @@ export function EmailDisposalCenterPage({
         action={pendingAction ?? undefined}
         onConfirm={(finalType) => void handleReclassifyConfirm(finalType)}
         busy={reclassifyBusy}
+        mixedSelectionCount={mixedSelectionCount}
       />
 
       <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>

@@ -140,6 +140,9 @@ export interface FieldDef {
   available?: boolean;
   active_resource_count?: number;
   pages?: string[];
+  // enum_values: 该字段是枚举字段时的可选值集合（value=原始值，label=中文名）。
+  // 通用条件编辑器据此把值输入渲染成下拉/多选，而不是纯文本框（GT-12914）。
+  enum_values?: { value: string; label: string }[];
 }
 
 export interface SidelineCheckMeta {

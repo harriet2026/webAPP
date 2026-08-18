@@ -1333,6 +1333,14 @@
     "invalidMember": "Недопустимый формат участника: {value}",
     "duplicateName": "Имена групп должны быть уникальными для всех типов групп",
     "noMembers": "Требуется хотя бы один участник",
+    "contentScopes": "Области совпадения",
+    "noScopes": "Выберите хотя бы одну область совпадения",
+    "contentScopeSubject": "Тема",
+    "contentScopeTextBody": "Текстовое тело",
+    "contentScopeHtmlBody": "HTML тело",
+    "contentScopeHeader": "Заголовок",
+    "contentScopeAttachmentNames": "Имена вложений",
+    "contentScopeUrls": "URL-адреса",
     "warningOnTagPage": "Это правило управляется страницей Управление группами. Изменение stage или условия может сделать его непригодным для разбора на странице Управление группами. Если это не обязательно, отредактируйте через 'Безопасность → Управление группами'.",
     "goToGroupManagement": "Перейти к Управление группами",
     "featureFieldDisallowed": "Эти поля недоступны в группе функций: {fields}",
@@ -1355,7 +1363,9 @@
     "importFailureValue": "Значение",
     "importFailureReason": "Причина",
     "platformIpGroupTitle": "Платформенные группы IP",
-    "platformScopeHint": "Платформенные группы IP действуют для всех арендаторов и используются в стратегии IP (выражения чёрного/белого списка IP)."
+    "platformScopeHint": "Платформенные группы IP действуют для всех арендаторов и используются в стратегии IP (выражения чёрного/белого списка IP).",
+    "contentMemberListPerLine": "По одному ключевому слову в строке",
+    "newGroupOfType": "Создать {typeLabel}"
   },
   "groupPolicy": {
     "eyebrow": "Групповая политика",
@@ -1605,6 +1615,12 @@
       "cacSuspiciousUrls": "Подозрительные URL CAC",
       "cacRepeatCount": "Счетчик повторов CAC",
       "isOutbound": "Исходящее",
+      "oneRecipient": "Один получатель",
+      "originKind": "Тип происхождения письма",
+      "recipient": "Получатель",
+      "recipientCount": "Количество получателей",
+      "recipientDomain": "Домен получателя",
+      "senderDomain": "Домен отправителя",
       "rcpttags": "Теги получателя"
     },
     "operators": {
@@ -3373,7 +3389,7 @@
     "actionReviewDesc": "Поставить в очередь ручной проверки",
     "actionQuarantine": "Карантин",
     "actionQuarantineDesc": "Переместить в карантин на проверку",
-    "actionBlock": "Блокировать",
+    "actionBlock": "Отклонить",
     "actionBlockDesc": "Отклонить и вернуть отправителю",
     "actionDrop": "Отклонить",
     "actionDropDesc": "Удалить без уведомления",
@@ -3431,7 +3447,9 @@
     "attachmentNavSummary": "Антивирус/песочница/проверка типов",
     "contentNavSummary": "Ключевые слова/регулярные выражения/DLP",
     "intentEngineNavSummary": "Порно/азартные игры/Политика/Фишинг/Спам/Подписка",
-    "intentEngineNavSummaryDisabled": "Не включено"
+    "intentEngineNavSummaryDisabled": "Не включено",
+    "actionNextStep": "Следующий шаг",
+    "actionNextStepDesc": "Продолжить выполнение последующих политик"
   },
   "ipFrequency": {
     "title": "Ограничение частоты IP",
@@ -3638,7 +3656,8 @@
     "validUntilBeforeFrom": "Время истечения не может быть раньше времени начала",
     "windowLimitHint": "Когда окно равно -1 (без ограничений), лимит подключений в окне также должен быть -1",
     "suspendDurationInvalid": "Выберите поддерживаемую длительность блокировки",
-    "windowMinutesInvalid": "Неверное значение минут окна"
+    "windowMinutesInvalid": "Неверное значение минут окна",
+    "priorityOutOfRange": "Приоритет должен быть от {min} до {max}"
   },
   "ipFilter": {
     "title": "Чёрный/белый список IP",
@@ -3842,7 +3861,8 @@
     "importListTypeMismatch": "Тип списка не соответствует текущей вкладке",
     "importExpressionUnsupported": "Правила-выражения нельзя импортировать пакетно; создайте их вручную",
     "blacklistActionInvalid": "Это действие недопустимо для чёрного списка",
-    "whitelistActionInvalid": "Это действие недопустимо для белого списка"
+    "whitelistActionInvalid": "Это действие недопустимо для белого списка",
+    "priorityOutOfRange": "Приоритет должен быть от {min} до {max}"
   },
   "inboundAudit": {
     "title": "Аудит входящих",
@@ -4288,25 +4308,29 @@
       "run": "Выполнить тест",
       "finalAction": "Итоговое действие",
       "hits": "Совпадения правил",
-      "noHits": "Нет совпадений с правилами",
+      "noHits": "Проверка пройдена",
       "close": "Закрыть"
     },
     "observing": "Наблюдение",
     "observe": "Наблюдать",
+    "legacyDisabled": "Эта проверка сейчас отключена",
+    "legacyDisabledHint": "Отключённое состояние осталось от предыдущей версии. В новой модели проверки подделки аутентификации нет переключателя «выкл.»: если изменить действие в этой строке, вернуть её в отключённое состояние будет невозможно.",
     "notAuthorized": "Нет доступа к этой странице",
     "action": {
       "accept": "Принять",
       "quarantine": "Карантин",
       "reject": "Отклонить",
       "audit": "Аудит",
-      "discard": "Отбросить"
+      "discard": "Отбросить",
+      "markDelivery": "Следующий шаг"
     },
     "actionTooltip": {
       "accept": "Разрешить: для условия этого правила не выполняется никаких блокирующих действий. Примечание: выбор «Разрешить» равнозначен отключению этого правила — оно не будет участвовать в оценке.",
       "quarantine": "Карантин: переместить совпадающие письма в карантин для проверки администратором перед выпуском или удалением.",
       "reject": "Отклонить: отклонить письмо на этапе SMTP; отправитель получит уведомление о недоставке.",
       "audit": "Аудит: направить письмо в очередь одобрения для ручной проверки администратором перед доставкой.",
-      "discard": "Удалить: тихо удалить письмо без уведомления отправителя и без доставки получателю."
+      "discard": "Удалить: тихо удалить письмо без уведомления отправителя и без доставки получателю.",
+      "markDelivery": "Следующий шаг: письмо не блокируется и продолжает проходить остальные этапы проверки, при желании перед доставкой к нему добавляется метка."
     },
     "formatChecks": {
       "title": "Проверки формата",
@@ -4331,6 +4355,8 @@
       "spf_noneDesc": "Для домена не настроена запись SPF",
       "spf_temperror": "Ошибка запроса (TempError)",
       "spf_temperrorDesc": "Тайм-аут или ошибка DNS-запроса",
+      "spf_permerror": "Ошибка записи SPF",
+      "spf_permerrorDesc": "Запись SPF домена отправителя составлена некорректно (например, цепочка include превышает лимит в 10 DNS-запросов), проверка невыполнима. Это ошибка настройки на их стороне, а не признак подделки.",
       "dkim_fail": "Ошибка проверки",
       "dkim_failDesc": "Проверка подписи DKIM не пройдена",
       "dkim_neutral": "Нейтрально (Neutral)",
@@ -4339,6 +4365,8 @@
       "dkim_partialDesc": "Часть подписей из нескольких прошла проверку",
       "dkim_none": "Нет подписи",
       "dkim_noneDesc": "Письмо не содержит подписи DKIM",
+      "dkim_temperror": "Временный сбой проверки DKIM",
+      "dkim_temperrorDesc": "Тайм-аут DNS или временный сбой при получении открытого ключа DKIM — результат проверки неизвестен. Обычно устраняется при повторе, не является признаком подделки.",
       "dmarc_reject": "p=reject",
       "dmarc_rejectDesc": "Домен отправителя требует отклонять письма, не прошедшие проверку",
       "dmarc_quarantine": "p=quarantine",
@@ -4437,14 +4465,16 @@
       "quarantine": "Карантин",
       "audit": "Аудит",
       "reject": "Отклонить",
-      "discard": "Удалить"
+      "discard": "Удалить",
+      "markDelivery": "Следующий шаг"
     },
     "protocolActionLabel": {
       "accept": "Перейти к следующей проверке",
       "quarantine": "Карантин (в папку \"Спам\")",
       "reject": "Блокировать (5xx)",
       "audit": "Аудит (ожидает одобрения)",
-      "discard": "Удалить (тихое удаление)"
+      "discard": "Удалить (тихое удаление)",
+      "markDelivery": "Следующий шаг (с меткой)"
     },
     "flowSub": {
       "drop": "Удалить",
@@ -4452,7 +4482,8 @@
       "quarantine": "Карантин",
       "check": "Проверка",
       "tag": "Пометить",
-      "pass": "Передать дальше"
+      "pass": "Передать дальше",
+      "review": "Аудит"
     },
     "flowTitle": "Процесс аутентификации почты",
     "flowNode": {
@@ -4492,21 +4523,39 @@
       "quarantine": "Письмо помещается в карантин для проверки администратором",
       "audit": "Письмо доставляется, в журнал аудита записывается запись для последующей проверки",
       "reject": "Отправителю возвращается SMTP-отказ; письмо не попадает в систему",
-      "discard": "Письмо тихо удаляется; отправитель получает подтверждение доставки, но письмо фактически удалено"
+      "discard": "Письмо тихо удаляется; отправитель получает подтверждение доставки, но письмо фактически удалено",
+      "markDelivery": "Не блокировать; письмо продолжает проходить остальные этапы проверки, при желании перед доставкой добавляется метка"
     },
     "protocolActionShort": {
       "accept": "Пропустить",
       "reject": "Отклонить",
       "quarantine": "Карантин",
       "audit": "Пометить",
-      "discard": "Удалить"
+      "discard": "Удалить",
+      "markDelivery": "Следующий шаг"
     },
     "protocolActionDesc": {
       "accept": "Без действий — передать следующей проверке протокола",
       "reject": "Вернуть отправителю SMTP-ответ 5xx",
       "quarantine": "Переместить в карантин для проверки администратором",
       "audit": "Доставить с добавленным заголовком метки",
-      "discard": "Тихо удалить; отправитель получает ответ об успешной доставке"
+      "discard": "Тихо удалить; отправитель получает ответ об успешной доставке",
+      "markDelivery": "Не блокировать; письмо продолжает проходить остальные этапы проверки, при желании перед доставкой добавляется метка"
+    },
+    "tagPanel": {
+      "bodyLabel": "Метка в теле письма",
+      "bodyPlaceholder": "Текст, вставляемый в тело письма",
+      "errorTagRequired": "При включении этого действия нужно включить хотя бы один способ маркировки",
+      "errorTagFieldRequired": "Содержимое включённых способов маркировки не может быть пустым",
+      "headerLabel": "Метка в заголовке",
+      "headerNamePlaceholder": "Имя заголовка, например X-Spoof-Warning",
+      "headerValuePlaceholder": "Значение заголовка",
+      "hint": "Выберите хотя бы один способ маркировки; метки темы, заголовка и тела можно включить одновременно",
+      "subjectLabel": "Метка в теме",
+      "subjectPlaceholder": "Например: [Подозрение на подделку]",
+      "subjectPositionPrefix": "Префикс",
+      "subjectPositionSuffix": "Суффикс",
+      "title": "Способ маркировки"
     }
   },
   "behaviorControl": {
@@ -4980,7 +5029,6 @@
       "mode_none": "Не обнаруживать",
       "mode_deep": "Глубокое обнаружение (расшифровка и сканирование содержимого)",
       "decryptFailAction": "Действие при ошибке расшифровки",
-      "receiveDefault": "Для входящих по умолчанию: продолжить конвейер",
       "advancedOptions": "Расширенные параметры",
       "recursiveDetectDepth": "Рекурсивно сканировать расшифрованное содержимое (глубина: 3)",
       "markSuspicious": "Сохранять отметку подозрительного письма после успешных последующих проверок",
@@ -5369,7 +5417,7 @@
     "triggerCount": "Порог срабатывания",
     "emails": "писем",
     "triggerAction": "Действие при срабатывании",
-    "actionMarkDelivery": "Пометить и доставить",
+    "actionMarkDelivery": "Следующий шаг",
     "actionReview": "Проверка",
     "actionBlock": "Блокировать",
     "actionDiscard": "Отбросить",
@@ -5395,7 +5443,10 @@
     "navSummary": "Окно {window} мин / порог {threshold}%",
     "tooltipObserve": "После включения ведётся только журнал, реальные действия перехвата не выполняются",
     "errorTagRequired": "Для «Пометить и доставить» включите хотя бы один способ пометки",
-    "tooltipAction": "Действие, выполняемое при обнаружении похожего письма. Выберите «Только собрать сигнал», чтобы только записывать без выполнения действия."
+    "tooltipAction": "Действие, выполняемое при обнаружении похожего письма. Выберите «Только собрать сигнал», чтобы только записывать без выполнения действия.",
+    "errorTagFieldRequired": "Содержимое включённых способов маркировки не может быть пустым",
+    "tagBodyLabel": "Метка в теле письма",
+    "tagBodyPlaceholder": "Например: [Похожее письмо]"
   },
   "mailMarking": {
     "title": "Маркировка и оговорка писем",
@@ -5513,7 +5564,11 @@
     "deleted": "Успешно удалено",
     "saveFailed": "Ошибка сохранения",
     "deleteFailed": "Ошибка удаления",
-    "loadFailed": "Ошибка загрузки"
+    "loadFailed": "Ошибка загрузки",
+    "errorPriorityRange": "Приоритет должен быть целым числом от {min} до {max}",
+    "errors": {
+      "priorityRange": "Приоритет должен быть от {min} до {max}"
+    }
   },
   "passwordBook": {
     "title": "Книга паролей",
@@ -5550,6 +5605,16 @@
     "pageTitle": "Центр обработки почты",
     "investigationTitle": "Центр расследования почты",
     "investigationSubtitle": "Просмотр и анализ инцидентов безопасности почты для расследования угроз и принятия мер",
+    "recipientStatusBar": {
+      "delivered": "Доставлено",
+      "sideline": "Отложено",
+      "quarantine": "В карантине",
+      "rejected": "Отклонено",
+      "discarded": "Удалено",
+      "audit": "На проверке",
+      "other": "Другое",
+      "mixedMailHint": "На этой странице {count} писем с несколькими получателями и разными действиями. Категория, совпавшая с фильтром, показана первой в столбце действий (только текущая страница)."
+    },
     "search": {
       "placeholder": "Опишите признаки письма, например: фишинговые письма под видом Microsoft за прошлую неделю",
       "aiParse": "ИИ-разбор",
@@ -5632,6 +5697,7 @@
         "sideline_pending": "Проверяется",
         "audit_pending": "Ожидает проверки",
         "delivering": "Доставка",
+        "delivery_cancelled": "Доставка отменена",
         "delivered": "Доставлено",
         "delivery_failed": "Доставка не удалась",
         "recalling": "Отзыв",
@@ -5639,12 +5705,17 @@
         "recall_pending": "Отзыв",
         "recall_success": "Отзыв выполнен",
         "recall_failed": "Отзыв не удался",
-        "partial_recall_success": "Частичный отзыв",
-        "deleted": "Удалено",
+        "expired": "Истекло"
+      },
+      "legacyStatuses": {
+        "quarantined": "В карантине",
+        "pending_review": "Проверяется",
+        "blocked": "Заблокировано",
         "bounced": "Возвращено",
-        "expired": "Истекло",
-        "reviewed_rejected": "Отклонено при проверке",
-        "partial_delivered": "Частично доставлено"
+        "partial_delivered": "Доставлено частично",
+        "partial_recall_success": "Отозвано частично",
+        "deleted": "Удалено",
+        "reviewed_rejected": "Отклонено после проверки"
       },
       "mailType": "Тип письма",
       "disposalPolicyKeys": "Основание для обработки",
@@ -5817,6 +5888,16 @@
       "empty": "Нет данных",
       "selected": "Выбрано {n}",
       "disposalBasis": "Основание утилизации",
+      "disposalBasisGroupHeader": "{module} ({count} получателей)",
+      "disposalBasisRuleLine": "{recipient} — правило: {ruleName} ({ruleId}) · {state}",
+      "disposalBasisPlatformRuleLine": "{recipient} — правило: {policyLabel} · {state}",
+      "disposalBasisLoading": "Загрузка сведений по получателям...",
+      "disposalBasisLoadFailed": "Не удалось загрузить сведения по получателям; показана сводка по группам",
+      "disposalBasisState": {
+        "effective": "Итоговое",
+        "hitOnly": "Только совпадение",
+        "unknown": "Привязка неизвестна"
+      },
       "total": "Всего {n}",
       "settings": "Настройки",
       "columnSettings": "Столбцы",
@@ -5825,7 +5906,7 @@
     },
     "batch": {
       "findSimilar": "Найти похожие",
-      "release": "Выпустить",
+      "release": "Доставить",
       "delete": "Отбросить",
       "export": "Экспорт",
       "confirmRelease": "Подтвердить выпуск выбранных писем?",
@@ -5834,10 +5915,13 @@
       "releaseAuditHint": "Разрешение и исправление типа записываются в журнал аудита.",
       "recallDescription": "Попытаться удалить выбранные письма из ящиков получателей и при необходимости исправить их тип.",
       "recallAuditHint": "Отзыв зависит от целевой почтовой системы; результат и исправление типа записываются в аудит.",
+      "csvRecipientDetail": "Детали по получателям",
+      "mixedSelectionWarning": "В {count} выбранных письмах к получателям применены разные действия. Будут обработаны только получатели, для которых операция ещё применима; получатели в конечном состоянии повторно не обрабатываются.",
       "similarLimit": "Максимум 10 примеров",
       "similarFound": "Найдено {n} похожих писем",
       "exportNotImplemented": "Функция экспорта скоро появится",
       "partialResult": "{succeeded} успешно, {failed} ошибок, {notApplicable} неприменимо",
+      "partialRecipientResult": "{succeeded} успешно, {partial} частично успешно по получателям, {failed} ошибок, {notApplicable} неприменимо",
       "allSucceeded": "{n} писем обработано успешно",
       "failed": "Массовая операция не удалась, повторите позже",
       "recall": "Отозвать",
@@ -5924,7 +6008,7 @@
         "mailType": {
           "label": "Mail Type"
         },
-        "confidenceScore": "Уверенность {pct}%",
+        "confidenceScore": "Уверенность {score}",
         "confidenceBlacklist": "Совпадение с чёрным списком (без оценки)",
         "confidenceRule": "Совпадение с правилом (без оценки)",
         "action": "Action",
@@ -5935,12 +6019,14 @@
           "title": "Контекст отправки/получения",
           "recipientsCount": "Получателей: {n}",
           "notOperableWarning": "Это письмо заблокировано/удалено, содержимое не сохранено, дальнейшие действия невозможны.",
+          "deliveryFailedWarning": "Это письмо было выпущено и отправлено шлюзом, но нижестоящая почтовая система не приняла его (см. статус получателей и детали доставки). Используйте действие “Отправить повторно” для восстановления доставки.",
           "viewPolicyDetail": "Просмотр деталей срабатывания политики",
           "time": "Время",
           "size": "Размер",
           "expandFullInfo": "Развернуть полную информацию",
-          "authDetails": "Детали аутентификации",
-          "networkFeatures": "Сетевые признаки"
+          "mailHeaders": "Заголовки письма",
+          "mailHeadersUnavailable": "Заголовки письма недоступны",
+          "mailHeadersTruncated": "Заголовки письма превысили лимит хранения; содержимое ниже неполное."
         },
         "emailContent": "Email Content",
         "noContent": "No content available",
@@ -5968,8 +6054,9 @@
         "urgentTooltip": "Письмо содержит чувствительные/срочные ключевые слова",
         "domainAge": "Возраст домена {n} дн.",
         "domainAgeTooltip": "Домен отправителя зарегистрирован всего {n} дн. назад -- недавно зарегистрированные домены часто являются признаком фишинга/подмены",
-        "aiJudgmentBasis": "Основание вердикта ИИ",
-        "cloudCheckBasis": "Основание облачной проверки",
+        "recipientOutcomeLabel": "Результаты массовой отправки",
+        "multiBasisCount": "+{n}",
+        "multiBasisPopoverTitle": "Всего оснований для обработки: {count}",
         "recipientStatus": {
           "title": "Recipient Status",
           "header": "Статус получателей ({n})",
@@ -5986,7 +6073,11 @@
             "blocked": "Blocked",
             "rejected": "Rejected",
             "discarded": "Discarded",
-            "audited": "Under Audit"
+            "audited": "Under Audit",
+            "delivering": "Доставляется",
+            "delivery_failed": "Ошибка доставки",
+            "deferred": "Отложено",
+            "bounced": "Возвращено"
           },
           "notOperable": "Not Operable",
           "noContent": "(Нет содержимого)",
@@ -5997,13 +6088,22 @@
             "block": "Block",
             "discard": "Discard",
             "recall": "Recall",
-            "notify": "Notify"
+            "notify": "Notify",
+            "redeliver": "Отправить повторно"
           },
           "readOnlyTooltip": "Drill-down view is read-only",
           "selected": "Выбрано получателей: {n}",
           "empty": "No recipient disposal records",
           "actionSuccess": "Action succeeded",
           "actionFailed": "Action failed",
+          "redeliverSuccess": "Запрос на повторную отправку принят; результат доставки скоро обновится в статусе",
+          "deferredRetrying": "Доставка отложена; автоматический повтор",
+          "redeliverDialog": {
+            "title": "Повторная отправка",
+            "body": "Сохранённый оригинал письма будет повторно доставлен выбранным получателям.",
+            "duplicateWarning": "Этот получатель уже получил письмо; повторная отправка создаст дубликат",
+            "confirm": "Подтвердить отправку"
+          },
           "quarantineBlockUnsupported": "Карантин/Блокировка пока не поддерживаются бэкендом",
           "notApplicable": "Not applicable to current status",
           "unsupportedObjectTarget": "This object type does not support per-object disposal yet",
@@ -6026,16 +6126,8 @@
         "senderActions": {
           "blacklist": "Заблокировать отправителя",
           "whitelist": "Добавить отправителя в белый список",
-          "more": "Ещё",
           "recipientHint": "Доставка, карантин и другие действия по получателям выполняются в таблице получателей ниже",
           "notImplementedToast": "Пока не реализовано",
-          "menu": {
-            "exportEml": "Экспорт EML",
-            "exportPdf": "Экспорт PDF-отчёта",
-            "markFalsePositive": "Отметить как ложное срабатывание",
-            "markFalseNegative": "Отметить как пропуск угрозы",
-            "addToInvestigation": "Добавить в расследование"
-          },
           "blacklistDialog": {
             "title": "Добавить отправителя «{sender}» в чёрный список?",
             "desc": "Последующие письма от этого отправителя будут автоматически блокироваться.",
@@ -6059,7 +6151,7 @@
         "entityDetection": {
           "linksTab": "Ссылки ({n})",
           "attachmentsTab": "Вложения ({n})",
-          "globalHint": "Это действие с объектом применяется глобально и затрагивает всех получателей.",
+          "globalHint": "Добавление в чёрный список создаёт правило содержимого для этого арендатора и направления почты и влияет на последующие совпадения.",
           "noLinks": "Ссылки не обнаружены",
           "noAttachments": "Вложения не обнаружены",
           "blacklistDomain": "Заблокировать домен",
@@ -6068,6 +6160,14 @@
           "download": "Скачать",
           "ruleSuccess": "Правило чёрного списка добавлено",
           "ruleFailed": "Не удалось добавить правило чёрного списка",
+          "confirmTitle": {
+            "domain": "Добавить этот домен в чёрный список?",
+            "url": "Добавить этот URL в чёрный список?",
+            "attachment_hash": "Добавить хеш вложения в чёрный список?"
+          },
+          "confirmImpact": "Будет создано правило содержимого для того же направления почты. Последующие совпадения будут помещаться в карантин; управлять правилом можно в разделе «Правила содержимого».",
+          "confirm": "Добавить",
+          "confirming": "Создание…",
           "vtScore": "VirusTotal: {score}",
           "title": "Обнаружение и обработка сущностей контента"
         },
@@ -6133,14 +6233,20 @@
           "intentEngine": "Intent Engine",
           "similarityDetection": "Similarity Detection",
           "advancedRules": "Advanced Rules",
-          "senderBehaviorAgent": "Sender Behavior Agent",
-          "intentRecognitionAgent": "Intent Recognition Agent",
-          "marketingEmailAgent": "Marketing Email Agent",
-          "phishingDetectionAgent": "Phishing Detection Agent",
-          "retrospectiveAgent": "Retrospective Agent"
+          "mailMarking": "Маркировка писем",
+          "phishingAgent": "Phishing Detection Agent",
+          "spoofingAgent": "Spoofing Detection Agent",
+          "threatRetroAgent": "Threat Retro Agent"
         },
         "contentDetails": "Content Details",
         "detectionPipeline": "Конвейер обнаружения",
+        "recipientGroupsBadge": "{n} групп",
+        "recipientScopeLine": "{recipients} ({count} чел.)",
+        "recipientGroupLine": "{recipients} ({count} чел.)",
+        "multiBasisSummaryLabel": "Получателей: {recipients} · оснований для обработки: {groups}",
+        "analysisLoading": "Загрузка результатов проверки…",
+        "analysisLoadFailed": "Не удалось загрузить результаты проверки",
+        "retry": "Повторить",
         "totalElapsed": "Общее время: {ms} мс",
         "elapsed": "Время: {ms} мс",
         "policyCount": "{n} правил",
@@ -6150,10 +6256,10 @@
         "postDetectionTimeline": "Хронология после обнаружения",
         "eventCount": "{n} событий",
         "detectionComplete": "Обнаружение завершено",
-        "recallScope": "Область отзыва",
-        "recallAction": "Действие отзыва",
+        "recallScope": "Объект операции",
+        "recallAction": "Тип операции",
         "executionResult": "Результат выполнения",
-        "viewRecallLog": "Просмотреть журнал отзыва",
+        "viewRecallLog": "Просмотреть исходный журнал",
         "noEvents": "Нет событий",
         "aiVerdict": {
           "title": "AI Verdict",
@@ -6174,7 +6280,34 @@
           "recommendedActionsLabel": "Recommended Actions",
           "noRecommendedActions": "No recommendations available"
         },
-        "noAiData": "No data available"
+        "noAiData": "No data available",
+        "eventResult": {
+          "released": "Выпущено",
+          "sidelineReleased": "Повторно доставлено",
+          "discarded": "Отброшено",
+          "deleted": "Удалено",
+          "approved": "Одобрено",
+          "rejected": "Отклонено",
+          "bounced": "Возвращено",
+          "delivered": "Успешно",
+          "failed": "Не удалось",
+          "success": "Успешно",
+          "handling": "Выполняется",
+          "expanded": "Разбито на подзапросы",
+          "timeoutReleased": "Автовыпуск по тайм-ауту",
+          "timeout": "Тайм-аут (нет ответа)"
+        },
+        "operationType": {
+          "quarantineDisposal": "Обработка карантина",
+          "sidelineDisposal": "Обработка обходного пути",
+          "manualAudit": "Ручная проверка",
+          "bounce": "Возврат письма",
+          "reinject": "Повторная доставка",
+          "forwardDelivery": "Доставка пересылки",
+          "adminRecall": "Отзыв администратором",
+          "agentRecall": "Отзыв агентом",
+          "sidelineAgentRecall": "Отзыв агентом обходного пути"
+        }
       },
       "features": {
         "basicInfo": "Basic Information",
@@ -6231,7 +6364,12 @@
         "platformPolicyModule": "Политика, управляемая платформой",
         "platformPolicyRuleName": "Управляется платформой",
         "platformPolicyHitDetail": "Это письмо перехвачено платформенной политикой уровня соединения. За подробностями обратитесь к администратору платформы.",
-        "platformPolicyListReason": "Перехвачено политикой платформы"
+        "platformPolicyListReason": "Перехвачено политикой платформы",
+        "basisScope": "Область применения",
+        "hitModules": "Сработавшие модули",
+        "hitModulesHint": "Модули, сработавшие на этом письме. Правила, которые не оценивались (предыдущий модуль уже принял решение), здесь не показаны.",
+        "effectiveFor": "Применено к: {list}",
+        "matchedOnlyFor": "Только совпадение: {list}"
       },
       "delivery": {
         "noData": "No delivery records",
@@ -6374,8 +6512,6 @@
       "reviewDesc": "Отправить письмо на проверку администратору",
       "discard": "Отклонить",
       "discardDesc": "Тихо отклонить письмо",
-      "block": "Заблокировать",
-      "blockDesc": "Отклонить приём письма",
       "none": "Без действия",
       "noneDesc": "Только тегирование; основное действие не выполняется"
     },
@@ -6483,13 +6619,6 @@
       "tagStyleHtmlYellow": "HTML жёлтый",
       "tagStylePlainText": "Обычный текст",
       "disclaimerContentSourceHint": "Текст оговорки берётся из общесистемной настройки; здесь задаётся только место вставки. Изменить текст можно в системной конфигурации (обратитесь к администратору)."
-    },
-    "block": {
-      "paramsTitle": "Параметры блокировки",
-      "smtpCode": "Код SMTP",
-      "responseText": "Текст ответа",
-      "tarpitEnabled": "Включить задержку ответа",
-      "tarpitSeconds": "Время задержки (секунды)"
     },
     "review": {
       "paramsTitle": "Параметры проверки",
@@ -7133,20 +7262,15 @@
       "quarantineHint": "Карантин письма не требует параметров; письма в карантине можно просмотреть в модуле карантина.",
       "tagStyleLabel": "Стиль метки",
       "tagDeliverStyleDisabledHint": "Стиль не действует, если позиция метки — заголовок",
-      "blockSmtpCodeHint": "Часто используемые: 550/554/571",
       "previewTitle": "Предпросмотр логического выражения",
       "orGroupTag": "Группа политик OR",
       "fullExpressionTitle": "Полное выражение",
       "willBeActioned": "Письмо будет: {action}",
-      "blockResponseCodeSuffix": " (код ответа SMTP: {code})",
       "andExecuteAddons": "и выполнит следующие дополнения:",
       "configSummaryTitle": "Сводка конфигурации",
       "configSummaryPolicyCol": "Политика",
       "configSummaryConfigCol": "Конфигурация",
       "summaryDefaultParams": "Параметры по умолчанию",
-      "summarySmtpCode": "Код SMTP: {code}",
-      "summaryTarpitOn": "Tarpit: включён ({sec} с)",
-      "summaryTarpitOff": "Tarpit: выключен",
       "summarySeparator": ", ",
       "summaryMergeWindow": "{recipientType}, объединение {minutes} мин",
       "summaryScope": "Область: {scope}",
@@ -7180,11 +7304,6 @@
           "source": "Механизм доставки",
           "usage": "Немедленное удаление без уведомления",
           "note": "После удаления восстановление невозможно"
-        },
-        "block": {
-          "source": "Прокси-уровень MTA",
-          "usage": "Отклонение во время SMTP-сессии",
-          "note": "Заблокированное письмо не попадает в движок обработки контента"
         }
       },
       "policyGroup": "Группа политик",
@@ -7206,7 +7325,6 @@
     "settings": {
       "title": "Расширенные настройки",
       "forwardRateLimit": "Лимит пересылки (на правило в минуту)",
-      "tarpitMaxConcurrent": "Глобальный лимит параллелизма tarpit",
       "adminNotifyMaxRecipients": "Макс. получателей adminNotify",
       "reviewTimeoutAction": "Действие по умолчанию при тайм-ауте проверки",
       "reviewTimeoutAccept": "Автоматически принять",
@@ -7220,8 +7338,7 @@
     },
     "priorityPresets": {
       "daily": "Обычный 1000",
-      "security": "Безопасность 5000",
-      "block": "Блокировка 9000"
+      "security": "Безопасность 5000"
     },
     "stage": {
       "selectLabel": "Этап оценки",
@@ -7540,6 +7657,11 @@
       "backToWorld": "Вернуться к миру",
       "topIps": "Основные IP-источники",
       "byThreat": "Распределение угроз",
+      "specialRegionNames": {
+        "HK": "Гонконг, Китай",
+        "MO": "Макао, Китай",
+        "TW": "Тайвань, Китай"
+      },
       "blockRateLegend": "Цвет полосы = доля блокировки",
       "blockRateGood": "≥97%  Хорошая защита",
       "blockRateWarn": "95–97%  Требует внимания",
@@ -7681,7 +7803,6 @@
       "bounceRate": "Процент отказов",
       "avgLatencyMs": "Средняя задержка",
       "sidelineQueue": "Очередь фоновой обработки",
-      "latencyP99": "Задержка P99",
       "outboundQueueBacklog": "Исходящая очередь",
       "threatRate": "Уровень угроз",
       "internalThreatCount": "Количество угроз",
@@ -7691,7 +7812,6 @@
       "antispamQueue": "Очередь антиспама",
       "outboundSuccessRate": "Успешная исходящая доставка",
       "outboundBounceRate": "Отказы исходящей доставки",
-      "outboundLatencyP99": "Задержка исходящей доставки P99",
       "internalSuccessRate": "Успешная внутренняя доставка",
       "internalThreatRate": "Уровень внутренних угроз",
       "avgInternalLatency": "Средняя внутренняя задержка",
@@ -7707,7 +7827,6 @@
         "bounceRate": "Доля неудачных или возвращённых сообщений среди всех сообщений.",
         "avgLatencyMs": "Среднее время от получения до завершения обработки.",
         "sidelineQueue": "Задачи, ожидающие фоновой обработки.",
-        "latencyP99": "99% исходящих сообщений завершаются за это время; предупреждение при превышении 30 секунд.",
         "outboundQueueBacklog": "Оценка исходящей очереди по сообщениям в процессе доставки.",
         "threatRate": "Доля внутренних сообщений с обнаруженной угрозой.",
         "internalThreatCount": "Внутренние сообщения, распознанные как спам, фишинг или вирус."
@@ -7734,7 +7853,7 @@
       "total": "Всего",
       "success": "Успешно",
       "failure": "Ошибка",
-      "deferred": "Отложено",
+      "detecting": "Проверка",
       "cancelled": "Отменено",
       "successRate": "Процент успеха",
       "change": "Изменение",
@@ -7754,8 +7873,6 @@
       "bounceReasons": "Причины возврата",
       "receiveBounceReasons": "Причины возврата входящих сообщений",
       "threatDistribution": "Распределение угроз",
-      "latencyPercentiles": "Процентили задержки",
-      "queueTrend": "Динамика очереди",
       "latencyDistribution": "Распределение задержки",
       "receiveTrend": "Динамика входящего трафика",
       "sendTrend": "Динамика исходящего трафика",
@@ -8017,6 +8134,8 @@
     "hardware": {
       "cpuMem": "Тренд CPU / памяти",
       "netTop5": "Топ-5 сетевых интерфейсов",
+      "rxMbps": "Приём Mbps",
+      "txMbps": "Передача Mbps",
       "rxPps": "Rx PPS",
       "txPps": "Tx PPS",
       "dropRate": "Потери пакетов",
@@ -9899,13 +10018,12 @@
       "error": "Не удалось загрузить данные о состоянии системы. Обновите страницу и попробуйте снова."
     },
     "kpi": {
-      "inbound": "Всего входящих",
+      "inbound": "Всего писем (вход/исход)",
       "threats": "Заблокировано угроз",
       "pending": "Писем в очереди",
       "nodes": "Узлов онлайн",
       "ratio": "к пред. периоду",
       "blockRate": "Доля блокировок",
-      "pendingSplit": "Карантин {a} / На проверку {b}",
       "allOnline": "Все онлайн",
       "nOffline": "{n} офлайн",
       "attention": "Требует внимания",
@@ -10119,6 +10237,7 @@
     "testContentRequired": "Введите тестовое содержимое",
     "testMatched": "Правило сработало",
     "testNotMatched": "Правило не сработало",
+    "testFailed": "Не удалось выполнить тест, попробуйте снова",
     "noRules": "Правил содержимого нет",
     "batchEnable": "Включить выбранные",
     "batchDisable": "Отключить выбранные",
@@ -10201,7 +10320,9 @@
     "applyTo": "Проверять",
     "applyToTip": "Выберите области письма для проверки",
     "scopeDisplayAttachmentTypes": "Тип вложения",
+    "scopeDisplayAttachmentHash": "Хеш вложения",
     "scopeDisplayUrls": "URL",
+    "sourceEmailDisposal": "Центр обработки почты",
     "attachmentContentUnavailable": "Проверка содержимого вложений доступна только в sideline-сканере и пока не настраивается здесь.",
     "legacyScopesPreserved": "Правило сохраняет устаревшие области ({count}), которые не показаны в упрощённом редакторе.",
     "headerOnlyTagHint": "Пометка добавляет только заголовок письма и не изменяет тему.",
@@ -10211,7 +10332,6 @@
     "keywordPlaceholder": "Например: секретно|конфиденциально|внутреннее",
     "keywordDividerHint": "Разделяйте несколько ключевых слов символом |",
     "regexPlaceholder": "Введите регулярное выражение, совместимое с Go",
-    "invalidRegex": "Недопустимое регулярное выражение",
     "runTest": "Запустить тест",
     "simulateTest": "Симуляция",
     "ruleNameTooLong": "Название правила не должно превышать 50 символов",
@@ -10550,7 +10670,14 @@
     "queueThreshold": "Предупреждение выше 1 000",
     "allNormal": "Всё в норме",
     "normal": "Норма",
+    "status": {
+      "normal": "Норма",
+      "warning": "Частичные сбои",
+      "critical": "Критические сбои",
+      "unknown": "Статус неизвестен"
+    },
     "viewAll": "Показать все",
+    "viewDetails": "Подробнее",
     "exportPdf": "Экспорт PDF",
     "pdfUnavailable": "Пока недоступно",
     "mailflowVolume": "Объём",
@@ -10559,6 +10686,7 @@
     "engineTrend": "Производительность движка (24ч)",
     "alertsHealth": "Здоровье оповещений",
     "alertMarquee": "Живые оповещения",
+    "noAlerts": "Нет оповещений",
     "range": {
       "today": "Сегодня",
       "24h": "24ч",
@@ -10678,6 +10806,11 @@
     "siteIdHint": "Это значение может быть переопределено переменной окружения OSG_RULESYNC_SITE_ID — в кластерной установке оно задаётся централизованно clustermgr и всегда имеет приоритет над этой настройкой, поэтому ваше изменение здесь может незаметно не вступить в силу. Подтвердите действующее значение на панели clustermgr «Cross-Site Rule Sync»."
   },
   "apiErrors": {
+    "redeliver": {
+      "in_progress": "Повторная отправка этого письма уже выполняется, повторите попытку позже",
+      "original_expired": "Оригинал письма не сохранён (или истёк срок хранения); повторная отправка недоступна",
+      "recipient_deferred": "Доставка получателю {recipient} повторяется автоматически; ручная повторная отправка не требуется"
+    },
     "account": {
       "cannot_delete_self": "Нельзя удалить собственную учётную запись",
       "last_super_admin": "Нельзя отключить последнего активного суперадминистратора — управлять системой станет некому",
@@ -10924,6 +11057,7 @@
       "action_required": "Правила действия должны указывать действие",
       "advanced_rules_need_tenant": "Расширенные правила фильтрации недоступны в режиме платформы; сначала выберите арендатора",
       "bulk_action_invalid": "Недопустимое пакетное действие. Допустимо: {allowed}",
+      "condition_regex_invalid": "Регулярное выражение {pattern} не удалось скомпилировать движком Go (RE2) шлюза: {reason}. Перепишите его в синтаксисе, поддерживаемом RE2: опережающая проверка вида (?=...) не поддерживается.",
       "condition_tree_invalid": "Условия правила некорректны; проверьте, что все условия заполнены",
       "content_rules_need_tenant": "Правилами содержимого можно управлять только в режиме арендатора; сначала выберите арендатора",
       "copy_denied": "У вас нет прав на копирование этого правила",
@@ -10943,7 +11077,8 @@
       "tag_required": "Правила меток должны указывать хотя бы одну метку",
       "tenant_config_managed": "Это правило управляется настройками безопасности вложений арендатора и не может быть изменено напрямую; измените его на странице настроек безопасности вложений",
       "tenant_context_required": "Перед этим действием выберите арендатора",
-      "valid_range_invalid": "Время окончания действия не может быть раньше времени начала"
+      "valid_range_invalid": "Время окончания действия не может быть раньше времени начала",
+      "group_type_immutable": "Тип группы нельзя изменить ({before} → {after}): тип определяет, как интерпретируются участники. Создайте новую группу."
     },
     "investigation": {
       "not_found": "Задача расследования не найдена",
@@ -11032,7 +11167,8 @@
       "mail_content_unavailable": "Содержимое письма больше недоступно на узле хранения",
       "item_not_pending": "Этот элемент проверки уже обработан",
       "ids_required": "Выберите хотя бы один элемент проверки",
-      "action_invalid": "Неверное действие: допустимо одобрить или отклонить"
+      "action_invalid": "Неверное действие: допустимо одобрить или отклонить",
+      "access_denied": "У вас нет прав доступа к этому элементу проверки"
     },
     "assistant": {
       "not_authenticated": "Сначала войдите в систему",
@@ -11144,7 +11280,6 @@
     "advanced_rules_config": {
       "review_timeout_action_accept_reject_keep": "Действие при тайм-ауте проверки должно быть accept, reject или keep_pending",
       "forward_rate_limit_per_minute_non": "Лимит пересылки в минуту не может быть отрицательным",
-      "tarpit_max_concurrent_non_negative": "Лимит одновременных соединений tarpit не может быть отрицательным",
       "admin_notify_max_recipients_non_negative": "Лимит получателей уведомлений администратора не может быть отрицательным"
     },
     "alert_rules": {
@@ -11160,7 +11295,6 @@
       "dkim_key_not_found": "Ключ DKIM не найден"
     },
     "antispam_queue": {
-      "notification_message_uuid_accepted_by_atomic": "UUID уведомления принимается только конечной точкой атомарного отслеживания уведомлений",
       "invalid_quarantine_notification_tracking_request": "Неверный запрос отслеживания уведомления карантина"
     },
     "auth_spoofing": {

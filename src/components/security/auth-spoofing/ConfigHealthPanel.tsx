@@ -26,7 +26,7 @@ export function ConfigHealthPanel({ config, onChange }: ConfigHealthPanelProps) 
   const showObserveRow =
     !config.observe_mode && (spfFail?.action === 'discard' || dmarcFail?.action === 'discard');
 
-  const handleSoftfailAction = (action: 'quarantine' | 'audit') => {
+  const handleSoftfailAction = (action: 'quarantine' | 'mark-delivery') => {
     if (!spfSoftfail) return;
     onChange({
       ...config,
@@ -64,7 +64,7 @@ export function ConfigHealthPanel({ config, onChange }: ConfigHealthPanelProps) 
               variant="outline"
               size="sm"
               className="h-6 text-xs"
-              onClick={() => handleSoftfailAction('audit')}
+              onClick={() => handleSoftfailAction('mark-delivery')}
             >
               {t('health.changeToTag')}
             </Button>

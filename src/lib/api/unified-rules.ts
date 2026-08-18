@@ -142,14 +142,18 @@ export async function toggleUnifiedRule(id: number, isActive: boolean, requestFn
   });
 }
 
+// ruleClass 让字段目录与写侧校验同源：rule_class=route 时后端只返回投递规则
+// 白名单内的字段（GT-12780）。不传 = 完整目录，既有调用方行为不变。
 export async function getFieldDefinitions(
   stage: string,
   page?: string,
   requestFn: ApiRequestFn = apiRequest,
+  ruleClass?: string,
 ): Promise<FieldDefinitionsResponse> {
   const qs = new URLSearchParams();
   if (stage) qs.set('stage', stage);
   if (page) qs.set('page', page);
+  if (ruleClass) qs.set('rule_class', ruleClass);
   return requestFn<FieldDefinitionsResponse>(`${API_BASE}/unified-rules/field-definitions?${qs.toString()}`);
 }
 

@@ -41,11 +41,13 @@ interface ConditionTreeBuilderProps {
   onChange: (node: RuleNode) => void;
   stage: string;
   allowedFields?: string[];
+  /** rule_class：route 语境下后端按写侧白名单收敛字段目录（GT-12780）。 */
+  ruleClass?: string;
   lockedStructure?: boolean;
   originalNode?: RuleNode;
 }
 
-export function ConditionTreeBuilder({ value, onChange, stage, allowedFields, lockedStructure, originalNode }: ConditionTreeBuilderProps) {
+export function ConditionTreeBuilder({ value, onChange, stage, allowedFields, ruleClass, lockedStructure, originalNode }: ConditionTreeBuilderProps) {
   const t = useTranslations('advancedRules');
   const { apiRequest } = useApiRequest();
   const [fieldDefs, setFieldDefs] = useState<Record<string, FieldDef>>({});
@@ -53,10 +55,10 @@ export function ConditionTreeBuilder({ value, onChange, stage, allowedFields, lo
 
   useEffect(() => {
     if (!stage) return;
-    getFieldDefinitions(stage, undefined, apiRequest)
+    getFieldDefinitions(stage, undefined, apiRequest, ruleClass)
       .then(resp => setFieldDefs(resp.fields || {}))
       .catch(() => setFieldDefs({}));
-  }, [stage, apiRequest]);
+  }, [stage, apiRequest, ruleClass]);
 
   useEffect(() => {
     if (stage !== 'sideline') return;
@@ -318,7 +320,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
                 map_key: newIsMap ? '*' : undefined,
               });
             }}>
-              <SelectTrigger className="w-[180px] h-8 text-xs">
+              <SelectTrigger className="w-[180px] h-8 text-xs" data-testid="condition-field-trigger">
                 <SelectValue placeholder={t('selectField')} />
               </SelectTrigger>
               <SelectContent>
@@ -326,7 +328,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
                   <SelectGroup key={groupKey}>
                     <SelectLabel>{group.label}</SelectLabel>
                     {group.fields.map((f) => (
-                      <SelectItem key={f.value} value={f.value}>
+                      <SelectItem key={f.value} value={f.value} data-testid={`condition-field-option-${f.value}`}>
                         {f.label} <span className="text-muted-foreground ml-1 text-[10px]">({f.value})</span>
                       </SelectItem>
                     ))}
@@ -342,6 +344,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
               value={node.map_key || ''}
               onChange={(e) => onChange({ ...node, map_key: e.target.value || undefined })}
               placeholder="* (any)"
+              data-testid="condition-map-key"
             />
           )}
 
@@ -351,12 +354,12 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
             </span>
           ) : (
             <Select value={operator} onValueChange={(v) => { if (v) onChange({ ...node, operator: v }); }}>
-              <SelectTrigger className="w-[130px] h-8 text-xs">
+              <SelectTrigger className="w-[130px] h-8 text-xs" data-testid="condition-operator-trigger">
                 <SelectValue placeholder={t('selectOperator')} />
               </SelectTrigger>
               <SelectContent>
                 {operators.map((op) => (
-                  <SelectItem key={op} value={op}>{t(`operators.${OPERATOR_LABEL_KEYS[op] || op}`)}</SelectItem>
+                  <SelectItem key={op} value={op} data-testid={`condition-operator-option-${op}`}>{t(`operators.${OPERATOR_LABEL_KEYS[op] || op}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -381,6 +384,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
             onChange={(e) => onChange({ ...node, value: e.target.value })}
             placeholder={t('withinPlaceholder')}
             rows={5}
+            data-testid="condition-within-value"
           />
           {showOriginalHint && (
             <span className="text-xs text-muted-foreground">(初始值: {originalValue})</span>
@@ -417,7 +421,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
             map_key: newIsMap ? '*' : undefined,
           });
         }}>
-          <SelectTrigger className="w-[180px] h-8 text-xs">
+          <SelectTrigger className="w-[180px] h-8 text-xs" data-testid="condition-field-trigger">
             <SelectValue placeholder={t('selectField')} />
           </SelectTrigger>
           <SelectContent>
@@ -425,7 +429,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
               <SelectGroup key={groupKey}>
                 <SelectLabel>{group.label}</SelectLabel>
                 {group.fields.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>
+                  <SelectItem key={f.value} value={f.value} data-testid={`condition-field-option-${f.value}`}>
                     {f.label} <span className="text-muted-foreground ml-1 text-[10px]">({f.value})</span>
                   </SelectItem>
                 ))}
@@ -441,6 +445,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
           value={node.map_key || ''}
           onChange={(e) => onChange({ ...node, map_key: e.target.value || undefined })}
           placeholder="* (any)"
+          data-testid="condition-map-key"
         />
       )}
 
@@ -450,12 +455,12 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
         </span>
       ) : (
         <Select value={operator} onValueChange={(v) => { if (v) onChange({ ...node, operator: v }); }}>
-          <SelectTrigger className="w-[130px] h-8 text-xs">
+          <SelectTrigger className="w-[130px] h-8 text-xs" data-testid="condition-operator-trigger">
             <SelectValue placeholder={t('selectOperator')} />
           </SelectTrigger>
           <SelectContent>
             {operators.map((op) => (
-              <SelectItem key={op} value={op}>{t(`operators.${OPERATOR_LABEL_KEYS[op] || op}`)}</SelectItem>
+              <SelectItem key={op} value={op} data-testid={`condition-operator-option-${op}`}>{t(`operators.${OPERATOR_LABEL_KEYS[op] || op}`)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -463,12 +468,12 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
 
       {isBool && (
         <Select value={value || 'true'} onValueChange={(v) => { if (v) onChange({ ...node, value: v }); }}>
-          <SelectTrigger className="w-[80px] h-8 text-xs">
+          <SelectTrigger className="w-[80px] h-8 text-xs" data-testid="condition-boolean-value-trigger">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="true">{t('booleanTrue')}</SelectItem>
-            <SelectItem value="false">{t('booleanFalse')}</SelectItem>
+            <SelectItem value="true" data-testid="condition-boolean-value-option-true">{t('booleanTrue')}</SelectItem>
+            <SelectItem value="false" data-testid="condition-boolean-value-option-false">{t('booleanFalse')}</SelectItem>
           </SelectContent>
         </Select>
       )}
@@ -480,6 +485,7 @@ function ConditionEditor({ node, onChange, onDelete, t, fieldDefs, fieldGroups, 
             value={value}
             onChange={(e) => onChange({ ...node, value: e.target.value })}
             placeholder={t('valuePlaceholder')}
+            data-testid="condition-value"
           />
           {showOriginalHint && (
             <span className="text-xs text-muted-foreground">(初始值: {originalValue})</span>

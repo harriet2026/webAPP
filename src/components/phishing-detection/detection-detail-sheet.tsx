@@ -91,7 +91,7 @@ export function DetectionDetailSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
+        <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl" data-testid="phishing-detail-sheet">
           <SheetHeader className="border-b px-6 py-4">
             <SheetTitle>{tpd('detail.title')}</SheetTitle>
             <SheetDescription>
@@ -135,7 +135,7 @@ export function DetectionDetailSheet({
                   </div>
                 ) : null}
 
-                <section className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4">
+                <section className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4" data-testid="phishing-detail-mail-context">
                   <h3 className="text-sm font-semibold">{tpd('detail.mailContext')}</h3>
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     <Field label={tpd('detail.sender')} value={summary.sender} />
@@ -162,7 +162,7 @@ export function DetectionDetailSheet({
                 </section>
 
                 {investigation ? (
-                  <section className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4">
+                  <section className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4" data-testid="phishing-detail-agent-verdict">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold">{tpd('detail.agentVerdict')}</h3>
                       {investigation.status ? (
@@ -205,7 +205,7 @@ export function DetectionDetailSheet({
                 ) : null}
 
                 {urlFindings.length > 0 ? (
-                  <section className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4">
+                  <section className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4" data-testid="phishing-detail-url-findings">
                     <h3 className="text-sm font-semibold">
                       {tpd('table.urlFindingsTitle', { count: urlFindings.length })}
                     </h3>

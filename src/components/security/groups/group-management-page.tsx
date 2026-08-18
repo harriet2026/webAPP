@@ -237,7 +237,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
     }
   };
 
-  const handleSubmit = async (values: { name: string; type: GroupType; members: string[] }) => {
+  const handleSubmit = async (values: { name: string; type: GroupType; members: string[]; scopes?: string[] }) => {
     if (editingGroup) {
       const body = buildRulePayload(values, false);
       await upsertMutation.mutateAsync({ id: editingGroup.ruleId, body });
@@ -263,7 +263,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
           </div>
           <div className="flex items-center gap-2">
             <Button data-testid="groups-new" onClick={() => { setFeatureEditingGroup(null); setActiveTab('feature'); setFeatureDrawerOpen(true); }}>
-              <Plus className="h-4 w-4 mr-1" />{t('newGroup')}
+              <Plus className="h-4 w-4 mr-1" />{t('newGroupOfType', { typeLabel: t('featureGroup') })}
             </Button>
             {/* 特征组无成员名单概念：按 demo 保留按钮位，置灰并说明 */}
             <Button data-testid="groups-batch-import" variant="outline" disabled title={t('featureImportExportNA')}>
@@ -357,7 +357,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
           </div>
           <div className="flex items-center gap-2">
             <Button data-testid="groups-new" onClick={() => { setEditingGroup(null); setActiveTab(type); setDialogOpen(true); }}>
-              <Plus className="h-4 w-4 mr-1" />{t('newGroup')}
+              <Plus className="h-4 w-4 mr-1" />{t('newGroupOfType', { typeLabel: t(`${type}Group`) })}
             </Button>
             <Button
               data-testid="groups-batch-import"

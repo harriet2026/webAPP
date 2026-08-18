@@ -111,7 +111,8 @@ export function summarizeLeaf(
   const def = defFor(leaf);
   const panel = def?.panel;
   const envelope = !!def?.envelope;
-  const baseName = envelope ? leaf.conditionKey || leaf.field : t(`v3Conditions.conditions.${leaf.conditionKey}`);
+  // GT-12691：envelope 条件也走 i18n 翻译，不再直接用 raw key。
+  const baseName = t(`v3Conditions.conditions.${leaf.conditionKey}`);
   // GT-12261：map_* 字段（特征组 / 发信人组 / IP组 / RBL 等）真正指向哪个键，
   // 全靠 leaf.mapKey。此前 summarizeLeaf 完全没读它，于是所有 map 条件都渲染成
   // 「<字段名> 等于 true」——重开规则时看不出绑定的是哪个组，看着就像条件退化成了

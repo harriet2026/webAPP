@@ -20,17 +20,12 @@ describe('effectiveAddons', () => {
     expect(effectiveAddons('quarantine', value(['forwardServer', 'adminNotify']))).toEqual(['adminNotify'])
   })
 
-  it('leaves only adminNotify for block', () => {
-    expect(effectiveAddons('block', value(['disclaimer', 'emailTag', 'adminNotify']))).toEqual(['adminNotify'])
-  })
-
   it('returns addons in UI_ADDON_KEYS order, not insertion order', () => {
     expect(effectiveAddons('deliver', value(['modifyHeader', 'disclaimer']))).toEqual(['disclaimer', 'modifyHeader'])
   })
 
-  it('marks discard and block as terminal', () => {
+  it('marks discard as terminal', () => {
     expect(TERMINAL_ACTIONS.has('discard')).toBe(true)
-    expect(TERMINAL_ACTIONS.has('block')).toBe(true)
     expect(TERMINAL_ACTIONS.has('quarantine')).toBe(false)
   })
 })

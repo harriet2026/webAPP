@@ -109,11 +109,24 @@ describe('backfillAiFilter', () => {
       expect(result.quick.sendReceiveType).toBe('incoming');
     });
 
-    it('maps action eq to executionAction verbatim', () => {
+    it('maps action eq to the executionActions multi-select', () => {
       const result = backfillAiFilter(
         andFilter([{ operator: 'AND', conditions: [{ field: 'action', op: 'eq', value: 'quarantine' }] }]),
       );
-      expect(result.quick.executionAction).toBe('quarantine');
+      expect(result.quick.executionActions).toEqual(['quarantine']);
+      expect(result.quick.executionAction).toBeUndefined();
+    });
+
+    it('maps action in to the executionActions multi-select', () => {
+      const result = backfillAiFilter(
+        andFilter([
+          {
+            operator: 'AND',
+            conditions: [{ field: 'action', op: 'in', value: ['deliver', 'quarantine'] }],
+          },
+        ]),
+      );
+      expect(result.quick.executionActions).toEqual(['deliver', 'quarantine']);
     });
 
     it('maps sender/subject contains to the matching quick text fields', () => {

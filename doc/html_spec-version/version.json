@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 34,
+  "current_version": 48,
   "history": [
     {
       "version": 1,
@@ -328,6 +328,132 @@
       "incremental": true,
       "summary": "GT-12731.html 追加一级需求 GT-11651 内容规则-执行动作调整（内容规则新建/编辑抽屉 → 执行动作下拉，doc 版本 GT-12731 v5→v6）：新增变更 15（ContentRuleDrawer 的 ACTIONS 数组移除 'tag_deliver'，下拉由 6 项减为 5 项；经用户确认保留 'deliver'；ContentRuleUiAction 类型与历史 tag_deliver 标记配置块保留不删以免越界）、变更 16（block 标题「阻断」改为「拒收」，为 5 种动作补充灰字说明——新增 actionHint() 助手、SelectItem 改标题+说明两行式、SelectTrigger 经 SelectValue 仅显示标题；四语改 contentRules.actionBlock 及 actionBlock/Discard/Isolate/ReviewHint，deliver 的 actionDeliverHint 不变）、变更 17（deliver 标题「放行」改为「投递」，zh contentRules.actionDeliver 改文案、th 由 ส่งต่อ 对齐为 ส่งมอบ、en Deliver/ru Доставить 语义本即投递不变）；浏览器实拍 S-1 执行动作下拉 5 项两行式（投递/隔离/审核/拒收/丢弃，浅色 AI版·单租户 平台管理员 Mock 1694×1046）；差异新增 D-017~D-019、待确认新增 Q-007；TOC 增 GT-11651 一级条目与变更 15/16/17、C 范围 D-001~D-019、D 范围 Q-001~Q-007，标题追加 GT-11651（v6），版本历史新增 v6 行；顺带修复本文档 6 处既有 UTF-8 乱码（TOC 1.2、back-link、S-7 figcaption、S-2 标题、GT-11675 一级标题、change-14 clamp 说明）；乱码自检 CLEAN；version.json current_version 19→20。",
       "demo_version": 20
+    },
+    {
+      "version": 35,
+      "generated_at": "2026-08-06",
+      "webapp_commit": "35ca1b2",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12807.html v1→v2：将 GT-12801「DMARC协议执行动作对齐以及增加进行下一步」追加到 GT-12807 文档中（不单独新建文档）。变更 1：messages/zh.json authSpoofing.protocolActionShort.reject 由「阻断」改为「拒收」；变更 2：ProtocolChecksSection.tsx DMARC_ACTIONS 由 4 项扩充为 5 项（追加 accept，对应「进行下一步」，i18n key 已存在）。目录追加 GT-12801 一级条目，版本历史 v1→v2。"
+    },
+    {
+      "version": 36,
+      "generated_at": "2026-08-06",
+      "webapp_commit": "81e7555",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12807.html v2→v3：追加 GT-12797「群组策略——新建群组：不支持切换群组类型」需求体（3 个变更点）。变更 1：新建按钮文案「新建群组」→「新建X组」（group-management-page.tsx，messages 新增 groups.newGroupOfType）；变更 2：新建抽屉移除「群组类型」Select，SheetTitle 改为「新建X组」，编辑场景改为只读 Input（group-edit-dialog.tsx）；变更 3：内容组标签「每行一条成员」→「每行一条关键词」，占位符「敏感词1/2」→「关键词1/2」（messages 新增 groups.contentMemberListPerLine）。附截图 S-1（新建IP组抽屉）、S-2（新建内容组抽屉）；目录追加 GT-12797 一级条目及三级子章节；版本历史 v2→v3。"
+    },
+    {
+      "version": 37,
+      "generated_at": "2026-08-06",
+      "webapp_commit": "c6f98d9",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12807.html v3→v4：追加 GT-12719「策略流水线执行动作/黑白名单文案解释」需求体（3 个变更点）。变更 1：执行动作图例「阻断」→「拒收」，新增「进行下一步·继续执行后续策略」（pipeline.actionNextStep/actionNextStepDesc），移除「标记投递」条目（PolicyPipelinePage.tsx actionLegendItems 删除 tagDeliver，union type 收窄）；变更 2：名单类型黑名单描述「阻断/隔离/丢弃」→「拒收/隔离/丢弃」（pipeline.blacklistTypeDesc），白名单描述「投递/标记投递」→「投递」（pipeline.whitelistTypeDesc）；变更 3：流程控制终止短文案/描述「阻断」→「拒收」（pipeline.flowTerminateShort/flowTerminateDesc），继续描述移除「标记投递」（pipeline.flowContinueDesc）；附截图 S-1（策略流水线默认态含图例区，暗色主题 1406×803）；目录追加 GT-12719 一级条目及三级子章节；版本历史 v3→v4。"
+    },
+    {
+      "version": 38,
+      "generated_at": "2026-08-07",
+      "webapp_commit": "1a445a9",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12807",
+      "incremental": true,
+      "summary": "GT-12807.html v4→v5：追加 GT-12793「邮件标记与声明模块优化」需求体（3 个变更点）。变更 1：RuleEditDrawer「取消」「保存」按钮从 SheetHeader 右上移至 SheetContent 底部 footer 右下；变更 2：MailMarkingPage.loadRules Promise.all→Promise.allSettled，scopes 失败不再阻断规则展示，修复 zh.json mailMarking 4 处 UTF-8 乱码（priorityHint/noData/markPosition/sampleSubject）；变更 3：RuleListTable「优先级」列从第1列移至第5列（状态之后、操作之前）；附截图 gt12793-receive-list（接收标记4条）、gt12793-send-list（外发声明2条）；目录追加 GT-12793 一级条目及三级子章节；版本历史 v4→v5。"
+    },
+    {
+      "version": 39,
+      "generated_at": "2026-08-07",
+      "webapp_commit": "db8a95b",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12795",
+      "incremental": true,
+      "summary": "GT-12807.html v5→v6：追加 GT-12795「邮件标记与声明：创建规则优先级问题处理」需求体（1 个变更点）。变更 1：nextPriority 无规则时默认 100（原为 1），有规则时 Math.min(Math.max(max+1,100),1000)；RuleEditDrawer Input min 从 1 改为 100，新增 max=1000，宽度 w-20→w-24；validate 校验条件改为 100~1000，新增 i18n key mailMarking.errorPriorityRange（zh：优先级必须为 100 到 1000 之间的整数；en：Priority must be an integer between 100 and 1000）；mailMarking.priorityTip 更新为「取值范围 100～1000；数值越大，规则越优先执行」；附截图 gt12795-drawer-default（默认值100，DOM 验证 min/max/value）、gt12795-priority-validation-error（校验失败态）；目录追加 GT-12795 一级条目及子章节；版本历史 v5→v6。"
+    },
+    {
+      "version": 40,
+      "generated_at": "2026-08-07",
+      "webapp_commit": "4dab352",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12828",
+      "incremental": true,
+      "summary": "GT-12807.html v6→v7：追加 GT-12828「策略：优先级统一」需求体（3 个变更点）。方案A：邮件标记模块接入 getRulePriorityRange(isSystemAdmin)——MailMarkingPage 引入 useAuth + getRulePriorityRange，RuleEditDrawer 新增 priorityRange prop（FALLBACK_PRIORITY_RANGE 兜底），Input/validate/priorityTip/priorityHint 全部参数化，新增 mailMarking.errors.priorityRange。方案B：ContentRuleDrawer、IPFilterPage、IPFrequencyPage 按行为管控标准模式（createRuleSchema工厂函数+useMemo动态schema），priority schema 从 nonnegative/无约束 改为 min(range.min).max(range.max)，新增 ipFilter.priorityOutOfRange 和 ipFrequency.priorityOutOfRange，IP频率新增 priority inline 错误渲染，TypeScript 编译零新增错误。方案C：仅改 zh.json/en.json 共10处，统一 senderFilter/contentRules/behaviorControl 措辞（en dash、「需在」、行内提示完整）。附截图 gt12828-mail-marking-priority（邮件标记 priorityTip参数化渲染）、gt12828-content-rule-drawer（内容规则 min=100 max=1000 value=100）、gt12828-pipeline-overview（策略流水线全景）。目录追加 GT-12828 一级条目及三个变更点子章节；版本历史 v6→v7。"
+    },
+    {
+      "version": 41,
+      "generated_at": "2026-08-07",
+      "webapp_commit": "0b575c4",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12791",
+      "incremental": true,
+      "summary": "GT-12807.html v7→v8：追加 GT-12791「相似检测模块优化」需求体（3 个变更点）。变更1：触发动作 label 调整——actionMarkDelivery「标记投递」→「进行下一步」（en: Mark & Deliver → Next Step，与 GT-12719 策略流水线模块的 pipeline.actionNextStep 术语呼应但 i18n key 独立互不影响）、actionBlock「阻断」→「拒收」（value 不变，action-options.ts 不改），动作顺序：进行下一步/隔离/审核/拒收/丢弃；errorTagRequired 文案去除动作名引用改为「启用该动作时需至少启用一种标记方式」（en: At least one tag mode is required when this action is enabled）。变更2：附加策略新增正文标记——TagDeliveryPanel.tsx 信头标记下方对称追加第三行（tag_body_enabled Switch + tag_body_content 自由文本 Input，data-testid=similar-detection-tag-body-switch/content），types.ts 追加两个可选字段，新增 i18n key tagBodyLabel/tagBodyPlaceholder（zh/en），tagModeHint 提示文案同步更新（含「正文标记」）。变更3：① 校验逻辑拆分——「未选任何标记」→ errorTagRequired，「已选但字段为空」→ 新增 errorTagFieldRequired（zh「已启用的标记方式内容不能为空」/en「Enabled tag modes cannot have empty content」）；② 移除豁免提示条（renderExemptionNote函数+两处调用+Link/ExternalLink import）；③ 按钮区 justify-between→justify-end。附截图 5 张（摄制于「投递」措辞阶段，实际以「进行下一步」为准）：gt12791-page-default（页面全景）、gt12791-action-dropdown-send（5选项下拉）、gt12791-tag-panel-default（动作选中后标记面板）、gt12791-footer-buttons（完整面板+靠右按钮区 justify-end）、gt12791-validation-error-none（errorTagFieldRequired toast）。目录追加 GT-12791 一级条目及三个变更点子章节；版本历史 v7→v8。"
+    },
+    {
+      "version": 42,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "9f5217a",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12790",
+      "incremental": true,
+      "summary": "GT-12807.html v8→v9：追加 GT-12790「相似邮件与主题检测：交互优化」需求体（1 个变更点）。背景：检测粒度可切换「全方向聚合」与「按方向独立检测」，方向卡片（DirectionCard.tsx）开启观察模式后外层容器会切换为黄色（border-amber-300/bg-amber-50/50），但聚合卡片（AggregateCard.tsx）外层容器颜色是硬编码固定值，从不随 observe_mode 变化，只有内部徽标变黄，导致两种检测粒度下观察模式视觉表现不一致。修复方案：AggregateCard.tsx 外层容器 className 改为与 DirectionCard.tsx 完全一致的条件判断（复用相同色值与逻辑，不新增颜色定义，不修改 DirectionCard.tsx），保留 240ms 过渡动画使颜色切换平滑。附截图 3 张：gt12790-aggregate-before-fix（聚合卡片观察模式关闭态）、gt12790-aggregate-after-fix（聚合卡片观察模式开启态，修复后已变黄）、gt12790-direction-observe-reference（方向卡片观察模式开启态，对齐参照）。目录追加 GT-12790 一级条目及变更点子章节；版本历史 v8→v9。"
+    },
+    {
+      "version": 43,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "386aa38",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12833",
+      "incremental": true,
+      "summary": "GT-12807.html v9→v10：追加 GT-12833「认证协议检查：动作精简为5项，默认动作改为“标记放行”」需求体（3 个变更点）。变更1：PROTOCOL_ACTIONS（SPF/DKIM/PTR 共用）与 DMARC_ACTIONS 均由 6 项精简为 5 项，移除语义与「标记放行」（mark-delivery）高度重叠的 accept（「进行下一步」），四个协议 Tab 统一收敛为拒收/丢弃/隔离/审核/标记放行；i18n key protocolActionShort.accept/protocolActionDesc.accept 保留未删除，仅不再被引用。本变更反向调整了 GT-12801 变更2「DMARC处置策略新增“进行下一步”选项」的原有结论（GT-12801 曾专门为 DMARC 扩充 accept，本次又将其移除），已在 GT-12801 处对应标题/方案概述打删除线标注并交叉链接到本需求，另追加差异标注 D-005 说明反向调整关系。变更2：CheckItem 缺省 fallback 由 { enabled: false, action: 'accept' } 改为 { enabled: true, action: 'mark-delivery' }（未配置项默认变为“开启+标记放行”而非“关闭+进行下一步”）；Select onValueChange 回调中原 enabled: action !== 'accept' 联动逻辑简化为固定 enabled: true，动作选择与检查项启停彻底解耦；auth-spoofing-labels.ts 中 dominantAction() 的 fallback 参数默认值同步由 'accept' 改为 'mark-delivery'。变更3：「宽松」预设模板（TEMPLATES.loose）中 SPF（none/temperror）、DKIM（partial/none）、PTR（noptr）原 accept 预设值全部替换为 mark-delivery，与「标准」「严格」模板动作取值风格保持一致；auth-spoofing-templates.ts 的 applyGroup() 函数内两处（已有 key 分支、新增 key 分支）根据 action !== 'accept' 计算 enabled 的逻辑同步简化为固定 enabled: true；「标准」「严格」模板本身未使用 accept，不受影响。附截图 4 张（真实浏览器 agent-browser 采集，自定义/宽松模板下拉展开态）：gt12833-spf-fail-dropdown-5options（SPF硬拒绝Fail动作下拉，5项：拒收/丢弃/隔离/审核/标记放行）、gt12833-spf-softfail-dropdown-5options（SPF软拒绝SoftFail动作下拉，同5项）、gt12833-dmarc-reject-dropdown-5options（DMARC p=reject动作下拉，验证DMARC_ACTIONS与PROTOCOL_ACTIONS已重新对齐）、gt12833-loose-template-none-tmperror-enabled（宽松模板下SPF“未维护None”“查询失败TempError”两行均为启用态+标记放行，展开标记方式附加配置面板）。目录追加 GT-12833 一级条目及三个变更点子章节（各含1.1方案概述/1.2截图式交互预览/1.3逐元素说明结构）；差异标注区追加 D-005（记录 GT-12801 变更2 已被本需求反向调整）；待确认事项区追加 Q-003（截图中“标记方式”面板内 主题标记/信头标记/正文标记 三个 Switch 行内文案在本次截图环境下渲染为空白方块，经可访问性树核对 DOM 文本本身未损坏，推测为截图当时字体资源未完全加载，与本次改动无关，待正式验收环境复核）；版本历史 v9→v10。"
+    },
+    {
+      "version": 44,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "bc57fee",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12826",
+      "incremental": true,
+      "summary": "GT-12807.html v10→v11：追加 GT-12826「内容规则规则使用错误图标问题解决」需求体（2 个变更点）。背景（现场验收意见）：内容规则新建/编辑抽屉「模拟测试」结果反馈中，“命中”使用红色 XCircle 失败图标（border-rose-200 bg-rose-50 text-rose-700），“未命中”反而使用绿色 CheckCircle2 成功图标（border-emerald-200 bg-emerald-50 text-emerald-700），与“命中/未命中均为正常判定结果、不代表处置好坏”的实际语义直接矛盾。变更1：命中态改为中性信息色 sky + Target 靶心图标（border-sky-200 bg-sky-50 text-sky-700，暗色态 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300），未命中态改为设计系统中性 muted token + MinusCircle 图标（border-border bg-muted text-muted-foreground，非硬编码颜色），文案 contentRules.testMatched「匹配」/testNotMatched「不匹配」不变，仅调整配色与图标；lucide-react import 移除 CheckCircle2/XCircle，新增 Target/MinusCircle。变更2：新增独立 testRunError state，testContentRule 接口调用失败（catch 分支）不再 setTestMatch(false) 伪装成“未命中”渲染绿色成功态，改为写入 testRunError 并单独渲染红色 destructive + AlertTriangle 提示（新增 i18n key contentRules.testFailed，zh:“测试执行失败，请稍后重试”/en:“Test failed to run, please try again”），与命中/未命中结果渲染路径互斥；测试内容变更、动作切换、重新点击运行测试三处既有清空联动同步补齐 testRunError 清空。新增单元测试 ContentRuleDrawer.test.tsx 锁定该交互语义（断言命中态 className 不含 rose/destructive，未命中态不含绿色成功态），避免回归。附截图 2 张（真实浏览器 agent-browser 采集）：gt12826-test-matched-sky（命中态，匹配内容与测试内容均为 aaaa，结果框浅蓝+靶心图标）、gt12826-test-not-matched-neutral（未命中态，测试内容改为 zzzz，结果框 muted 中性灰+减号圆圈图标）；接口执行失败态因需人工构造异常触发未截图，行为已通过源码 catch 分支逻辑确认，记为“不适用”。目录追加 GT-12826 一级条目及两个变更点子章节；版本历史 v10→v11。"
+    },
+    {
+      "version": 45,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "c16eb51",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12818",
+      "incremental": true,
+      "summary": "GT-12807.html v11→v12：追加 GT-12818「附件安全-反病毒去掉拒收，增加审核」需求体（2 个变更点）。功能路径：/zh/security/pipeline → 附件安全检测 → 配置 → 反病毒引擎页签 → 发现病毒后的处置（virus_action）下拉。变更1（移除拒收）：AntivirusTab.tsx 的 VIRUS_ACTIONS 由 ['quarantine', 'reject', 'discard'] 去掉 reject；attachment-security.ts 的 AntivirusActionConfig.virus_action 类型由 Exclude<AttachmentAction, 'accept' | 'partial_skip'> 收窄为 Exclude<AttachmentAction, 'accept' | 'partial_skip' | 'reject'>，从类型层面禁止写入 reject；i18n key actions.reject/actionDesc.reject 保留不删除（仍被 timeout_action 等场景引用），仅从本下拉解除引用；同一页签的扫描超时/不可用动作 timeout_action（['quarantine','reject','discard','accept']）不变，其中拒收保留。变更2（新增审核）：同一 VIRUS_ACTIONS 新增 audit，最终为 ['quarantine', 'audit', 'discard']（隔离/审核/丢弃），审核插在隔离与丢弃之间；名称与描述复用既有 i18n key actions.audit「审核」/actionDesc.audit「邮件进入待审核队列，人工确认后投递或退回」（zh/en 均已存在，无新增硬编码文案）；virus_action 类型本身已允许 audit 无需改动；DEFAULT_ANTIVIRUS_ACTIONS.virus_action 默认值仍为 quarantine 不变。仅调整该下拉动作候选列表，未改动其它功能模块。验证：tsc --noEmit 无附件安全相关报错，AntivirusTab.test.tsx 现有用例通过。附截图 1 张：gt12818-virus-action-dropdown（发现病毒后的处置下拉展开，三项候选 隔离/审核/丢弃、无拒收）——改用 VM 内 Playwright chromium 采集（VM 已装 Noto Sans CJK 字体），中文正常渲染肉眼可读，并经可访问性树核对候选项权威文本为 隔离/审核/丢弃（不含拒收）与视觉一致。注：截图脚本须用 localhost（非 127.0.0.1）访问 dev server，否则 Next dev 跨域 host 限制会阻断客户端水合导致页面停在 auth loading。目录追加 GT-12818 一级条目及两个变更点子章节（各含 x.1 方案概述/x.2 截图式交互预览/x.3 逐元素说明）；差异标注追加 D-006（已解决）；待确认事项 Q-004 初记为 agent-browser 沙箱字体缺失致方块，现已用 VM 内 Playwright 重采中文正常渲染并标记为已解决；版本历史 v11→v12。"
+    },
+    {
+      "version": 46,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "c16eb51",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-11990",
+      "incremental": true,
+      "summary": "GT-12807.html v12→v13：追加 GT-11990「投递与流量分析页面优化」需求体。明确各统计指标含义与统计口径；按方向将“延迟投递”改为“检测中”、接收“反垃圾处理队列”改为“检测队列”，并仅从明细展示中隐藏指定失败原因，保留其原始统计；彻底移除外发方向“延迟百分位趋势”和“队列趋势”模块及其页面引用、类型、mock、测试、国际化引用；附真实浏览器验证截图 GT-11990-delivery-traffic-default.png。"
+    },
+    {
+      "version": 47,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "c16eb51",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12818",
+      "incremental": true,
+      "summary": "GT-12807.html v13→v14：新增独立一级需求目录 GT-12818「附件安全检测——加密附件：提示词存在误导性问题解决」，不再作为既有 GT-12818 反病毒需求的第 3 个变更点。移除加密附件页签“收信方向默认：继续流水线”辅助描述；同步移除 zh/en/th/ru 国际化键 encrypted.receiveDefault；不修改其他功能模块；采用用户提供的修改后页面截图 gt12818-encrypted-attachment-after.png 作为结果态证据。"
+    },
+    {
+      "version": 48,
+      "generated_at": "2026-08-08",
+      "webapp_commit": "c16eb51",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12556",
+      "incremental": true,
+      "summary": "GT-12807.html v14→v15：新增 GT-12556「攻击时段分析：去掉雍总的邮件类型陈列模块」独立一级需求目录。移除邮件安全总览攻击时段分析堆叠柱状图底部的攻击类型图例及其布局预留空间；保留方向筛选、日内/周内切换、峰值提示、柱状图和高峰时段列表；采用用户提供的修改后页面截图 gt12556-attack-time-after.png 作为结果态证据。"
     }
   ]
 }

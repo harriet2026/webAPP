@@ -103,6 +103,59 @@ describe("SelectedConditions - multi-value quick filter chips (review finding 3/
     ).toBeInTheDocument();
   });
 
+  it("keeps a legacy single emailStatus visible and removable after loading an old template", async () => {
+    const onRemoveChip = vi.fn();
+    render(
+      <SelectedConditions
+        quick={baseQuick({ emailStatus: "partial_delivered" })}
+        advanced={emptyAdvanced}
+        aiConditions={[]}
+        onClearAll={vi.fn()}
+        onRemoveChip={onRemoveChip}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        /emailDisposal\.filters\.legacyStatuses\.partial_delivered/,
+      ),
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: /emailDisposal\.search\.clearAll:/,
+      }),
+    );
+    expect(onRemoveChip).toHaveBeenCalledWith("q-emailStatus");
+  });
+
+  it("renders current and legacy multi-status chips with readable labels from their separate dictionaries", () => {
+    render(
+      <SelectedConditions
+        quick={baseQuick({
+          emailStatuses: ["delivered", "bounced", "pending_review"],
+        })}
+        advanced={emptyAdvanced}
+        aiConditions={[]}
+        onClearAll={vi.fn()}
+        onRemoveChip={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByText(/emailDisposal\.filters\.statuses\.delivered/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/emailDisposal\.filters\.legacyStatuses\.bounced/),
+    ).toBeInTheDocument();
+    // The historical top-level alias means "detecting", not the newer raw
+    // recipient status with the same spelling (which maps to audit pending).
+    expect(
+      screen.getByText(
+        /emailDisposal\.filters\.legacyStatuses\.pending_review/,
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("renders one chip per selected disposal policy key with the module name", () => {
     render(
       <SelectedConditions
@@ -211,7 +264,7 @@ describe("SelectedConditions - multi-value quick filter chips (review finding 3/
 });
 
 // GT-12368: AI 智能搜索 filter 全覆盖新增了三个 AI 专用字段（received_at 日期/
-// display_status 17 值枚举/disposal_policy_key 模块 key）；解析结果原先直接以
+// display_status 13 值枚举/disposal_policy_key 模块 key）；解析结果原先直接以
 // `${field}: ${value}` 渲染裸字段名，本组用例锁定它们改走与 advanced chips 相同
 // 的本地化格式（field/op/value 三段皆本地化）。
 describe("SelectedConditions - AI condition chips localization (GT-12368)", () => {
@@ -436,6 +489,38 @@ describe("SelectedConditions - advanced chip multi-value enum mapping (GT-12368)
     expect(
       screen.getByText(
         /emailDisposal\.filters\.actions\.quarantine,emailDisposal\.filters\.actions\.drop/,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps retired display-status values readable in saved advanced filters", () => {
+    const advanced: AdvancedFilter = {
+      operator: "AND",
+      groups: [
+        {
+          operator: "AND",
+          conditions: [
+            {
+              field: "display_status",
+              op: "in" as never,
+              value: ["partial_delivered", "reviewed_rejected"] as never,
+            },
+          ],
+        },
+      ],
+    };
+    render(
+      <SelectedConditions
+        quick={baseQuick()}
+        advanced={advanced}
+        aiConditions={[]}
+        onClearAll={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        /emailDisposal\.filters\.legacyStatuses\.partial_delivered,emailDisposal\.filters\.legacyStatuses\.reviewed_rejected/,
       ),
     ).toBeInTheDocument();
   });

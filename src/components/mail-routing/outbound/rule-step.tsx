@@ -68,7 +68,7 @@ import { useScopedApiRequest } from '@/lib/api/client';
 import { getUnifiedRules, createUnifiedRule, updateUnifiedRule, deleteUnifiedRule } from '@/lib/api/unified-rules';
 import { listActiveProxysvrGroups } from '@/lib/api/proxysvr';
 import type { RuleNode } from '@/types/unified-rules';
-import { INTENT_TYPES, type IntentType } from '@/types/intent-engine';
+import { MultiSelectFilter } from '@/components/email-disposal/lib/multi-select-filter';
 import type { ProxysvrGroup } from '@/types/proxysvr';
 import {
   unifiedToRow,
@@ -112,17 +112,11 @@ const RCPT_USER_FIELD_REVERSE: Record<string, RcptUserKind> = { recipient: 'to',
 const CLIENT_IP_OPERATORS = ['eq', 'ne', 'cidr', 'match'];
 const SCALAR_TEXT_OPERATORS = ['eq', 'ne', 'contain', 'not_contain', 'match', 'suffix', 'prefix'];
 
-// 与 internal/api/intent_engine_helper.go::intentToCACTags 保持一致。出站路由仍然匹配
-// 引擎实际消费的 cac_int_tag，而不是把 UI 展示名或 sys:mark:* 写进条件树。
-const INTENT_TAG_VALUES: Record<IntentType, string> = {
-  porn_gambling: '5',
-  political: '6',
-  phishing: '7\n9',
-  spam: '3\n4',
-  subscription: '2',
-};
-
-const INTENT_TAG_NONE = '__any_intent_tag__';
+// GT-12854：意图引擎标签逐值列出（不再按五类分组合并 3/4、7/9），支持多选，
+// 补上此前缺失的「正常(1)」。取值语义与 internal/models/email_type.go::
+// EmailTypeFromCacIntTag 对齐：1=正常、2=订阅、3=垃圾、4=广告、5=色情赌博、
+// 6=涉政、7=钓鱼、8=账号失陷、9=病毒。条件树仍写引擎实际消费的 cac_int_tag。
+const INTENT_TAG_ALL_VALUES = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 function normalizedIntentTagValues(raw: string): string {
   const values = raw
@@ -134,19 +128,20 @@ function normalizedIntentTagValues(raw: string): string {
   return [...new Set(values)].sort((a, b) => Number(a) - Number(b)).join('\n');
 }
 
-/** 只把与意图引擎五类标签集合完全等价的节点暴露给下拉框。像 cac_int_tag eq 3
- * 这种更窄的历史条件无法由"垃圾（3/4）"准确表达，必须留在 otherConditions 原样透传，
- * 不能在一次普通编辑保存后被悄悄放宽。 */
-function intentTypeFromCondition(node: RuleNode): IntentType | undefined {
+/** 把 cac_int_tag 条件节点解析成勾选值集合。eq 只接受单值；within 接受
+ * 已知标签值（1~9）的任意子集。含未知值（如 0 或 12）的节点无法由勾选列表
+ * 准确表达，返回 undefined 留在 otherConditions 原样透传，不能在一次普通
+ * 编辑保存后被悄悄改写。 */
+function intentTagsFromCondition(node: RuleNode): string[] | undefined {
   if (node.type !== 'condition' || node.field !== 'cac_int_tag' || !node.operator || !node.value) return undefined;
   if (node.operator !== 'eq' && node.operator !== 'within') return undefined;
 
-  const actual = normalizedIntentTagValues(node.value);
-  return INTENT_TYPES.find((intent) => {
-    const expected = normalizedIntentTagValues(INTENT_TAG_VALUES[intent]);
-    if (node.operator === 'eq' && expected.includes('\n')) return false;
-    return actual === expected;
-  });
+  const normalized = normalizedIntentTagValues(node.value);
+  if (!normalized) return undefined;
+  const values = normalized.split('\n');
+  if (node.operator === 'eq' && values.length > 1) return undefined;
+  if (!values.every((value) => INTENT_TAG_ALL_VALUES.includes(value))) return undefined;
+  return values;
 }
 
 type KnownSlot = 'clientIp' | 'senderDomain' | 'authUser' | 'rcptDomain' | 'rcptUser' | 'intentTag';
@@ -188,9 +183,10 @@ interface RuleDraft {
   rcptUserKind: RcptUserKind;
   rcptUser: string;
   rcptUserOperator?: string;
-  intentTag: IntentType | '';
-  /** 编辑态中与 intentTag 等价的原始条件节点。未修改下拉时原样回写，避免把历史 eq/within
-   * 或值分隔符格式做无意义改写；用户主动改选后清空并生成标准 within 节点。 */
+  /** 已勾选的意图引擎标签值（cac_int_tag 字面值，如 ['1','3']；空数组=不限）。 */
+  intentTags: string[];
+  /** 编辑态中与 intentTags 等价的原始条件节点。勾选集合未变化时原样回写，避免把
+   * 历史 eq/within 或值分隔符格式做无意义改写；改选后生成标准 within 节点。 */
   intentTagCondition?: RuleNode;
   /** 固定字段之外的更多条件（如 is_outbound），由 CompactConditionEditor 编辑；复合条件树、
    * 算子超出固定表单表达范围的节点和同槽位多余节点也存于此，保证原样透传。 */
@@ -214,7 +210,7 @@ function emptyDraft(): RuleDraft {
     rcptDomainMatch: 'contains',
     rcptUserKind: 'to',
     rcptUser: '',
-    intentTag: '',
+    intentTags: [],
     otherConditions: [],
   };
 }
@@ -238,7 +234,7 @@ function splitConditions(tree: ConditionTree): { known: Partial<Record<KnownSlot
   for (const node of topChildren) {
     const mapping = node.type === 'condition' && node.field ? SLOT_BY_FIELD[node.field] : undefined;
     const operatorExpressible = !!mapping && !!node.operator && mapping.operators.includes(node.operator);
-    const valueExpressible = mapping?.slot !== 'intentTag' || !!intentTypeFromCondition(node);
+    const valueExpressible = mapping?.slot !== 'intentTag' || !!intentTagsFromCondition(node);
     if (mapping && operatorExpressible && valueExpressible && !known[mapping.slot]) {
       known[mapping.slot] = node;
     } else {
@@ -274,7 +270,7 @@ function draftFromRow(row: OutboundRuleRow): RuleDraft {
     rcptUserKind,
     rcptUser: rcptUserNode?.value ?? '',
     rcptUserOperator: rcptUserNode?.operator,
-    intentTag: intentTagNode ? (intentTypeFromCondition(intentTagNode) ?? '') : '',
+    intentTags: intentTagNode ? (intentTagsFromCondition(intentTagNode) ?? []) : [],
     intentTagCondition: intentTagNode,
     otherConditions: other,
   };
@@ -301,12 +297,15 @@ function buildConditionTree(draft: RuleDraft): ConditionTree {
   if (rcptUser) {
     children.push({ type: 'condition', field: RCPT_USER_FIELD[draft.rcptUserKind], operator: draft.rcptUserOperator ?? 'contain', value: rcptUser });
   }
-  if (draft.intentTag) {
-    const originalIntent = draft.intentTagCondition ? intentTypeFromCondition(draft.intentTagCondition) : undefined;
+  if (draft.intentTags.length > 0) {
+    const selected = [...new Set(draft.intentTags)].sort((a, b) => Number(a) - Number(b));
+    const originalTags = draft.intentTagCondition ? intentTagsFromCondition(draft.intentTagCondition) : undefined;
+    const unchanged =
+      !!originalTags && originalTags.length === selected.length && originalTags.every((v) => selected.includes(v));
     children.push(
-      originalIntent === draft.intentTag
+      unchanged
         ? draft.intentTagCondition!
-        : { type: 'condition', field: 'cac_int_tag', operator: 'within', value: INTENT_TAG_VALUES[draft.intentTag] },
+        : { type: 'condition', field: 'cac_int_tag', operator: 'within', value: selected.join('\n') },
     );
   }
   return { type: 'AND', children };
@@ -320,7 +319,6 @@ export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
   const t = useTranslations('mailRouting.outbound.rule');
   const apiErrorMessage = useApiErrorMessage();
   const tRcpt = useTranslations('mailRouting.relay.fields');
-  const tIntent = useTranslations('intentEngine');
   const ts = useTranslations('mailRouting.shared');
   const tc = useTranslations('common');
   const { apiRequest } = useScopedApiRequest(tenantId);
@@ -759,28 +757,19 @@ export function RuleStep({ tenantId, channels, proxies }: RuleStepProps) {
               </div>
               <div className="space-y-1.5">
                 <Label>{t('fields.intentTag')}</Label>
-                <Select
-                  value={draft.intentTag || INTENT_TAG_NONE}
-                  onValueChange={(value) =>
-                    setDraft((current) => ({
-                      ...current,
-                      intentTag: value === INTENT_TAG_NONE ? '' : (value as IntentType),
-                      intentTagCondition: undefined,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="w-full" data-testid="mr-ob-rule-intent-tag-select">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={INTENT_TAG_NONE}>{t('fields.intentTagAny')}</SelectItem>
-                    {INTENT_TYPES.map((intent) => (
-                      <SelectItem key={intent} value={intent}>
-                        {tIntent(`intent.${intent}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <MultiSelectFilter
+                  options={INTENT_TAG_ALL_VALUES.map((value) => ({
+                    value,
+                    label: t(`fields.intentTagValue${value}`),
+                  }))}
+                  value={draft.intentTags}
+                  onChange={(intentTags) => setDraft((current) => ({ ...current, intentTags }))}
+                  placeholder={t('fields.intentTagAny')}
+                  selectedCountLabel={(count) => t('fields.intentTagSelected', { count })}
+                  clearLabel={t('fields.intentTagClear')}
+                  className="h-9 text-sm"
+                  triggerTestId="mr-ob-rule-intent-tag-select"
+                />
                 <p className="text-xs text-muted-foreground">{t('fields.intentTagHint')}</p>
               </div>
               <CompactConditionEditor

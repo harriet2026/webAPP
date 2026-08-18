@@ -1,9 +1,18 @@
-export type AuthSpoofingAction = 'accept' | 'reject' | 'quarantine' | 'audit' | 'discard';
+export type AuthSpoofingAction = 'accept' | 'reject' | 'quarantine' | 'audit' | 'mark-delivery' | 'discard';
 
 export interface CheckItem {
   enabled: boolean;
   action: AuthSpoofingAction;
   observe_mode: boolean;
+  /** 以下字段仅在 action === 'mark-delivery' 时生效，为可选的附加标记策略 */
+  tag_subject_enabled?: boolean;
+  tag_subject_position?: 'prefix' | 'suffix';
+  tag_subject_content?: string;
+  tag_header_enabled?: boolean;
+  tag_header_name?: string;
+  tag_header_value?: string;
+  tag_body_enabled?: boolean;
+  tag_body_content?: string;
 }
 
 export interface FormatChecksConfig {
@@ -30,6 +39,15 @@ export interface SimilarDomainConfig {
   observe_mode: boolean;
   threshold: number;
   protected_domains: string[];
+  /** 以下字段仅在 action === 'mark-delivery' 时生效，为可选的附加标记策略 */
+  tag_subject_enabled?: boolean;
+  tag_subject_position?: 'prefix' | 'suffix';
+  tag_subject_content?: string;
+  tag_header_enabled?: boolean;
+  tag_header_name?: string;
+  tag_header_value?: string;
+  tag_body_enabled?: boolean;
+  tag_body_content?: string;
 }
 
 export interface InternalUser {

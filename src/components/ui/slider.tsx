@@ -13,6 +13,7 @@ interface SliderProps {
   step?: number
   disabled?: boolean
   className?: string
+  'data-testid'?: string
 }
 
 function Slider({
@@ -23,10 +24,12 @@ function Slider({
   max = 100,
   step = 1,
   disabled,
+  'data-testid': testId,
 }: SliderProps) {
   return (
     <SliderPrimitive.Root
       data-slot="slider"
+      data-testid={testId}
       value={value}
       onValueChange={(v: number | number[], eventDetails: unknown) => {
         // base-ui 在单滑块（values.length === 1）场景下，指针/触摸拖拽与轨道点击路径
@@ -63,6 +66,7 @@ function Slider({
             key={index}
             index={index}
             data-slot="slider-thumb"
+            data-testid={testId ? `${testId}-thumb-${index}` : undefined}
             className="block size-4 shrink-0 rounded-full border border-primary bg-background shadow transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-disabled:pointer-events-none data-disabled:opacity-50"
           />
         ))}

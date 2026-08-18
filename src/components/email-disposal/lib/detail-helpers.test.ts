@@ -158,9 +158,10 @@ describe('recipientActionsForStatus', () => {
   test('audited status without an object_id exposes no actions', () => {
     expect(recipientActionsForStatus('audited', false)).toEqual([]);
   });
-  test('delivered statuses expose recall and notify regardless of object_id', () => {
-    expect(recipientActionsForStatus('delivered', false)).toEqual(['recall', 'notify']);
-    expect(recipientActionsForStatus('marked_delivered', false)).toEqual(['recall', 'notify']);
+  test('delivered statuses expose recall/notify/redeliver regardless of object_id', () => {
+    // GT-12880：已投递邮件追加重新投递（裁决"只要邮件还在就支持重投"）。
+    expect(recipientActionsForStatus('delivered', false)).toEqual(['recall', 'notify', 'redeliver']);
+    expect(recipientActionsForStatus('marked_delivered', false)).toEqual(['recall', 'notify', 'redeliver']);
   });
   test('non-operable statuses expose no actions', () => {
     expect(recipientActionsForStatus('blocked', false)).toEqual([]);
@@ -209,7 +210,7 @@ describe('isNewSender', () => {
 // for deterministic hits (blacklist/rule) rather than a misleading 0%/低 score.
 describe('deriveConfidence', () => {
   test('deriveConfidence prefers hitSource over score', () => {
-    expect(deriveConfidence({ prob: ['0.9'] }, 'blacklist')).toEqual({ kind: 'blacklist' });
+    expect(deriveConfidence({ prob: ['0', '0.1', '0.9'] }, 'blacklist')).toEqual({ kind: 'blacklist' });
   });
   // review Important: int_tag is a 0-7 severity bucket (see deriveThreatLevel),
   // NOT a probability -- it must never be used as a confidence fallback (a
@@ -221,36 +222,25 @@ describe('deriveConfidence', () => {
     expect(deriveConfidence({ int_tag: 1 }, undefined)).toEqual({ kind: 'none' });
   });
   test('rule hitSource also takes priority over any score', () => {
-    expect(deriveConfidence({ prob: ['0.9'] }, 'rule')).toEqual({ kind: 'rule' });
+    expect(deriveConfidence({ prob: ['0', '0.1', '0.9'] }, 'rule')).toEqual({ kind: 'rule' });
   });
-  test('score kind carries a 0-100 pct derived from cac prob (mirrors demo renderMailType)', () => {
-    expect(deriveConfidence({ prob: ['0.9'] }, undefined)).toEqual({ kind: 'score', pct: 90 });
-    expect(deriveConfidence({ prob: ['42'] }, undefined)).toEqual({ kind: 'score', pct: 42 });
+  test('score is the intent-engine spam probability: sum of cac.prob indexes >= 2', () => {
+    expect(deriveConfidence({ prob: ['0.99', '0.005', '0.9'] }, undefined)).toEqual({ kind: 'score', score: 0.9 });
+    expect(deriveConfidence({ prob: ['0.2', '0.2', '0.3', '0.25', '0.05'] }, undefined)).toEqual({ kind: 'score', score: 0.6 });
+  });
+  test('a present zero intent-engine score remains an explicit 0', () => {
+    expect(deriveConfidence({ prob: ['1', '0', '0'] }, undefined)).toEqual({ kind: 'score', score: 0 });
+  });
+  test('prob[0] alone is not an intent-engine score', () => {
+    expect(deriveConfidence({ prob: ['0.9'] }, undefined)).toEqual({ kind: 'none' });
   });
   test('no cac and no hitSource yields none', () => {
     expect(deriveConfidence(undefined, undefined)).toEqual({ kind: 'none' });
     expect(deriveConfidence({}, undefined)).toEqual({ kind: 'none' });
   });
 
-  // CONFIDENCE SOURCE FIX (task 7): the real confidence for the overview
-  // card is phish_agent_check.confidence, not cac.prob -- phishConfidence
-  // must win over any cac score when present, but a deterministic
-  // hitSource (blacklist/rule) still outranks even the phish-agent score.
-  test('phishConfidence takes priority over cac.prob when both present', () => {
-    expect(deriveConfidence({ prob: ['0.2'] }, undefined, 0.91)).toEqual({ kind: 'score', pct: 91 });
-    expect(deriveConfidence({ prob: ['0.2'] }, undefined, 91)).toEqual({ kind: 'score', pct: 91 });
-  });
-  test('hitSource still wins over phishConfidence', () => {
-    expect(deriveConfidence(undefined, 'blacklist', 0.91)).toEqual({ kind: 'blacklist' });
-    expect(deriveConfidence(undefined, 'rule', 91)).toEqual({ kind: 'rule' });
-  });
-  test('phishConfidence alone (no cac) yields a score', () => {
-    expect(deriveConfidence(undefined, undefined, 0.5)).toEqual({ kind: 'score', pct: 50 });
-  });
-  test('falls back to cac.prob when phishConfidence is absent/zero/NaN', () => {
-    expect(deriveConfidence({ prob: ['0.9'] }, undefined, undefined)).toEqual({ kind: 'score', pct: 90 });
-    expect(deriveConfidence({ prob: ['0.9'] }, undefined, 0)).toEqual({ kind: 'score', pct: 90 });
-    expect(deriveConfidence({ prob: ['0.9'] }, undefined, Number.NaN)).toEqual({ kind: 'score', pct: 90 });
+  test('invalid probability entries are skipped like the backend helper', () => {
+    expect(deriveConfidence({ prob: ['0', '0', '0.5', 'oops', '0.25'] }, undefined)).toEqual({ kind: 'score', score: 0.75 });
   });
 });
 
@@ -287,22 +277,27 @@ describe('deriveHitSource', () => {
     expect(deriveHitSource({} as unknown as MailLogDetail)).toBeUndefined();
   });
 
-  // A real score (phish_agent_check.confidence or cac.prob) must always win
-  // over a policy_key-derived hitSource -- deriveConfidence gives hitSource
-  // supremacy over score, so deriveHitSource must itself defer whenever a
-  // real score exists, or it would silently suppress that score.
-  test('phish_agent_check.confidence present defers to the real score (undefined)', () => {
+  // Only an intent-engine score wins over a policy-derived hitSource. Agent
+  // confidence is displayed separately and must not replace this value.
+  test('phish_agent_check.confidence does not replace a missing intent score', () => {
     expect(deriveHitSource({
       phish_agent_check: { status: 'done', checked: true, confidence: 0.9 },
       disposal_basis: { policy_key: 'SBL', rule_name: 'r', rule_id: 'SBL-1', action: 'quarantine' },
+    } as unknown as MailLogDetail)).toBe('blacklist');
+  });
+
+  test('cac_result with an intent-engine score defers to the real score (undefined)', () => {
+    expect(deriveHitSource({
+      cac_result: { prob: ['0.5', '0.1', '0.4'] },
+      disposal_basis: { policy_key: 'IPBL', rule_name: 'r', rule_id: 'IPBL-1', action: 'quarantine' },
     } as unknown as MailLogDetail)).toBeUndefined();
   });
 
-  test('cac_result.prob with a numeric value defers to the real score (undefined)', () => {
+  test('a short prob array has no intent-engine score and keeps the hitSource', () => {
     expect(deriveHitSource({
       cac_result: { prob: ['0.5'] },
       disposal_basis: { policy_key: 'IPBL', rule_name: 'r', rule_id: 'IPBL-1', action: 'quarantine' },
-    } as unknown as MailLogDetail)).toBeUndefined();
+    } as unknown as MailLogDetail)).toBe('blacklist');
   });
 
   // GT-12214 review Important: SBL/IPBL/UBL/RBL are shared black/allow-list

@@ -30,7 +30,7 @@ import {
 import { format, differenceInDays, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { EXECUTION_ACTIONS } from "@/types/email-disposal";
+import { DISPLAY_STATUSES, EXECUTION_ACTIONS } from "@/types/email-disposal";
 import type { DisposalQuickFilter } from "@/types/email-disposal";
 import { MultiSelectFilter } from "./lib/multi-select-filter";
 import {
@@ -44,6 +44,7 @@ interface QuickFiltersProps {
   value: DisposalQuickFilter;
   onChange: (value: DisposalQuickFilter) => void;
   disposalRuleOptions?: { id: string; name: string }[];
+  onDisposalRuleSearchChange?: (value: string) => void;
   tenantSelector?: ReactNode;
 }
 
@@ -51,6 +52,7 @@ export function QuickFilters({
   value,
   onChange,
   disposalRuleOptions = [],
+  onDisposalRuleSearchChange,
   tenantSelector,
 }: QuickFiltersProps) {
   const t = useTranslations("emailDisposal.filters");
@@ -134,25 +136,7 @@ export function QuickFilters({
     },
     [tErrors],
   );
-  const statuses = [
-    "rejected",
-    "bounced",
-    "discarded",
-    "quarantine_pending",
-    "sideline_pending",
-    "audit_pending",
-    "delivering",
-    "delivered",
-    "partial_delivered",
-    "delivery_failed",
-    "recall_pending",
-    "recall_success",
-    "recall_failed",
-    "partial_recall_success",
-    "deleted",
-    "expired",
-    "reviewed_rejected",
-  ] as const;
+  const statuses = DISPLAY_STATUSES;
 
   const startTime = value.sendReceiveTime?.start;
   const endTime = value.sendReceiveTime?.end;
@@ -309,31 +293,34 @@ export function QuickFilters({
             />
           </div>
 
-          <div className="order-11 space-y-1">
+          <div className="order-11 space-y-1" data-testid="disposal-action-filter">
             <label className="text-xs font-medium text-muted-foreground">
               {t("executionAction")}
             </label>
-            <Select
-              value={value.executionAction || ""}
-              onValueChange={(v) =>
-                onChange({ ...value, executionAction: v || undefined })
+            <MultiSelectFilter
+              options={actions.map((action) => ({
+                value: action,
+                label: t(`actions.${action}`),
+              }))}
+              value={
+                value.executionActions ??
+                (value.executionAction ? [value.executionAction] : [])
               }
-            >
-              <SelectTrigger
-                data-testid="disposal-action-filter"
-                className="h-9 w-full text-xs"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">{t("all")}</SelectItem>
-                {actions.map((a) => (
-                  <SelectItem key={a} value={a}>
-                    {t(`actions.${a}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(executionActions) =>
+                onChange({
+                  ...value,
+                  executionAction: undefined,
+                  executionActions:
+                    executionActions.length > 0
+                      ? (executionActions as typeof value.executionActions)
+                      : undefined,
+                })
+              }
+              placeholder={t("all")}
+              selectedCountLabel={(count) => `${count} ${tCommon("selected")}`}
+              clearLabel={t("clearAll")}
+              className="h-9"
+            />
           </div>
 
           <div className="order-9 space-y-1" data-testid="disposal-status-filter">
@@ -537,7 +524,10 @@ export function QuickFilters({
                         data-testid="disposal-policy-rule-search"
                         className="h-8 pl-8 text-xs"
                         value={ruleSearch}
-                        onChange={(event) => setRuleSearch(event.target.value)}
+                        onChange={(event) => {
+                          setRuleSearch(event.target.value);
+                          onDisposalRuleSearchChange?.(event.target.value);
+                        }}
                         placeholder={t("policyRulePlaceholder")}
                       />
                     </div>

@@ -19,7 +19,6 @@ import {
 } from "@/components/shared/page-shell";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
-  complexContentRuleEditHref,
   ContentRulesTable,
 } from "@/components/security/content-rules/ContentRulesTable";
 import { ContentRuleDrawer } from "@/components/security/content-rules/ContentRuleDrawer";
@@ -44,17 +43,12 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { useProductForm } from "@/contexts/product-form-context";
 import { canManageContentRules } from "@/components/security/content-rules/access";
-// GT-11698: 必须用 i18n 的 locale-aware router。仓库没有 middleware.ts，next-intl
-// 不做 locale 重写，所有路由都要显式 locale 段；用 next/navigation 的 router.push
-// 推 "/rules/data?..." 会被匹配成 [locale]="rules" + (dashboard)/data 而 404。
-import { useRouter } from "@/i18n/navigation";
 import { RuleImportExportDialog } from "@/components/rules/RuleImportExportDialog";
 import {
   exportUnifiedRules,
   previewUnifiedRulesImport,
   executeUnifiedRulesImport,
 } from "@/lib/api/unified-rules";
-import { ApiError } from "@/lib/api/client";
 import { ModuleMasterSwitch } from "@/components/security/ModuleMasterSwitch";
 import { useApiErrorMessage } from "@/lib/api/use-api-error-message";
 
@@ -65,14 +59,17 @@ function toRFC3339(value?: string): string | null {
   return d.toISOString();
 }
 
-export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
+export function ContentRulesPage({ embedded, onEnabledChange }: {
+  embedded?: boolean;
+  /** 向父级（策略流水线左导航）回传模块总开关启用态，用于圆点/摘要联动。 */
+  onEnabledChange?: (enabled: boolean) => void;
+} = {}) {
   const t = useTranslations();
   const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin, isTenantAdmin, user, selectedTenantId } = useAuth();
   const { capabilities } = useProductForm();
-  const router = useRouter();
 
   // GT-12174 / GT-12334: 内容规则是策略流水线阶段3（模块A），tenant 级安全模块。
   // 租户管理员应能配置本租户规则；多租户下平台管理员在*平台视角*不可管理（后端
@@ -303,15 +300,15 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
           t(editingRule ? "common.updateSuccess" : "common.createSuccess"),
         );
       } catch (error) {
-        const message =
-          error instanceof ApiError && error.message
-            ? error.message
-            : t("common.error");
-        toast.error(message);
+        // 走与本页其他写操作同一条本地化路径：后端给稳定错误码 + 参数
+        // （正则不合法时带 pattern 与原因），前端按当前语言渲染。
+        // 这里原来直接 toast 后端的英文 message，既不四语、也把
+        // "invalid regex pattern ..." 这种排障文案当成了用户文案。
+        toast.error(apiErrorMessage(error));
         throw error;
       }
     },
-    [apiRequest, editingRule, queryClient, queryKey, t],
+    [apiErrorMessage, apiRequest, editingRule, queryClient, queryKey, t],
   );
 
   const handleCopy = useCallback(
@@ -368,7 +365,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
         </Button>
       )}
       {isContentRulesAdmin && (
-        <Button onClick={() => handleOpenDrawer()}>
+        <Button onClick={() => handleOpenDrawer()} data-testid="content-rule-create">
           <Plus className="h-4 w-4 mr-2" />
           {t("contentRules.createRule")}
         </Button>
@@ -381,6 +378,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
       <div className="space-y-4">
         <div className="flex flex-wrap gap-3 items-center">
           <Input
+            data-testid="content-rules-search"
             placeholder={t("contentRules.searchPlaceholder")}
             value={search}
             onChange={(e) => {
@@ -484,7 +482,12 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
               setSelectedIds([]);
             }}
             onEdit={(rule) => handleOpenDrawer(rule)}
-            onEditComplex={(ruleId) => router.push(complexContentRuleEditHref(ruleId))}
+            // 复杂规则编辑与新建同款抽屉（不再跳 /rules/data 技术编辑器），
+            // 抽屉对复杂规则回填基础字段、匹配/范围/方向用默认值。
+            onEditComplex={(ruleId) => {
+              const rule = ruleViews.find((r) => r.rule.id === ruleId);
+              if (rule) handleOpenDrawer(rule);
+            }}
             onDelete={(rule) =>
               setDeleteTarget({ id: rule.rule.id, name: rule.rule.name })
             }
@@ -567,6 +570,7 @@ export function ContentRulesPage({ embedded }: { embedded?: boolean } = {}) {
         page="content_rules"
         title={t("contentRules.title")}
         actions={actionButtons}
+        onEnabledChange={onEnabledChange}
       >
         {content}
       </ModuleMasterSwitch>

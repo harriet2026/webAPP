@@ -27,10 +27,12 @@ export interface TrendSeries {
 
 export interface NetIface {
   device: string;
-  rx_pps: number;
-  tx_pps: number;
-  drop_rate: number;
-  retransmit_rate: number;
+  rx_mbps: number | null;
+  tx_mbps: number | null;
+  rx_pps: number | null;
+  tx_pps: number | null;
+  drop_rate: number | null;
+  retransmit_rate: number | null;
 }
 
 export interface HardwareResp extends DegradeInfo {

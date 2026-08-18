@@ -92,18 +92,26 @@ describe('ThreatSummaryCard', () => {
     expect(typeEl.textContent).toContain('邮件类型：钓鱼邮件');
   });
 
-  it('renders confidence from phish_agent_check.confidence, not cac.prob (A2 / CONFIDENCE SOURCE FIX)', () => {
+  it('renders the intent-engine score from the sum of cac.prob spam classes', () => {
     renderCard(baseDetail({
-      cac_result: { prob: ['0.2'] }, // must NOT win
+      cac_result: { prob: ['0.001', '0.002', '0.7', '0.2'] },
       phish_agent_check: { status: 'done', checked: true, confidence: 0.91 },
     }));
     const confEl = screen.getByTestId('email-disposal-overview-confidence');
-    expect(confEl.textContent).toContain('91%');
-    expect(confEl.textContent).not.toContain('20%');
+    expect(confEl.textContent).toContain('置信度 0.9');
+    expect(confEl.textContent).not.toContain('%');
   });
 
   it('renders no confidence element when there is no score/hitSource (kind=none)', () => {
     renderCard(baseDetail({ cac_result: undefined, phish_agent_check: undefined }));
+    expect(screen.queryByTestId('email-disposal-overview-confidence')).not.toBeInTheDocument();
+  });
+
+  it('does not substitute phishing-agent confidence when the intent score is absent', () => {
+    renderCard(baseDetail({
+      cac_result: undefined,
+      phish_agent_check: { status: 'done', checked: true, confidence: 0.91 },
+    }));
     expect(screen.queryByTestId('email-disposal-overview-confidence')).not.toBeInTheDocument();
   });
 
@@ -132,11 +140,13 @@ describe('ThreatSummaryCard', () => {
 
   it('a real score still wins over a blacklist policy_key (G3 priority)', () => {
     renderCard(baseDetail({
+      cac_result: { prob: ['0.001', '0.002', '0.91'] },
       phish_agent_check: { status: 'done', checked: true, confidence: 0.91 },
       disposal_basis: { policy_key: 'SBL', rule_name: '发件人黑名单', rule_id: 'SBL-1', action: 'quarantine' },
     }));
     const confEl = screen.getByTestId('email-disposal-overview-confidence');
-    expect(confEl.textContent).toContain('91%');
+    expect(confEl.textContent).toContain('置信度 0.91');
+    expect(confEl.textContent).not.toContain('%');
     expect(confEl.textContent).not.toContain('黑名单命中');
   });
 
@@ -198,40 +208,38 @@ describe('ThreatSummaryCard', () => {
     expect(screen.queryByTestId('email-disposal-overview-hit-domain-age')).not.toBeInTheDocument();
   });
 
-  it('renders AI判定依据 inline text sourced from disposal_basis (formatHitDetail), visible without clicking', () => {
-    renderCard(baseDetail({
-      disposal_basis: { policy_key: 'AI-SPOOF', rule_name: '高管仿冒识别', rule_id: 'AI-SPOOF-1', action: 'quarantine', hit_values: { spoof_type: '高管', confidence: '94' } },
-    }));
-    const label = screen.getByText('AI判定依据：');
-    expect(label.parentElement?.textContent).toContain('AI 判定为 高管 仿冒（置信度：94%）');
-  });
-
-  // GT-12578：这条用例此前断言「cac_result.description 显示为 AI判定依据」，
-  // 把缺陷行为编码成了期望值。cac_result 来自外部 CAC 反垃圾云查服务
-  // （internal/cac/client.go 的 CAC_PROT_DESC），不是我们的 AI 智能体
-  // （phish_agent_check），贴 AI 标签属于误标。现改为断言正确的来源标签。
-  it('云查描述用「云查依据」标签而不是 AI判定依据 (GT-12578)', () => {
-    renderCard(baseDetail({
-      disposal_basis: undefined,
-      phish_agent_check: undefined,
-      cac_result: { description: '命中已知钓鱼特征库' },
-    }));
+  it.each([
+    {
+      source: 'disposal_basis',
+      overrides: {
+        disposal_basis: {
+          policy_key: 'AI-SPOOF',
+          rule_name: '高管仿冒识别',
+          rule_id: 'AI-SPOOF-1',
+          action: 'quarantine',
+          hit_values: { spoof_type: '高管', confidence: '94' },
+        },
+      },
+    },
+    {
+      source: 'phish_agent_check.summary',
+      overrides: {
+        phish_agent_check: {
+          status: 'completed',
+          checked: true,
+          verdict: 'malicious',
+          risk_level: 'high',
+          summary: 'credential harvesting page detected',
+        },
+      },
+    },
+    {
+      source: 'cac_result.description',
+      overrides: { cac_result: { description: '命中已知钓鱼特征库' } },
+    },
+  ])('does not render the removed inline verdict for $source', ({ overrides }) => {
+    renderCard(baseDetail(overrides));
     expect(screen.queryByText('AI判定依据：')).not.toBeInTheDocument();
-    const label = screen.getByText('云查依据：');
-    expect(label.parentElement?.textContent).toContain('命中已知钓鱼特征库');
-  });
-
-  // GT-12578：真实的 AI 智能体结论必须压过云查文案——此前的 fallback 链把
-  // cac_result.description 排在 phish_agent_check.summary 之前，两者都存在时
-  // 显示的是云查的话，却挂着 AI 的标签。
-  it('AI 智能体结论优先于云查描述 (GT-12578)', () => {
-    renderCard(baseDetail({
-      disposal_basis: undefined,
-      cac_result: { description: '命中已知钓鱼特征库' },
-      phish_agent_check: { status: 'completed', checked: true, summary: 'credential harvesting page detected' },
-    }));
-    const label = screen.getByText('AI判定依据：');
-    expect(label.parentElement?.textContent).toContain('credential harvesting page detected');
     expect(screen.queryByText('云查依据：')).not.toBeInTheDocument();
   });
 
@@ -250,25 +258,6 @@ describe('ThreatSummaryCard', () => {
     expect(basis.textContent).toContain('rule f01-receive-mark-001 matched at data stage');
   });
 
-  it('falls back to phish_agent_check.summary for AI判定依据 (real sidelined mail has no disposal_basis/cac)', () => {
-    // Real environment: an AI-agent-sidelined phishing mail has no
-    // disposal_basis/cac_result, but phish_agent_check carries the agent's
-    // own conclusion summary -- that real verdict must show inline instead of
-    // leaving the row empty behind a manual "生成 AI 推理" button.
-    renderCard(baseDetail({
-      disposal_basis: undefined,
-      cac_result: undefined,
-      phish_agent_check: { status: 'completed', checked: true, verdict: 'malicious', risk_level: 'high', summary: 'credential harvesting page detected' },
-    }));
-    const label = screen.getByText('AI判定依据：');
-    expect(label.parentElement?.textContent).toContain('credential harvesting page detected');
-  });
-
-  it('does NOT render the AI判定依据 row when neither disposal_basis nor cac_result.description nor phish_agent_check.summary is available', () => {
-    renderCard(baseDetail({ disposal_basis: undefined, cac_result: undefined, phish_agent_check: undefined }));
-    expect(screen.queryByText('AI判定依据：')).not.toBeInTheDocument();
-  });
-
   it('renders 处置依据 INSIDE the threat summary card, with a module/rule/action inline row', () => {
     renderCard(baseDetail({
       disposal_basis: { policy_key: 'AI-PHISH', rule_name: 'BEC钓鱼识别', rule_id: 'AI-PHISH-003', action: 'quarantine' },
@@ -281,11 +270,39 @@ describe('ThreatSummaryCard', () => {
     expect(basisEl.textContent).toContain('隔离');
   });
 
-  it('renders SenderActions header buttons (A4/A5/A6)', () => {
+  it('matches the origin bulk outcome row and multi-basis popover', async () => {
+    const user = userEvent.setup();
+    renderCard(baseDetail({
+      recipients: ['a@example.com', 'b@example.com'],
+      recipient_dispositions: [
+        { recipient: 'a@example.com', final_action: 'quarantine', status: 'quarantined' },
+        { recipient: 'b@example.com', final_action: 'audit', status: 'pending_review' },
+      ],
+      disposal_basis: {
+        policy_key: 'CR',
+        rule_name: '正文规则',
+        rule_id: 'CR-1',
+        action: 'quarantine',
+        modules: [
+          { policy_key: 'CR', rule_name: '正文规则', rule_id: 'CR-1', action: 'quarantine', recipients: ['a@example.com'], effective_for: ['a@example.com'] },
+          { policy_key: 'ACF', rule_name: '财务审核', rule_id: 'ACF-2', action: 'audit', recipients: ['b@example.com'], effective_for: ['b@example.com'] },
+        ],
+      },
+    }), { isSingleRecipient: false });
+
+    expect(screen.getByTestId('email-disposal-overview-recipient-outcomes')).toHaveTextContent('群发结果');
+    const more = screen.getByTestId('email-disposal-overview-disposal-basis-more');
+    expect(more).toHaveTextContent('+1 项');
+    await user.click(more);
+    expect(await screen.findByText(/a@example\.com/)).toBeInTheDocument();
+    expect(screen.getByText(/b@example\.com/)).toBeInTheDocument();
+  });
+
+  it('renders SenderActions header buttons without the removed more menu (A4/A5/A6)', () => {
     renderCard(baseDetail());
     expect(screen.getByTestId('email-disposal-overview-action-blacklist')).toBeInTheDocument();
     expect(screen.getByTestId('email-disposal-overview-action-whitelist')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-action-more')).toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-overview-action-more')).not.toBeInTheDocument();
   });
 
   it('shows the multi-recipient hint (A6) when isSingleRecipient is false', () => {
@@ -404,8 +421,8 @@ describe('ThreatSummaryCard single-recipient dispose buttons (Task 11b)', () => 
   });
 
   // G1 (v2 html_spec §②): header order is dispose-actions FIRST, then
-  // sender/more (发信人加黑/加白/更多).
-  it('renders dispose-action buttons (投递/丢弃) BEFORE the sender actions (加黑/加白/更多) in DOM order (G1)', () => {
+  // sender actions (发信人加黑/加白).
+  it('renders dispose-action buttons (投递/丢弃) BEFORE the sender actions (加黑/加白) in DOM order (G1)', () => {
     renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
     const deliverBtn = screen.getByTestId('email-disposal-overview-recipient-action-deliver');
     const blacklistBtn = screen.getByTestId('email-disposal-overview-action-blacklist');

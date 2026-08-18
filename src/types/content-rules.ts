@@ -1,7 +1,7 @@
 import type { Rule } from './unified-rules';
 
 export type ContentRuleMatchType = 'keyword' | 'regex' | 'content_group';
-export type ContentRuleScope = 'subject' | 'header' | 'text_body' | 'html_body' | 'attachment_names' | 'attachment_types' | 'urls';
+export type ContentRuleScope = 'subject' | 'header' | 'text_body' | 'html_body' | 'attachment_names' | 'attachment_types' | 'attachment_hash' | 'urls';
 export type ContentRuleAction = 'reject' | 'quarantine' | 'audit' | 'accept' | 'discard';
 export type ContentRuleUiAction = 'deliver' | 'tag_deliver' | 'isolate' | 'review' | 'block' | 'discard';
 
@@ -43,6 +43,9 @@ export interface ContentRulesMetadata {
   directions: ContentRuleDirections;
   mark_config?: MarkConfig;
   block_alert_config?: BlockAlertConfig;
+  source?: 'email_disposal_center';
+  source_mail_log_id?: number;
+  entity_kind?: 'domain' | 'url' | 'attachment_hash';
 }
 
 export interface ContentRuleRuleView {

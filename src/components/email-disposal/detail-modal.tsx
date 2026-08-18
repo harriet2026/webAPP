@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Search, Loader2, AlertCircle } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
-import { getMailLifecycleLogs, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
+import { getMailLifecycleLogs, getMailLogAnalysis, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
 import { OverviewSection } from './sections/overview-section';
 import { AnalysisSection } from './sections/analysis-section';
 import { RawLogsSection } from './sections/raw-logs-section';
@@ -28,6 +28,9 @@ interface DetailModalProps {
   // through to OverviewSection -- see that component's readOnly prop doc for
   // why it must not be re-derived here or lower (review finding).
   readOnly?: boolean;
+  // 安全分析属于 demo/产品形态切换器下的诊断界面。由服务端解析
+  // OSGATEWAY_PRODUCT_FORM_SWITCHER 后通过 ProductFormContext 传入，默认关闭。
+  showSecurityAnalysis?: boolean;
 }
 
 type SectionKey = 'overview' | 'analysis' | 'rawlogs';
@@ -42,8 +45,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('detail fetch timed out')), ms);
     promise.then(
-      (value) => { clearTimeout(timer); resolve(value); },
-      (err) => { clearTimeout(timer); reject(err); },
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
     );
   });
 }
@@ -52,7 +61,7 @@ function rawLogSearchSignal(signal: AbortSignal): AbortSignal {
   return AbortSignal.any([signal, AbortSignal.timeout(RAW_LOG_FETCH_TIMEOUT_MS)]);
 }
 
-export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEnabled = true, aiInterpretEnabled = true, readOnly = false }: DetailModalProps) {
+export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEnabled = true, aiInterpretEnabled = true, readOnly = false, showSecurityAnalysis = false }: DetailModalProps) {
   const t = useTranslations('emailDisposal.detail');
   const { apiRequest } = useApiRequest();
   const queryClient = useQueryClient();
@@ -101,6 +110,11 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     queryFn: () => withTimeout(getMailLogEvents(mailLogId!, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
     enabled: open && mailLogId != null,
   });
+  const analysisQ = useQuery({
+    queryKey: ['mail-log-analysis', mailLogId],
+    queryFn: () => withTimeout(getMailLogAnalysis(mailLogId!, undefined, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
+    enabled: open && mailLogId != null && showSecurityAnalysis,
+  });
   const lifecycleLogsQ = useQuery({
     queryKey: ['mail-lifecycle-logs', mailLogId],
     queryFn: ({ signal }) => getMailLifecycleLogs(mailLogId!, apiRequest, rawLogSearchSignal(signal)),
@@ -117,7 +131,9 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   // I/O until the server deadline.
   useEffect(() => {
     if ((open && rawLogsExpanded) || mailLogId == null) return;
-    void queryClient.cancelQueries({ queryKey: ['mail-lifecycle-logs', mailLogId] });
+    void queryClient.cancelQueries({
+      queryKey: ['mail-lifecycle-logs', mailLogId],
+    });
   }, [open, rawLogsExpanded, mailLogId, queryClient]);
 
   // A dispose action taken from inside the drawer (release/discard/recall via
@@ -127,9 +143,18 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   // stale pre-release status ("投递中"/"隔离中") until a manual reload, even
   // though the backend state and a re-query were already correct (GT-12173).
   const handleDisposed = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: ['mail-log-detail', mailLogId] });
-    void queryClient.invalidateQueries({ queryKey: ['mail-log-events', mailLogId] });
-    void queryClient.invalidateQueries({ queryKey: ['mail-lifecycle-logs', mailLogId] });
+    void queryClient.invalidateQueries({
+      queryKey: ['mail-log-detail', mailLogId],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ['mail-log-events', mailLogId],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ['mail-log-analysis', mailLogId],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: ['mail-lifecycle-logs', mailLogId],
+    });
     void queryClient.invalidateQueries({ queryKey: ['email-disposal'] });
   }, [queryClient, mailLogId]);
 
@@ -139,14 +164,15 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     const containerTop = container.getBoundingClientRect().top;
     const threshold = container.clientHeight * 0.3;
     let current: SectionKey = 'overview';
-    for (const key of ['overview', 'analysis', 'rawlogs'] as const) {
+    const visibleSections: SectionKey[] = showSecurityAnalysis ? ['overview', 'analysis', 'rawlogs'] : ['overview', 'rawlogs'];
+    for (const key of visibleSections) {
       const el = sectionRefs.current[key];
       if (!el) continue;
       const top = el.getBoundingClientRect().top - containerTop;
       if (top <= threshold) current = key;
     }
     setActiveSection(current);
-  }, []);
+  }, [showSecurityAnalysis]);
 
   useEffect(() => {
     const container = contentRef.current;
@@ -168,12 +194,15 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
 
   const scrollToSection = (key: SectionKey) => {
     setActiveSection(key); // immediate feedback on click, ahead of the scroll-spy catching up
-    sectionRefs.current[key]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    sectionRefs.current[key]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   };
 
   const navItems: { key: SectionKey; label: string }[] = [
     { key: 'overview', label: t('overviewAndHandle') },
-    { key: 'analysis', label: t('securityAnalysis') },
+    ...(showSecurityAnalysis ? [{ key: 'analysis' as const, label: t('securityAnalysis') }] : []),
     { key: 'rawlogs', label: t('originalLog') },
   ];
 
@@ -187,9 +216,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
       >
         <div className="flex items-start justify-between gap-4 border-b py-4 pl-6 pr-14 shrink-0">
           <div className="min-w-0">
-            <div className="text-xs text-muted-foreground mb-1">
-              {t('breadcrumb')}
-            </div>
+            <div className="text-xs text-muted-foreground mb-1">{t('breadcrumb')}</div>
             <SheetTitle ref={titleRef} tabIndex={-1} className="text-lg font-semibold truncate outline-none">
               {detail?.subject || (mailLogId ? `Email #${mailLogId}` : '')}
             </SheetTitle>
@@ -250,12 +277,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                         : 'border-transparent text-muted-foreground data-[hovered=true]:bg-muted/50 data-[hovered=true]:text-foreground',
                     )}
                   >
-                    <button
-                      data-testid={`disposal-detail-nav-${key}`}
-                      type="button"
-                      aria-current={activeSection === key ? 'location' : undefined}
-                      onClick={() => scrollToSection(key)}
-                    >
+                    <button data-testid={`disposal-detail-nav-${key}`} type="button" aria-current={activeSection === key ? 'location' : undefined} onClick={() => scrollToSection(key)}>
                       {label}
                     </button>
                   </InteractiveSurface>
@@ -264,7 +286,9 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
               <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto p-6 space-y-8">
                 <section
                   data-testid="disposal-detail-overview"
-                  ref={(el) => { sectionRefs.current.overview = el; }}
+                  ref={(el) => {
+                    sectionRefs.current.overview = el;
+                  }}
                   className="scroll-mt-4"
                 >
                   <h3 className="text-base font-semibold mb-2">{t('overviewAndHandle')}</h3>
@@ -274,21 +298,41 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                     aiInterpretEnabled={aiInterpretEnabled}
                     events={eventsQ.data ?? []}
                     readOnly={readOnly}
-                    onViewBasis={() => scrollToSection('analysis')}
+                    onViewBasis={showSecurityAnalysis ? () => scrollToSection('analysis') : undefined}
                     onViewRawLogs={() => scrollToSection('rawlogs')}
                   />
                 </section>
-                <section
-                  data-testid="disposal-detail-analysis"
-                  ref={(el) => { sectionRefs.current.analysis = el; }}
-                  className="scroll-mt-4"
-                >
-                  <h3 className="text-base font-semibold mb-2">{t('securityAnalysis')}</h3>
-                  <AnalysisSection detail={detail} aiEnabled={aiEnabled} events={eventsQ.data ?? []} />
-                </section>
+                {showSecurityAnalysis && (
+                  <section
+                    data-testid="disposal-detail-analysis"
+                    ref={(el) => {
+                      sectionRefs.current.analysis = el;
+                    }}
+                    className="scroll-mt-4"
+                  >
+                    <h3 className="text-base font-semibold mb-2">{t('securityAnalysis')}</h3>
+                    <AnalysisSection
+                      detail={detail}
+                      analysis={analysisQ.data}
+                      analysisLoading={analysisQ.isLoading || analysisQ.isFetching}
+                      analysisError={analysisQ.isError}
+                      onRetryAnalysis={() => {
+                        void analysisQ.refetch();
+                      }}
+                      aiEnabled={aiEnabled}
+                      events={eventsQ.data ?? []}
+                      onViewRawLogs={() => {
+                        setRawLogsExpanded(true);
+                        scrollToSection('rawlogs');
+                      }}
+                    />
+                  </section>
+                )}
                 <section
                   data-testid="disposal-detail-rawlogs"
-                  ref={(el) => { sectionRefs.current.rawlogs = el; }}
+                  ref={(el) => {
+                    sectionRefs.current.rawlogs = el;
+                  }}
                   className="scroll-mt-4"
                 >
                   <RawLogsSection

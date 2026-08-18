@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mapMailLogToDisposalItem, mapToDisplayStatus, getDisposalList, localDayBound, type MailLogAPIItem } from './disposal-api';
+import { getDisposalRuleOptions, mapMailLogToDisposalItem, getDisposalList, localDayBound, type MailLogAPIItem } from './disposal-api';
 
 function baseItem(overrides: Partial<MailLogAPIItem> = {}): MailLogAPIItem {
   return {
@@ -61,84 +61,70 @@ describe('mapMailLogToDisposalItem - direction (GT-12254)', () => {
   });
 });
 
-describe('mapToDisplayStatus - recall priority', () => {
-  it('recall status wins over delivery status', () => {
-    expect(mapToDisplayStatus('accept', 'delivered', 'released', 'recall_success')).toBe('recall_success');
-  });
-  it('no recall status falls through to normal logic', () => {
-    expect(mapToDisplayStatus('accept', 'delivered', undefined, undefined)).toBe('delivered');
-  });
-  it('recall_status_summary none is treated as no recall', () => {
-    expect(mapToDisplayStatus('accept', 'delivered', undefined, 'none')).toBe('delivered');
-  });
-  it('recall_status_summary empty string is treated as no recall', () => {
-    expect(mapToDisplayStatus('accept', 'delivered', undefined, '')).toBe('delivered');
-  });
-  it('partial_recall_success surfaces correctly', () => {
-    expect(mapToDisplayStatus('accept', 'delivered', 'released', 'partial_recall_success')).toBe('partial_recall_success');
+describe('mapMailLogToDisposalItem - disposal basis summary (GT-12935)', () => {
+  it('passes the lightweight group summary through without reconstructing recipients', () => {
+    const groups = [{
+      policy_key: 'CR',
+      recipient_count: 3,
+      effective_count: 1,
+      effective_known: true,
+      entries: [{
+        rule_name: '正文规则', rule_id: 'CR-66', action: 'quarantine',
+        recipient_count: 3, effective_count: 1, effective_known: true,
+      }],
+    }];
+    const item = mapMailLogToDisposalItem(baseItem({ disposal_basis_groups: groups }));
+    expect(item.disposalBasisGroups).toEqual(groups);
+    expect(item.disposalBasisGroups?.[0].entries[0]).not.toHaveProperty('recipients');
   });
 });
 
-// TestMapToDisplayStatus 17-state truth table (V2 status dict, design doc §5.1).
-// Regression coverage for review finding 1: audit_pending was entirely
-// unhandled (fell through to the removed 'processing' bucket), and
-// 'processing'/'delay_detecting' were extra states outside the 17-state set.
-describe('mapToDisplayStatus - 17-state truth table', () => {
-  it('action=audit with no workflow outcome yet maps to audit_pending', () => {
-    expect(mapToDisplayStatus('audit', undefined, undefined, undefined)).toBe('audit_pending');
-    expect(mapToDisplayStatus('audit', undefined, '', undefined)).toBe('audit_pending');
+// GT-12782 Task 4：mapToDisplayStatus 已删除——展示状态由后端下发的
+// display_statuses 列表承载（一致邮件单元素、mixed 多元素带收件人数），
+// mapper 只透传、不推导。13 态真值表由后端契约锁定：
+// internal/models/display_status_test.go（Go 单元）+
+// internal/storage/maillog_display_status_parity_dbtest_test.go（列表↔筛选
+// 双向等价）。
+describe('mapMailLogToDisposalItem - display_statuses passthrough (GT-12782)', () => {
+  it('passes the backend list through verbatim (order and counts preserved)', () => {
+    const item = mapMailLogToDisposalItem(baseItem({
+      action: 'mixed',
+      display_statuses: [
+        { status: 'quarantine_pending', count: 1 },
+        { status: 'delivered', count: 2 },
+      ],
+    }));
+    expect(item.displayStatuses).toEqual([
+      { status: 'quarantine_pending', count: 1 },
+      { status: 'delivered', count: 2 },
+    ]);
   });
-  it('action=audit approved and delivered maps to delivered, not audit_pending', () => {
-    expect(mapToDisplayStatus('audit', 'delivered', 'approved', undefined)).toBe('delivered');
+
+  it('uniform mail carries a single-element list', () => {
+    const item = mapMailLogToDisposalItem(baseItem({
+      display_statuses: [{ status: 'audit_pending', count: 3 }],
+    }));
+    expect(item.displayStatuses).toEqual([{ status: 'audit_pending', count: 3 }]);
   });
-  it('action=audit rejected after review maps to reviewed_rejected', () => {
-    expect(mapToDisplayStatus('audit', undefined, 'rejected_after_review', undefined)).toBe('reviewed_rejected');
+
+  it('retains the raw recall rollup while badges remain driven by display_statuses', () => {
+    const item = mapMailLogToDisposalItem(baseItem({
+      recall_status_summary: 'partial_recall_success',
+      display_statuses: [
+        { status: 'recall_success', count: 2 },
+        { status: 'recall_failed', count: 1 },
+      ],
+    }));
+    expect(item.recallStatusSummary).toBe('partial_recall_success');
+    expect(item.displayStatuses).toEqual([
+      { status: 'recall_success', count: 2 },
+      { status: 'recall_failed', count: 1 },
+    ]);
   });
-  it('action=quarantine with no workflow outcome maps to quarantine_pending', () => {
-    expect(mapToDisplayStatus('quarantine', undefined, undefined, undefined)).toBe('quarantine_pending');
-  });
-  it('action=sideline with no workflow outcome maps to sideline_pending', () => {
-    expect(mapToDisplayStatus('sideline', undefined, undefined, undefined)).toBe('sideline_pending');
-  });
-  it('action=reject maps to rejected', () => {
-    expect(mapToDisplayStatus('reject', undefined, undefined, undefined)).toBe('rejected');
-  });
-  it('action=bounce maps to bounced', () => {
-    expect(mapToDisplayStatus('bounce', undefined, undefined, undefined)).toBe('bounced');
-  });
-  it('action=discard maps to discarded', () => {
-    expect(mapToDisplayStatus('discard', undefined, undefined, undefined)).toBe('discarded');
-  });
-  it('workflow_outcome=discarded maps to discarded', () => {
-    expect(mapToDisplayStatus('sideline', undefined, 'discarded', undefined)).toBe('discarded');
-  });
-  it('workflow_outcome=expired maps to expired', () => {
-    expect(mapToDisplayStatus('quarantine', undefined, 'expired', undefined)).toBe('expired');
-  });
-  it('workflow_outcome=deleted maps to deleted', () => {
-    expect(mapToDisplayStatus('quarantine', undefined, 'deleted', undefined)).toBe('deleted');
-  });
-  it('accept with no delivery status yet maps to delivering, never processing', () => {
-    expect(mapToDisplayStatus('accept', undefined, undefined, undefined)).toBe('delivering');
-  });
-  it('released with no delivery status yet maps to delivering, never processing', () => {
-    expect(mapToDisplayStatus('accept', undefined, 'released', undefined)).toBe('delivering');
-  });
-  it('accept + delivery cancelled maps to discarded', () => {
-    expect(mapToDisplayStatus('accept', 'cancelled', undefined, undefined)).toBe('discarded');
-  });
-  it('accept + delivery in_delivery maps to delivering', () => {
-    expect(mapToDisplayStatus('accept', 'in_delivery', undefined, undefined)).toBe('delivering');
-  });
-  it('accept + delivery failed maps to delivery_failed', () => {
-    expect(mapToDisplayStatus('accept', 'failed', undefined, undefined)).toBe('delivery_failed');
-  });
-  it('accept + delivery partial_delivered maps to partial_delivered', () => {
-    expect(mapToDisplayStatus('accept', 'partial_delivered', undefined, undefined)).toBe('partial_delivered');
-  });
-  it('recall states always win regardless of action/workflow/delivery', () => {
-    expect(mapToDisplayStatus('accept', 'delivered', 'released', 'recall_pending')).toBe('recall_pending');
-    expect(mapToDisplayStatus('accept', 'delivered', 'released', 'recall_failed')).toBe('recall_failed');
+
+  it('falls back to an empty list when the backend omits the field (no client-side fabrication)', () => {
+    const item = mapMailLogToDisposalItem(baseItem({ display_statuses: undefined }));
+    expect(item.displayStatuses).toEqual([]);
   });
 });
 
@@ -174,6 +160,23 @@ describe('getDisposalList - multi-value quick filter serialization', () => {
   });
 });
 
+describe('getDisposalRuleOptions - global rule picker search', () => {
+  it('queries the dedicated metadata endpoint with a bounded server-side search', async () => {
+    const requestFn = vi.fn().mockResolvedValue({
+      items: [{ id: 'CR-77', name: '付款规则' }],
+    });
+
+    await expect(getDisposalRuleOptions(' 付款 ', requestFn)).resolves.toEqual([
+      { id: 'CR-77', name: '付款规则' },
+    ]);
+    const url = String(requestFn.mock.calls[0][0]);
+    expect(url).toContain('/mail-logs/_meta/disposal-rules?');
+    const params = new URLSearchParams(url.split('?')[1]);
+    expect(params.get('search')).toBe('付款');
+    expect(params.get('limit')).toBe('12');
+  });
+});
+
 describe('localDayBound / date range params (GT-12633)', () => {
   it('converts yyyy-MM-dd to local-timezone day bounds in RFC3339', () => {
     const start = localDayBound('2026-07-29', false);
@@ -200,31 +203,5 @@ describe('localDayBound / date range params (GT-12633)', () => {
     expect(params.get('start_date')).toBe(localDayBound('2026-07-29', false));
     expect(params.get('end_date')).toBe(localDayBound('2026-07-29', true));
     expect(params.get('start_date')).not.toBe('2026-07-29');
-  });
-});
-
-// GT-12353：审核队列/超时 worker 把审核项翻成终态后，后端现在会回写
-// mail_log.workflow_outcome_summary（此前只有邮件处置中心自己写，于是这类
-// 邮件在处置中心永远显示「待审核」、放行点了返回 not_applicable、召回恒灰）。
-// 前端必须认得这三种终态取值，否则回写了也白写——会继续落到
-// action==='audit' 的分支。
-describe('审核终态的展示映射 (GT-12353)', () => {
-  it('timeout_released 按已投递渲染，而不是继续显示待审核', () => {
-    expect(mapToDisplayStatus('audit', 'delivered', 'timeout_released')).toBe('delivered');
-    // 未拿到终端投递状态时按「投递中」，与 released/approved 同语义。
-    expect(mapToDisplayStatus('audit', undefined, 'timeout_released')).toBe('delivering');
-  });
-
-  it('approved 按已投递渲染', () => {
-    expect(mapToDisplayStatus('audit', 'delivered', 'approved')).toBe('delivered');
-  });
-
-  it('rejected_after_review 渲染为已驳回', () => {
-    expect(mapToDisplayStatus('audit', undefined, 'rejected_after_review')).toBe('reviewed_rejected');
-  });
-
-  it('终态缺失时仍显示待审核（这正是修复前的现象，必须保持可区分）', () => {
-    expect(mapToDisplayStatus('audit', undefined, 'none')).toBe('audit_pending');
-    expect(mapToDisplayStatus('audit', undefined, undefined)).toBe('audit_pending');
   });
 });

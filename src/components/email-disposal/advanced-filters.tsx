@@ -715,6 +715,7 @@ export function AdvancedFilters({ value, onChange }: AdvancedFiltersProps) {
                     className="h-6 w-6 shrink-0"
                     aria-label={tc("delete")}
                     title={tc("delete")}
+                    data-testid={`disposal-advanced-remove-condition-${gi}-${ci}`}
                     onClick={() => removeCondition(gi, ci)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />

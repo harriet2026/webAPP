@@ -3,7 +3,9 @@ import zh from '../../messages/zh.json';
 import en from '../../messages/en.json';
 import th from '../../messages/th.json';
 import ru from '../../messages/ru.json';
-import { mapToDisplayStatus } from '@/components/email-disposal/lib/disposal-api';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { DISPLAY_STATUSES } from '@/types/email-disposal';
 
 // GT-11583: the disposal-center table renders the 执行动作 / 邮件状态 columns by
 // looking up `emailDisposal.filters.actions.<action>` and
@@ -25,6 +27,12 @@ function actions(m: Record<string, unknown>): Record<string, string> {
 function statuses(m: Record<string, unknown>): Record<string, string> {
   const ed = m.emailDisposal as { filters: { statuses: Record<string, string> } };
   return ed.filters.statuses;
+}
+function legacyStatuses(m: Record<string, unknown>): Record<string, string> {
+  const ed = m.emailDisposal as {
+    filters: { legacyStatuses: Record<string, string> };
+  };
+  return ed.filters.legacyStatuses;
 }
 
 // filters.actions 现在同时服务两个枚举域（GT-12649）：
@@ -91,41 +99,96 @@ describe('emailDisposal.filters.actions covers every mail_log.action (GT-11583)'
   });
 });
 
-describe('emailDisposal.filters.statuses covers every DisplayStatus (GT-11583)', () => {
-  // Derive the reachable DisplayStatus set from the real mapper rather than
-  // restating the union type, so a new branch in mapToDisplayStatus is caught.
-  const reachable = new Set<string>();
-  const deliveryStates = ['delivered', 'in_delivery', 'failed', 'partial_delivered', 'cancelled', 'unknown', undefined];
-  const workflowStates = [
-    'released', 'approved', 'rejected_after_review', 'discarded', 'expired', 'deleted', 'none', undefined,
-  ];
-  const recallStates = [
-    'recall_pending', 'recall_success', 'recall_failed', 'partial_recall_success', 'none', '', undefined,
-  ];
-  const actionStates = ['accept', 'reject', 'bounce', 'quarantine', 'sideline', 'audit', 'discard', 'mixed'];
-
-  for (const a of actionStates) {
-    for (const d of deliveryStates) {
-      for (const w of workflowStates) {
-        for (const r of recallStates) {
-          reachable.add(mapToDisplayStatus(a, d, w, r));
-        }
-      }
+// GT-12782 Task 4：mapToDisplayStatus 已删除，展示状态由后端下发
+// （display_statuses 列表）。这里改为「后端枚举 ↔ 前端 union ↔ i18n 键」
+// 三方一致性守卫的前端一环：
+//
+//   - 后端枚举的事实来源是 api/openapi.yaml 的 MailLogListItem.
+//     display_statuses.items.status（它与 Go 侧 models.DisplayStatusValues 的
+//     一致性由 internal/api/openapi_mail_logs_test.go 锁住）；
+//   - 本用例断言 openapi 枚举 == 前端 DISPLAY_STATUSES union，且每个取值在
+//     四份 i18n 目录里都有 filters.statuses.<status> 文案。
+//
+// 任何一环漂移（后端新增/删除状态、前端 union 改动、i18n 漏 key）都会红。
+describe('display_statuses 三方一致性：openapi 枚举 ↔ 前端 union ↔ i18n (GT-12782)', () => {
+  const openapiEnum = (() => {
+    const doc = readFileSync(
+      resolve(__dirname, '../../../api/openapi.yaml'),
+      'utf-8',
+    );
+    // 定位 display_statuses 响应字段的 status 枚举：从字段声明起，取其
+    // items.properties.status.enum 的连续 "- value" 列表。避免引入 yaml
+    // 解析依赖——枚举块的缩进形态由后端契约测试保证稳定。
+    const fieldIdx = doc.indexOf('display_statuses:');
+    expect(fieldIdx).toBeGreaterThan(-1);
+    const tail = doc.slice(fieldIdx);
+    const enumIdx = tail.indexOf('enum:');
+    expect(enumIdx).toBeGreaterThan(-1);
+    const values: string[] = [];
+    for (const line of tail.slice(enumIdx).split('\n').slice(1)) {
+      const m = /^\s+-\s+([a-z_]+)\s*$/.exec(line);
+      if (!m) break;
+      values.push(m[1]);
     }
-  }
+    return values;
+  })();
 
-  it('reaches a non-trivial number of display statuses', () => {
-    expect(reachable.size).toBeGreaterThan(8);
+  it('openapi display_statuses 枚举与前端 DISPLAY_STATUSES union 逐值一致（含顺序）', () => {
+    expect(openapiEnum).toEqual([...DISPLAY_STATUSES]);
+  });
+
+  it('uses the approved GT-12955 position-based 13-state contract', () => {
+    expect(DISPLAY_STATUSES).toEqual([
+      'delivering',
+      'quarantine_pending',
+      'sideline_pending',
+      'audit_pending',
+      'rejected',
+      'discarded',
+      'delivery_cancelled',
+      'delivered',
+      'delivery_failed',
+      'recall_pending',
+      'recall_success',
+      'recall_failed',
+      'expired',
+    ]);
   });
 
   for (const [locale, messages] of Object.entries(LOCALES)) {
-    it(`${locale} has a label for every reachable display status`, () => {
+    it(`${locale} has a label for every display status`, () => {
       const have = statuses(messages);
-      const missing = [...reachable].filter((s) => typeof have[s] !== 'string');
+      const missing = [...DISPLAY_STATUSES].filter((s) => typeof have[s] !== 'string');
       expect(
         missing,
         `missing status labels -> the table renders the raw i18n key path: ${missing.join(', ')}`,
       ).toEqual([]);
+    });
+  }
+});
+
+describe('retired display-status labels remain readable outside the active enum', () => {
+  const retired = [
+    'quarantined',
+    'pending_review',
+    'blocked',
+    'bounced',
+    'partial_delivered',
+    'partial_recall_success',
+    'deleted',
+    'reviewed_rejected',
+  ] as const;
+
+  it('does not reintroduce retired values into the 13-value selector contract', () => {
+    expect(retired.some((value) =>
+      (DISPLAY_STATUSES as readonly string[]).includes(value),
+    )).toBe(false);
+  });
+
+  for (const [locale, messages] of Object.entries(LOCALES)) {
+    it(`${locale} has a saved-filter compatibility label for every retired value`, () => {
+      const have = legacyStatuses(messages);
+      expect(retired.filter((value) => typeof have[value] !== 'string')).toEqual([]);
     });
   }
 });

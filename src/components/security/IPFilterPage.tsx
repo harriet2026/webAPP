@@ -65,7 +65,7 @@ import type {
   IPFilterIPConfigType,
   DemoAction,
 } from '@/types/ip-filter';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -87,6 +87,7 @@ import { useApiRequest } from '@/lib/api/client';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/auth-context';
+import { getRulePriorityRange, isPriorityInRange } from '@/components/security/advanced-filter-rules/priority-range';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 import { IPFilterImportDialog } from '@/components/security/IPFilterImportDialog';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
@@ -94,7 +95,10 @@ import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 const BLACKLIST_ACTION_SET = new Set<DemoAction>(BLACKLIST_DEMO_ACTIONS);
 const WHITELIST_ACTION_SET = new Set<DemoAction>(WHITELIST_DEMO_ACTIONS);
 
-export const ruleSchema = z
+import type { PriorityRange } from '@/components/security/advanced-filter-rules/priority-range';
+
+export function createRuleSchema(range: PriorityRange) {
+  return z
   .object({
     name: z.string().min(1, 'nameRequired'),
     description: z.string().max(200).optional(),
@@ -104,7 +108,7 @@ export const ruleSchema = z
     // 仅 expression 使用：全局 IP 组的数值规则 ID，≤20 个（与后端一致）。
     ip_groups: z.array(z.number()).max(MAX_IP_GROUPS, 'expressionTooManyGroups').optional(),
     demo_action: z.enum(['block', 'quarantine', 'drop', 'review', 'deliver', 'tagDeliver']),
-    priority: z.number().int().nonnegative(),
+    priority: z.number().int().min(range.min, 'priorityOutOfRange').max(range.max, 'priorityOutOfRange'),
     is_active: z.boolean(),
     valid_until: z.string().optional(),
   })
@@ -146,8 +150,12 @@ export const ruleSchema = z
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['valid_until'], message: 'validUntilBeforeNow' });
     }
   });
+}
 
-type RuleForm = z.infer<typeof ruleSchema>;
+// Backward-compatible export for existing tests (tenant-admin range).
+export const ruleSchema = createRuleSchema({ min: 100, max: 1000, defaultValue: 600 });
+
+type RuleForm = z.infer<ReturnType<typeof createRuleSchema>>;
 
 /**
  * Every i18n key `ruleSchema` can attach to the `ip_value` field (GT-12087).
@@ -198,6 +206,12 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
+  // 阶段1 IP 策略只有平台管理员能改：后端两条路由都挂在 adminOnly/RequireSystemAdmin
+  // （internal/api/routes.go:443-444），策略流水线里该阶段对租户是 locked 的锁态、
+  // 点不开抽屉。所以这里不按角色分档——能走到这段代码的只可能是平台管理员，
+  // 按角色分会让人误以为租户也能编辑 IP 策略，与实际权限模型矛盾。
+  const range = useMemo(() => getRulePriorityRange(true), []);
+  const schema = useMemo(() => createRuleSchema(range), [range]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<IPFilterRuleView | null>(null);
@@ -217,7 +231,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [simResult, setSimResult] = useState<SimResult | null>(null);
 
   const form = useForm<RuleForm>({
-    resolver: zodResolver(ruleSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: '',
       description: '',
@@ -226,7 +240,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       ip_value: '',
       ip_groups: [],
       demo_action: 'block',
-      priority: 100,
+      priority: range.defaultValue,
       is_active: true,
       valid_until: '',
     },
@@ -302,7 +316,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           ip_value: '',
           ip_groups: [],
           demo_action: listTypeTab === 'whitelist' ? 'deliver' : 'block',
-          priority: (rulesData?.items?.[0]?.priority ?? 99) + 1,
+          priority: Math.min(Math.max((rulesData?.items?.[0]?.priority ?? (range.defaultValue - 1)) + 1, range.min), range.max),
           is_active: true,
           valid_until: '',
         });
@@ -310,7 +324,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       resetPreview();
       setDialogOpen(true);
     },
-    [form, listTypeTab, rulesData?.items, resetPreview],
+    [form, listTypeTab, rulesData?.items, resetPreview, range],
   );
 
   const onSubmit = form.handleSubmit(async (data) => {
@@ -565,7 +579,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                   className="pl-9 w-64"
                 />
               </div>
-              <Button size="sm" onClick={() => handleOpenDialog()}>
+              <Button size="sm" data-testid="ip-filter-create" onClick={() => handleOpenDialog()}>
                 <Plus className="h-4 w-4 mr-1" />
                 {t('ipFilter.createRule')}
               </Button>
@@ -633,7 +647,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                 <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button size="sm" disabled={isSubmitting} onClick={onSubmit}>
+                <Button size="sm" data-testid="ip-filter-save" disabled={isSubmitting} onClick={onSubmit}>
                   {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   {t('ipFilter.saveAndEnable')}
                 </Button>
@@ -666,6 +680,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                         </Label>
                         <div className="flex-1">
                           <Input
+                            data-testid="ip-filter-name"
                             placeholder={t('ipFilter.ruleNamePlaceholder')}
                             {...form.register('name')}
                             className={cn(form.formState.errors.name && 'border-red-500')}
@@ -698,7 +713,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                                 if (v !== 'expression') form.setValue('ip_groups', []);
                               }}
                             >
-                              <SelectTrigger className="w-28">
+                              <SelectTrigger className="w-28" data-testid="ip-filter-ip-config-type">
                                 <SelectValue>
                                   {{
                                     single: t('ipFilter.ipConfigTypeSingle'),
@@ -708,9 +723,9 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                                 </SelectValue>
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="single">{t('ipFilter.ipConfigTypeSingle')}</SelectItem>
-                                <SelectItem value="range">{t('ipFilter.ipConfigTypeRange')}</SelectItem>
-                                <SelectItem value="expression">{t('ipFilter.ipConfigTypeExpression')}</SelectItem>
+                                <SelectItem value="single" data-testid="ip-filter-ip-config-type-option-single">{t('ipFilter.ipConfigTypeSingle')}</SelectItem>
+                                <SelectItem value="range" data-testid="ip-filter-ip-config-type-option-range">{t('ipFilter.ipConfigTypeRange')}</SelectItem>
+                                <SelectItem value="expression" data-testid="ip-filter-ip-config-type-option-expression">{t('ipFilter.ipConfigTypeExpression')}</SelectItem>
                               </SelectContent>
                             </Select>
 
@@ -725,6 +740,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                               />
                             ) : (
                               <Input
+                                data-testid="ip-filter-ip-value"
                                 placeholder={watchIpConfigType === 'single' ? '10.0.0.1' : '192.168.1.0/24'}
                                 {...form.register('ip_value')}
                                 className={cn('flex-1', form.formState.errors.ip_value && 'border-red-500')}
@@ -823,7 +839,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                           <Tooltip>
                             <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />} />
                             <TooltipContent className="max-w-[300px]">
-                              <p>{t('ipFilter.priorityTip')}</p>
+                              <p>{t('ipFilter.priorityTip', { min: range.min, max: range.max })}</p>
                             </TooltipContent>
                           </Tooltip>
                         </Label>
@@ -832,11 +848,18 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                             type="number"
                             {...form.register('priority', { valueAsNumber: true })}
                             className="w-24"
-                            min={0}
+                            min={range.min}
+                            max={range.max}
                           />
-                          <span className="text-xs text-muted-foreground">{t('ipFilter.priorityHint')}</span>
+                          <span className="text-xs text-muted-foreground">{t('ipFilter.priorityHint', { min: range.min, max: range.max })}</span>
                         </div>
                       </div>
+                      {form.formState.errors.priority && (
+                        <div className="flex gap-3">
+                          <div className="min-w-[100px] w-[100px] shrink-0" />
+                          <p className="text-xs text-red-500">{t('ipFilter.priorityOutOfRange', { min: range.min, max: range.max })}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -865,14 +888,14 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                         </Tooltip>
                       </Label>
                       <Select value={watchAction} onValueChange={(v) => v && form.setValue('demo_action', v as DemoAction)}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full" data-testid="ip-filter-action">
                           <SelectValue>
                             <span className={ACTION_TEXT_CLASS[watchAction]}>{t(DEMO_ACTION_LABEL_KEY[watchAction])}</span>
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {availableActions.map((a) => (
-                            <SelectItem key={a} value={a}>
+                            <SelectItem key={a} value={a} data-testid={`ip-filter-action-option-${a}`}>
                               <span className={ACTION_TEXT_CLASS[a]}>{t(DEMO_ACTION_LABEL_KEY[a])}</span>
                             </SelectItem>
                           ))}

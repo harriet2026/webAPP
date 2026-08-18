@@ -66,7 +66,7 @@ export function PlatformSecurityPage() {
             <TabsTrigger value="groups" data-testid="platform-security-tab-groups">
               {t('tabs.groupPolicy')}
             </TabsTrigger>
-            <TabsTrigger value="attachment">
+            <TabsTrigger value="attachment" data-testid="platform-security-tab-attachment">
               {t('tabs.attachmentLimit')}
             </TabsTrigger>
             {/* 反病毒引擎：平台级反病毒服务器 + 病毒库配置，统一作用于全部租户。

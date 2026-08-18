@@ -118,6 +118,7 @@ describe('TimeDistributionCard peak-hours ranking (GT-11983 / GT-11932)', () => 
     expect(option.series).toHaveLength(8);
     expect(option.series.every((series: { type: string }) => series.type === 'bar')).toBe(true);
     expect(option.series.every((series: { stack: string }) => series.stack === 'threats')).toBe(true);
+    expect(option.legend).toBeUndefined();
   });
 
   it('renders weekly mode as an ECharts heatmap', () => {

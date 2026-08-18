@@ -198,6 +198,8 @@ function item(id: number) {
     status: "",
     authenticated: false,
     received_at: "2026-01-01T00:00:00Z",
+    // GT-12782 Task 4：DisposalMailItem 的展示状态来自后端下发列表。
+    displayStatuses: [{ status: "quarantine_pending", count: 1 }],
   };
 }
 

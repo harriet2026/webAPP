@@ -1716,6 +1716,14 @@
     "invalidMember": "รูปแบบสมาชิกไม่ถูกต้อง: {value}",
     "duplicateName": "ชื่อกลุ่มต้องไม่ซ้ำกันในทุกประเภทกลุ่ม",
     "noMembers": "ต้องมีอย่างน้อยหนึ่งสมาชิก",
+    "contentScopes": "ขอบเขตการจับคู่",
+    "noScopes": "เลือกอย่างน้อยหนึ่งขอบเขตการจับคู่",
+    "contentScopeSubject": "หัวข้อ",
+    "contentScopeTextBody": "เนื้อหาข้อความ",
+    "contentScopeHtmlBody": "เนื้อหา HTML",
+    "contentScopeHeader": "ส่วนหัว",
+    "contentScopeAttachmentNames": "ชื่อไฟล์แนบ",
+    "contentScopeUrls": "URL",
     "warningOnTagPage": "กฎนี้ถูกจัดการโดยหน้าจัดการกลุ่ม การแก้ไข stage หรือเงื่อนไขอาจทำให้หน้าจัดการกลุ่มไม่สามารถวิเคราะห์ได้ หากไม่จำเป็นโปรดแก้ไขผ่าน 'นโยบายความปลอดภัย → การจัดการกลุ่ม'",
     "goToGroupManagement": "ไปที่การจัดการกลุ่ม",
     "featureFieldDisallowed": "ฟิลด์เหล่านี้ไม่ได้รับอนุญาตในกลุ่มฟีเจอร์: {fields}",
@@ -1738,7 +1746,9 @@
     "importFailureValue": "ค่า",
     "importFailureReason": "สาเหตุ",
     "platformIpGroupTitle": "กลุ่ม IP ระดับแพลตฟอร์ม",
-    "platformScopeHint": "กลุ่ม IP ระดับแพลตฟอร์มมีผลกับผู้เช่าทั้งหมด และใช้อ้างอิงในนโยบาย IP (นิพจน์บัญชีดำ/ขาว IP)"
+    "platformScopeHint": "กลุ่ม IP ระดับแพลตฟอร์มมีผลกับผู้เช่าทั้งหมด และใช้อ้างอิงในนโยบาย IP (นิพจน์บัญชีดำ/ขาว IP)",
+    "contentMemberListPerLine": "หนึ่งคำสำคัญต่อหนึ่งบรรทัด",
+    "newGroupOfType": "สร้าง{typeLabel}"
   },
   "groupPolicy": {
     "eyebrow": "นโยบายกลุ่ม",
@@ -1988,6 +1998,12 @@
       "cacSuspiciousUrls": "URL ที่น่าสงสัย CAC",
       "cacRepeatCount": "จำนวนซ้ำ CAC",
       "isOutbound": "ขาออก",
+      "oneRecipient": "ผู้รับหนึ่งราย",
+      "originKind": "ประเภทที่มาของอีเมล",
+      "recipient": "ผู้รับ",
+      "recipientCount": "จำนวนผู้รับ",
+      "recipientDomain": "โดเมนผู้รับ",
+      "senderDomain": "โดเมนผู้ส่ง",
       "rcpttags": "แท็กผู้รับ"
     },
     "operators": {
@@ -3372,7 +3388,7 @@
     "actionReviewDesc": "เข้าคิวตรวจสอบโดยเจ้าหน้าที่",
     "actionQuarantine": "กักกัน",
     "actionQuarantineDesc": "ย้ายไปกักกันเพื่อตรวจสอบ",
-    "actionBlock": "บล็อก",
+    "actionBlock": "ปฏิเสธ",
     "actionBlockDesc": "ปฏิเสธและตีกลับ",
     "actionDrop": "ทิ้ง",
     "actionDropDesc": "ลบทิ้งโดยไม่แจ้งเตือน",
@@ -3430,7 +3446,9 @@
     "attachmentNavSummary": "สแกนไวรัส/วิเคราะห์แซนด์บ็อกซ์/ตรวจประเภท",
     "contentNavSummary": "คีย์เวิร์ด/นิพจน์ทั่วไป/DLP",
     "intentEngineNavSummary": "ลามก/การพนัน/การเมือง/ฟิชชิ่ง/สแปม/การสมัครสมาชิก",
-    "intentEngineNavSummaryDisabled": "ยังไม่เปิดใช้งาน"
+    "intentEngineNavSummaryDisabled": "ยังไม่เปิดใช้งาน",
+    "actionNextStep": "ไปขั้นตอนถัดไป",
+    "actionNextStepDesc": "ดำเนินนโยบายถัดไปต่อ"
   },
   "ipFrequency": {
     "title": "จำกัดความถี่ IP",
@@ -3637,7 +3655,8 @@
     "validUntilBeforeFrom": "เวลาหมดอายุต้องไม่เร็วกว่าเวลาเริ่มต้น",
     "windowLimitHint": "เมื่อหน้าต่างเป็น -1 (ไม่จำกัด) ขีดจำกัดการเชื่อมต่อในหน้าต่างต้องเป็น -1 ด้วย",
     "suspendDurationInvalid": "กรุณาเลือกระยะเวลาระงับที่รองรับ",
-    "windowMinutesInvalid": "จำนวนนาทีของหน้าต่างไม่ถูกต้อง"
+    "windowMinutesInvalid": "จำนวนนาทีของหน้าต่างไม่ถูกต้อง",
+    "priorityOutOfRange": "ลำดับความสำคัญต้องอยู่ระหว่าง {min}–{max}"
   },
   "ipFilter": {
     "title": "รายการดำ/ขาว IP",
@@ -3841,7 +3860,8 @@
     "importListTypeMismatch": "ประเภทบัญชีไม่ตรงกับแท็บปัจจุบัน",
     "importExpressionUnsupported": "กฎแบบนิพจน์ไม่รองรับการนำเข้าเป็นชุด กรุณาสร้างด้วยตนเอง",
     "blacklistActionInvalid": "ไม่อนุญาตการกระทำนี้สำหรับบัญชีดำ",
-    "whitelistActionInvalid": "ไม่อนุญาตการกระทำนี้สำหรับบัญชีขาว"
+    "whitelistActionInvalid": "ไม่อนุญาตการกระทำนี้สำหรับบัญชีขาว",
+    "priorityOutOfRange": "ลำดับความสำคัญต้องอยู่ระหว่าง {min}–{max}"
   },
   "inboundAudit": {
     "title": "ตรวจสอบขาเข้า",
@@ -4331,6 +4351,7 @@
     "testContentRequired": "กรุณากรอกเนื้อหาทดสอบ",
     "testMatched": "จับคู่แล้ว",
     "testNotMatched": "ไม่ตรงกัน",
+    "testFailed": "ทดสอบไม่สำเร็จ กรุณาลองใหม่",
     "noRules": "ไม่มีกฎเนื้อหา",
     "batchEnable": "เปิดใช้งานเป็นชุด",
     "batchDisable": "ปิดใช้งานเป็นชุด",
@@ -4412,7 +4433,9 @@
     "applyTo": "ใช้กับ",
     "applyToTip": "เลือกส่วนของอีเมลที่กฎจะตรวจสอบ",
     "scopeDisplayAttachmentTypes": "ประเภทไฟล์แนบ",
+    "scopeDisplayAttachmentHash": "แฮชไฟล์แนบ",
     "scopeDisplayUrls": "URL",
+    "sourceEmailDisposal": "ศูนย์จัดการอีเมล",
     "attachmentContentUnavailable": "การจับคู่เนื้อหาไฟล์แนบมีเฉพาะในตัวสแกน sideline และยังตั้งค่าที่นี่ไม่ได้",
     "legacyScopesPreserved": "กฎนี้เก็บขอบเขตแบบเดิม {count} รายการที่ไม่แสดงในตัวแก้ไขแบบย่อ",
     "headerOnlyTagHint": "การติดแท็กจะเพิ่มเฉพาะส่วนหัวอีเมลและไม่แก้ไขหัวข้อ",
@@ -4422,7 +4445,6 @@
     "keywordPlaceholder": "เช่น ลับ|ลับมาก|ภายใน",
     "keywordDividerHint": "คั่นคำสำคัญหลายคำด้วย |",
     "regexPlaceholder": "ป้อนนิพจน์ทั่วไปที่เข้ากันได้กับ Go",
-    "invalidRegex": "นิพจน์ทั่วไปไม่ถูกต้อง",
     "runTest": "เรียกใช้การทดสอบ",
     "simulateTest": "ทดสอบจำลอง",
     "ruleNameTooLong": "ชื่อกฎต้องไม่เกิน 50 อักขระ",
@@ -4471,25 +4493,29 @@
       "run": "เรียกใช้การทดสอบ",
       "finalAction": "การดำเนินการขั้นสุดท้าย",
       "hits": "กฎที่ตรง",
-      "noHits": "ไม่มีกฎที่ตรง",
+      "noHits": "ผ่านการตรวจสอบ",
       "close": "ปิด"
     },
     "observing": "กำลังสังเกต",
     "observe": "สังเกต",
+    "legacyDisabled": "รายการนี้ยังไม่ได้เปิดใช้งาน",
+    "legacyDisabledHint": "สถานะปิดใช้งานนี้ตกค้างมาจากเวอร์ชันก่อน โมเดลตรวจสอบการปลอมแปลงตัวตนแบบใหม่ไม่มีสวิตช์ปิด เมื่อเปลี่ยนรายการนี้เป็นการกระทำอื่นแล้ว จะไม่สามารถกลับไปเป็นไม่เปิดใช้งานได้อีก",
     "notAuthorized": "ไม่มีสิทธิ์เข้าถึงหน้านี้",
     "action": {
       "accept": "ยอมรับ",
       "quarantine": "กักกัน",
       "reject": "ปฏิเสธ",
       "audit": "ตรวจสอบ",
-      "discard": "ละทิ้ง"
+      "discard": "ละทิ้ง",
+      "markDelivery": "ไปขั้นตอนถัดไป"
     },
     "actionTooltip": {
       "accept": "อนุญาต: ไม่ดำเนินการบล็อกสำหรับเงื่อนไขของกฎนี้ หมายเหตุ: การเลือก \"อนุญาต\" เทียบเท่ากับการปิดใช้งานกฎนี้ — กฎจะไม่เข้าร่วมในการประเมิน",
       "quarantine": "กักกัน: ย้ายอีเมลที่ตรงกันไปยังพื้นที่กักกันเพื่อตรวจสอบโดยผู้ดูแลระบบก่อนปล่อยหรือลบ",
       "reject": "ปฏิเสธ: ปฏิเสธอีเมลในขั้นตอน SMTP ผู้ส่งจะได้รับการแจ้งเตือนการส่งคืน",
       "audit": "ตรวจสอบ: ส่งอีเมลไปยังคิวการอนุมัติเพื่อตรวจสอบโดยผู้ดูแลระบบด้วยตนเองก่อนการส่งมอบ",
-      "discard": "ทิ้ง: ทิ้งอีเมลโดยไม่แจ้งผู้ส่งและไม่ส่งมอบให้ผู้รับ"
+      "discard": "ทิ้ง: ทิ้งอีเมลโดยไม่แจ้งผู้ส่งและไม่ส่งมอบให้ผู้รับ",
+      "markDelivery": "ไปขั้นตอนถัดไป: ไม่สกัดกั้นอีเมลฉบับนี้ แต่ให้ผ่านขั้นตอนตรวจจับที่เหลือต่อไป และสามารถเลือกใส่แท็กก่อนนำส่งได้"
     },
     "formatChecks": {
       "title": "การตรวจสอบรูปแบบพื้นฐาน",
@@ -4514,6 +4540,8 @@
       "spf_noneDesc": "โดเมนไม่ได้กำหนดค่าระเบียน SPF",
       "spf_temperror": "การสอบถามล้มเหลว (TempError)",
       "spf_temperrorDesc": "การสอบถาม DNS หมดเวลาหรือล้มเหลว",
+      "spf_permerror": "เรกคอร์ด SPF ผิดพลาด",
+      "spf_permerrorDesc": "เรกคอร์ด SPF ของโดเมนผู้ส่งเขียนไม่ถูกต้อง (เช่น ห่วงโซ่ include เกินขีดจำกัดการค้นหา DNS 10 ครั้ง) จึงตรวจสอบไม่ได้ เป็นปัญหาการตั้งค่าฝ่ายผู้ส่ง ไม่ใช่หลักฐานการปลอมแปลง",
       "dkim_fail": "การยืนยันล้มเหลว",
       "dkim_failDesc": "การยืนยันลายเซ็น DKIM ไม่ผ่าน",
       "dkim_neutral": "เป็นกลาง (Neutral)",
@@ -4522,6 +4550,8 @@
       "dkim_partialDesc": "ยืนยันผ่านบางส่วนจากหลายลายเซ็น",
       "dkim_none": "ไม่มีลายเซ็น",
       "dkim_noneDesc": "อีเมลไม่มีลายเซ็น DKIM",
+      "dkim_temperror": "DKIM ล้มเหลวชั่วคราว",
+      "dkim_temperrorDesc": "DNS หมดเวลาหรือขัดข้องชั่วคราวขณะดึงกุญแจสาธารณะ DKIM ทำให้ไม่ทราบผลการตรวจสอบ มักหายเองเมื่อลองใหม่ ไม่ใช่หลักฐานการปลอมแปลง",
       "dmarc_reject": "p=reject",
       "dmarc_rejectDesc": "โดเมนผู้ส่งกำหนดให้ปฏิเสธอีเมลที่ไม่ผ่านการยืนยัน",
       "dmarc_quarantine": "p=quarantine",
@@ -4620,14 +4650,16 @@
       "quarantine": "กักกัน",
       "audit": "ตรวจสอบ",
       "reject": "ปฏิเสธ",
-      "discard": "ทิ้ง"
+      "discard": "ทิ้ง",
+      "markDelivery": "ไปขั้นตอนถัดไป"
     },
     "protocolActionLabel": {
       "accept": "ดำเนินการตรวจสอบขั้นต่อไป",
       "quarantine": "กักกัน (เข้าถังขยะ)",
       "reject": "บล็อก (ส่งคืน 5xx)",
       "audit": "ตรวจสอบ (รอการอนุมัติ)",
-      "discard": "ทิ้ง (ลบแบบเงียบ)"
+      "discard": "ทิ้ง (ลบแบบเงียบ)",
+      "markDelivery": "ไปขั้นตอนถัดไป (ใส่แท็กได้)"
     },
     "flowSub": {
       "drop": "ทิ้ง",
@@ -4635,7 +4667,8 @@
       "quarantine": "กักกัน",
       "check": "ตรวจสอบ",
       "tag": "แท็ก",
-      "pass": "ผ่านไปยังขั้นตอนถัดไป"
+      "pass": "ผ่านไปยังขั้นตอนถัดไป",
+      "review": "ตรวจสอบ"
     },
     "flowTitle": "กระบวนการยืนยันตัวตนอีเมล",
     "flowNode": {
@@ -4675,21 +4708,39 @@
       "quarantine": "อีเมลถูกส่งไปยังคิวกักกันเพื่อให้ผู้ดูแลระบบตรวจสอบก่อนปล่อยหรือลบ",
       "audit": "ส่งอีเมลตามปกติและบันทึกรายการตรวจสอบสำหรับการตรวจสอบของผู้ดูแลระบบในภายหลัง",
       "reject": "ส่งการตอบสนอง SMTP ปฏิเสธไปยังผู้ส่ง อีเมลจะไม่เข้าสู่ระบบ",
-      "discard": "ทิ้งอีเมลอย่างเงียบ ผู้ส่งได้รับการยืนยันการส่งแต่อีเมลถูกทิ้งจริง"
+      "discard": "ทิ้งอีเมลอย่างเงียบ ผู้ส่งได้รับการยืนยันการส่งแต่อีเมลถูกทิ้งจริง",
+      "markDelivery": "ไม่สกัดกั้น ให้ผ่านขั้นตอนตรวจจับที่เหลือต่อไป และสามารถเลือกใส่แท็กก่อนนำส่งได้"
     },
     "protocolActionShort": {
       "accept": "ผ่าน",
       "reject": "ปฏิเสธ",
       "quarantine": "กักกัน",
       "audit": "แท็ก",
-      "discard": "ทิ้ง"
+      "discard": "ทิ้ง",
+      "markDelivery": "ไปขั้นตอนถัดไป"
     },
     "protocolActionDesc": {
       "accept": "ไม่มีการดำเนินการ ส่งต่อไปยังการตรวจสอบโปรโตคอลถัดไป",
       "reject": "ส่ง SMTP 5xx กลับไปยังผู้ส่ง",
       "quarantine": "ย้ายไปยังพื้นที่กักกันเพื่อให้ผู้ดูแลระบบตรวจสอบ",
       "audit": "ส่งอีเมลพร้อมเพิ่ม header แท็ก",
-      "discard": "ลบโดยไม่แจ้ง ผู้ส่งได้รับการตอบกลับว่าส่งสำเร็จ"
+      "discard": "ลบโดยไม่แจ้ง ผู้ส่งได้รับการตอบกลับว่าส่งสำเร็จ",
+      "markDelivery": "ไม่สกัดกั้น ให้ผ่านขั้นตอนตรวจจับที่เหลือต่อไป และสามารถเลือกใส่แท็กก่อนนำส่งได้"
+    },
+    "tagPanel": {
+      "bodyLabel": "แท็กในเนื้อหา",
+      "bodyPlaceholder": "ข้อความที่จะแทรกลงในเนื้อหาอีเมล",
+      "errorTagRequired": "เมื่อเปิดใช้การดำเนินการนี้ ต้องเปิดใช้วิธีใส่แท็กอย่างน้อยหนึ่งวิธี",
+      "errorTagFieldRequired": "เนื้อหาของวิธีใส่แท็กที่เปิดใช้งานต้องไม่ว่าง",
+      "headerLabel": "แท็กในส่วนหัว",
+      "headerNamePlaceholder": "ชื่อฟิลด์ส่วนหัว เช่น X-Spoof-Warning",
+      "headerValuePlaceholder": "ค่าของฟิลด์ส่วนหัว",
+      "hint": "เลือกวิธีใส่แท็กอย่างน้อยหนึ่งวิธี สามารถเปิดใช้แท็กหัวเรื่อง ส่วนหัว และเนื้อหาพร้อมกันได้",
+      "subjectLabel": "แท็กหัวเรื่อง",
+      "subjectPlaceholder": "เช่น [สงสัยว่าปลอมแปลง]",
+      "subjectPositionPrefix": "คำนำหน้า",
+      "subjectPositionSuffix": "คำต่อท้าย",
+      "title": "วิธีใส่แท็ก"
     }
   },
   "behaviorControl": {
@@ -5163,7 +5214,6 @@
       "mode_none": "ไม่ตรวจจับ",
       "mode_deep": "ตรวจจับเชิงลึก (ถอดรหัสและสแกนเนื้อหา)",
       "decryptFailAction": "การดำเนินการเมื่อถอดรหัสล้มเหลว",
-      "receiveDefault": "ค่าเริ่มต้นขาเข้า: ทำขั้นตอนถัดไปในไปป์ไลน์",
       "advancedOptions": "ตัวเลือกขั้นสูง",
       "recursiveDetectDepth": "สแกนเนื้อหาที่ถอดรหัสแบบเรียกซ้ำ (จำกัดความลึก 3 ระดับ)",
       "markSuspicious": "คงเครื่องหมายอีเมลน่าสงสัยไว้แม้ผ่านการตรวจสอบขั้นถัดไป",
@@ -5552,7 +5602,7 @@
     "triggerCount": "จำนวนทริกเกอร์",
     "emails": "ฉบับ",
     "triggerAction": "การดำเนินการทริกเกอร์",
-    "actionMarkDelivery": "ทำเครื่องหมายและส่ง",
+    "actionMarkDelivery": "ไปขั้นตอนถัดไป",
     "actionReview": "ตรวจสอบ",
     "actionBlock": "บล็อก",
     "actionDiscard": "ทิ้ง",
@@ -5578,7 +5628,10 @@
     "navSummary": "หน้าต่าง {window} นาที / เกณฑ์ {threshold}%",
     "tooltipObserve": "เมื่อเปิดใช้งาน จะบันทึกเฉพาะบันทึกเท่านั้น ไม่ดำเนินการสกัดกั้นจริง",
     "errorTagRequired": "การทำเครื่องหมายและส่งต้องเปิดใช้วิธีทำเครื่องหมายอย่างน้อยหนึ่งวิธี",
-    "tooltipAction": "การดำเนินการที่จะทำเมื่อตรวจพบอีเมลที่คล้ายกัน เลือก \"เก็บสัญญาณเท่านั้น\" เพื่อบันทึกโดยไม่ดำเนินการ"
+    "tooltipAction": "การดำเนินการที่จะทำเมื่อตรวจพบอีเมลที่คล้ายกัน เลือก \"เก็บสัญญาณเท่านั้น\" เพื่อบันทึกโดยไม่ดำเนินการ",
+    "errorTagFieldRequired": "เนื้อหาของวิธีใส่แท็กที่เปิดใช้งานต้องไม่ว่าง",
+    "tagBodyLabel": "แท็กในเนื้อหา",
+    "tagBodyPlaceholder": "เช่น [อีเมลที่คล้ายกัน]"
   },
   "mailMarking": {
     "title": "การทำเครื่องหมายและคำประกาศอีเมล",
@@ -5696,7 +5749,11 @@
     "deleted": "ลบสำเร็จ",
     "saveFailed": "การบันทึกล้มเหลว",
     "deleteFailed": "การลบล้มเหลว",
-    "loadFailed": "โหลดไม่สำเร็จ"
+    "loadFailed": "โหลดไม่สำเร็จ",
+    "errorPriorityRange": "ลำดับความสำคัญต้องเป็นจำนวนเต็มระหว่าง {min} ถึง {max}",
+    "errors": {
+      "priorityRange": "ลำดับความสำคัญต้องอยู่ระหว่าง {min}–{max}"
+    }
   },
   "passwordBook": {
     "title": "สมุดรหัสผ่าน",
@@ -5733,6 +5790,16 @@
     "pageTitle": "ศูนย์จัดการอีเมล",
     "investigationTitle": "ศูนย์สอบสวนอีเมล",
     "investigationSubtitle": "ดูและวิเคราะห์เหตุการณ์ความปลอดภัยอีเมลเพื่อการสอบสวนภัยคุกคามและการกำจัด",
+    "recipientStatusBar": {
+      "delivered": "ส่งแล้ว",
+      "sideline": "รอตรวจสอบ",
+      "quarantine": "กักกัน",
+      "rejected": "ปฏิเสธ",
+      "discarded": "ละทิ้ง",
+      "audit": "ตรวจสอบ",
+      "other": "อื่น ๆ",
+      "mixedMailHint": "อีเมล {count} ฉบับในหน้านี้มีผู้รับหลายคนและได้รับการดำเนินการต่างกัน หมวดหมู่ที่ตรงกับตัวกรองจะแสดงก่อนในคอลัมน์การดำเนินการ (นับเฉพาะหน้านี้)"
+    },
     "search": {
       "placeholder": "อธิบายลักษณะอีเมล เช่น: อีเมลฟิชชิงปลอมเป็น Microsoft สัปดาห์ที่แล้ว",
       "aiParse": "AI วิเคราะห์",
@@ -5815,6 +5882,7 @@
         "sideline_pending": "กำลังตรวจสอบ",
         "audit_pending": "รอตรวจสอบ",
         "delivering": "กำลังส่ง",
+        "delivery_cancelled": "ยกเลิกการนำส่ง",
         "delivered": "ส่งสำเร็จ",
         "delivery_failed": "ส่งล้มเหลว",
         "recalling": "กำลังเรียกคืน",
@@ -5822,12 +5890,17 @@
         "recall_pending": "กำลังเรียกคืน",
         "recall_success": "เรียกคืนสำเร็จ",
         "recall_failed": "เรียกคืนล้มเหลว",
-        "partial_recall_success": "เรียกคืนบางส่วนสำเร็จ",
-        "deleted": "ถูกลบ",
-        "bounced": "ตีกลับแล้ว",
-        "expired": "หมดอายุ",
-        "reviewed_rejected": "ตรวจสอบแล้วปฏิเสธ",
-        "partial_delivered": "ส่งบางส่วนสำเร็จ"
+        "expired": "หมดอายุ"
+      },
+      "legacyStatuses": {
+        "quarantined": "กักกัน",
+        "pending_review": "กำลังตรวจสอบ",
+        "blocked": "บล็อกแล้ว",
+        "bounced": "ตีกลับ",
+        "partial_delivered": "นำส่งบางส่วน",
+        "partial_recall_success": "เรียกคืนสำเร็จบางส่วน",
+        "deleted": "ลบแล้ว",
+        "reviewed_rejected": "ปฏิเสธหลังการตรวจสอบ"
       },
       "mailType": "ประเภทอีเมล",
       "disposalPolicyKeys": "เหตุผลในการจัดการ",
@@ -6000,6 +6073,16 @@
       "empty": "ไม่มีข้อมูล",
       "selected": "เลือก {n} ฉบับ",
       "disposalBasis": "พื้นฐานการกำจัด",
+      "disposalBasisGroupHeader": "{module} ({count} ผู้รับ)",
+      "disposalBasisRuleLine": "{recipient} — กฎ: {ruleName} ({ruleId}) · {state}",
+      "disposalBasisPlatformRuleLine": "{recipient} — กฎ: {policyLabel} · {state}",
+      "disposalBasisLoading": "กำลังโหลดรายละเอียดผู้รับ...",
+      "disposalBasisLoadFailed": "โหลดรายละเอียดผู้รับไม่สำเร็จ แสดงข้อมูลสรุปกลุ่มแล้ว",
+      "disposalBasisState": {
+        "effective": "มีผลสุดท้าย",
+        "hitOnly": "ตรงเงื่อนไขเท่านั้น",
+        "unknown": "ไม่ทราบการมีผล"
+      },
       "total": "ทั้งหมด {n}",
       "settings": "ตั้งค่า",
       "columnSettings": "คอลัมน์",
@@ -6008,7 +6091,7 @@
     },
     "batch": {
       "findSimilar": "ค้นหาคล้าย",
-      "release": "ปล่อย",
+      "release": "นำส่ง",
       "delete": "ทิ้ง",
       "export": "ส่งออก",
       "confirmRelease": "ยืนยันปล่อยอีเมลที่เลือก?",
@@ -6017,10 +6100,13 @@
       "releaseAuditHint": "การปล่อยและการแก้ไขประเภทจะถูกบันทึกในบันทึกการตรวจสอบ",
       "recallDescription": "พยายามลบอีเมลที่เลือกออกจากกล่องจดหมายของผู้รับ และแก้ไขประเภทอีเมลได้หากต้องการ",
       "recallAuditHint": "การเรียกคืนขึ้นอยู่กับระบบอีเมลปลายทาง ผลลัพธ์และการแก้ไขประเภทจะถูกบันทึกในการตรวจสอบ",
+      "csvRecipientDetail": "รายละเอียดผู้รับ",
+      "mixedSelectionWarning": "อีเมลที่เลือก {count} ฉบับมีการดำเนินการต่างกันตามผู้รับ ระบบจะประมวลผลเฉพาะผู้รับที่ยังใช้การดำเนินการนี้ได้ และจะไม่ประมวลผลผู้รับที่อยู่ในสถานะสิ้นสุดซ้ำ",
       "similarLimit": "สูงสุด 10 ฉบับตัวอย่าง",
       "similarFound": "พบ {n} อีเมลที่คล้ายกัน",
       "exportNotImplemented": "ฟีเจอร์ส่งออกกำลังจะมา",
       "partialResult": "{succeeded} สำเร็จ, {failed} ล้มเหลว, {notApplicable} ไม่เกี่ยวข้อง",
+      "partialRecipientResult": "{succeeded} สำเร็จ, {partial} สำเร็จบางส่วนตามผู้รับ, {failed} ล้มเหลว, {notApplicable} ไม่เกี่ยวข้อง",
       "allSucceeded": "ดำเนินการ {n} อีเมลสำเร็จ",
       "failed": "การดำเนินการหมู่ล้มเหลว กรุณาลองใหม่",
       "recall": "เรียกคืน",
@@ -6107,7 +6193,7 @@
         "mailType": {
           "label": "ประเภทอีเมล"
         },
-        "confidenceScore": "ความมั่นใจ {pct}%",
+        "confidenceScore": "ความมั่นใจ {score}",
         "confidenceBlacklist": "ตรงกับบัญชีดำ (ไม่มีคะแนนความมั่นใจ)",
         "confidenceRule": "ตรงกับกฎ (ไม่มีคะแนนความมั่นใจ)",
         "action": "การดำเนินการ",
@@ -6118,12 +6204,14 @@
           "title": "บริบทการส่ง/รับ",
           "recipientsCount": "ผู้รับ {n} ราย",
           "notOperableWarning": "อีเมลนี้ถูกบล็อก/ทิ้งแล้ว ระบบไม่ได้เก็บเนื้อหาต้นฉบับ ไม่สามารถดำเนินการต่อได้",
+          "deliveryFailedWarning": "อีเมลนี้ถูกปล่อยและจัดส่งโดยเกตเวย์แล้ว แต่ระบบเมลปลายทางรับไม่สำเร็จ (ดูสถานะผู้รับและรายละเอียดการจัดส่ง) ใช้การดำเนินการ “ส่งซ้ำ” เพื่อกู้คืนการจัดส่ง",
           "viewPolicyDetail": "ดูรายละเอียดการตรงกับนโยบาย",
           "time": "เวลา",
           "size": "ขนาด",
           "expandFullInfo": "ขยายข้อมูลทั้งหมด",
-          "authDetails": "รายละเอียดการยืนยันตัวตน",
-          "networkFeatures": "ลักษณะเครือข่าย"
+          "mailHeaders": "ส่วนหัวอีเมล",
+          "mailHeadersUnavailable": "ไม่มีข้อมูลส่วนหัวอีเมล",
+          "mailHeadersTruncated": "ส่วนหัวอีเมลเกินขีดจำกัดการจัดเก็บ เนื้อหาด้านล่างจึงไม่สมบูรณ์"
         },
         "emailContent": "เนื้อหาอีเมล",
         "noContent": "ไม่มีเนื้อหา",
@@ -6151,8 +6239,9 @@
         "urgentTooltip": "อีเมลตรงกับคำสำคัญที่ละเอียดอ่อน/เร่งด่วน",
         "domainAge": "อายุโดเมน {n} วัน",
         "domainAgeTooltip": "โดเมนของผู้ส่งเพิ่งลงทะเบียนเมื่อ {n} วันก่อน -- โดเมนที่เพิ่งลงทะเบียนใหม่มักเป็นสัญญาณของฟิชชิง/การปลอมแปลง",
-        "aiJudgmentBasis": "พื้นฐานการตัดสินของ AI",
-        "cloudCheckBasis": "เกณฑ์การตรวจสอบบนคลาวด์",
+        "recipientOutcomeLabel": "ผลลัพธ์การส่งแบบกลุ่ม",
+        "multiBasisCount": "+{n} รายการ",
+        "multiBasisPopoverTitle": "มีเหตุผลการจัดการทั้งหมด {count} รายการ",
         "recipientStatus": {
           "title": "สถานะผู้รับ",
           "header": "สถานะผู้รับ ({n} คน)",
@@ -6169,7 +6258,11 @@
             "blocked": "ถูกปิดกั้น",
             "rejected": "ถูกปฏิเสธ",
             "discarded": "ถูกทิ้ง",
-            "audited": "อยู่ระหว่างตรวจสอบ"
+            "audited": "อยู่ระหว่างตรวจสอบ",
+            "delivering": "กำลังนำส่ง",
+            "delivery_failed": "นำส่งไม่สำเร็จ",
+            "deferred": "เลื่อนการนำส่ง",
+            "bounced": "ตีกลับ"
           },
           "notOperable": "ไม่สามารถดำเนินการได้",
           "noContent": "(ไม่มีต้นฉบับ)",
@@ -6180,13 +6273,22 @@
             "block": "ปิดกั้น",
             "discard": "ทิ้ง",
             "recall": "เรียกคืน",
-            "notify": "แจ้งเตือน"
+            "notify": "แจ้งเตือน",
+            "redeliver": "ส่งซ้ำ"
           },
           "readOnlyTooltip": "มุมมองเจาะลึกนี้ดูได้อย่างเดียว",
           "selected": "เลือกแล้ว {n} ผู้รับ",
           "empty": "ยังไม่มีประวัติการจัดการผู้รับ",
           "actionSuccess": "ดำเนินการสำเร็จ",
           "actionFailed": "ดำเนินการล้มเหลว",
+          "redeliverSuccess": "ส่งคำขอส่งซ้ำแล้ว ผลการจัดส่งจะอัปเดตในสถานะเร็ว ๆ นี้",
+          "deferredRetrying": "การจัดส่งถูกเลื่อน ระบบกำลังลองใหม่อัตโนมัติ",
+          "redeliverDialog": {
+            "title": "ส่งซ้ำ",
+            "body": "ระบบจะส่งอีเมลต้นฉบับที่เก็บไว้ให้ผู้รับที่เลือกอีกครั้ง",
+            "duplicateWarning": "ผู้รับนี้ได้รับอีเมลสำเร็จแล้ว การส่งซ้ำจะทำให้ได้รับอีเมลซ้ำ",
+            "confirm": "ยืนยันการส่งซ้ำ"
+          },
           "quarantineBlockUnsupported": "ระบบหลังบ้านยังไม่รองรับการกักกัน/ปิดกั้น",
           "notApplicable": "ไม่สามารถใช้ได้กับสถานะปัจจุบัน",
           "unsupportedObjectTarget": "อ็อบเจ็กต์ประเภทนี้ยังไม่รองรับการจัดการแยกรายอ็อบเจ็กต์",
@@ -6209,16 +6311,8 @@
         "senderActions": {
           "blacklist": "เพิ่มผู้ส่งในบัญชีดำ",
           "whitelist": "เพิ่มผู้ส่งในบัญชีขาว",
-          "more": "เพิ่มเติม",
           "recipientHint": "การส่งมอบ กักกัน และการดำเนินการอื่น ๆ ต่อผู้รับ ให้ทำในตารางผู้รับด้านล่าง",
           "notImplementedToast": "ยังไม่รองรับฟีเจอร์นี้",
-          "menu": {
-            "exportEml": "ส่งออก EML",
-            "exportPdf": "ส่งออกรายงาน PDF",
-            "markFalsePositive": "ทำเครื่องหมายผลบวกลวง",
-            "markFalseNegative": "ทำเครื่องหมายผลลบลวง",
-            "addToInvestigation": "เพิ่มในงานสืบสวน"
-          },
           "blacklistDialog": {
             "title": "ยืนยันการเพิ่มผู้ส่ง \"{sender}\" เข้าบัญชีดำ?",
             "desc": "อีเมลจากผู้ส่งรายนี้ในอนาคตจะถูกบล็อกโดยอัตโนมัติ",
@@ -6242,7 +6336,7 @@
         "entityDetection": {
           "linksTab": "ลิงก์ ({n})",
           "attachmentsTab": "ไฟล์แนบ ({n})",
-          "globalHint": "การจัดการเอนทิตีนี้จะมีผลกับนโยบายทั่วทั้งระบบ ส่งผลต่อผู้รับทุกคน",
+          "globalHint": "การเพิ่มในบัญชีดำจะสร้างกฎเนื้อหาระดับผู้เช่าสำหรับทิศทางอีเมลนี้และมีผลกับอีเมลที่ตรงกันในอนาคต",
           "noLinks": "ไม่พบลิงก์",
           "noAttachments": "ไม่พบไฟล์แนบ",
           "blacklistDomain": "เพิ่มโดเมนในบัญชีดำ",
@@ -6251,6 +6345,14 @@
           "download": "ดาวน์โหลด",
           "ruleSuccess": "เพิ่มกฎบัญชีดำแล้ว",
           "ruleFailed": "เพิ่มกฎบัญชีดำไม่สำเร็จ",
+          "confirmTitle": {
+            "domain": "เพิ่มโดเมนนี้ในบัญชีดำหรือไม่",
+            "url": "เพิ่ม URL นี้ในบัญชีดำหรือไม่",
+            "attachment_hash": "เพิ่มแฮชไฟล์แนบนี้ในบัญชีดำหรือไม่"
+          },
+          "confirmImpact": "ระบบจะสร้างกฎเนื้อหาสำหรับทิศทางเดียวกับอีเมลนี้ อีเมลที่ตรงกันในอนาคตจะถูกกักกันและจัดการได้ในกฎเนื้อหา",
+          "confirm": "เพิ่มในบัญชีดำ",
+          "confirming": "กำลังสร้าง…",
           "vtScore": "ตรวจสอบ VirusTotal: {score}",
           "title": "การตรวจจับและจัดการเอนทิตีเนื้อหา"
         },
@@ -6316,14 +6418,20 @@
           "intentEngine": "เครื่องมือวิเคราะห์เจตนา",
           "similarityDetection": "ตรวจจับความคล้ายคลึง",
           "advancedRules": "กฎขั้นสูง",
-          "senderBehaviorAgent": "เอเจนต์พฤติกรรมผู้ส่ง",
-          "intentRecognitionAgent": "เอเจนต์รู้จำเจตนา",
-          "marketingEmailAgent": "เอเจนต์อีเมลการตลาด",
-          "phishingDetectionAgent": "เอเจนต์ตรวจจับอีเมลฟิชชิง",
-          "retrospectiveAgent": "เอเจนต์ย้อนวิเคราะห์"
+          "mailMarking": "การทำเครื่องหมายอีเมล",
+          "phishingAgent": "เอเจนต์ตรวจจับอีเมลฟิชชิง",
+          "spoofingAgent": "เอเจนต์ตรวจจับการปลอมแปลง",
+          "threatRetroAgent": "เอเจนต์ย้อนรอยภัยคุกคาม"
         },
         "contentDetails": "รายละเอียดเนื้อหา",
         "detectionPipeline": "กระบวนการตรวจจับ",
+        "recipientGroupsBadge": "{n} กลุ่ม",
+        "recipientScopeLine": "{recipients} ({count} คน)",
+        "recipientGroupLine": "{recipients} ({count} คน)",
+        "multiBasisSummaryLabel": "ผู้รับ {recipients} คน · เหตุผลการจัดการ {groups} กลุ่ม",
+        "analysisLoading": "กำลังโหลดผลการตรวจจับ…",
+        "analysisLoadFailed": "โหลดผลการตรวจจับไม่สำเร็จ",
+        "retry": "ลองอีกครั้ง",
         "totalElapsed": "เวลารวม: {ms}ms",
         "elapsed": "ใช้เวลา: {ms}ms",
         "policyCount": "{n} รายการนโยบาย",
@@ -6333,10 +6441,10 @@
         "postDetectionTimeline": "ไทม์ไลน์การจัดการหลังตรวจพบ",
         "eventCount": "{n} เหตุการณ์",
         "detectionComplete": "ตรวจจับเสร็จสิ้น",
-        "recallScope": "ขอบเขตการเรียกคืน",
-        "recallAction": "การดำเนินการเรียกคืน",
+        "recallScope": "เป้าหมายการดำเนินการ",
+        "recallAction": "ประเภทการดำเนินการ",
         "executionResult": "ผลการดำเนินการ",
-        "viewRecallLog": "ดูบันทึกการเรียกคืน",
+        "viewRecallLog": "ดูบันทึกดิบ",
         "noEvents": "ไม่มีเหตุการณ์",
         "aiVerdict": {
           "title": "ผลตัดสินโดย AI",
@@ -6357,7 +6465,34 @@
           "recommendedActionsLabel": "ข้อเสนอแนะการดำเนินการ",
           "noRecommendedActions": "ยังไม่มีข้อเสนอแนะ"
         },
-        "noAiData": "ยังไม่มีข้อมูล"
+        "noAiData": "ยังไม่มีข้อมูล",
+        "eventResult": {
+          "released": "ปล่อยผ่านแล้ว",
+          "sidelineReleased": "ส่งซ้ำและปล่อยผ่านแล้ว",
+          "discarded": "ทิ้งแล้ว",
+          "deleted": "ลบแล้ว",
+          "approved": "อนุมัติ",
+          "rejected": "ปฏิเสธ",
+          "bounced": "ตีกลับแล้ว",
+          "delivered": "สำเร็จ",
+          "failed": "ล้มเหลว",
+          "success": "สำเร็จ",
+          "handling": "กำลังดำเนินการ",
+          "expanded": "แยกเป็นคำขอย่อย",
+          "timeoutReleased": "ปล่อยอัตโนมัติเมื่อหมดเวลา",
+          "timeout": "หมดเวลา (ไม่มีการตอบกลับ)"
+        },
+        "operationType": {
+          "quarantineDisposal": "การจัดการพื้นที่กักกัน",
+          "sidelineDisposal": "การจัดการช่องทางแยก",
+          "manualAudit": "การตรวจสอบโดยเจ้าหน้าที่",
+          "bounce": "การตีกลับ",
+          "reinject": "การส่งใหม่",
+          "forwardDelivery": "การส่งต่อ",
+          "adminRecall": "ผู้ดูแลระบบเรียกคืน",
+          "agentRecall": "เอเจนต์เรียกคืน",
+          "sidelineAgentRecall": "เอเจนต์ช่องทางแยกเรียกคืน"
+        }
       },
       "features": {
         "basicInfo": "ข้อมูลพื้นฐาน",
@@ -6414,7 +6549,12 @@
         "platformPolicyModule": "นโยบายที่แพลตฟอร์มควบคุม",
         "platformPolicyRuleName": "ควบคุมโดยแพลตฟอร์ม",
         "platformPolicyHitDetail": "อีเมลนี้ถูกสกัดกั้นโดยนโยบายชั้นการเชื่อมต่อระดับแพลตฟอร์ม หากต้องการรายละเอียดโปรดติดต่อผู้ดูแลแพลตฟอร์ม",
-        "platformPolicyListReason": "ถูกสกัดกั้นโดยนโยบายที่แพลตฟอร์มควบคุม"
+        "platformPolicyListReason": "ถูกสกัดกั้นโดยนโยบายที่แพลตฟอร์มควบคุม",
+        "basisScope": "ขอบเขตที่ใช้",
+        "hitModules": "โมดูลที่ตรงกัน",
+        "hitModulesHint": "โมดูลที่อีเมลฉบับนี้ตรงกัน กฎที่ยังไม่ถูกประเมิน (เพราะโมดูลก่อนหน้าตัดสินไปแล้ว) จะไม่แสดงที่นี่",
+        "effectiveFor": "มีผลกับ: {list}",
+        "matchedOnlyFor": "ตรงกันเท่านั้น: {list}"
       },
       "delivery": {
         "noData": "ไม่มีบันทึกการนำส่ง",
@@ -6557,8 +6697,6 @@
       "reviewDesc": "ส่งอีเมลให้ผู้ดูแลตรวจสอบ",
       "discard": "ทิ้ง",
       "discardDesc": "ทิ้งอีเมลโดยไม่แจ้งเตือน",
-      "block": "บล็อก",
-      "blockDesc": "ปฏิเสธอีเมล",
       "none": "ไม่มีการกระทำ",
       "noneDesc": "กฎสำหรับแท็กเท่านั้น; ไม่มีการกระทำหลัก"
     },
@@ -6667,13 +6805,6 @@
       "tagStylePlainText": "ข้อความธรรมดา",
       "disclaimerContentSourceHint": "ข้อความข้อจำกัดความรับผิดชอบมาจากการตั้งค่าส่วนกลางของระบบ ที่นี่กำหนดเฉพาะตำแหน่งที่แทรก หากต้องการแก้ไขข้อความ โปรดติดต่อผู้ดูแลระบบ"
     },
-    "block": {
-      "paramsTitle": "พารามิเตอร์การบล็อก",
-      "smtpCode": "รหัส SMTP",
-      "responseText": "ข้อความตอบกลับ",
-      "tarpitEnabled": "เปิดใช้การตอบสนองล่าช้า",
-      "tarpitSeconds": "เวลาหน่วง (วินาที)"
-    },
     "review": {
       "paramsTitle": "พารามิเตอร์การตรวจสอบ",
       "reviewers": "อีเมลผู้ตรวจสอบ",
@@ -6705,7 +6836,6 @@
     "settings": {
       "title": "การตั้งค่าขั้นสูง",
       "forwardRateLimit": "ขีดจำกัดอัตราการส่งต่อ (ต่อกฎต่อนาที)",
-      "tarpitMaxConcurrent": "ขีดจำกัดพร้อมกันของ tarpit ทั่วโลก",
       "adminNotifyMaxRecipients": "จำนวนผู้รับ adminNotify สูงสุด",
       "reviewTimeoutAction": "การดำเนินการสำรองเมื่อหมดเวลาตรวจสอบ",
       "reviewTimeoutAccept": "อนุมัติอัตโนมัติ",
@@ -6719,8 +6849,7 @@
     },
     "priorityPresets": {
       "daily": "ประจำวัน 1000",
-      "security": "ความปลอดภัย 5000",
-      "block": "บล็อก 9000"
+      "security": "ความปลอดภัย 5000"
     },
     "stage": {
       "selectLabel": "ขั้นตอนการประเมิน",
@@ -7379,20 +7508,15 @@
       "quarantineHint": "การกักกันอีเมลไม่ต้องตั้งค่าพารามิเตอร์ สามารถดูอีเมลที่ถูกกักกันได้ในโมดูลกักกันอีเมล",
       "tagStyleLabel": "รูปแบบป้ายกำกับ",
       "tagDeliverStyleDisabledHint": "รูปแบบจะไม่มีผลเมื่อตำแหน่งป้ายกำกับเป็นส่วนหัว",
-      "blockSmtpCodeHint": "ที่ใช้บ่อย: 550/554/571",
       "previewTitle": "ตัวอย่างนิพจน์ตรรกะ",
       "orGroupTag": "กลุ่มนโยบาย OR",
       "fullExpressionTitle": "นิพจน์แบบเต็ม",
       "willBeActioned": "อีเมลจะถูก{action}",
-      "blockResponseCodeSuffix": "（รหัสตอบกลับ SMTP: {code}）",
       "andExecuteAddons": "และดำเนินการส่วนเสริมต่อไปนี้:",
       "configSummaryTitle": "สรุปการตั้งค่า",
       "configSummaryPolicyCol": "นโยบาย",
       "configSummaryConfigCol": "การตั้งค่า",
       "summaryDefaultParams": "พารามิเตอร์เริ่มต้น",
-      "summarySmtpCode": "รหัส SMTP: {code}",
-      "summaryTarpitOn": "Tarpit: เปิด ({sec} วินาที)",
-      "summaryTarpitOff": "Tarpit: ปิด",
       "summarySeparator": ", ",
       "summaryMergeWindow": "{recipientType} รวม {minutes} นาที",
       "summaryScope": "ขอบเขต: {scope}",
@@ -7426,11 +7550,6 @@
           "source": "กลไกการนำส่ง",
           "usage": "ลบทันทีโดยไม่แจ้งเตือน",
           "note": "ไม่สามารถกู้คืนได้หลังจากละทิ้ง"
-        },
-        "block": {
-          "source": "ชั้นพร็อกซี MTA",
-          "usage": "ปฏิเสธทันทีในขั้นตอนเซสชัน SMTP",
-          "note": "อีเมลที่ถูกบล็อกจะไม่เข้าสู่กลไกประมวลผลเนื้อหา"
         }
       },
       "policyGroup": "กลุ่มนโยบาย",
@@ -7724,6 +7843,11 @@
       "backToWorld": "กลับสู่ทั่วโลก",
       "topIps": "IP ต้นทางอันดับสูงสุด",
       "byThreat": "สัดส่วนภัยคุกคาม",
+      "specialRegionNames": {
+        "HK": "ฮ่องกง จีน",
+        "MO": "มาเก๊า จีน",
+        "TW": "ไต้หวัน จีน"
+      },
       "blockRateLegend": "สีของแถบ = อัตราการบล็อก",
       "blockRateGood": "≥97%  ป้องกันได้ดี",
       "blockRateWarn": "95–97%  ควรเฝ้าระวัง",
@@ -7865,7 +7989,6 @@
       "bounceRate": "อัตราตีกลับ",
       "avgLatencyMs": "เวลาแฝงเฉลี่ย",
       "sidelineQueue": "คิวประมวลผลข้างเคียง",
-      "latencyP99": "เวลาแฝง P99",
       "outboundQueueBacklog": "คิวส่งออก",
       "threatRate": "อัตราภัยคุกคาม",
       "internalThreatCount": "จำนวนภัยคุกคาม",
@@ -7875,7 +7998,6 @@
       "antispamQueue": "คิวป้องกันสแปม",
       "outboundSuccessRate": "อัตราสำเร็จส่งออก",
       "outboundBounceRate": "อัตราตีกลับส่งออก",
-      "outboundLatencyP99": "เวลาแฝงส่งออก P99",
       "internalSuccessRate": "อัตราสำเร็จภายใน",
       "internalThreatRate": "อัตราตรวจพบภัยคุกคามภายใน",
       "avgInternalLatency": "เวลาแฝงภายในเฉลี่ย",
@@ -7891,7 +8013,6 @@
         "bounceRate": "ข้อความที่ล้มเหลวหรือตีกลับหารด้วยข้อความทั้งหมด",
         "avgLatencyMs": "เวลาเฉลี่ยตั้งแต่รับจนประมวลผลเสร็จ",
         "sidelineQueue": "งานที่รอการประมวลผลข้างเคียง",
-        "latencyP99": "99% ของเมลส่งออกเสร็จภายในเวลานี้ และแจ้งเตือนเมื่อเกิน 30 วินาที",
         "outboundQueueBacklog": "งานส่งออกค้างที่ประมาณจากข้อความระหว่างการส่ง",
         "threatRate": "สัดส่วนข้อความภายในที่ตรวจพบภัยคุกคาม",
         "internalThreatCount": "ข้อความภายในที่ตรวจพบว่าเป็นสแปม ฟิชชิง หรือไวรัส"
@@ -7918,7 +8039,7 @@
       "total": "ทั้งหมด",
       "success": "สำเร็จ",
       "failure": "ล้มเหลว",
-      "deferred": "เลื่อนการส่ง",
+      "detecting": "กำลังตรวจสอบ",
       "cancelled": "ยกเลิก",
       "successRate": "อัตราความสำเร็จ",
       "change": "การเปลี่ยนแปลง",
@@ -7938,8 +8059,6 @@
       "bounceReasons": "สาเหตุการตีกลับ",
       "receiveBounceReasons": "สาเหตุการตีกลับฝั่งรับเข้า",
       "threatDistribution": "การกระจายภัยคุกคาม",
-      "latencyPercentiles": "เปอร์เซ็นไทล์เวลาแฝง",
-      "queueTrend": "แนวโน้มคิว",
       "latencyDistribution": "การกระจายเวลาแฝง",
       "receiveTrend": "แนวโน้มปริมาณรับเข้า",
       "sendTrend": "แนวโน้มปริมาณส่งออก",
@@ -8201,6 +8320,8 @@
     "hardware": {
       "cpuMem": "แนวโน้ม CPU / หน่วยความจำ",
       "netTop5": "เครือข่าย Top 5",
+      "rxMbps": "รับ Mbps",
+      "txMbps": "ส่ง Mbps",
       "rxPps": "Rx PPS",
       "txPps": "Tx PPS",
       "dropRate": "อัตราสูญหาย",
@@ -10083,13 +10204,12 @@
       "error": "โหลดข้อมูลสถานะระบบไม่สำเร็จ กรุณารีเฟรชแล้วลองใหม่อีกครั้ง"
     },
     "kpi": {
-      "inbound": "อีเมลขาเข้าทั้งหมด",
+      "inbound": "อีเมลรับส่งทั้งหมด",
       "threats": "ภัยคุกคามที่บล็อก",
       "pending": "อีเมลรอดำเนินการ",
       "nodes": "โหนดออนไลน์",
       "ratio": "เทียบช่วงก่อนหน้า",
       "blockRate": "อัตราการบล็อก",
-      "pendingSplit": "กักกัน {a} / รอตรวจรายงาน {b}",
       "allOnline": "ออนไลน์ทั้งหมด",
       "nOffline": "ออฟไลน์ {n} รายการ",
       "attention": "ต้องดำเนินการ",
@@ -10550,7 +10670,14 @@
     "queueThreshold": "เตือนเมื่อมากกว่า 1,000",
     "allNormal": "ปกติทั้งหมด",
     "normal": "ปกติ",
+    "status": {
+      "normal": "ปกติ",
+      "warning": "ผิดปกติบางส่วน",
+      "critical": "มีปัญหาร้ายแรง",
+      "unknown": "ไม่ทราบสถานะ"
+    },
     "viewAll": "ดูทั้งหมด",
+    "viewDetails": "ดูรายละเอียด",
     "exportPdf": "ส่งออก PDF",
     "pdfUnavailable": "ยังไม่เปิดใช้งาน",
     "mailflowVolume": "ปริมาณ",
@@ -10559,6 +10686,7 @@
     "engineTrend": "ประสิทธิภาพเอนจินตรวจจับ (24ชม.)",
     "alertsHealth": "สุขภาพการแจ้งเตือน",
     "alertMarquee": "การแจ้งเตือนสด",
+    "noAlerts": "ไม่มีการแจ้งเตือน",
     "range": {
       "today": "วันนี้",
       "24h": "24ชม.",
@@ -10678,6 +10806,11 @@
     "siteIdHint": "ค่านี้อาจถูกแทนที่ด้วยตัวแปรสภาพแวดล้อม OSG_RULESYNC_SITE_ID — ในการติดตั้งแบบคลัสเตอร์ค่าจะถูกกำหนดจากส่วนกลางโดย clustermgr และมีความสำคัญเหนือการตั้งค่านี้เสมอ ดังนั้นการแก้ไขที่นี่อาจไม่มีผลอย่างเงียบ ๆ ให้ยืนยันค่าที่มีผลจริงในแผง \"Cross-Site Rule Sync\" ของ clustermgr"
   },
   "apiErrors": {
+    "redeliver": {
+      "in_progress": "มีคำขอส่งซ้ำสำหรับอีเมลนี้กำลังดำเนินการอยู่ โปรดลองใหม่ภายหลัง",
+      "original_expired": "ไม่ได้เก็บต้นฉบับไว้ (หรือหมดอายุแล้ว) ไม่สามารถส่งซ้ำได้",
+      "recipient_deferred": "การส่งถึง {recipient} กำลังลองใหม่โดยอัตโนมัติ ไม่จำเป็นต้องส่งซ้ำด้วยตนเอง"
+    },
     "account": {
       "cannot_delete_self": "คุณไม่สามารถลบบัญชีของตนเองได้",
       "last_super_admin": "ไม่สามารถปิดใช้งานผู้ดูแลระบบสูงสุดที่เปิดใช้งานคนสุดท้ายได้ มิฉะนั้นจะไม่มีใครจัดการระบบ",
@@ -10924,6 +11057,7 @@
       "action_required": "กฎประเภทดำเนินการต้องระบุการดำเนินการหนึ่งอย่าง",
       "advanced_rules_need_tenant": "กฎกรองขั้นสูงไม่มีให้ใช้ในมุมมองแพลตฟอร์ม กรุณาเลือกผู้เช่าก่อน",
       "bulk_action_invalid": "การดำเนินการแบบกลุ่มไม่ถูกต้อง ต้องเป็น: {allowed}",
+      "condition_regex_invalid": "ไม่สามารถคอมไพล์นิพจน์ทั่วไป {pattern} ด้วยเอนจิน Go (RE2) ของเกตเวย์ได้: {reason} กรุณาเขียนใหม่ด้วยไวยากรณ์ที่ RE2 รองรับ เช่น การมองไปข้างหน้าแบบ (?=...) ไม่รองรับ",
       "condition_tree_invalid": "เงื่อนไขของกฎไม่ถูกต้อง กรุณาตรวจสอบว่ากรอกครบทุกเงื่อนไข",
       "content_rules_need_tenant": "กฎเนื้อหาจัดการได้เฉพาะในมุมมองผู้เช่า กรุณาเลือกผู้เช่าก่อน",
       "copy_denied": "คุณไม่มีสิทธิ์คัดลอกกฎนี้",
@@ -10943,7 +11077,8 @@
       "tag_required": "กฎประเภทติดป้ายต้องระบุป้ายอย่างน้อยหนึ่งรายการ",
       "tenant_config_managed": "กฎนี้ถูกจัดการโดยการตั้งค่าความปลอดภัยไฟล์แนบของผู้เช่า ไม่สามารถแก้ไขโดยตรง กรุณาแก้ไขที่หน้าตั้งค่าความปลอดภัยไฟล์แนบ",
       "tenant_context_required": "กรุณาเลือกผู้เช่าก่อนดำเนินการนี้",
-      "valid_range_invalid": "เวลาสิ้นสุดการมีผลต้องไม่เร็วกว่าเวลาเริ่มต้น"
+      "valid_range_invalid": "เวลาสิ้นสุดการมีผลต้องไม่เร็วกว่าเวลาเริ่มต้น",
+      "group_type_immutable": "ไม่สามารถเปลี่ยนประเภทกลุ่มได้ ({before} → {after}): ประเภทกำหนดวิธีตีความสมาชิก กรุณาสร้างกลุ่มใหม่"
     },
     "investigation": {
       "not_found": "ไม่พบงานตรวจสอบ",
@@ -11032,7 +11167,8 @@
       "mail_content_unavailable": "เนื้อหาอีเมลไม่มีอยู่บนโหนดจัดเก็บแล้ว",
       "item_not_pending": "รายการตรวจสอบนี้ถูกดำเนินการไปแล้ว",
       "ids_required": "กรุณาเลือกรายการตรวจสอบอย่างน้อยหนึ่งรายการ",
-      "action_invalid": "การดำเนินการไม่ถูกต้อง ต้องเป็นอนุมัติหรือปฏิเสธ"
+      "action_invalid": "การดำเนินการไม่ถูกต้อง ต้องเป็นอนุมัติหรือปฏิเสธ",
+      "access_denied": "คุณไม่มีสิทธิ์เข้าถึงรายการตรวจสอบนี้"
     },
     "assistant": {
       "not_authenticated": "กรุณาเข้าสู่ระบบก่อน",
@@ -11144,7 +11280,6 @@
     "advanced_rules_config": {
       "review_timeout_action_accept_reject_keep": "การจัดการเมื่อหมดเวลาตรวจสอบต้องเป็น accept, reject หรือ keep_pending",
       "forward_rate_limit_per_minute_non": "ขีดจำกัดอัตราการส่งต่อต่อนาทีต้องไม่เป็นค่าลบ",
-      "tarpit_max_concurrent_non_negative": "ขีดจำกัดการทำงานพร้อมกันของ tarpit ต้องไม่เป็นค่าลบ",
       "admin_notify_max_recipients_non_negative": "จำนวนผู้รับการแจ้งเตือนผู้ดูแลต้องไม่เป็นค่าลบ"
     },
     "alert_rules": {
@@ -11160,7 +11295,6 @@
       "dkim_key_not_found": "ไม่พบคีย์ DKIM"
     },
     "antispam_queue": {
-      "notification_message_uuid_accepted_by_atomic": "UUID ข้อความแจ้งเตือนรับได้เฉพาะที่ปลายทางติดตามการแจ้งเตือนแบบอะตอมมิก",
       "invalid_quarantine_notification_tracking_request": "คำขอติดตามการแจ้งเตือนการกักกันไม่ถูกต้อง"
     },
     "auth_spoofing": {

@@ -19,14 +19,19 @@ import { resolve } from 'node:path';
  * 所以 href 字符串对不代表跳转对：真正的不变式是「这个组件必须用 locale-aware
  * router」。href 单测抓不到，这条才抓得到。
  */
-describe('ContentRulesPage complex-rule navigation (GT-11698)', () => {
+describe('ContentRulesPage complex-rule editing (GT-11698 → 统一抽屉)', () => {
   const src = readFileSync(
     resolve(__dirname, '../ContentRulesPage.tsx'),
     'utf8',
   );
 
-  it('从 @/i18n/navigation 取 useRouter，而不是 next/navigation', () => {
-    expect(src).toMatch(/import\s*\{[^}]*\buseRouter\b[^}]*\}\s*from\s*["']@\/i18n\/navigation["']/);
+  it('复杂规则编辑不再跳转 /rules/data 技术编辑器', () => {
+    expect(src).not.toMatch(/complexContentRuleEditHref/);
+    expect(src).not.toMatch(/rules\/data\?edit_rule_id/);
+  });
+
+  it('复杂规则编辑打开与新建相同的抽屉（handleOpenDrawer）', () => {
+    expect(src).toMatch(/onEditComplex=\{\(ruleId\)\s*=>\s*\{[\s\S]*?handleOpenDrawer\(rule\)/);
   });
 
   it('不从 next/navigation 引入 useRouter', () => {

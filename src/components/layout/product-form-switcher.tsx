@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { Building2, Check, ExternalLink, FileText, User, FlaskConical } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -30,26 +30,10 @@ export function ProductFormSwitcher() {
   // 水合后从 localStorage 读真实值，并经 subscribeMockEnabled 订阅跨标签页变化。
   const mockEnabled = useSyncExternalStore(subscribeMockEnabled, isMockEnabled, () => false);
 
-  // 变更规格索引：动态扫描 doc/html_spec-version/ 下的所有 HTML 文件，
-  // 无需手动维护列表，每次增加新 spec 文件后自动出现在此入口。
-  const [versionSpecs, setVersionSpecs] = useState<{ ticket: string; label: string; url: string }[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const fetchVersionSpecs = () => {
-    fetch('/api/dev/version-specs')
-      .then((r) => r.json())
-      .then((data) => setVersionSpecs(data.specs ?? []))
-      .catch(() => {/* 非开发环境下 API 不可用属正常 */});
-  };
-
-  // mount 时预热，保证首次打开 dropdown 时数据已就绪
-  useEffect(() => { fetchVersionSpecs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleDropdownOpenChange = (open: boolean) => {
-    setDropdownOpen(open);
-    // 每次打开都重新 fetch，确保新增 spec 文件即时可见
-    if (open) fetchVersionSpecs();
-  };
+  // 变更规格（GT-xxxx 增量索引）已收进 html-spec/index.html 的
+  // 「变更规格（增量 GT 索引）」栏目，下拉不再重复列出。
 
   // 可见性门控：服务端 layout 仅在 OSGATEWAY_PRODUCT_FORM_SWITCHER=true
   // 时才给 provider 传 switcherEnabled=true。provider 会透传此 flag；
@@ -87,7 +71,7 @@ export function ProductFormSwitcher() {
 
   return (
     <>
-      <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownOpenChange}>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger
           className="inline-flex h-8 items-center gap-1 rounded border border-border/80 bg-card px-2.5 text-xs font-medium text-muted-foreground shadow-none transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           aria-label={t('label')}
@@ -198,33 +182,6 @@ export function ProductFormSwitcher() {
             </span>
             <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
           </DropdownMenuItem>
-          {/* 变更规格索引：独立分区，动态读取 doc/html_spec-version/ 下所有 HTML，
-              每新增一个 spec 文件后无需修改前端代码即自动出现在此。 */}
-          {versionSpecs.length > 0 && (
-            <>
-              <DropdownMenuSeparator />
-              <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                {tMock('changeSpecs')}
-              </div>
-              {versionSpecs.map((spec) => (
-                <DropdownMenuItem
-                  key={spec.ticket}
-                  onClick={() => {
-                    if (typeof window !== 'undefined') {
-                      window.open(spec.url, '_blank', 'noopener,noreferrer');
-                    }
-                  }}
-                  className="flex items-center justify-between"
-                >
-                  <span className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    {spec.label}
-                  </span>
-                  <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground" />
-                </DropdownMenuItem>
-              ))}
-            </>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

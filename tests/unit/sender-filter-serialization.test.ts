@@ -56,6 +56,23 @@ describe('buildConditionTree', () => {
     expect(buildConditionTree(input)).toEqual(expected);
   });
 
+  it('serializes individual *@domain wildcard as suffix', () => {
+    const tree = buildConditionTree({
+      sender_config: { type: 'individual', value: '*@domain.com' },
+      ip_range: { type: 'all' },
+    });
+    expect(tree).toEqual({ type: 'condition', field: 'sender', operator: 'suffix', value: '@domain.com' });
+  });
+
+  it('round-trips *@domain wildcard through parseSenderFilterRule', () => {
+    const tree = buildConditionTree({
+      sender_config: { type: 'individual', value: '*@domain.com' },
+      ip_range: { type: 'all' },
+    });
+    const parsed = parseSenderFilterRule(tree);
+    expect(parsed?.sender_config).toEqual({ type: 'individual', value: '*@domain.com' });
+  });
+
   it.each(cases)('round-trips %s', (_name, input, _expected) => {
     const tree = buildConditionTree(input);
     const parsed = parseSenderFilterRule(tree);

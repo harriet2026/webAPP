@@ -15,7 +15,6 @@ const PRIMARY_ACTIONS: PrimaryAction[] = [
   'quarantine',
   'review',
   'discard',
-  'block',
 ];
 
 export function parseRuleMetadata(metadata: Rule['metadata']): Record<string, unknown> | null {

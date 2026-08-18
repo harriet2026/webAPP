@@ -24,7 +24,13 @@ export type ResolvedAgentPresentation = AgentPresentation & {
   configHref?: string;
 };
 
-const AGENT_PRESENTATIONS: Record<AgentModuleKey, AgentPresentation> = {
+export const AGENT_PRESENTATION_ORDER = [
+  'phishing_agent',
+  'spoofing_agent',
+  'threat_retro_agent',
+] as const satisfies readonly AgentModuleKey[];
+
+export const AGENT_PRESENTATIONS: Record<AgentModuleKey, AgentPresentation> = {
   phishing_agent: {
     moduleKey: 'phishing_agent',
     agentKey: 'phishing',

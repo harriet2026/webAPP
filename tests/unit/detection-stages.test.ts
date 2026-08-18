@@ -131,4 +131,17 @@ describe('stage ordering aligns with policy pipeline (GT-12575)', () => {
     expect(byKey.ai).toBe(4);
     expect(byKey.comprehensive).toBe(5);
   });
+
+  it('uses the same three real agents as Agent Center', () => {
+    const stages = buildDetectionStages({
+      id: 1, action: 'accept',
+    } as unknown as MailLogDetail);
+    const ai = stages.find((stage) => stage.key === 'ai')!;
+
+    expect(ai.checks.map((check) => check.key)).toEqual([
+      'phishingAgent',
+      'spoofingAgent',
+      'threatRetroAgent',
+    ]);
+  });
 });

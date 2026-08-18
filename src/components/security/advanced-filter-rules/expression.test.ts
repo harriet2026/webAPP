@@ -11,6 +11,8 @@ function fakeT(key: string): string {
     'v3Conditions.conditions.urlCount': 'URL 数量',
     'v3Conditions.conditions.senderIp': '发信IP地址',
     'v3Conditions.conditions.sendDayOfWeek': '发信星期',
+    'v3Conditions.conditions.envelopeSender': '信封发信人',
+    'v3Conditions.conditions.envelopeRecipient': '信封收信人',
     'v3Conditions.matchModes.contains': '包含',
     'v3Conditions.matchModes.equals': '等于',
     'v3Conditions.matchModes.gt': '大于',
@@ -91,12 +93,12 @@ describe('summarizeLeaf / renderBriefLine', () => {
     expect(line).toBe('主题 包含 "x" (NOT)');
   });
 
-  it('shows the raw catalogue key (not the translated label) for envelope conditions', () => {
+  it('shows the translated label for envelope conditions (GT-12691)', () => {
     // envelopeSender is envelope:true in catalogue.ts
     const l = leaf({ conditionKey: 'envelopeSender', field: 'sender', operator: 'contain', value: 'a@b.com' });
     const s = summarizeLeaf(l, fakeT);
     expect(s.envelope).toBe(true);
-    expect(s.name).toBe('envelopeSender');
+    expect(s.name).toBe('信封发信人');
   });
 
   it('renders a between (number range) pair', () => {

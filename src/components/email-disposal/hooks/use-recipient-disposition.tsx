@@ -23,22 +23,24 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Loader2, Trash2 } from 'lucide-react';
+import { AlertTriangle, Loader2, Trash2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import type { ApiRequestFn } from '@/lib/api/client';
 import { useAuth } from '@/contexts/auth-context';
+import { localizeApiError } from '@/lib/api/error-message';
 import type { EmailType, ObjectDisposeResult, RecipientDisposition } from '@/types/email-disposal-detail';
 import { recipientActionsForStatus } from '../lib/detail-helpers';
 import {
-  addSenderFilterRule, disposalRulePriority, disposeByObject, disposeObjectAction, notifyRecipient,
+  addSenderFilterRule, disposalRulePriority, disposeByObject, disposeObjectAction, notifyRecipient, redeliverMail,
 } from '../lib/disposal-detail-api';
 import { recallMails } from '../lib/disposal-api';
 import { ReclassifyDialog } from '../components/reclassify-dialog';
 
-export type ActionKey = 'deliver' | 'discard' | 'recall' | 'notify' | 'quarantine' | 'block';
+export type ActionKey = 'deliver' | 'discard' | 'recall' | 'notify' | 'quarantine' | 'block' | 'redeliver';
 
 export interface RecipientGroup {
   key: string;
@@ -85,9 +87,14 @@ const STATUS_ORDER: Record<string, number> = {
   quarantined: 1,
   sidelined: 1,
   marked_delivered: 2,
+  // GT-12835：accept 收件人 milter 时点是在途（delivering），投递事实回写后转
+  // delivered / delivery_failed——三者同属投递族，delivering 与 delivered 同权，
+  // delivery_failed 与 blocked/rejected 同权（失败类）。
+  delivering: 3,
   delivered: 3,
   blocked: 4,
   rejected: 4,
+  delivery_failed: 4,
   discarded: 5,
 };
 function statusSortKey(status: string): number {
@@ -146,6 +153,8 @@ export function useRecipientDisposition({
   recipient_dispositions, mailLogId, sender, apiRequest, onDisposed, onSettled,
 }: UseRecipientDispositionArgs) {
   const t = useTranslations('emailDisposal.detail.overview');
+  // 根命名空间实例：localizeApiError 需要完整 key（apiErrors.<code>）。
+  const tRoot = useTranslations();
   const { isSystemAdmin } = useAuth();
 
   const groups = useMemo(
@@ -155,6 +164,9 @@ export function useRecipientDisposition({
 
   const [pending, setPending] = useState<PendingAction | null>(null);
   const [reclassifyOpen, setReclassifyOpen] = useState(false);
+  // GT-12880 重新投递弹窗状态（勾选集合以收件人地址为键）。
+  const [redeliverOpen, setRedeliverOpen] = useState(false);
+  const [redeliverSelected, setRedeliverSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   // G6: batch-result modal state -- lastResults holds one row per affected
   // recipient of the most recent dispatch (single-row action or multi-select
@@ -169,6 +181,21 @@ export function useRecipientDisposition({
   }
 
   function openAction(action: ActionKey, groupKeys: string[]) {
+    // GT-12880 重新投递：独立确认弹窗（收件人勾选 + 重复警示），不进
+    // deliver/discard/recall/notify 的改判状态机——它不改处置状态，只发起
+    // 一次新的投递（结果经 delivery_facts 回写自然刷新）。
+    if (action === 'redeliver') {
+      const targets = groups.filter((g) => groupKeys.includes(g.key));
+      const failed = new Set(
+        targets.flatMap((g) => g.dispositions.filter((d) => d.status === 'delivery_failed').map((d) => d.recipient)),
+      );
+      const preset = failed.size > 0
+        ? failed
+        : new Set(targets.flatMap((g) => g.dispositions.map((d) => d.recipient)));
+      setRedeliverSelected(preset);
+      setRedeliverOpen(true);
+      return;
+    }
     // RA-5: 隔离/阻断 fire immediately, with no confirm/reclassify dialog
     // (matches the demo) -- they never touch `pending`/`dispatch()`, so the
     // guarded deliver/discard/recall/notify state machine below is
@@ -374,16 +401,21 @@ export function useRecipientDisposition({
         } else {
           try {
             const resp = await recallMails({ mail_log_ids: [mailLogId], final_type: finalType }, apiRequest);
+            // GT-12772：后端返回的 failed 列表里的收件人实际上没有召回成功，
+            // 不能恒为 ok:true。
+            const isRecallFailed = resp.failed?.some((f) => f.id === mailLogId);
+            const failedReason = resp.failed?.find((f) => f.id === mailLogId)?.reason;
             const applicableRows: RecipientResultRow[] = applicable.flatMap((g) => g.dispositions.map((d) => ({
-              recipient: d.recipient, prevStatus: g.status, ok: true,
+              recipient: d.recipient, prevStatus: g.status, ok: !isRecallFailed,
+              reason: isRecallFailed ? (failedReason || t('recipientStatus.actionFailed')) : undefined,
             })));
             finishResults([...notApplicableRows, ...applicableRows]);
-            if (resp.reclassify_failed?.includes(mailLogId)) {
+            if (isRecallFailed) {
+              toast.error(failedReason || t('recipientStatus.actionFailed'));
+            } else if (resp.reclassify_failed?.includes(mailLogId)) {
               toast.warning(t('reclassifyPartialFail'));
-            } else if (failures.length === 0) {
-              toast.success(t('recipientStatus.actionSuccess'));
             } else {
-              toast.error(t('recipientStatus.bulkResult', { success: applicable.length, failed: failures.length }));
+              toast.success(t('recipientStatus.actionSuccess'));
             }
             onDisposed();
           } catch {
@@ -525,8 +557,95 @@ export function useRecipientDisposition({
       .flatMap((g) => g.dispositions.map((d) => d.recipient))
     : [];
 
+  // GT-12880：重新投递提交。错误经 apiErrors.redeliver.* 本地化（error-message
+  // 管道），成功 toast + onDisposed 刷新（重投后状态由 delivery_facts 回写驱动）。
+  async function confirmRedeliver() {
+    const recipients = [...redeliverSelected];
+    if (recipients.length === 0) return;
+    setBusy(true);
+    try {
+      await redeliverMail(mailLogId, recipients, apiRequest);
+      toast.success(t('recipientStatus.redeliverSuccess'));
+      setRedeliverOpen(false);
+      onDisposed();
+    } catch (e) {
+      toast.error(localizeApiError(e, tRoot) ?? t('recipientStatus.actionFailed'));
+    } finally {
+      setBusy(false);
+      onSettled?.();
+    }
+  }
+
+  // review F6：行状态必须取**逐收件人** d.status——同一 object 组内收件人状态
+  // 可分裂（放行后一人退信一人成功），用组代表状态会把已成功者的重复警示吞掉。
+  const allRecipientRows = groups.flatMap((g) => g.dispositions.map((d) => ({
+    recipient: d.recipient,
+    status: d.status,
+  })));
+
   const DispositionDialogs = (
     <>
+      {/* GT-12880 重新投递确认弹窗：收件人勾选（默认勾投递失败者），勾选已
+          投递成功的收件人时给重复邮件警示。 */}
+      <AlertDialog open={redeliverOpen} onOpenChange={(o) => { if (!busy) setRedeliverOpen(o); }}>
+        <AlertDialogContent data-testid="email-disposal-redeliver-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('recipientStatus.redeliverDialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('recipientStatus.redeliverDialog.body')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="max-h-64 space-y-1.5 overflow-y-auto">
+            {allRecipientRows.map((r) => {
+              const checked = redeliverSelected.has(r.recipient);
+              // delivering 也警示（review F5）：postfix 暂缓重试在逐收件人状态上
+              // 呈现为 delivering，人工重投会与自动重试竞争产生重复。
+              const duplicateRisk = checked
+                && (r.status === 'delivered' || r.status === 'marked_delivered' || r.status === 'delivering');
+              return (
+                <label
+                  key={r.recipient}
+                  className="flex items-start gap-2 rounded border p-2 text-sm"
+                  data-testid="email-disposal-redeliver-recipient-row"
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => {
+                      setRedeliverSelected((prev) => {
+                        const next = new Set(prev);
+                        if (v) next.add(r.recipient); else next.delete(r.recipient);
+                        return next;
+                      });
+                    }}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{r.recipient}</span>
+                    {duplicateRisk && (
+                      <span
+                        className="mt-0.5 flex items-center gap-1 text-xs text-amber-600"
+                        data-testid="email-disposal-redeliver-duplicate-warning"
+                      >
+                        <AlertTriangle className="h-3 w-3 shrink-0" />
+                        {t('recipientStatus.redeliverDialog.duplicateWarning')}
+                      </span>
+                    )}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={busy || redeliverSelected.size === 0}
+              data-testid="email-disposal-redeliver-confirm"
+              onClick={(e) => { e.preventDefault(); void confirmRedeliver(); }}
+            >
+              {busy ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+              {t('recipientStatus.redeliverDialog.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <ReclassifyDialog
         open={reclassifyOpen && pending != null && pending.action !== 'discard' && pending.action !== 'notify'}
         onOpenChange={(o) => { setReclassifyOpen(o); if (!o) setPending(null); }}

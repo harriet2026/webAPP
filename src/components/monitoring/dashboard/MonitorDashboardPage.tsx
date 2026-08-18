@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Mail, TrendingUp, RefreshCw, Activity, Shield, Inbox, AlertTriangle, Server,
-  ChevronRight, Cpu, MemoryStick, HardDrive, Database, Clock, Download, CircleCheck,
+  ChevronRight, Cpu, MemoryStick, HardDrive, Database, Clock, Download, CircleCheck, ExternalLink,
 } from 'lucide-react';
 import {
   useMonitorDashboardOverview,
@@ -23,6 +23,12 @@ const ENGINE_COLORS = { antispam: '#1890FF', antivirus: '#52C41A', sandbox: '#FA
 
 function normalizedStatus(status?: DashboardStatus): DashboardStatus {
   return status ?? 'unknown';
+}
+
+function normalizedDatabaseStatus(status?: string): DashboardStatus {
+  if (status === 'ok') return 'normal';
+  if (status === 'normal' || status === 'warning' || status === 'critical') return status;
+  return 'unknown';
 }
 
 function statusBgClass(s: DashboardStatus) {
@@ -135,7 +141,7 @@ export function MonitorDashboardPage() {
   };
 
   const engineOption = {
-    grid: { left: 40, right: 16, top: 24, bottom: 24 },
+    grid: { left: 40, right: 16, top: 24, bottom: 72 },
     tooltip: { trigger: 'axis' },
     legend: { bottom: 0 },
     xAxis: { type: 'category', data: engineData.map((d) => d.hour) },
@@ -159,6 +165,10 @@ export function MonitorDashboardPage() {
     { key: 'disk', value: api?.infrastructure?.disk_usage ?? 0, icon: HardDrive },
   ] as const;
   const engineHealth = new Map((api?.engine_health ?? []).map((item) => [item.key, item.status]));
+  const statusLabel = (status: DashboardStatus) => t(`status.${status}`);
+  const healthDetail = (status: DashboardStatus) => status === 'normal' ? t('allNormal') : statusLabel(status);
+  const databaseStatus = normalizedDatabaseStatus(api?.infrastructure?.database_status);
+  const recentAlerts = api?.recent_alerts ?? [];
   const miniTrend = (api?.mailflow_trend ?? []).slice(-6);
   const maxMiniVolume = Math.max(1, ...miniTrend.map((item) => item.volume));
   const alertHealth = [
@@ -171,8 +181,8 @@ export function MonitorDashboardPage() {
     { key: 'today-volume', label: t('kpi.todayVolume'), value: kpiView.todayVolume.value.toLocaleString(), change: `${kpiView.todayVolume.change >= 0 ? '+' : ''}${kpiView.todayVolume.change}%`, detail: t('comparedYesterday'), status: kpiView.todayVolume.status, icon: <Mail className="w-4 h-4 text-muted-foreground" />, href: '/monitoring/mailflow?tab=delivery' },
     { key: 'delivery-rate', label: t('kpi.deliverySuccessRate'), value: `${kpiView.deliverySuccessRate.value}%`, change: `${kpiView.deliverySuccessRate.change >= 0 ? '+' : ''}${kpiView.deliverySuccessRate.change.toFixed(1)}%`, detail: t('deliveryThreshold'), status: kpiView.deliverySuccessRate.status, icon: <CircleCheck className="w-4 h-4 text-muted-foreground" />, href: '/monitoring/mailflow?tab=delivery' },
     { key: 'queue-depth', label: t('kpi.queueDepth'), value: kpiView.queueDepth.value.toLocaleString(), change: '', detail: t('queueThreshold'), status: kpiView.queueDepth.status, icon: <Inbox className="w-4 h-4 text-muted-foreground" />, href: '/monitoring/mailflow?tab=queue' },
-    { key: 'alerts', label: t('kpi.engineHealth'), value: `${kpiView.alerts.healthy}/${kpiView.alerts.total}`, change: '', detail: t('allNormal'), status: kpiView.alerts.status, icon: <Shield className="w-4 h-4 text-muted-foreground" />, href: '/monitoring/security' },
-    { key: 'nodes', label: t('kpi.infrastructureHealth'), value: `${kpiView.nodes.online}/${kpiView.nodes.total}`, change: '', detail: t('allNormal'), status: kpiView.nodes.status, icon: <Server className="w-4 h-4 text-muted-foreground" />, href: '/monitoring/infrastructure' },
+    { key: 'alerts', label: t('kpi.engineHealth'), value: `${kpiView.alerts.healthy}/${kpiView.alerts.total}`, change: '', detail: healthDetail(kpiView.alerts.status), status: kpiView.alerts.status, icon: <Shield className="w-4 h-4 text-muted-foreground" />, href: '/monitoring/security' },
+    { key: 'nodes', label: t('kpi.infrastructureHealth'), value: `${kpiView.nodes.online}/${kpiView.nodes.total}`, change: '', detail: healthDetail(kpiView.nodes.status), status: kpiView.nodes.status, icon: <Server className="w-4 h-4 text-muted-foreground" />, href: '/monitoring/infrastructure' },
     { key: 'todo', label: t('kpi.todo'), value: String(kpiView.todo.value), change: '', status: kpiView.todo.status, icon: <AlertTriangle className="w-4 h-4 text-gray-400" />, href: '/monitoring/alerts' },
   ];
 
@@ -227,7 +237,7 @@ export function MonitorDashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6" data-testid="monitor-dashboard-kpi-grid">
         {kpiCards.map((c) => (
           <Link key={c.key} href={c.href} data-testid={`monitor-dashboard-kpi-${c.key}`}>
-            <Card className={`${statusBgClass(c.status)} border cursor-pointer hover:shadow-md transition-all`}>
+            <Card className={`${statusBgClass(c.status)} border cursor-pointer hover:shadow-md transition-all ${c.key === 'todo' && kpiView.todo.value > 0 ? 'animate-pulse' : ''}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-gray-500 dark:text-gray-400">{c.label}</span>
@@ -254,7 +264,7 @@ export function MonitorDashboardPage() {
                     {'detail' in c && c.detail ? <span className="ml-1 text-xs text-muted-foreground">{c.detail}</span> : null}
                   </div>
                 ) : 'detail' in c && c.detail ? (
-                  <div className={`mt-1 text-xs ${c.status === 'warning' ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                  <div className={`mt-1 text-xs ${c.status === 'critical' ? 'text-red-600' : c.status === 'warning' ? 'text-amber-600' : 'text-muted-foreground'}`}>
                     {c.detail}
                   </div>
                 ) : c.key === 'todo' ? (
@@ -272,7 +282,7 @@ export function MonitorDashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-4" data-testid="monitor-dashboard-module-health-grid">
         <Link href="/monitoring/infrastructure" data-testid="monitor-dashboard-module-infrastructure">
           <Card className="h-full cursor-pointer transition-shadow hover:shadow-md">
-            <CardHeader className="flex-row items-center justify-between pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="flex items-center gap-2 text-sm"><Server className="size-4" />{t('module.infrastructure')}</CardTitle>
               <div className="flex items-center gap-1"><span className={`size-2 rounded-full ${statusDotClass(api?.infrastructure?.status)}`} /><ChevronRight className="size-4 text-muted-foreground" /></div>
             </CardHeader>
@@ -281,21 +291,21 @@ export function MonitorDashboardPage() {
                 <div key={key} className="flex items-center gap-2" data-testid={`monitor-dashboard-infra-${key}`}>
                   <Icon className="size-4 text-muted-foreground" />
                   <span className="w-12 text-sm text-muted-foreground">{t(`metric.${key}`)}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={t(`metric.${key}`)} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}>
                     <div className={`h-full rounded-full ${value >= 90 ? 'bg-red-500' : value >= 80 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(value, 100)}%` }} />
                   </div>
                   <span className={`text-sm font-medium ${value >= 90 ? 'text-red-500' : value >= 80 ? 'text-amber-500' : 'text-emerald-600'}`}>{value.toFixed(1)}%</span>
                 </div>
               ))}
               <div className="flex items-center gap-2" data-testid="monitor-dashboard-infra-database">
-                <Database className="size-4 text-muted-foreground" /><span className="w-12 text-sm text-muted-foreground">{t('metric.database')}</span><span className={`text-sm font-medium ${api?.infrastructure?.status === 'normal' ? 'text-emerald-600' : api?.infrastructure?.status === 'critical' ? 'text-red-500' : 'text-amber-500'}`}>{api?.infrastructure?.database_status || 'unknown'}</span>
+                <Database className="size-4 text-muted-foreground" /><span className="w-12 text-sm text-muted-foreground">{t('metric.database')}</span><span className={`text-sm font-medium ${databaseStatus === 'normal' ? 'text-emerald-600' : databaseStatus === 'critical' ? 'text-red-500' : databaseStatus === 'warning' ? 'text-amber-500' : 'text-muted-foreground'}`}>{statusLabel(databaseStatus)}</span>
               </div>
             </CardContent>
           </Card>
         </Link>
         <Link href="/monitoring/mailflow" data-testid="monitor-dashboard-module-mailflow">
           <Card className="h-full cursor-pointer transition-shadow hover:shadow-md">
-            <CardHeader className="flex-row items-center justify-between pb-2"><CardTitle className="flex items-center gap-2 text-sm"><Mail className="size-4" />{t('module.mailflow')}</CardTitle><div className="flex items-center gap-1"><span className={`size-2 rounded-full ${statusDotClass(api?.mailflow_health?.status)}`} /><ChevronRight className="size-4 text-muted-foreground" /></div></CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="flex items-center gap-2 text-sm"><Mail className="size-4" />{t('module.mailflow')}</CardTitle><div className="flex items-center gap-1"><span className={`size-2 rounded-full ${statusDotClass(api?.mailflow_health?.status)}`} /><ChevronRight className="size-4 text-muted-foreground" /></div></CardHeader>
             <CardContent>
               <div className="mb-3 flex h-16 items-end gap-1" aria-label={t('module.queueTrend')} data-testid="monitor-dashboard-module-mailflow-chart">
                 {miniTrend.map((point) => <span key={point.time} className="flex-1 bg-amber-200" style={{ height: `${Math.max(4, point.volume / maxMiniVolume * 100)}%` }} />)}
@@ -306,7 +316,7 @@ export function MonitorDashboardPage() {
         </Link>
         <Link href="/monitoring/security" data-testid="monitor-dashboard-module-engine">
           <Card className="h-full cursor-pointer transition-shadow hover:shadow-md">
-            <CardHeader className="flex-row items-center justify-between pb-2"><CardTitle className="flex items-center gap-2 text-sm"><Shield className="size-4" />{t('module.engine')}</CardTitle><div className="flex items-center gap-1"><span className={`size-2 rounded-full ${statusDotClass(kpiView.alerts.status)}`} /><ChevronRight className="size-4 text-muted-foreground" /></div></CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="flex items-center gap-2 text-sm"><Shield className="size-4" />{t('module.engine')}</CardTitle><div className="flex items-center gap-1"><span className={`size-2 rounded-full ${statusDotClass(kpiView.alerts.status)}`} /><ChevronRight className="size-4 text-muted-foreground" /></div></CardHeader>
             <CardContent className="grid grid-cols-2 gap-2">
               {(['antispam', 'antivirus', 'sandbox', 'rbl'] as const).map((engine) => (
                 <div key={engine} className="flex items-center gap-2 rounded-lg bg-muted p-2" data-testid={`monitor-dashboard-engine-${engine}`}>
@@ -318,7 +328,7 @@ export function MonitorDashboardPage() {
         </Link>
         <Link href="/monitoring/alerts" data-testid="monitor-dashboard-module-alerts">
           <Card className="h-full cursor-pointer transition-shadow hover:shadow-md" data-testid="monitor-dashboard-alerts-health">
-            <CardHeader className="flex-row items-center justify-between pb-2"><CardTitle className="flex items-center gap-2 text-sm"><AlertTriangle className="size-4" />{t('module.alerts')}</CardTitle><div className="flex items-center gap-1"><span className={`size-2 rounded-full ${statusDotClass(kpiView.todo.status)}`} /><ChevronRight className="size-4 text-muted-foreground" /></div></CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="flex items-center gap-2 text-sm"><AlertTriangle className="size-4" />{t('module.alerts')}</CardTitle><div className="flex items-center gap-1"><span className={`size-2 rounded-full ${statusDotClass(kpiView.todo.status)}`} /><ChevronRight className="size-4 text-muted-foreground" /></div></CardHeader>
             <CardContent className="space-y-3">
               {alertHealth.map(([key, value, color]) => (
                 <div key={String(key)} className="flex items-center gap-2" data-testid={`monitor-dashboard-alert-${key}`}><span className={`size-3 rounded-full ${String(color).replace('text-', 'bg-')}`} /><span className="text-sm text-muted-foreground">{t(`alert.${key}`)}</span><span className={`ml-auto font-medium ${color}`}>{value}</span></div>
@@ -331,29 +341,41 @@ export function MonitorDashboardPage() {
       {/* 趋势图：邮件流健康 + 检测引擎性能 */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card data-testid="monitor-dashboard-mailflow-trend">
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Activity className="w-4 h-4" />{t('mailflowTrend')}</CardTitle></CardHeader>
+          <CardHeader className="pb-2 flex flex-row items-center justify-between"><CardTitle className="text-sm font-medium flex items-center gap-2"><Activity className="w-4 h-4" />{t('mailflowTrend')}</CardTitle><Link className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground" href="/monitoring/mailflow" data-testid="monitor-dashboard-mailflow-trend-link">{t('viewDetails')}<ExternalLink className="w-3.5 h-3.5" /></Link></CardHeader>
           <CardContent><ReactECharts option={mailflowOption} style={{ height: 260 }} /></CardContent>
         </Card>
         <Card data-testid="monitor-dashboard-engine-trend">
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Activity className="w-4 h-4" />{t('engineTrend')}</CardTitle></CardHeader>
+          <CardHeader className="pb-2 flex flex-row items-center justify-between"><CardTitle className="text-sm font-medium flex items-center gap-2"><Activity className="w-4 h-4" />{t('engineTrend')}</CardTitle><Link className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground" href="/monitoring/security" data-testid="monitor-dashboard-engine-trend-link">{t('viewDetails')}<ExternalLink className="w-3.5 h-3.5" /></Link></CardHeader>
           <CardContent><ReactECharts option={engineOption} style={{ height: 260 }} /></CardContent>
         </Card>
       </div>
 
       <Card data-testid="monitor-dashboard-alert-marquee">
           <CardContent className="flex items-center gap-4 p-3">
-            <AlertTriangle className="size-5 shrink-0 animate-pulse text-red-500" />
-            <div className="flex flex-1 items-center gap-8 overflow-x-auto">
-            {(api?.recent_alerts ?? []).map((a) => (
-              <Link href={`/monitoring/alerts?id=${a.id}`} key={a.id} data-testid={`monitor-dashboard-marquee-item-${a.id}`} className={`flex shrink-0 items-center gap-2 text-sm ${a.severity === 'critical' ? 'text-red-500' : 'text-amber-500'}`}>
-                <span className="font-medium">[{new Date(a.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]</span>
-                <Badge variant="outline">{a.module}</Badge>
-                <span className="truncate">{a.message}</span>
-                <Badge variant={a.status === 'unconfirmed' ? 'destructive' : a.status === 'processing' ? 'default' : 'secondary'}>{t(`alertStatus.${a.status}`)}</Badge>
-              </Link>
-            ))}
-            </div>
-            <Link className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md px-3 text-sm font-medium hover:bg-accent" href="/monitoring/alerts" data-testid="monitor-dashboard-alert-view-all">{t('viewAll')}<ChevronRight className="size-4" /></Link>
+            {recentAlerts.length > 0 ? (
+              <>
+                <AlertTriangle className="size-5 shrink-0 animate-pulse text-red-500" />
+                <div className="flex-1 overflow-hidden">
+                <div className="flex items-center gap-8 animate-marquee w-max" data-testid="monitor-dashboard-marquee-track">
+                {[...recentAlerts, ...recentAlerts].map((a, i) => {
+                  const duplicate = i >= recentAlerts.length;
+                  return <Link href={`/monitoring/alerts?id=${a.id}`} key={`${a.id}-${i}`} data-testid={duplicate ? undefined : `monitor-dashboard-marquee-item-${a.id}`} aria-hidden={duplicate || undefined} tabIndex={duplicate ? -1 : undefined} className={`flex shrink-0 items-center gap-2 text-sm ${a.severity === 'critical' ? 'text-red-500' : 'text-amber-500'}`}>
+                    <span className="font-medium">[{new Date(a.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]</span>
+                    <Badge variant="outline">{a.module}</Badge>
+                    <span className="truncate">{a.message}</span>
+                    <Badge variant={a.status === 'unconfirmed' ? 'destructive' : a.status === 'processing' ? 'default' : 'secondary'}>{t(`alertStatus.${a.status}`)}</Badge>
+                  </Link>;
+                })}
+                </div>
+                </div>
+                <Link className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md px-3 text-sm font-medium hover:bg-accent" href="/monitoring/alerts" data-testid="monitor-dashboard-alert-view-all">{t('viewAll')}<ChevronRight className="size-4" /></Link>
+              </>
+            ) : (
+              <>
+                <CircleCheck className="size-5 shrink-0 text-emerald-500" />
+                <span className="flex-1 text-sm text-muted-foreground" data-testid="monitor-dashboard-marquee-empty">{t('noAlerts')}</span>
+              </>
+            )}
           </CardContent>
       </Card>
 

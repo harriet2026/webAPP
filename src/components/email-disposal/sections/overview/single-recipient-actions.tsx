@@ -34,6 +34,8 @@ const ACTION_ICONS: Record<ActionKey, typeof Send> = {
   // 隔离/阻断 icon+color choice for a pending recipient.
   quarantine: Clock,
   block: XCircle,
+  // GT-12880：重新投递（对保留期内仍留有原文的邮件）。
+  redeliver: RotateCcw,
 };
 
 // G2 (v2 html_spec §②): 投递/丢弃 are filled (green/red) in the header strip,
@@ -47,6 +49,7 @@ const ACTION_FILL_CLASS: Partial<Record<ActionKey, string>> = {
   discard: 'border-transparent bg-red-600 text-white data-[hovered=true]:bg-red-700',
   quarantine: 'border-slate-300 text-slate-600 data-[hovered=true]:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:data-[hovered=true]:bg-slate-900/40',
   block: 'border-orange-300 text-orange-600 data-[hovered=true]:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:data-[hovered=true]:bg-orange-950/30',
+  redeliver: 'border-transparent bg-emerald-600 text-white data-[hovered=true]:bg-emerald-700',
 };
 
 interface SingleRecipientActionsProps {

@@ -4,17 +4,15 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 // a single rejected call took the whole query down and every field fell back to
 // 0 / [] / null — "统计卡片数据全为0" and "待办面板为空". A tenant_admin hits this
 // reliably: /inbound-audit is RequireSystemAdmin and 403s, while
-// /statistics/dashboard and /statistics/security-overview return that tenant's
-// real data (verified against the live stack: 200 / 200 / 403).
+// the homepage summary endpoint returns that tenant's real data.
 
 vi.mock('@/lib/api/statistics', () => ({
   getDashboardSummary: vi.fn(),
   getTypeStatistics: vi.fn(),
 }));
-vi.mock('@/lib/api/security-overview', () => ({ getSecurityOverview: vi.fn() }));
+vi.mock('@/lib/api/system-status-summary', () => ({ fetchSystemStatusSummary: vi.fn() }));
 vi.mock('@/lib/api/ops-top', () => ({ fetchOpsTop: vi.fn() }));
 vi.mock('@/lib/api/monitoring', () => ({ fetchNodes: vi.fn(), fetchAlerts: vi.fn() }));
-vi.mock('@/components/email-disposal/lib/disposal-api', () => ({ getDisposalList: vi.fn() }));
 vi.mock('@/lib/api/inbound-audit', () => ({ getInboundAuditItems: vi.fn() }));
 vi.mock('@/lib/api/phishing-detection', () => ({ getDetectionStats: vi.fn() }));
 vi.mock('@/lib/api/spoofing-detection', () => ({ getSpoofingStats: vi.fn() }));
@@ -22,10 +20,9 @@ vi.mock('@/lib/api/threat-retro', () => ({ getThreatRetroStats: vi.fn() }));
 
 import { fetchSystemStatusData, resolveRangeDates } from '../hooks';
 import { ApiError } from '@/lib/api/client';
-import { getDashboardSummary, getTypeStatistics } from '@/lib/api/statistics';
-import { getSecurityOverview } from '@/lib/api/security-overview';
+import { getTypeStatistics } from '@/lib/api/statistics';
+import { fetchSystemStatusSummary } from '@/lib/api/system-status-summary';
 import { fetchOpsTop } from '@/lib/api/ops-top';
-import { getDisposalList } from '@/components/email-disposal/lib/disposal-api';
 import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 import { getDetectionStats } from '@/lib/api/phishing-detection';
 import { getSpoofingStats } from '@/lib/api/spoofing-detection';
@@ -46,16 +43,16 @@ function args() {
 describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // The two CORE sources succeed — the tenant's data really is available.
-    mock(getDashboardSummary)
-      .mockResolvedValueOnce({ metrics: { total_emails: 82 } })
-      .mockResolvedValueOnce({ metrics: { total_emails: 41 } });
-    mock(getSecurityOverview)
-      .mockResolvedValueOnce({ kpi: { blocked: 12, block_rate: 14.6 } })
-      .mockResolvedValueOnce({ kpi: { blocked: 6, block_rate: 10 } });
+    // The CORE source succeeds — all existing KPI/trend/disposal fields remain available.
+    mock(fetchSystemStatusSummary).mockResolvedValue({
+      current: { mail_volume: 82, threats: 12, block_rate: 14.6 },
+      previous: { mail_volume: 41, threats: 6, block_rate: 10 },
+      threat_trend: [],
+      pending_disposal: 5,
+      generated_at: '2026-07-10T00:00:00Z',
+    });
     mock(getTypeStatistics).mockResolvedValue({ series: [] });
     mock(fetchOpsTop).mockResolvedValue({ dimension: 'sender', total: 0, trendLabels: [], rows: [] });
-    mock(getDisposalList).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 5 });
   });
 
   it('requests hourly overview buckets for today and daily buckets for longer ranges', async () => {
@@ -66,30 +63,25 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
       range: 'today',
       dates: resolveRangeDates('today', new Date('2026-07-10T12:00:00')),
     });
-    expect(mock(getSecurityOverview)).toHaveBeenNthCalledWith(
+    expect(mock(fetchSystemStatusSummary)).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ startDate: '2026-07-10', endDate: '2026-07-10', interval: 'hour' }),
       expect.anything(),
     );
-    expect(mock(getSecurityOverview)).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ startDate: '2026-07-09', endDate: '2026-07-09', interval: 'hour' }),
-      expect.anything(),
-    );
 
     vi.clearAllMocks();
-    mock(getDashboardSummary)
-      .mockResolvedValueOnce({ metrics: { total_emails: 82 } })
-      .mockResolvedValueOnce({ metrics: { total_emails: 41 } });
-    mock(getSecurityOverview)
-      .mockResolvedValueOnce({ kpi: { blocked: 12, block_rate: 14.6 }, trend: { threat_type: [] } })
-      .mockResolvedValueOnce({ kpi: { blocked: 6, block_rate: 10 } });
+    mock(fetchSystemStatusSummary).mockResolvedValue({
+      current: { mail_volume: 82, threats: 12, block_rate: 14.6 },
+      previous: { mail_volume: 41, threats: 6, block_rate: 10 },
+      threat_trend: [],
+      pending_disposal: 0,
+      generated_at: '2026-07-10T00:00:00Z',
+    });
     mock(fetchOpsTop).mockResolvedValue({ dimension: 'sender', total: 0, trendLabels: [], rows: [] });
-    mock(getDisposalList).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
     mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
 
     await fetchSystemStatusData(args());
-    expect(mock(getSecurityOverview)).toHaveBeenNthCalledWith(
+    expect(mock(fetchSystemStatusSummary)).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ interval: 'day' }),
       expect.anything(),
@@ -113,14 +105,13 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
 
   it('the whole fetch no longer rejects when auxiliary sources are FORBIDDEN', async () => {
     mock(getInboundAuditItems).mockRejectedValue(new ApiError(403, 'forbidden'));
-    mock(getDisposalList).mockRejectedValue(new ApiError(403, 'forbidden'));
     mock(fetchOpsTop).mockRejectedValue(new ApiError(403, 'forbidden'));
 
     await expect(fetchSystemStatusData(args())).resolves.toBeTruthy();
   });
 
   // Review finding — the defect my own design introduced. optionalSource used to
-  // swallow EVERY rejection, so a 500 on /monitor/alerts or on the disposal query
+  // swallow EVERY rejection, so a 500 on /monitor/alerts or another auxiliary query
   // degraded to "[] / total 0" with isError still false: HealthBanner rendered the
   // green 系统运行正常 while real alerts were hidden, and the 待办面板 said 无待办事项
   // while quarantined mail was actually queued. Silently-wrong beats an honest
@@ -128,7 +119,7 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
   // My earlier tests encoded the WRONG design: they asserted "any auxiliary failure
   // is swallowed", so they could never have caught this.
   it('a 500 on an auxiliary source must NOT be swallowed — the dashboard must not lie', async () => {
-    mock(getDisposalList).mockRejectedValue(new ApiError(500, 'db down'));
+    mock(fetchOpsTop).mockRejectedValue(new ApiError(500, 'db down'));
 
     await expect(fetchSystemStatusData(args())).rejects.toThrow();
   });
@@ -157,8 +148,8 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
   });
 
   it('a CORE source failing still fails hard (the error banner must be honest)', async () => {
-    mock(getDashboardSummary).mockReset();
-    mock(getDashboardSummary).mockRejectedValue(new Error('db down'));
+    mock(fetchSystemStatusSummary).mockReset();
+    mock(fetchSystemStatusSummary).mockRejectedValue(new Error('db down'));
     mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
 
     await expect(fetchSystemStatusData(args())).rejects.toThrow();

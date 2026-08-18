@@ -92,16 +92,25 @@ function mapReceivedAt(
 function mapEnumArray(
   cond: FilterCondition,
   draft: Partial<DisposalQuickFilter>,
-  key: "emailStatuses" | "emailTypes" | "disposalPolicyKeys",
+  key: "emailStatuses" | "emailTypes" | "disposalPolicyKeys" | "executionActions",
 ): boolean {
+  const assign = (values: string[]) => {
+    if (key === "executionActions") {
+      draft.executionActions = values as NonNullable<
+        DisposalQuickFilter["executionActions"]
+      >;
+    } else {
+      draft[key] = values;
+    }
+  };
   if (cond.op === "in") {
     if (!Array.isArray(cond.value) || cond.value.length === 0) return false;
-    draft[key] = cond.value.map(String);
+    assign(cond.value.map(String));
     return true;
   }
   if (cond.op === "eq") {
     if (!isScalar(cond.value)) return false;
-    draft[key] = [String(cond.value)];
+    assign([String(cond.value)]);
     return true;
   }
   return false;
@@ -137,15 +146,6 @@ function mapDirection(
   return true;
 }
 
-function mapAction(
-  cond: FilterCondition,
-  draft: Partial<DisposalQuickFilter>,
-): boolean {
-  if (cond.op !== "eq" || !isScalar(cond.value)) return false;
-  draft.executionAction = String(cond.value);
-  return true;
-}
-
 // 第一级字段 -> 处理器映射表。未出现在此表中的字段一律视为第一级不可命中。
 const LEVEL1_HANDLERS: Record<
   string,
@@ -156,7 +156,7 @@ const LEVEL1_HANDLERS: Record<
   email_type: (c, d) => mapEnumArray(c, d, "emailTypes"),
   disposal_policy_key: (c, d) => mapEnumArray(c, d, "disposalPolicyKeys"),
   direction: mapDirection,
-  action: mapAction,
+  action: (c, d) => mapEnumArray(c, d, "executionActions"),
   sender: (c, d) => mapContainsText(c, d, "sender"),
   subject: (c, d) => mapContainsText(c, d, "subject"),
   header_recipient: (c, d) => mapContainsText(c, d, "recipient"),

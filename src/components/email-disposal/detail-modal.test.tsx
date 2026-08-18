@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import zh from '@/../messages/zh.json';
-import type { MailLogDetail } from '@/types/email-disposal-detail';
+import type { MailLogAnalysis, MailLogDetail } from '@/types/email-disposal-detail';
 import { DetailModal } from './detail-modal';
 
 const { apiRequestMock } = vi.hoisted(() => ({
@@ -16,11 +16,13 @@ vi.mock('@/lib/api/client', () => ({
 }));
 
 vi.mock('./sections/overview-section', () => ({
-  OverviewSection: () => <div data-testid="overview-section-stub" />,
+  OverviewSection: ({ onViewBasis }: { onViewBasis?: () => void }) => <div data-testid="overview-section-stub" data-has-view-basis={onViewBasis ? 'true' : 'false'} />,
 }));
 
 vi.mock('./sections/analysis-section', () => ({
-  AnalysisSection: () => <div data-testid="analysis-section-stub" />,
+  AnalysisSection: ({ analysis, analysisLoading }: { analysis?: MailLogAnalysis; analysisLoading?: boolean }) => (
+    <div data-testid="analysis-section-stub" data-analysis-scope={analysis?.scope ?? ''} data-analysis-loading={analysisLoading ? 'true' : 'false'} />
+  ),
 }));
 
 vi.mock('sonner', () => ({
@@ -47,9 +49,22 @@ function detail(): MailLogDetail {
 }
 
 function rawLogRequestCount(): number {
-  return apiRequestMock.mock.calls.filter(
-    ([path]) => path === '/mail-logs/1/lifecycle-logs',
-  ).length;
+  return apiRequestMock.mock.calls.filter(([path]) => path === '/mail-logs/1/lifecycle-logs').length;
+}
+
+function analysisResponse(): object {
+  return {
+    scope: 'all',
+    final_verdict: 'safe',
+    total_elapsed_ms: 12,
+    stages: [
+      { stage: 1, key: 'connection', status: 'pass', duration_ms: 12, checks: [] },
+      { stage: 2, key: 'identity', status: 'pass', checks: [] },
+      { stage: 3, key: 'content', status: 'pass', checks: [] },
+      { stage: 4, key: 'ai', status: 'skipped', checks: [] },
+      { stage: 5, key: 'comprehensive', status: 'pass', checks: [] },
+    ],
+  };
 }
 
 describe('DetailModal raw lifecycle logs', () => {
@@ -57,6 +72,7 @@ describe('DetailModal raw lifecycle logs', () => {
     apiRequestMock.mockReset();
     apiRequestMock.mockImplementation(async (path: string) => {
       if (path === '/mail-logs/1') return detail();
+      if (path === '/mail-logs/1/analysis') return analysisResponse();
       if (path === '/mail-logs/1/events?page=1&page_size=100') return { items: [] };
       if (path === '/mail-logs/1/lifecycle-logs') {
         return {
@@ -80,16 +96,15 @@ describe('DetailModal raw lifecycle logs', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal
-            open
-            mailLogId={1}
-            onOpenChange={vi.fn()}
-          />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
 
     const trigger = await screen.findByTestId('disposal-raw-logs-trigger');
+    expect(screen.queryByTestId('disposal-detail-nav-analysis')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('disposal-detail-analysis')).not.toBeInTheDocument();
+    expect(screen.getByTestId('overview-section-stub')).toHaveAttribute('data-has-view-basis', 'false');
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByTestId('raw-logs-count-badge')).toHaveTextContent('未加载');
     expect(rawLogRequestCount()).toBe(0);
@@ -103,5 +118,29 @@ describe('DetailModal raw lifecycle logs', () => {
     await waitFor(() => {
       expect(screen.getByTestId('raw-logs-count-badge')).toHaveTextContent('0 条');
     });
+  });
+
+  it('shows security analysis and its jump entry only when explicitly enabled', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh as never}>
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByTestId('disposal-detail-nav-analysis')).toBeInTheDocument();
+    expect(screen.getByTestId('disposal-detail-analysis')).toBeInTheDocument();
+    expect(screen.getByTestId('analysis-section-stub')).toBeInTheDocument();
+    expect(screen.getByTestId('overview-section-stub')).toHaveAttribute('data-has-view-basis', 'true');
+    await waitFor(() => {
+      expect(screen.getByTestId('analysis-section-stub')).toHaveAttribute('data-analysis-scope', 'all');
+    });
+
+    expect(apiRequestMock.mock.calls.filter(([path]) => path === '/mail-logs/1/analysis')).toHaveLength(1);
   });
 });

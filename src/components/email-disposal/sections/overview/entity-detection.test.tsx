@@ -17,15 +17,6 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
-// GT-12601：EntityDetection 现在按登录角色决定加黑规则的 priority（tenant_admin
-// 只能用 100-1000，system_admin 维持 5000）。这里的 mock 刻意做成每用例可变
-// （mockIsSystemAdmin），而不是恒真常量——恒真 mock 会让"角色分支"永远只走一边，
-// 测不出租户管理员路径（见 skill Lessons：恒真 fixture 陷阱）。
-let mockIsSystemAdmin = false;
-vi.mock('@/contexts/auth-context', () => ({
-  useAuth: () => ({ isSystemAdmin: mockIsSystemAdmin }),
-}));
-
 function baseDetail(overrides: Partial<MailLogDetail> = {}): MailLogDetail {
   return {
     id: 1,
@@ -53,7 +44,6 @@ function baseProps(overrides: Partial<React.ComponentProps<typeof EntityDetectio
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockIsSystemAdmin = false;
 });
 
 describe('EntityDetection', () => {
@@ -129,7 +119,7 @@ describe('EntityDetection', () => {
     expect(screen.queryByTestId(`email-disposal-overview-entity-link-${key}-vt-score`)).not.toBeInTheDocument();
   });
 
-  it('clicking 域名加黑 calls requestFn with a POST to /unified-rules, page=url_protection, field=urls', async () => {
+  it('asks for confirmation before sending a domain blacklist intent', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT', threat_type: 'MALWARE' }];
@@ -138,16 +128,19 @@ describe('EntityDetection', () => {
     const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
     await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-domain`));
 
+    expect(requestFn).not.toHaveBeenCalled();
+    expect(screen.getByTestId('email-disposal-entity-blacklist-dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-entity-blacklist-value')).toHaveTextContent('evil.com');
+    await user.click(screen.getByTestId('email-disposal-entity-blacklist-confirm'));
+
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [url, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(url).toContain('/unified-rules');
+    expect(url).toBe('/mail-logs/1/blacklist');
     expect(opts.method).toBe('POST');
-    expect(opts.body.page).toBe('url_protection');
-    expect(opts.body.action).toBe('reject');
-    expect(opts.body.condition_tree).toEqual({ type: 'condition', field: 'urls', operator: 'contain', value: 'evil.com' });
+    expect(opts.body).toEqual({ kind: 'domain', value: 'evil.com' });
   });
 
-  it('clicking URL加黑 sends the full URL as the condition value', async () => {
+  it('sends the full URL only after confirmation', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
     const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT' }];
@@ -155,56 +148,12 @@ describe('EntityDetection', () => {
 
     const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
     await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-url`));
+    await user.click(screen.getByTestId('email-disposal-entity-blacklist-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(opts.body.condition_tree).toEqual({ type: 'condition', field: 'urls', operator: 'contain', value: 'https://evil.com/phish' });
-  });
-
-  // GT-12601 防回归：tenant_admin 的加黑请求 priority 必须落在后端
-  // validatePriority 的 100-1000 区间（此前硬编码 5000 → 400 加黑必败）。
-  it('GT-12601: tenant admin 域名加黑 sends priority 1000 (inside the 100-1000 backend range)', async () => {
-    mockIsSystemAdmin = false;
-    const user = userEvent.setup();
-    const requestFn = vi.fn().mockResolvedValue({}) as never;
-    const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT' }];
-    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ entity_urls: urls }) })} />);
-
-    const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
-    await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-domain`));
-
-    await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
-    const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(opts.body.priority).toBe(1000);
-  });
-
-  it('GT-12601: system admin 域名加黑 keeps priority 5000 (unchanged precedence)', async () => {
-    mockIsSystemAdmin = true;
-    const user = userEvent.setup();
-    const requestFn = vi.fn().mockResolvedValue({}) as never;
-    const urls = [{ url: 'https://evil.com/phish', domain: 'evil.com', check_result: 'THREAT' }];
-    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ entity_urls: urls }) })} />);
-
-    const key = encodeURIComponent('https://evil.com/phish').slice(0, 64);
-    await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-url`));
-
-    await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
-    const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(opts.body.priority).toBe(5000);
-  });
-
-  it('GT-12601: tenant admin 哈希加黑 sends priority 1000 as well', async () => {
-    mockIsSystemAdmin = false;
-    const user = userEvent.setup();
-    const requestFn = vi.fn().mockResolvedValue({}) as never;
-    const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
-    render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }), tab: 'attachments' })} />);
-
-    await user.click(screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef-blacklist-hash'));
-
-    await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
-    const [, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(opts.body.priority).toBe(1000);
+    expect(opts.body).toEqual({ kind: 'url', value: 'https://evil.com/phish' });
+    expect(opts.body).not.toHaveProperty('priority');
   });
 
   it('shows the report.pdf attachment with its hash-blacklist button on the attachments tab', async () => {
@@ -231,20 +180,21 @@ describe('EntityDetection', () => {
     expect(onDownload.mock.calls[0][0]).toMatchObject({ md5sum: 'deadbeef', filename: 'report.pdf' });
   });
 
-  it('clicking 哈希加黑 calls requestFn with page=attachment_security, field=attachment_md5, operator=eq', async () => {
+  it('confirms and sends an attachment_hash intent for an attachment MD5', async () => {
     const user = userEvent.setup();
     const requestFn = vi.fn().mockResolvedValue({}) as never;
-    const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: 'deadbeef', content_type: 'application/pdf', inline: false, content_length: 2048 }];
+    const md5 = 'deadbeefdeadbeefdeadbeefdeadbeef';
+    const attachments = [{ filename: 'report.pdf', size: 2048, md5sum: md5, content_type: 'application/pdf', inline: false, content_length: 2048 }];
     render(<EntityDetection {...baseProps({ requestFn, detail: baseDetail({ attachments }), tab: 'attachments' })} />);
 
-    await user.click(screen.getByTestId('email-disposal-overview-entity-attachment-deadbeef-blacklist-hash'));
+    await user.click(screen.getByTestId(`email-disposal-overview-entity-attachment-${md5}-blacklist-hash`));
+    expect(requestFn).not.toHaveBeenCalled();
+    await user.click(screen.getByTestId('email-disposal-entity-blacklist-confirm'));
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledTimes(1));
     const [url, opts] = (requestFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(url).toContain('/unified-rules');
-    expect(opts.body.page).toBe('attachment_security');
-    expect(opts.body.stage).toBe('sideline');
-    expect(opts.body.condition_tree).toEqual({ type: 'condition', field: 'attachment_md5', operator: 'eq', value: 'deadbeef' });
+    expect(url).toBe('/mail-logs/1/blacklist');
+    expect(opts.body).toEqual({ kind: 'attachment_hash', value: md5 });
   });
 
   it('shows an AV verdict badge when scan_results has a matching virus_name', async () => {

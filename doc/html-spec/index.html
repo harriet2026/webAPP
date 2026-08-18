@@ -187,6 +187,83 @@
     <div class="overview-item"><div class="num">85%</div><div class="label">完成率</div></div>
   </div>
 
+  <!-- ==================== 一级：变更规格（增量 GT 索引） ==================== -->
+  <details class="l1-section" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">📑</span>
+        <h2>变更规格（增量 GT 索引）</h2>
+        <span class="l1-stats"><span class="done-count">4</span> 已完成 / 4 总计</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12649.html" target="_blank" rel="noopener noreferrer">GT-12649 · SidebarNav 移除 VersionFooter（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v4</span>
+              <span class="card-generated-at">2026-07-30</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /zh/dashboard 及所有挂载全局侧边栏的后台路由</p>
+            <p>组件: src/components/layout/sidebar-nav.tsx（移除 &lt;VersionFooter /&gt; 及其 import）</p>
+            <p>变更类型: 功能移除（增量规格）· 含 DevMode 变更规格独立分区、处置中心/安全总览执行动作移除"标记投递"</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-126811.html" target="_blank" rel="noopener noreferrer">GT-126811 · GT-12682-RBL优化（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v2</span>
+              <span class="card-generated-at">2026-07-31</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>模块: RBL 过滤（filter-rules-pipeline-rbl-filter）</p>
+            <p>变更类型: 交互优化（增量规格）· 含真实浏览器截图 S-1 默认态 / S-2 执行动作选中态</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12695.html" target="_blank" rel="noopener noreferrer">GT-12695 · 附件安全检测 / 认证仿冒检测 / 发信行为管控（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v32</span>
+              <span class="card-generated-at">2026-08-04</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>模块: 附件安全检测（图片识别/OCR 深度检测）、身份认证与仿冒检测、发信行为管控</p>
+            <p>变更类型: 多功能增量（GT-12700~GT-12721 系列需求节）· 含 i18n 四语言变更</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12731.html" target="_blank" rel="noopener noreferrer">GT-12731 · 高级过滤规则 / 处置策略 / 内容规则 等（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v34</span>
+              <span class="card-generated-at">2026-08-04</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>模块: 高级过滤规则优化（GT-12751）、处置策略去自定义模板（GT-12753）、内容规则执行动作（GT-11651）、反病毒/二维码/系统状态/个人中心等</p>
+            <p>变更类型: 多需求增量（GT-12723~GT-12774 系列）· 10 点优化全落文档</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </details>
+
   <!-- ==================== 一级：系统状态（首页） ==================== -->
   <details class="l1-section" open>
     <summary>
@@ -433,6 +510,24 @@
             <p>组件: identity-strategy-page.tsx（renderAuthSpoofingConfig）</p>
             <p>子文件: <a href="filter-rules-identity-auth-spoofing/layer-1-observe-mode.html">观察模式</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-check-disabled.html">检查项禁用</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-auth-protocol-tabs.html">协议Tab</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-template-dialog.html">模板Dialog</a> / <a href="filter-rules-identity-auth-spoofing/layer-2-custom-template.html">自定义模板</a> / <a href="filter-rules-identity-auth-spoofing/layer-1-module-disabled.html">模块禁用态</a></p>
             <p>预览可交互 · 5 组件 / 6 交互层级 · 10 项差异 / 10 项需确认</p>
+          </div>
+        </details>
+        <details class="spec-card status-done">
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/html-spec/version/GT-12807.html" target="_blank" rel="noopener noreferrer">GT-12833 · 认证协议检查：动作精简为5项，默认动作改为"标记放行"（增量变更规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v18</span>
+              <span class="card-generated-at">2026-08-08</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>路由: /zh/security/pipeline（策略流水线 → 身份认证与仿冒检测 → 认证协议检查）</p>
+            <p>组件: src/components/security/auth-spoofing/ProtocolChecksSection.tsx、src/lib/auth-spoofing-labels.ts、src/lib/auth-spoofing-templates.ts</p>
+            <p>变更类型: 动作枚举精简 + 默认值/联动逻辑调整（增量规格）· commit 386aa38</p>
+            <p>内含: PROTOCOL_ACTIONS/DMARC_ACTIONS 由6项精简为5项（移除"进行下一步"accept）· 缺省态与动作联动改为"标记放行"+启用解耦 ·「宽松」模板 accept 场景全部改为 mark-delivery · S-1~S-4 真实浏览器截图 · D-005 · Q-003</p>
+            <p>关联: 本链接指向的 GT-12807.html 为滚动容器文档，同时收录 GT-12801/GT-12793/GT-12795/GT-12797/GT-12719/GT-12828/GT-12790/GT-12791/GT-12833 等多个需求的增量规格，本条特指其中 GT-12833 部分；反向调整了同文档内 GT-12801 变更2 的结论</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -911,8 +1006,8 @@
               <span class="chevron"></span>
               <a class="card-title" href="email-handling-disposal-center/index.html">邮件处置中心</a>
               <span class="badge badge-done">✅</span>
-              <span class="card-version-badge">v2</span>
-              <span class="card-generated-at">2026-07-23</span>
+              <span class="card-version-badge">v3</span>
+              <span class="card-generated-at">2026-08-06</span>
             </div>
           </summary>
           <div class="card-detail">
@@ -920,7 +1015,9 @@
             <p>spec: 0702邮件处置中心.md / 邮件处置中心.md / 邮件处置中心（多租户视角）.md / 邮件处置中心—详情查看页面.md / 0702…「查看」页面.md / 0703处置依据.md / V1·V2邮件状态机 / 0702邮件调查中心.md</p>
             <p>组件: mail-investigation-page.tsx + compact-search-filters.tsx + investigation-logs-table.tsx + overview-action-section.tsx + security-analysis-section.tsx + raw-logs-section.tsx</p>
             <p>子文件: <a href="email-handling-disposal-center/layer-1-search-mailtype.html">邮件类型多选</a> / <a href="email-handling-disposal-center/layer-2-search-more-filters.html">更多筛选(27字段)</a> / <a href="email-handling-disposal-center/layer-3-search-sample-mode.html">样本检索态</a> / <a href="email-handling-disposal-center/layer-4-table-header-filter.html">表头筛选</a> / <a href="email-handling-disposal-center/layer-5-table-batch-selected.html">批量选中</a> / <a href="email-handling-disposal-center/layer-6-release-dialog.html">放行</a> / <a href="email-handling-disposal-center/layer-7-delete-dialog.html">删除</a> / <a href="email-handling-disposal-center/layer-8-recall-dialog.html">召回</a> / <a href="email-handling-disposal-center/layer-9-similar-mode.html">找相似</a> / <a href="email-handling-disposal-center/layer-10-detail-overview-single.html">详情·概览与处置</a> / <a href="email-handling-disposal-center/layer-11-detail-recipient-matrix.html">详情·收件人矩阵</a> / <a href="email-handling-disposal-center/layer-12-detail-security-analysis.html">详情·安全分析</a> / <a href="email-handling-disposal-center/layer-13-detail-raw-logs.html">详情·原始日志</a> / <a href="email-handling-disposal-center/layer-14-detail-dialogs.html">详情·弹窗组</a></p>
-            <p>预览可交互 · 14 交互层级 · 30 截图 · 15 项差异 / 8 项需确认</p>
+  <p>增量文档: <a href="email-handling-disposal-center/GT-12807.html">GT-12807 — GT-12772 邮件处置中心事后处置时间线修复</a>（2026-08-06）</p>
+  <p>关联增量规格：<a href="/html-spec/version/GT-12807.html">GT-12807.html v14</a>，追加 GT-11990 投递与流量分析页面优化、GT-12818 附件安全检测——加密附件：提示词存在误导性问题解决。</p>
+  <p>预览可交互 · 14 交互层级 · 31 截图 · 15 项差异 / 8 项需确认 · 增量 v4（GT-12807）</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1449,6 +1546,48 @@
       </div>
     </details>
 
+    </div>
+  </details>
+
+  <!-- ==================== 迭代：GT-12923【0813】邮件处置中心总优化 ==================== -->
+  <details class="l1-section iteration" open>
+    <summary>
+      <div class="l1-header">
+        <span class="chevron"></span>
+        <span class="l1-icon">🛠️</span>
+        <h2>GT-12923【0813】邮件处置中心总优化</h2>
+        <span class="l1-stats"><span class="done-count">8</span> 项规格已迁入 webapp</span>
+      </div>
+    </summary>
+    <div class="l1-body">
+      <div class="grid">
+        <details class="spec-card status-done" open>
+          <summary>
+            <div class="card-summary">
+              <span class="chevron"></span>
+              <a class="card-title" href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md" target="_blank" rel="noopener noreferrer">GT-12923 · 邮件处置中心总优化（Markdown 增量规格）</a>
+              <span class="badge badge-done">✅</span>
+              <span class="card-version-badge">v10</span>
+              <span class="card-generated-at">2026-08-16</span>
+            </div>
+          </summary>
+          <div class="card-detail">
+            <p>正式路由: /email-disposal/center</p>
+            <p>规格事实源: 当前 webapp + 后端 OpenAPI；demo 截图只作为产品意图留档。</p>
+            <p>GT-12955 批准裁决: 后端与 webapp 统一使用 13 项位置维度 <code>display_statuses[]</code>；GT-12935 方案 A 使用写时有界 <code>disposal_basis_list</code> 生成列表 <code>disposal_basis_groups[]</code> + Tooltip 按需详情 <code>modules[] / effective_for[]</code>，以 <code>disposal_rule_ids</code> 全命中并集筛选具体规则，并通过 <code>GET /mail-logs/_meta/disposal-rules</code> 在完整租户规则目录中搜索选项；同模块多规则按当前筛选规则高亮。旧投影本期不回填。</p>
+            <p>关联现有规格: <a href="email-handling-disposal-center/index.html">邮件处置中心 HTML Spec</a></p>
+            <ul>
+              <li><a href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12931群发邮件多投递信执行动作筛选逻辑以及展示逻辑调整" target="_blank" rel="noopener noreferrer">GT-12931 · mixed 执行动作筛选、主类别展示、CSV 与批量操作</a></li>
+              <li><a href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12955邮件状态枚举值优化" target="_blank" rel="noopener noreferrer">GT-12955 · 邮件状态 13 项契约落地</a></li>
+              <li><a href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12934群发邮件多投递信邮件状态筛选逻辑以及展示逻辑调整" target="_blank" rel="noopener noreferrer">GT-12934 · mixed 邮件状态筛选与主要类别高亮</a></li>
+              <li><a href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12935群发邮件多投递信处置依据筛选逻辑以及展示逻辑调整" target="_blank" rel="noopener noreferrer">GT-12935 · modules/effective_for 多处置依据展示</a></li>
+              <li><a href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12965邮件处置中心详情页去掉更多ai判定依据" target="_blank" rel="noopener noreferrer">GT-12965 · 移除“更多”和“AI判定依据”</a></li>
+              <li><a href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12966邮件处置中心查看展开完整信息模块1不展示身份验证详情以及网络特征2展示邮件头信息也就是信头信息" target="_blank" rel="noopener noreferrer">GT-12966 · 完整信息改为邮件头信息</a></li>
+              <li><a href="/md-spec/version/GT-12923【0813】邮件处置中心总优化工单.md#gt-12967邮件处置中心查看域名加黑url加黑哈希加黑" target="_blank" rel="noopener noreferrer">GT-12967 · 域名/URL/附件哈希加黑确认与来源标识</a></li>
+            </ul>
+          </div>
+        </details>
+      </div>
     </div>
   </details>
 

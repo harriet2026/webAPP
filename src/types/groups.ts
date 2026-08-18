@@ -5,6 +5,10 @@ export interface Group {
   name: string;
   type: GroupType;
   members: string[];
+  // content 组的匹配 scopes（subject/text_body/html_body/header/
+  // attachment_names/urls）。GT-12802：scopes 是组定义的一部分，决定关键词
+  // 在哪几个字段上匹配；其它类型恒为空数组。
+  scopes?: string[];
   memberCount: number | null;
   referenceCount: number;
   isActive: boolean;

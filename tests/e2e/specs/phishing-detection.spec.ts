@@ -20,6 +20,11 @@ import { test, expect } from '../fixtures/auth.fixture';
 import { internalFetch } from '../helpers/internal-client';
 import { getDefaultTenantId, getDefaultTenantIdViaFetch } from '../helpers/tenant';
 import { uniqueSuffix } from '../helpers/test-data';
+import {
+  deleteInvBySidelineSQL,
+  invCreatedSQL,
+  invDoneSQL,
+} from '../helpers/inv-facts';
 
 const HMAC_SECRET = process.env.OSG_INTERNAL_HMAC_SECRET || 'test-hmac-secret-for-e2e';
 
@@ -50,11 +55,9 @@ async function seedSQL(sql: string): Promise<void> {
 // Resolved in beforeAll; `NULL` until then so seeds outside the suite still work.
 let TENANT_ID = 'NULL';
 
-// sidelineDedupeKey mirrors internal/api/recall_materialize.go: the recall
-// rows join to a detection row by sha256("sideline:"+itemId+":"+receiver).
-function sidelineDedupeKey(itemId: string, receiver: string): string {
-  return crypto.createHash('sha256').update(`sideline:${itemId}:${receiver}`).digest('hex');
-}
+// 旧的 sidelineDedupeKey(sha256("sideline:"+itemId+":"+receiver))随
+// recall_request 表一并退役:召回事实的幂等由 fact_uid 承载,行级关联改按
+// (source_ref, recipient) tuple —— 见 seedRecall。
 
 async function seedDetectionRow(suffix: string, opts: {
   status: string;
@@ -63,32 +66,43 @@ async function seedDetectionRow(suffix: string, opts: {
   subjectMarker?: string;
   urlFindings?: Array<Record<string, unknown>>;
 }): Promise<{ itemId: string; subject: string; recipient: string; messageId: string }> {
-  // sideline_items.id is VARCHAR(36) — keep the id well under that.
+  // mail_log.sideline_id is VARCHAR(64) — keep the id well under that.
   const short = crypto.randomBytes(8).toString('hex'); // 16 hex chars
   const itemId = `pw-${suffix}-${short}`.slice(0, 34);
   const subject = `PW-${suffix}-${short}`;
   const msgId = `<${itemId}@pw.test>`;
   const recipient = `victim-${short}@pw.test`;
   const marker = opts.subjectMarker ?? '';
-  const reinjectedAt = opts.reinjected ? 'NOW()' : 'NULL';
+  // 事件溯源修订 14:中央 sideline_items 已删除——旁路件就是 mail_log 行上的
+  // 一组投影列(sideline_id / sidelined_at / sideline_state / …)。旧的
+  // reinjected_at IS NULL 语义等价于 sideline_state <> 'reinjected'。
+  const state = opts.reinjected ? 'reinjected' : opts.status;
   await seedSQL(
-    `INSERT INTO sideline_items ` +
-      `(id, message_id, sender, recipients, subject, storage_path, storage_node, ` +
-      ` direction, status, tenant_id, sidelined_at, reinjected_at) ` +
-      `VALUES ('${itemId}', '${msgId}', 'attacker-${short}@pw.test', ` +
+    `INSERT INTO mail_log ` +
+      `(message_id, message_uuid, sender, recipients, subject, storage_path, storage_node, ` +
+      ` storage_kind, direction, tenant_id, action, status, received_at, ` +
+      ` sideline_id, sideline_state, sidelined_at) ` +
+      `VALUES ('${msgId}', '${crypto.randomUUID()}', 'attacker-${short}@pw.test', ` +
       ` ARRAY['victim-${short}@pw.test']::text[], '${marker}${subject}', ` +
-      ` 'blob/${itemId}.eml', 'antispam', 'receive', '${opts.status}', ` +
-      ` ${TENANT_ID}, NOW(), ${reinjectedAt})`,
+      ` 'blob/${itemId}.eml', 'antispam', 'sideline', 'receive', ` +
+      ` ${TENANT_ID}, 'sideline', 'sidelined', NOW(), ` +
+      ` '${itemId}', '${state}', NOW())`,
   );
   {
     // The phishing detection log is scoped to sideline items that carry a
     // phish_analysis investigation (backend ddde95be "scope detection logs to
-    // phish tasks"): the page-membership boundary is
-    //   EXISTS(investigation_tasks WHERE source_type='sideline_item'
-    //          AND source_id=si.id AND type='phish_analysis').
+    // phish tasks"). 事件溯源(spec 修订 13)后页面归属边界是
+    //   EXISTS(delivery_facts WHERE kind='inv_created'
+    //          AND event_source='phish_analysis'
+    //          AND source_ref='sideline_item:'||si.id)。
     // Every seeded detection row must therefore always carry the investigation —
     // not only when the test specified an explicit risk level — or the row would
     // not appear in the list at all. Default the risk when unspecified.
+    //
+    // 本 spec 的用例只按关键字 / disposition 过滤,风险等级仅用于**展示**
+    // (展示走事实折叠的 payload),所以这里不需要额外播种 mail_log 的
+    // inv_phish_state / inv_phish_risk 研判投影列(那是 risk_level **过滤**
+    // 的唯一 SQL 维度)。
     const risk = opts.risk ?? 'medium';
     const invId = `pw-inv-${short}`.slice(0, 34);
     const result = {
@@ -103,17 +117,25 @@ async function seedDetectionRow(suffix: string, opts: {
       { name: 'tool_call', status: 'completed', data: { iteration: 1 } },
       { name: 'tool_call', status: 'completed', data: { iteration: 2 } },
     ];
-    const resultJson = JSON.stringify(result).replace(/'/g, "''");
-    const stepsJson = JSON.stringify(steps).replace(/'/g, "''");
     await seedSQL(
-      `INSERT INTO investigation_tasks ` +
-        `(id, tenant_id, type, status, trigger_type, source_type, source_id, ` +
-        ` target_type, target_ids_json, summary, risk_level, confidence, ` +
-        ` result_json, steps_json, recommended_actions_json) ` +
-        `VALUES ('${invId}', ${TENANT_ID}, 'phish_analysis', 'completed', 'finding', ` +
-        ` 'sideline_item', '${itemId}', 'mail', '[]'::jsonb, 'pw seed', ` +
-        ` '${risk}', 0.9, ` +
-        ` '${resultJson}'::jsonb, '${stepsJson}'::jsonb, '[]'::jsonb)`,
+      invCreatedSQL(invId, {
+        tenantId: TENANT_ID,
+        sourceType: 'sideline_item',
+        sourceId: itemId,
+        triggerType: 'finding',
+      }),
+    );
+    await seedSQL(
+      invDoneSQL(invId, {
+        sourceType: 'sideline_item',
+        sourceId: itemId,
+        summary: 'pw seed',
+        riskLevel: risk,
+        confidence: 0.9,
+        result,
+        steps,
+        recommendedActions: [],
+      }),
     );
   }
   return { itemId, subject, recipient, messageId: msgId };
@@ -138,21 +160,41 @@ async function seedMailLogDispositions(
   );
 }
 
-// seedRecall seeds a recall_request row joined to the item by source_item_id +
-// dedupe_key so the detection row's recall_status column derives from it.
+// seedRecall 播种召回 tuple(事件溯源修订 11/13:recall_request 表已删除)。
+// 一个 tuple = 一条 recall_req 事实 + 非 handling 时一条同 tuple 的
+// recall_result 事实;tuple 定位键是 (source_ref, recipient),sideline 发起
+// 的 source_ref 就是**裸** sideline item id(GetRecallStatesBySourceRefs /
+// recallReqFactExistsSQL 都按 si.id 关联),detection 行的 recall_status 列由
+// 它推导。旧的 dedupe_key 幂等键随表消亡,由 fact_uid 承载。
 async function seedRecall(
   itemId: string,
   messageId: string,
   recipient: string,
   operateResult: string,
 ): Promise<void> {
-  const dedupe = sidelineDedupeKey(itemId, recipient);
+  const mu = crypto.randomUUID();
+  const payload = JSON.stringify({
+    tenant_id: TENANT_ID === 'NULL' ? null : Number(TENANT_ID),
+    mid: messageId,
+    tid: `tid-${itemId}`,
+    sender: 'attacker@pw.test',
+    subject: 'recall',
+    mail_time_s: 0,
+  }).replace(/'/g, "''");
   await seedSQL(
-    `INSERT INTO recall_request (tenant_id, mid, tid, sender, receiver, subject, ` +
-      ` operate_result, backend, source_item_id, dedupe_key) ` +
-      `VALUES (${TENANT_ID}, '${messageId}', 'tid-${itemId}', 'attacker@pw.test', ` +
-      ` '${recipient}', 'recall', '${operateResult}', 'coremail', '${itemId}', '${dedupe}')`,
+    `INSERT INTO delivery_facts (fact_uid, kind, node, message_uuid, recipient, ` +
+      ` event_source, source_ref, event_time, payload) ` +
+      `VALUES ('pw-recall-${crypto.randomBytes(12).toString('hex')}', 'recall_req', 'unknown', ` +
+      ` '${mu}', '${recipient}', 'coremail', '${itemId}', NOW(), '${payload}'::jsonb)`,
   );
+  if (operateResult && operateResult !== 'handling') {
+    await seedSQL(
+      `INSERT INTO delivery_facts (fact_uid, kind, node, message_uuid, recipient, ` +
+        ` event_source, source_ref, event_result, event_time) ` +
+        `VALUES ('pw-recall-${crypto.randomBytes(12).toString('hex')}', 'recall_result', 'unknown', ` +
+        ` '${mu}', '${recipient}', 'coremail', '${itemId}', '${operateResult}', NOW())`,
+    );
+  }
 }
 
 // gotoAndIsolate navigates to the overview and filters the table down to a
@@ -178,14 +220,15 @@ async function gotoAndIsolate(page: import('@playwright/test').Page, subject: st
 }
 
 async function cleanupItem(itemId: string, messageId?: string): Promise<void> {
+  await seedSQL(deleteInvBySidelineSQL(itemId));
   await seedSQL(
-    `DELETE FROM investigation_tasks WHERE source_type='sideline_item' AND source_id='${itemId}'`,
+    `DELETE FROM delivery_facts WHERE kind IN ('recall_req', 'recall_result') ` +
+      `AND source_ref='${itemId}'`,
   );
-  await seedSQL(`DELETE FROM recall_request WHERE source_item_id='${itemId}'`);
   if (messageId) {
     await seedSQL(`DELETE FROM mail_log WHERE message_id='${messageId}'`);
   }
-  await seedSQL(`DELETE FROM sideline_items WHERE id='${itemId}'`);
+  await seedSQL(`DELETE FROM mail_log WHERE sideline_id='${itemId}'`);
 }
 
 test.describe('Phishing Detection Tab A', () => {

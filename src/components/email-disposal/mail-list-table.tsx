@@ -29,11 +29,12 @@ import {
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
 import { resolveActionBadges, actionToVariant } from '@/lib/email-log-action';
-import type { DisposalMailItem, DisplayStatus } from '@/types/email-disposal';
-import { formatListReason, isStage1Policy, type DisposalLang } from './lib/disposal-basis-config';
-import { RecipientStatusBadges } from './components/recipient-status-badges';
+import type { ApiRequestFn } from '@/lib/api/client';
+import { DISPLAY_STATUSES, type DisposalMailItem, type DisplayStatus } from '@/types/email-disposal';
+import { type DisposalLang } from './lib/disposal-basis-config';
+import { DisplayStatusBadges, RecipientStatusBadges } from './components/recipient-status-badges';
+import { DisposalBasisCell } from './components/disposal-basis-cell';
 import { mailTypeLabelKey, correctionSourceLabelKey } from './lib/detail-helpers';
-import { useProductForm } from '@/contexts/product-form-context';
 
 interface MailListTableProps {
   items: DisposalMailItem[];
@@ -52,6 +53,15 @@ interface MailListTableProps {
   onTimeSortChange: (sort: TimeSortOrder) => void;
   /** 全量筛选导出时的 loading 状态 */
   exportLoading?: boolean;
+  /** Active action filters, used to explain why a mixed row matched. */
+  activeExecutionActions?: string[];
+  /** Active status filters, used to select the matching mixed status badge. */
+  activeDisplayStatuses?: string[];
+  /** Active disposal-basis filters; matching groups are displayed first. */
+  activeDisposalPolicyKeys?: string[];
+  activeDisposalRuleIds?: string[];
+  /** Tenant-scoped API client used for lazy full-basis loading. */
+  requestFn: ApiRequestFn;
 }
 
 export type TimeSortOrder = 'none' | 'asc' | 'desc';
@@ -61,26 +71,6 @@ export interface TableHeaderFilters {
   emailTypes: string[];
   statuses: DisplayStatus[];
 }
-
-const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  rejected: 'destructive',
-  bounced: 'destructive',
-  discarded: 'outline',
-  quarantine_pending: 'destructive',
-  sideline_pending: 'secondary',
-  audit_pending: 'secondary',
-  delivering: 'secondary',
-  delivered: 'default',
-  partial_delivered: 'secondary',
-  delivery_failed: 'destructive',
-  recall_pending: 'secondary',
-  recall_success: 'default',
-  recall_failed: 'destructive',
-  partial_recall_success: 'secondary',
-  deleted: 'outline',
-  expired: 'outline',
-  reviewed_rejected: 'destructive',
-};
 
 // ACTION_VARIANTS is no longer used for rendering; actionToVariant() from
 // email-log-action.ts is used directly so mixed actions expand to per-action badges.
@@ -111,16 +101,19 @@ export function MailListTable({
   timeSort,
   onTimeSortChange,
   exportLoading = false,
+  activeExecutionActions,
+  activeDisplayStatuses,
+  activeDisposalPolicyKeys,
+  activeDisposalRuleIds,
+  requestFn,
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
-  const tFeatures = useTranslations('emailDisposal.detail.features');
   const rawLocale = useLocale();
   // Map next-intl locale to one of the disposal-basis dictionary's supported
   // langs; unknown locales fall back to zh (the dictionary's primary language).
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
     ? (rawLocale as DisposalLang)
     : 'zh';
-  const { viewer, capabilities } = useProductForm();
 
   // GT-11579: localize enum badges (direction / action) with safe fallback to
   // the raw value when the i18n key is missing.
@@ -134,11 +127,19 @@ export function MailListTable({
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
   const hasSelection = selectedIds.size > 0;
   const selectedItems = items.filter((item) => selectedIds.has(item.id));
+  // GT-12782 Task 4：门禁改读后端下发的展示状态列表——「列表包含待处置/已投递
+  // 类状态」即可用。mixed 邮件因此按包含语义参与门禁（内部含隔离收件人的
+  // 多投信可批量放行、含已投递收件人的可召回），与筛选同一套语义，刻意设计。
+  // 防御空值：列表理应恒存在（后端三条读路径统一下发），但陈旧 mock/接口缺失
+  // 不应把整页打崩——按空列表处理（门禁禁用、状态列显示 '—'）。
+  const listOf = (item: DisposalMailItem) => item.displayStatuses ?? [];
+  const listContains = (item: DisposalMailItem, statuses: DisplayStatus[]) =>
+    listOf(item).some((entry) => statuses.includes(entry.status));
   const canRelease = hasSelection && selectedItems.every((item) =>
-    ['quarantine_pending', 'sideline_pending', 'audit_pending'].includes(item.displayStatus),
+    listContains(item, ['quarantine_pending', 'sideline_pending', 'audit_pending']),
   );
   const canRecall = hasSelection && selectedIds.size <= 10 && selectedItems.every((item) =>
-    ['delivered', 'partial_delivered'].includes(item.displayStatus),
+    listContains(item, ['delivered']),
   );
 
   // GT-11580: per-browser column show/hide preference. Initialised empty (all
@@ -183,7 +184,7 @@ export function MailListTable({
 
   const directionOptions = ['incoming', 'outgoing', 'internal'];
   const emailTypeOptions = ['normal', 'subscription', 'advertising', 'spam', 'harmful', 'phishing', 'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive'];
-  const statusOptions: DisplayStatus[] = ['rejected', 'bounced', 'discarded', 'quarantine_pending', 'sideline_pending', 'audit_pending', 'reviewed_rejected', 'expired', 'deleted', 'delivering', 'delivered', 'partial_delivered', 'delivery_failed', 'recall_pending', 'recall_success', 'recall_failed', 'partial_recall_success'];
+  const statusOptions = DISPLAY_STATUSES;
 
   const updateHeaderFilter = useCallback((key: keyof TableHeaderFilters, option: string, checked: boolean) => {
     const current = headerFilters[key] as string[];
@@ -355,6 +356,7 @@ export function MailListTable({
                   checked={isColVisible(key)}
                   onCheckedChange={() => toggleColumn(key)}
                   onSelect={(e) => e.preventDefault()}
+                  data-testid={`disposal-column-toggle-${key}`}
                 >
                   {t(`table.${key}`)}
                 </DropdownMenuCheckboxItem>
@@ -372,7 +374,7 @@ export function MailListTable({
       const nextSort: TimeSortOrder = timeSort === 'none' ? 'asc' : timeSort === 'asc' ? 'desc' : 'none';
       const SortIcon = timeSort === 'asc' ? ArrowUp : timeSort === 'desc' ? ArrowDown : ArrowUpDown;
       return (
-        <TableHead className="text-xs">
+        <TableHead className="text-xs" data-testid="disposal-column-header-time">
           <Button
             type="button"
             variant="ghost"
@@ -386,10 +388,10 @@ export function MailListTable({
         </TableHead>
       );
     }
-    if (key === 'direction') return <TableHead className="text-xs">{headerFilter(t('table.direction'), 'directions', directionOptions, (option) => localizeEnum(`filters.${option}`, option))}</TableHead>;
-    if (key === 'mailType') return <TableHead className="text-xs">{headerFilter(t('table.mailType'), 'emailTypes', emailTypeOptions, (option) => t(`filters.mailTypes.${option}`))}</TableHead>;
-    if (key === 'status') return <TableHead className="text-xs">{headerFilter(t('table.status'), 'statuses', statusOptions, (option) => t(`filters.statuses.${option}`))}</TableHead>;
-    return <TableHead className="text-xs">{t(`table.${key}`)}</TableHead>;
+    if (key === 'direction') return <TableHead className="text-xs" data-testid="disposal-column-header-direction">{headerFilter(t('table.direction'), 'directions', directionOptions, (option) => localizeEnum(`filters.${option}`, option))}</TableHead>;
+    if (key === 'mailType') return <TableHead className="text-xs" data-testid="disposal-column-header-mailType">{headerFilter(t('table.mailType'), 'emailTypes', emailTypeOptions, (option) => t(`filters.mailTypes.${option}`))}</TableHead>;
+    if (key === 'status') return <TableHead className="text-xs" data-testid="disposal-column-header-status">{headerFilter(t('table.status'), 'statuses', statusOptions, (option) => t(`filters.statuses.${option}`))}</TableHead>;
+    return <TableHead className="text-xs" data-testid={`disposal-column-header-${key}`}>{t(`table.${key}`)}</TableHead>;
   };
 
   // colSpan for the loading / empty message row: 1 select column + visible
@@ -597,6 +599,7 @@ export function MailListTable({
                 }}
               >
                 <TableCell
+                  data-testid={`disposal-cell-${item.id}-select`}
                   className={cn(
                     'sticky left-0 z-10 w-10 min-w-[40px] max-w-[40px] p-0 border-r bg-card transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
                     selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
@@ -612,22 +615,22 @@ export function MailListTable({
                   </div>
                 </TableCell>
                 {isColVisible('time') && (
-                <TableCell className="text-xs whitespace-nowrap">
+                <TableCell className="text-xs whitespace-nowrap" data-testid={`disposal-cell-${item.id}-time`}>
                   {formatDate(item.timestamp)}
                 </TableCell>
                 )}
                 {isColVisible('direction') && (
-                <TableCell className="text-xs">
+                <TableCell className="text-xs" data-testid={`disposal-cell-${item.id}-direction`}>
                   <Badge variant="outline">{localizeEnum(`filters.${item.direction}` as const, item.direction)}</Badge>
                 </TableCell>
                 )}
                 {isColVisible('subject') && (
-                <TableCell className="text-xs max-w-[300px] truncate">
+                <TableCell className="text-xs max-w-[300px] truncate" data-testid={`disposal-cell-${item.id}-subject`}>
                   {item.subject}
                 </TableCell>
                 )}
                 {isColVisible('senderIp') && (
-                <TableCell className="text-xs max-w-[160px] truncate font-mono">
+                <TableCell className="text-xs max-w-[160px] truncate font-mono" data-testid={`disposal-cell-${item.id}-senderIp`}>
                   <Tooltip>
                     <TooltipTrigger render={<span className="cursor-default" />}>{item.clientIp || '—'}</TooltipTrigger>
                     <TooltipContent className="max-w-md text-xs">{item.clientIp || '—'}</TooltipContent>
@@ -635,7 +638,7 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('sender') && (
-                <TableCell className="text-xs max-w-[200px] truncate">
+                <TableCell className="text-xs max-w-[200px] truncate" data-testid={`disposal-cell-${item.id}-sender`}>
                   <Tooltip>
                     <TooltipTrigger render={<span className="cursor-default" />}>{item.sender}</TooltipTrigger>
                     <TooltipContent className="max-w-md text-xs">{item.sender}</TooltipContent>
@@ -643,7 +646,7 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('recipient') && (
-                <TableCell className="text-xs max-w-[200px] truncate">
+                <TableCell className="text-xs max-w-[200px] truncate" data-testid={`disposal-cell-${item.id}-recipient`}>
                   <Tooltip>
                     <TooltipTrigger render={<span className="cursor-default" />}>{(item.recipientList ?? (item.recipient ? [item.recipient] : [])) .join(', ') || '—'}</TooltipTrigger>
                     <TooltipContent className="max-w-md text-xs">{(item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—'}</TooltipContent>
@@ -651,43 +654,21 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('disposalBasis') && (
-                <TableCell className="text-xs max-w-[280px] truncate">
-                  {item.disposalBasis ? (() => {
-                    const isPlatformPolicy =
-                      viewer === 'tenant' &&
-                      capabilities?.multiTenant === true &&
-                      isStage1Policy(item.disposalBasis.policy_key);
-                    const label = isPlatformPolicy
-                      ? tFeatures('platformPolicyListReason')
-                      : formatListReason(item.disposalBasis, disposalLang);
-                    return (
-                      <Tooltip>
-                        <TooltipTrigger render={<span className="cursor-default truncate block" />}>
-                          {label}
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-md text-xs">
-                          {isPlatformPolicy
-                            ? tFeatures('platformPolicyHitDetail')
-                            : label}
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })() : item.reason ? (
-                    // GT-12578 / GT-12686：落地 spec §4.1「合成失败/无命中时
-                    // disposal_basis 存 null，前端回退现有 MailLog.Reason
-                    // 自由文本」。此前这里直接落 '—'，于是 mail_marking 这类
-                    // 不参与 disposal_basis 合成的规则命中后列表上什么都看不到。
-                    <Tooltip>
-                      <TooltipTrigger render={<span className="cursor-default truncate block" />}>
-                        {item.reason}
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-md text-xs">{item.reason}</TooltipContent>
-                    </Tooltip>
-                  ) : '—'}
+                <TableCell className="text-xs max-w-[280px] truncate" data-testid={`disposal-cell-${item.id}-disposalBasis`}>
+                  <DisposalBasisCell
+                    mailLogId={item.id}
+                    basis={item.disposalBasis}
+                    groups={item.disposalBasisGroups}
+                    reason={item.reason}
+                    lang={disposalLang}
+                    requestFn={requestFn}
+                    highlightPolicyKeys={activeDisposalPolicyKeys}
+                    highlightRuleIds={activeDisposalRuleIds}
+                  />
                 </TableCell>
                 )}
                 {isColVisible('mailType') && (
-                <TableCell className="text-xs whitespace-nowrap">
+                <TableCell className="text-xs whitespace-nowrap" data-testid={`disposal-cell-${item.id}-mailType`}>
                   {item.emailType ? (
                     <span className="inline-flex items-center gap-1">
                       <span>{t(mailTypeLabelKey(item.emailType))}</span>
@@ -714,16 +695,19 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {aiEnabled && similarMode && isColVisible('similarity') && (
-                  <TableCell className="text-xs whitespace-nowrap">
+                  <TableCell className="text-xs whitespace-nowrap" data-testid={`disposal-cell-${item.id}-similarity`}>
                     {item.similarity != null ? `${item.similarity}%` : '—'}
                   </TableCell>
                 )}
                 {isColVisible('action') && (
-                <TableCell className="text-xs">
-                  {/* 方案 C：mixed + 有逐收件人明细时用 mini 堆叠色条（按 final_action 聚类），
-                      否则走原 badge 路径（单一动作展开） */}
+                <TableCell className="text-xs" data-testid={`disposal-cell-${item.id}-action`}>
+                  {/* mixed + 有逐收件人明细时展示一个主要动作 Badge，完整明细放在 tooltip；
+                      否则走原 badge 路径（单一动作展开）。 */}
                   {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
-                    <RecipientStatusBadges dispositions={item.recipientDispositions} />
+                    <RecipientStatusBadges
+                      dispositions={item.recipientDispositions}
+                      highlightKeys={activeExecutionActions}
+                    />
                   ) : (
                     <div className="flex flex-wrap items-center gap-1">
                       {(() => {
@@ -746,18 +730,21 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('status') && (
-                <TableCell className="text-xs">
-                  {/* 方案 C：mixed + 有逐收件人明细时用 status 维度的堆叠条，否则走原 Badge */}
-                  {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
-                    <RecipientStatusBadges dispositions={item.recipientDispositions} dimension="status" />
-                  ) : (
-                    <Badge variant={STATUS_VARIANTS[item.displayStatus] || 'outline'}>
-                      {t(`filters.statuses.${item.displayStatus}`)}
-                    </Badge>
+                <TableCell className="text-xs" data-testid={`disposal-cell-${item.id}-status`}>
+                  {/* 状态列无条件消费后端权威 display_statuses。逐收件人明细只负责
+                      “执行动作”列的 tooltip，不能在 mixed 分支重新推导状态；否则
+                      召回后会出现筛选命中 recall_success、列表仍显示投递/隔离态的
+                      双真源。单元素 → 单徽章，多元素 → 主要徽章 + hover 覆盖数明细。 */}
+                  {listOf(item).length === 0 ? '—' : (
+                    <DisplayStatusBadges
+                      entries={listOf(item)}
+                      highlightKeys={activeDisplayStatuses}
+                    />
                   )}
                 </TableCell>
                 )}
                 <TableCell
+                  data-testid={`disposal-cell-${item.id}-operations`}
                   className={cn(
                     'sticky right-0 z-10 min-w-32 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
                     selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',

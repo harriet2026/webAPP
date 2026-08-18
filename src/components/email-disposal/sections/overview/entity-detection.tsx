@@ -4,9 +4,8 @@
 // 逐条展示 detail.entity_urls 的域名 + 威胁标注 + URL 原文，支持域名/URL 两级
 // 加黑；附件 tab（C7）逐条展示 detail.attachments 的文件名/大小/哈希 + AV 结论
 // （join detail.scan_results by md5），支持哈希加黑 + 下载。两个 tab 共用统一
-// 规则系统的 createUnifiedRule（见 disposal-detail-api.ts 的 addUrlRule /
-// addAttachmentHashRule 及其字段映射说明），复用既有 reject 动作，不新增动作
-// 类型。
+// 规则系统的邮件日志实体动作接口。后端校验实体归属并生成同方向、隔离动作的
+// content_rules 规则，前端不再拼条件树或硬编码优先级。
 //
 // 威胁 badge 文案直接展示后端的 check_result/threat_type 原文；VirusTotal 分数
 // 独立渲染在 vt_score 字段存在时（"47/90" 形态，见 URLEntity.vt_score 注释）—
@@ -22,11 +21,20 @@ import { Ban, Download, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/auth-context';
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { AttachmentInfo, MailLogDetail, URLEntity } from '@/types/email-disposal-detail';
 import { formatBytes } from '../../lib/detail-helpers';
-import { addAttachmentHashRule, addUrlRule, disposalRulePriority } from '../../lib/disposal-detail-api';
+import { blacklistMailLogEntity, type MailLogBlacklistEntityKind } from '../../lib/disposal-detail-api';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface EntityDetectionProps {
   detail: MailLogDetail;
@@ -45,6 +53,7 @@ interface EntityDetectionProps {
 
 type EntityTab = 'links' | 'attachments';
 type ThreatLevel = 'threat' | 'suspicious' | 'safe';
+type PendingBlacklist = { key: string; kind: MailLogBlacklistEntityKind; value: string };
 
 function urlThreatLevel(u: URLEntity): ThreatLevel {
   if (u.check_result === 'THREAT' || u.verdict === 'malicious' || u.verdict === 'phishing') return 'threat';
@@ -78,37 +87,23 @@ function vtScoreIsPositive(vtScore: string): boolean {
 export function EntityDetection({ detail, requestFn, readOnly = false, onDownload, onDisposed, tab: tabProp }: EntityDetectionProps) {
   const t = useTranslations('emailDisposal.detail.overview.entityDetection');
   const tOverview = useTranslations('emailDisposal.detail.overview');
-  const { isSystemAdmin } = useAuth();
+  const tCommon = useTranslations('common');
   // 受控模式：调用方提供 tab 时使用外部 state；未提供时固定默认 'links'。
   const tab: EntityTab = tabProp ?? 'links';
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [pending, setPending] = useState<PendingBlacklist | null>(null);
 
   const urls = detail.entity_urls ?? [];
   const attachments = detail.attachments ?? [];
   const scans = detail.scan_results ?? [];
-  // GT-12601：priority 必须落在当前角色的合法区间内（tenant_admin 只接受
-  // 100-1000），否则后端 400、加黑永远失败。
-  const rulePriority = disposalRulePriority(isSystemAdmin);
-
-  async function handleUrlRule(key: string, value: string, field: 'domain' | 'url') {
-    setBusyKey(key);
+  async function confirmBlacklist() {
+    if (!pending) return;
+    setBusyKey(pending.key);
     try {
-      await addUrlRule(value, field, requestFn, rulePriority);
+      await blacklistMailLogEntity(detail.id, pending.kind, pending.value, requestFn);
       toast.success(t('ruleSuccess'));
       onDisposed?.();
-    } catch {
-      toast.error(t('ruleFailed'));
-    } finally {
-      setBusyKey(null);
-    }
-  }
-
-  async function handleAttachmentRule(key: string, md5: string) {
-    setBusyKey(key);
-    try {
-      await addAttachmentHashRule(md5, requestFn, rulePriority);
-      toast.success(t('ruleSuccess'));
-      onDisposed?.();
+      setPending(null);
     } catch {
       toast.error(t('ruleFailed'));
     } finally {
@@ -182,7 +177,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                       size="sm"
                       variant="outline"
                       disabled={readOnly || busy}
-                      onClick={() => handleUrlRule(key, u.domain, 'domain')}
+                      onClick={() => setPending({ key, kind: 'domain', value: u.domain })}
                       data-testid={`email-disposal-overview-entity-link-${key}-blacklist-domain`}
                     >
                       <Ban className="mr-1 h-3.5 w-3.5" />
@@ -193,7 +188,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                       size="sm"
                       variant="outline"
                       disabled={readOnly || busy}
-                      onClick={() => handleUrlRule(key, u.url, 'url')}
+                      onClick={() => setPending({ key, kind: 'url', value: u.url })}
                       data-testid={`email-disposal-overview-entity-link-${key}-blacklist-url`}
                     >
                       <Ban className="mr-1 h-3.5 w-3.5" />
@@ -251,7 +246,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                       size="sm"
                       variant="outline"
                       disabled={readOnly || !a.md5sum || busy}
-                      onClick={() => a.md5sum && handleAttachmentRule(key, a.md5sum)}
+                      onClick={() => a.md5sum && setPending({ key, kind: 'attachment_hash', value: a.md5sum })}
                       data-testid={`email-disposal-overview-entity-attachment-${key}-blacklist-hash`}
                     >
                       <Ban className="mr-1 h-3.5 w-3.5" />
@@ -274,6 +269,44 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
           </div>
         )
       )}
+
+      <AlertDialog
+        open={pending !== null}
+        onOpenChange={(open) => {
+          if (!open && busyKey === null) setPending(null);
+        }}
+      >
+        <AlertDialogContent
+          className="sm:max-w-[480px]"
+          overlayClassName="z-[199] bg-black/60"
+          data-testid="email-disposal-entity-blacklist-dialog"
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pending ? t(`confirmTitle.${pending.kind}`) : t('confirmTitle.domain')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>{t('confirmImpact')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          {pending && (
+            <div
+              className="max-h-28 overflow-y-auto break-all rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs"
+              data-testid="email-disposal-entity-blacklist-value"
+            >
+              {pending.value}
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busyKey !== null}>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={busyKey !== null}
+              onClick={() => void confirmBlacklist()}
+              data-testid="email-disposal-entity-blacklist-confirm"
+            >
+              {busyKey !== null ? t('confirming') : t('confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

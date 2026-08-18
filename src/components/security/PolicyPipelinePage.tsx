@@ -101,6 +101,20 @@ const stage3NavItems: { key: Stage3PolicyKey; nameKey: string; functional: boole
   { key: 'intentEngine', nameKey: 'pipeline.intentEngine', functional: true },
 ];
 
+// 阶段3 左导航与模块总开关联动的单一事实源（url/attachment/content/intentEngine）。
+// page：对应安全模块页（父级 securityModulesMap 兜底真值 + 子页 onEnabledChange 回传）。
+// enabledSummaryKey / disabledSummaryKey：左导航摘要在启用/禁用态的 i18n key。
+const STAGE3_NAV_MODULE: Record<string, {
+  page: SecurityModulePage;
+  enabledSummaryKey: string;
+  disabledSummaryKey: string;
+}> = {
+  url:          { page: 'url_protection',      enabledSummaryKey: 'pipeline.urlNavSummary',          disabledSummaryKey: 'pipeline.urlNavSummaryDisabled' },
+  attachment:   { page: 'attachment_security', enabledSummaryKey: 'pipeline.attachmentNavSummary',   disabledSummaryKey: 'securityModules.disabled' },
+  content:      { page: 'content_rules',       enabledSummaryKey: 'pipeline.contentNavSummary',      disabledSummaryKey: 'securityModules.disabled' },
+  intentEngine: { page: 'intent_engine',       enabledSummaryKey: 'pipeline.intentEngineNavSummary', disabledSummaryKey: 'pipeline.intentEngineNavSummaryDisabled' },
+};
+
 export const stage5NavItems: { key: Stage5PolicyKey; nameKey: string; functional: boolean }[] = [
   // D-8: 左导航名沿用模块内标题「相似邮件与主题检测」(similarDetection.title)，与流水线卡片/
   // 抽屉面包屑子标题「相似检测」(pipeline.similarDetection) 刻意不同 —— demo 三层命名各异。
@@ -125,13 +139,13 @@ export const pipelineDrawerResponsiveClasses = {
  * supports (GT-11894 shipped four).
  */
 export const actionLegendItems: {
-  key: 'deliver' | 'tagDeliver' | 'quarantine' | 'review' | 'block' | 'drop';
+  key: 'deliver' | 'quarantine' | 'review' | 'block' | 'drop' | 'nextStep';
   color: string;
   labelKey: string;
   descKey: string;
 }[] = [
   { key: 'deliver', color: 'var(--action-deliver)', labelKey: 'pipeline.actionDeliver', descKey: 'pipeline.actionDeliverDesc' },
-  { key: 'tagDeliver', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionTagDeliver', descKey: 'pipeline.actionTagDeliverDesc' },
+  { key: 'nextStep', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionNextStep', descKey: 'pipeline.actionNextStepDesc' },
   { key: 'quarantine', color: 'var(--action-quarantine)', labelKey: 'pipeline.actionQuarantine', descKey: 'pipeline.actionQuarantineDesc' },
   { key: 'review', color: 'var(--action-review)', labelKey: 'pipeline.actionReview', descKey: 'pipeline.actionReviewDesc' },
   { key: 'block', color: 'var(--action-block)', labelKey: 'pipeline.actionBlock', descKey: 'pipeline.actionBlockDesc' },
@@ -196,17 +210,19 @@ export function PolicyPipelinePage() {
   const [activeDrawerPolicy, setActiveDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string }>({ stage: 1, key: 'ipFrequency' });
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [intentDirty, setIntentDirty] = useState(false);
-  // html_spec 宿主对齐（Task 10）：意图引擎左导航圆点/摘要跟随总开关启用态（同 url 模块模式）
-  const [intentEngineEnabled, setIntentEngineEnabled] = useState<boolean | undefined>(undefined);
   const [similarDirty, setSimilarDirty] = useState(false);
   // html_spec §2.2-5：URL检测与防护显式保存 —— 未保存关抽屉需确认
   const [urlDirty, setUrlDirty] = useState(false);
   // GT-12105：海外邮件检测抽屉的未保存确认与其它模块共用同一套机制。
   const [overseasDirty, setOverseasDirty] = useState(false);
-  // html_spec §2.2-2/§2.2-3：URL 左导航圆点/摘要跟随模块启用态（含未保存草稿）
-  const [urlModuleEnabled, setUrlModuleEnabled] = useState<boolean | undefined>(undefined);
   const [attachmentDirty, setAttachmentDirty] = useState(false);
-  const [attachmentEnabled, setAttachmentEnabled] = useState<boolean | undefined>(undefined);
+  // 阶段3 模块总开关启用态（左导航圆点/摘要联动）：nav key → 启用态。
+  // 子页 onEnabledChange 回传写入；加载期未回传时由 securityModulesMap 兜底。
+  const [stage3EnabledByNav, setStage3EnabledByNav] = useState<Record<string, boolean | undefined>>({});
+  // 值不变时返回原对象 bail out，避免子页回传回调（每次渲染新身份）引发重渲染循环。
+  const handleStage3EnabledChange = useCallback((navKey: string, enabled: boolean) => {
+    setStage3EnabledByNav((prev) => (prev[navKey] === enabled ? prev : { ...prev, [navKey]: enabled }));
+  }, []);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [pendingDrawerPolicy, setPendingDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string } | null>(null);
   // 抽屉导航折叠按钮的 pointer 驱动 hover（柔和交互反馈规格 §7.2，兼容 hover:none 设备）。
@@ -667,9 +683,8 @@ export function PolicyPipelinePage() {
     behaviorControl: 'pipeline.behaviorControlDesc',
     recipientCheck: 'pipeline.recipientCheckDesc',
     userList: 'pipeline.userListDesc',
-    // 阶段3 内容层（url/intentEngine 项为动态摘要，见 renderNavItems —— html_spec §2.2-2 / Task 10）
-    attachment: 'pipeline.attachmentNavSummary',
-    content: 'pipeline.contentNavSummary',
+    // 阶段3 内容层：url/attachment/content/intentEngine 为动态摘要，
+    // 由 STAGE3_NAV_MODULE 配置表驱动（见 renderNavItems）。
     // 阶段5 综合策略
     similarDetection: 'pipeline.similarDetectionDesc',
     advancedRules: 'pipeline.advancedRulesSummary',
@@ -688,22 +703,17 @@ export function PolicyPipelinePage() {
     // 本地状态为 undefined。此前会退回 item.functional（恒 true），使「未启用」模块的
     // 圆点先亮起、子页加载完成后再闪回熄灭。改为优先用父级预取的 securityModulesMap
     // 作为加载期兜底真值，让首帧就正确。子页回传后（含未保存草稿）本地状态优先。
-    const stage3ModuleKey: Record<string, SecurityModulePage> = {
-      url: 'url_protection',
-      attachment: 'attachment_security',
-      intentEngine: 'intent_engine',
-    };
-    const stage3Fallback = stage3ModuleKey[item.key] !== undefined
-      ? securityModulesMap?.[stage3ModuleKey[item.key]]
+    // GT-12731：stage3 在对应子页把真实启用态回传前，本地状态为 undefined。
+    // 此前会退回 item.functional（恒 true），使「未启用」模块的圆点先亮起、子页加载
+    // 完成后再闪回熄灭。改为优先用父级预取的 securityModulesMap 作为加载期兜底真值，
+    // 让首帧就正确；子页回传后（含未保存草稿）本地状态优先。
+    // 四个模块（url/attachment/content/intentEngine）共用 STAGE3_NAV_MODULE 配置表。
+    const stage3Cfg = STAGE3_NAV_MODULE[item.key];
+    const stage3Enabled = stage3Cfg
+      ? (stage3EnabledByNav[item.key] ?? securityModulesMap?.[stage3Cfg.page])
       : undefined;
-    const urlEnabled = item.key === 'url' ? (urlModuleEnabled ?? stage3Fallback) : undefined;
-    const attachmentModuleEnabled = item.key === 'attachment' ? (attachmentEnabled ?? stage3Fallback) : undefined;
-    // html_spec 宿主对齐（Task 10）：意图引擎圆点跟随总开关启用态，同 url 模块模式。
-    const intentEnabled = item.key === 'intentEngine' ? (intentEngineEnabled ?? stage3Fallback) : undefined;
     const dotOn = stage5Enabled !== undefined ? stage5Enabled
-      : urlEnabled !== undefined ? urlEnabled
-      : attachmentModuleEnabled !== undefined ? attachmentModuleEnabled
-      : intentEnabled !== undefined ? intentEnabled
+      : stage3Enabled !== undefined ? stage3Enabled
       : item.functional;
     // html_spec §2.2-2：url 摘要 启用=「信誉评估/沙箱分析/仿冒检测」，禁用=「未启用」
     // 意图引擎摘要 启用=「涉黄赌/涉政/钓鱼/垃圾/订阅」，禁用=「未启用」（Task 10）
@@ -711,16 +721,11 @@ export function PolicyPipelinePage() {
     // demo D-8 未新造 key）；配置 query 未就绪前退回静态描述文案，避免摘要闪烁。
     // GT-12731：摘要的启用/未启用判断同样以「本地状态 ?? 父级兜底真值」为准，
     // 使加载期首帧就显示正确的摘要（未启用模块直接显示「未启用」，不再先显示能力摘要再闪回）。
-    const urlEnabledForSummary = urlModuleEnabled ?? (item.key === 'url' ? stage3Fallback : undefined);
-    const attachmentEnabledForSummary = attachmentEnabled ?? (item.key === 'attachment' ? stage3Fallback : undefined);
-    const intentEnabledForSummary = intentEngineEnabled ?? (item.key === 'intentEngine' ? stage3Fallback : undefined);
-    const summaryText = item.key === 'url'
-      ? (urlEnabledForSummary === false ? t('pipeline.urlNavSummaryDisabled') : t('pipeline.urlNavSummary'))
-      : item.key === 'attachment'
-        ? (attachmentEnabledForSummary === false ? t('securityModules.disabled') : t('pipeline.attachmentNavSummary'))
-      : item.key === 'intentEngine'
-        ? (intentEnabledForSummary === false ? t('pipeline.intentEngineNavSummaryDisabled') : t('pipeline.intentEngineNavSummary'))
-        : item.key === 'similarDetection'
+    // html_spec §2.2-2 / Task 10 / GT-12731：摘要启用/禁用判断以
+    // 「本地状态 ?? 父级兜底真值」为准，使加载期首帧就显示正确摘要。
+    const summaryText = stage3Cfg
+      ? (stage3Enabled === false ? t(stage3Cfg.disabledSummaryKey) : t(stage3Cfg.enabledSummaryKey))
+      : item.key === 'similarDetection'
           ? (similarDetectionEnabled === false
               ? t('common.disabled')
               : similarDetectionNavSummary ?? t(navSummaryKey.similarDetection))
@@ -831,7 +836,7 @@ export function PolicyPipelinePage() {
       return <UserListPage embedded />;
     }
     if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'content') {
-      return <ContentRulesPage embedded />;
+      return <ContentRulesPage embedded onEnabledChange={(v) => handleStage3EnabledChange('content', v)} />;
     }
     if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'attachment') {
       return (
@@ -839,7 +844,7 @@ export function PolicyPipelinePage() {
           embedded
           hideBasicLimit={caps.multiTenant && effectiveViewer === 'tenant'}
           onDirtyChange={setAttachmentDirty}
-          onEnabledChange={setAttachmentEnabled}
+          onEnabledChange={(v) => handleStage3EnabledChange('attachment', v)}
         />
       );
     }
@@ -849,12 +854,12 @@ export function PolicyPipelinePage() {
           direction="receive"
           embedded
           onDirtyChange={setUrlDirty}
-          onEnabledChange={setUrlModuleEnabled}
+          onEnabledChange={(v) => handleStage3EnabledChange('url', v)}
         />
       );
     }
     if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'intentEngine') {
-      return <IntentEnginePage embedded onDirtyChange={setIntentDirty} onEnabledChange={setIntentEngineEnabled} />;
+      return <IntentEnginePage embedded onDirtyChange={setIntentDirty} onEnabledChange={(v) => handleStage3EnabledChange('intentEngine', v)} />;
     }
     if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'similarDetection') {
       return <SimilarDetectionPage embedded onDirtyChange={setSimilarDirty} />;

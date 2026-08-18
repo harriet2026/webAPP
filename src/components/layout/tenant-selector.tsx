@@ -110,16 +110,26 @@ export function TenantSelector({ value, onChange, className }: TenantSelectorPro
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{t('allTenants')}</SelectItem>
+        <SelectItem value="all" data-testid="tenant-option-all">
+          {t('allTenants')}
+        </SelectItem>
         {tenants?.map((tenant) => (
-          <SelectItem key={tenant.id} value={tenant.id.toString()}>
+          <SelectItem
+            key={tenant.id}
+            value={tenant.id.toString()}
+            data-testid={`tenant-option-${tenant.id}`}
+          >
             {tenant.name}
           </SelectItem>
         ))}
         {/* The kept-but-off-page selection (see selectItems) needs an option of
             its own, otherwise the current value has no row in the popup. */}
         {selectedNotInList && verifiedTenant?.id != null && (
-          <SelectItem key={verifiedTenant.id} value={verifiedTenant.id.toString()}>
+          <SelectItem
+            key={verifiedTenant.id}
+            value={verifiedTenant.id.toString()}
+            data-testid={`tenant-option-${verifiedTenant.id}`}
+          >
             {verifiedTenant.name}
           </SelectItem>
         )}

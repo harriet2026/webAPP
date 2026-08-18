@@ -141,6 +141,10 @@ export interface MailLogDetail {
   return_path?: string;
   reply_to?: string;
   x_mailer?: string;
+  /** Intake-time header block persisted with mail_log; independent of EML retention. */
+  raw_headers?: string;
+  /** True when raw_headers reached the backend's bounded persistence limit. */
+  raw_headers_truncated?: boolean;
   sensitive_keyword_hit?: boolean;
   entity_urls?: URLEntity[];
 
@@ -149,6 +153,8 @@ export interface MailLogDetail {
   session_id?: string;
   delivery_status_summary?: string;
   workflow_outcome_summary?: string;
+  /** Raw recall fold retained for detail/audit; visible badges use display_statuses. */
+  recall_status_summary?: string;
   delivery_error_summary?: string;
 
   matched_tag_rules?: MatchedRulesByStage;
@@ -232,10 +238,17 @@ export type { MailLifecycleLog, MailLifecycleLogsResponse };
 
 export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped';
 
+export interface DetectionRecipientGroup {
+  recipients: string[];
+  status: CheckStatus;
+  ruleIds: number[];
+}
+
 export interface DetectionCheckItem {
   key: string;
   status: CheckStatus;
   ruleIds: number[];
+  recipientGroups?: DetectionRecipientGroup[];
 }
 
 export interface DetectionStage {
@@ -248,18 +261,26 @@ export interface DetectionStage {
 
 export type FinalVerdict = 'malicious' | 'suspicious' | 'safe';
 
-export type EmailType =
-  | 'normal' | 'subscription' | 'advertising' | 'spam' | 'harmful'
-  | 'suspicious' | 'sensitive' | 'spoofing' | 'phishing' | 'virus'
-  | 'account_compromised';
+// Backend-authored security-analysis contract returned by
+// GET /mail-logs/{id}/analysis. The client localizes stable keys but does not
+// re-derive per-recipient rule/action semantics.
+export interface MailLogAnalysis {
+  scope: 'all' | 'recipient';
+  recipient?: string;
+  action?: string;
+  status?: string;
+  final_verdict: FinalVerdict;
+  total_elapsed_ms: number;
+  stages: DetectionStage[];
+}
+
+export type EmailType = 'normal' | 'subscription' | 'advertising' | 'spam' | 'harmful' | 'suspicious' | 'sensitive' | 'spoofing' | 'phishing' | 'virus' | 'account_compromised';
 
 // user_retrieval is retained for backward compatibility with historical data
 // (before quarantine release stopped auto-reclassifying in Task F1).
 export type CorrectionSource = 'admin_release' | 'admin_recall' | 'user_retrieval';
 
-export type ObjectDisposeStatus =
-  | 'succeeded' | 'failed' | 'not_applicable'
-  | 'unsupported_object_target' | 'forbidden_object_target';
+export type ObjectDisposeStatus = 'succeeded' | 'failed' | 'not_applicable' | 'unsupported_object_target' | 'forbidden_object_target';
 
 export interface ObjectDisposeResult {
   mail_log_id: number;

@@ -119,7 +119,7 @@ const ENUM_VALUE_MAP: Record<string, (v: string) => string | undefined> = {
   rbl_result: (v) => `enumValue.${v}`,
   intent_label: intentLabelI18nKey,
   // GT-12368 AI 搜索 filter 全覆盖：display_status 复用 quick-filter 的
-  // statuses.* 字典（17 值枚举，与 emailStatus 多选一致）。
+  // statuses.* 字典（GT-12955 13 值枚举，与 emailStatus 多选一致）。
   // disposal_policy_key 不走此表——模块名走 getModuleName（见 formatCondLabel）。
   display_status: (v) => `statuses.${v}`,
 };
@@ -129,7 +129,6 @@ const ENUM_VALUE_MAP: Record<string, (v: string) => string | undefined> = {
 const QUICK_ENUM_VALUE_KEYS: Record<string, (v: string) => string | undefined> =
   {
     sendReceiveType: (v) => v, // flat key under filters (incoming/outgoing/internal)
-    executionAction: (v) => `actions.${v}`,
     emailStatus: (v) => `statuses.${v}`,
   };
 
@@ -151,6 +150,19 @@ export function SelectedConditions({
   ).includes(rawLocale as DisposalLang)
     ? (rawLocale as DisposalLang)
     : "zh";
+
+  // GT-12955: active status selectors expose only the approved 13-value
+  // contract, but a saved filter may still contain one of the retired values.
+  // Keep those labels in a separate namespace so loading a historical template
+  // never renders next-intl's dot-joined missing-key path, while the retired
+  // values stay out of the active selector enum.
+  const displayStatusFilterLabel = (value: string): string => {
+    const legacyPath = `legacyStatuses.${value}`;
+    if (ft.has(legacyPath)) return ft(legacyPath);
+    const currentPath = `statuses.${value}`;
+    if (ft.has(currentPath)) return ft(currentPath);
+    return value;
+  };
 
   const chips: { key: string; label: string; isAi: boolean }[] = [];
 
@@ -187,6 +199,9 @@ export function SelectedConditions({
     const mapOne = (v: string): string => {
       if (cond.field === "disposal_policy_key") {
         return getModuleName(v, disposalLang) || v;
+      }
+      if (cond.field === "display_status") {
+        return displayStatusFilterLabel(v);
       }
       if (valueMapper && v) {
         const i18nPath = valueMapper(v);
@@ -236,7 +251,6 @@ export function SelectedConditions({
     ["recipient", ft("recipient")],
     ["subject", ft("subject")],
     ["sendReceiveType", ft("sendReceiveType")],
-    ["executionAction", ft("executionAction")],
     ["emailStatus", ft("emailStatus")],
     ["ipLocation", ft("ipLocation")],
   ];
@@ -251,14 +265,12 @@ export function SelectedConditions({
     // Resolve enum values (sendReceiveType/executionAction/emailStatus) via i18n
     const enumMapper = QUICK_ENUM_VALUE_KEYS[k];
     let displayValue: string | { start: string; end: string } = v;
-    if (enumMapper && typeof v === "string") {
+    if (k === "emailStatus") {
+      displayValue = displayStatusFilterLabel(v);
+    } else if (enumMapper && typeof v === "string") {
       const i18nPath = enumMapper(v);
-      if (i18nPath) {
-        try {
-          displayValue = ft(i18nPath);
-        } catch {
-          displayValue = v;
-        }
+      if (i18nPath && ft.has(i18nPath)) {
+        displayValue = ft(i18nPath);
       }
     }
     chips.push({
@@ -271,6 +283,21 @@ export function SelectedConditions({
   // Multi-value quick filters (spec §3.3.1 / §4.3): one removable chip per
   // selected value, so clearing a single mail type / policy module doesn't
   // wipe the whole selection.
+  if (quick.executionActions && quick.executionActions.length > 0) {
+    for (const action of quick.executionActions) {
+      chips.push({
+        key: `q-executionActions:${action}`,
+        label: `${ft("executionAction")}: ${ft(`actions.${action}`)}`,
+        isAi: false,
+      });
+    }
+  } else if (quick.executionAction) {
+    chips.push({
+      key: "q-executionAction",
+      label: `${ft("executionAction")}: ${ft(`actions.${quick.executionAction}`)}`,
+      isAi: false,
+    });
+  }
   for (const mt of quick.emailTypes ?? []) {
     let label = mt;
     try {
@@ -287,7 +314,7 @@ export function SelectedConditions({
   for (const status of quick.emailStatuses ?? []) {
     chips.push({
       key: `q-emailStatuses:${status}`,
-      label: `${ft("emailStatus")}: ${ft(`statuses.${status}`)}`,
+      label: `${ft("emailStatus")}: ${displayStatusFilterLabel(status)}`,
       isAi: false,
     });
   }

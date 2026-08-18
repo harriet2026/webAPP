@@ -36,6 +36,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3000 npx playwright test tests/e2e/specs/<x
   节奏：**迭代期用 dev server 免 build → 全部修完后重建镜像跑一次完整回归认证**。
 - webapp 镜像构建涉及 Node base image 和 npm registry；具体 `NODE_IMAGE`、`BASE_IMAGE_REGISTRY`、`NPM_CONFIG_REGISTRY` 等 build args 以根目录 [`AGENTS.md`](../AGENTS.md) 和 `python3 build.py --help/--status` 为准，不要在 webapp 文档里另写一套 registry 规则。
 - 重建 webapp 镜像时选择一个显式 `IMAGE_TAG`，并把同一个值同时传给 `build.py --image-tag` 和 `docker compose`。启动前用 `docker compose config --images` 和容器 image ID 验证，不要靠同时维护 `:8.0` / `:1.0.0` 两个别名掩盖 tag 漂移。Clean host 还必须先有与当前源码匹配的 `tmpl-webapp-builder`、`tmpl-webapp-runtime` 固定模板镜像；`--all-images` 不会自动构建它们。
+- 给 UI 自动化补 `data-testid` 后，远端/容器环境必须先重建并替换 webapp 镜像；源码里能 grep 到不等于浏览器 DOM 已更新。排查时先查容器 image ID，再去运行镜像的 `/app/.next` 或 `/usr/share/nginx/html` grep 新 testid，最后看实际 DOM。
 
 ## Playwright E2E 测试
 

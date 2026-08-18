@@ -87,9 +87,18 @@ describe('applyTemplate', () => {
     const r = applyTemplate(baseStandard, 'strict');
     expect(r.template).toBe('strict');
     expect(r.spf.fail.action).toBe('reject');
-    expect(r.dkim.fail.action).toBe('reject');
+    // 2026-08-11：严格档 dkim.fail 由拒收降为隔离。DKIM 签名在正常投递链路里
+    // routinely 会坏（邮件列表改主题/加页脚、转发网关加免责声明 → body hash 不符,
+    // ARC 就是为此而生），RFC 6376 要求把验证失败的签名当作没有签名处理而非伪造
+    // 证据；拒收是退回发件人、不可挽回。后端守卫 TestDKIMFailNeverHarsherThanSPFFail。
+    expect(r.dkim.fail.action).toBe('quarantine');
     expect(r.dmarc.reject.action).toBe('reject');
-    expect(r.ptr.noptr.action).toBe('quarantine');
+    // PTR 三个中性条件在**所有档位**（含 strict）下一律「标记放行」，永不拦截：
+    // 它们是「缺少证据」而非「有证据表明是坏的」，很多正规中小企业的邮件服务器
+    // 压根没配 PTR；严格档往往全量启用、误杀面反而更大，而缺少证据不足以支撑
+    // 退信这种不可挽回的动作。后端有对应守卫
+    // TestPTRNeutralConditions_NeverBlockInAnyTemplate。
+    expect(r.ptr.noptr.action).toBe('mark-delivery');
   });
 
   it('transforms strict to loose', () => {
@@ -98,15 +107,17 @@ describe('applyTemplate', () => {
     expect(r.template).toBe('loose');
     expect(r.spf.fail.action).toBe('quarantine');
     expect(r.dkim.fail.action).toBe('quarantine');
-    expect(r.spf.none.action).toBe('accept');
+    expect(r.spf.none.action).toBe('mark-delivery');
   });
 
-  it('sets enabled=false for accept actions from template', () => {
+  // GT-12833：模板不再产出 accept——原先用 accept 表达的「放行」场景一律改为
+  // mark-delivery（标记放行），且所有检查项恒为启用态，由动作本身决定处置强度。
+  it('maps former accept scenarios to mark-delivery and keeps them enabled', () => {
     const r = applyTemplate(baseStandard, 'loose');
-    expect(r.spf.none.action).toBe('accept');
-    expect(r.spf.none.enabled).toBe(false);
-    expect(r.dkim.partial.action).toBe('accept');
-    expect(r.dkim.partial.enabled).toBe(false);
+    expect(r.spf.none.action).toBe('mark-delivery');
+    expect(r.spf.none.enabled).toBe(true);
+    expect(r.dkim.partial.action).toBe('mark-delivery');
+    expect(r.dkim.partial.enabled).toBe(true);
   });
 
   it('preserves observe_mode flags', () => {

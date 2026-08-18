@@ -53,7 +53,8 @@ describe('ConfigHealthPanel', () => {
     fireEvent.click(screen.getByText('改为标记'));
     expect(onChange).toHaveBeenCalledTimes(1);
     next = onChange.mock.calls[0][0] as ProtocolChecksConfig;
-    expect(next.spf.softfail.action).toBe('audit');
+    // GT-12833：「改为标记」的落点从 audit 改为 mark-delivery（标记放行）。
+    expect(next.spf.softfail.action).toBe('mark-delivery');
   });
 
   it('shows the observe-mode row and fires onChange when a discard action is present', () => {

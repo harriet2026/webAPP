@@ -120,6 +120,7 @@ export function Header() {
                   variant="destructive"
                   onClick={() => setLogoutOpen(true)}
                   className="gap-2 px-2 py-1.5"
+                  data-testid="user-menu-logout"
                 >
                   <LogOut className="mr-2 size-4" />
                   {t('header.logout')}

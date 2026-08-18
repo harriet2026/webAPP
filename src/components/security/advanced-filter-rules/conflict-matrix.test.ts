@@ -50,12 +50,4 @@ describe('disabledAddons', () => {
     );
     expect(disabled).not.toContain('adminNotify');
   });
-
-  it('block disables everything except adminNotify', () => {
-    const disabled = disabledAddons('block');
-    expect(disabled.sort()).toEqual(
-      ['disclaimer', 'externalReminder', 'deleteAttachment', 'emailTag', 'forwardServer', 'modifyHeader'].sort(),
-    );
-    expect(disabled).not.toContain('adminNotify');
-  });
 });

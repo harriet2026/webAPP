@@ -173,45 +173,42 @@ export function mailTypeLabelKey(type?: string): string {
 // fall back to a whole-message dispose the operator never asked for.
 export type ConfidenceKind = 'score' | 'blacklist' | 'rule' | 'none';
 
-// deriveConfidence mirrors demo overview-action-section's renderMailType: a
-// deterministic hit (blacklist/rule) carries no numeric confidence at all
-// (showing "0%"/a fabricated score there would be misleading), so hitSource
-// always wins over any score when present. cac.int_tag is a coarser 0-7
-// severity bucket (see deriveThreatLevel above) -- NOT a probability -- so it
-// must never be used as a confidence fallback (review Important: int_tag:5
-// would previously render as "置信度 5%" and int_tag:1 as "置信度 100%", an
-// inverted/fabricated number the demo never produces).
-//
-// CONFIDENCE SOURCE FIX (task 7, ThreatSummaryCard): the overview card's real
-// confidence signal is the phish agent's own investigation score
-// (phish_agent_check.confidence) -- that's the model that actually classified
-// this specific message -- so `phishConfidence` (when a positive number) now
-// takes priority over `cac.prob`. cac.prob[0] (the CAC engine's own
-// probability string, "0.9" or "90") remains the fallback when no phish-agent
-// confidence is available (message never went through the sideline phish
-// agent, or the field is absent/zero/NaN). Either source normalizes through
-// the same `>1 ? raw : raw*100` branch the demo uses, since both CAC and the
-// phish agent have been observed to emit either the 0-1 or 0-100 convention.
-// With no hitSource, no phishConfidence, and no prob there is no confidence
-// signal at all, so the result is kind:'none'.
+// CAC's prob array is indexed by intent: indexes 0/1 are non-spam classes and
+// indexes >= 2 are spam classes. The intent engine's score is the sum of all
+// spam-class probabilities, matching internal/cac.SpamProbability and the
+// score used by intent-engine threshold rules. Reading prob[0] made malicious
+// mail commonly render as "0%" because that slot is a non-spam probability.
+export function deriveIntentEngineScore(cac?: CACResult): number | undefined {
+  if (!cac?.prob || cac.prob.length < 3) return undefined;
+
+  let score = 0;
+  let hasNumericProbability = false;
+  for (const item of cac.prob.slice(2)) {
+    const value = item.trim() === '' ? Number.NaN : Number(item);
+    if (!Number.isFinite(value)) continue;
+    score += value;
+    hasNumericProbability = true;
+  }
+  return hasNumericProbability ? score : undefined;
+}
+
+// The detail overview's confidence is specifically the intent-engine score.
+// The phishing agent has a separate confidence display in the analysis stage
+// and must not replace this value. Deterministic blacklist/rule hits without
+// an intent score keep their fixed "no score" labels.
 export function deriveConfidence(
   cac?: CACResult,
   hitSource?: string,
-  phishConfidence?: number,
-): { kind: ConfidenceKind; pct?: number } {
+): { kind: ConfidenceKind; score?: number } {
   if (hitSource === 'blacklist') return { kind: 'blacklist' };
   if (hitSource === 'rule') return { kind: 'rule' };
 
-  if (phishConfidence !== undefined && !Number.isNaN(phishConfidence) && phishConfidence > 0) {
-    const pct = Number((phishConfidence > 1 ? phishConfidence : phishConfidence * 100).toFixed(0));
-    return { kind: 'score', pct };
-  }
+  const score = deriveIntentEngineScore(cac);
+  if (score === undefined || !Number.isFinite(score) || score < 0) return { kind: 'none' };
 
-  const raw = cac?.prob?.[0] !== undefined ? parseFloat(cac.prob[0]) : undefined;
-  if (raw === undefined || Number.isNaN(raw) || raw <= 0) return { kind: 'none' };
-
-  const pct = Number((raw > 1 ? raw : raw * 100).toFixed(0));
-  return { kind: 'score', pct };
+  // Keep the engine's original 0-1 score scale. Rounding only removes
+  // floating-point addition noise; it is not a percentage conversion.
+  return { kind: 'score', score: Number(score.toFixed(6)) };
 }
 
 // G3 (v2 html_spec §①): a deterministic (blacklist/rule) hit must show
@@ -225,11 +222,8 @@ export function deriveConfidence(
 const BLACKLIST_POLICY_KEYS = new Set(['SBL', 'IPBL', 'UBL', 'RBL']);
 
 // AI_POLICY_KEYS -- the intelligent-analysis-layer agents (钓鱼/仿冒/回溯
-// 智能体). These DO carry their own confidence (surfaced separately via
-// phish_agent_check.confidence, already prioritized above hitSource in
-// deriveConfidence's dispatch), so they must never resolve to a hitSource
-// here -- doing so would suppress a real score that deriveConfidence would
-// otherwise have shown.
+// 智能体). Their own confidence is surfaced in the corresponding analysis
+// result rather than being described as a deterministic rule hit here.
 const AI_POLICY_KEYS = new Set(['AI-PHISH', 'AI-SPOOF', 'AI-TRACE']);
 
 // Every other cataloged policy_key (IPFREQ/OVERSEAS/AUTH/BEHAVIOR/RCPT/CR/
@@ -238,14 +232,10 @@ const AI_POLICY_KEYS = new Set(['AI-PHISH', 'AI-SPOOF', 'AI-TRACE']);
 // advanced-filter/overseas/intent/attachment/url per the task's mapping)
 // is a non-AI rule-engine hit and maps to 'rule'.
 export function deriveHitSource(detail: MailLogDetail): 'blacklist' | 'rule' | undefined {
-  // A real score already exists -- prefer it over any hitSource label
-  // (mirrors deriveConfidence's own phishConfidence > cac.prob priority, but
-  // inverted: hitSource normally OUTRANKS score inside deriveConfidence, so
-  // this function must itself refuse to emit a hitSource whenever a real
-  // score is available, or it would silently suppress that score).
-  if (detail.phish_agent_check?.confidence !== undefined) return undefined;
-  const rawProb = detail.cac_result?.prob?.[0];
-  if (rawProb !== undefined && !Number.isNaN(parseFloat(rawProb))) return undefined;
+  // A real intent-engine score already exists -- prefer it over any hitSource
+  // label. deriveConfidence gives hitSource precedence, so this function must
+  // defer before returning a policy-derived label.
+  if (deriveIntentEngineScore(detail.cac_result) !== undefined) return undefined;
 
   const policyKey = detail.disposal_basis?.policy_key;
   if (!policyKey) return undefined;
@@ -299,7 +289,9 @@ export function recipientActionsForStatus(status: string, hasObjectId: boolean):
   switch (status) {
     case 'delivered':
     case 'marked_delivered':
-      return ['recall', 'notify'];
+      // GT-12880 裁决"只要邮件还在就支持重投"：已投递邮件也提供重新投递
+      //（弹窗对已成功收件人给重复邮件警示；原文超保留期由后端如实 404）。
+      return ['recall', 'notify', 'redeliver'];
     case 'quarantined':
     case 'sidelined':
       // Already quarantined -- the demo prototype exposes only 投递/丢弃
@@ -320,6 +312,14 @@ export function recipientActionsForStatus(status: string, hasObjectId: boolean):
     case 'pending_review':
     case 'audited':
       return hasObjectId ? ['deliver', 'quarantine', 'block', 'discard'] : [];
+    case 'deferred':
+      // GT-12880 review F10：暂缓（milter tempfail，上游在自动重试）≠ 拦截族，
+      // 不提供动作但展示层不得落"未保留原文"文案（recipient-status 单独分支）。
+      return [];
+    case 'delivery_failed':
+      // GT-12880：投递失败 ≠ 拦截族（展示层见 SendReceiveContextCard 的
+      // singleDeliveryFailed 分支）。B 部分落地重新投递入口。
+      return ['redeliver'];
     default:
       // blocked/rejected/discarded (no original content) -- not operable,
       // per spec §5.3's canOperate=✗ row.

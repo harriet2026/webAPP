@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,6 +25,7 @@ interface HardwareTabProps {
 
 export function HardwareTab({ node, range }: HardwareTabProps) {
   const t = useTranslations('infrastructure');
+  const locale = useLocale();
   const { data, isLoading, isError } = useHardware(node, range);
 
   const chartOption = useMemo(() => {
@@ -34,11 +35,24 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
     const ts = (cpuPts.length >= memPts.length ? cpuPts : memPts).map((p) => p.ts);
     const cpuMap = new Map(cpuPts.map((p) => [p.ts, p.value]));
     const memMap = new Map(memPts.map((p) => [p.ts, p.value]));
+    const timeFormatter = new Intl.DateTimeFormat(locale, range === '7d'
+      ? { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }
+      : { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
     return {
       tooltip: { trigger: 'axis' as const },
       legend: { data: ['CPU', t('hardware.memory')], top: 0 },
       grid: { left: 48, right: 16, top: 36, bottom: 32 },
-      xAxis: { type: 'category' as const, data: ts, axisLabel: { showMaxLabel: true } },
+      xAxis: {
+        type: 'category' as const,
+        data: ts,
+        axisLabel: {
+          showMaxLabel: true,
+          formatter: (value: string) => {
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? value : timeFormatter.format(date);
+          },
+        },
+      },
       yAxis: { type: 'value' as const, min: 0, max: 100, axisLabel: { formatter: '{value}%' } },
       series: [
         {
@@ -61,7 +75,7 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
         },
       ],
     };
-  }, [data, t]);
+  }, [data, locale, range, t]);
 
   if (isLoading) {
     return (
@@ -104,10 +118,13 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
           {netTop5.length === 0 ? (
             <EmptyState message={t('noData')} />
           ) : (
-            <Table data-testid="monitor-infrastructure-network-table">
+            <div className="overflow-x-auto">
+            <Table className="min-w-[900px]" data-testid="monitor-infrastructure-network-table">
               <TableHeader>
                 <TableRow>
                   <TableHead>Device</TableHead>
+                  <TableHead className="text-right">{t('hardware.rxMbps')}</TableHead>
+                  <TableHead className="text-right">{t('hardware.txMbps')}</TableHead>
                   <TableHead className="text-right">{t('hardware.rxPps')}</TableHead>
                   <TableHead className="text-right">{t('hardware.txPps')}</TableHead>
                   <TableHead className="text-right">{t('hardware.dropRate')}</TableHead>
@@ -115,20 +132,35 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {netTop5.map((iface) => (
+                {netTop5.slice(0, 5).map((iface) => (
                   <TableRow key={iface.device} data-testid={`monitor-infrastructure-network-row-${iface.device}`}>
                     <TableCell className="font-mono">{iface.device}</TableCell>
-                    <TableCell className="text-right">{iface.rx_pps}</TableCell>
-                    <TableCell className="text-right">{iface.tx_pps}</TableCell>
-                    <TableCell className="text-right">{iface.drop_rate}</TableCell>
-                    <TableCell className="text-right">{iface.retransmit_rate}</TableCell>
+                    <TableCell className="text-right">{formatMbps(iface.rx_mbps, locale)}</TableCell>
+                    <TableCell className="text-right">{formatMbps(iface.tx_mbps, locale)}</TableCell>
+                    <TableCell className="text-right">{formatPps(iface.rx_pps, locale)}</TableCell>
+                    <TableCell className="text-right">{formatPps(iface.tx_pps, locale)}</TableCell>
+                    <TableCell className="text-right">{formatPercent(iface.drop_rate, locale)}</TableCell>
+                    <TableCell className="text-right">{formatPercent(iface.retransmit_rate, locale)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>
     </div>
   );
+}
+
+function formatPps(value: number | null, locale: string) {
+  return value == null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
+}
+
+function formatMbps(value: number | null, locale: string) {
+  return value == null ? '—' : new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(value);
+}
+
+function formatPercent(value: number | null, locale: string) {
+  return value == null ? '—' : `${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}%`;
 }

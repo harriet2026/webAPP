@@ -13,7 +13,8 @@ const wrap = (ui: React.ReactNode) => (
 
 const item = (overrides: Partial<CheckItem> = {}): CheckItem => ({
   enabled: true,
-  action: 'accept',
+  // 「允许」(accept) 已从认证仿冒移除，默认取一个仍在下拉里的动作。
+  action: 'quarantine',
   observe_mode: false,
   ...overrides,
 });

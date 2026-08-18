@@ -7,7 +7,7 @@ import type { RuleForm } from './rule-form';
 
 // ActionSummary.tsx — layer-4-actions.html 右栏三区：
 //   ① OR 策略组卡（动作行 + 已启用未冲突 addon 行 + 参数摘要小字）
-//   ② 完整表达式琥珀卡（动作详述；discard/block 终结动作不列 addon；none 文案）
+//   ② 完整表达式琥珀卡（动作详述；discard 终结动作不列 addon；none 文案）
 //   ③ 配置摘要两列表（策略/配置）
 // Pure read-only projection of `form` — no state of its own.
 
@@ -18,14 +18,12 @@ const ACTION_COLOR_CLASS: Record<PrimaryAction, string> = {
   quarantine: 'bg-action-quarantine',
   review: 'bg-action-review',
   discard: 'bg-action-drop',
-  block: 'bg-action-block',
 };
 
 // Builds the short one-line "sum" string shown next to each enabled addon
 // (mirrors demo ADDONS[].sum, but derived from live params + i18n option
 // labels instead of a static string).
 function addonSummary(t: ReturnType<typeof useTranslations>, key: AddonKey, params: Record<string, unknown>): string {
-  const sep = t('disposition.summarySeparator');
   switch (key) {
     case 'disclaimer': {
       const position = String(params.position ?? 'body_bottom');
@@ -118,7 +116,7 @@ export function ActionSummary({ form }: Props) {
   const action = form.primaryAction;
   const disabledSet = new Set(disabledAddons(action));
   const enabledKeys = UI_ADDON_KEYS.filter((k) => form.addons[k]?.enabled && !disabledSet.has(k));
-  const terminal = action === 'discard' || action === 'block';
+  const terminal = action === 'discard';
   const actionLabel = t(`primaryActions.${action}` as never);
 
   return (
@@ -137,11 +135,6 @@ export function ActionSummary({ form }: Props) {
             <span className={cn('mt-1 h-1.5 w-1.5 shrink-0 rounded-full', ACTION_COLOR_CLASS[action])} />
             <div>
               <div>{actionLabel}</div>
-              {action === 'block' && (
-                <div className="text-muted-foreground">
-                  {t('disposition.summarySmtpCode', { code: form.actionParams.block?.smtpCode ?? '550' })}
-                </div>
-              )}
             </div>
           </li>
           {enabledKeys.map((k) => (
@@ -167,7 +160,6 @@ export function ActionSummary({ form }: Props) {
         ) : (
           <p>
             {t('disposition.willBeActioned', { action: actionLabel })}
-            {action === 'block' && t('disposition.blockResponseCodeSuffix', { code: form.actionParams.block?.smtpCode ?? '550' })}
           </p>
         )}
         {enabledKeys.length > 0 && !terminal && (
@@ -199,13 +191,7 @@ export function ActionSummary({ form }: Props) {
               <tr>
                 <td className="border px-1.5 py-1">{actionLabel}</td>
                 <td className="border px-1.5 py-1">
-                  {action === 'block'
-                    ? `${t('disposition.summarySmtpCode', { code: form.actionParams.block?.smtpCode ?? '550' })}, ${
-                        form.actionParams.block?.tarpit
-                          ? t('disposition.summaryTarpitOn', { sec: form.actionParams.block?.tarpitSeconds ?? 5 })
-                          : t('disposition.summaryTarpitOff')
-                      }`
-                    : t('disposition.summaryDefaultParams')}
+                  {t('disposition.summaryDefaultParams')}
                 </td>
               </tr>
             )}

@@ -47,8 +47,15 @@ describe('serializeMembers shapes', () => {
     const domains = children.filter(c => c.field === 'senderdomain').map(c => c.value);
     expect(domains.sort()).toEqual(['b.com', 'c.com']);
   });
+  // GT-12802 起单个关键词不再多包一层 OR：只有一个关键词时直接返回该词的
+  // 字段 OR，多个关键词才是「关键词 OR（字段 OR）」两层。
   it('content keyword expands to 3-field OR per word', () => {
-    const tree = serializeMembers('content', ['hello']);
+    const single = serializeMembers('content', ['hello']);
+    expect(single.type).toBe('OR');
+    expect((single as { children: RuleNode[] }).children.map(c => c.field).sort())
+      .toEqual(['html_body', 'subject', 'text_body']);
+
+    const tree = serializeMembers('content', ['hello', 'world']);
     expect(tree.type).toBe('OR');
     const inner = (tree as { children: RuleNode[] }).children[0];
     const innerChildren = (inner as { children: RuleNode[] }).children;

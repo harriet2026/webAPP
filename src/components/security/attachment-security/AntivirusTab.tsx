@@ -15,8 +15,17 @@ export const DEFAULT_ANTIVIRUS_ACTIONS: AntivirusActionConfig = {
   timeout_action: 'accept',
 };
 
-const VIRUS_ACTIONS: AttachmentAction[] = ['quarantine', 'reject', 'discard'];
+const VIRUS_ACTIONS: AttachmentAction[] = ['quarantine', 'audit', 'discard'];
 const TIMEOUT_ACTIONS: AttachmentAction[] = ['quarantine', 'reject', 'discard', 'accept'];
+
+// GT-12818：「拒收」已从「发现病毒后的处置」的新建选项中下线（VIRUS_ACTIONS 不含它），
+// 但**后端仍接受并照常执行存量的 reject 配置**——产品裁决是「只是新建不给选，存量继续
+// 生效」。若不做任何处理，存量租户会看到触发器上写着「拒收」、下拉里却找不到这一项，
+// 无从确认自己当前究竟是什么行为。这里把这类已下线但仍生效的值补成一个**禁用项**：
+// 看得见、选不中、也改不回去。timeout_action 的下拉未做此调整，因为它的 reject 没下线。
+function retiredVirusActions(current: string): string[] {
+  return VIRUS_ACTIONS.includes(current as AttachmentAction) ? [] : [current];
+}
 
 interface AntivirusTabProps {
   direction?: Direction;
@@ -77,6 +86,14 @@ export function AntivirusTab({
                   <SelectItem key={action} value={action} data-testid={`antivirus-virus-action-${action}`}>
                     <span className="flex flex-col gap-0.5">
                       <span>{t(`actions.${action}`)}</span>
+                      <span className="text-xs text-muted-foreground">{t(`actionDesc.${action}` as `actionDesc.quarantine`)}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+                {retiredVirusActions(actions.virus_action).map((action) => (
+                  <SelectItem key={action} value={action} disabled data-testid={`antivirus-virus-action-${action}`}>
+                    <span className="flex flex-col gap-0.5">
+                      <span>{t(`actions.${action}` as `actions.quarantine`)}</span>
                       <span className="text-xs text-muted-foreground">{t(`actionDesc.${action}` as `actionDesc.quarantine`)}</span>
                     </span>
                   </SelectItem>

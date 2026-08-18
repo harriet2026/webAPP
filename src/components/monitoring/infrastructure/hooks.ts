@@ -29,7 +29,8 @@ export function useHardware(node: string, range: TimeRange) {
   return useQuery({
     queryKey: ['monitoring', 'hardware', node, range],
     queryFn: () => fetchHardware(node, range, apiRequest),
-    staleTime: 30_000,
+    staleTime: 15_000,
+    refetchInterval: 30_000,
     enabled: !!node,
     refetchOnWindowFocus: false,
   });

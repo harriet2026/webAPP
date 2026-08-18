@@ -14,6 +14,7 @@ const nextConfig = {
   // only its two asset trees instead of letting NFT trace the whole project.
   outputFileTracingIncludes: {
     '/html-spec/*': ['./doc/html-spec/**/*', './doc/html_spec-version/**/*'],
+    '/md-spec/*': ['./doc/md_spec-version/**/*'],
   },
   allowedDevOrigins: devOrigins,
 };

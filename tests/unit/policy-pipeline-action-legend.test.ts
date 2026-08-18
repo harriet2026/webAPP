@@ -15,7 +15,11 @@ vi.mock('@/i18n/navigation', () => ({
 // prototype pairs every swatch with a one-line description of what the action
 // does. The legend is the only place the page explains its colour coding, so a
 // missing entry means a colour appears in the diagram with nothing to decode it.
-const EXPECTED_ORDER = ['deliver', 'tagDeliver', 'quarantine', 'review', 'block', 'drop'];
+//
+// GT-12719: the second entry became "nextStep"（进行下一步）—— the legend no
+// longer advertises tagDeliver as a pipeline outcome, it explains that the mail
+// keeps flowing into the following policies.
+const EXPECTED_ORDER = ['deliver', 'nextStep', 'quarantine', 'review', 'block', 'drop'];
 
 const LOCALES = { zh, en, th, ru } as Record<string, { pipeline: Record<string, string> }>;
 

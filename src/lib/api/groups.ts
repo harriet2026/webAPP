@@ -76,7 +76,7 @@ function normalizeDomain(line: string): string {
   return line;
 }
 
-export function serializeMembers(type: GroupType, members: string[]): RuleNode {
+export function serializeMembers(type: GroupType, members: string[], scopes?: string[]): RuleNode {
   const rows = members.map(m => m.trim()).filter(Boolean);
   if (rows.length === 0) {
     throw new Error('group must have at least one member');
@@ -98,17 +98,13 @@ export function serializeMembers(type: GroupType, members: string[]): RuleNode {
     case 'recipient':
       return serializeAddrGroup(rows, 'recipient', 'recipient_domain');
     case 'content': {
-      return {
-        type: 'OR',
-        children: rows.map(kw => ({
-          type: 'OR' as const,
-          children: [
-            { type: 'condition' as const, field: 'subject', operator: 'contain', value: kw },
-            { type: 'condition' as const, field: 'text_body', operator: 'contain', value: kw },
-            { type: 'condition' as const, field: 'html_body', operator: 'contain', value: kw },
-          ],
-        })),
-      };
+      // GT-12802：内容组定义本身携带 scopes——决定关键词在哪几个字段上匹配。
+      const scopeFields = normalizeContentScopes(scopes);
+      const keywordNodes = rows.map(kw => {
+        const leaves = scopeFields.map(f => ({ type: 'condition' as const, field: f, operator: 'contain' as const, value: kw }));
+        return leaves.length === 1 ? leaves[0] : { type: 'OR' as const, children: leaves };
+      });
+      return keywordNodes.length === 1 ? keywordNodes[0] : { type: 'OR', children: keywordNodes };
     }
     case 'feature':
       throw new Error('feature groups do not support member serialization');
@@ -188,18 +184,89 @@ function parseAddrGroup(tree: RuleNode, addrField: string, domainField: string):
 }
 
 function parseContentGroup(tree: RuleNode): string[] | null {
+  // 兼容两种形态：旧版（每个关键词是 OR 三件套）与新版（condition 或 OR-of-N）。
+  const collect = (kwNode: RuleNode): string | null => {
+    if (kwNode.type === 'condition' && kwNode.operator === 'contain') {
+      if (CONTENT_GROUP_SCOPE_FIELDS.has(kwNode.field || '')) return kwNode.value || '';
+      return null;
+    }
+    if (kwNode.type !== 'OR' || !kwNode.children?.length) return null;
+    let first = '';
+    for (const leaf of kwNode.children) {
+      if (leaf.type !== 'condition' || leaf.operator !== 'contain') return null;
+      if (!CONTENT_GROUP_SCOPE_FIELDS.has(leaf.field || '')) return null;
+      const val = leaf.value || '';
+      if (!first) first = val;
+      else if (val !== first) return null;
+    }
+    return first || null;
+  };
+
+  if (tree.type === 'condition' && tree.operator === 'contain') {
+    // 单关键词 + 单 scope 的退化形态：直接读。
+    if (CONTENT_GROUP_SCOPE_FIELDS.has(tree.field || '')) return [tree.value || ''];
+    return null;
+  }
   if (tree.type !== 'OR' || !tree.children?.length) return null;
   const out: string[] = [];
   for (const kwNode of tree.children) {
-    if (kwNode.type !== 'OR' || !kwNode.children || kwNode.children.length !== 3) return null;
-    const fields: Record<string, string> = {};
-    for (const leaf of kwNode.children) {
-      if (leaf.type !== 'condition' || leaf.operator !== 'contain') return null;
-      if (leaf.field) fields[leaf.field] = leaf.value || '';
+    const text = collect(kwNode);
+    if (text == null) return null;
+    out.push(text);
+  }
+  return out;
+}
+
+// CONTENT_GROUP_SCOPE_FIELDS 内容组可在 condition_tree 中出现的字段集合。
+// 与后端 groups_helper.go 的 contentGroupScopeFields 同步。
+const CONTENT_GROUP_SCOPE_FIELDS = new Set([
+  'subject', 'text_body', 'html_body', 'header', 'attachment_names', 'urls',
+]);
+
+// normalizeContentScopes 规范化 scopes：空 → 默认主体三字段；非法值过滤；保序去重。
+function normalizeContentScopes(scopes?: string[]): string[] {
+  if (!scopes || scopes.length === 0) {
+    return ['subject', 'text_body', 'html_body'];
+  }
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const s of scopes) {
+    if (!CONTENT_GROUP_SCOPE_FIELDS.has(s) || seen.has(s)) continue;
+    seen.add(s);
+    out.push(s);
+  }
+  return out.length === 0 ? ['subject', 'text_body', 'html_body'] : out;
+}
+
+// parseContentGroupScopes 从 condition_tree 提取实际生效的 scopes（保序去重）。
+export function parseContentGroupScopes(tree: RuleNode | null): string[] {
+  if (!tree) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  const walk = (field: string) => {
+    if (field && CONTENT_GROUP_SCOPE_FIELDS.has(field) && !seen.has(field)) {
+      seen.add(field);
+      out.push(field);
     }
-    if (fields.subject == null || fields.text_body == null || fields.html_body == null) return null;
-    if (fields.subject !== fields.text_body || fields.text_body !== fields.html_body) return null;
-    out.push(fields.subject);
+  };
+  if (tree.type === 'condition' && tree.operator === 'contain') {
+    walk(tree.field || '');
+    return out;
+  }
+  if (tree.type !== 'OR' || !tree.children) return out;
+  for (const kw of tree.children) {
+    if (!kw) continue;
+    if (kw.type === 'condition' && kw.operator === 'contain') {
+      walk(kw.field || '');
+      continue;
+    }
+    if (kw.type === 'OR' && kw.children) {
+      for (const leaf of kw.children) {
+        if (leaf && leaf.type === 'condition' && leaf.operator === 'contain') {
+          walk(leaf.field || '');
+        }
+      }
+    }
   }
   return out;
 }
@@ -219,6 +286,7 @@ export function ruleToGroup(rule: Rule): Group | null {
     tree = typeof rule.condition_tree === 'string' ? JSON.parse(rule.condition_tree) : rule.condition_tree;
   } catch { tree = null; }
   const members = tree ? parseMembers(tree, type) : null;
+  const scopes = type === 'content' && tree ? parseContentGroupScopes(tree) : undefined;
   const memberCountFromBackend = (rule as Rule & { member_count?: number | null }).member_count;
   const referenceCountFromBackend = (rule as Rule & { reference_count?: number | null }).reference_count;
   return {
@@ -226,6 +294,7 @@ export function ruleToGroup(rule: Rule): Group | null {
     name,
     type,
     members: members ?? [],
+    scopes,
     memberCount: memberCountFromBackend ?? (members ? members.length : null),
     referenceCount: referenceCountFromBackend ?? 0,
     isActive: rule.is_active,
@@ -262,12 +331,16 @@ export interface GroupFormValues {
   name: string;
   type: GroupType;
   members: string[];
+  // content 组的 scopes（决定关键词匹配哪些字段）；其它类型忽略。
+  scopes?: string[];
   conditionTree?: RuleNode;
 }
 
 export function buildRulePayload(values: GroupFormValues, isCreate: boolean) {
   const stage = GROUP_TYPE_TO_STAGE[values.type];
-  const tree = values.type === 'feature' ? (values.conditionTree ?? { type: 'OR', children: [] }) : serializeMembers(values.type, values.members);
+  const tree = values.type === 'feature'
+    ? (values.conditionTree ?? { type: 'OR', children: [] })
+    : serializeMembers(values.type, values.members, values.scopes);
   const tag = GROUP_TAG_PREFIX + values.name;
   const base = {
     name: values.name,

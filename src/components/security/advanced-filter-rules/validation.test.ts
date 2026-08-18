@@ -8,7 +8,7 @@ function addon(enabled: boolean): { enabled: boolean; params: Record<string, unk
 describe('canSaveActions', () => {
   it('is savable when the primary action is not none, regardless of addons', () => {
     expect(canSaveActions('deliver', {})).toBe(true);
-    expect(canSaveActions('block', {})).toBe(true);
+    expect(canSaveActions('discard', {})).toBe(true);
   });
 
   it('is not savable when action is none and no addon is enabled', () => {
@@ -29,7 +29,7 @@ describe('canSaveActions', () => {
     // action is 'none' here just to exercise the addon-driven path; disabledAddons('none') is [].
     // Use quarantine-disabled addon key with quarantine as action but action!=none already saves.
     // To truly exercise exclusion, action must be 'none' AND matrix must disable something —
-    // matrix only disables for quarantine/discard/block, none of which is 'none'. So verify
+    // matrix only disables for quarantine/discard, neither of which is 'none'. So verify
     // that an enabled-but-irrelevant addon for a restrictive action still requires action!=none.
     const addons: AddonsState = { forwardServer: addon(true) };
     expect(canSaveActions('none', addons)).toBe(true);

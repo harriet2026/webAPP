@@ -25,7 +25,8 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { FORMAT_ACTIONS } from './CheckItemRow';
-import { formatActionKey } from '@/lib/auth-spoofing-labels';
+import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
+import { formatActionKey, toMessageKeySegment } from '@/lib/auth-spoofing-labels';
 import { ChevronDown, Info, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -79,6 +80,14 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
         <div className="flex items-center gap-2">
           <Switch checked={item.enabled} onCheckedChange={handleEnableChange} disabled={disabled} />
           <span className="text-sm font-medium">{t(labelKey as any)}</span>
+          {!item.enabled && (
+            <span
+              data-testid={`legacy-disabled-${labelKey}`}
+              className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
+            >
+              {t('legacyDisabled')}
+            </span>
+          )}
           {item.observe_mode && item.enabled && (
             <span className="flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
@@ -98,6 +107,12 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
           <span className={cn('text-xs', !item.enabled && 'text-muted-foreground')}>{t('observe')}</span>
         </div>
       </div>
+
+      {/* 存量配置提示：库里 {enabled:false, action:"accept"} 的行含义是「这项检查
+          关着」。新模型没有关闭入口，所以只标注、不自动转换（后端 GET 也原样返回）。 */}
+      {!item.enabled && (
+        <p className="pl-12 text-xs text-muted-foreground">{t('legacyDisabledHint')}</p>
+      )}
 
       {item.enabled && (
         <>
@@ -125,7 +140,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                       <div className="flex flex-col gap-0.5 py-0.5">
                         <span>{t(formatActionKey(a) as any)}</span>
                         <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                          {tDesc(a as any)}
+                          {tDesc(toMessageKeySegment(a) as any)}
                         </span>
                       </div>
                     </SelectItem>
@@ -139,6 +154,16 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
             <div className="ml-12 flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950/30">
               <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
               <p className="text-xs text-amber-700 dark:text-amber-300">{t('highRiskWarning')}</p>
+            </div>
+          )}
+
+          {!item.observe_mode && item.action === 'mark-delivery' && (
+            <div className="pl-12">
+              <AuthSpoofingTagPanel
+                value={item}
+                onChange={(patch) => onChange({ ...item, ...patch })}
+                disabled={disabled}
+              />
             </div>
           )}
 

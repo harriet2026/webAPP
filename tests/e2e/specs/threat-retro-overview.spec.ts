@@ -19,6 +19,11 @@ import { test, expect } from '../fixtures/auth.fixture';
 import { internalFetch } from '../helpers/internal-client';
 import { getDefaultTenantId, getDefaultTenantIdViaFetch } from '../helpers/tenant';
 import { uniqueSuffix } from '../helpers/test-data';
+import {
+  deleteInvByTaskSQL,
+  invCreatedSQL,
+  invDoneSQL,
+} from '../helpers/inv-facts';
 
 const HMAC_SECRET = process.env.OSG_INTERNAL_HMAC_SECRET || 'test-hmac-secret-for-e2e';
 
@@ -69,7 +74,7 @@ async function seedRun(suffix: string, runId = `run-pw-${suffix}`): Promise<Seed
       ` NOW() - INTERVAL '1 hour', NOW(), 1, 1, 'medium', 'pending_recall')`,
   );
 
-  const result = JSON.stringify({
+  const result = {
     leak_mails: [
       {
         mail_log_id: 1,
@@ -83,24 +88,40 @@ async function seedRun(suffix: string, runId = `run-pw-${suffix}`): Promise<Seed
       },
     ],
     details: '',
-  }).replace(/'/g, "''");
+  };
 
   // Also seed the child task so GetThreatRetroRun can return leak_mails.
+  // 事件溯源(spec 修订 13):子任务 = delivery_facts 的 inv_created +
+  // inv_done 事实,source_ref='threat_retro_run:<runId>' 让 run 级取数
+  // (listThreatRetroChildRecordsFromFacts)单谓词命中。
   await seedSQL(
-    `INSERT INTO investigation_tasks ` +
-      `(id, tenant_id, type, status, trigger_type, source_type, source_id, ` +
-      ` target_type, target_ids_json, config_snapshot_json, result_json, steps_json, ` +
-      ` recommended_actions_json, created_at, updated_at) ` +
-      `VALUES ('${childId}', ${TENANT_ID}, 'threat_traceback', 'completed', 'manual', ` +
-      ` 'threat_retro_run', '${runId}', 'cluster', '[1]', '{}'::jsonb, ` +
-      ` '${result}'::jsonb, '[]'::jsonb, '[]'::jsonb, NOW(), NOW())`,
+    invCreatedSQL(childId, {
+      invType: 'threat_traceback',
+      tenantId: TENANT_ID,
+      sourceType: 'threat_retro_run',
+      sourceId: runId,
+      triggerType: 'manual',
+      targetType: 'cluster',
+      targetIdsJson: '[1]',
+      configSnapshot: {},
+    }),
+  );
+  await seedSQL(
+    invDoneSQL(childId, {
+      invType: 'threat_traceback',
+      sourceType: 'threat_retro_run',
+      sourceId: runId,
+      result,
+      steps: [],
+      recommendedActions: [],
+    }),
   );
 
   return { runId, childId, subjectMarker };
 }
 
 async function cleanupRun(childId: string, runId: string): Promise<void> {
-  await seedSQL(`DELETE FROM investigation_tasks WHERE id='${childId}'`);
+  await seedSQL(deleteInvByTaskSQL(childId));
   await seedSQL(`DELETE FROM threat_retro_runs WHERE run_id='${runId}'`);
 }
 

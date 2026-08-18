@@ -44,6 +44,9 @@ const geoMessages: Record<string, string> = {
   backToWorld: '返回全球',
   topIps: '来源 IP TOP',
   byThreat: '威胁构成',
+  'specialRegionNames.HK': '中国香港',
+  'specialRegionNames.MO': '中国澳门',
+  'specialRegionNames.TW': '中国台湾',
 };
 
 vi.mock('next-intl', () => ({
@@ -174,6 +177,37 @@ describe('GeoDistributionCard ECharts world map', () => {
         [[[120, 22], [122, 25], [120, 22]]],
       ],
     });
+  });
+
+  it('uses unified China names and flags while merging HK, MO and TW into the CN map datum', () => {
+    countries = [
+      { country: 'HK', count: 70, block_rate: 97 },
+      { country: 'MO', count: 20, block_rate: 98 },
+      { country: 'TW', count: 10, block_rate: 99 },
+    ];
+    render(<GeoDistributionCard {...props} />);
+
+    expect(screen.getByText('本周攻击主要来源于：中国香港(70%)、中国澳门(20%)、中国台湾(10%)')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '1. 中国香港' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '2. 中国澳门' })).toBeInTheDocument();
+    const taiwan = screen.getByRole('button', { name: '3. 中国台湾' });
+    expect(taiwan).toBeInTheDocument();
+
+    const chinaFlagPosition = countryFlagPosition('CN');
+    expect(countryFlagPosition('HK')).toBe(chinaFlagPosition);
+    expect(countryFlagPosition('MO')).toBe(chinaFlagPosition);
+    expect(countryFlagPosition('TW')).toBe(chinaFlagPosition);
+
+    fireEvent.click(taiwan);
+    expect(screen.getByText('中国台湾', { selector: '[data-slot="card-title"] span' })).toBeInTheDocument();
+    const option = JSON.parse(screen.getByTestId('geo-echarts').getAttribute('data-option') ?? '{}');
+    expect(option.series[0]).toMatchObject({
+      data: [{ name: 'CN', value: 100 }],
+      center: [104.5, 35],
+      zoom: 3.7,
+      selectedMap: { CN: true },
+    });
+    expect(option.visualMap.max).toBe(100);
   });
 
   it('renders ISO-derived flags, a scrollable TOP ranking and safe block-rate values', () => {

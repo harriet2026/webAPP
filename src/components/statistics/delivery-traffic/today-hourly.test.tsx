@@ -32,7 +32,6 @@ vi.mock('./KpiCards', () => ({ KpiCards: () => null }));
 vi.mock('./TrendChart', () => ({ TrendChart: () => null }));
 vi.mock('./SideChart', () => ({ SideChart: () => null }));
 vi.mock('./LatencyChart', () => ({ LatencyChart: () => null }));
-vi.mock('./QueueTrendChart', () => ({ QueueTrendChart: () => null }));
 vi.mock('./DetailTable', () => ({ DetailTable: () => null }));
 vi.mock('./BottomActions', () => ({ BottomActions: () => null }));
 

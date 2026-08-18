@@ -5,14 +5,27 @@ import { useTranslations } from 'next-intl';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import type { Group, GroupType } from '@/types/groups';
 import { isValidAddressMember, isValidIPOrCIDR } from '@/lib/api/group-validation';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const NAME_RE = /^[A-Za-z0-9._\-一-龥]{1,64}$/;
+
+// GT-12802：内容组的 scopes 选集（与后端 contentGroupScopeFields 对齐）。
+// 默认三件套 = subject/text_body/html_body，可勾掉任一项以收窄匹配范围。
+const CONTENT_SCOPE_DEFAULTS = ['subject', 'text_body', 'html_body'];
+const CONTENT_SCOPE_CHOICES = [
+  { value: 'subject', labelKey: 'contentScopeSubject' },
+  { value: 'text_body', labelKey: 'contentScopeTextBody' },
+  { value: 'html_body', labelKey: 'contentScopeHtmlBody' },
+  { value: 'header', labelKey: 'contentScopeHeader' },
+  { value: 'attachment_names', labelKey: 'contentScopeAttachmentNames' },
+  { value: 'urls', labelKey: 'contentScopeUrls' },
+] as const;
 
 export interface GroupEditDialogProps {
   open: boolean;
@@ -21,7 +34,7 @@ export interface GroupEditDialogProps {
   initialType: GroupType;
   existingNames: string[];
   allowedTypes?: GroupType[];
-  onSubmit: (values: { name: string; type: GroupType; members: string[] }) => Promise<void>;
+  onSubmit: (values: { name: string; type: GroupType; members: string[]; scopes?: string[] }) => Promise<void>;
   // 类型选「特征组」时切到宽屏特征组抽屉（demo：同一抽屉内切换形态；webapp 拆成两个组件）
   onSwitchToFeature?: () => void;
 }
@@ -41,6 +54,9 @@ export function GroupEditDialog({
   const [type, setType] = useState<GroupType>(initialType);
   const [membersText, setMembersText] = useState('');
   const [membersTouched, setMembersTouched] = useState(false);
+  // GT-12802：内容组的 scopes。仅在 type === 'content' 时显示/提交。
+  const [contentScopes, setContentScopes] = useState<string[]>(CONTENT_SCOPE_DEFAULTS);
+  const [scopesTouched, setScopesTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -53,6 +69,12 @@ export function GroupEditDialog({
       setType(initialGroup?.type ?? initialType);
       setMembersText((initialGroup?.members ?? []).join('\n'));
       setMembersTouched(false);
+      // GT-12802：编辑回显 scopes。缺失/空 → 默认三件套。
+      const restored = initialGroup?.scopes && initialGroup.scopes.length > 0
+        ? initialGroup.scopes
+        : CONTENT_SCOPE_DEFAULTS;
+      setContentScopes(restored);
+      setScopesTouched(false);
       setErrorMsg(null);
     }
   }, [open, initialGroup, initialType]);
@@ -79,6 +101,17 @@ export function GroupEditDialog({
   const membersEmpty = memberLines.length === 0;
   const showMembersError = membersEmpty && (membersTouched || nameTouched);
 
+  // GT-12802：内容组至少要选一个 scope。
+  const scopesEmpty = type === 'content' && contentScopes.length === 0;
+  const showScopesError = scopesEmpty && (scopesTouched || nameTouched || membersTouched);
+
+  const toggleScope = (scope: string, checked: boolean) => {
+    setScopesTouched(true);
+    setContentScopes(prev =>
+      checked ? Array.from(new Set([...prev, scope])) : prev.filter(s => s !== scope),
+    );
+  };
+
   const validateMembers = (lines: string[]): string | null => {
     if (lines.length === 0) return t('noMembers');
     if (type === 'ip') {
@@ -103,12 +136,19 @@ export function GroupEditDialog({
     setNameTouched(true);
     if (nameInvalid) return;
     setMembersTouched(true);
+    if (type === 'content') setScopesTouched(true);
+    if (scopesEmpty) return;
     const dedup = Array.from(new Set(memberLines));
     const memberErr = validateMembers(dedup);
     if (memberErr) { setErrorMsg(memberErr); return; }
     setSubmitting(true);
     try {
-      await onSubmit({ name: trimmedName, type, members: dedup });
+      await onSubmit({
+        name: trimmedName,
+        type,
+        members: dedup,
+        scopes: type === 'content' ? contentScopes : undefined,
+      });
       onOpenChange(false);
     } catch (e) {
       setErrorMsg((e as Error).message ?? 'error');
@@ -121,58 +161,61 @@ export function GroupEditDialog({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="sm:max-w-md w-full flex flex-col p-0" data-testid="group-edit-drawer">
         <SheetHeader className="px-6 py-4 border-b">
-          <SheetTitle>{isEdit ? t('editGroup') : t('newGroup')}</SheetTitle>
+          <SheetTitle>
+            {isEdit
+              ? t('editGroup')
+              : t('newGroupOfType', {
+                  typeLabel: ({ ip: t('ipGroup'), sender: t('senderGroup'), recipient: t('recipientGroup'), content: t('contentGroup'), feature: t('featureGroup') })[type],
+                })}
+          </SheetTitle>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-          {/* demo：名称与类型并排两列 */}
-          <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>{t('groupName')} *</Label>
-            <Input
-              value={name}
-              onChange={e => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
-              placeholder={t('namePlaceholder')}
-              disabled={isEdit}
-              aria-invalid={showNameError || undefined}
-              className={showNameError ? 'border-destructive focus-visible:ring-destructive' : ''}
-              data-testid="group-edit-name"
-            />
-            {showNameError && (
-              <p className="text-xs text-destructive" data-testid="group-edit-name-error">{nameErrorText}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label>{t('groupType')} *</Label>
-            <Select
-              value={type}
-              onValueChange={v => {
-                if (v === 'feature') {
-                  // demo：类型选特征组即切换为宽屏条件编辑器抽屉
-                  onOpenChange(false);
-                  onSwitchToFeature?.();
-                  return;
-                }
-                setType(v as GroupType);
-              }}
-              disabled={isEdit}
-            >
-              <SelectTrigger data-testid="group-edit-type">
-                <SelectValue>{({ ip: t('ipGroup'), sender: t('senderGroup'), recipient: t('recipientGroup'), content: t('contentGroup'), feature: t('featureGroup') })[type]}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {allowedTypes.includes('ip') && <SelectItem value="ip">{t('ipGroup')}</SelectItem>}
-                {allowedTypes.includes('sender') && <SelectItem value="sender">{t('senderGroup')}</SelectItem>}
-                {allowedTypes.includes('recipient') && <SelectItem value="recipient">{t('recipientGroup')}</SelectItem>}
-                {allowedTypes.includes('content') && <SelectItem value="content">{t('contentGroup')}</SelectItem>}
-                {allowedTypes.includes('feature') && !isEdit && (
-                  <SelectItem value="feature">{t('featureGroup')}</SelectItem>
+          {/* 新建时：类型已由 Tab 上下文确定，直接全宽显示名称输入框
+              编辑时：类型只读展示，名称禁止修改，两列并排保持原有布局 */}
+          {isEdit ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('groupName')} *</Label>
+                <Input
+                  value={name}
+                  onChange={e => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
+                  placeholder={t('namePlaceholder')}
+                  disabled={true}
+                  aria-invalid={showNameError || undefined}
+                  className={showNameError ? 'border-destructive focus-visible:ring-destructive' : ''}
+                  data-testid="group-edit-name"
+                />
+                {showNameError && (
+                  <p className="text-xs text-destructive" data-testid="group-edit-name-error">{nameErrorText}</p>
                 )}
-              </SelectContent>
-            </Select>
-          </div>
-          </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('groupType')}</Label>
+                <Input
+                  value={({ ip: t('ipGroup'), sender: t('senderGroup'), recipient: t('recipientGroup'), content: t('contentGroup'), feature: t('featureGroup') })[type]}
+                  disabled={true}
+                  data-testid="group-edit-type-readonly"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>{t('groupName')} *</Label>
+              <Input
+                value={name}
+                onChange={e => { setName(e.target.value); if (!nameTouched) setNameTouched(true); }}
+                placeholder={t('namePlaceholder')}
+                aria-invalid={showNameError || undefined}
+                className={showNameError ? 'border-destructive focus-visible:ring-destructive' : ''}
+                data-testid="group-edit-name"
+              />
+              {showNameError && (
+                <p className="text-xs text-destructive" data-testid="group-edit-name-error">{nameErrorText}</p>
+              )}
+            </div>
+          )}
           <div className="space-y-2">
-            <Label>{t('memberListPerLine')} *</Label>
+            <Label>{type === 'content' ? t('contentMemberListPerLine') : t('memberListPerLine')} *</Label>
             <Textarea
               rows={8}
               value={membersText}
@@ -186,11 +229,31 @@ export function GroupEditDialog({
               <p className="text-xs text-destructive" data-testid="group-edit-members-error">{t('noMembers')}</p>
             )}
           </div>
+          {type === 'content' && (
+            <div className="space-y-2" data-testid="group-edit-content-scopes">
+              <Label>{t('contentScopes')}</Label>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+                {CONTENT_SCOPE_CHOICES.map(choice => (
+                  <label key={choice.value} className="flex cursor-pointer items-center gap-2 whitespace-nowrap text-sm">
+                    <Checkbox
+                      checked={contentScopes.includes(choice.value)}
+                      onCheckedChange={(checked) => toggleScope(choice.value, checked === true)}
+                      data-testid={`group-edit-scope-${choice.value}`}
+                    />
+                    <span>{t(choice.labelKey)}</span>
+                  </label>
+                ))}
+              </div>
+              {showScopesError && (
+                <p className="text-xs text-destructive" data-testid="group-edit-scopes-error">{t('noScopes')}</p>
+              )}
+            </div>
+          )}
           {errorMsg && <p className="text-sm text-destructive" data-testid="group-edit-error">{errorMsg}</p>}
         </div>
         <SheetFooter className="px-6 py-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>{tCommon('cancel')}</Button>
-          <Button onClick={handleSubmit} disabled={submitting || nameInvalid || membersEmpty} data-testid="group-edit-save">
+          <Button onClick={handleSubmit} disabled={submitting || nameInvalid || membersEmpty || scopesEmpty} data-testid="group-edit-save">
             {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             {tCommon('save')}
           </Button>

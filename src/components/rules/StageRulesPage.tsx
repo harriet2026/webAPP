@@ -511,7 +511,7 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
             <Button variant="outline" onClick={() => setImportExportOpen(true)}>
               {t('ruleImportExport.trigger')}
             </Button>
-            <Button onClick={() => handleOpenDialog()}>
+            <Button onClick={() => handleOpenDialog()} data-testid={`stage-rule-create-${stage}`}>
               <Plus className="h-4 w-4 mr-2" />
               {t('rules.createRule')}
             </Button>
@@ -530,7 +530,7 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
       </PageSurface>
 
       <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[28px] border-border/70 shadow-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[28px] border-border/70 shadow-2xl" data-testid={`stage-rule-dialog-${stage}`}>
           <DialogHeader>
             <DialogTitle>{editingRule ? t('rules.editRule') : t('rules.createRule')}</DialogTitle>
           </DialogHeader>
@@ -552,6 +552,7 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
                 {...form.register('name')}
                 disabled={!!editingRule?.is_system}
                 className={editingRule?.is_system ? 'opacity-50 cursor-not-allowed' : ''}
+                data-testid={`stage-rule-name-${stage}`}
               />
             </div>
 
@@ -570,23 +571,23 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
               <div className="space-y-2">
                 <Label>{t('rules.action')} *</Label>
                 <Select value={form.watch('action')} onValueChange={(v) => form.setValue('action', v as AdvancedRuleForm['action'])}>
-                  <SelectTrigger><SelectValue>{{ accept: t('rules.accept'), reject: t('rules.reject'), quarantine: t('rules.quarantine'), sideline: t('rules.sideline'), audit: t('rules.audit') }[form.watch('action')]}</SelectValue></SelectTrigger>
+                  <SelectTrigger data-testid={`stage-rule-action-${stage}`}><SelectValue>{{ accept: t('rules.accept'), reject: t('rules.reject'), quarantine: t('rules.quarantine'), sideline: t('rules.sideline'), audit: t('rules.audit') }[form.watch('action')]}</SelectValue></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="accept">{t('rules.accept')}</SelectItem>
-                    <SelectItem value="reject">{t('rules.reject')}</SelectItem>
-                    <SelectItem value="quarantine">{t('rules.quarantine')}</SelectItem>
+                    <SelectItem value="accept" data-testid={`stage-rule-action-${stage}-option-accept`}>{t('rules.accept')}</SelectItem>
+                    <SelectItem value="reject" data-testid={`stage-rule-action-${stage}-option-reject`}>{t('rules.reject')}</SelectItem>
+                    <SelectItem value="quarantine" data-testid={`stage-rule-action-${stage}-option-quarantine`}>{t('rules.quarantine')}</SelectItem>
                     {stage !== 'sideline' && !editingRule?.is_system && (
-                      <SelectItem value="sideline">{t('rules.sideline')}</SelectItem>
+                      <SelectItem value="sideline" data-testid={`stage-rule-action-${stage}-option-sideline`}>{t('rules.sideline')}</SelectItem>
                     )}
                     {stage !== 'sideline' && !editingRule?.is_system && (
-                      <SelectItem value="audit">{t('rules.audit')}</SelectItem>
+                      <SelectItem value="audit" data-testid={`stage-rule-action-${stage}-option-audit`}>{t('rules.audit')}</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>{t('rules.priority')}</Label>
-                <Input type="number" {...form.register('priority', { valueAsNumber: true })} />
+                <Input type="number" {...form.register('priority', { valueAsNumber: true })} data-testid={`stage-rule-priority-${stage}`} />
               </div>
               {!editingRule?.is_system && (
                 <div className="space-y-2">
@@ -703,7 +704,7 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
                 <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} data-testid={`stage-rule-save-${stage}`}>
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {t('common.save')}
               </Button>

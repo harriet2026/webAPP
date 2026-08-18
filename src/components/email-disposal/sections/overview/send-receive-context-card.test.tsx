@@ -41,6 +41,20 @@ vi.mock('../../lib/disposal-api', async () => {
   };
 });
 
+const RAW_HEADERS = [
+  'Received: from edge.example by mx.example with ESMTP',
+  'Received: from sender.example by edge.example with ESMTP',
+  'From: "Board Chair" <chair@example.org>',
+  'To: victim@company.com',
+  'Subject: =?UTF-8?B?UTLotKLliqHmiqXooag=?=',
+  'Date: Sun, 19 Jul 2026 23:58:00 +0000',
+  'Message-ID: <abc123@mail.company-security.com>',
+  'Return-Path: <bounce@company-security.com>',
+  'Reply-To: ceo@company-security.com',
+  'X-Mailer: Microsoft Outlook 16.0',
+  '',
+].join('\r\n');
+
 function baseDetail(overrides: Partial<MailLogDetail> = {}): MailLogDetail {
   return {
     id: 1,
@@ -62,6 +76,7 @@ function baseDetail(overrides: Partial<MailLogDetail> = {}): MailLogDetail {
     return_path: 'bounce@company-security.com',
     reply_to: 'ceo@company-security.com',
     x_mailer: 'Microsoft Outlook 16.0',
+    raw_headers: RAW_HEADERS,
     ptr_domain: 'mail.company-security.com',
     geo_asn: 12345,
     recipient_dispositions: [
@@ -162,22 +177,101 @@ describe('SendReceiveContextCard', () => {
     expect(row.textContent).toContain('20.0 KB');
   });
 
-  it('expands to show full info (Message-ID/Return-Path/PTR/ASN) and NOT TLS (B6/B7, §9-A)', () => {
-    renderCard(baseDetail());
+  // GT-12758：库里已有约 3.4 万条 action=reject 的存量行没有 recipient_dispositions
+  // （后端整封 reject 分支此前从不写），前端却拿处置记录的条数当「N 个收件人」，
+  // 于是详情页恒显示「0 个收件人」「暂无收件人处置记录」。后端补写只对新邮件
+  // 生效，存量行只能靠这一层回落：处置记录为空时改用 detail.recipients 渲染，
+  // 状态由整封 action/status 推导。
+  it('GT-12758: falls back to detail.recipients when recipient_dispositions is empty', () => {
+    renderCard(baseDetail({
+      recipients: ['rcpt@example.org'],
+      action: 'reject',
+      status: 'rejected',
+      recipient_dispositions: undefined,
+    }));
+    const row = screen.getByTestId('email-disposal-overview-context-recipient');
+    expect(row.textContent).toContain('rcpt@example.org');
+    expect(row.textContent).toContain(STATUS.rejected);
+    expect(row.textContent).not.toContain('0 个收件人');
+  });
+
+  it('GT-12758: multi-recipient fallback counts detail.recipients, not dispositions', () => {
+    renderCard(baseDetail({
+      recipients: ['a@example.org', 'b@example.org'],
+      action: 'reject',
+      status: 'rejected',
+      recipient_dispositions: [],
+    }));
+    const row = screen.getByTestId('email-disposal-overview-context-recipient');
+    expect(row.textContent).toContain('2 个收件人');
+    expect(row.textContent).toContain(`${STATUS.rejected}: 2`);
+    // B3 的 RecipientStatus 矩阵也要拿到回落出来的名单，不能再是空态。
+    expect(screen.getByText('a@example.org')).toBeInTheDocument();
+    expect(screen.getByText('b@example.org')).toBeInTheDocument();
+  });
+
+  // 回落只在处置记录为空时生效：有处置记录时行为完全不变（防止回落把真实
+  // 逐收件人状态盖掉）。
+  it('GT-12758: does NOT fall back when recipient_dispositions is present', () => {
+    renderCard(baseDetail({
+      recipients: ['victim@company.com', 'ghost@company.com'],
+    }));
+    const row = screen.getByTestId('email-disposal-overview-context-recipient');
+    expect(row.textContent).toContain('victim@company.com');
+    expect(row.textContent).toContain(STATUS.quarantined);
+    expect(row.textContent).not.toContain('ghost@company.com');
+  });
+
+  // status 缺失时按 action 推导（与后端 statusForAction 同表）。
+  it('GT-12758: derives the fallback status from action when status is empty', () => {
+    renderCard(baseDetail({
+      recipients: ['rcpt@example.org'],
+      action: 'discard',
+      status: '',
+      recipient_dispositions: undefined,
+    }));
+    const row = screen.getByTestId('email-disposal-overview-context-recipient');
+    expect(row.textContent).toContain(STATUS.discarded);
+  });
+
+  // GT-12966：必须展示 mail_log 持久化的信头原文，不能拿信封 sender /
+  // recipients 或网关 received_at 现场伪造 RFC From/To/Date。这里刻意让信封
+  // 收件人多一个 hidden 地址、From/Date 也与结构化字段不同，钉住数据真源。
+  it('GT-12966: expands to show persisted mail headers exactly and removes the old auth/network modules', () => {
+    renderCard(baseDetail({
+      recipients: ['victim@company.com', 'hidden-recipient@company.com'],
+      bcc: ['hidden-recipient@company.com'],
+    }));
     expect(screen.queryByTestId('email-disposal-overview-context-fullinfo')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
 
     const full = screen.getByTestId('email-disposal-overview-context-fullinfo');
-    expect(full.textContent).toContain('Message-ID: <abc123@mail.company-security.com>');
-    expect(full.textContent).toContain('Return-Path: bounce@company-security.com');
-    expect(full.textContent).toContain('Reply-To: ceo@company-security.com');
-    expect(full.textContent).toContain('X-Mailer: Microsoft Outlook 16.0');
-    expect(full.textContent).toContain('PTR: mail.company-security.com');
-    expect(full.textContent).toContain('ASN: AS12345');
+    expect(full.textContent).toContain('邮件头信息');
+    expect(full.textContent).not.toContain('身份验证详情');
+    expect(full.textContent).not.toContain('网络特征');
+    const headers = screen.getByTestId('email-disposal-overview-context-mail-headers');
+    expect(headers.textContent).toBe(RAW_HEADERS);
+    expect(headers.textContent).not.toContain('hidden-recipient@company.com');
+    expect(headers.textContent).not.toContain('attacker@evil.com');
+    expect(headers.textContent).not.toContain('2026-07-20 18:00:00');
+    expect(full.textContent).not.toContain('PTR');
+    expect(full.textContent).not.toContain('ASN');
     expect(full.textContent).not.toContain('TLS');
 
     fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
     expect(screen.queryByTestId('email-disposal-overview-context-fullinfo')).not.toBeInTheDocument();
+  });
+
+  it('GT-12966: shows an explicit unavailable state for legacy rows without persisted headers', () => {
+    renderCard(baseDetail({ raw_headers: undefined }));
+    fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
+    expect(screen.getByTestId('email-disposal-overview-context-mail-headers')).toHaveTextContent('邮件头信息不可用');
+  });
+
+  it('GT-12966: labels a bounded persisted header block as incomplete', () => {
+    renderCard(baseDetail({ raw_headers_truncated: true }));
+    fireEvent.click(screen.getByTestId('email-disposal-overview-context-expand-fullinfo'));
+    expect(screen.getByTestId('email-disposal-overview-context-mail-headers-truncated')).toHaveTextContent('以下内容不完整');
   });
 });

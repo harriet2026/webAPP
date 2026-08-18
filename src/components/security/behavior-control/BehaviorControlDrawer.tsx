@@ -51,6 +51,7 @@ import { simulateBehaviorControl } from '@/lib/behavior-control-simulator';
 import { createBehaviorControlSchema, getBehaviorControlPriorityRange } from './schema';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { parseMembers } from '@/lib/api/groups';
+import { parseRuleJson } from '@/lib/api/rule-json';
 import type { GroupType } from '@/types/groups';
 import type { RuleNode } from '@/types/unified-rules';
 
@@ -144,19 +145,15 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
     if (!groupsQuery.data) return [];
     return groupsQuery.data
       .filter((r) => {
-        if (!r.metadata) return false;
-        try {
-          const m = JSON.parse(r.metadata);
-          return m.group_type === groupType;
-        } catch { return false; }
+        // metadata 在真实 API 响应里是**对象**（后端 serializeRuleToMap 用
+        // json.RawMessage 内联下发），裸 JSON.parse 会抛错并被 catch 吞成
+        // false，等于把每个群组都判成"不匹配"，下拉恒空（GT-12717）。
+        const m = parseRuleJson(r.metadata);
+        return m?.group_type === groupType;
       })
       .map((r) => {
-        try {
-          const m = JSON.parse(r.metadata);
-          return { name: r.name, memberCount: m.member_count as number | undefined };
-        } catch {
-          return { name: r.name };
-        }
+        const m = parseRuleJson(r.metadata);
+        return { name: r.name, memberCount: m?.member_count as number | undefined };
       });
   }, [groupsQuery.data]);
 
@@ -172,13 +169,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
     }
     const rule = groupsQuery.data.find((r) => r.name === previewGroupName);
     if (!rule) return null;
-    let groupType = 'sender';
-    let totalCount = 0;
-    try {
-      const m = JSON.parse(rule.metadata);
-      groupType = m.group_type ?? 'sender';
-      totalCount = m.member_count ?? 0;
-    } catch { /* noop */ }
+    // 同上：metadata 运行时为对象，必须走容错解析（GT-12717）。
+    const m = parseRuleJson(rule.metadata);
+    const groupType = (m?.group_type as string | undefined) ?? 'sender';
+    const totalCount = (m?.member_count as number | undefined) ?? 0;
 
     // 成员名单从群组规则自身的 condition_tree 解析（与群组管理同一套 parseMembers），
     // 不再像原型那样按 member_count 造 user1@corp.com / 192.168.x.y 这类假数据。

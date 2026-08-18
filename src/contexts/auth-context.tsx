@@ -263,12 +263,14 @@ export function AuthProvider({
       }
     }
     if (!restoredStoredUser && demoAuthBypassEnabled) {
-      cachedTenantRef.current = null;
+      const demoTenantStr = localStorage.getItem('osgateway_selected_tenant');
+      const demoTenantId = demoTenantStr ? parseInt(demoTenantStr, 10) : null;
+      cachedTenantRef.current = demoTenantId;
       setState({
         user: DEMO_SUPER_ADMIN,
         token: null,
         expiresAt: null,
-        selectedTenantId: null,
+        selectedTenantId: demoTenantId,
       });
     }
     const storedFeatures = localStorage.getItem('osgateway_features');

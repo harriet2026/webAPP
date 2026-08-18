@@ -21,27 +21,8 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
-import type { DisplayStatus, DisposalMailItem } from '@/types/email-disposal';
-
-const STATUS_VARIANTS: Record<DisplayStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  rejected: 'destructive',
-  bounced: 'destructive',
-  discarded: 'outline',
-  quarantine_pending: 'destructive',
-  sideline_pending: 'secondary',
-  audit_pending: 'secondary',
-  delivering: 'secondary',
-  delivered: 'default',
-  partial_delivered: 'secondary',
-  delivery_failed: 'destructive',
-  recall_pending: 'secondary',
-  recall_success: 'default',
-  recall_failed: 'destructive',
-  partial_recall_success: 'secondary',
-  deleted: 'outline',
-  expired: 'outline',
-  reviewed_rejected: 'destructive',
-};
+import { DISPLAY_STATUS_VARIANTS as STATUS_VARIANTS } from '@/lib/display-status';
+import type { DisposalMailItem } from '@/types/email-disposal';
 
 const ACTION_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   accept: 'default',
@@ -145,9 +126,20 @@ export function SimilarResultsSheet({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs">
-                        <Badge variant={STATUS_VARIANTS[item.displayStatus] || 'outline'}>
-                          {t(`filters.statuses.${item.displayStatus}`)}
-                        </Badge>
+                        {/* GT-12782 Task 4：直读后端下发的 display_statuses。
+                            单元素 → 单徽章（现状）；多元素（mixed）→ 逐条带
+                            数量的徽章（此前 mixed 在抽屉里被压成一个整封状态，
+                            现在如实展示逐收件人分布）。 */}
+                        {(item.displayStatuses ?? []).length === 0 ? '—' : (
+                          <div className="flex flex-wrap items-center gap-1">
+                            {item.displayStatuses.map((entry) => (
+                              <Badge key={entry.status} variant={STATUS_VARIANTS[entry.status] || 'outline'}>
+                                {t(`filters.statuses.${entry.status}`)}
+                                {item.displayStatuses.length > 1 ? ` ${entry.count}` : ''}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

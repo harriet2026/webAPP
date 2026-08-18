@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { useScopedApiRequest } from '@/lib/api/client';
 import { getFieldDefinitions } from '@/lib/api/unified-rules';
+import { MultiSelectFilter } from '@/components/email-disposal/lib/multi-select-filter';
 import type { FieldDef, RuleNode } from '@/types/unified-rules';
 
 const NO_VALUE_OPERATORS = new Set(['isNull', 'isNotNull']);
@@ -47,6 +48,24 @@ const OPERATOR_LABEL_KEYS: Record<string, string> = {
 };
 
 const CATEGORY_ORDER = ['connection', 'mail_basic', 'attachment', 'security', 'behavior', 'other'];
+
+// field_registry 的 Label 是协议层英文兜底；产品界面按字段 key 使用当前 locale。
+// 覆盖 route 字段目录的完整集合，包含通常由固定表单接管、但可能因历史算子或重复
+// 条件而回落到「更多条件」中的字段。
+const ROUTE_FIELD_LABEL_KEYS = {
+  auth_user: 'fields.authUser',
+  cac_int_tag: 'fields.cacIntTag',
+  client_ip: 'fields.clientIp',
+  is_outbound: 'fields.isOutbound',
+  onercpt: 'fields.oneRecipient',
+  origin_kind: 'fields.originKind',
+  rcpt_count: 'fields.recipientCount',
+  recipient: 'fields.recipient',
+  recipient_domain: 'fields.recipientDomain',
+  sender: 'fields.sender',
+  sender_domain: 'fields.senderDomain',
+  senderdomain: 'fields.senderDomain',
+} as const;
 
 interface CompactConditionEditorProps {
   tenantId: number;
@@ -127,12 +146,18 @@ export function CompactConditionEditor({
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['unified-rule-field-definitions', 'data', 'mail_routing_outbound', tenantId],
-    queryFn: () => getFieldDefinitions('data', 'mail_routing_outbound', apiRequest),
+    // rule_class=route：出站路由规则是投递规则，条件字段必须收敛到写侧白名单，
+    // 否则选择器会提供保存时被 400 拒的字段（GT-12780）。
+    queryKey: ['unified-rule-field-definitions', 'data', 'mail_routing_outbound', 'route', tenantId],
+    queryFn: () => getFieldDefinitions('data', 'mail_routing_outbound', apiRequest, 'route'),
   });
 
   const fieldDefs = data?.fields ?? EMPTY_FIELD_DEFS;
   const excluded = useMemo(() => new Set(excludedFields), [excludedFields]);
+  const fieldLabel = (field: string, fallback: string) => {
+    const translationKey = ROUTE_FIELD_LABEL_KEYS[field as keyof typeof ROUTE_FIELD_LABEL_KEYS];
+    return translationKey ? ta(translationKey) : fallback;
+  };
 
   const selectableGroups = useMemo(() => {
     const groups = new Map<string, FieldOption[]>();
@@ -284,7 +309,7 @@ export function CompactConditionEditor({
                   <SelectGroup>
                     <SelectLabel>{t('currentField')}</SelectLabel>
                     <SelectItem value={node.field}>
-                      {def.label} <span className="ml-1 text-[10px] text-muted-foreground">({node.field})</span>
+                      {fieldLabel(node.field, def.label)} <span className="ml-1 text-[10px] text-muted-foreground">({node.field})</span>
                     </SelectItem>
                   </SelectGroup>
                 )}
@@ -293,7 +318,7 @@ export function CompactConditionEditor({
                     <SelectLabel>{t(`categories.${category}`)}</SelectLabel>
                     {options.map(({ key, def: optionDef }) => (
                       <SelectItem key={key} value={key}>
-                        {optionDef.label} <span className="ml-1 text-[10px] text-muted-foreground">({key})</span>
+                        {fieldLabel(key, optionDef.label)} <span className="ml-1 text-[10px] text-muted-foreground">({key})</span>
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -362,7 +387,50 @@ export function CompactConditionEditor({
               </Select>
             )}
 
-            {needsValue && def?.type !== 'boolean' && (
+            {/* 枚举字段（如 origin_kind 自产信类型，GT-12914）：within 用多选、
+                eq/ne 用单选，标签取后端下发的中文名，值存原始枚举值（换行分隔）。 */}
+            {needsValue && def?.type !== 'boolean' && def?.enum_values && def.enum_values.length > 0 && (
+              node.operator === 'within' ? (
+                <div className="min-w-[180px] flex-1">
+                  <MultiSelectFilter
+                    options={def.enum_values.map((e) => ({ value: e.value, label: e.label }))}
+                    value={(node.value ?? '')
+                      .split(/[\n,]/)
+                      .map((v) => v.trim())
+                      .filter(Boolean)}
+                    onChange={(next) => updateAt(index, { ...node, value: next.join('\n') })}
+                    placeholder={t('value')}
+                    selectedCountLabel={(count) => `${count}`}
+                    className="h-7 text-xs"
+                    triggerTestId={`mr-ob-rule-more-condition-value-${index}`}
+                  />
+                </div>
+              ) : (
+                <Select
+                  value={node.value || null}
+                  onValueChange={(v) => {
+                    if (v) updateAt(index, { ...node, value: v });
+                  }}
+                >
+                  <SelectTrigger
+                    className="h-7 min-w-[150px] flex-1 text-xs"
+                    aria-invalid={!node.value?.trim()}
+                    data-testid={`mr-ob-rule-more-condition-value-${index}`}
+                  >
+                    <SelectValue placeholder={t('value')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {def.enum_values.map((e) => (
+                      <SelectItem key={e.value} value={e.value}>
+                        {e.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )
+            )}
+
+            {needsValue && def?.type !== 'boolean' && (!def?.enum_values || def.enum_values.length === 0) && (
               <Input
                 className="h-7 min-w-[130px] flex-1 px-2 text-xs"
                 value={node.value ?? ''}

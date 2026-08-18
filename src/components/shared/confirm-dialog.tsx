@@ -37,14 +37,15 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent data-testid="confirm-dialog">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText || t('cancel')}</AlertDialogCancel>
+          <AlertDialogCancel data-testid="confirm-dialog-cancel">{cancelText || t('cancel')}</AlertDialogCancel>
           <AlertDialogAction
+            data-testid="confirm-dialog-confirm"
             onClick={onConfirm}
             className={
               variant === 'destructive' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''

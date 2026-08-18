@@ -141,6 +141,7 @@ export function DetectionLogTable({
         return (
           <button
             type="button"
+            data-testid={`phishing-log-expand-${row.original.sideline_id}`}
             className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={() => setExpanded((prev) => ({ ...prev, [row.original.sideline_id]: !isOpen }))}
           >
@@ -183,6 +184,7 @@ export function DetectionLogTable({
         return (
           <button
             type="button"
+            data-testid={`phishing-log-url-summary-${row.original.sideline_id}`}
             className="cursor-pointer text-left"
             aria-expanded={isOpen}
             aria-label={tpd('table.urlFindings')}
@@ -248,12 +250,19 @@ export function DetectionLogTable({
         const live = isLiveState(item.disposition);
         return (
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700" onClick={() => onOpenDetail(item.sideline_id)}>
+            <Button
+              data-testid={`phishing-log-detail-${item.sideline_id}`}
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700"
+              onClick={() => onOpenDetail(item.sideline_id)}
+            >
               {tpd('table.detail')}
             </Button>
             {isAdmin ? (
               <>
                 <Button
+                  data-testid={`phishing-log-block-${item.sideline_id}`}
                   variant="outline"
                   size="sm"
                   className="h-7 px-2 text-xs"
@@ -263,6 +272,7 @@ export function DetectionLogTable({
                   {tpd('table.block')}
                 </Button>
                 <Button
+                  data-testid={`phishing-log-exempt-${item.sideline_id}`}
                   variant="ghost"
                   size="sm"
                   className="h-7 px-2 text-xs"
@@ -293,7 +303,7 @@ export function DetectionLogTable({
           {tpd('table.truncatedBanner')}
         </div>
       ) : null}
-      <div className="overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-card shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+      <div className="overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-card shadow-[0_8px_24px_rgba(15,23,42,0.08)]" data-testid="phishing-log-table">
         <Table className="w-full min-w-[1220px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -324,9 +334,9 @@ export function DetectionLogTable({
                 const isOpen = !!expanded[row.original.sideline_id];
                 return (
                   <Fragment key={row.id}>
-                    <TableRow className="hover:bg-gray-50">
+                    <TableRow className="hover:bg-gray-50" data-testid={`phishing-log-row-${row.original.sideline_id}`}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-3 py-2.5 text-xs">
+                        <TableCell key={cell.id} className="px-3 py-2.5 text-xs" data-testid={`phishing-log-cell-${row.original.sideline_id}-${cell.column.id}`}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}

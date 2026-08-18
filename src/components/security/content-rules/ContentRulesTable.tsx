@@ -107,6 +107,7 @@ function displayScopes(scopes: ContentRuleScope[]): string[] {
   if (scopes.includes('header')) values.push('header');
   if (scopes.includes('attachment_names')) values.push('attachmentNames');
   if (scopes.includes('attachment_types')) values.push('attachmentTypes');
+  if (scopes.includes('attachment_hash')) values.push('attachmentHash');
   if (scopes.includes('urls')) values.push('urls');
   return values;
 }
@@ -185,7 +186,18 @@ export function ContentRulesTable({
       header: t('contentRules.ruleName'),
       cell: ({ row }) => (
         <div className="min-w-[180px] max-w-[280px]">
-          <div className="truncate font-medium">{row.original.rule.name}</div>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <div className="truncate font-medium">{row.original.rule.name}</div>
+            {row.original.resolved?.source === 'email_disposal_center' && (
+              <Badge
+                variant="outline"
+                className="shrink-0 border-blue-200 bg-blue-50 text-[10px] text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/20 dark:text-blue-300"
+                data-testid={`content-rule-source-email-disposal-${row.original.rule.id}`}
+              >
+                {t('contentRules.sourceEmailDisposal')}
+              </Badge>
+            )}
+          </div>
           <div className="truncate text-xs text-muted-foreground">
             {row.original.resolved?.match_content || row.original.rule.description || '—'}
           </div>
@@ -266,18 +278,29 @@ export function ContentRulesTable({
               variant="ghost"
               size="icon"
               aria-label={t('common.edit')}
+              data-testid={`content-rule-edit-${item.rule.id}`}
               onClick={() => item.is_complex ? onEditComplex(item.rule.id) : onEdit(item)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger
-                render={<Button variant="ghost" size="icon" aria-label={t('contentRules.moreOperations')} />}
+                render={(
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t('contentRules.moreOperations')}
+                    data-testid={`content-rule-more-${item.rule.id}`}
+                  />
+                )}
               >
                 <MoreHorizontal className="h-4 w-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem onClick={() => onToggle(item.rule.id, !item.rule.is_active)}>
+                <DropdownMenuItem
+                  data-testid={`content-rule-toggle-${item.rule.id}`}
+                  onClick={() => onToggle(item.rule.id, !item.rule.is_active)}
+                >
                   <Power />
                   {item.rule.is_active ? t('contentRules.disableRule') : t('contentRules.enableRule')}
                 </DropdownMenuItem>
@@ -286,7 +309,11 @@ export function ContentRulesTable({
                   {t('common.copy')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => onDelete(item)}>
+                <DropdownMenuItem
+                  variant="destructive"
+                  data-testid={`content-rule-delete-${item.rule.id}`}
+                  onClick={() => onDelete(item)}
+                >
                   <Trash2 />
                   {t('common.delete')}
                 </DropdownMenuItem>
@@ -308,6 +335,7 @@ export function ContentRulesTable({
       pageSize={pageSize}
       pageSizeOptions={[10, 20, 50, 100]}
       onPageSizeChange={onPageSizeChange}
+      rowTestId={(row) => `content-rule-row-${row.rule.id}`}
       noDataText={t('contentRules.noRules')}
       totalCount={totalCount}
       pageJumpLabel={t('contentRules.jumpToPage')}

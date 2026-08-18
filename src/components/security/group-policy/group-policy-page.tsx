@@ -52,7 +52,11 @@ export function GroupPolicyPage() {
   const { effectiveTenantId } = useTenant();
   const { isSystemAdmin, isTenantAdmin } = usePermission();
   const { apiRequest } = useApiRequest();
-  const { capabilities } = useProductForm();
+  // 群组策略规则卡片暂不对外露出：仅在产品形态切换器
+  // （OSGATEWAY_PRODUCT_FORM_SWITCHER=true，演示/开发环境）开启时渲染
+  // 卡片二「群组策略规则」，生产默认只保留「群组管理」
+  // （与高级过滤规则、仿冒/威胁回溯同一门控）。
+  const { capabilities, switcherEnabled } = useProductForm();
 
   const aiEnabled = !!capabilities?.ai;
   // Group management is tenant-owned in multi-tenant forms. The sidebar is
@@ -77,7 +81,8 @@ export function GroupPolicyPage() {
   const { data: policies, isLoading, isFetching, refetch } = useQuery<GroupPolicyRule[]>({
     queryKey: [...QUERY_KEY, effectiveTenantId],
     queryFn: () => listGroupPolicies(apiRequest),
-    enabled: !platformWithoutTenant,
+    // 卡片二被切换器隐藏时不再取数（该 query 只喂群组策略规则表）。
+    enabled: !platformWithoutTenant && switcherEnabled,
   });
 
   const deleteMutation = useMutation({
@@ -182,8 +187,10 @@ export function GroupPolicyPage() {
             variant="outline"
             data-testid="group-policy-refresh"
             onClick={() => {
-              // 页级刷新统一驱动两张卡片：策略列表 + 群组列表
-              refetch();
+              // 页级刷新统一驱动两张卡片：策略列表 + 群组列表。
+              // 卡片二被切换器隐藏时 query 已 disabled（refetch 会绕过
+              // enabled 强制拉取），此时跳过策略列表刷新。
+              if (switcherEnabled) refetch();
               queryClient.invalidateQueries({ queryKey: ['groups'] });
             }}
             disabled={isFetching}
@@ -198,7 +205,8 @@ export function GroupPolicyPage() {
         <GroupManagementPage />
       </PageSurface>
 
-      {/* 卡片二：群组策略规则 */}
+      {/* 卡片二：群组策略规则（OSGATEWAY_PRODUCT_FORM_SWITCHER 门控，暂不对外露出） */}
+      {switcherEnabled && (
       <PageSurface>
         <Card data-testid="group-policy-card">
           <CardHeader className="pb-3">
@@ -349,6 +357,7 @@ export function GroupPolicyPage() {
           </CardContent>
         </Card>
       </PageSurface>
+      )}
 
       <GroupPolicyDrawer
         open={drawerOpen}

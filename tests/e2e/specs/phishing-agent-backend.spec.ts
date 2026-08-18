@@ -15,6 +15,11 @@ import { test, expect } from '../fixtures/auth.fixture';
 import { createAuthenticatedClient } from '../fixtures/api.fixture';
 import { internalFetch } from '../helpers/internal-client';
 import { uniqueSuffix } from '../helpers/test-data';
+import {
+  deleteInvByTaskSQL,
+  invCreatedSQL,
+  invDoneSQL,
+} from '../helpers/inv-facts';
 
 const HMAC_SECRET = process.env.OSG_INTERNAL_HMAC_SECRET || 'test-hmac-secret-for-e2e';
 
@@ -142,14 +147,26 @@ test.describe('Phishing Detection Agent Backend', () => {
     // The screenshot proxy checks tenant ownership when X-Tenant-ID is present.
     const api = await createAuthenticatedClient(request);
     const tenantId = api.getTenantId();
-    const tenantSQL = tenantId != null ? `, tenant_id` : '';
-    const tenantVal = tenantId != null ? `, ${tenantId}` : '';
 
-    // Seed an investigation task so the screenshot proxy's task_id validation passes.
+    // Seed an investigation task so the screenshot proxy's task_id validation
+    // passes. 事件溯源(spec 修订 13):任务 = delivery_facts 的 inv_created +
+    // inv_done 两条事实,租户归属落在 created 的 payload.tenant_id。
     await seedSQL(
-      `INSERT INTO investigation_tasks ` +
-        `(id${tenantSQL}, type, status, trigger_type, source_type, source_id, target_type, target_ids_json, summary, risk_level, confidence, created_by) ` +
-        `VALUES ('${taskId}'${tenantVal}, 'phish_analysis', 'completed', 'api', 'manual', '${taskId}', 'mail', '[]'::jsonb, 'pw screenshot test', 'low', 0.1, 'pw-test')`,
+      invCreatedSQL(taskId, {
+        tenantId,
+        sourceType: 'manual',
+        sourceId: taskId,
+        triggerType: 'api',
+      }),
+    );
+    await seedSQL(
+      invDoneSQL(taskId, {
+        sourceType: 'manual',
+        sourceId: taskId,
+        summary: 'pw screenshot test',
+        riskLevel: 'low',
+        confidence: 0.1,
+      }),
     );
 
     try {
@@ -166,7 +183,7 @@ test.describe('Phishing Detection Agent Backend', () => {
       const body = await resp.body();
       expect(body.equals(pngBytes)).toBeTruthy();
     } finally {
-      await cleanupSQL(`DELETE FROM investigation_tasks WHERE id='${taskId}'`);
+      await cleanupSQL(deleteInvByTaskSQL(taskId));
     }
   });
 
@@ -190,16 +207,33 @@ test.describe('Phishing Detection Agent Backend', () => {
     try {
       // Seed sideline_item with matching tenant_id (reinjected_at NULL → visible in detection logs)
       await seedSQL(
-        `INSERT INTO sideline_items ` +
-          `(id${tidSQL}, message_id, sender, recipients, subject, storage_path, storage_node, direction, status, sidelined_at) ` +
-          `VALUES ('${itemId}'${tidVal}, '<${itemId}@e2e.test>', '${sender}', ARRAY['${rcpt}']::text[], '${subject}', 'blob/test/${itemId}.eml', 'antispam', 'receive', 'pending', NOW())`,
+        // 修订 14:旁路件是 mail_log 行上的投影列(中央 sideline_items 已删除)。
+        `INSERT INTO mail_log ` +
+          `(sideline_id${tidSQL}, message_id, sender, recipients, subject, storage_path, storage_node, storage_kind, direction, action, status, received_at, sideline_state, sidelined_at) ` +
+          `VALUES ('${itemId}'${tidVal}, '<${itemId}@e2e.test>', '${sender}', ARRAY['${rcpt}']::text[], '${subject}', 'blob/test/${itemId}.eml', 'antispam', 'sideline', 'receive', 'sideline', 'sidelined', NOW(), 'pending', NOW())`,
       );
 
-      // Seed investigation_task linked to the sideline item with matching tenant_id
+      // Seed 研判事实 linked to the sideline item with matching tenant_id
+      // (source_ref='sideline_item:<itemId>' 是检测日志的页面归属边界)。
       await seedSQL(
-        `INSERT INTO investigation_tasks ` +
-          `(id${tidSQL}, type, status, trigger_type, source_type, source_id, target_type, target_ids_json, summary, risk_level, confidence, result_json, steps_json, created_by) ` +
-          `VALUES ('${invId}'${tidVal}, 'phish_analysis', 'completed', 'api', 'sideline_item', '${itemId}', 'mail', '["${itemId}"]'::jsonb, 'pw test', 'high', 0.92, '{"verdict":"phishing_suspected","summary":"pw test"}'::jsonb, '[{"name":"llm_analysis","status":"completed"}]'::jsonb, 'pw-test')`,
+        invCreatedSQL(invId, {
+          tenantId,
+          sourceType: 'sideline_item',
+          sourceId: itemId,
+          triggerType: 'api',
+          targetIdsJson: JSON.stringify([itemId]),
+        }),
+      );
+      await seedSQL(
+        invDoneSQL(invId, {
+          sourceType: 'sideline_item',
+          sourceId: itemId,
+          summary: 'pw test',
+          riskLevel: 'high',
+          confidence: 0.92,
+          result: { verdict: 'phishing_suspected', summary: 'pw test' },
+          steps: [{ name: 'llm_analysis', status: 'completed' }],
+        }),
       );
 
       // GET detection logs filtered by the unique subject
@@ -218,8 +252,8 @@ test.describe('Phishing Detection Agent Backend', () => {
       expect(matched.risk_level).toBe('high');
       expect(matched.sender).toBe(sender);
     } finally {
-      await cleanupSQL(`DELETE FROM investigation_tasks WHERE id='${invId}'`);
-      await cleanupSQL(`DELETE FROM sideline_items WHERE id='${itemId}'`);
+      await cleanupSQL(deleteInvByTaskSQL(invId));
+      await cleanupSQL(`DELETE FROM mail_log WHERE sideline_id='${itemId}'`);
     }
   });
 

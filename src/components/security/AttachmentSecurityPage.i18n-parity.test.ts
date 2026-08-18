@@ -34,7 +34,7 @@ const required = [
     'isolateFallback', 'enable',
   ].map((key) => `imageDetect.${key}`),
   ...[
-    'detectPolicy', 'mode_none', 'mode_detectOnly', 'mode_deep', 'decryptFailAction', 'receiveDefault',
+    'detectPolicy', 'mode_none', 'mode_detectOnly', 'mode_deep', 'decryptFailAction',
     'passwordSources', 'extractFromBody', 'usePasswordBook', 'advancedOptions', 'recursiveDetectDepth',
     'markSuspicious',
   ].map((key) => `encrypted.${key}`),

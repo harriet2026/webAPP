@@ -4,9 +4,10 @@ import { waitForDataRow, findRowBySubject } from '../helpers/mail-list';
 
 const INGEST_URL = (process.env.INTERNAL_API_BASE_URL || 'https://localhost:18081') + '/internal/mail-logs/ingest';
 
-// A releasable row: 放行 is enabled only for displayStatus ∈
-// {quarantine_pending, sideline_pending, audit_pending} (mail-list-table.tsx
-// `canRelease`). seedMailLogs() only produces accept/delivered and
+// A releasable row: 放行 is enabled only when the backend display_statuses
+// list contains one of {quarantine_pending, sideline_pending, audit_pending}
+// (mail-list-table.tsx `canRelease`, GT-12782 Task 4 — the status is
+// backend-downlinked, the frontend derives nothing). seedMailLogs() only produces accept/delivered and
 // reject/rejected rows — none of them releasable — so the enablement test used
 // to depend on some *other* spec having left a quarantined row at the top of
 // the list. Seed and select our own row instead of trusting list order.

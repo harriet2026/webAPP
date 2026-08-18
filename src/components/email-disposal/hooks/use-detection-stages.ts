@@ -2,6 +2,16 @@ import { useMemo } from 'react';
 import type {
   MailLogDetail, DetectionStage, DetectionCheckItem, CheckStatus, FinalVerdict,
 } from '@/types/email-disposal-detail';
+import {
+  AGENT_PRESENTATIONS,
+  AGENT_PRESENTATION_ORDER,
+} from '@/lib/agent-center/presentation';
+
+const AI_AGENT_CHECKS = AGENT_PRESENTATION_ORDER.map((moduleKey) => ({
+  key: AGENT_PRESENTATIONS[moduleKey].pipelineKey,
+  pages: AGENT_PRESENTATIONS[moduleKey].requiredPages.map((item) => item.page),
+  moduleKey,
+}));
 
 const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: string[] }[] }[] = [
   { stage: 1, key: 'connection', checks: [
@@ -19,24 +29,22 @@ const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: st
   ]},
   { stage: 3, key: 'content', checks: [
     { key: 'attachmentSecurity', pages: ['attachment_security'] },
-    { key: 'urlProtection',      pages: ['url_protection'] },
+    { key: 'urlProtection',      pages: ['link_attachment_security'] },
     { key: 'contentRules',       pages: ['content_rules'] },
+    { key: 'intentEngine',       pages: ['intent_engine'] },
   ]},
   // GT-12575: 阶段4/5 顺序与安全策略流水线对齐（阶段4=智能分析、阶段5=综合，
   // 见 policyPipeline.stages 与 disposal-basis-config 的 stage 赋值）。非 AI
   // 形态过滤掉 ai 阶段后由消费方重编号（综合显示为阶段4），与策略页 F10 的
   // 「综合是阶段4还是阶段5取决于智能分析层是否展示」语义一致。
-  { stage: 4, key: 'ai', checks: [
-    { key: 'senderBehaviorAgent',     pages: [] },
-    { key: 'intentRecognitionAgent',  pages: [] },
-    { key: 'marketingEmailAgent',     pages: [] },
-    { key: 'phishingDetectionAgent',  pages: [] },
-    { key: 'retrospectiveAgent',      pages: [] },
-  ]},
+  // Keep the detail pipeline on the same three-agent catalog as Agent Center
+  // and the security-policy pipeline. The former five-item prototype list
+  // included agents that do not exist in the product and omitted spoofing.
+  { stage: 4, key: 'ai', checks: AI_AGENT_CHECKS },
   { stage: 5, key: 'comprehensive', checks: [
-    { key: 'intentEngine',        pages: ['intent_engine'] },
     { key: 'similarityDetection', pages: ['similar_detection'] },
     { key: 'advancedRules',       pages: ['advanced_rules'] },
+    { key: 'mailMarking',         pages: ['mail_marking'] },
   ]},
 ];
 
@@ -73,25 +81,47 @@ function checkStatus(ml: MailLogDetail, pages: string[]): { status: CheckStatus;
   return { status: 'pass', ruleIds: [] };
 }
 
-function aiCheckStatus(ml: MailLogDetail, key: string): { status: CheckStatus; ruleIds: number[] } {
-  const tag = (ml.cac_result?.tag ?? '').toLowerCase();
-  const intTag = ml.cac_result?.int_tag ?? 0;
-  if (key === 'intentRecognitionAgent') {
-    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [] };
-    if (intTag >= 5) return { status: 'threat', ruleIds: [] };
-    if (intTag >= 3) return { status: 'suspicious', ruleIds: [] };
-    return { status: 'pass', ruleIds: [] };
+function basisActionForPolicy(ml: MailLogDetail, policyKey: string): string | undefined {
+  if (ml.disposal_basis?.policy_key === policyKey) return ml.disposal_basis.action;
+  return ml.disposal_basis?.modules?.find((module) => module.policy_key === policyKey)?.action;
+}
+
+function aiCheckStatus(ml: MailLogDetail, key: string, pages: string[]): { status: CheckStatus; ruleIds: number[] } {
+  const projected = checkStatus(ml, pages);
+  if (projected.ruleIds.length > 0) return projected;
+
+  const policyKey = key === 'phishingAgent' ? 'AI-PHISH'
+    : key === 'spoofingAgent' ? 'AI-SPOOF'
+      : key === 'threatRetroAgent' ? 'AI-TRACE' : '';
+  const basisAction = policyKey ? basisActionForPolicy(ml, policyKey) : undefined;
+  if (basisAction !== undefined) {
+    return { status: basisAction === 'accept' ? 'pass' : 'threat', ruleIds: [] };
   }
-  if (key === 'phishingDetectionAgent') {
-    if (!ml.cac_result?.tag) return { status: 'skipped', ruleIds: [] };
-    return { status: tag.includes('phish') ? 'threat' : 'pass', ruleIds: [] };
+  if (key === 'phishingAgent' && ml.phish_agent_check) {
+    if (ml.phish_agent_check.status === 'pending' || ml.phish_agent_check.status === 'running') {
+      return { status: 'processing', ruleIds: [] };
+    }
+    if (ml.phish_agent_check.checked) {
+      const verdict = (ml.phish_agent_check.verdict ?? '').toLowerCase();
+      const risk = (ml.phish_agent_check.risk_level ?? '').toLowerCase();
+      return { status: verdict.includes('phish') || verdict === 'suspicious' || risk === 'high' ? 'threat' : 'pass', ruleIds: [] };
+    }
   }
   return { status: 'skipped', ruleIds: [] };
+}
+
+function mailMarkingStatus(ml: MailLogDetail, pages: string[]): { status: CheckStatus; ruleIds: number[] } {
+  const actionIds = rulesForPages(ml.matched_action_rule_pages, pages);
+  const tagIds = rulesForPages(ml.matched_tag_rule_pages, pages);
+  if (actionIds.length > 0) return { status: 'pass', ruleIds: actionIds };
+  if (tagIds.length > 0) return { status: 'pass', ruleIds: tagIds };
+  return { status: 'pass', ruleIds: [] };
 }
 
 function aggregate(checks: DetectionCheckItem[]): CheckStatus {
   if (checks.some((c) => c.status === 'threat')) return 'threat';
   if (checks.some((c) => c.status === 'suspicious')) return 'suspicious';
+  if (checks.some((c) => c.status === 'processing')) return 'processing';
   if (checks.some((c) => c.status === 'pass')) return 'pass';
   return 'skipped';
 }
@@ -100,8 +130,8 @@ export function buildDetectionStages(ml: MailLogDetail): DetectionStage[] {
   return STAGE_DEFS.map((def) => {
     const checks: DetectionCheckItem[] = def.checks.map((c) => {
       const { status, ruleIds } = def.key === 'ai'
-        ? aiCheckStatus(ml, c.key)
-        : checkStatus(ml, c.pages);
+        ? aiCheckStatus(ml, c.key, c.pages)
+        : c.key === 'mailMarking' ? mailMarkingStatus(ml, c.pages) : checkStatus(ml, c.pages);
       return { key: c.key, status, ruleIds };
     });
     if (def.key === 'identity') {

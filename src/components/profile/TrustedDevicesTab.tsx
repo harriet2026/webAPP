@@ -23,22 +23,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { useTrustedDevices, useRevokeTrustedDevice } from './api';
 import type { AdminTrustedDevice } from './types';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
-
-function formatTime(iso: string | undefined, locale: string): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  try {
-    return d.toLocaleString(locale === 'zh' ? 'zh-CN' : undefined);
-  } catch {
-    return d.toISOString();
-  }
-}
+import { formatTimestamp } from '@/lib/format-time';
 
 /**
  * TrustedDevicesTab — lists the caller's active "trust this device" cookies
@@ -52,7 +41,6 @@ export function TrustedDevicesTab() {
   const tc = useTranslations('common');
   const { data, isLoading } = useTrustedDevices();
   const revoke = useRevokeTrustedDevice();
-  const locale = useLocale();
 
   const [target, setTarget] = useState<AdminTrustedDevice | null>(null);
 
@@ -107,9 +95,9 @@ export function TrustedDevicesTab() {
                     <TableCell className="font-medium text-foreground">{d.device || '—'}</TableCell>
                     <TableCell className="text-muted-foreground">{d.browser || '—'}</TableCell>
                     <TableCell className="text-muted-foreground">{d.ip || '—'}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatTime(d.created_at, locale)}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatTime(d.last_used_at, locale)}</TableCell>
-                    <TableCell className="text-muted-foreground">{formatTime(d.expires_at, locale)}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatTimestamp(d.created_at) || '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatTimestamp(d.last_used_at) || '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatTimestamp(d.expires_at) || '—'}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

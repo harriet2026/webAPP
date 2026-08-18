@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import zh from '../../messages/zh.json';
 
 // GT-12237: 邮件状态筛选标签必须与 design/origin/spec/V2邮件状态机字典.md
-// 的状态机定义一致（rejected=拒收、bounced=已退信、sideline_pending=检测中、
+// 的状态机定义一致（rejected=拒收、delivery_failed=投递失败、sideline_pending=检测中、
 // audit_pending=待审核）。此前 UI 显示 已拒绝/退信/待审核/待审批，把旁路检测
 // 与人工审核语义混淆。
 describe('GT-12237 emailDisposal.filters.statuses 对齐 V2 状态机字典', () => {
@@ -14,8 +14,9 @@ describe('GT-12237 emailDisposal.filters.statuses 对齐 V2 状态机字典', ()
     expect(statuses.rejected).toBe('拒收');
   });
 
-  it('bounced 显示为「已退信」', () => {
-    expect(statuses.bounced).toBe('已退信');
+  it('GT-12955 将退信归并为「投递失败」', () => {
+    expect(statuses.delivery_failed).toBe('投递失败');
+    expect(statuses.bounced).toBeUndefined();
   });
 
   it('sideline_pending 显示为「检测中」（旁路深度分析，非人工审核）', () => {
@@ -79,28 +80,21 @@ describe('GT-12238 邮件类型筛选枚举包含八个类别', () => {
 });
 
 // GT-12237 补充：QC 报告"筛选项中没有检测中"。快捷筛选（quick-filters.tsx）
-// 与表头筛选（mail-list-table.tsx statusOptions）的状态枚举都必须包含
-// sideline_pending，否则即使 i18n 文案正确，"检测中"也不会出现在筛选下拉里。
+// 与表头筛选共用 DISPLAY_STATUSES，防止局部数组漂移。
 describe('GT-12237 状态筛选枚举包含 sideline_pending（检测中）', () => {
-  it('quick-filters 状态枚举含 sideline_pending', () => {
+  it('quick-filters 复用权威枚举', () => {
     const src = readFileSync(
       resolve(__dirname, '../../src/components/email-disposal/quick-filters.tsx'),
       'utf-8',
     );
-    const m = src.match(/const statuses = \[([\s\S]*?)\] as const/);
-    expect(m, '未找到 quick-filters statuses 枚举').toBeTruthy();
-    expect(m![1]).toContain('"sideline_pending"');
-    expect(m![1]).toContain('"audit_pending"');
+    expect(src).toContain('const statuses = DISPLAY_STATUSES');
   });
 
-  it('mail-list-table 表头筛选 statusOptions 含 sideline_pending', () => {
+  it('mail-list-table 表头筛选复用权威枚举', () => {
     const src = readFileSync(
       resolve(__dirname, '../../src/components/email-disposal/mail-list-table.tsx'),
       'utf-8',
     );
-    const m = src.match(/statusOptions: DisplayStatus\[\] = \[([\s\S]*?)\]/);
-    expect(m, '未找到 statusOptions 枚举').toBeTruthy();
-    expect(m![1]).toContain("'sideline_pending'");
-    expect(m![1]).toContain("'audit_pending'");
+    expect(src).toContain('const statusOptions = DISPLAY_STATUSES');
   });
 });

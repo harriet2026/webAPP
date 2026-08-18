@@ -127,7 +127,9 @@ const STRING_PATHS: string[][] = [
   ['emailDisposal', 'detail', 'analysis', 'status', 'pass'],
   ['emailDisposal', 'detail', 'analysis', 'status', 'skipped'],
   ['emailDisposal', 'detail', 'analysis', 'check', 'ipRateLimit'],
-  ['emailDisposal', 'detail', 'analysis', 'check', 'retrospectiveAgent'],
+  ['emailDisposal', 'detail', 'analysis', 'check', 'phishingAgent'],
+  ['emailDisposal', 'detail', 'analysis', 'check', 'spoofingAgent'],
+  ['emailDisposal', 'detail', 'analysis', 'check', 'threatRetroAgent'],
 
   // analysis.* -- genuinely NEW keys (DD-12, analysis-section.tsx)
   ['emailDisposal', 'detail', 'analysis', 'contentDetails'],
@@ -149,6 +151,14 @@ const STRING_PATHS: string[][] = [
   ['emailDisposal', 'detail', 'features', 'senderRecipientInfo'],
   ['emailDisposal', 'detail', 'features', 'urlDetection'],
   ['emailDisposal', 'detail', 'features', 'noData'],
+
+  // GT-12727：命中模块清单的新 key。i18n-literal-keys.test.ts 只查 zh/en，
+  // 漏掉 th/ru 时 next-intl 不报错、只把 key 原样渲染给用户；列进 STRING_PATHS
+  // 才拿到四语守卫。
+  ['emailDisposal', 'detail', 'features', 'hitModules'],
+  ['emailDisposal', 'detail', 'features', 'hitModulesHint'],
+  ['emailDisposal', 'detail', 'features', 'effectiveFor'],
+  ['emailDisposal', 'detail', 'features', 'matchedOnlyFor'],
   ['emailDisposal', 'detail', 'features', 'attachmentSecurity'],
   ['emailDisposal', 'detail', 'features', 'virusScan'],
   ['emailDisposal', 'detail', 'features', 'yes'],

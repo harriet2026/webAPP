@@ -48,6 +48,7 @@ interface ReclassifyDialogProps {
   // never combined whitelist with recall.
   showWhitelistOption?: boolean;
   action?: "release" | "recall";
+  mixedSelectionCount?: number;
 }
 
 export function ReclassifyDialog({
@@ -58,6 +59,7 @@ export function ReclassifyDialog({
   busy = false,
   showWhitelistOption = false,
   action,
+  mixedSelectionCount = 0,
 }: ReclassifyDialogProps) {
   const t = useTranslations("emailDisposal.detail.overview");
   const tDetail = useTranslations("emailDisposal.detail");
@@ -116,6 +118,14 @@ export function ReclassifyDialog({
             }
           >
             {tBatch(`${action}AuditHint`)}
+          </div>
+        )}
+        {action && mixedSelectionCount > 0 && (
+          <div
+            data-testid="disposal-mixed-selection-warning"
+            className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+          >
+            {tBatch("mixedSelectionWarning", { count: mixedSelectionCount })}
           </div>
         )}
         <div className="py-2">

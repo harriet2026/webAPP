@@ -17,10 +17,16 @@ import { ProtocolChecksSection } from './auth-spoofing/ProtocolChecksSection';
 import { SimilarDomainSection } from './auth-spoofing/SimilarDomainSection';
 import { DisplayNameSpoofSection } from './auth-spoofing/DisplayNameSpoofSection';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
+import { hasEmptyAuthSpoofingTag } from '@/lib/auth-spoofing-validation';
 
+// 后端响应到达前 / 后端漏发某个 key 时的兜底，逐项对齐 auth-spoofing-templates.ts
+// 的 standard 模板（也就是后端 defaultStandardConfig）。不对齐会让 mergeWithDefaults
+// 补出一个与任何模板都不等的值，页面回显立刻变成"自定义"。
+// 「允许」(accept) 已从本模块移除：每项检查都在跑，不拦截用「标记放行」表达。
 const DEFAULT_CONFIG: AuthSpoofingConfig = {
   format_checks: {
-    mailfrom_empty: { enabled: true, action: 'quarantine', observe_mode: false },
+    // MAIL FROM:<> 是退信/DSN 的合法用法，默认不得拦截。
+    mailfrom_empty: { enabled: true, action: 'mark-delivery', observe_mode: false },
     mailfrom_invalid: { enabled: true, action: 'reject', observe_mode: false },
     envelope_header_mismatch: { enabled: true, action: 'quarantine', observe_mode: false },
   },
@@ -30,24 +36,24 @@ const DEFAULT_CONFIG: AuthSpoofingConfig = {
     spf: {
       fail: { enabled: true, action: 'reject', observe_mode: false },
       softfail: { enabled: true, action: 'quarantine', observe_mode: false },
-      none: { enabled: true, action: 'audit', observe_mode: false },
-      temperror: { enabled: true, action: 'audit', observe_mode: false },
+      none: { enabled: true, action: 'mark-delivery', observe_mode: false },
+      temperror: { enabled: true, action: 'mark-delivery', observe_mode: false },
     },
     dkim: {
       fail: { enabled: true, action: 'quarantine', observe_mode: false },
       neutral: { enabled: true, action: 'quarantine', observe_mode: false },
-      partial: { enabled: false, action: 'accept', observe_mode: false },
-      none: { enabled: true, action: 'audit', observe_mode: false },
+      partial: { enabled: true, action: 'mark-delivery', observe_mode: false },
+      none: { enabled: true, action: 'mark-delivery', observe_mode: false },
     },
     dmarc: {
       reject: { enabled: true, action: 'reject', observe_mode: false },
       quarantine: { enabled: true, action: 'quarantine', observe_mode: false },
-      none: { enabled: true, action: 'audit', observe_mode: false },
+      none: { enabled: true, action: 'mark-delivery', observe_mode: false },
       no_record: { enabled: true, action: 'quarantine', observe_mode: false },
-      query_fail: { enabled: true, action: 'audit', observe_mode: false },
+      query_fail: { enabled: true, action: 'mark-delivery', observe_mode: false },
     },
     ptr: {
-      noptr: { enabled: true, action: 'audit', observe_mode: false },
+      noptr: { enabled: true, action: 'mark-delivery', observe_mode: false },
       nomatch: { enabled: true, action: 'quarantine', observe_mode: false },
       ehlo_mismatch: { enabled: true, action: 'quarantine', observe_mode: false },
     },
@@ -77,8 +83,12 @@ function mergeGroup(
   return { ...def, ...(got ?? {}) };
 }
 
-/** FORMAT_ACTIONS 的合法 action 集合。accept 已废弃 → 回落到 quarantine */
-const FORMAT_ACTION_SET = new Set(['quarantine', 'audit', 'reject', 'discard']);
+/**
+ * FORMAT_ACTIONS 的合法 action 集合，必须与 CheckItemRow 的 FORMAT_ACTIONS 保持一致，
+ * 否则下拉里能选到的值会在下次加载时被下面的归一化悄悄改写掉。
+ * accept 已废弃 → 回落到 quarantine。
+ */
+const FORMAT_ACTION_SET = new Set(['quarantine', 'audit', 'mark-delivery', 'reject', 'discard']);
 function normalizeFormatItem(item: CheckItem): CheckItem {
   return FORMAT_ACTION_SET.has(item.action) ? item : { ...item, action: 'quarantine' };
 }
@@ -158,12 +168,20 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
 
   const isChanged = JSON.stringify(localConfig) !== JSON.stringify(lastSavedConfig);
 
+  const handleSave = () => {
+    if (hasEmptyAuthSpoofingTag(localConfig)) {
+      toast.error(t('tagPanel.errorTagFieldRequired'));
+      return;
+    }
+    saveMutation.mutate(localConfig);
+  };
+
   const saveButton = (
     <Button
       type="button"
       data-testid="auth-spoofing-save"
       className="min-w-28"
-      onClick={() => saveMutation.mutate(localConfig)}
+      onClick={handleSave}
       disabled={isLoading || !isChanged || saveMutation.isPending}
     >
       {saveMutation.isPending ? (

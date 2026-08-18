@@ -20,6 +20,11 @@ import { test, expect } from '../fixtures/auth.fixture';
 import { internalFetch } from '../helpers/internal-client';
 import { getDefaultTenantId } from '../helpers/tenant';
 import { uniqueSuffix } from '../helpers/test-data';
+import {
+  deleteInvBySidelineSQL,
+  invCreatedSQL,
+  invDoneSQL,
+} from '../helpers/inv-facts';
 
 // ---------------------------------------------------------------------------
 // HMAC helpers for seeding test data via the internal SQL endpoint
@@ -225,21 +230,32 @@ test.describe('Phishing Detection Tab B — config', () => {
     const tidSQL = tenantId != null ? `, tenant_id` : '';
     const tidVal = tenantId != null ? `, ${tenantId}` : '';
     await seedSQL(
-      `INSERT INTO sideline_items ` +
-        `(id${tidSQL}, message_id, sender, recipients, subject, storage_path, storage_node, direction, status, sidelined_at) ` +
-        `VALUES ('${itemId}'${tidVal}, '<${itemId}@e2e.test>', '${sender}', ARRAY['rcpt@e2e.test']::text[], '${subject}', 'blob/test/${itemId}.eml', 'antispam', 'receive', 'pending', NOW())`,
+      // 修订 14:旁路件是 mail_log 行上的投影列(中央 sideline_items 已删除)。
+      `INSERT INTO mail_log ` +
+        `(sideline_id${tidSQL}, message_id, sender, recipients, subject, storage_path, storage_node, storage_kind, direction, action, status, received_at, sideline_state, sidelined_at) ` +
+        `VALUES ('${itemId}'${tidVal}, '<${itemId}@e2e.test>', '${sender}', ARRAY['rcpt@e2e.test']::text[], '${subject}', 'blob/test/${itemId}.eml', 'antispam', 'sideline', 'receive', 'sideline', 'sidelined', NOW(), 'pending', NOW())`,
     );
     // The phishing detection log is now scoped to sideline items that carry a
     // phish_analysis investigation (backend ddde95be "scope detection logs to
-    // phish tasks"): the page-membership boundary is
-    //   EXISTS(investigation_tasks WHERE source_type='sideline_item'
-    //          AND source_id=si.id AND type='phish_analysis').
-    // A bare sideline_items row therefore no longer renders a detection row, so
-    // seed the qualifying phish_analysis investigation too.
+    // phish tasks"). 事件溯源(spec 修订 13)后页面归属边界是
+    //   EXISTS(delivery_facts WHERE kind='inv_created'
+    //          AND event_source='phish_analysis'
+    //          AND source_ref='sideline_item:'||si.id)。
+    // A bare sideline projection row therefore no longer renders a detection row, so
+    // seed the qualifying phish_analysis 研判事实 too.
     await seedSQL(
-      `INSERT INTO investigation_tasks ` +
-        `(id${tidSQL}, type, status, trigger_type, source_type, source_id, target_type) ` +
-        `VALUES ('inv-${itemId}'${tidVal}, 'phish_analysis', 'completed', 'finding', 'sideline_item', '${itemId}', 'mail')`,
+      invCreatedSQL(`inv-${itemId}`, {
+        tenantId,
+        sourceType: 'sideline_item',
+        sourceId: itemId,
+        triggerType: 'finding',
+      }),
+    );
+    await seedSQL(
+      invDoneSQL(`inv-${itemId}`, {
+        sourceType: 'sideline_item',
+        sourceId: itemId,
+      }),
     );
 
     try {
@@ -273,8 +289,8 @@ test.describe('Phishing Detection Tab B — config', () => {
     // No raw i18n key should leak.
     expect(bodyText).not.toMatch(/phishingConfig\./);
     } finally {
-      await cleanupSQL(`DELETE FROM investigation_tasks WHERE source_id='${itemId}'`);
-      await cleanupSQL(`DELETE FROM sideline_items WHERE id='${itemId}'`);
+      await cleanupSQL(deleteInvBySidelineSQL(itemId));
+      await cleanupSQL(`DELETE FROM mail_log WHERE sideline_id='${itemId}'`);
     }
   });
 

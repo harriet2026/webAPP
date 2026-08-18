@@ -7,7 +7,7 @@
 // action / hit_values / detection_tags / per_recipient），由
 // types/email-disposal.ts 的 DisposalBasis 接口定义，此处仅引用之。
 
-import type { DisposalBasis } from '@/types/email-disposal';
+import type { DisposalBasis, DisposalBasisGroupSummary } from '@/types/email-disposal';
 
 export type { DisposalBasis };
 
@@ -84,6 +84,32 @@ const val = (v: HitValues | undefined, k: string, fallback = '-'): string => {
 export function isAllowList(v: HitValues | undefined): boolean {
   const t = String(v?.list_type ?? '').toLowerCase();
   return t === 'whitelist' || t === 'allowlist' || t === 'allow';
+}
+
+// 内容规则匹配方式 token → 四语标签。token 由后端产出（keyword/regex/
+// content_group），后端只发规范化 token 不发中文，文案映射是前端职责。
+function crMethodLabel(token: string, lang: DisposalLang): string {
+  const table: Record<string, Record<DisposalLang, string>> = {
+    keyword: { zh: '关键词', en: 'keyword', th: 'คำสำคัญ', ru: 'ключевому слову' },
+    regex: { zh: '正则表达式', en: 'regular expression', th: 'นิพจน์ทั่วไป', ru: 'регулярному выражению' },
+    content_group: { zh: '内容组', en: 'content group', th: 'กลุ่มเนื้อหา', ru: 'контентной группе' },
+  };
+  return table[token]?.[lang] ?? table[token]?.zh ?? '';
+}
+
+// 内容规则命中位置 token → 四语标签，覆盖 internal/api 的 validContentRuleScopes 全部项。
+function crPositionLabel(token: string, lang: DisposalLang): string {
+  const table: Record<string, Record<DisposalLang, string>> = {
+    subject: { zh: '主题', en: 'subject', th: 'หัวเรื่อง', ru: 'тема' },
+    header: { zh: '邮件头', en: 'header', th: 'ส่วนหัว', ru: 'заголовок' },
+    text_body: { zh: '纯文本正文', en: 'text body', th: 'เนื้อหาข้อความ', ru: 'текст письма' },
+    html_body: { zh: 'HTML 正文', en: 'HTML body', th: 'เนื้อหา HTML', ru: 'HTML-текст' },
+    attachment_names: { zh: '附件名称', en: 'attachment name', th: 'ชื่อไฟล์แนบ', ru: 'имя вложения' },
+    attachment_types: { zh: '附件类型', en: 'attachment type', th: 'ประเภทไฟล์แนบ', ru: 'тип вложения' },
+    attachment_hash: { zh: '附件哈希', en: 'attachment hash', th: 'แฮชไฟล์แนบ', ru: 'хеш вложения' },
+    urls: { zh: '链接', en: 'URL', th: 'ลิงก์', ru: 'ссылка' },
+  };
+  return table[token]?.[lang] ?? table[token]?.zh ?? token;
 }
 
 export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
@@ -584,7 +610,15 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleRu: 'Контентное правило',
     idPrefix: 'CR-',
     listSummary: (v, lang) => {
-      const mm = val(v, 'match_method', lang === 'zh' ? '关键词' : 'keyword');
+      const mm = crMethodLabel(val(v, 'match_method', ''), lang);
+      if (!mm) {
+        switch (lang) {
+          case 'en': return 'Matched content rule';
+          case 'th': return 'ตรงกับกฎเนื้อหา';
+          case 'ru': return 'Совпадение с контентным правилом';
+          default: return '命中内容规则';
+        }
+      }
       switch (lang) {
         case 'en': return `Matched ${mm}`;
         case 'th': return `ตรงกับ${mm}`;
@@ -593,14 +627,65 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       }
     },
     hitDetail: (v, lang) => {
-      const mp = val(v, 'match_position', lang === 'zh' ? '正文' : 'body');
-      const mm = val(v, 'match_method', lang === 'zh' ? '关键词' : 'keyword');
-      const mc = val(v, 'matched_content');
+      const method = val(v, 'match_method', '');
+      const content = val(v, 'match_content', '');
+      // content_group 编译成 rcpttags/hasTag，没有邮件内容意义上的命中位置，
+      // 走独立文案，不套"邮件 {位置} 匹配 {方式} {内容}"模板。
+      if (method === 'content_group') {
+        switch (lang) {
+          case 'en': return `Mail matched content group "${content}"`;
+          case 'th': return `อีเมลตรงกับกลุ่มเนื้อหา "${content}"`;
+          case 'ru': return `Письмо совпало с контентной группой "${content}"`;
+          default: return `邮件命中内容组 “${content}”`;
+        }
+      }
+
+      const mm = crMethodLabel(method, lang);
+      const positions = val(v, 'match_position', '').split(',').filter(Boolean);
+      const snippets = val(v, 'matched_content', '').split(' | ');
+
+      // GT-12727 §7.10.4：match_content 缺失时不得渲染出空引号（`匹配 关键词 ""`）
+      // —— 空洞占位与本工单要消灭的"可读的错误结论"同类。有内容才带引号。
+      const quoted = content ? (lang === 'zh' ? `“${content}”` : `"${content}"`) : '';
+      const withQuoted = (prefix: string) => (quoted ? `${prefix} ${quoted}` : prefix);
+
+      // 缺字段时不编造 —— 兜底成"正文/关键词/-"正是 GT-12727 这个 bug 的放大器。
+      if (positions.length === 0) {
+        if (!mm) {
+          switch (lang) {
+            case 'en': return 'Matched content rule';
+            case 'th': return 'ตรงกับกฎเนื้อหา';
+            case 'ru': return 'Совпадение с контентным правилом';
+            default: return '命中内容规则';
+          }
+        }
+        switch (lang) {
+          case 'en': return withQuoted(`Mail matched ${mm}`);
+          case 'th': return withQuoted(`อีเมลตรงกับ${mm}`);
+          case 'ru': return withQuoted(`Письмо совпало с ${mm}`);
+          default: return withQuoted(`邮件匹配 ${mm}`);
+        }
+      }
+
+      const posLabels = positions.map((p) => crPositionLabel(p, lang));
+      const detail = positions
+        .map((p, i) => (snippets[i] ? `${crPositionLabel(p, lang)}“${snippets[i]}”` : ''))
+        .filter(Boolean)
+        .join(lang === 'zh' ? '；' : '; ');
+
+      let head: string;
       switch (lang) {
-        case 'en': return `Mail ${mp} matched ${mm} ${mc}`;
-        case 'th': return `อีเมล${mp}ตรงกับ${mm} ${mc}`;
-        case 'ru': return `${mp} письма совпало с ${mm} ${mc}`;
-        default: return `邮件 ${mp} 匹配 ${mm} ${mc}`;
+        case 'en': head = withQuoted(`Mail ${posLabels.join(', ')} matched ${mm}`); break;
+        case 'th': head = withQuoted(`อีเมล ${posLabels.join('、')} ตรงกับ${mm}`); break;
+        case 'ru': head = withQuoted(`${posLabels.join(', ')} письма совпало с ${mm}`); break;
+        default: head = withQuoted(`邮件 ${posLabels.join('、')} 匹配 ${mm}`);
+      }
+      if (!detail) return head;
+      switch (lang) {
+        case 'en': return `${head}\nMatched: ${detail}`;
+        case 'th': return `${head}\nที่ตรงกัน: ${detail}`;
+        case 'ru': return `${head}\nСовпадение: ${detail}`;
+        default: return `${head}\n实际命中：${detail}`;
       }
     },
   },
@@ -882,6 +967,43 @@ export function formatHitDetail(basis: DisposalBasis, lang: DisposalLang = 'zh')
   return meta.hitDetail(hv, lang);
 }
 
+// GT-12727 spec §7.10.3：命中模块清单的**唯一**取数口径，兼容两种行格式。
+//
+//   新行：basis.modules 非空 —— 每条带 recipients / effective_for。
+//   老行：只有 basis.per_recipient —— 逐收件人各存一份（含 N 份重复），
+//         且**没有** effective_for。老的 per_recipient 全是各收件人的胜出者，
+//         若按 [] 处理会把每条都标成"命中但未生效"，直接违反 §7.9
+//         「两种行都渲染正确」。所以这里保持 effective_for 为 undefined
+//         （= 无归属信息，前端不打任何徽标），并按 (policy_key, rule_id, action)
+//         去重。
+export function resolveHitModules(basis?: DisposalBasis): DisposalBasis[] {
+  if (!basis) return [];
+  if (Array.isArray(basis.modules) && basis.modules.length > 0) {
+    return basis.modules;
+  }
+  const legacy = Array.isArray(basis.per_recipient) ? basis.per_recipient : [];
+  const seen = new Set<string>();
+  const out: DisposalBasis[] = [];
+  for (const item of legacy) {
+    if (!item) continue;
+    // 去重键必须带 rule_name：未映射页（如 ip_frequency）的 policy_key 与显示态
+    // rule_id **都是空串**，只用 (policy_key, rule_id, action) 会把两条不同的规则
+    // 坍缩成一条 —— 与后端 MF-3 同一个坑。前端拿不到数值 id，rule_name 是这里
+    // 唯一还能区分它们的字段。
+    const key = JSON.stringify([
+      item.policy_key ?? '', item.rule_id ?? '', item.action ?? '', item.rule_name ?? '',
+    ]);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    // 显式剥掉 recipients/effective_for：老格式没有归属信息，不得伪造。
+    const { recipients: _r, effective_for: _e, ...rest } = item;
+    void _r;
+    void _e;
+    out.push(rest);
+  }
+  return out;
+}
+
 // 详情页模块名。
 export function getModuleName(policyKey: string, lang: DisposalLang = 'zh'): string {
   const meta = DISPOSAL_POLICY_MAP[policyKey];
@@ -913,4 +1035,247 @@ export function groupDisposalModulesByStage(lang: DisposalLang = 'zh'): Disposal
     }
   }
   return groups;
+}
+
+// ============================================================================
+// GT-12935：群发邮件多处置依据分组（modules[] 为事实源）
+// ============================================================================
+
+export interface DisposalBasisRecipientGroup {
+  policyKey: string;
+  entries: DisposalBasis[];
+  recipientCount: number;
+  effectiveCount: number;
+  effectiveKnown: boolean;
+  matchesRootBasis: boolean;
+}
+
+function normalizedRecipient(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+export function recipientsOfBasisEntry(entry: DisposalBasis): string[] {
+  if (entry.recipients?.length) return entry.recipients;
+  return entry.recipient ? [entry.recipient] : [];
+}
+
+export type DisposalBasisRecipientState = 'effective' | 'hitOnly' | 'unknown';
+
+export function recipientBasisState(entry: DisposalBasis, recipient: string): DisposalBasisRecipientState {
+  if (entry.effective_for === undefined) return 'unknown';
+  const normalized = normalizedRecipient(recipient);
+  return entry.effective_for.some((item) => normalizedRecipient(item) === normalized)
+    ? 'effective'
+    : 'hitOnly';
+}
+
+export function groupRecipientBasisByPolicy(
+  basis: DisposalBasis | undefined,
+): DisposalBasisRecipientGroup[] {
+  if (!basis) return [];
+  // 列表单元格还要兼容只有根处置依据的历史行；详情页的“命中模块清单”则
+  // 必须继续只认 modules/per_recipient，不能把根依据伪装成一条模块明细。
+  const resolved = resolveHitModules(basis);
+  const entries = resolved.length > 0
+    ? resolved
+    : basis.policy_key
+      ? [basis]
+      : [];
+  const groups: DisposalBasisRecipientGroup[] = [];
+  for (const entry of entries) {
+    if (!entry.policy_key) continue;
+    let group = groups.find((candidate) => candidate.policyKey === entry.policy_key);
+    if (!group) {
+      group = {
+        policyKey: entry.policy_key,
+        entries: [],
+        recipientCount: 0,
+        effectiveCount: 0,
+        effectiveKnown: false,
+        matchesRootBasis: false,
+      };
+      groups.push(group);
+    }
+    group.entries.push(entry);
+  }
+
+  for (const group of groups) {
+    const recipients = new Set<string>();
+    const effective = new Set<string>();
+    for (const entry of group.entries) {
+      for (const recipient of recipientsOfBasisEntry(entry)) {
+        const normalized = normalizedRecipient(recipient);
+        if (normalized) recipients.add(normalized);
+      }
+      if (entry.effective_for !== undefined) {
+        group.effectiveKnown = true;
+        for (const recipient of entry.effective_for) {
+          const normalized = normalizedRecipient(recipient);
+          if (!normalized) continue;
+          effective.add(normalized);
+          recipients.add(normalized);
+        }
+      }
+    }
+    group.recipientCount = recipients.size;
+    group.effectiveCount = effective.size;
+    group.matchesRootBasis = group.entries.some((entry) =>
+      entry.policy_key === basis.policy_key &&
+      (!basis.rule_id || entry.rule_id === basis.rule_id),
+    );
+  }
+  return groups;
+}
+
+export interface DisposalBasisRuleRecipientGroup {
+  policyKey: string;
+  entry: DisposalBasis;
+  recipients: string[];
+}
+
+// 详情页群发分叉使用“最终生效依据”而不是所有命中模块：新数据只纳入
+// effective_for 非空的规则；明确未生效（[]）的模块仍保留在命中模块清单，
+// 但不能被描述成某个收件人的最终处置依据。旧数据没有归属三态，只能按历史
+// recipients/recipient 保守回落，并由规格明确标记边界。
+export function groupEffectiveRecipientBasisByRule(
+  basis: DisposalBasis | undefined,
+): DisposalBasisRuleRecipientGroup[] {
+  if (!basis) return [];
+  const modules = resolveHitModules(basis);
+  const groups: DisposalBasisRuleRecipientGroup[] = [];
+  const indexes = new Map<string, number>();
+
+  for (const entry of modules) {
+    if (!entry.policy_key) continue;
+    const recipients = entry.effective_for !== undefined
+      ? entry.effective_for
+      : recipientsOfBasisEntry(entry);
+    if (entry.effective_for !== undefined && recipients.length === 0) continue;
+    const key = JSON.stringify([
+      entry.policy_key,
+      entry.rule_id ?? '',
+      entry.action ?? '',
+      entry.rule_name ?? '',
+    ]);
+    const existingIndex = indexes.get(key);
+    if (existingIndex !== undefined) {
+      const existing = groups[existingIndex];
+      const seen = new Set(existing.recipients.map(normalizedRecipient));
+      for (const recipient of recipients) {
+        if (!seen.has(normalizedRecipient(recipient))) {
+          seen.add(normalizedRecipient(recipient));
+          existing.recipients.push(recipient);
+        }
+      }
+      continue;
+    }
+    indexes.set(key, groups.length);
+    groups.push({
+      policyKey: entry.policy_key,
+      entry,
+      recipients: [...recipients],
+    });
+  }
+
+  if (groups.length === 0 && basis.policy_key) {
+    groups.push({
+      policyKey: basis.policy_key,
+      entry: basis,
+      recipients: recipientsOfBasisEntry(basis),
+    });
+  }
+  return groups;
+}
+
+export function groupsFromSummaries(
+  basis: DisposalBasis | undefined,
+  summaries: DisposalBasisGroupSummary[] | undefined,
+): DisposalBasisRecipientGroup[] {
+  if (!summaries?.length) return groupRecipientBasisByPolicy(basis);
+  return summaries.map((summary) => ({
+    policyKey: summary.policy_key,
+    entries: summary.entries.map((entry) => ({
+      policy_key: summary.policy_key,
+      rule_name: entry.rule_name,
+      rule_id: entry.rule_id,
+      action: entry.action,
+      hit_values: entry.hit_values,
+      detection_tags: entry.detection_tags,
+    })),
+    recipientCount: summary.recipient_count,
+    effectiveCount: summary.effective_count,
+    effectiveKnown: summary.effective_known,
+    matchesRootBasis: summary.entries.some((entry) =>
+      summary.policy_key === basis?.policy_key &&
+      (!basis?.rule_id || entry.rule_id === basis.rule_id),
+    ),
+  }));
+}
+
+function groupMatchesHighlight(
+  group: DisposalBasisRecipientGroup,
+  highlightPolicyKeys?: string[],
+  highlightRuleIds?: string[],
+): boolean {
+  return Boolean(
+    highlightPolicyKeys?.includes(group.policyKey) ||
+    group.entries.some((entry) =>
+      Boolean(entry.rule_id && highlightRuleIds?.includes(entry.rule_id)),
+    ),
+  );
+}
+
+export function pickPrimaryBasisGroup(
+  groups: DisposalBasisRecipientGroup[],
+  highlightPolicyKeys?: string[],
+  highlightRuleIds?: string[],
+): DisposalBasisRecipientGroup | undefined {
+  if (groups.length === 0) return undefined;
+  if (highlightPolicyKeys?.length || highlightRuleIds?.length) {
+    const highlighted = groups.find((group) =>
+      groupMatchesHighlight(group, highlightPolicyKeys, highlightRuleIds),
+    );
+    if (highlighted) return highlighted;
+  }
+  return groups.find((group) => group.effectiveCount > 0)
+    ?? groups.find((group) => group.matchesRootBasis)
+    ?? groups[0];
+}
+
+export function sortBasisGroupsForTooltip(
+  groups: DisposalBasisRecipientGroup[],
+  highlightPolicyKeys?: string[],
+  highlightRuleIds?: string[],
+): DisposalBasisRecipientGroup[] {
+  if (!highlightPolicyKeys?.length && !highlightRuleIds?.length) return groups;
+  const highlighted = groups.filter((group) =>
+    groupMatchesHighlight(group, highlightPolicyKeys, highlightRuleIds),
+  );
+  const rest = groups.filter((group) =>
+    !groupMatchesHighlight(group, highlightPolicyKeys, highlightRuleIds),
+  );
+  return [...highlighted, ...rest];
+}
+
+export function formatMultiBasisListReason(
+  groups: DisposalBasisRecipientGroup[],
+  lang: DisposalLang = 'zh',
+  highlightPolicyKeys?: string[],
+  highlightRuleIds?: string[],
+): string {
+  const primary = pickPrimaryBasisGroup(groups, highlightPolicyKeys, highlightRuleIds);
+  if (!primary?.entries.length) return '';
+  const highlightedEntry = highlightRuleIds?.length
+    ? primary.entries.find((entry) =>
+        Boolean(entry.rule_id && highlightRuleIds.includes(entry.rule_id)))
+    : undefined;
+  const primaryText = formatListReason(highlightedEntry ?? primary.entries[0], lang);
+  if (groups.length <= 1) return primaryText;
+  const suffix: Record<DisposalLang, (count: number) => string> = {
+    zh: (count) => `等 ${count} 项`,
+    en: (count) => `and ${count} more`,
+    th: (count) => `และอีก ${count} รายการ`,
+    ru: (count) => `и еще ${count}`,
+  };
+  return `${primaryText} ${suffix[lang](groups.length)}`;
 }

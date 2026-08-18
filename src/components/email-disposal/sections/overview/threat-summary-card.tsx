@@ -10,20 +10,19 @@
 //   Row2 命中特征（A7/A8/A9/A10，inline label）-- SPF/DKIM/DMARC + 首次出现 +
 //        域名年龄（deriveDomainAge，值缺失/不够新时不渲染，后端暂无
 //        whois/RDAP 数据时优雅降级）+ 紧急
-//   Row3 AI判定依据（A11 restructure）-- 短判定文本（formatHitDetail /
-//        cac_result.description）内联可见（demo 无独立的 SSE 深度推理小节，
-//        这里与 demo 对齐：仅此一行）
-//   Row4 处置依据（A12，action 本地化，修复 G4：此前 getActionLabel 对
+//   Row3 处置依据（A12，action 本地化，修复 G4：此前 getActionLabel 对
 //        disposal_basis.action==="audit" 等值落回原始英文字符串）-- 阶段色点
 //        + 模块「规则名」+ 动作徽标 + 查看依据详情 链接，同一行内联展示
 
+import { useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import {
-  AlertTriangle, CheckCircle, Info, Pencil, ShieldAlert, Sparkles, XCircle, ArrowRight,
+  AlertTriangle, CheckCircle, Info, Layers, Pencil, ShieldAlert, Users, XCircle, ArrowRight,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
@@ -32,11 +31,15 @@ import {
   stripDetailPrefix, isNewSender, deriveConfidence, deriveHitSource, isSensitiveUrgent, deriveDomainAge,
 } from '../../lib/detail-helpers';
 import {
-  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, formatHitDetail, isStage1Policy, type DisposalLang,
+  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor,
+  groupRecipientBasisByPolicy, isStage1Policy, pickPrimaryBasisGroup,
+  recipientBasisState, recipientsOfBasisEntry, sortBasisGroupsForTooltip,
+  type DisposalLang,
 } from '../../lib/disposal-basis-config';
 import { useProductForm } from '@/contexts/product-form-context';
 import { SenderActions } from './sender-actions';
 import { SingleRecipientActions } from './single-recipient-actions';
+import { RecipientStatusBadges } from '../../components/recipient-status-badges';
 
 interface ThreatSummaryCardProps {
   detail: MailLogDetail;
@@ -199,65 +202,49 @@ export function ThreatSummaryCard({
   const t = useTranslations('emailDisposal.detail.overview'); // this card's own strings
   const tDetail = useTranslations('emailDisposal.detail'); // mailTypeConfig / correctionSourceLabelKey keys
   const tFeatures = useTranslations('emailDisposal.detail.features'); // shared disposal-basis strings (same source as analysis-section)
+  const tTable = useTranslations('emailDisposal.table');
   const locale = useLocale();
   const { viewer, capabilities } = useProductForm();
-  const isPlatformPolicyContext =
-    viewer === 'tenant' &&
-    capabilities?.multiTenant === true &&
-    isStage1Policy(detail.disposal_basis?.policy_key);
+  const isTenantPlatformViewer = viewer === 'tenant' && capabilities?.multiTenant === true;
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(locale as DisposalLang)
     ? (locale as DisposalLang)
     : 'zh';
 
   const typeCfg = detail.email_type ? mailTypeConfig[detail.email_type] : null;
 
-  // CONFIDENCE SOURCE FIX (A2): the real per-message confidence is the phish
-  // agent's own investigation score (phish_agent_check.confidence), not
-  // cac.prob -- see deriveConfidence's doc comment. G3: hitSource (blacklist/
-  // rule deterministic hits, e.g. disposal_basis.policy_key === 'SBL') is now
-  // wired via deriveHitSource, which itself defers to a real score when one
-  // is available -- see its doc comment for the exact priority order.
-  const confidence = deriveConfidence(detail.cac_result, deriveHitSource(detail), detail.phish_agent_check?.confidence);
+  // This overview value follows the intent engine's score. The phishing
+  // agent's independent confidence remains in its expandable analysis row.
+  const confidence = deriveConfidence(detail.cac_result, deriveHitSource(detail));
 
   // A9 域名年龄：仅在存在且够"新"（deriveDomainAge 的阈值判断）时才是一个命中
   // 特征，否则不渲染（后端暂无 whois/RDAP 数据，真实环境下这个字段本就缺席）。
   const domainAge = deriveDomainAge(detail);
 
-  // AI判定依据（inline，A11 restructure）：短判定文本默认可见，来源优先取
-  // disposal_basis 经统一规则字典渲染出的「命中」叙述（formatHitDetail，与
-  // analysis-section「处置依据」区块用的是同一份事实源，因此这里的文案与
-  // 下方安全分析里的「命中」行天然一致，不会出现两处对不上的判定依据），
-  // 缺失时退回 cac_result.description。完整 SSE 深度推理仍保留在下方可展开
-  // 区块（aiExpanded），不受这行是否有内容影响。
-  const stagePolicyMeta = detail.disposal_basis?.policy_key ? getPolicyMeta(detail.disposal_basis.policy_key) : undefined;
-  // 真实环境下，很多经 AI 智能体研判（旁路 sideline）的邮件没有 disposal_basis
-  // /cac_result（这两个字段来自规则命中链路），但 phish_agent_check 里带有智能体
-  // 自己的结论摘要（summary，如 "credential harvesting page detected"）。此时应
-  // 把这条真实结论作为「AI判定依据」内联显示，而不是让这行落空、只剩下方需手动
-  // 「生成 AI 推理」的 SSE 按钮——否则真实态的钓鱼邮件看起来比 demo「缺内容」。
-  const phishAgentInline = detail.phish_agent_check?.checked
-    ? (detail.phish_agent_check.summary || '')
-    : '';
-  // GT-12578：这一行的**标签必须跟着来源走**。此前它固定写「AI判定依据」，
-  // 而 fallback 链里的 cac_result.description 来自外部 CAC 反垃圾云查服务
-  // （internal/cac/client.go 的 CAC_PROT_DESC，典型值 "Check by predict
-  // engine"），与我们的 AI 智能体（phish_agent_check）无关——给云查的话贴 AI
-  // 标签是误标。同时把真实的智能体结论排到云查之前：两者都存在时应该显示
-  // 智能体自己的结论，而不是云查文案。
-  const inlineVerdict: { text: string; labelKey: 'aiJudgmentBasis' | 'cloudCheckBasis' } | null =
-    (detail.disposal_basis?.policy_key && formatHitDetail(detail.disposal_basis, disposalLang))
-      ? { text: formatHitDetail(detail.disposal_basis, disposalLang), labelKey: 'aiJudgmentBasis' }
-      : phishAgentInline
-        ? { text: phishAgentInline, labelKey: 'aiJudgmentBasis' }
-        : detail.cac_result?.description
-          ? { text: detail.cac_result.description, labelKey: 'cloudCheckBasis' }
-          : null;
+  const basisGroups = useMemo(() => groupRecipientBasisByPolicy(detail.disposal_basis), [detail.disposal_basis]);
+  const primaryBasisGroup = pickPrimaryBasisGroup(basisGroups);
+  const primaryBasisEntry = primaryBasisGroup?.entries.find((entry) =>
+    entry.policy_key === detail.disposal_basis?.policy_key &&
+    (!detail.disposal_basis?.rule_id || entry.rule_id === detail.disposal_basis.rule_id),
+  ) ?? primaryBasisGroup?.entries[0];
+  const isMultiBasis = basisGroups.length > 1;
+  const orderedBasisGroups = isMultiBasis ? sortBasisGroupsForTooltip(basisGroups) : [];
+  const isPlatformPolicyContext = isTenantPlatformViewer && isStage1Policy(primaryBasisEntry?.policy_key);
+  const stagePolicyMeta = primaryBasisEntry?.policy_key ? getPolicyMeta(primaryBasisEntry.policy_key) : undefined;
 
   return (
     <div
       className="rounded-lg border bg-muted/30 p-4 space-y-3"
       data-testid="email-disposal-overview-threat-card"
     >
+      {/* origin GT-12946：群发结果摘要保持在威胁摘要卡首行；具体操作仍在
+          下方收件人矩阵执行，这里只复用同一聚类组件展示结果分布。 */}
+      {!isSingleRecipient && detail.recipient_dispositions && detail.recipient_dispositions.length > 0 && (
+        <div className="flex items-center gap-2 text-sm" data-testid="email-disposal-overview-recipient-outcomes">
+          <span className="shrink-0 font-medium text-muted-foreground">{t('recipientOutcomeLabel')}：</span>
+          <RecipientStatusBadges dispositions={detail.recipient_dispositions} />
+        </div>
+      )}
+
       {/* Row 1: 邮件类型（A1）+ 置信度（A2）+ 已纠正（A3）  |  头部处置按钮组（A4/A5/A6） */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -273,7 +260,7 @@ export function ThreatSummaryCard({
             <span className="text-xs text-muted-foreground" data-testid="email-disposal-overview-confidence">
               {confidence.kind === 'blacklist' && t('confidenceBlacklist')}
               {confidence.kind === 'rule' && t('confidenceRule')}
-              {confidence.kind === 'score' && t('confidenceScore', { pct: confidence.pct ?? 0 })}
+              {confidence.kind === 'score' && t('confidenceScore', { score: confidence.score ?? 0 })}
             </span>
           )}
           {detail.email_type_overridden && typeCfg && (
@@ -299,8 +286,8 @@ export function ThreatSummaryCard({
 
         <div className="flex flex-wrap items-center gap-2">
           {/* G1 (v2 html_spec §②): header button order is dispose-actions
-              FIRST (投递·隔离·阻断·丢弃), THEN sender/more (发信人加黑/加白/
-              更多) -- 隔离/阻断 stay omitted per spec §9. Task 11b:
+              FIRST (投递·隔离·阻断·丢弃), THEN sender actions (发信人加黑/加白)
+              -- 隔离/阻断 stay omitted per spec §9. Task 11b:
               single-recipient deliver/discard/recall/notify buttons reuse
               the SAME dispatch hook as the multi-recipient matrix
               (RecipientStatus). Renders nothing for a multi-recipient
@@ -339,18 +326,7 @@ export function ThreatSummaryCard({
         {isSensitiveUrgent(detail) && <UrgentBadge t={t} />}
       </div>
 
-      {/* Row 3: AI判定依据（A11 restructure）-- 短判定文本内联展示，来源见
-          上方 aiInlineText 注释。demo 无独立的 SSE 深度推理小节，此处与 demo
-          对齐：仅此一行，不再有可展开的「AI 深度推理」区块。 */}
-      {inlineVerdict && (
-        <div className="flex items-start gap-2 border-t pt-3 text-sm">
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-600" />
-          <span className="shrink-0 font-semibold text-muted-foreground">{t(inlineVerdict.labelKey)}：</span>
-          <p className="flex-1 text-muted-foreground">{inlineVerdict.text}</p>
-        </div>
-      )}
-
-      {/* Row 4: 处置依据（A12）-- 现在是卡片内的一行内联展示（此前是卡片内
+      {/* Row 3: 处置依据（A12）-- 现在是卡片内的一行内联展示（此前是卡片内
           另起一个独立橙色边框/背景的子块，视觉上像"卡中卡"），阶段色点
           （getStageColor）+ 模块名 +「规则名」+ 动作徽标（getActionLabel/
           getActionColor，修复 G4：此前对 disposal_basis.action==="audit" 等
@@ -362,7 +338,7 @@ export function ThreatSummaryCard({
           mail_marking（接收标记）这类不参与 disposal_basis 合成的规则，
           命中后处置依据处什么都看不到——尽管规则名早已由 decision.go 写进
           mail_log.reason。html-spec 对该卡片的规定也是「常显」。 */}
-      {!detail.disposal_basis?.policy_key && detail.reason && (
+      {basisGroups.length === 0 && detail.reason && (
         <div
           className="flex flex-wrap items-start gap-2 border-t pt-3 text-sm"
           data-testid="email-disposal-overview-disposal-basis"
@@ -373,7 +349,7 @@ export function ThreatSummaryCard({
         </div>
       )}
 
-      {detail.disposal_basis?.policy_key && (
+      {primaryBasisEntry?.policy_key && (
         <div
           className="flex flex-wrap items-center gap-2 border-t pt-3 text-sm"
           data-testid="email-disposal-overview-disposal-basis"
@@ -387,16 +363,79 @@ export function ThreatSummaryCard({
             </span>
           ) : (
             <span className="font-medium text-foreground">
-              {getModuleName(detail.disposal_basis.policy_key, disposalLang) || detail.disposal_basis.policy_key}
-              {detail.disposal_basis.rule_name && detail.disposal_basis.rule_name !== '—' && (
-                <span className="font-normal text-muted-foreground">「{detail.disposal_basis.rule_name}」</span>
+              {getModuleName(primaryBasisEntry.policy_key, disposalLang) || primaryBasisEntry.policy_key}
+              {primaryBasisEntry.rule_name && primaryBasisEntry.rule_name !== '—' && (
+                <span className="font-normal text-muted-foreground">「{primaryBasisEntry.rule_name}」</span>
               )}
             </span>
           )}
-          {detail.disposal_basis.action && (
-            <span className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(detail.disposal_basis.action))}>
-              {getActionLabel(detail.disposal_basis.action, disposalLang)}
+          {primaryBasisEntry.action && (
+            <span className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(primaryBasisEntry.action))}>
+              {getActionLabel(primaryBasisEntry.action, disposalLang)}
             </span>
+          )}
+          {isMultiBasis && (
+            <Popover>
+              <PopoverTrigger
+                data-testid="email-disposal-overview-disposal-basis-more"
+                render={
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 rounded-full border border-violet-300 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300"
+                  />
+                }
+              >
+                <Layers className="h-3 w-3" />
+                {t('multiBasisCount', { n: basisGroups.length - 1 })}
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  {t('multiBasisPopoverTitle', { count: basisGroups.length })}
+                </div>
+                <div className="max-h-72 space-y-2 overflow-y-auto text-xs">
+                  {orderedBasisGroups.map((group) => {
+                    const isPlatformGroup = isTenantPlatformViewer && isStage1Policy(group.policyKey);
+                    const moduleLabel = isPlatformGroup
+                      ? tFeatures('platformPolicyListReason')
+                      : getModuleName(group.policyKey, disposalLang);
+                    return (
+                      <div key={group.policyKey}>
+                        <div className="font-medium text-foreground">
+                          {tTable('disposalBasisGroupHeader', { module: moduleLabel, count: group.recipientCount })}
+                        </div>
+                        <ul className="mt-0.5 space-y-0.5 text-muted-foreground">
+                          {group.entries.flatMap((entry, entryIndex) => {
+                            const recipients = recipientsOfBasisEntry(entry);
+                            const visibleRecipients = recipients.length > 0 ? recipients : ['—'];
+                            return visibleRecipients.map((recipient, recipientIndex) => {
+                              const state = recipient === '—' ? 'unknown' : recipientBasisState(entry, recipient);
+                              const stateLabel = tTable(`disposalBasisState.${state}`);
+                              return (
+                                <li key={`${entry.rule_id ?? entryIndex}-${recipient}-${recipientIndex}`}>
+                                  {isPlatformGroup
+                                    ? tTable('disposalBasisPlatformRuleLine', {
+                                        recipient,
+                                        policyLabel: tFeatures('platformPolicyListReason'),
+                                        state: stateLabel,
+                                      })
+                                    : tTable('disposalBasisRuleLine', {
+                                        recipient,
+                                        ruleName: entry.rule_name || '—',
+                                        ruleId: entry.rule_id || '—',
+                                        state: stateLabel,
+                                      })}
+                                </li>
+                              );
+                            });
+                          })}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
           {onViewBasis && (
             <InteractiveSurface asChild variant="text" className="ml-auto shrink-0 text-primary data-[hovered=true]:text-primary/80">

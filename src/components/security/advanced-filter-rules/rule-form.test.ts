@@ -64,15 +64,6 @@ describe('emptyRuleForm', () => {
     expect(f.primaryAction).toBe('none');
   });
 
-  it('block defaults', () => {
-    expect(f.actionParams.block).toEqual({
-      smtpCode: '550',
-      responseText: '5.7.1 Message rejected due to content policy',
-      tarpit: false,
-      tarpitSeconds: 5,
-    });
-  });
-
   it('review defaults', () => {
     expect(f.actionParams.review).toEqual({ reviewers: '', timeoutHours: 24 });
   });
@@ -129,38 +120,6 @@ describe('formToCreateRequest — basic mapping', () => {
     const req = formToCreateRequest(f, fieldDefs);
     expect(req.action).toBeUndefined();
     expect((req.metadata as Record<string, unknown>).primary_action).toBe('none');
-  });
-
-  it('primaryAction block → action "reject" + primary_action_params snake_case', () => {
-    const f: RuleForm = {
-      ...emptyRuleForm(),
-      conditions: leafConditions(),
-      primaryAction: 'block',
-      actionParams: {
-        ...emptyRuleForm().actionParams,
-        block: { smtpCode: '554', responseText: 'go away', tarpit: true, tarpitSeconds: 12 },
-      },
-    };
-    const req = formToCreateRequest(f, fieldDefs);
-    expect(req.action).toBe('reject');
-    expect((req.metadata as Record<string, unknown>).primary_action_params).toEqual({
-      smtp_code: 554,
-      response_text: 'go away',
-      tarpit_enabled: true,
-      tarpit_seconds: 12,
-    });
-  });
-
-  it('block with tarpit disabled omits tarpit_seconds', () => {
-    const f: RuleForm = {
-      ...emptyRuleForm(),
-      conditions: leafConditions(),
-      primaryAction: 'block',
-    };
-    const req = formToCreateRequest(f, fieldDefs);
-    const params = (req.metadata as Record<string, unknown>).primary_action_params as Record<string, unknown>;
-    expect(params.tarpit_enabled).toBe(false);
-    expect(params.tarpit_seconds).toBeUndefined();
   });
 
   it('primaryAction deliver → action "accept" + skip_subsequent', () => {
@@ -310,12 +269,12 @@ describe('formToCreateRequest — addons', () => {
 
 describe('formToUpdateRequest', () => {
   it('mirrors formToCreateRequest but has no rule_class field', () => {
-    const f: RuleForm = { ...emptyRuleForm(), name: 'edited', conditions: leafConditions(), primaryAction: 'block' };
+    const f: RuleForm = { ...emptyRuleForm(), name: 'edited', conditions: leafConditions(), primaryAction: 'discard' };
     const req = formToUpdateRequest(f, fieldDefs);
     expect((req as Record<string, unknown>).rule_class).toBeUndefined();
     expect(req.name).toBe('edited');
-    expect(req.action).toBe('reject');
-    expect((req.metadata as Record<string, unknown>).primary_action).toBe('block');
+    expect(req.action).toBe('discard');
+    expect((req.metadata as Record<string, unknown>).primary_action).toBe('discard');
     expect(req.page).toBe('advanced_rules');
   });
 });
@@ -323,7 +282,7 @@ describe('formToUpdateRequest', () => {
 describe('ruleToForm', () => {
   it('reads basic fields back from a Rule', () => {
     const rule = baseRule({
-      name: 'incoming block',
+      name: 'incoming rule',
       priority: 33,
       is_active: false,
       description: 'desc',
@@ -336,31 +295,12 @@ describe('ruleToForm', () => {
       }),
     });
     const f = ruleToForm(rule);
-    expect(f.name).toBe('incoming block');
+    expect(f.name).toBe('incoming rule');
     expect(f.priority).toBe(33);
     expect(f.enabled).toBe(false);
     expect(f.description).toBe('desc');
     expect(f.validUntil).toBe('2026-12-31');
     expect(f.scope).toEqual(['incoming']);
-  });
-
-  it('parses block primary_action_params back into actionParams.block', () => {
-    const rule = baseRule({
-      metadata: JSON.stringify({
-        feature: 'advanced_rules',
-        scope: ['incoming', 'outgoing', 'internal'],
-        primary_action: 'block',
-        primary_action_params: { smtp_code: 554, response_text: 'nope', tarpit_enabled: true, tarpit_seconds: 9 },
-      }),
-    });
-    const f = ruleToForm(rule);
-    expect(f.primaryAction).toBe('block');
-    expect(f.actionParams.block).toEqual({
-      smtpCode: '554',
-      responseText: 'nope',
-      tarpit: true,
-      tarpitSeconds: 9,
-    });
   });
 
   it('parses review_params back into actionParams.review (reviewers array → comma string)', () => {
@@ -453,24 +393,24 @@ describe('round trip: ruleToForm(formToCreateRequest-shaped Rule) ≈ original f
     };
   }
 
-  it('block action round-trips', () => {
+  it('discard action round-trips', () => {
     const f: RuleForm = {
       ...emptyRuleForm(),
-      name: 'rt-block',
+      name: 'rt-discard',
       conditions: leafConditions(),
-      primaryAction: 'block',
+      primaryAction: 'discard',
       scope: ['incoming', 'internal'],
       actionParams: {
         ...emptyRuleForm().actionParams,
-        block: { smtpCode: '552', responseText: 'blocked', tarpit: true, tarpitSeconds: 20 },
+        discard: { logEnabled: false, silent: true, notifyAdmin: true },
       },
     };
     const req = formToCreateRequest(f, fieldDefs);
     const back = ruleToForm(requestToFakeRule(req));
     expect(back.name).toBe(f.name);
-    expect(back.primaryAction).toBe('block');
+    expect(back.primaryAction).toBe('discard');
     expect(back.scope).toEqual(f.scope);
-    expect(back.actionParams.block).toEqual(f.actionParams.block);
+    expect(back.actionParams.discard).toEqual(f.actionParams.discard);
     // Leaf `id` is an ephemeral UI key regenerated by deserializeGroups, not
     // part of the wire protocol — compare everything else.
     const withoutId = (leaves: RuleForm['conditions']['all']) =>

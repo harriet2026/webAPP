@@ -99,7 +99,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="flex h-[92vh] w-[96vw] max-w-[96vw] flex-col overflow-hidden p-0 sm:max-w-[96vw] lg:h-[94vh] lg:w-[92vw] lg:max-w-[92vw] 2xl:w-[88rem] 2xl:max-w-[88rem]">
+        <DialogContent data-testid="email-log-detail-modal" className="flex h-[92vh] w-[96vw] max-w-[96vw] flex-col overflow-hidden p-0 sm:max-w-[96vw] lg:h-[94vh] lg:w-[92vw] lg:max-w-[92vw] 2xl:w-[88rem] 2xl:max-w-[88rem]">
           <DialogHeader className="shrink-0 border-b border-border/70 px-6 py-5">
             <DialogTitle>{t('logs.emailDetail')}</DialogTitle>
           </DialogHeader>
@@ -111,7 +111,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
             <Tabs defaultValue="info" className="min-h-0 flex-1 px-6 py-5">
               <TabsList className="w-full justify-start overflow-x-auto">
                 <TabsTrigger value="info">{t('logs.basicInfo')}</TabsTrigger>
-                <TabsTrigger value="rules">{t('logs.ruleMatches')}</TabsTrigger>
+                <TabsTrigger value="rules" data-testid="email-log-detail-tab-rules">{t('logs.ruleMatches')}</TabsTrigger>
                 <TabsTrigger value="content">{t('logs.content')}</TabsTrigger>
                 <TabsTrigger value="attachments">{t('logs.attachments')}</TabsTrigger>
                 <TabsTrigger value="delivery">{t('logs.delivery')}</TabsTrigger>
@@ -237,7 +237,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                 </div>
                 <div className="min-w-0 rounded-2xl border border-border/60 bg-muted/20 p-4">
                   <label className="text-sm text-muted-foreground">{t('logs.action')}</label>
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5" data-testid="email-log-detail-action">
                     {(() => {
                       const a = email.action || '';
                       if (a.toLowerCase() !== 'mixed') {
@@ -334,7 +334,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
 
               <TabsContent value="rules" className="min-h-0">
                 <ScrollArea className="h-[calc(92vh-13rem)] pr-2">
-                <div className="space-y-4 pb-1">
+                <div className="space-y-4 pb-1" data-testid="email-log-detail-rules">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">{t('logs.matchedTagRules')}</label>
                   {email.matched_tag_rules && Object.keys(email.matched_tag_rules).length > 0 ? (

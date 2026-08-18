@@ -61,23 +61,24 @@ test.describe('Delivery Traffic html_spec alignment (mock runtime)', () => {
     }
 
     const expectations = {
-      all: ['延迟投递', '取消'],
-      receive: ['用户不存在', '邮箱已满'],
-      send: ['目标拒绝', 'DNS失败', 'RBL拦截'],
-      internal: ['内部垃圾', '内部钓鱼', '内部病毒'],
+      all: { visible: ['检测中', '取消'], hidden: [] },
+      receive: { visible: ['检测中'], hidden: ['用户不存在', '邮箱已满'] },
+      send: { visible: ['检测中'], hidden: ['目标拒绝', 'DNS失败', 'RBL拦截'] },
+      internal: { visible: [], hidden: ['内部垃圾', '内部钓鱼', '内部病毒'] },
     } as const;
 
-    for (const [direction, headers] of Object.entries(expectations)) {
+    for (const [direction, { visible, hidden }] of Object.entries(expectations)) {
       await page.getByTestId(`delivery-direction-${direction}`).click();
       await expect(page.getByTestId(`delivery-direction-${direction}`)).toHaveAttribute('aria-pressed', 'true');
       await page.waitForTimeout(450);
-      for (const header of headers) await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
+      for (const header of visible) await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
+      for (const header of hidden) await expect(page.getByRole('columnheader', { name: header })).toHaveCount(0);
     }
 
     await expect(page.getByTestId('delivery-internal-extended')).toBeVisible();
     await page.getByTestId('delivery-direction-send').click();
     await page.waitForTimeout(450);
-    await expect(page.getByTestId('delivery-send-extended')).toBeVisible();
+    await expect(page.getByTestId('delivery-send-extended')).toHaveCount(0);
 
     await page.getByTestId('delivery-direction-receive').click();
     await page.waitForTimeout(450);

@@ -33,6 +33,10 @@ function parseRuleObject(value: unknown): Record<string, unknown> | null {
 
 function buildSenderChild(sc: SenderFilterSenderConfig): RuleNode {
   if (sc.type === 'individual') {
+    // *@domain.com → suffix 匹配 @domain.com，后端 suffix 操作符已原生支持
+    if (sc.value.startsWith('*@')) {
+      return { type: 'condition', field: 'sender', operator: 'suffix', value: sc.value.slice(1) };
+    }
     return { type: 'condition', field: 'sender', operator: 'eq', value: sc.value };
   }
   if (sc.type === 'domain') {
@@ -61,6 +65,9 @@ function parseSenderChild(n: RuleNode): SenderFilterSenderConfig | null {
   if (!n || n.type !== 'condition') return null;
   if (n.field === 'sender' && n.operator === 'eq')
     return { type: 'individual', value: n.value! };
+  // suffix + @domain → 回显为 *@domain（buildSenderChild 的通配符形式）
+  if (n.field === 'sender' && n.operator === 'suffix' && n.value!.startsWith('@'))
+    return { type: 'individual', value: '*' + n.value! };
   if (n.field === 'senderdomain' && n.operator === 'eq')
     return { type: 'domain', value: n.value! };
   if (n.field === 'rcpttags' && n.operator === 'hasTag' && n.value!.startsWith('grp:'))

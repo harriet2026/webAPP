@@ -23,6 +23,62 @@ const ACTION_SEVERITY: Record<string, number> = {
   reject: 6,
 };
 
+const RAW_ACTION_TO_EXECUTION_ACTION: Record<string, string> = {
+  accept: 'deliver',
+  quarantine: 'quarantine',
+  audit: 'review',
+  reject: 'block',
+  bounce: 'block',
+  discard: 'drop',
+};
+
+export function normalizeRawActionToExecutionAction(action: string | undefined | null): string {
+  const raw = (action || '').toLowerCase();
+  return RAW_ACTION_TO_EXECUTION_ACTION[raw] ?? raw;
+}
+
+const RAW_ACTION_TO_RECIPIENT_LABEL_KEY: Record<string, string> = {
+  accept: 'recipientStatusBar.delivered',
+  sideline: 'recipientStatusBar.sideline',
+  quarantine: 'recipientStatusBar.quarantine',
+  reject: 'recipientStatusBar.rejected',
+  bounce: 'recipientStatusBar.rejected',
+  discard: 'recipientStatusBar.discarded',
+  audit: 'recipientStatusBar.audit',
+};
+
+/** Pure label-key mapping shared by CSV/export code without importing a React component. */
+export function recipientActionLabelKey(action: string | undefined | null): string {
+  const raw = (action || '').toLowerCase();
+  return RAW_ACTION_TO_RECIPIENT_LABEL_KEY[raw] ?? 'recipientStatusBar.other';
+}
+
+const RAW_STATUS_TO_DISPLAY_STATUS: Record<string, string> = {
+  delivered: 'delivered',
+  marked_delivered: 'delivered',
+  reinjected: 'delivered',
+  delivering: 'delivering',
+  in_delivery: 'delivering',
+  deferred: 'delivering',
+  quarantined: 'quarantine_pending',
+  pending_review: 'audit_pending',
+  audited: 'audit_pending',
+  sidelined: 'sideline_pending',
+  pending: 'sideline_pending',
+  blocked: 'rejected',
+  rejected: 'rejected',
+  bounced: 'delivery_failed',
+  failed: 'delivery_failed',
+  delivery_failed: 'delivery_failed',
+  cancelled: 'delivery_cancelled',
+  discarded: 'discarded',
+};
+
+export function normalizeRawStatusToDisplayStatus(status: string | undefined | null): string {
+  const raw = (status || '').toLowerCase();
+  return RAW_STATUS_TO_DISPLAY_STATUS[raw] ?? raw;
+}
+
 export function actionToVariant(action: string | undefined | null): ActionBadgeVariant {
   switch ((action || '').toLowerCase()) {
     case 'accept':

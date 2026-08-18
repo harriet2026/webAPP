@@ -30,18 +30,24 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { AuthSpoofingTagPanel } from "./AuthSpoofingTagPanel";
+import { toMessageKeySegment } from "@/lib/auth-spoofing-labels";
 
+// 「允许」(accept) 已从认证仿冒移除：每项检查都在跑，管理员只能选处理动作，
+// "不拦截"由「标记放行」表达。后端 validateASConfig 会 400 掉 accept，所以它也
+// 不能再出现在下拉里。
 const ACTIONS: AuthSpoofingAction[] = [
-  "accept",
   "quarantine",
   "reject",
   "audit",
+  "mark-delivery",
   "discard",
 ];
 
 export const FORMAT_ACTIONS: AuthSpoofingAction[] = [
   "quarantine",
   "audit",
+  "mark-delivery",
   "reject",
   "discard",
 ];
@@ -79,9 +85,9 @@ export function CheckItemRow({
   const actionLabel = (a: AuthSpoofingAction) =>
     actionLabelKey
       ? t(actionLabelKey(a) as Parameters<typeof t>[0])
-      : t(`action.${a}` as `action.${AuthSpoofingAction}`);
+      : t(`action.${toMessageKeySegment(a)}` as Parameters<typeof t>[0]);
   const actionTip = (a: AuthSpoofingAction) =>
-    t(`actionTooltip.${a}` as `actionTooltip.${AuthSpoofingAction}`);
+    t(`actionTooltip.${toMessageKeySegment(a)}` as Parameters<typeof t>[0]);
 
   const handleEnableChange = (enabled: boolean) => {
     if (enabled && warningI18nKey) {
@@ -90,6 +96,8 @@ export function CheckItemRow({
       onChange({ ...item, enabled });
     }
   };
+
+  const showTagPanel = item.enabled && item.action === "mark-delivery";
 
   return (
     <>
@@ -162,6 +170,14 @@ export function CheckItemRow({
           </div>
         )}
       </div>
+
+      {showTagPanel && (
+        <AuthSpoofingTagPanel
+          value={item}
+          onChange={(patch) => onChange({ ...item, ...patch })}
+          disabled={disabled}
+        />
+      )}
 
       {warningI18nKey && (
       <AlertDialog

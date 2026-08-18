@@ -382,6 +382,7 @@ export function RouteRulesPage() {
                 value={conditionTree}
                 onChange={setConditionTree}
                 stage="data"
+                ruleClass="route"
               />
             </div>
 

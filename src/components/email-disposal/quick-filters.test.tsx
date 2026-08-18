@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { QuickFilters } from "./quick-filters";
@@ -50,5 +50,23 @@ describe("QuickFilters grid layout", () => {
     expect(grid.firstElementChild).toHaveTextContent(
       "emailDisposal.filters.tenantScope",
     );
+  });
+
+  it("forwards rule-search text so options can be searched globally", () => {
+    const onDisposalRuleSearchChange = vi.fn();
+    render(
+      <QuickFilters
+        value={{}}
+        onChange={vi.fn()}
+        onDisposalRuleSearchChange={onDisposalRuleSearchChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("disposal-policy-filter-trigger"));
+    fireEvent.click(screen.getByTestId("disposal-policy-rule-mode"));
+    fireEvent.change(screen.getByTestId("disposal-policy-rule-search"), {
+      target: { value: "CR-77" },
+    });
+    expect(onDisposalRuleSearchChange).toHaveBeenLastCalledWith("CR-77");
   });
 });

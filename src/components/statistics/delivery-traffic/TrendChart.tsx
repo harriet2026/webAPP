@@ -85,7 +85,6 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
         xAxis: { type: 'category' as const, data: xLabels, axisLabel: xAxisLabel, axisLine: { lineStyle: { color: axisColor } } },
         yAxis: {
           type: 'value' as const,
-          ...(isHourly ? {} : { min: 0, max: 14_000, interval: 3_500 }),
           axisLabel: { color: axisColor, fontSize: 12 },
           splitLine: { lineStyle: { type: 'dashed', color: splitColor } },
         },
@@ -106,7 +105,6 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
       xAxis: { type: 'category' as const, data: xLabels, axisLabel: xAxisLabel, axisLine: { lineStyle: { color: axisColor } } },
       yAxis: {
         type: 'value' as const,
-        ...(direction === 'receive' && !isHourly ? { min: 0, max: 14_000, interval: 3_500 } : {}),
         axisLabel: { color: axisColor, fontSize: 12 },
         splitLine: { lineStyle: { type: 'dashed', color: splitColor } },
       },

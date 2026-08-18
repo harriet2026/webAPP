@@ -9,10 +9,9 @@ vi.mock('@/lib/api/statistics', () => ({
   getDashboardSummary: vi.fn(),
   getTypeStatistics: vi.fn(),
 }));
-vi.mock('@/lib/api/security-overview', () => ({ getSecurityOverview: vi.fn() }));
+vi.mock('@/lib/api/system-status-summary', () => ({ fetchSystemStatusSummary: vi.fn() }));
 vi.mock('@/lib/api/ops-top', () => ({ fetchOpsTop: vi.fn() }));
 vi.mock('@/lib/api/monitoring', () => ({ fetchNodes: vi.fn(), fetchAlerts: vi.fn() }));
-vi.mock('@/components/email-disposal/lib/disposal-api', () => ({ getDisposalList: vi.fn() }));
 vi.mock('@/lib/api/inbound-audit', () => ({ getInboundAuditItems: vi.fn() }));
 vi.mock('@/lib/api/phishing-detection', () => ({ getDetectionStats: vi.fn() }));
 vi.mock('@/lib/api/spoofing-detection', () => ({ getSpoofingStats: vi.fn() }));
@@ -40,25 +39,24 @@ vi.mock('../agent-overview', () => ({ useAgentRowVisibility: () => ({ phishing: 
 import { fetchSystemStatusData, resolveRangeDates } from '../hooks';
 import { TodoAlerts } from '../todo-alerts';
 import { ApiError } from '@/lib/api/client';
-import { getDashboardSummary, getTypeStatistics } from '@/lib/api/statistics';
-import { getSecurityOverview } from '@/lib/api/security-overview';
+import { getTypeStatistics } from '@/lib/api/statistics';
+import { fetchSystemStatusSummary } from '@/lib/api/system-status-summary';
 import { fetchOpsTop } from '@/lib/api/ops-top';
 import { fetchNodes, fetchAlerts } from '@/lib/api/monitoring';
-import { getDisposalList } from '@/components/email-disposal/lib/disposal-api';
 import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 
 const mock = (fn: unknown) => fn as unknown as ReturnType<typeof vi.fn>;
 
 function baseMocks() {
-  mock(getDashboardSummary)
-    .mockResolvedValueOnce({ metrics: { total_emails: 82 } })
-    .mockResolvedValueOnce({ metrics: { total_emails: 41 } });
-  mock(getSecurityOverview)
-    .mockResolvedValueOnce({ kpi: { blocked: 12, block_rate: 14.6 } })
-    .mockResolvedValueOnce({ kpi: { blocked: 6, block_rate: 10 } });
+  mock(fetchSystemStatusSummary).mockResolvedValue({
+    current: { mail_volume: 82, threats: 12, block_rate: 14.6 },
+    previous: { mail_volume: 41, threats: 6, block_rate: 10 },
+    threat_trend: [],
+    pending_disposal: 0,
+    generated_at: '2026-07-10T00:00:00Z',
+  });
   mock(getTypeStatistics).mockResolvedValue({ series: [] });
   mock(fetchOpsTop).mockResolvedValue({ dimension: 'sender', total: 0, trendLabels: [], rows: [] });
-  mock(getDisposalList).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
   mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
   mock(fetchNodes).mockResolvedValue({ items: [{ id: 'n1', last_seen_unix: 1, online: true }] });
   mock(fetchAlerts).mockResolvedValue({ items: [], total: 0, page: 1, page_size: 0 });

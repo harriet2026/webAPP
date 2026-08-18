@@ -51,11 +51,14 @@ const CARDS_BY_DIRECTION: Record<Direction, CardDef[]> = {
     { key: 'avgLatencyMs', labelKey: 'avgInboundLatency', getValue: (d) => formatLatency(d.avg_latency_ms), color: '#3b82f6' },
     { key: 'sidelineQueue', labelKey: 'antispamQueue', getValue: (d) => formatNum(d.sideline_queue), color: '#f59e0b' },
   ],
+  // GT-11990：外发延迟 P99 已按需求从外发方向页面移除（规格原文「该指标已从外发方向
+  // 页面移除，不再展示」）。后端 latency_p99_ms 仍在计算，暂未清理——它是单值 KPI，
+  // 开销远小于同批删掉的分位数趋势（那条在无原生 percentile 方言的库上会全表排序），
+  // 且需先确认监控面板等处没有别的消费方。
   send: [
     { key: 'total', labelKey: 'outboundTotal', icon: ArrowUpFromLine, getValue: (d) => formatNum(d.total), color: '#52C41A' },
     { key: 'successRate', labelKey: 'outboundSuccessRate', getValue: (d) => formatPercent(d.success_rate), color: '#10b981' },
     { key: 'bounceRate', labelKey: 'outboundBounceRate', getValue: (d) => formatPercent(d.bounce_rate), color: '#ef4444' },
-    { key: 'latencyP99', labelKey: 'outboundLatencyP99', getValue: (d) => formatLatency(d.latency_p99_ms), color: '#f59e0b' },
     { key: 'outboundQueueBacklog', getValue: (d) => formatNum(d.queue_backlog_approx), color: '#ef4444' },
   ],
   internal: [

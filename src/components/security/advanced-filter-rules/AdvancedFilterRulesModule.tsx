@@ -64,7 +64,6 @@ const ACTION_BADGE_CLASS: Record<Exclude<PrimaryAction, 'none'>, string> = {
   quarantine: 'border-action-quarantine/30 bg-action-quarantine/10 text-action-quarantine',
   review: 'border-action-review/30 bg-action-review/10 text-action-review',
   discard: 'border-action-drop/30 bg-action-drop/10 text-action-drop',
-  block: 'border-action-block/30 bg-action-block/10 text-action-block',
 };
 
 // The catalogue's `security` category (22) bundles both actual security

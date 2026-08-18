@@ -7,6 +7,12 @@ import {
   getModuleName,
   getActionLabel,
   getPolicyRoute,
+  formatMultiBasisListReason,
+  groupEffectiveRecipientBasisByRule,
+  groupRecipientBasisByPolicy,
+  groupsFromSummaries,
+  pickPrimaryBasisGroup,
+  sortBasisGroupsForTooltip,
   DISPOSAL_POLICY_MAP,
 } from './disposal-basis-config';
 import type { DisposalBasis } from '@/types/email-disposal';
@@ -236,5 +242,116 @@ describe('IPBL / UBL allow-block list rendering (GT-12214 复开)', () => {
       const pagePath = join(dashboardDir, route, 'page.tsx');
       expect(existsSync(pagePath), `route ${route} -> ${pagePath} 不存在`).toBe(true);
     }
+  });
+});
+
+describe('multi-recipient disposal basis grouping (GT-12935)', () => {
+  const basis: DisposalBasis = {
+    policy_key: 'CR',
+    rule_name: '正文规则',
+    rule_id: 'CR-66',
+    modules: [
+      {
+        policy_key: 'CR',
+        rule_name: '正文规则',
+        rule_id: 'CR-66',
+        action: 'quarantine',
+        recipients: ['a@example.com', 'b@example.com'],
+        effective_for: ['b@example.com'],
+        hit_values: { match_position: 'subject', matched_content: '发票' },
+      },
+      {
+        policy_key: 'IPBL',
+        rule_name: '来源黑名单',
+        rule_id: 'IPBL-11',
+        action: 'reject',
+        recipients: ['a@example.com'],
+        effective_for: [],
+        hit_values: { source_ip: '203.0.113.7' },
+      },
+    ],
+  };
+
+  it('groups formal modules by policy while preserving effective tri-state counts', () => {
+    const groups = groupRecipientBasisByPolicy(basis);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toMatchObject({
+      policyKey: 'CR', recipientCount: 2, effectiveCount: 1, effectiveKnown: true,
+    });
+    expect(groups[1]).toMatchObject({
+      policyKey: 'IPBL', recipientCount: 1, effectiveCount: 0, effectiveKnown: true,
+    });
+  });
+
+  it('groups only effective rules for the origin-style recipient split cards', () => {
+    const groups = groupEffectiveRecipientBasisByRule(basis);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]).toMatchObject({
+      policyKey: 'CR',
+      recipients: ['b@example.com'],
+      entry: { rule_id: 'CR-66', action: 'quarantine' },
+    });
+  });
+
+  it('keeps legacy per-recipient winners without fabricating effective ownership', () => {
+    const groups = groupEffectiveRecipientBasisByRule({
+      policy_key: 'CR',
+      per_recipient: [
+        { policy_key: 'CR', rule_id: 'CR-1', action: 'quarantine', recipient: 'a@example.com' },
+        { policy_key: 'ACF', rule_id: 'ACF-2', action: 'reject', recipient: 'b@example.com' },
+      ],
+    });
+    expect(groups.map((group) => ({ policyKey: group.policyKey, recipients: group.recipients }))).toEqual([
+      { policyKey: 'CR', recipients: ['a@example.com'] },
+      { policyKey: 'ACF', recipients: ['b@example.com'] },
+    ]);
+  });
+
+  it('uses the lightweight list summaries without fabricating recipient addresses', () => {
+    const groups = groupsFromSummaries(basis, [
+      {
+        policy_key: 'CR',
+        recipient_count: 2,
+        effective_count: 1,
+        effective_known: true,
+        entries: [{
+          rule_name: '正文规则', rule_id: 'CR-66', action: 'quarantine',
+          recipient_count: 2, effective_count: 1, effective_known: true,
+        }],
+      },
+      {
+        policy_key: 'IPBL',
+        recipient_count: 1,
+        effective_count: 0,
+        effective_known: true,
+        entries: [{
+          rule_name: '来源黑名单', rule_id: 'IPBL-11', action: 'reject',
+          recipient_count: 1, effective_count: 0, effective_known: true,
+        }],
+      },
+    ]);
+    expect(groups[0].entries[0].recipients).toBeUndefined();
+    expect(groups[0].recipientCount).toBe(2);
+  });
+
+  it('prioritizes the active rule filter in both the cell label and tooltip order', () => {
+    const groups = groupRecipientBasisByPolicy(basis);
+    expect(pickPrimaryBasisGroup(groups, undefined, ['IPBL-11'])?.policyKey).toBe('IPBL');
+    expect(sortBasisGroupsForTooltip(groups, undefined, ['IPBL-11'])[0].policyKey).toBe('IPBL');
+    expect(formatMultiBasisListReason(groups, 'zh', undefined, ['IPBL-11']))
+      .toContain('IP黑白名单');
+  });
+
+  it('prioritizes the matching entry when several rules share one policy group', () => {
+    const samePolicyGroups = groupRecipientBasisByPolicy({
+      policy_key: 'CR',
+      modules: [
+        { policy_key: 'CR', rule_id: 'CR-66', rule_name: '正文规则', action: 'quarantine' },
+        { policy_key: 'CR', rule_id: 'CR-77', rule_name: '付款规则', action: 'audit' },
+      ],
+    });
+
+    expect(formatMultiBasisListReason(samePolicyGroups, 'zh', undefined, ['CR-77']))
+      .toContain('付款规则');
   });
 });

@@ -74,12 +74,14 @@ async function seedDisposalRows(request: APIRequestContext, count: number) {
     recipients: [`edc-recall-${i}@testdomain.local`],
     subject: `EDC Recall Cap ${i}`,
     // Recall only applies to mail that was actually delivered: the batch-recall
-    // button is gated on displayStatus ∈ {delivered, partial_delivered}, and
-    // mapToDisplayStatus derives `delivered` from action=accept +
-    // delivery_status_summary=delivered. Seeding action/status=quarantine* left
-    // the button permanently disabled — which not only blocked TC-O10 but made
-    // TC-O08 ("capped at 10") vacuous, since it asserts the button is disabled
-    // and that held for the wrong reason no matter what the cap logic did.
+    // button is gated on "the backend display_statuses list contains
+    // delivered" (GT-12955 — partial outcomes are shown per recipient,
+    // `delivered` from action=accept + delivery_status_summary=delivered and
+    // downlinks it; the frontend no longer computes any status). Seeding
+    // action/status=quarantine* left the button permanently disabled — which
+    // not only blocked TC-O10 but made TC-O08 ("capped at 10") vacuous, since
+    // it asserts the button is disabled and that held for the wrong reason no
+    // matter what the cap logic did.
     action: 'accept',
     status: 'delivered',
     direction: 'receive',

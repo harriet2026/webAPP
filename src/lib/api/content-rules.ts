@@ -10,6 +10,7 @@ import type {
 } from '@/types/content-rules';
 import type { ApiRequestFn } from './client';
 import { apiRequest } from './client';
+import { parseRuleJson } from './rule-json';
 
 export const CONTENT_RULES_PAGE = 'content_rules';
 
@@ -227,14 +228,12 @@ function parseScopesFromContentNode(n: RuleNode | null): ContentRuleScope[] {
 export function resolveContentRulesRule(rule: Rule): ContentRulesMetadata | null {
   let metadata: ContentRulesMetadata | null = null;
   if (rule.metadata) {
-    try {
-      const parsed = JSON.parse(rule.metadata);
-      if (parsed.feature === 'content_rules') metadata = parsed as ContentRulesMetadata;
-    } catch {}
+    // 后端以 json.RawMessage 内联下发，运行时可能是对象而非字符串，必须走容错解析
+    const parsed = parseRuleJson(rule.metadata);
+    if (parsed?.feature === 'content_rules') metadata = parsed as unknown as ContentRulesMetadata;
   }
 
-  let tree: RuleNode | null = null;
-  try { tree = JSON.parse(rule.condition_tree); } catch {}
+  const tree = parseRuleJson(rule.condition_tree) as RuleNode | null;
   const treeShape = parseContentRulesRule(tree);
 
   if (metadata && treeShape) {

@@ -10,10 +10,13 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
+import { toMessageKeySegment } from '@/lib/auth-spoofing-labels';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const ACTIONS: AuthSpoofingAction[] = ['accept', 'quarantine', 'reject', 'audit', 'discard'];
+// 「允许」(accept) 已从认证仿冒移除（后端校验层会 400 掉它）；不拦截用「标记放行」。
+const ACTIONS: AuthSpoofingAction[] = ['quarantine', 'reject', 'audit', 'mark-delivery', 'discard'];
 
 interface SimilarDomainSectionProps {
   config: SimilarDomainConfig;
@@ -44,7 +47,7 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                 <CardTitle className="text-base font-semibold">{t('similarDomain.title')}</CardTitle>
                 {config.enabled && (
                   <Badge variant="secondary" className="text-[10px] ml-2">
-                    {t('action.' + config.action as any)}
+                    {t(`action.${toMessageKeySegment(config.action)}` as any)}
                   </Badge>
                 )}
               </CollapsibleCardTrigger>
@@ -65,12 +68,12 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                   disabled={disabled || !config.enabled}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue>{t(`action.${config.action}` as any)}</SelectValue>
+                    <SelectValue>{t(`action.${toMessageKeySegment(config.action)}` as any)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {ACTIONS.map((a) => (
                       <SelectItem key={a} value={a}>
-                        {t(`action.${a}` as any)}
+                        {t(`action.${toMessageKeySegment(a)}` as any)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -88,6 +91,14 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                 )}
               </div>
             </div>
+
+            {config.enabled && !config.observe_mode && config.action === 'mark-delivery' && (
+              <AuthSpoofingTagPanel
+                value={config}
+                onChange={(patch) => onChange({ ...config, ...patch })}
+                disabled={disabled}
+              />
+            )}
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">

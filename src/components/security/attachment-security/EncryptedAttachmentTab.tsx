@@ -80,7 +80,6 @@ export function EncryptedAttachmentTab({
             <SelectItem value="reject" data-testid="decrypt-fail-action-reject">{t('actions.reject')}</SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">{t('encrypted.receiveDefault')}</p>
       </section>
 
       <section className="space-y-3">

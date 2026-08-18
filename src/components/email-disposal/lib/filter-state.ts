@@ -28,6 +28,36 @@ export function isCompleteFilterCondition(condition: {
   return hasScalarValue(condition.value);
 }
 
+export function resolveExecutionActions(quick: DisposalQuickFilter): string[] {
+  if (quick.executionActions && quick.executionActions.length > 0) {
+    return quick.executionActions;
+  }
+  return quick.executionAction ? [quick.executionAction] : [];
+}
+
+export function resolvePositiveEnumFilterValues(
+  filter: AdvancedFilter,
+  field: string,
+): string[] {
+  const values = new Set<string>();
+  for (const group of filter.groups) {
+    // NOT (display_status = X) 不是“当前筛选命中 X”。若把它当高亮条件，
+    // 顶层 OR 的其它分支命中时可能把被排除的 X 反而选成主 Badge。
+    if (group.not) continue;
+    for (const condition of group.conditions) {
+      if (condition.field !== field) continue;
+      if (condition.op === "eq" && hasScalarValue(condition.value)) {
+        values.add(String(condition.value));
+      } else if (condition.op === "in" && Array.isArray(condition.value)) {
+        for (const value of condition.value) {
+          if (hasScalarValue(value)) values.add(String(value));
+        }
+      }
+    }
+  }
+  return [...values];
+}
+
 export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
   let count = 0;
 
@@ -38,7 +68,6 @@ export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
     "sender",
     "recipient",
     "subject",
-    "executionAction",
     "ipLocation",
   ] as const) {
     if (quick[key]?.trim()) count += 1;
@@ -51,6 +80,7 @@ export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
         ? [quick.emailStatus]
         : [];
   count += statuses.filter(Boolean).length;
+  count += resolveExecutionActions(quick).filter(Boolean).length;
   count += (quick.emailTypes ?? []).filter(Boolean).length;
   count += (quick.disposalPolicyKeys ?? []).filter(Boolean).length;
   count += (quick.disposalRuleIds ?? []).filter(Boolean).length;

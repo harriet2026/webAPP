@@ -68,13 +68,6 @@ export async function updateSidelineStatus(id: string, status: SidelineItem['sta
   });
 }
 
-export async function updateSidelinePriority(id: string, priority: number, requestFn: ApiRequestFn = apiRequest): Promise<SidelineItem> {
-  return requestFn<SidelineItem>(`/sideline/${id}/priority`, {
-    method: 'PUT',
-    body: { priority },
-  });
-}
-
 export async function reinjectSideline(id: string, requestFn: ApiRequestFn = apiRequest): Promise<SidelineItem> {
   return requestFn<SidelineItem>(`/sideline/${id}/reinject`, {
     method: 'POST',

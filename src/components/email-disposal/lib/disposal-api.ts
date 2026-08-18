@@ -1,65 +1,15 @@
 import type { ApiRequestFn } from '@/lib/api/client';
-import type { DisposalBasis, DisposalListResponse, DisposalMailItem, DisplayStatus, BulkDisposeRequest, BulkDisposeResponse, ParseQueryRequest, ParseQueryResponse, SimilarSearchRequest } from '@/types/email-disposal';
+import type { DisposalBasis, DisposalBasisGroupSummary, DisposalListResponse, DisposalMailItem, DisplayStatusEntry, BulkDisposeRequest, BulkDisposeResponse, ParseQueryRequest, ParseQueryResponse, SimilarSearchRequest } from '@/types/email-disposal';
 import type { AdvancedFilter, FinalActionRuleDetail } from '@/types/log';
 import type { RecipientDisposition } from '@/types/phishing-detection';
 
-export function mapToDisplayStatus(action: string, deliveryStatus?: string, workflowOutcome?: string, recallStatusSummary?: string): DisplayStatus {
-  // Recall status takes priority: if the message has any recall record
-  // (recall_status_summary is a non-empty, non-'none' value), surface the
-  // recall state regardless of the underlying delivery/workflow state.
-  if (recallStatusSummary && recallStatusSummary !== 'none' && recallStatusSummary !== '') {
-    return recallStatusSummary as DisplayStatus;
-  }
-
-  // GT-12353 F5：超时自动放行（timeout_released）与管理员主动批准
-  // （approved）在"邮件已经投递出去"这件事上等价，展示态同样按投递状态推导。
-  // 此前缺这一支，超时放行的邮件会落到下面 action==='audit' 的分支，
-  // 继续显示成「待审核」。
-  if (workflowOutcome === 'released' || workflowOutcome === 'approved' || workflowOutcome === 'timeout_released') {
-    if (deliveryStatus === 'delivered') return 'delivered';
-    if (deliveryStatus === 'in_delivery') return 'delivering';
-    if (deliveryStatus === 'failed') return 'delivery_failed';
-    if (deliveryStatus === 'partial_delivered') return 'partial_delivered';
-    // V2 §三 `delivering`'s trigger condition is delivery_status=unknown/
-    // in_delivery — an already-released/approved mail with no terminal
-    // delivery status yet is "handed to Postfix, in flight", not a distinct
-    // 18th state.
-    return 'delivering';
-  }
-  if (workflowOutcome === 'rejected_after_review') return 'reviewed_rejected';
-  if (workflowOutcome === 'discarded') return 'discarded';
-  if (workflowOutcome === 'expired') return 'expired';
-  if (workflowOutcome === 'deleted') return 'deleted';
-
-  if (action === 'quarantine') return 'quarantine_pending';
-  if (action === 'sideline') return 'sideline_pending';
-  if (action === 'audit') return 'audit_pending';
-  if (action === 'reject') return 'rejected';
-  if (action === 'bounce') return 'bounced';
-  if (action === 'discard') return 'discarded';
-
-  if (action === 'accept') {
-    if (deliveryStatus === 'delivered') return 'delivered';
-    if (deliveryStatus === 'in_delivery') return 'delivering';
-    if (deliveryStatus === 'partial_delivered') return 'partial_delivered';
-    if (deliveryStatus === 'failed') return 'delivery_failed';
-    if (deliveryStatus === 'cancelled') return 'discarded';
-    return 'delivering';
-  }
-
-  // mixed: 收件人被拆分成不同处置（部分投递/部分隔离/部分旁路…）。
-  // 执行动作列已用 mini 堆叠色条展示明细，状态列表示整体投递结果。
-  // 如果有 delivery_status_summary，优先采用后端值；否则用 partial_delivered。
-  if (action === 'mixed') {
-    if (deliveryStatus === 'delivered') return 'delivered';
-    if (deliveryStatus === 'in_delivery') return 'delivering';
-    if (deliveryStatus === 'partial_delivered') return 'partial_delivered';
-    if (deliveryStatus === 'failed') return 'delivery_failed';
-    return 'partial_delivered';
-  }
-
-  return 'delivering';
-}
+// GT-12782 Task 4：前端本地的 mapToDisplayStatus 已删除。展示状态由后端在
+// 列表 / 详情 / 相似三条读路径统一下发（display_statuses 列表，一致邮件单
+// 元素、mixed 邮件多元素带收件人数），前端只消费、不再自行推导——**显示与
+// 筛选同源于这份列表**：按状态筛选 = 列表包含该状态，mixed 的包含语义
+// （一封信里有的状态就能筛到）是后端的刻意设计（见 internal/storage/
+// repo_maillog.go displayStatusFilterSQL 与 internal/models/display_status.go），
+// 不是漂移，不要在前端再"修"出第二份状态规则。
 
 export interface MailLogAPIItem {
   id: number;
@@ -89,6 +39,7 @@ export interface MailLogAPIItem {
   // top-level similarity_pct emitted by SimilarItemEntry when returned from /similar endpoints
   similarity_pct?: number;
   disposal_basis?: DisposalBasis;
+  disposal_basis_groups?: DisposalBasisGroupSummary[];
   disposal_policy_keys?: string;
   /** Per-recipient action details; present when action === 'mixed'. */
   final_action_rule?: Record<string, FinalActionRuleDetail>;
@@ -96,6 +47,13 @@ export interface MailLogAPIItem {
   recipient_dispositions?: RecipientDisposition[];
   /** Distinct actions across all recipients (e.g. ['accept','quarantine']). */
   disposition_actions?: string[];
+  /**
+   * Backend-authoritative display-status list (GT-12782 Task 4): single
+   * element for uniform mail, one entry per distinct outcome (with recipient
+   * count) for mixed mail, in the stable GT-12955 order. The ONLY source of the
+   * status the UI renders.
+   */
+  display_statuses?: DisplayStatusEntry[];
 }
 
 export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem {
@@ -124,12 +82,10 @@ export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem
     subject: item.subject || '',
     action: item.action,
     status: item.status,
-    displayStatus: mapToDisplayStatus(
-      item.action,
-      item.delivery_status_summary,
-      item.workflow_outcome_summary,
-      item.recall_status_summary,
-    ),
+    // 直读后端下发的列表；缺失时给空列表（不在前端伪造状态——消费点对空列表
+    // 各自兜底显示 '—'）。
+    displayStatuses: item.display_statuses ?? [],
+    recallStatusSummary: item.recall_status_summary,
     similarity: item.similarity_pct,
     clientIp: item.client_ip,
     queueId: item.queue_id,
@@ -139,6 +95,7 @@ export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem
     emailTypeOriginal: item.email_type_original,
     correctionSource: item.correction_source,
     disposalBasis: item.disposal_basis,
+    disposalBasisGroups: item.disposal_basis_groups,
     reason: item.reason,
     disposalPolicyKeys: item.disposal_policy_keys,
     finalActionRule: item.final_action_rule,
@@ -153,6 +110,24 @@ interface MailLogListResponse {
   page: number;
   page_size: number;
   total_pages?: number;
+}
+
+export interface DisposalRuleOption {
+  id: string;
+  name: string;
+}
+
+export async function getDisposalRuleOptions(
+  search: string,
+  requestFn: ApiRequestFn,
+): Promise<DisposalRuleOption[]> {
+  const query = new URLSearchParams({ limit: '12' });
+  const normalizedSearch = search.trim();
+  if (normalizedSearch) query.set('search', normalizedSearch);
+  const response = await requestFn<{ items: DisposalRuleOption[] }>(
+    `/mail-logs/_meta/disposal-rules?${query}`,
+  );
+  return response.items ?? [];
 }
 
 // localDayBound 把 yyyy-MM-dd 的"某一天"换算成用户本地时区的日界时刻
@@ -283,11 +258,7 @@ export async function recallMails(
     final_type?: string;
   },
   requestFn: ApiRequestFn,
-): Promise<{
-  succeeded: number[];
-  failed: { id: number; reason: string }[];
-  reclassify_failed?: number[];
-}> {
+): Promise<import('@/types/email-disposal').RecallMailsResponse> {
   return requestFn('/mail-logs/recall', {
     method: 'POST',
     body: req,

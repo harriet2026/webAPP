@@ -7,8 +7,7 @@ export type PrimaryAction =
   | 'tagDeliver'
   | 'quarantine'
   | 'review'
-  | 'discard'
-  | 'block';
+  | 'discard';
 
 export type AddonKey =
   | 'detailedLog'
@@ -34,8 +33,8 @@ export const UI_ADDON_KEYS: AddonKey[] = [
 
 const QUARANTINE_DISABLED: AddonKey[] = ['forwardServer', 'modifyHeader'];
 
-// discard/block: only adminNotify remains available.
-const DISCARD_BLOCK_DISABLED: AddonKey[] = [
+// discard: only adminNotify remains available.
+const DISCARD_DISABLED: AddonKey[] = [
   'disclaimer',
   'externalReminder',
   'deleteAttachment',
@@ -49,8 +48,7 @@ export function disabledAddons(action: PrimaryAction): AddonKey[] {
     case 'quarantine':
       return [...QUARANTINE_DISABLED];
     case 'discard':
-    case 'block':
-      return [...DISCARD_BLOCK_DISABLED];
+      return [...DISCARD_DISABLED];
     case 'none':
     case 'deliver':
     case 'tagDeliver':

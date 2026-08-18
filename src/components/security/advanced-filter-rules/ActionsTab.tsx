@@ -27,7 +27,7 @@ import { ActionSummary } from './ActionSummary';
 // 本 Tab 使用，保留仅为与 F6 ConditionsTab 一致的容器签名(RuleEditorDrawer
 // 对所有 Tab 统一传参).
 
-const PRIMARY_ACTIONS: PrimaryAction[] = ['none', 'deliver', 'tagDeliver', 'quarantine', 'review', 'discard', 'block'];
+const PRIMARY_ACTIONS: PrimaryAction[] = ['none', 'deliver', 'tagDeliver', 'quarantine', 'review', 'discard'];
 
 type Selection = { type: 'action' } | { type: 'addon'; key: AddonKey };
 
@@ -90,7 +90,7 @@ export function ActionsTab({ form, setForm }: Props) {
             </SelectTrigger>
             <SelectContent>
               {PRIMARY_ACTIONS.map((a) => (
-                <SelectItem key={a} value={a}>
+                <SelectItem key={a} value={a} data-testid={`primary-action-option-${a}`}>
                   {t(`primaryActions.${a}` as never)}
                 </SelectItem>
               ))}
@@ -211,19 +211,6 @@ function ActionParamsPanel({ form, setForm }: { form: RuleForm; setForm: Props['
       },
     }));
   }
-  function patchBlock(patch: Partial<NonNullable<RuleForm['actionParams']['block']>>) {
-    setForm((f) => ({
-      ...f,
-      actionParams: {
-        ...f.actionParams,
-        block: {
-          ...(f.actionParams.block ?? { smtpCode: '550', responseText: '', tarpit: false, tarpitSeconds: 5 }),
-          ...patch,
-        },
-      },
-    }));
-  }
-
   return (
     <div data-testid="action-params-panel">
       <div className="mb-2 flex items-center gap-2 text-base font-semibold">
@@ -296,7 +283,6 @@ function ActionParamsPanel({ form, setForm }: { form: RuleForm; setForm: Props['
         </div>
       )}
 
-      {action === 'block' && <BlockForm value={form.actionParams.block} onPatch={patchBlock} />}
     </div>
   );
 }
@@ -359,53 +345,6 @@ function TagDeliverForm({
             <Label className="text-xs font-normal text-muted-foreground">{t('addons.headerValue')}</Label>
             <Input value={value?.headerValue ?? ''} onChange={(e) => onPatch({ headerValue: e.target.value })} />
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function BlockForm({
-  value,
-  onPatch,
-}: {
-  value: RuleForm['actionParams']['block'];
-  onPatch: (p: Partial<NonNullable<RuleForm['actionParams']['block']>>) => void;
-}) {
-  const t = useTranslations('advancedRulesFeature');
-  const tarpit = !!value?.tarpit;
-  return (
-    <div className="space-y-3" data-testid="block-params">
-      <div className="space-y-1.5">
-        <Label className="text-xs font-normal text-muted-foreground">
-          {t('block.smtpCode')} <span className="text-destructive">*</span>
-        </Label>
-        <Input autoFocus value={value?.smtpCode ?? '550'} onChange={(e) => onPatch({ smtpCode: e.target.value })} />
-        <p className="text-xs text-muted-foreground">{t('disposition.blockSmtpCodeHint')}</p>
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs font-normal text-muted-foreground">
-          {t('block.responseText')} <span className="text-destructive">*</span>
-        </Label>
-        <Input value={value?.responseText ?? ''} onChange={(e) => onPatch({ responseText: e.target.value })} />
-      </div>
-      <label className="flex items-center gap-2 text-sm cursor-pointer">
-        <Checkbox checked={tarpit} onCheckedChange={(v) => onPatch({ tarpit: !!v })} />
-        {t('block.tarpitEnabled')}
-      </label>
-      {tarpit && (
-        <div className="space-y-1.5 pl-1">
-          <Label className="text-xs font-normal text-muted-foreground">{t('block.tarpitSeconds')}</Label>
-          <Input
-            type="number"
-            min={1}
-            max={60}
-            value={value?.tarpitSeconds ?? 5}
-            onChange={(e) => {
-              const n = Number(e.target.value);
-              onPatch({ tarpitSeconds: Number.isFinite(n) ? n : 5 });
-            }}
-          />
         </div>
       )}
     </div>

@@ -1,15 +1,15 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { disabledAddons, UI_ADDON_KEYS, type AddonKey } from './conflict-matrix'
+import { disabledAddons, UI_ADDON_KEYS, type AddonKey, type PrimaryAction } from './conflict-matrix'
 import type { AddonsState } from './validation'
 
-/** 丢弃 / 阻断后邮件不再投递，右栏「完整表达式」不列附加策略。 */
-export const TERMINAL_ACTIONS: Set<string> = new Set(['discard', 'block'])
+/** 丢弃后邮件不再投递，右栏「完整表达式」不列附加策略。 */
+export const TERMINAL_ACTIONS: Set<PrimaryAction> = new Set(['discard'])
 
 /** 已启用 ∧ 未被冲突禁用 ∧ 非 detailedLog，按 UI_ADDON_KEYS 的展示顺序返回。 */
-export function effectiveAddons(primaryAction: string, v: AddonsState): AddonKey[] {
-  const disabled = new Set(disabledAddons(primaryAction as any))
+export function effectiveAddons(primaryAction: PrimaryAction, v: AddonsState): AddonKey[] {
+  const disabled = new Set(disabledAddons(primaryAction))
   return UI_ADDON_KEYS.filter((k) => v[k]?.enabled && !disabled.has(k))
 }
 
@@ -43,7 +43,7 @@ export function DispositionSummary({
   addonsValue,
   actionSummary,
 }: {
-  primaryAction: string
+  primaryAction: PrimaryAction
   addonsValue: AddonsState
   actionSummary: string
 }) {
@@ -63,7 +63,7 @@ export function DispositionSummary({
               {t('disposition.policyGroup')}
             </h4>
             <p className="text-xs" data-testid="summary-action">
-              {t(`primaryActions.${primaryAction}` as any)}
+              {t(`primaryActions.${primaryAction}` as never)}
               {actionSummary ? ` — ${actionSummary}` : ''}
             </p>
           </section>
@@ -79,7 +79,7 @@ export function DispositionSummary({
             ) : (
               <ol className="text-xs list-decimal list-inside space-y-0.5" data-testid="summary-addon-list">
                 {addons.map((k) => (
-                  <li key={k}>{t(`addons.${k}` as any)}</li>
+                  <li key={k}>{t(`addons.${k}` as never)}</li>
                 ))}
               </ol>
             )}
@@ -97,7 +97,7 @@ export function DispositionSummary({
               <tbody>
                 {addons.map((k) => (
                   <tr key={k} className="border-t">
-                    <td className="py-1 pr-2 align-top">{t(`addons.${k}` as any)}</td>
+                    <td className="py-1 pr-2 align-top">{t(`addons.${k}` as never)}</td>
                     <td className="py-1 align-top break-all">{summarizeAddon(k, addonsValue)}</td>
                   </tr>
                 ))}

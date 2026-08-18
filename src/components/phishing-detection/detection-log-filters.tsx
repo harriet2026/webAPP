@@ -106,11 +106,12 @@ export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFi
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="phishing-log-filters">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[240px] flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
           <Input
+            data-testid="phishing-log-keyword"
             value={keywordDraft}
             onChange={(e) => setKeywordDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -191,6 +192,7 @@ export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFi
         />
 
         <Button
+          data-testid="phishing-log-search"
           size="sm"
           className="h-9 flex-shrink-0 gap-1.5 bg-blue-600 px-4 text-white hover:bg-blue-700"
           onClick={submitKeyword}
@@ -199,7 +201,7 @@ export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFi
           {tc('search')}
         </Button>
 
-        <Button variant="outline" size="sm" className="h-9 flex-shrink-0 gap-1.5 px-3" onClick={resetFilters}>
+        <Button data-testid="phishing-log-reset" variant="outline" size="sm" className="h-9 flex-shrink-0 gap-1.5 px-3" onClick={resetFilters}>
           <RotateCcw className="h-4 w-4" />
           {tc('reset')}
         </Button>

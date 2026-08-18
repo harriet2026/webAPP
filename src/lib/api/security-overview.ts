@@ -27,6 +27,18 @@ export const NON_SERIES_KEYS = new Set<string>(['success_rate', ...SUMMARY_KEYS]
 export interface SecurityOverviewParams {
   startDate?: string;
   endDate?: string;
+  /**
+   * Optional clock-of-day (HH:mm or HH:mm:ss) refining startDate / endDate,
+   * mirroring the delivery-traffic client's pair so the dashboard can ask both
+   * endpoints for exactly the same window.
+   * Omitted => the backend keeps its whole-day semantics
+   * ([startDate 00:00, endDate+1d 00:00)). Supplied => the window is
+   * [startDate startTime, endDate endTime), with the END clock EXCLUSIVE.
+   * Only the dashboard's "过去 24 小时" selector needs this; this page's own
+   * calendar-day picker must keep sending dates only.
+   */
+  startTime?: string;
+  endTime?: string;
   direction?: Direction;
   comparePreviousPeriod?: boolean;
   interval?: SecurityOverviewInterval;
@@ -233,6 +245,10 @@ export async function getSecurityOverview(
   const query = buildQuery({
     start_date: params.startDate,
     end_date: params.endDate,
+    // buildQuery drops undefined/'' — an omitted clock never reaches the wire,
+    // so date-only callers are byte-identical to before.
+    start_time: params.startTime,
+    end_time: params.endTime,
     direction: params.direction,
     compare_previous_period: params.comparePreviousPeriod,
     interval: params.interval,

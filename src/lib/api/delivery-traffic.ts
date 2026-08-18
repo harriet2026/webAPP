@@ -8,6 +8,16 @@ export interface DeliveryTrafficParams {
   direction?: Direction;
   startDate?: string;
   endDate?: string;
+  /**
+   * Optional clock-of-day (HH:mm or HH:mm:ss) refining startDate / endDate.
+   * Omitted => the backend keeps its whole-day semantics
+   * ([startDate 00:00, endDate+1d 00:00)). Supplied => the window is
+   * [startDate startTime, endDate endTime), with the END clock EXCLUSIVE.
+   * Only the dashboard's "过去 24 小时" selector needs this; the calendar-day
+   * pickers must keep sending dates only.
+   */
+  startTime?: string;
+  endTime?: string;
   tenantId?: number | null;
   interval?: DeliveryTrafficInterval;
 }
@@ -57,7 +67,6 @@ export interface LatencyBucket {
 }
 
 export interface LatencyData {
-  percentiles?: TrendPoint[];
   buckets?: LatencyBucket[];
 }
 
@@ -76,7 +85,6 @@ export interface DeliveryTrafficResponse {
   trend: TrendData;
   distribution: DistributionItem[];
   latency: LatencyData;
-  queue_trend?: TrendPoint[];
   detail_table: DetailTableRow[];
   generated_at?: string;
   data_lag_seconds?: number | null;
@@ -99,6 +107,10 @@ export async function fetchDeliveryTraffic(
   const query = buildQuery({
     start_date: params.startDate,
     end_date: params.endDate,
+    // buildQuery drops undefined/'' — an omitted clock never reaches the wire,
+    // so date-only callers are byte-identical to before.
+    start_time: params.startTime,
+    end_time: params.endTime,
     direction: params.direction,
     tenant_id: params.tenantId,
     interval: params.interval,

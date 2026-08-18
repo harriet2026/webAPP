@@ -5,6 +5,7 @@ import type {
   FilterConditionGroup,
 } from "@/types/log";
 import type { DisposalQuickFilter, AICondition } from "@/types/email-disposal";
+import { resolveExecutionActions } from "../lib/filter-state";
 
 // GT-11618: the quick-filter "emailStatus" (display_status) is NO LONGER mapped
 // to the backend "action" field here — that mapping was lossy (only 4 of the 13
@@ -72,11 +73,12 @@ export function useFilterMerger() {
           value: quick.subject,
         });
       }
-      if (quick.executionAction) {
+      const executionActions = resolveExecutionActions(quick);
+      if (executionActions.length > 0) {
         quickConditions.push({
           field: "action",
-          op: "eq",
-          value: quick.executionAction,
+          op: "in",
+          value: executionActions,
         });
       }
       if (quick.ipLocation) {

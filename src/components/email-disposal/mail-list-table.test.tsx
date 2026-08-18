@@ -34,7 +34,8 @@ function makeItem(id: number): DisposalMailItem {
     subject: `subject ${id}`,
     action: "quarantine",
     status: "quarantined",
-    displayStatus: "quarantine_pending",
+    // GT-12782 Task 4：后端下发的展示状态列表（一致邮件单元素）。
+    displayStatuses: [{ status: "quarantine_pending", count: 1 }],
   };
 }
 
@@ -55,6 +56,7 @@ function renderTable(
     onHeaderFiltersChange: vi.fn(),
     timeSort: "none",
     onTimeSortChange: vi.fn(),
+    requestFn: vi.fn().mockResolvedValue({}),
     ...overrides,
   };
   return render(
@@ -185,6 +187,105 @@ describe("MailListTable toolbar (GT-11580)", () => {
   });
 });
 
+// GT-12782 Task 4：门禁与状态列改读后端下发的 display_statuses 列表。
+// 门禁语义 = 「列表包含待处置/已投递类状态」——mixed 邮件按包含语义参与
+// （信里有待处置/已投递的收件人即可用），与筛选同源，刻意设计。
+describe("MailListTable display_statuses list consumption (GT-12782)", () => {
+  it("enables 批量放行 when every selected item's list contains a pending status (mixed containment)", () => {
+    const mixed: DisposalMailItem = {
+      ...makeItem(1),
+      action: "mixed",
+      displayStatuses: [
+        { status: "quarantine_pending", count: 1 },
+        { status: "delivered", count: 2 },
+      ],
+    };
+    renderTable({ items: [mixed], selectedIds: new Set([1]) });
+    expect(
+      screen.getByRole("button", { name: /emailDisposal\.batch\.release/ }),
+    ).toBeEnabled();
+    // 同一封信含已投递收件人 → 召回门禁同样按包含语义放开。
+    expect(
+      screen.getByRole("button", { name: /emailDisposal\.batch\.recall/ }),
+    ).toBeEnabled();
+  });
+
+  it("disables 批量放行/召回 when the list contains neither pending nor delivered statuses", () => {
+    const rejected: DisposalMailItem = {
+      ...makeItem(1),
+      action: "reject",
+      displayStatuses: [{ status: "rejected", count: 1 }],
+    };
+    renderTable({ items: [rejected], selectedIds: new Set([1]) });
+    expect(
+      screen.getByRole("button", { name: /emailDisposal\.batch\.release/ }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /emailDisposal\.batch\.recall/ }),
+    ).toBeDisabled();
+  });
+
+  it("renders a single badge for a single-element list (existing look)", () => {
+    renderTable({ items: [makeItem(1)] });
+    expect(
+      screen.getByText("emailDisposal.filters.statuses.quarantine_pending"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the risk-primary badge from a multi-element authoritative list", () => {
+    const mixed: DisposalMailItem = {
+      ...makeItem(1),
+      action: "mixed",
+      displayStatuses: [
+        { status: "quarantine_pending", count: 1 },
+        { status: "delivered", count: 2 },
+      ],
+    };
+    const { container } = renderTable({ items: [mixed] });
+    expect(container.textContent).toContain(
+      "emailDisposal.filters.statuses.quarantine_pending 1",
+    );
+    expect(container.textContent).toContain("+1");
+    expect(container.textContent).not.toContain(
+      "emailDisposal.filters.statuses.delivered 2",
+    );
+  });
+
+  it("prioritizes the active display-status filter without deriving from recipients", () => {
+    const mixed: DisposalMailItem = {
+      ...makeItem(1),
+      action: "mixed",
+      displayStatuses: [
+        { status: "quarantine_pending", count: 1 },
+        { status: "delivered", count: 6 },
+      ],
+    };
+    const { container } = renderTable({
+      items: [mixed],
+      activeDisplayStatuses: ["delivered"],
+    });
+    expect(container.textContent).toContain(
+      "emailDisposal.filters.statuses.delivered 6",
+    );
+  });
+
+  it("renders authoritative recall status for mixed mail even when recipient dispositions exist", () => {
+    const recalled: DisposalMailItem = {
+      ...makeItem(1),
+      action: "mixed",
+      displayStatuses: [{ status: "recall_success", count: 1 }],
+      recipientDispositions: [
+        { recipient: "ok@example.com", final_action: "accept", status: "delivered" },
+        { recipient: "held@example.com", final_action: "quarantine", status: "quarantined" },
+      ],
+    };
+
+    renderTable({ items: [recalled] });
+    expect(screen.getByText("emailDisposal.filters.statuses.recall_success")).toBeInTheDocument();
+    expect(screen.queryByText("emailDisposal.filters.statuses.delivered")).not.toBeInTheDocument();
+  });
+});
+
 // GT-12585: 勾选列在横向滚动时固定在表格左侧（与右侧 sticky 操作列同款
 // 模式：sticky + 不透明背景遮挡滚过的内容 + border 分隔）。
 describe("MailListTable sticky select column (GT-12585)", () => {
@@ -237,5 +338,46 @@ describe("处置依据列的 reason 回退 (GT-12578/GT-12686)", () => {
     };
     const { container } = renderTable({ items: [item] });
     expect(container.textContent).toContain("—");
+  });
+});
+
+// GT-12727：只命中 feature-processing（mail_marking / 高级过滤 tagDeliver）的邮件
+// 现在**会**拿到一个 disposal_basis 对象——policy_key 为空、只带 modules 命中清单。
+// 若这一列的门写成 `item.disposalBasis ?`（按对象是否存在开门），就会走进
+// formatListReason，而它在 !policy_key 时返回空串 → 单元格渲染成空白，
+// reason 兜底分支再也进不去，直接回退上面 GT-12578/GT-12686 修的那个问题。
+describe("处置依据列：policy_key 为空的 disposal_basis 不得吞掉 reason 回退 (GT-12727)", () => {
+  it("disposalBasis 存在但 policy_key 为空时仍显示 reason", () => {
+    const item: DisposalMailItem = {
+      ...makeItem(1),
+      disposalBasis: {
+        policy_key: "",
+        modules: [
+          { policy_key: "", rule_name: "接收标记规则", action: "accept" },
+        ],
+      },
+      reason: "rule f01-receive-mark-001 matched at data stage",
+    };
+    renderTable({ items: [item] });
+    expect(
+      screen.getAllByText("rule f01-receive-mark-001 matched at data stage").length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("policy_key 非空时照常走 formatListReason", () => {
+    const item: DisposalMailItem = {
+      ...makeItem(1),
+      disposalBasis: {
+        policy_key: "CR",
+        rule_name: "内容规则A",
+        rule_id: "CR-66",
+        action: "quarantine",
+        hit_values: { match_method: "keyword", match_content: "发票" },
+      },
+      reason: "should not be used",
+    };
+    const { container } = renderTable({ items: [item] });
+    expect(container.textContent).toContain("内容规则A");
+    expect(container.textContent).not.toContain("should not be used");
   });
 });

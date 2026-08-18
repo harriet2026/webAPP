@@ -8,6 +8,7 @@ import {
   getDisposalFilterSignature,
   hasSavableDisposalFilters,
   isCompleteFilterCondition,
+  resolvePositiveEnumFilterValues,
 } from "./filter-state";
 
 describe("email disposal filter state", () => {
@@ -37,7 +38,7 @@ describe("email disposal filter state", () => {
       countQuickFilterConditions({
         subject: "invoice",
         emailStatus: "delivered",
-        emailStatuses: ["rejected", "bounced"],
+        emailStatuses: ["rejected", "delivery_failed"],
         emailTypes: ["spam", "phishing"],
         sendReceiveTime: { start: "2026-07-01", end: "" },
       }),
@@ -76,5 +77,51 @@ describe("email disposal filter state", () => {
       getDisposalFilterSignature({}, withPlaceholder, [], null),
     );
     expect(getApplicableAdvancedFilter(withPlaceholder).groups).toEqual([]);
+  });
+
+  it("collects positive enum eq/in values for mixed-badge explanations", () => {
+    expect(
+      resolvePositiveEnumFilterValues(
+        {
+          operator: "AND",
+          groups: [
+            {
+              operator: "AND",
+              conditions: [
+                { field: "action", op: "eq", value: "deliver" },
+                { field: "action", op: "in", value: ["quarantine", "deliver"] },
+                { field: "action", op: "neq", value: "drop" },
+                { field: "display_status", op: "eq", value: "delivered" },
+              ],
+            },
+          ],
+        },
+        "action",
+      ),
+    ).toEqual(["deliver", "quarantine"]);
+  });
+
+  it("does not treat positive conditions inside a negated group as badge highlights", () => {
+    expect(
+      resolvePositiveEnumFilterValues(
+        {
+          operator: "OR",
+          groups: [
+            {
+              not: true,
+              operator: "AND",
+              conditions: [
+                { field: "display_status", op: "eq", value: "delivered" },
+              ],
+            },
+            {
+              operator: "AND",
+              conditions: [{ field: "subject", op: "contains", value: "report" }],
+            },
+          ],
+        },
+        "display_status",
+      ),
+    ).toEqual([]);
   });
 });

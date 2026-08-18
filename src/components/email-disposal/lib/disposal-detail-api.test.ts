@@ -1,6 +1,46 @@
 import { describe, expect, test, vi } from 'vitest';
-import { addAttachmentHashRule, addUrlRule, disposeByObject } from './disposal-detail-api';
+import { blacklistMailLogEntity, disposeByObject, getMailLogAnalysis } from './disposal-detail-api';
 import type { ApiRequestFn } from '@/lib/api/client';
+
+describe('getMailLogAnalysis', () => {
+  test('encodes the selected recipient and normalizes snake_case stage fields', async () => {
+    const requestFn = vi.fn().mockResolvedValue({
+      scope: 'recipient',
+      recipient: 'A+B@example.test',
+      action: 'quarantine',
+      status: 'quarantined',
+      final_verdict: 'malicious',
+      total_elapsed_ms: 42,
+      stages: [
+        {
+          stage: 3,
+          key: 'content',
+          status: 'threat',
+          duration_ms: 17,
+          checks: [{
+            key: 'contentRules',
+            status: 'threat',
+            rule_ids: [7, 9],
+            recipient_groups: [
+              { recipients: ['A+B@example.test'], status: 'threat', rule_ids: [7, 9] },
+              { recipients: ['clean@example.test'], status: 'pass', rule_ids: [] },
+            ],
+          }],
+        },
+      ],
+    }) as unknown as ApiRequestFn;
+
+    const result = await getMailLogAnalysis(42, 'A+B@example.test', requestFn);
+
+    expect(requestFn).toHaveBeenCalledWith('/mail-logs/42/analysis?recipient=A%2BB%40example.test');
+    expect(result.stages[0]).toMatchObject({ durationMs: 17 });
+    expect(result.stages[0].checks[0]).toMatchObject({ ruleIds: [7, 9] });
+    expect(result.stages[0].checks[0].recipientGroups).toEqual([
+      { recipients: ['A+B@example.test'], status: 'threat', ruleIds: [7, 9] },
+      { recipients: ['clean@example.test'], status: 'pass', ruleIds: [] },
+    ]);
+  });
+});
 
 describe('disposeByObject', () => {
   test('omits final_type from the request body when undefined', async () => {
@@ -22,53 +62,34 @@ describe('disposeByObject', () => {
   });
 });
 
-describe('addUrlRule', () => {
-  test('domain field: page=url_protection, field=urls, operator=contain, value=domain', async () => {
+describe('blacklistMailLogEntity', () => {
+  test('sends only mail id, entity kind and value to the semantic backend action', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
-    await addUrlRule('evil.com', 'domain', requestFn, 5000);
+    await blacklistMailLogEntity(42, 'domain', 'evil.com', requestFn);
 
     expect(requestFn).toHaveBeenCalledTimes(1);
     const [url, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(url).toContain('/unified-rules');
+    expect(url).toBe('/mail-logs/42/blacklist');
     expect(opts.method).toBe('POST');
-    expect(opts.body).toMatchObject({
-      page: 'url_protection',
-      rule_class: 'action',
-      stage: 'data',
-      action: 'reject',
-      priority: 5000,
-      condition_tree: { type: 'condition', field: 'urls', operator: 'contain', value: 'evil.com' },
-    });
+    expect(opts.body).toEqual({ kind: 'domain', value: 'evil.com' });
+    expect(opts.body).not.toHaveProperty('priority');
+    expect(opts.body).not.toHaveProperty('condition_tree');
   });
 
-  test('url field: same field/operator, full URL as value', async () => {
+  test('preserves a full URL as the action value', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
-    await addUrlRule('https://evil.com/phish', 'url', requestFn, 1000);
+    await blacklistMailLogEntity(7, 'url', 'https://evil.com/phish', requestFn);
 
     const [, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(opts.body.priority).toBe(1000);
-    expect(opts.body.condition_tree).toEqual({
-      type: 'condition', field: 'urls', operator: 'contain', value: 'https://evil.com/phish',
-    });
+    expect(opts.body).toEqual({ kind: 'url', value: 'https://evil.com/phish' });
   });
-});
 
-describe('addAttachmentHashRule', () => {
-  test('page=attachment_security, stage=sideline, field=attachment_md5, operator=eq', async () => {
+  test('uses the attachment_hash kind for an MD5 entity', async () => {
     const requestFn = vi.fn().mockResolvedValue({}) as unknown as ApiRequestFn;
-    await addAttachmentHashRule('deadbeef', requestFn, 1000);
+    const md5 = 'deadbeefdeadbeefdeadbeefdeadbeef';
+    await blacklistMailLogEntity(9, 'attachment_hash', md5, requestFn);
 
-    expect(requestFn).toHaveBeenCalledTimes(1);
-    const [url, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(url).toContain('/unified-rules');
-    expect(opts.method).toBe('POST');
-    expect(opts.body).toMatchObject({
-      page: 'attachment_security',
-      rule_class: 'action',
-      stage: 'sideline',
-      action: 'reject',
-      priority: 1000,
-      condition_tree: { type: 'condition', field: 'attachment_md5', operator: 'eq', value: 'deadbeef' },
-    });
+    const [, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(opts.body).toEqual({ kind: 'attachment_hash', value: md5 });
   });
 });

@@ -58,18 +58,7 @@ describe('ActionsTab — conflict matrix three states', () => {
     expect(rowIsDisabled('emailTag')).toBe(false);
   });
 
-  it('block: only adminNotify remains available, the other six addon rows are disabled', () => {
-    renderTab('block');
-    expect(rowIsDisabled('adminNotify')).toBe(false);
-    expect(rowIsDisabled('disclaimer')).toBe(true);
-    expect(rowIsDisabled('externalReminder')).toBe(true);
-    expect(rowIsDisabled('deleteAttachment')).toBe(true);
-    expect(rowIsDisabled('emailTag')).toBe(true);
-    expect(rowIsDisabled('forwardServer')).toBe(true);
-    expect(rowIsDisabled('modifyHeader')).toBe(true);
-  });
-
-  it('discard: same disabled set as block (only adminNotify available)', () => {
+  it('discard: only adminNotify remains available', () => {
     renderTab('discard');
     expect(rowIsDisabled('adminNotify')).toBe(false);
     expect(rowIsDisabled('disclaimer')).toBe(true);
@@ -84,7 +73,7 @@ describe('ActionsTab — conflict matrix three states', () => {
   });
 
   it('configure-action-button appears once a non-none action is selected', () => {
-    renderTab('block');
+    renderTab('discard');
     expect(screen.getByTestId('configure-action-button')).toBeTruthy();
     expect(screen.queryByTestId('none-action-hint')).toBeNull();
   });

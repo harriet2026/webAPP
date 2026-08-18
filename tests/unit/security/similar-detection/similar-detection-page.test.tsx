@@ -192,10 +192,6 @@ describe('SimilarDetectionPage', () => {
     expect(getCalls.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('豁免提示条链接指向 /security/groups', async () => {
-    setupApi();
-    renderPage();
-    await waitFor(() => expect(screen.getByText('goToGroupPolicy')).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: /goToGroupPolicy/ })).toHaveAttribute('href', '/security/groups');
-  });
+  // 原「豁免提示条链接指向 /security/groups」用例已随 GT-12791 变更3 ③ 删除：
+  // 该提示条（renderExemptionNote + goToGroupPolicy 链接）整体从页面移除。
 });

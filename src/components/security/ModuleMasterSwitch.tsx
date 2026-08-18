@@ -48,9 +48,11 @@ interface Props {
   actions?: React.ReactNode;
   /** Keep the toggle as a draft until the user explicitly saves it. */
   deferred?: boolean;
+  /** 向父级（策略流水线左导航）回传当前启用态，用于圆点/摘要联动。 */
+  onEnabledChange?: (enabled: boolean) => void;
 }
 
-export function ModuleMasterSwitch({ page, children, title, actions, deferred = false }: Props) {
+export function ModuleMasterSwitch({ page, children, title, actions, deferred = false, onEnabledChange }: Props) {
   const t = useTranslations('securityModules');
   const pipelineT = useTranslations('pipeline');
   const common = useTranslations('common');
@@ -76,6 +78,10 @@ export function ModuleMasterSwitch({ page, children, title, actions, deferred = 
   const [enabled, setEnabled] = useState(true);
   const [persistedEnabled, setPersistedEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  // 用户是否手动操作过开关。加载失败时不上报乐观默认值（避免误覆盖父级兜底真值），
+  // 但用户一旦手动切换，值即为用户驱动，应当上报。
+  const [userInteracted, setUserInteracted] = useState(false);
 
   useEffect(() => {
     getSecurityModules(apiRequest)
@@ -83,11 +89,22 @@ export function ModuleMasterSwitch({ page, children, title, actions, deferred = 
         const next = m[page] ?? true;
         setEnabled(next);
         setPersistedEnabled(next);
+        setLoaded(true);
       })
+      // 加载失败：保持 loaded=false，不上报乐观默认值 true，
+      // 让父级继续以 securityModulesMap 兜底真值为准。
       .catch(() => {});
   }, [apiRequest, page]);
 
+  // 启用态回传给父级，使策略流水线左导航圆点/摘要与本面板总开关联动。
+  // 仅在「加载成功」或「用户手动操作过」后回传，避免首帧乐观默认值 true
+  // 覆盖父级兜底真值（GT-12731 闪回）。
+  useEffect(() => {
+    if (loaded || userInteracted) onEnabledChange?.(enabled);
+  }, [loaded, userInteracted, enabled, onEnabledChange]);
+
   const handleToggle = async (next: boolean) => {
+    setUserInteracted(true);
     if (deferred) {
       setEnabled(next);
       return;

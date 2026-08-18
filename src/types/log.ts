@@ -141,6 +141,9 @@ export interface MailChildEvent {
   event_source: string;
   event_type: string;
   event_result: string;
+  /** 同一次业务动作的关联键（后端 delivery_facts.source_ref）。召回的发起事件与终态
+   *  事件共用它，时间线据此把一次召回折叠成一行。workflow 族等事件为空。 */
+  source_ref?: string;
   queue_id: string;
   parent_queue_id?: string;
   message_id?: string;

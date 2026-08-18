@@ -19,21 +19,26 @@ import {
 import { AuthFlowDiagram } from './AuthFlowDiagram';
 import { ConfigHealthPanel } from './ConfigHealthPanel';
 import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
+import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
 import { protocolActionShortKey, protocolActionDescKey, dominantAction } from '@/lib/auth-spoofing-labels';
 import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// D5 裁决（2026-08-11）：spf.permerror 与 dkim.temperror 后端一直有规则、界面却
+// 没有对应行——前端保存时不传这两项，后端把缺失项重置为关闭，等于**每保存一次
+// 就静默关掉一项检查**。补上行即闭合。守卫测试见后端
+// TestProtocolCheckSubkeysMatchFrontend（它直接解析本文件的 keys）。
 const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string; keys: string[] }[] = [
-  { key: 'spf', labelKey: 'protocolChecks.spf', keys: ['fail', 'softfail', 'none', 'temperror'] },
-  { key: 'dkim', labelKey: 'protocolChecks.dkim', keys: ['fail', 'neutral', 'partial', 'none'] },
+  { key: 'spf', labelKey: 'protocolChecks.spf', keys: ['fail', 'softfail', 'none', 'temperror', 'permerror'] },
+  { key: 'dkim', labelKey: 'protocolChecks.dkim', keys: ['fail', 'neutral', 'partial', 'none', 'temperror'] },
   { key: 'dmarc', labelKey: 'protocolChecks.dmarc', keys: ['reject', 'quarantine', 'none', 'no_record', 'query_fail'] },
   { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['noptr', 'nomatch', 'ehlo_mismatch'] },
 ];
 
-/** DMARC has no "accept" option (demo: block/drop/quarantine/tag only); the rest offer all 5 unified actions. */
-const PROTOCOL_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'accept'];
-const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit'];
+/** All protocols including DMARC now offer all 5 unified actions (reject/discard/quarantine/audit/mark-delivery). */
+const PROTOCOL_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery'];
+const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 'audit', 'mark-delivery'];
 
 const TEMPLATE_NAMES: Template[] = ['loose', 'standard', 'strict', 'custom'];
 
@@ -168,47 +173,73 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                       // Always render every defined subkey row; if the loaded config
                       // omits it (e.g. an older backend payload), fall back to a default
                       // item so the demo's full row set still shows and Save writes it back.
-                      const item: CheckItem = config[g.key]?.[subkey] ?? { enabled: false, action: 'accept', observe_mode: false };
+                      const item: CheckItem = config[g.key]?.[subkey] ?? { enabled: true, action: 'mark-delivery', observe_mode: false };
                       const label = t(`protocolChecks.${g.key}_${subkey}` as any);
                       const desc = t(`protocolChecks.${g.key}_${subkey}Desc` as any);
                       const isDisabled = lockNonCustom || (g.key === 'ptr' && ptrReadonly);
                       const actions = g.key === 'dmarc' ? DMARC_ACTIONS : PROTOCOL_ACTIONS;
+                      const showTagPanel = item.enabled && item.action === 'mark-delivery';
                       return (
                         <div
                           key={subkey}
-                          className="flex items-center justify-between gap-3 rounded-lg border bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900"
+                          className="space-y-2 rounded-lg border bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900"
                         >
-                          <div>
-                            <div className="text-sm font-medium">{label}</div>
-                            <div className="text-xs text-muted-foreground">{desc}</div>
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{label}</span>
+                                {!item.enabled && (
+                                  <span
+                                    data-testid={`legacy-disabled-${g.key}-${subkey}`}
+                                    className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
+                                  >
+                                    {t('legacyDisabled')}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground">{desc}</div>
+                            </div>
+                            <Select
+                              value={item.action}
+                              onValueChange={(v) =>
+                                handleCheckChange(g.key, subkey, {
+                                  ...item,
+                                  action: v as AuthSpoofingAction,
+                                  enabled: true,
+                                })
+                              }
+                              disabled={isDisabled}
+                            >
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue>{t(protocolActionShortKey(item.action) as any)}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent alignItemWithTrigger={false} className="w-72">
+                                {actions.map((a) => (
+                                  <SelectItem key={a} value={a}>
+                                    <div className="flex flex-col gap-0.5 py-0.5">
+                                      <span>{t(protocolActionShortKey(a) as any)}</span>
+                                      <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
+                                        {t(protocolActionDescKey(a) as any)}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                          <Select
-                            value={item.action}
-                            onValueChange={(v) =>
-                              handleCheckChange(g.key, subkey, {
-                                ...item,
-                                action: v as AuthSpoofingAction,
-                                enabled: (v as AuthSpoofingAction) !== 'accept',
-                              })
-                            }
-                            disabled={isDisabled}
-                          >
-                            <SelectTrigger className="w-[140px]">
-                              <SelectValue>{t(protocolActionShortKey(item.action) as any)}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent alignItemWithTrigger={false} className="w-72">
-                              {actions.map((a) => (
-                                <SelectItem key={a} value={a}>
-                                  <div className="flex flex-col gap-0.5 py-0.5">
-                                    <span>{t(protocolActionShortKey(a) as any)}</span>
-                                    <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                                      {t(protocolActionDescKey(a) as any)}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          {/* 存量配置提示：库里 {enabled:false, action:"accept"} 的行含义是
+                              「这项检查关着」。新模型没有关闭入口，所以只标注、不自动转换
+                              （后端 GET 也原样返回），并提醒改动动作后无法恢复。 */}
+                          {!item.enabled && (
+                            <p className="text-xs text-muted-foreground">{t('legacyDisabledHint')}</p>
+                          )}
+                          {showTagPanel && (
+                            <AuthSpoofingTagPanel
+                              value={item}
+                              onChange={(patch) => handleCheckChange(g.key, subkey, { ...item, ...patch })}
+                              disabled={isDisabled}
+                            />
+                          )}
                         </div>
                       );
                     })}

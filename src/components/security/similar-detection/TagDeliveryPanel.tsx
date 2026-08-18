@@ -37,11 +37,11 @@ export function TagDeliveryPanel({ value, onChange, disabled }: Props) {
               onValueChange={(v) => onChange({ tag_subject_position: v as 'prefix' | 'suffix' })}
               className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <RadioGroupItem value="prefix" id={`${uid}-prefix`} />
+                <RadioGroupItem value="prefix" id={`${uid}-prefix`} data-testid="similar-detection-tag-subject-position-prefix" />
                 <Label htmlFor={`${uid}-prefix`} className="text-sm font-normal">{t('tagPositionPrefix')}</Label>
               </div>
               <div className="flex items-center gap-1.5">
-                <RadioGroupItem value="suffix" id={`${uid}-suffix`} />
+                <RadioGroupItem value="suffix" id={`${uid}-suffix`} data-testid="similar-detection-tag-subject-position-suffix" />
                 <Label htmlFor={`${uid}-suffix`} className="text-sm font-normal">{t('tagPositionSuffix')}</Label>
               </div>
             </RadioGroup>
@@ -63,6 +63,29 @@ export function TagDeliveryPanel({ value, onChange, disabled }: Props) {
               onChange={(e) => onChange({ tag_header_name: e.target.value })} className="w-[220px] h-8" />
             <Input value={value.tag_header_value || ''} disabled={disabled} placeholder={t('tagHeaderValuePlaceholder')}
               onChange={(e) => onChange({ tag_header_value: e.target.value })} className="flex-1 min-w-[140px] h-8" />
+          </div>
+        )}
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Switch
+            data-testid="similar-detection-tag-body-switch"
+            checked={!!value.tag_body_enabled}
+            disabled={disabled}
+            onCheckedChange={(checked) => onChange({ tag_body_enabled: checked })}
+          />
+          <Label className="text-sm">{t('tagBodyLabel')}</Label>
+        </div>
+        {value.tag_body_enabled && (
+          <div className="pl-10">
+            <Input
+              value={value.tag_body_content || ''}
+              disabled={disabled}
+              placeholder={t('tagBodyPlaceholder')}
+              onChange={(e) => onChange({ tag_body_content: e.target.value })}
+              className="h-8 w-full"
+              data-testid="similar-detection-tag-body-content"
+            />
           </div>
         )}
       </div>

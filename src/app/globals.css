@@ -210,3 +210,17 @@
     display: none;
   }
 }
+
+/* 告警跑马灯：内容横向无限滚动，hover 暂停（监控总览 GT 告警跑马灯）。
+   demo 原为 globals.css 的 @keyframes marquee + .animate-marquee，落地时遗漏。 */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@utility animate-marquee {
+  animation: marquee 30s linear infinite;
+
+  &:hover {
+    animation-play-state: paused;
+  }
+}

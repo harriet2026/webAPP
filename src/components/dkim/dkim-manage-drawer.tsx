@@ -12,7 +12,6 @@ import {
   Upload,
   KeyRound,
   CheckCircle2,
-  ExternalLink,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,6 @@ import { toast } from 'sonner';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const SELECTOR_RE = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
-const DKIM_SETUP_DOC = 'https://github.com/your-org/osgateway/blob/master/doc/dkim-setup.md';
 
 type AlgorithmChoice = 'rsa-2048' | 'rsa-3072' | 'rsa-4096' | 'ed25519';
 
@@ -207,15 +205,6 @@ export function DkimManageDrawer({ open, onOpenChange, tenantId, domain }: DkimM
             </SheetTitle>
             <SheetDescription className="flex items-center gap-1">
               {t('manageDescription')}
-              <a
-                href={DKIM_SETUP_DOC}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-0.5 text-primary hover:underline"
-              >
-                {t('setupGuide')}
-                <ExternalLink className="h-3 w-3" />
-              </a>
             </SheetDescription>
           </SheetHeader>
 

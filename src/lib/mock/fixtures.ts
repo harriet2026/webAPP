@@ -8,18 +8,25 @@
 // 而不是 404，这样页面不会因为单个接口缺失就整页崩掉。
 
 import type { Bootstrap } from "@/lib/api/bootstrap";
+import { normalizeRawActionToExecutionAction } from "@/lib/email-log-action";
 import canonicalRegistry from "@/lib/product-form/__fixtures__/registry_for_test.json";
 import type { FeatureDef } from "@/lib/product-form/resolve";
 import type { LinkClickLog } from "@/lib/api/link-clicks";
 import type { AuthAttempt, AuthAttemptStats } from "@/lib/api/auth-attempts";
 import type { AdminAuditLog } from "@/lib/api/admin-audit";
 import type { DeliveryTrafficResponse, DetailTableRow, Direction } from "@/lib/api/delivery-traffic";
+import type { SystemStatusSummaryResponse } from "@/lib/api/system-status-summary";
 import type {
   LinkAttachmentStats,
   TopMaliciousAttachment,
   TopMaliciousDomain,
 } from "@/lib/api/link-attachment-security";
 import type { TenantListResponse, TenantStats } from "@/types/tenant";
+import {
+  DISPLAY_STATUSES,
+  type DisposalBasis,
+  type DisposalBasisGroupSummary,
+} from "@/types/email-disposal";
 import type {
   IPFrequencyRuleView,
   IPFrequencyRulePayload,
@@ -805,6 +812,33 @@ export function mockSecurityOverviewFor(
   };
 }
 
+export function mockSystemStatusSummaryFor(
+  startDate: string,
+  endDate: string,
+  interval?: string,
+): SystemStatusSummaryResponse {
+  const { range } = noteDashboardWindow(startDate, endDate);
+  const totals = DASH_TOTALS[range];
+  const security = mockSecurityOverviewFor(startDate, endDate, false, interval);
+  return {
+    current: {
+      mail_volume: totals.cur,
+      threats: SECURITY_KPI.blocked,
+      block_rate: SECURITY_KPI.block_rate,
+    },
+    previous: {
+      mail_volume: totals.prev,
+      // The two legacy mock security-overview calls returned the same KPI.
+      // Keep that demo behaviour while consolidating them into one response.
+      threats: SECURITY_KPI.blocked,
+      block_rate: SECURITY_KPI.block_rate,
+    },
+    threat_trend: security.trend.email_type ?? [],
+    pending_disposal: DISPOSAL_PENDING[range],
+    generated_at: new Date().toISOString(),
+  };
+}
+
 const GEO_COUNTRIES = [
   ["US", 1245, 97.2], ["BR", 532, 95.1], ["NL", 356, 98.3], ["RU", 289, 96.5],
   ["CN", 234, 99.1], ["DE", 198, 97.8], ["IN", 167, 94.2], ["VN", 145, 96.9],
@@ -1318,11 +1352,11 @@ export function mockMonitorHardware(range: "1h" | "24h" | "7d"): HardwareResp {
     cpu_mem: { points: monitorPoints(count, 45, 8) },
     mem_trend: { points: monitorPoints(count, 62, 5) },
     network_top5: [
-      { device: "eth0", rx_pps: 12540, tx_pps: 8630, drop_rate: 0.02, retransmit_rate: 0.12 },
-      { device: "eth1", rx_pps: 8920, tx_pps: 6740, drop_rate: 0.01, retransmit_rate: 0.08 },
-      { device: "docker0", rx_pps: 4210, tx_pps: 3980, drop_rate: 0, retransmit_rate: 0.03 },
-      { device: "lo", rx_pps: 3180, tx_pps: 3180, drop_rate: 0, retransmit_rate: 0 },
-      { device: "br-abc123", rx_pps: 1850, tx_pps: 1620, drop_rate: 0.01, retransmit_rate: 0.04 },
+      { device: "eth0", rx_mbps: 128.4, tx_mbps: 86.2, rx_pps: 12540, tx_pps: 8630, drop_rate: 0.02, retransmit_rate: null },
+      { device: "eth1", rx_mbps: 92.8, tx_mbps: 64.7, rx_pps: 8920, tx_pps: 6740, drop_rate: 0.01, retransmit_rate: null },
+      { device: "docker0", rx_mbps: 31.5, tx_mbps: 29.8, rx_pps: 4210, tx_pps: 3980, drop_rate: 0, retransmit_rate: null },
+      { device: "lo", rx_mbps: 18.2, tx_mbps: 18.2, rx_pps: 3180, tx_pps: 3180, drop_rate: 0, retransmit_rate: null },
+      { device: "br-abc123", rx_mbps: 12.6, tx_mbps: 10.9, rx_pps: 1850, tx_pps: 1620, drop_rate: 0.01, retransmit_rate: null },
     ],
   };
 }
@@ -3906,7 +3940,7 @@ function normalizeContentRule(
     description: String(source.description ?? previous?.description ?? ""),
     page: "content_rules",
     rule_class: "action",
-    stage: "data",
+    stage: String(source.stage ?? previous?.stage ?? "data") as Rule["stage"],
     priority: Number(source.priority ?? previous?.priority ?? 100),
     condition_tree: JSON.stringify(conditionTree),
     action: String(source.action ?? previous?.action ?? "quarantine"),
@@ -5210,6 +5244,14 @@ interface MockDisposalSeed {
   // isMixed -- 标记这封邮件是多收件人混合处置（action='mixed'），mockMailLog
   // 据此生成 disposition_actions + 逐收件人 final_action 各异的 dispositions。
   isMixed?: boolean;
+  // mixedBasis 与 recipients 按下标对齐。mock 会按正式 modules[] 契约把同一
+  // 规则的收件人合并，并只在详情接口返回地址数组；列表仅返回计数摘要。
+  mixedBasis?: Array<{
+    policyKey: string;
+    ruleName: string;
+    ruleId: string;
+    hitValues?: Record<string, string>;
+  }>;
 }
 
 const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
@@ -5256,6 +5298,16 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     score: 35,
     basis: ["CONTENT", "内容关键字匹配", "CT-007"],
     isMixed: true,
+    mixedBasis: [
+      { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
+      { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
+      { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
+      { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
+      { policyKey: "SIM", ruleName: "相似邮件批量检测", ruleId: "SIM-077", hitValues: { similar_type: "营销", dimension: "正文", similarity: "91" } },
+      { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
+      { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
+      { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
+    ],
   },
   {
     tid: "MIC002",
@@ -6322,12 +6374,47 @@ function recipientStatusFor(
   recipientCount: number,
   index: number,
 ): string {
+  // 直投邮件进入与正式后端相同的 per-recipient 展示模式；它的 status 必须承载
+  // 真实投递结果，不能继续套 demo 的五态处置分布。部分投递固定最后一人失败，
+  // 与 displayStatusesOf 及测试使用的 5 成 1 败契约一致。
+  if (!seed.isMixed && disposalAction(seed) === "accept") {
+    switch (seed.deliveryStatus) {
+      case "delivered":
+        return "delivered";
+      case "failed":
+      case "delivery_failed":
+        return "delivery_failed";
+      case "partial_delivered":
+        return index === recipientCount - 1 ? "delivery_failed" : "delivered";
+      case "cancelled":
+        return "cancelled";
+      default:
+        return "delivering";
+    }
+  }
   if (recipientCount > 1) {
     return MULTI_RECIPIENT_STATUS_DISTRIBUTION[
       index % MULTI_RECIPIENT_STATUS_DISTRIBUTION.length
     ];
   }
   return recipientDisposalStatus(seed);
+}
+
+function objectKindForRecipientStatus(
+  status: string,
+  direction: MockDisposalSeed["direction"],
+): string | undefined {
+  switch (status) {
+    case "quarantined":
+      return "quarantine";
+    case "sidelined":
+      return "sideline";
+    case "audited":
+    case "pending_review":
+      return direction === "outgoing" ? "outbound_audit" : "inbound_audit";
+    default:
+      return undefined;
+  }
 }
 
 // 附件 + 扫描结果 mock：数据照抄 demo mockEntities.attachments（同一份
@@ -6340,7 +6427,7 @@ function mockAttachmentsFor(seed: MockDisposalSeed) {
     {
       filename: "report.pdf",
       size: 1_258_291, // ~1.2MB，照抄 demo
-      md5sum: "abc123mockmd5",
+      md5sum: "abc12300000000000000000000000000",
       content_type: "application/pdf",
       inline: false,
       content_length: 1_258_291,
@@ -6348,7 +6435,7 @@ function mockAttachmentsFor(seed: MockDisposalSeed) {
     {
       filename: "invoice.xlsx",
       size: 876_544, // ~856KB，照抄 demo
-      md5sum: "def456mockmd5",
+      md5sum: "def45600000000000000000000000000",
       content_type:
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       inline: false,
@@ -6363,7 +6450,7 @@ function mockAttachmentsFor(seed: MockDisposalSeed) {
       antivirus_result: "clean",
       final_disposition: disposalAction(seed),
       is_encrypted: false,
-      attachment_md5: "abc123mockmd5",
+      attachment_md5: "abc12300000000000000000000000000",
       qr_code_count: 0,
       qr_code_text: null,
       is_zip_bomb: false,
@@ -6377,7 +6464,7 @@ function mockAttachmentsFor(seed: MockDisposalSeed) {
       antivirus_result: seed.mailType === "virus" ? "virus" : "suspicious",
       final_disposition: disposalAction(seed),
       is_encrypted: false,
-      attachment_md5: "def456mockmd5",
+      attachment_md5: "def45600000000000000000000000000",
       qr_code_count: seed.hasQrCode ? 1 : 0,
       qr_code_text: seed.hasQrCode
         ? "https://suspicious.example/mock-login"
@@ -6393,9 +6480,9 @@ function mockAttachmentsFor(seed: MockDisposalSeed) {
   return { attachments, scanResults };
 }
 
-function disposalBasis(seed: MockDisposalSeed) {
+function disposalBasis(seed: MockDisposalSeed): DisposalBasis | undefined {
   if (!seed.basis) return undefined;
-  return {
+  const base: DisposalBasis = {
     policy_key: seed.basis[0],
     rule_name: seed.basis[1],
     rule_id: seed.basis[2],
@@ -6409,15 +6496,43 @@ function disposalBasis(seed: MockDisposalSeed) {
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
   };
+  if (!seed.isMixed || !seed.mixedBasis?.length) return base;
+
+  const recipients = seed.recipients.split(",").map((item) => item.trim());
+  const mixedActions = ["accept", "accept", "accept", "quarantine", "sideline"];
+  const modules = new Map<string, DisposalBasis>();
+  seed.mixedBasis.forEach((entry, index) => {
+    const action = mixedActions[index] ?? disposalAction(seed);
+    const key = JSON.stringify([entry.policyKey, entry.ruleId, entry.ruleName, action]);
+    const recipient = recipients[index];
+    if (!recipient) return;
+    const existing = modules.get(key);
+    if (existing) {
+      existing.recipients!.push(recipient);
+      existing.effective_for!.push(recipient);
+      return;
+    }
+    modules.set(key, {
+      policy_key: entry.policyKey,
+      rule_name: entry.ruleName,
+      rule_id: entry.ruleId,
+      action,
+      hit_values: entry.hitValues,
+      recipients: [recipient],
+      effective_for: [recipient],
+    });
+  });
+  return { ...base, modules: [...modules.values()] };
 }
 
 function mockMailLog(seed: MockDisposalSeed, index: number) {
   const recipients = seed.recipients.split(",").map((item) => item.trim());
+  const messageId = `<mock-${seed.tid.toLowerCase()}@osgateway.local>`;
   const { attachments: mockAttachments, scanResults: mockScanResults } =
     mockAttachmentsFor(seed);
   return {
     id: index + 1,
-    message_id: `<mock-${seed.tid.toLowerCase()}@osgateway.local>`,
+    message_id: messageId,
     message_uuid: `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
     tid: seed.tid,
     sender: seed.sender,
@@ -6448,7 +6563,9 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
         ? "user_retrieval"
         : seed.correctionSource,
     disposal_basis: disposalBasis(seed),
-    disposal_policy_keys: seed.basis?.[0],
+    disposal_policy_keys: seed.mixedBasis?.length
+      ? `,${Array.from(new Set(seed.mixedBasis.map((entry) => entry.policyKey))).join(",")},`
+      : seed.basis?.[0],
     similarity_pct: Math.max(62, seed.score),
     geo_region: seed.ipLocation,
     geo_region_name: seed.ipLocation,
@@ -6473,6 +6590,17 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     return_path: `bounce@${seed.sender.split("@")[1]}`,
     reply_to: seed.sender,
     x_mailer: "Microsoft Outlook 16.0",
+    raw_headers: [
+      `Received: from mail.${seed.sender.split("@")[1]} by gateway.local with ESMTP`,
+      `From: ${seed.sender}`,
+      `To: ${recipients.join(", ")}`,
+      `Subject: ${seed.subject}`,
+      `Message-ID: ${messageId}`,
+      `Return-Path: <bounce@${seed.sender.split("@")[1]}>`,
+      `Reply-To: ${seed.sender}`,
+      "X-Mailer: Microsoft Outlook 16.0",
+      "",
+    ].join("\r\n"),
     // A10 紧急/敏感词徽章（isSensitiveUrgent）——钓鱼/敏感数据外发行命中。
     sensitive_keyword_hit:
       seed.mailType === "phishing" || seed.mailType === "sensitive",
@@ -6508,7 +6636,14 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     content: `这是 ${seed.tid} 的 mock 邮件正文。\n主题：${seed.subject}\n处置原因：${seed.reason}`,
     html_content: `<p>这是 <strong>${seed.tid}</strong> 的 mock 邮件正文。</p><p>${seed.reason}</p>`,
     attachments: mockAttachments,
-    urls: seed.hasQrCode ? ["https://suspicious.example/mock-login"] : [],
+    // EntityURLs 是 URLs 的详情投影，两者必须同源；否则页面显示的
+    // 实体无法通过真实后端的“必须存在于该邮件日志”校验。
+    urls: [
+      ...(seed.mailType === "phishing"
+        ? ["https://evil.com/login", "https://safe.company.com/x"]
+        : []),
+      ...(seed.hasQrCode ? ["https://suspicious.example/mock-login"] : []),
+    ],
     processing_time_ms: 86 + index * 7,
     stage_timings: {
       connection: 8,
@@ -6547,7 +6682,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
       const status = recipientStatusFor(seed, recipients.length, i);
       // mixed seed: 前半投递、后半隔离/旁路，模拟真实 mixed 场景
       const mixedActions = ["accept", "accept", "accept", "quarantine", "sideline"];
-      const mixedStatuses = ["delivered", "delivered", "delivered", "quarantined", "delivered"];
+      const mixedStatuses = ["delivered", "delivered", "delivered", "quarantined", "sidelined"];
       const mixedReasons = [
         "rule 投递白名单 matched at data stage",
         "rule 投递白名单 matched at data stage",
@@ -6555,15 +6690,29 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
         "rule 隔离扣留 matched at data stage",
         "default_sideline",
       ];
-      const isMixedRcpt = seed.isMixed && i < mixedActions.length;
+      const mixedAction = mixedActions[i] ?? disposalAction(seed);
+      const mixedStatus =
+        mixedStatuses[i] ??
+        ({
+          accept: "delivered",
+          quarantine: "quarantined",
+          sideline: "sidelined",
+          audit: "audited",
+          reject: "rejected",
+          bounce: "bounced",
+          discard: "discarded",
+        } as Record<string, string>)[mixedAction] ??
+        status;
+      const finalAction = seed.isMixed ? mixedAction : disposalAction(seed);
+      const finalStatus = seed.isMixed ? mixedStatus : status;
+      const hasObjectId = OPERABLE_RECIPIENT_STATUSES.has(finalStatus);
       return {
         recipient,
-        final_action: isMixedRcpt ? mixedActions[i] : disposalAction(seed),
-        status: isMixedRcpt ? mixedStatuses[i] : status,
-        reason: isMixedRcpt ? mixedReasons[i] : seed.reason,
-        object_id: OPERABLE_RECIPIENT_STATUSES.has(status)
-          ? `obj-${index + 1}-${i}`
-          : undefined,
+        final_action: finalAction,
+        status: finalStatus,
+        reason: seed.isMixed ? (mixedReasons[i] ?? seed.reason) : seed.reason,
+        object_kind: objectKindForRecipientStatus(finalStatus, seed.direction),
+        object_id: hasObjectId ? `obj-${index + 1}-${i}` : undefined,
       };
     }),
     scan_results: mockScanResults,
@@ -6605,23 +6754,243 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
   };
 }
 
+type MockDisposalMailLog = ReturnType<typeof mockMailLog>;
+type MockRecipientDisposition =
+  MockDisposalMailLog["recipient_dispositions"][number];
+
 let mockDisposalMailLogs = MOCK_DISPOSAL_SEEDS.map(mockMailLog);
 
+/** Reset mutable fixture state so unit tests never depend on declaration order. */
+export function resetMockEmailDisposalStateForTests() {
+  mockDisposalMailLogs = MOCK_DISPOSAL_SEEDS.map(mockMailLog);
+  mockContentRules = mockContentRules.filter(
+    (rule) => readObject(rule.metadata).source !== "email_disposal_center",
+  );
+}
+
+const MOCK_ACTIVE_RECALL_STATES = new Set([
+  "recall_pending",
+  "recall_success",
+  "recall_failed",
+  "partial_recall_success",
+]);
+
+/** Mirrors models.displayStatusForRecall's exact accepted input set. */
+export function isMockActiveRecallState(
+  value: string | null | undefined,
+): boolean {
+  return value != null && MOCK_ACTIVE_RECALL_STATES.has(value);
+}
+
+const MOCK_ACTION_TO_DISPLAY_STATUS: Record<string, string> = {
+  accept: "delivered",
+  quarantine: "quarantine_pending",
+  sideline: "sideline_pending",
+  audit: "audit_pending",
+  reject: "rejected",
+  bounce: "delivery_failed",
+  discard: "discarded",
+};
+
+const MOCK_RECIPIENT_TO_DISPLAY_STATUS: Record<string, string> = {
+  delivered: "delivered",
+  delivering: "delivering",
+  delivery_failed: "delivery_failed",
+  quarantined: "quarantine_pending",
+  sidelined: "sideline_pending",
+  audited: "audit_pending",
+  pending_review: "audit_pending",
+  rejected: "rejected",
+  bounced: "delivery_failed",
+  cancelled: "delivery_cancelled",
+  discarded: "discarded",
+};
+
+function mockRecipientDisplayStatus(
+  disposition: MockRecipientDisposition,
+): string | undefined {
+  return (
+    MOCK_RECIPIENT_TO_DISPLAY_STATUS[
+      (disposition.status ?? "").toLowerCase()
+    ] ??
+    MOCK_ACTION_TO_DISPLAY_STATUS[
+      (disposition.final_action ?? "").toLowerCase()
+    ]
+  );
+}
+
+// displayStatusesOf 模拟后端下发的展示状态列表（GT-12782 Task 4 契约）：
+// 一致邮件通常是单元素；mixed、部分投递、部分召回按现有 13 个状态拆桶
+// （按 GT-12955 稳定顺序）。真实实现见 internal/models/display_status.go 的
+// ComputeDisplayStatuses。
+function displayStatusesOf(
+  item: (typeof mockDisposalMailLogs)[number],
+): { status: string; count: number }[] {
+  const dispositions = item.recipient_dispositions ?? [];
+  if (item.recall_status_summary === "partial_recall_success") {
+    // Mock 没有独立召回计数列；部分态至少证明一成一败。真实 API 使用
+    // recall_req_total / recall_success_total 下发精确 count。
+    return [
+      { status: "recall_success", count: 1 },
+      { status: "recall_failed", count: 1 },
+    ];
+  }
+  if (isMockActiveRecallState(item.recall_status_summary)) {
+    // Mock 不维护 recall tuple；不能用整封收件人数冒充实际召回请求数。
+    return [{ status: displayStatusOf(item), count: 1 }];
+  }
+  const wholeMessageTerminalWf = [
+    "rejected_after_review",
+    "discarded",
+    "expired",
+    "deleted",
+  ].includes(item.workflow_outcome_summary ?? "");
+  const releaseWorkflow = ["released", "approved", "timeout_released"].includes(
+    item.workflow_outcome_summary ?? "",
+  );
+  const recipientMode =
+    !wholeMessageTerminalWf &&
+    dispositions.length > 0 &&
+    (item.action === "mixed" || item.action === "accept" || releaseWorkflow);
+  if (recipientMode) {
+    const rank = (status: string) => {
+      const idx = (DISPLAY_STATUSES as readonly string[]).indexOf(status);
+      return idx < 0 ? DISPLAY_STATUSES.length : idx;
+    };
+    const counts = new Map<string, number>();
+    for (const d of dispositions) {
+      // 与 models.DisplayStatusForRecipient 同序：真实 status 优先，只有旧数据
+      // 的 status 为空/未知时才回落 final_action。
+      const status = mockRecipientDisplayStatus(d);
+      if (status) counts.set(status, (counts.get(status) ?? 0) + 1);
+    }
+    if (counts.size > 0) {
+      return [...counts.entries()]
+        .sort((a, b) => rank(a[0]) - rank(b[0]))
+        .map(([status, count]) => ({ status, count }));
+    }
+  }
+  if (item.delivery_status_summary === "partial_delivered") {
+    // Fixture 没有独立投递摘要；为这份确定是部分结果的数据明确约定最后一个
+    // 收件人失败，其余成功，使两个桶的 count 覆盖整封收件人。
+    const total = item.recipients.length || 2;
+    return [
+      { status: "delivered", count: Math.max(1, total - 1) },
+      { status: "delivery_failed", count: 1 },
+    ];
+  }
+  return [
+    { status: displayStatusOf(item), count: item.recipients.length || 1 },
+  ];
+}
+
+function withDisplayStatuses<T extends (typeof mockDisposalMailLogs)[number]>(
+  item: T,
+): T & { display_statuses: { status: string; count: number }[] } {
+  return { ...structuredClone(item), display_statuses: displayStatusesOf(item) };
+}
+
+function summarizeMockDisposalBasis(
+  basis: DisposalBasis | undefined,
+): DisposalBasisGroupSummary[] | undefined {
+  if (!basis?.modules?.length) return undefined;
+  const groups = new Map<string, {
+    entries: Map<string, {
+      summary: DisposalBasisGroupSummary["entries"][number];
+      recipients: Set<string>;
+      effective: Set<string>;
+    }>;
+    recipients: Set<string>;
+    effective: Set<string>;
+    effectiveKnown: boolean;
+  }>();
+  for (const basisModule of basis.modules) {
+    const group = groups.get(basisModule.policy_key ?? "") ?? {
+      entries: new Map(), recipients: new Set(), effective: new Set(), effectiveKnown: false,
+    };
+    groups.set(basisModule.policy_key ?? "", group);
+    const entryKey = JSON.stringify([basisModule.rule_id, basisModule.rule_name, basisModule.action]);
+    const entry = group.entries.get(entryKey) ?? {
+      summary: {
+        rule_name: basisModule.rule_name,
+        rule_id: basisModule.rule_id,
+        action: basisModule.action,
+        hit_values: basisModule.hit_values,
+        detection_tags: basisModule.detection_tags,
+        recipient_count: 0,
+        effective_count: 0,
+        effective_known: false,
+      },
+      recipients: new Set<string>(),
+      effective: new Set<string>(),
+    };
+    group.entries.set(entryKey, entry);
+    for (const recipient of basisModule.recipients ?? []) {
+      entry.recipients.add(recipient.toLowerCase());
+      group.recipients.add(recipient.toLowerCase());
+    }
+    if (basisModule.effective_for !== undefined) {
+      entry.summary.effective_known = true;
+      group.effectiveKnown = true;
+      for (const recipient of basisModule.effective_for) {
+        entry.effective.add(recipient.toLowerCase());
+        group.effective.add(recipient.toLowerCase());
+        group.recipients.add(recipient.toLowerCase());
+      }
+    }
+  }
+  return [...groups.entries()].map(([policyKey, group]) => ({
+    policy_key: policyKey,
+    entries: [...group.entries.values()].map((entry) => ({
+      ...entry.summary,
+      recipient_count: entry.recipients.size,
+      effective_count: entry.effective.size,
+    })),
+    recipient_count: group.recipients.size,
+    effective_count: group.effective.size,
+    effective_known: group.effectiveKnown,
+  }));
+}
+
+function withListDisposalProjection<T extends (typeof mockDisposalMailLogs)[number]>(
+  item: T,
+): T & {
+  display_statuses: { status: string; count: number }[];
+  disposal_basis_groups?: DisposalBasisGroupSummary[];
+} {
+  const projected = withDisplayStatuses(item);
+  const groups = summarizeMockDisposalBasis(projected.disposal_basis);
+  if (!groups?.length || !projected.disposal_basis) return projected;
+  const { modules: _modules, per_recipient: _legacy, ...root } = projected.disposal_basis;
+  void _modules;
+  void _legacy;
+  return { ...projected, disposal_basis: root, disposal_basis_groups: groups };
+}
+
 function displayStatusOf(item: (typeof mockDisposalMailLogs)[number]): string {
-  if (item.recall_status_summary && item.recall_status_summary !== "none")
-    return item.recall_status_summary;
+  if (isMockActiveRecallState(item.recall_status_summary)) {
+    return item.recall_status_summary === "partial_recall_success"
+      ? "recall_failed"
+      : item.recall_status_summary!;
+  }
   if (item.workflow_outcome_summary === "discarded") return "discarded";
+  if (item.workflow_outcome_summary === "deleted") return "discarded";
+  if (item.workflow_outcome_summary === "rejected_after_review")
+    return "discarded";
   if (item.action === "quarantine") return "quarantine_pending";
+  if (item.action === "sideline") return "sideline_pending";
   if (item.action === "audit") return "audit_pending";
   if (item.action === "reject") return "rejected";
+  if (item.action === "bounce") return "delivery_failed";
   if (item.action === "discard") return "discarded";
-  if (item.action === "mixed") return "partial_delivered";
+  if (item.action === "mixed") return "delivering";
   return (
     (
       {
         delivered: "delivered",
-        partial_delivered: "partial_delivered",
+        partial_delivered: "delivery_failed",
         failed: "delivery_failed",
+        cancelled: "delivery_cancelled",
       } as Record<string, string>
     )[item.delivery_status_summary ?? ""] ?? "delivering"
   );
@@ -6633,6 +7002,12 @@ function mockAdvancedValue(
 ): unknown {
   const attachments = item.attachments ?? [];
   const values: Record<string, unknown> = {
+    // Match the real action virtual field's mixed containment semantics:
+    // any recipient action may satisfy the display-level action filter.
+    action:
+      item.action === "mixed"
+        ? (item.disposition_actions ?? []).map(normalizeRawActionToExecutionAction)
+        : normalizeRawActionToExecutionAction(item.action),
     header_sender: item.sender,
     sender: item.sender,
     header_recipient: item.recipients,
@@ -6672,7 +7047,15 @@ function mockAdvancedValue(
       item.disposal_policy_keys === "RBL" ? "triggered" : "notTriggered",
     threat_level:
       (item.phish_agent_check?.confidence ?? 0) >= 0.8 ? "critical" : "none",
-    disposal_rule_id: item.disposal_basis?.rule_id,
+    disposal_rule_id: item.disposal_basis?.modules?.length
+      ? Array.from(new Set([
+          item.disposal_basis.rule_id,
+          ...item.disposal_basis.modules.map((basisModule) => basisModule.rule_id),
+        ].filter(Boolean)))
+      : item.disposal_basis?.rule_id,
+    // GT-12818 / GT-12955：高级筛选也必须执行“列表包含”语义；部分结果会有
+    // 两个状态，不能再压成一个标量。
+    display_status: displayStatusesOf(item).map((entry) => entry.status),
   };
   return values[field] ?? (item as unknown as Record<string, unknown>)[field];
 }
@@ -6804,9 +7187,13 @@ export function mockEmailDisposalList(path: string) {
     items = items.filter((item) =>
       direction === "send" ? item.authenticated : !item.authenticated,
     );
+  // GT-12782 Task 4：筛选语义与下发列表同源——「列表包含该状态」即命中
+  // （mixed 邮件是包含语义，刻意设计）。
   const statuses = query.get("display_status")?.split(",").filter(Boolean);
   if (statuses?.length)
-    items = items.filter((item) => statuses.includes(displayStatusOf(item)));
+    items = items.filter((item) =>
+      displayStatusesOf(item).some((entry) => statuses.includes(entry.status)),
+    );
   const emailTypes = query.get("email_type")?.split(",").filter(Boolean);
   if (emailTypes?.length)
     items = items.filter((item) => emailTypes.includes(item.email_type));
@@ -6815,9 +7202,12 @@ export function mockEmailDisposalList(path: string) {
     ?.split(",")
     .filter(Boolean);
   if (policyKeys?.length)
-    items = items.filter((item) =>
-      policyKeys.includes(item.disposal_policy_keys ?? ""),
-    );
+    items = items.filter((item) => {
+      const itemKeys = (item.disposal_policy_keys ?? "")
+        .split(",")
+        .filter(Boolean);
+      return itemKeys.some((key) => policyKeys.includes(key));
+    });
   const advanced = query.get("advanced_filters");
   if (advanced)
     items = items.filter((item) => mockAdvancedMatches(item, advanced));
@@ -6831,7 +7221,9 @@ export function mockEmailDisposalList(path: string) {
   const page = Math.max(1, Number(query.get("page") ?? 1));
   const pageSize = Math.max(1, Number(query.get("page_size") ?? 20));
   return {
-    items: structuredClone(items.slice((page - 1) * pageSize, page * pageSize)),
+    items: items
+      .slice((page - 1) * pageSize, page * pageSize)
+      .map(withListDisposalProjection),
     total: items.length,
     page,
     page_size: pageSize,
@@ -6839,9 +7231,155 @@ export function mockEmailDisposalList(path: string) {
   };
 }
 
+export function mockEmailDisposalRuleOptions(path: string) {
+  const query = new URLSearchParams(path.split("?")[1] ?? "");
+  const search = (query.get("search") ?? "").trim().toLowerCase();
+  const requestedLimit = Number(query.get("limit") ?? 12);
+  const limit = Math.min(50, Math.max(1, Number.isFinite(requestedLimit) ? requestedLimit : 12));
+  const unique = new Map<string, string>();
+  for (const item of mockDisposalMailLogs) {
+    const basis = item.disposal_basis;
+    const entries = basis?.modules?.length ? basis.modules : basis ? [basis] : [];
+    for (const entry of entries) {
+      const id = entry.rule_id?.trim();
+      if (!id || unique.has(id)) continue;
+      const name = entry.rule_name || id;
+      if (search && !id.toLowerCase().includes(search) && !name.toLowerCase().includes(search)) {
+        continue;
+      }
+      unique.set(id, name);
+      if (unique.size === limit) return { items: Array.from(unique, ([optionId, optionName]) => ({ id: optionId, name: optionName })) };
+    }
+  }
+  return { items: Array.from(unique, ([id, name]) => ({ id, name })) };
+}
+
 export function mockEmailDisposalDetail(id: number) {
   const item = mockDisposalMailLogs.find((entry) => entry.id === id);
-  return item ? structuredClone(item) : null;
+  return item ? withDisplayStatuses(item) : null;
+}
+
+export function mockEmailDisposalBlacklistEntity(
+  id: number,
+  body: unknown,
+): { status: number; data: Rule | { message: string } } {
+  const item = mockDisposalMailLogs.find((entry) => entry.id === id);
+  if (!item) return { status: 404, data: { message: "mail log entry not found" } };
+
+  const request = readObject(body);
+  const kind = String(request.kind ?? "").trim();
+  const rawValue = String(request.value ?? "").trim();
+  let value = rawValue;
+  const visibleURLs = [
+    ...(item.entity_urls ?? []).map((entry) => entry.url),
+    ...(item.urls ?? []),
+  ];
+
+  if (kind === "domain") {
+    value = rawValue.toLowerCase().replace(/\.$/, "");
+    const present = visibleURLs.some((rawURL) => {
+      try {
+        return new URL(rawURL).hostname.toLowerCase().replace(/\.$/, "") === value;
+      } catch {
+        return false;
+      }
+    });
+    if (!present) return { status: 400, data: { message: "domain is not present in this mail log" } };
+  } else if (kind === "url") {
+    try {
+      value = new URL(rawValue).toString();
+    } catch {
+      return { status: 400, data: { message: "invalid URL" } };
+    }
+    const present = visibleURLs.some((candidate) => {
+      try {
+        return new URL(candidate).toString() === value;
+      } catch {
+        return false;
+      }
+    });
+    if (!present) return { status: 400, data: { message: "URL is not present in this mail log" } };
+  } else if (kind === "attachment_hash") {
+    value = rawValue.toLowerCase();
+    if (!/^[0-9a-f]{32}$/.test(value)) {
+      return { status: 400, data: { message: "attachment hash must be a 32-character MD5 digest" } };
+    }
+    if (!(item.attachments ?? []).some((attachment) => attachment.md5sum?.toLowerCase() === value)) {
+      return { status: 400, data: { message: "attachment hash is not present in this mail log" } };
+    }
+  } else {
+    return { status: 400, data: { message: "kind must be domain, url, or attachment_hash" } };
+  }
+
+  const existing = mockContentRules.find((rule) => {
+    const metadata = readObject(rule.metadata);
+    return metadata.source === "email_disposal_center"
+      && Number(metadata.source_mail_log_id) === id
+      && metadata.entity_kind === kind
+      && metadata.match_content === value;
+  });
+  if (existing) return { status: 200, data: existing };
+
+  const usedPriorities = new Set(mockContentRules.map((rule) => rule.priority));
+  let priority = 1000;
+  while (priority >= 100 && usedPriorities.has(priority)) priority -= 1;
+  if (priority < 100) {
+    return { status: 409, data: { message: "all tenant content-rule priorities are in use" } };
+  }
+
+  const direction = item.authenticated ? "send" : "receive";
+  const directionConfig = { enabled: true, action: "quarantine" };
+  const directionNode: RuleNode = direction === "receive"
+    ? { type: "condition", field: "is_outbound", operator: "eq", value: "false" }
+    : {
+        type: "AND",
+        children: [
+          { type: "condition", field: "is_outbound", operator: "eq", value: "true" },
+          { type: "condition", field: "is_internal", operator: "eq", value: "false" },
+        ],
+      };
+  const entityNode: RuleNode = kind === "attachment_hash"
+    ? { type: "condition", field: "attachment_md5", operator: "csv_has", value }
+    : {
+        type: "condition",
+        field: "url_entities",
+        operator: kind === "domain" ? "url_domain" : "url_exact",
+        value,
+      };
+  const labels: Record<string, string> = {
+    domain: "域名加黑",
+    url: "URL加黑",
+    attachment_hash: "附件哈希加黑",
+  };
+  const now = "2026-08-17T00:00:00Z";
+  const nextID = Math.max(0, ...mockContentRules.map((rule) => rule.id)) + 1;
+  const rule: Rule = {
+    id: nextID,
+    name: `${labels[kind]} ${value.slice(0, 24)}-mock-${id}`,
+    description: `由邮件处置中心的邮件日志 #${id} 创建`,
+    tenant_id: 1,
+    page: "content_rules",
+    rule_class: "action",
+    stage: kind === "attachment_hash" ? "sideline" : "data",
+    priority,
+    condition_tree: JSON.stringify({ type: "AND", children: [directionNode, entityNode] }),
+    action: "quarantine",
+    metadata: JSON.stringify({
+      feature: "content_rules",
+      match_type: "keyword",
+      match_content: value,
+      scopes: [kind === "attachment_hash" ? "attachment_hash" : "urls"],
+      directions: { [direction]: directionConfig },
+      source: "email_disposal_center",
+      source_mail_log_id: id,
+      entity_kind: kind,
+    }),
+    is_active: true,
+    created_at: now,
+    updated_at: now,
+  };
+  mockContentRules.push(rule);
+  return { status: 201, data: rule };
 }
 
 export function mockEmailDisposalPreview(id: number) {
@@ -6930,7 +7468,45 @@ export function mockEmailDisposalEvents(id: number) {
       };
     },
   );
-  const events = [...genericEvents, ...perRecipientEvents];
+  // 事后处置时间线 mock 数据：**必须与后端真实产出的形态一致**。
+  //
+  // 旧版这里造的是 admin_api / threat_retro_agent + event_type:"recall" 的假事件，
+  // 后端从未写过这种组合 —— 开发环境看着正常、线上却对不上映射表，正是
+  // design/implement/spec/2026-08-10-disposal-timeline-requirements.md 记录的
+  // 那次出错的根因。现在改为后端今天真实会落库的 workflow 族事实：
+  // event_type 对 workflow 族恒为字面量 "workflow"
+  //（internal/storage/repo_delivery_events.go:15），区分度全在 event_source
+  // + event_result 上。覆盖隔离放行 / 审核通过 / 审核驳回 / 退信各一条。
+  const postDisposalEvents = (
+    [
+      { seq: 90, source: "workflow.quarantine", result: "released", afterMin: 5 },
+      { seq: 91, source: "workflow.audit", result: "approved", afterMin: 10 },
+      { seq: 92, source: "workflow.audit", result: "rejected", afterMin: 15 },
+      { seq: 93, source: "workflow.bounce", result: "bounced", afterMin: 20 },
+    ] as const
+  ).map(({ seq, source, result, afterMin }) => ({
+    id: id * 100 + seq,
+    mail_log_id: id,
+    event_source: source,
+    event_type: "workflow",
+    event_result: result,
+    queue_id: item.queue_id,
+    message_id: item.message_id,
+    sender: item.sender,
+    recipients: item.recipients.join(", "),
+    event_time: new Date(
+      new Date(item.received_at).getTime() + afterMin * 60 * 1000,
+    ).toISOString(),
+    raw_payload: JSON.stringify({
+      event: "workflow",
+      source,
+      result,
+      tid: item.tid,
+    }),
+    raw_line: `${item.received_at} ${item.queue_id} ${source} workflow ${result}`,
+    correlation_status: "matched",
+  }));
+  const events = [...genericEvents, ...perRecipientEvents, ...postDisposalEvents];
   return { items: events, total: events.length, page: 1, page_size: 100 };
 }
 
@@ -6943,10 +7519,136 @@ export function mockEmailDisposalSimilar(body: unknown) {
     .filter((item) => !ids.includes(item.id))
     .slice(0, limit);
   return {
-    items: structuredClone(items),
+    items: items.map(withDisplayStatuses),
     total: items.length,
     page: 1,
     page_size: limit,
+  };
+}
+
+function isMockActionableObjectKind(
+  displayStatus: string | undefined,
+  objectKind: string | undefined,
+): boolean {
+  switch (displayStatus) {
+    case "quarantine_pending":
+      return objectKind === "quarantine";
+    case "sideline_pending":
+      return objectKind === "sideline";
+    case "audit_pending":
+      return objectKind === "inbound_audit" || objectKind === "outbound_audit";
+    default:
+      return false;
+  }
+}
+
+function aggregateMockDispositionState(
+  item: MockDisposalMailLog,
+  dispositions: MockRecipientDisposition[],
+): MockDisposalMailLog {
+  const actions = [
+    ...new Set(dispositions.map((entry) => entry.final_action)),
+  ].sort();
+  const statuses = new Set(dispositions.map((entry) => entry.status));
+  return {
+    ...item,
+    recipient_dispositions: dispositions,
+    disposition_actions: actions,
+    action:
+      actions.length === 1 ? actions[0] : actions.length > 1 ? "mixed" : "accept",
+    status:
+      statuses.size === 1
+        ? (dispositions[0]?.status ?? "delivered")
+        : "mixed",
+  };
+}
+
+function releaseMockDisposalMailLog(item: MockDisposalMailLog) {
+  const skipped: {
+    mail_log_id: number;
+    object_kind?: string;
+    object_id?: string;
+    recipients: string[];
+    status: "skipped";
+    reason: string;
+  }[] = [];
+  const targets = new Map<
+    string,
+    {
+      objectKind: string;
+      objectId: string;
+      recipients: string[];
+      indexes: number[];
+    }
+  >();
+
+  item.recipient_dispositions.forEach((disposition, index) => {
+    const displayStatus = mockRecipientDisplayStatus(disposition);
+    if (!isMockActionableObjectKind(displayStatus, disposition.object_kind)) {
+      const isPending = [
+        "quarantine_pending",
+        "sideline_pending",
+        "audit_pending",
+      ].includes(displayStatus ?? "");
+      skipped.push({
+        mail_log_id: item.id,
+        object_kind: disposition.object_kind,
+        object_id: disposition.object_id,
+        recipients: [disposition.recipient],
+        status: "skipped",
+        reason: isPending ? "object_status_mismatch" : "not_actionable",
+      });
+      return;
+    }
+    if (!disposition.object_id) {
+      skipped.push({
+        mail_log_id: item.id,
+        object_kind: disposition.object_kind,
+        recipients: [disposition.recipient],
+        status: "skipped",
+        reason: "object_reference_missing",
+      });
+      return;
+    }
+    const key = `${disposition.object_kind}\u0000${disposition.object_id}`;
+    const existing = targets.get(key);
+    if (existing) {
+      existing.recipients.push(disposition.recipient);
+      existing.indexes.push(index);
+      return;
+    }
+    targets.set(key, {
+      objectKind: disposition.object_kind!,
+      objectId: disposition.object_id,
+      recipients: [disposition.recipient],
+      indexes: [index],
+    });
+  });
+
+  const targetIndexes = new Set(
+    [...targets.values()].flatMap((target) => target.indexes),
+  );
+  const dispositions = item.recipient_dispositions.map((disposition, index) =>
+    targetIndexes.has(index)
+      ? { ...disposition, final_action: "accept", status: "delivering" }
+      : disposition,
+  );
+  let updated = aggregateMockDispositionState(item, dispositions);
+  if (targets.size > 0) {
+    updated = { ...updated, workflow_outcome_summary: "released" };
+  }
+
+  const succeeded = [...targets.values()].map((target) => ({
+    mail_log_id: item.id,
+    object_kind: target.objectKind,
+    object_id: target.objectId,
+    recipients: target.recipients,
+    status: "succeeded" as const,
+  }));
+  return {
+    updated,
+    results: [...skipped, ...succeeded],
+    successCount: targets.size,
   };
 }
 
@@ -6975,7 +7677,7 @@ export function mockEmailDisposalMutate(
     // disposal-detail-api.ts's disposeObjectAction doc comment), so this
     // mock is the ONLY place action can be "quarantine"/"block".
     const STATUS_BY_ACTION: Record<string, string> = {
-      release: "delivered",
+      release: "delivering",
       delete: "discarded",
       quarantine: "quarantined",
       block: "blocked",
@@ -6990,19 +7692,57 @@ export function mockEmailDisposalMutate(
     const newFinalAction = FINAL_ACTION_BY_ACTION[raw.action ?? ""] ?? "discard";
     mockDisposalMailLogs = mockDisposalMailLogs.map((item) => {
       if (item.id !== mailLogId) return item;
-      return {
-        ...item,
-        recipient_dispositions: (item.recipient_dispositions ?? []).map((d) =>
-          d.object_id === raw.object_id
-            ? { ...d, status: newStatus, final_action: newFinalAction }
-            : d,
-        ),
-      };
+      const dispositions = (item.recipient_dispositions ?? []).map((d) =>
+        d.object_id === raw.object_id
+          ? { ...d, status: newStatus, final_action: newFinalAction }
+          : d,
+      );
+      return aggregateMockDispositionState(item, dispositions);
     });
     return {
       results: [
         { mail_log_id: mailLogId, object_id: raw.object_id, status: "succeeded" },
       ],
+    };
+  }
+
+  if (raw.action === "release") {
+    const succeeded: number[] = [];
+    const notApplicable: number[] = [];
+    const failed: { id: number; reason: string }[] = [];
+    const recipientResults: ReturnType<
+      typeof releaseMockDisposalMailLog
+    >["results"] = [];
+    const selected = new Set(ids);
+    const found = new Set<number>();
+
+    mockDisposalMailLogs = mockDisposalMailLogs.map((item) => {
+      if (!selected.has(item.id)) return item;
+      found.add(item.id);
+      const released = releaseMockDisposalMailLog(item);
+      recipientResults.push(...released.results);
+      if (released.successCount === 0) {
+        notApplicable.push(item.id);
+        return item;
+      }
+      succeeded.push(item.id);
+      return {
+        ...released.updated,
+        email_type: raw.final_type ?? released.updated.email_type,
+        email_type_overridden:
+          Boolean(raw.final_type) || released.updated.email_type_overridden,
+      };
+    });
+    for (const id of ids) {
+      if (!found.has(id)) failed.push({ id, reason: "not_found" });
+    }
+    return {
+      succeeded,
+      failed,
+      not_applicable: notApplicable,
+      partial: [],
+      reclassify_failed: [],
+      recipient_results: recipientResults,
     };
   }
 
@@ -7012,16 +7752,6 @@ export function mockEmailDisposalMutate(
       return {
         ...item,
         recall_status_summary: "recall_success",
-        email_type: raw.final_type ?? item.email_type,
-        email_type_overridden:
-          Boolean(raw.final_type) || item.email_type_overridden,
-      };
-    if (raw.action === "release")
-      return {
-        ...item,
-        action: "accept",
-        workflow_outcome_summary: "released",
-        delivery_status_summary: "delivered",
         email_type: raw.final_type ?? item.email_type,
         email_type_overridden:
           Boolean(raw.final_type) || item.email_type_overridden,
@@ -7826,6 +8556,24 @@ export function mockDeliveryTrafficFor(
   const scale = tenantId && tenantId > 0 ? 0.16 + (tenantId % 5) * 0.04 : 1;
   const n = (value: number) => Math.max(0, Math.round(value * scale));
 
+  // 系统状态「收发信总量」与本页「全部」KPI 必须共享同一组三向量。
+  // 无日期请求保留原有 7 日 demo 基线；带日期请求按当前期/上一期匹配系统状态范围。
+  const deliveryTotals = startDate && endDate
+    ? (() => {
+        const span = deliverySpanDays(startDate, endDate);
+        const range = span <= 1 ? 'today' : span <= 7 ? '7d' : '30d';
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const current = endDate >= today;
+        const totals = {
+          today: { current: [67000, 48000, 13456], previous: [59777, 43800, 11116] },
+          '7d': { current: [470000, 320000, 112331], previous: [435000, 300000, 100492] },
+          '30d': { current: [2050000, 1400000, 534210], previous: [2150000, 1450000, 550219] },
+        }[range];
+        return current ? totals.current : totals.previous;
+      })()
+    : [89234, 45678, 12345];
+
   const isToday = deliveryIsToday(startDate, endDate);
   const spanDays = isToday ? 1 : deliverySpanDays(startDate, endDate);
 
@@ -7930,9 +8678,9 @@ export function mockDeliveryTrafficFor(
 
   if (direction === 'all') {
     return {
-      kpi: { inbound_total: n(89234), outbound_total: n(45678), internal_total: n(12345), total_success_rate: 96.5, queue_backlog: n(1234), trends: { totalSuccessRate: 1.2, queueBacklog: -5.3 } },
+      kpi: { inbound_total: n(deliveryTotals[0]), outbound_total: n(deliveryTotals[1]), internal_total: n(deliveryTotals[2]), total_success_rate: 96.5, queue_backlog: n(1234), trends: { totalSuccessRate: 1.2, queueBacklog: -5.3 } },
       trend: { points: trendPoints, granularity: isToday ? 'hour' : 'day' } as DeliveryTrafficResponse['trend'] & { granularity: string },
-      distribution: [{ name: 'receive', value: n(89234) }, { name: 'send', value: n(45678) }, { name: 'internal', value: n(12345) }],
+      distribution: [{ name: 'receive', value: n(deliveryTotals[0]) }, { name: 'send', value: n(deliveryTotals[1]) }, { name: 'internal', value: n(deliveryTotals[2]) }],
       latency: { buckets: [] },
       detail_table: detail('receive', 'all'),
       generated_at: new Date().toISOString(),
@@ -7964,8 +8712,7 @@ export function mockDeliveryTrafficFor(
         { name: 'gmail.com', value: 5.2, count: n(320) }, { name: 'qq.com', value: 3.8, count: n(245) },
         { name: 'outlook.com', value: 2.1, count: n(156) }, { name: 'yahoo.com', value: 1.9, count: n(134) }, { name: '163.com', value: 1.5, count: n(98) },
       ],
-      latency: { percentiles: dates.map((date, i) => ({ date, p50: 850 + i * 30, p90: 6200 + i * 120, p99: 24500 + i * 600 })), buckets: [] },
-      queue_trend: dates.map((date, i) => ({ date, count: n(520 + i * 57) })),
+      latency: { buckets: [] },
       detail_table: detail('send'),
       generated_at: new Date().toISOString(), data_lag_seconds: 420,
     };
@@ -8321,4 +9068,66 @@ export function mockAdminAuditStats(
   const all = mockAdminAuditLogs.filter((l) => matchAdminAudit(l, params));
   const success = all.filter((l) => l.status === 'success').length;
   return { total: all.length, success, failed: all.length - success };
+}
+
+// ─── 智能体中心总览（GET /agent-center/overview）────────────────────────────
+// 返回三个智能体的运行卡片数据。
+// policy_pages 字段须与 presentation.ts 中 AGENT_PRESENTATIONS[key].requiredPages
+// 精确匹配（page / role / management 三字段），resolveAgentPresentation 才会置
+// canConfigure=true，点击「配置」按钮才可用。
+export function mockAgentCenterOverview() {
+  return {
+    agents: [
+      {
+        key: 'phishing',
+        module_key: 'phishing_agent',
+        feature_id: 'phishing_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 同步分析层',
+        policy_pages: [
+          { page: 'phishing_admission',   role: 'admission',   management: 'dedicated' },
+          { page: 'phishing_disposition', role: 'disposition', management: 'dedicated' },
+        ],
+        today_processed: 124580,
+        hit_count:       12450,
+        processed_count: 124580,
+        hit_rate:        0.0999,
+        fallback_count:  0,
+      },
+      {
+        key: 'spoofing',
+        module_key: 'spoofing_agent',
+        feature_id: 'spoofing_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 同步分析层',
+        policy_pages: [
+          { page: 'spoofing_admission',   role: 'admission',   management: 'internal' },
+          { page: 'spoofing_disposition', role: 'disposition', management: 'internal' },
+        ],
+        today_processed: 98320,
+        hit_count:       8650,
+        processed_count: 98320,
+        hit_rate:        0.088,
+        fallback_count:  0,
+      },
+      {
+        key: 'threat-retro',
+        module_key: 'threat_retro_agent',
+        feature_id: 'threat_retro_agent',
+        access: 'enabled',
+        status: 'running',
+        stage_position: 'AI 异步回溯层',
+        policy_pages: [
+          { page: 'threat_retro_strategy', role: 'strategy', management: 'dedicated' },
+        ],
+        today_processed: 326,
+        hit_count:       326,
+        processed_count: 326,
+        hit_rate:        1.0,
+        fallback_count:  0,
+      },
+    ],
+  };
 }

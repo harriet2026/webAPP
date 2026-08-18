@@ -52,6 +52,12 @@ const THREAT_FILTERS = [
 const WORLD_MAP_NAME = 'security-overview-world';
 const WORLD_MAP_URL = '/maps/world-countries.geojson';
 const ISO_ALPHA2 = /^[A-Z]{2}$/;
+const CHINA_MAP_REGION_CODES: ReadonlySet<string> = new Set(['CN', 'HK', 'MO', 'TW']);
+const SPECIAL_REGION_NAME_KEYS = {
+  HK: 'specialRegionNames.HK',
+  MO: 'specialRegionNames.MO',
+  TW: 'specialRegionNames.TW',
+} as const;
 
 let worldMapLoad: Promise<void> | null = null;
 
@@ -124,11 +130,16 @@ function ensureWorldMap(): Promise<void> {
 }
 
 export function countryFlagPosition(countryCode: string): string | null {
-  const code = countryCode.toUpperCase();
+  const code = mapCountryCode(countryCode);
   if (!ISO_ALPHA2.test(code)) return null;
   const row = code.charCodeAt(0) - 65;
   const column = code.charCodeAt(1) - 65;
   return `-${column * 24}px -${row * 18}px`;
+}
+
+function mapCountryCode(countryCode: string): string {
+  const code = countryCode.toUpperCase();
+  return CHINA_MAP_REGION_CODES.has(code) ? 'CN' : code;
 }
 
 function CountryFlag({ countryCode }: { countryCode: string }) {
@@ -162,6 +173,28 @@ function normalizeCountries(countries: GeoCountry[]): GeoCountry[] {
       count: Number.isFinite(country.count) ? Math.max(0, country.count) : 0,
       block_rate: finiteRate(country.block_rate),
     }));
+}
+
+/**
+ * The ranking keeps administrative-region rows separate, while the country
+ * map has one CN feature. Merge their counts only for the map visualization so
+ * no HK/MO/TW value is attached to a feature that cannot be rendered.
+ */
+function normalizeMapCountries(countries: GeoCountry[]): GeoCountry[] {
+  const byMapCode = new Map<string, { count: number; blockedWeight: number }>();
+  countries.forEach((country) => {
+    const mapCode = mapCountryCode(country.country);
+    const current = byMapCode.get(mapCode) ?? { count: 0, blockedWeight: 0 };
+    current.count += country.count;
+    current.blockedWeight += country.count * country.block_rate;
+    byMapCode.set(mapCode, current);
+  });
+
+  return Array.from(byMapCode, ([country, totals]) => ({
+    country,
+    count: totals.count,
+    block_rate: totals.count > 0 ? totals.blockedWeight / totals.count : 0,
+  }));
 }
 
 function WorldThreatMap({
@@ -319,6 +352,7 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
   });
 
   const countries = useMemo(() => normalizeCountries(data?.countries ?? []), [data?.countries]);
+  const mapCountries = useMemo(() => normalizeMapCountries(countries), [countries]);
   const totalCount = countries.reduce((sum, country) => sum + country.count, 0);
   const hasData = countries.length > 0 && totalCount > 0;
   const displayNames = useMemo(() => {
@@ -329,10 +363,19 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
     }
   }, [locale]);
   const countryName = useCallback(
-    (countryCode: string) => displayNames.of(countryCode) ?? countryCode,
-    [displayNames],
+    (countryCode: string) => {
+      const code = countryCode.toUpperCase();
+      if (code in SPECIAL_REGION_NAME_KEYS) {
+        return t(SPECIAL_REGION_NAME_KEYS[code as keyof typeof SPECIAL_REGION_NAME_KEYS]);
+      }
+      return displayNames.of(code) ?? code;
+    },
+    [displayNames, t],
   );
-  const activeCountry = selectedCountry && countries.some((country) => country.country === selectedCountry)
+  const activeCountry = selectedCountry && (
+    countries.some((country) => country.country === selectedCountry)
+      || mapCountries.some((country) => country.country === selectedCountry)
+  )
     ? selectedCountry
     : null;
   const selectedName = activeCountry ? countryName(activeCountry) : null;
@@ -403,8 +446,8 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
           <div className="space-y-4">
             <div className="grid gap-4 xl:grid-cols-2">
               <WorldThreatMap
-                countries={countries}
-                selectedCountry={activeCountry}
+                countries={mapCountries}
+                selectedCountry={activeCountry ? mapCountryCode(activeCountry) : null}
                 countryName={countryName}
                 onSelect={setSelectedCountry}
               />

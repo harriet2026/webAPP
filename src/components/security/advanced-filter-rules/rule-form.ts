@@ -37,13 +37,6 @@ export function isInternalIP(addr: string): boolean {
 
 export type Scope = 'incoming' | 'outgoing' | 'internal';
 
-export interface BlockActionParams {
-  smtpCode: string;
-  responseText: string;
-  tarpit: boolean;
-  tarpitSeconds: number;
-}
-
 export interface ReviewActionParams {
   reviewers: string;
   timeoutHours: number;
@@ -81,7 +74,6 @@ export interface RuleForm {
     tagDeliver?: TagDeliverActionParams;
     review?: ReviewActionParams;
     discard?: DiscardActionParams;
-    block?: BlockActionParams;
   };
   addons: AddonsState;
 }
@@ -95,7 +87,6 @@ const PRIMARY_ACTIONS: PrimaryAction[] = [
   'quarantine',
   'review',
   'discard',
-  'block',
 ];
 
 function isPrimaryAction(v: unknown): v is PrimaryAction {
@@ -114,12 +105,11 @@ const ACTION_TO_RULE_ACTION: Record<Exclude<PrimaryAction, 'none'>, string> = {
   quarantine: 'quarantine',
   review: 'audit',
   discard: 'discard',
-  block: 'reject',
 };
 
 // GT-12181: defaultPriority is role-aware (see priority-range.ts). Callers
 // inside the editor pass the logged-in role's default (tenant admin 600,
-// system admin 600); the 50 fallback is kept only for tests/legacy callers that
+// system admin 600); the 50 fallback is kept only for isolated callers that
 // invoke emptyRuleForm() with no argument.
 export function emptyRuleForm(defaultPriority = 50): RuleForm {
   return {
@@ -136,7 +126,6 @@ export function emptyRuleForm(defaultPriority = 50): RuleForm {
       tagDeliver: { content: '', position: 'subject_prefix', style: 'plain_text', headerName: '', headerValue: '' },
       review: { reviewers: '', timeoutHours: 24 },
       discard: { logEnabled: true, silent: true, notifyAdmin: false },
-      block: { smtpCode: '550', responseText: '5.7.1 Message rejected due to content policy', tarpit: false, tarpitSeconds: 5 },
     },
     addons: {},
   };
@@ -163,17 +152,6 @@ function buildForcedEmailTagAddon(p: TagDeliverActionParams): { type: string; pa
 
 function buildPrimaryActionParams(f: RuleForm): Record<string, unknown> {
   switch (f.primaryAction) {
-    case 'block': {
-      const b = f.actionParams.block ?? emptyRuleForm().actionParams.block!;
-      const smtpCode = Number(b.smtpCode);
-      const params: Record<string, unknown> = {
-        smtp_code: Number.isFinite(smtpCode) ? smtpCode : 550,
-        response_text: b.responseText,
-        tarpit_enabled: b.tarpit,
-      };
-      if (b.tarpit) params.tarpit_seconds = b.tarpitSeconds;
-      return params;
-    }
     case 'deliver': {
       const d = f.actionParams.deliver ?? emptyRuleForm().actionParams.deliver!;
       return { skip_subsequent: d.skipSubsequentRules };
@@ -306,15 +284,7 @@ export function ruleToForm(rule: Rule): RuleForm {
   form.primaryAction = primaryAction;
 
   const pap = (meta?.primary_action_params ?? {}) as Record<string, unknown>;
-  if (primaryAction === 'block') {
-    const defaults = emptyRuleForm().actionParams.block!;
-    form.actionParams.block = {
-      smtpCode: pap.smtp_code !== undefined ? String(pap.smtp_code) : defaults.smtpCode,
-      responseText: typeof pap.response_text === 'string' ? pap.response_text : defaults.responseText,
-      tarpit: !!pap.tarpit_enabled,
-      tarpitSeconds: typeof pap.tarpit_seconds === 'number' ? pap.tarpit_seconds : defaults.tarpitSeconds,
-    };
-  } else if (primaryAction === 'deliver') {
+  if (primaryAction === 'deliver') {
     form.actionParams.deliver = { skipSubsequentRules: !!pap.skip_subsequent };
   } else if (primaryAction === 'discard') {
     const defaults = emptyRuleForm().actionParams.discard!;

@@ -110,8 +110,8 @@ describe('AddonsPanel protocol matches rule-form.ts end to end', () => {
     const metadata = {
       feature: 'advanced_rules',
       scope: ['incoming'],
-      primary_action: 'block',
-      primary_action_params: { smtp_code: 550, response_text: 'no', tarpit_enabled: false },
+      primary_action: 'discard',
+      primary_action_params: { log_enabled: true, silent_discard: true, notify_admin: false },
       addons: [{ type: 'adminNotify', params: { recipient_type: 'adminList', merge_window_minutes: 5 } }],
     };
     const rule: Rule = {

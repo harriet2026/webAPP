@@ -136,6 +136,7 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
               onChange={(e) => onChange({ window_minutes: clampInt(e.target.value) })}
               disabled={disabled}
               className="w-20 h-8"
+              data-testid={`similar-detection-window-${direction}`}
             />
             <span className="text-sm text-gray-500">{t('minutes')}</span>
           </div>
@@ -160,8 +161,14 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
                 step={5}
                 disabled={disabled}
                 className="flex-1"
+                data-testid={`similar-detection-threshold-${direction}`}
               />
-              <span className="text-sm font-medium w-12">{value.similarity_pct}%</span>
+              <span
+                className="text-sm font-medium w-12"
+                data-testid={`similar-detection-threshold-${direction}-value`}
+              >
+                {value.similarity_pct}%
+              </span>
             </div>
           </div>
         )}
@@ -182,6 +189,7 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
               onChange={(e) => onChange({ min_count: clampInt(e.target.value) })}
               disabled={disabled}
               className="w-20 h-8"
+              data-testid={`similar-detection-min-count-${direction}`}
             />
             <span className="text-sm text-gray-500">{t('emails')}</span>
           </div>
@@ -209,7 +217,7 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
             </SelectTrigger>
             <SelectContent>
               {SIMILAR_DETECTION_ACTION_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
+                <SelectItem key={opt.value} value={opt.value} data-testid={`similar-detection-action-${direction}-option-${opt.value}`}>
                   {t(opt.labelKey)}
                 </SelectItem>
               ))}

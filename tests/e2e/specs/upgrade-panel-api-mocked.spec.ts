@@ -130,6 +130,15 @@ async function startUpgradePanelWeb(basePort = 18500, env: Record<string, string
   fs.mkdirSync(dataRoot, { recursive: true });
   const sockPath = path.join(tmpDir, 'ctl.sock');
   const agentMock = await startMockCtlSocket(sockPath, dataRoot);
+  // Isolated (empty) CA dir, like every other clustermgr-webui spec passes.
+  // WITHOUT it, `serve` falls back to the machine's real --ca-dir default
+  // (/var/lib/osgateway/ca) and, on any host that has cluster PKI installed,
+  // serves the console over HTTPS — every `http://…` navigation in this file
+  // then hangs, and the whole spec file fails for a reason that has nothing
+  // to do with what it tests. An empty dir means "no PKI" ⇒ plaintext on
+  // loopback, deterministically.
+  const caDir = path.join(tmpDir, 'ca');
+  fs.mkdirSync(caDir, { recursive: true });
 
   // The critical trap this test exists to avoid (task-9-brief.md): buildBinary
   // in the OTHER clustermgr-webui specs only rebuilds when the binary is
@@ -144,6 +153,7 @@ async function startUpgradePanelWeb(basePort = 18500, env: Record<string, string
   const web = spawn(clustermgrBin, [
     'serve',
     `--socket=${sockPath}`,
+    `--ca-dir=${caDir}`,
     `--listen=127.0.0.1:${webPort}`,
     '--idle-seconds=3600',
   ], { stdio: ['pipe', 'pipe', 'pipe'], env: { ...process.env, ...env } });
@@ -383,7 +393,7 @@ test.describe('Upgrade panel UI (mocked API)', () => {
     await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
 
     await expect(page.getByTestId('upg-status-summary')).toContainText('8.1.0');
-    await expect(page.getByTestId('upg-status-summary')).toContainText('rollback 可用: 是');
+    await expect(page.getByTestId('upg-status-summary')).toContainText('有可回退目标: 是');
     // Staged package row + its per-row delete button.
     await expect(page.getByTestId('upg-pkg-table')).toContainText('8.1.0');
     await expect(page.getByTestId('upg-del-8.1.0')).toBeVisible();
@@ -411,7 +421,18 @@ test.describe('Upgrade panel UI (mocked API)', () => {
     await expect(page.getByTestId('upg-gate-out')).toContainText('测试拒绝理由-P4');
     await expect(page.getByTestId('upg-pushall')).toBeDisabled();
     await expect(page.getByTestId('upg-node-go')).toBeDisabled();
-    await expect(page.getByTestId('upg-rollback-exec')).toBeDisabled();
+    // 整体回退 is deliberately NOT part of 检查门禁 (spec 2026-08-10 §4.3;
+    // review 2026-08-11 High-2). GET /api/upgrade/status scopes its Facts by
+    // the UPGRADE target version, so criterion 7 would judge the rollback
+    // against the wrong version's image probe; and since that query carries
+    // no multi_level override, criterion 8 refuses at EffectiveDepth >= 2 —
+    // the very case the feature exists for — while checkGates, the only
+    // writer of .disabled, would leave the button dead with no way for the
+    // operator to revive it. The rollback card runs its own plan query.
+    //
+    // This assertion previously read toBeDisabled(), i.e. it locked the bug
+    // in place; asserting ENABLED is what keeps the deadlock from returning.
+    await expect(page.getByTestId('upg-rollback-exec')).toBeEnabled();
   });
 
   // plan and abandon are no longer 501 stubs — both are implemented and hit
@@ -1219,5 +1240,462 @@ test.describe('Upgrade panel package lifecycle (real server, real disk)', () => 
     expect(dialogs[0]).toMatch(/完整包 \(dist tarball\)：[1-9]\d* B\/节点/);
     // Cancelling leaves the output at the estimate — no transfer was reported.
     await expect(page.getByTestId('upg-exec-out')).not.toContainText('分发完成');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Multi-level rollback panel (spec design/implement/spec/2026-08-10-multi-
+// level-rollback-design.md). Verifies the front-end:
+//   - renders the candidate dropdown with per-candidate annotations;
+//   - requires the 越级回退 reason when the selected candidate has
+//     requires_multi_level=true;
+//   - sends the complete request (to / multi_level / multi_level_reason /
+//     force_missing_image / force_reason) when the user fills everything in;
+//   - re-queries plan when the dropdown selection changes (so the selected
+//     candidate's image data is fresh);
+//   - NEVER computes effective_depth / requires_multi_level on the front end
+//     (it only reads what the backend already computed per candidate).
+// All API responses are mocked — this is a front-end behavior test, not an
+// integration test (that's in tests/integration/test_cluster_e2e.py).
+// ---------------------------------------------------------------------------
+test.describe('Upgrade panel multi-level rollback (mocked API)', () => {
+  test.describe.configure({ mode: 'serial' });
+  let procs: Procs | undefined;
+
+  // The two candidates every test in this block works with: an L1 that needs
+  // no override and an L2 the backend marked requires_multi_level.
+  const ROLLBACK_CANDIDATES = [
+    { tag: '8.1.0', level: 1, depth: 1, effective_depth: 1, requires_multi_level: false, registry: '', registry_ok: true, images: 'present' },
+    { tag: '8.0.0', level: 2, depth: 2, effective_depth: 2, requires_multi_level: true, registry: '', registry_ok: true, images: 'not_requested' },
+  ];
+
+  function parseRollbackBody(route: any): any {
+    try { return JSON.parse(route.request().postData() || '{}'); } catch { return {}; }
+  }
+
+  // The QUERY (execute=false) response. The dropdown is populated ONLY from a
+  // plan query, so every test that then drives the execute button must issue
+  // one first — exactly as the operator does.
+  async function fulfillRollbackPlan(route: any) {
+    await route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({
+        executed: false,
+        plan: { candidates: ROLLBACK_CANDIDATES, trailing_depth: 0 },
+        collection_diagnostics: [],
+      }),
+    });
+  }
+
+  test.beforeAll(async () => {
+    procs = await startUpgradePanelWeb(18700);
+  });
+
+  test.afterAll(async () => {
+    await stopProcs(procs);
+  });
+
+  test('rollback plan renders candidate dropdown with annotations', async ({ page }) => {
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: { RollbackAvailable: true }, collection_diagnostics: [] }),
+      });
+    });
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      const req = route.request();
+      let body: any = {};
+      try { body = JSON.parse(req.postData() || '{}'); } catch {}
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          executed: false,
+          plan: {
+            candidates: [
+              { tag: '8.1.0', level: 1, depth: 1, effective_depth: 1, requires_multi_level: false, registry: '', registry_ok: true, images: 'present' },
+              { tag: '8.0.0', level: 2, depth: 2, effective_depth: 2, requires_multi_level: true, registry: '', registry_ok: true, images: 'not_requested' },
+            ],
+            trailing_depth: 0,
+          },
+          collection_diagnostics: [],
+        }),
+      });
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+
+    // Click "查看回退计划" to populate the candidate dropdown.
+    await page.getByTestId('upg-rollback-plan').click();
+    // Both candidates appear in the dropdown.
+    const sel = page.getByTestId('upg-rollback-target');
+    await expect(sel).toBeVisible();
+    const options = await sel.locator('option').allTextContents();
+    expect(options.join('|')).toContain('8.1.0');
+    expect(options.join('|')).toContain('8.0.0');
+    // The L2 candidate's label includes "需越级" (read from backend's
+    // requires_multi_level — front-end must NOT recompute).
+    expect(options.join('|')).toContain('需越级');
+  });
+
+  test('execute sends complete request including multi_level reason', async ({ page }) => {
+    let capturedBody: any = null;
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      const body = parseRollbackBody(route);
+      if (!body.execute) {
+        await fulfillRollbackPlan(route);
+        return;
+      }
+      capturedBody = body;
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          executed: true,
+          plan: { candidates: [], trailing_depth: 0 },
+          note: '回退已执行', warnings: [],
+          collection_diagnostics: [],
+        }),
+      });
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+
+    // Query the plan first — that is what populates the candidate dropdown
+    // (and the front end's cache of the backend's per-candidate judgments).
+    await page.getByTestId('upg-rollback-plan').click();
+    // Select L2 candidate (requires multi-level).
+    await page.getByTestId('upg-rollback-target').selectOption('8.0.0');
+    // Check the 越级回退 checkbox and fill in the reason.
+    await page.getByTestId('upg-rollback-multi').check();
+    await page.getByTestId('upg-rollback-multi-reason').fill('rollback reason e2e');
+    // Execute.
+    await page.getByTestId('upg-rollback-exec').click();
+    // Confirm the confirm() dialog.
+    // (gotoUpgradeTab installs an accept-all dialog handler.)
+
+    // The backend received the complete request.
+    expect(capturedBody).not.toBeNull();
+    expect(capturedBody.execute).toBe(true);
+    expect(capturedBody.to).toBe('8.0.0');
+    expect(capturedBody.multi_level).toBe(true);
+    expect(capturedBody.multi_level_reason).toBe('rollback reason e2e');
+  });
+
+  test('multi-level checked without reason blocks execute (front-end pre-validation)', async ({ page }) => {
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    let executeCalled = false;
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      if (parseRollbackBody(route).execute) executeCalled = true;
+      await fulfillRollbackPlan(route);
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+
+    await page.getByTestId('upg-rollback-plan').click();
+    await page.getByTestId('upg-rollback-target').selectOption('8.0.0');
+    await page.getByTestId('upg-rollback-multi').check();
+    // Leave reason EMPTY.
+    await page.getByTestId('upg-rollback-exec').click();
+    // Front-end must block the request entirely (no execute call).
+    await expect(page.getByTestId('upg-rollback-out')).toContainText('理由');
+    expect(executeCalled).toBe(false);
+  });
+
+  // Spec §4.6 / review round-10 Medium: when the SELECTED candidate carries
+  // requires_multi_level=true and the operator has NOT ticked 越级回退, the
+  // front end must stop right there — no confirm() dialog, no request, and a
+  // message naming what is missing. Before this, the panel happily fired the
+  // request and rendered the backend's 409, which is a worse operator
+  // experience for a state the front end was already told about (the flag is
+  // READ from the plan response, never recomputed).
+  test('requires_multi_level candidate without 越级回退 is blocked locally', async ({ page }) => {
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    let executeCalled = false;
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      if (parseRollbackBody(route).execute) executeCalled = true;
+      await fulfillRollbackPlan(route);
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+
+    await page.getByTestId('upg-rollback-plan').click();
+    // 8.0.0 is the requires_multi_level=true candidate; leave the checkbox
+    // (and therefore the reason) untouched.
+    await page.getByTestId('upg-rollback-target').selectOption('8.0.0');
+    await page.getByTestId('upg-rollback-exec').click();
+
+    await expect(page.getByTestId('upg-rollback-out')).toContainText('越级回退');
+    expect(executeCalled).toBe(false);
+
+    // Ticking the box + filling the reason releases the local block (the
+    // guard must gate on the missing confirmation, not disable the path).
+    await page.getByTestId('upg-rollback-multi').check();
+    await page.getByTestId('upg-rollback-multi-reason').fill('越级理由 e2e');
+    await page.getByTestId('upg-rollback-exec').click();
+    await expect.poll(() => executeCalled).toBe(true);
+  });
+
+  test('switching dropdown re-queries plan with new to', async ({ page }) => {
+    const capturedBodies: any[] = [];
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      const req = route.request();
+      let body: any = {};
+      try { body = JSON.parse(req.postData() || '{}'); } catch {}
+      capturedBodies.push(body);
+      // Return a fresh plan with the requested target's image data.
+      const target = body.to || '8.1.0';
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          executed: false,
+          plan: {
+            candidates: [
+              { tag: '8.1.0', level: 1, depth: 1, effective_depth: 1, requires_multi_level: false, registry_ok: true,
+                images: target === '8.1.0' ? 'missing' : 'not_requested' },
+              { tag: '8.0.0', level: 2, depth: 2, effective_depth: 2, requires_multi_level: true, registry_ok: true,
+                images: target === '8.0.0' ? 'present' : 'not_requested' },
+            ],
+            trailing_depth: 0,
+          },
+          collection_diagnostics: [],
+        }),
+      });
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+    // Initial plan query (default to=L1).
+    await page.getByTestId('upg-rollback-plan').click();
+    // Switch dropdown to 8.0.0 — must trigger a re-query.
+    await page.getByTestId('upg-rollback-target').selectOption('8.0.0');
+    // Wait briefly for the re-query to land.
+    await page.waitForTimeout(200);
+    // At least two requests were made, and the second has to=8.0.0.
+    expect(capturedBodies.length).toBeGreaterThanOrEqual(2);
+    const lastCall = capturedBodies[capturedBodies.length - 1];
+    expect(lastCall.to).toBe('8.0.0');
+    expect(lastCall.execute).toBe(false);
+  });
+
+  // ── force_missing_image / force_reason UI flow ─────────────────────────
+  // The 强制放行 checkbox lets the operator override the criterion-7 image
+  // presence check (spec §4.5 — used when images are present but a detection
+  // false-negative blocks the rollback). Mirrors the multi_level UI pattern:
+  //   - happy path: checkbox + reason land on the request body verbatim;
+  //   - empty reason: front-end pre-validation blocks the call (no round-trip).
+  // Both are pinned here so a future refactor of rollback() can't silently
+  // break the user-facing force path.
+  test('execute sends force_missing_image and force_reason when 强制放行 is filled', async ({ page }) => {
+    let capturedBody: any = null;
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      const body = parseRollbackBody(route);
+      if (!body.execute) {
+        await fulfillRollbackPlan(route);
+        return;
+      }
+      capturedBody = body;
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          executed: true,
+          plan: { candidates: [], trailing_depth: 0 },
+          note: '回退已执行', warnings: [],
+          collection_diagnostics: [],
+        }),
+      });
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+
+    await page.getByTestId('upg-rollback-plan').click();
+    // Pick the L1 candidate so multi-level is NOT required; the only override
+    // in play is force_missing_image.
+    await page.getByTestId('upg-rollback-target').selectOption('8.1.0');
+    // Tick 强制放行 + supply the audit reason.
+    await page.getByTestId('upg-rollback-force-img').check();
+    await page.getByTestId('upg-rollback-force-reason').fill('images re-tagged manually, false negative');
+    await page.getByTestId('upg-rollback-exec').click();
+    // (gotoUpgradeTab installs an accept-all dialog handler.)
+
+    // The backend received the override pair.
+    expect(capturedBody).not.toBeNull();
+    expect(capturedBody.execute).toBe(true);
+    expect(capturedBody.to).toBe('8.1.0');
+    expect(capturedBody.force_missing_image).toBe(true);
+    expect(capturedBody.force_reason).toBe('images re-tagged manually, false negative');
+    // multi_level must NOT be set on this path — keep the two override pairs
+    // independent so a regression that couples them surfaces here.
+    expect(capturedBody.multi_level).toBeUndefined();
+  });
+
+  test('强制放行 checked without reason blocks execute (front-end pre-validation)', async ({ page }) => {
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    let executeCalled = false;
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      if (parseRollbackBody(route).execute) executeCalled = true;
+      await fulfillRollbackPlan(route);
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+
+    await page.getByTestId('upg-rollback-plan').click();
+    await page.getByTestId('upg-rollback-target').selectOption('8.1.0');
+    await page.getByTestId('upg-rollback-force-img').check();
+    // Leave force_reason EMPTY.
+    await page.getByTestId('upg-rollback-exec').click();
+    // Front-end must block the request entirely (no execute call). The
+    // pre-validation message must surface a 理由 hint, mirroring the
+    // multi-level pre-validation pattern.
+    await expect(page.getByTestId('upg-rollback-out')).toContainText('理由');
+    expect(executeCalled).toBe(false);
+  });
+
+  // ── Review 2026-08-11 additions ────────────────────────────────────────
+
+  // Round-7 High-2's contract has a front-end half that was untested: the
+  // plan probes ONLY the resolved target, so switching the dropdown must
+  // make the image data MOVE — the newly selected candidate gains it and the
+  // previously selected one falls back to not_requested. A front end that
+  // cached the first response (or merged responses) would keep showing stale
+  // image state for a candidate nobody probed this round, which is exactly
+  // the "编造镜像状态" the not_requested value exists to prevent.
+  test('switching dropdown transfers image data to the newly selected candidate', async ({ page }) => {
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      const target = parseRollbackBody(route).to || '8.1.0';
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          executed: false,
+          plan: {
+            candidates: [
+              { tag: '8.1.0', level: 1, depth: 1, effective_depth: 1, requires_multi_level: false, registry_ok: true,
+                images: target === '8.1.0' ? 'missing' : 'not_requested' },
+              { tag: '8.0.0', level: 2, depth: 2, effective_depth: 2, requires_multi_level: true, registry_ok: true,
+                images: target === '8.0.0' ? 'present' : 'not_requested' },
+            ],
+            trailing_depth: 0,
+          },
+          collection_diagnostics: [],
+        }),
+      });
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+    await page.getByTestId('upg-rollback-plan').click();
+
+    // Default target is L1 (8.1.0): it carries the real probe result.
+    // (not_requested is deliberately NOT rendered — the renderer only labels
+    // candidates whose image state was actually established, so "no label"
+    // is how an unprobed candidate reads.)
+    const out = page.getByTestId('upg-rollback-out');
+    await expect(out).toContainText('8.1.0');
+    await expect(out).toContainText('镜像:missing');
+    await expect(out).not.toContainText('镜像:present');
+
+    // Switch to 8.0.0 — the re-query moves the image data over: 8.0.0 gains
+    // its real state and 8.1.0 must STOP being reported as missing, because
+    // nobody probed it this round. A front end that merged responses instead
+    // of replacing them would keep showing the stale 镜像:missing.
+    await page.getByTestId('upg-rollback-target').selectOption('8.0.0');
+    await expect(out).toContainText('镜像:present');
+    await expect(out).not.toContainText('镜像:missing');
+  });
+
+  // spec §4.2 rule 2: a chain that broke earlier means part of the ledger is
+  // unreconstructable and the candidate list is SHORTER than the site's real
+  // history. That disclosure is the only thing standing between an operator
+  // and the conclusion "those versions were never deployed" — it must render,
+  // not be swallowed because the response was otherwise a success.
+  test('break_warning is surfaced in the rollback output', async ({ page }) => {
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ state: {}, collection_diagnostics: [] }),
+      });
+    });
+    await page.route('**/api/upgrade/rollback', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          executed: false,
+          plan: { candidates: ROLLBACK_CANDIDATES, trailing_depth: 0 },
+          break_warning: '链在 8.2.0→8.0.0 处不连续，更早的历史已丢弃、不可自动推导（只重放最后一个断点之后的部分）',
+          collection_diagnostics: [],
+        }),
+      });
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+    await page.getByTestId('upg-rollback-plan').click();
+    await expect(page.getByTestId('upg-rollback-out')).toContainText('链在 8.2.0→8.0.0 处不连续');
+    await expect(page.getByTestId('upg-rollback-out')).toContainText('更早的历史已丢弃');
+  });
+
+  // spec §4.6 status extension (review 2026-08-11 L-5): the chain-level facts
+  // belong in the status overview, not only in a plan query somebody has to
+  // think to run. The break warning in particular is a standing property of
+  // this site's ledger.
+  test('status summary renders rollback candidates and the chain warning', async ({ page }) => {
+    await page.route('**/api/upgrade/status*', async (route) => {
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({
+          state: {
+            RollbackAvailable: true,
+            rollback_candidates: [
+              { tag: '8.1.0', level: 1, depth: 1, registry: '', recorded_at: 1 },
+              { tag: '8.0.0', level: 2, depth: 2, registry: '', recorded_at: 0 },
+            ],
+            rollback_trailing_depth: 1,
+            rollback_chain_warning: '链在 8.2.0→8.0.0 处不连续，更早的历史已丢弃',
+          },
+          collection_diagnostics: [],
+        }),
+      });
+    });
+
+    await gotoUpgradeTab(page, procs!.webURL, procs!.webToken);
+    const summary = page.getByTestId('upg-status-summary');
+    await expect(summary).toContainText('有可回退目标: 是');
+    await expect(summary).toContainText('L1 8.1.0(depth=1)');
+    await expect(summary).toContainText('本轮已回退 1 级');
+    await expect(summary).toContainText('链在 8.2.0→8.0.0 处不连续');
   });
 });

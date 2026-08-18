@@ -18,6 +18,31 @@ describe('security-overview client', () => {
     expect(path).toContain('interval=hour');
   });
 
+  it('sends start_time / end_time when the caller supplies clocks', async () => {
+    const fn = vi.fn().mockResolvedValue({});
+    await getSecurityOverview(
+      {
+        startDate: '2026-07-02',
+        startTime: '12:34:56',
+        endDate: '2026-07-03',
+        endTime: '12:34:56',
+        interval: 'hour',
+      },
+      fn,
+    );
+    const path = fn.mock.calls[0][0] as string;
+    expect(path).toContain('start_time=12%3A34%3A56');
+    expect(path).toContain('end_time=12%3A34%3A56');
+  });
+
+  it('omits the clock parameters entirely when the caller sends dates only', async () => {
+    const fn = vi.fn().mockResolvedValue({});
+    await getSecurityOverview({ startDate: '2026-07-02', endDate: '2026-07-03' }, fn);
+    const path = fn.mock.calls[0][0] as string;
+    expect(path).not.toContain('start_time');
+    expect(path).not.toContain('end_time');
+  });
+
   it('CSV url includes tenant_id when provided', () => {
     const url = getExportCsvUrl({ startDate: '2026-06-01', endDate: '2026-06-07', direction: 'all', tenantId: 9 });
     expect(url).toContain('tenant_id=9');

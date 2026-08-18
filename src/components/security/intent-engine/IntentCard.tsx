@@ -157,6 +157,7 @@ export function IntentCard({
               data-testid={`ie-switch-wrap-${direction}-${intent}`}
             >
               <Switch
+                data-testid={`ie-switch-${direction}-${intent}`}
                 size="sm"
                 checked={value.enabled}
                 onCheckedChange={(enabled) => onChange({ ...value, enabled })}
@@ -228,11 +229,11 @@ export function IntentCard({
                   disabled={!value.enabled || !engineEnabled}
                 >
                   <div className="flex items-center gap-2">
-                    <RadioGroupItem value="classification" id={`mode-class-${intent}-${direction}`} />
+                    <RadioGroupItem value="classification" id={`mode-class-${intent}-${direction}`} data-testid={`ie-mode-classification-${direction}-${intent}`} />
                     <Label htmlFor={`mode-class-${intent}-${direction}`} className="text-sm cursor-pointer">{tMode('classification')}</Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <RadioGroupItem value="threshold" id={`mode-threshold-${intent}-${direction}`} />
+                    <RadioGroupItem value="threshold" id={`mode-threshold-${intent}-${direction}`} data-testid={`ie-mode-threshold-${direction}-${intent}`} />
                     <Label htmlFor={`mode-threshold-${intent}-${direction}`} className="text-sm cursor-pointer">{tMode('threshold')}</Label>
                   </div>
                 </RadioGroup>
@@ -260,12 +261,12 @@ export function IntentCard({
                       onValueChange={handleActionChange}
                       disabled={!value.enabled || !engineEnabled}
                     >
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-32" data-testid={`ie-action-select-${direction}-${intent}`}>
                         <SelectValue>{tAction(uiAction)}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {uiActions.map((a) => (
-                          <SelectItem key={a} value={a}>
+                          <SelectItem key={a} value={a} data-testid={`ie-action-option-${direction}-${intent}-${a}`}>
                             <span className={ACTION_TEXT_COLOR[a]}>{tAction(a)}</span>
                           </SelectItem>
                         ))}

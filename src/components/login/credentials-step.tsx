@@ -68,6 +68,7 @@ export function CredentialsStep(props: CredentialsStepProps) {
           <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="osg-login-username"
+            data-testid="login-username"
             name="username"
             autoComplete="username"
             placeholder={t('auth.accountPlaceholder')}
@@ -87,6 +88,7 @@ export function CredentialsStep(props: CredentialsStepProps) {
           <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             id="osg-login-password"
+            data-testid="login-password"
             name="password"
             type={showPwd ? 'text' : 'password'}
             autoComplete="current-password"
@@ -173,7 +175,7 @@ export function CredentialsStep(props: CredentialsStepProps) {
           {t('auth.remainingAttempts', { n: props.remainingAttempts })}
         </FormAlert>
       ) : props.errorMessage ? (
-        <FormAlert variant="error">{props.errorMessage}</FormAlert>
+        <FormAlert variant="error" data-testid="login-error">{props.errorMessage}</FormAlert>
       ) : props.successMessage ? (
         <FormAlert variant="success" data-testid="login-success">
           {props.successMessage}
@@ -182,6 +184,7 @@ export function CredentialsStep(props: CredentialsStepProps) {
 
       <Button
         type="submit"
+        data-testid="login-submit"
         className="w-full"
         disabled={props.submitting || locked}
       >

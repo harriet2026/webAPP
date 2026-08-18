@@ -21,6 +21,8 @@ interface MultiSelectFilterProps {
   selectedCountLabel: (count: number) => string;
   clearLabel?: string;
   className?: string;
+  /** 透传给触发按钮的 data-testid（表单/E2E 定位用） */
+  triggerTestId?: string;
 }
 
 // Reusable multi-select popover (checkbox list) for quick filters that need
@@ -35,6 +37,7 @@ export function MultiSelectFilter({
   selectedCountLabel,
   clearLabel,
   className,
+  triggerTestId,
 }: MultiSelectFilterProps) {
   const toggle = (val: string) => {
     onChange(value.includes(val) ? value.filter((v) => v !== val) : [...value, val]);
@@ -57,7 +60,13 @@ export function MultiSelectFilter({
   return (
     <Popover>
       <PopoverTrigger
-        render={<Button variant="outline" className={cn('h-8 w-full justify-between text-xs font-normal', className)} />}
+        render={
+          <Button
+            variant="outline"
+            className={cn('h-8 w-full justify-between text-xs font-normal', className)}
+            data-testid={triggerTestId}
+          />
+        }
       >
         <span className="truncate">{summary}</span>
         <ChevronDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-60" />

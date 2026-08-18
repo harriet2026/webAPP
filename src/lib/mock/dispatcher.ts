@@ -29,6 +29,7 @@ import {
   mockMailflowConnectionFailure,
   mockDashboardSummaryFor,
   mockSecurityOverviewFor,
+  mockSystemStatusSummaryFor,
   mockSecurityGeo,
   mockSecurityTime,
   mockSecurityDrill,
@@ -63,6 +64,7 @@ import {
   mockPhishingStats,
   mockSpoofingStats,
   mockThreatRetroStats,
+  mockAgentCenterOverview,
   mockSystemHealthSummary,
   spanToRange,
   type SystemStatusRangeKey,
@@ -135,7 +137,9 @@ import {
   mockAddAttachmentPassword,
   mockDeleteAttachmentPassword,
   mockEmailDisposalList,
+  mockEmailDisposalRuleOptions,
   mockEmailDisposalDetail,
+  mockEmailDisposalBlacklistEntity,
   mockEmailDisposalPreview,
   mockEmailDisposalEvents,
   mockEmailDisposalSimilar,
@@ -727,6 +731,10 @@ const routes: Route[] = [
     handler: () => ({ status: 200, data: mockEmailDisposalFields() }),
   },
   {
+    method: 'GET', pattern: '/mail-logs/_meta/disposal-rules',
+    handler: (req) => ({ status: 200, data: mockEmailDisposalRuleOptions(req.path) }),
+  },
+  {
     method: 'POST', pattern: '/mail-logs/parse-query',
     handler: (req) => {
       const description = String(((req.body ?? {}) as { description?: string }).description ?? '');
@@ -796,6 +804,13 @@ const routes: Route[] = [
     handler: () => ({ status: 204, data: {} }),
   },
   {
+    method: 'POST', pattern: /^\/mail-logs\/\d+\/blacklist$/,
+    handler: (req) => mockEmailDisposalBlacklistEntity(
+      Number(pathname(req.path).split('/')[2]),
+      req.body,
+    ),
+  },
+  {
     method: 'GET', pattern: /^\/mail-logs\/\d+$/,
     handler: (req) => {
       const item = mockEmailDisposalDetail(Number(pathname(req.path).split('/')[2]));
@@ -803,13 +818,14 @@ const routes: Route[] = [
     },
   },
   // 系统状态仪表盘的「待处置邮件」KPI 探针：page_size=1 且 advanced_filters 含
-  // sideline（隔离/旁路）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
-  // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只读 total）。
+  // audit_pending（待处置口径 = 隔离中 quarantine_pending + 待审核 audit_pending，
+  // GT-12818）——只命中这一探针，不影响处置中心默认视图（其 page_size 更大）。
+  // 返回按当前范围分支的 total（3/11/19），items 留空即可（KPI 卡只用 total）。
   {
     method: 'GET', pattern: '/mail-logs',
     matchQuery: (q) => {
       const p = new URLSearchParams(q);
-      return p.get('page_size') === '1' && (p.get('advanced_filters') ?? '').includes('sideline');
+      return p.get('page_size') === '1' && (p.get('advanced_filters') ?? '').includes('audit_pending');
     },
     handler: () => ({ status: 200, data: mockDisposalPendingProbe() }),
   },
@@ -926,6 +942,21 @@ const routes: Route[] = [
     method: 'GET',
     pattern: /^\/statistics\/type/,
     handler: (req) => ({ status: 200, data: mockTypeStatistics(rangeFromDates(req.path)) }),
+  },
+  {
+    method: 'GET',
+    pattern: /^\/statistics\/system-status-summary$/,
+    handler: (req) => {
+      const p = new URLSearchParams(rawQuery(req.path));
+      return {
+        status: 200,
+        data: mockSystemStatusSummaryFor(
+          p.get('start_date') ?? '',
+          p.get('end_date') ?? '',
+          p.get('interval') ?? undefined,
+        ),
+      };
+    },
   },
   // 邮件安全总览：子资源必须放在基础路径前，保持整页 mock 数据闭环。
   {
@@ -2302,6 +2333,13 @@ const routes: Route[] = [
     pattern: '/inbound-audit',
     handler: () => ({ status: 200, data: mockInboundAuditPending() }),
   },
+  // ─── 智能体中心总览 ────────────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/agent-center/overview',
+    handler: () => ({ status: 200, data: mockAgentCenterOverview() }),
+  },
+
   // 智能体运行概况 / 待办：钓鱼、仿冒、威胁回溯 stats。
   {
     method: 'GET',

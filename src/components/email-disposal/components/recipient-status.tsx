@@ -37,6 +37,12 @@ function deliveryStatusOf(_finalAction: string, status: string): DeliveryStatus 
 const STATUS_STYLES: Record<string, string> = {
   delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   marked_delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  // GT-12835：accept 收件人 milter 时点是在途，投递事实回写后转 delivered /
+  // delivery_failed；tempfail 整封暂缓时 accept 收件人转 deferred。
+  delivering: 'bg-sky-50 text-sky-700 border-sky-200',
+  delivery_failed: 'bg-red-50 text-red-700 border-red-200',
+  deferred: 'bg-amber-50 text-amber-700 border-amber-200',
+  bounced: 'bg-orange-50 text-orange-700 border-orange-200',
   quarantined: 'bg-blue-50 text-blue-700 border-blue-200',
   pending_review: 'bg-amber-50 text-amber-700 border-amber-200',
   sidelined: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -56,6 +62,8 @@ const ACTION_ICONS: Record<ActionKey, typeof Send> = {
   // 隔离/阻断 icon+color choice.
   quarantine: Clock,
   block: XCircle,
+  // GT-12880：重新投递（对保留期内仍留有原文的邮件）。
+  redeliver: RotateCcw,
 };
 
 // G13: inline per-row action buttons get colored text (投递 emerald, 召回/
@@ -69,6 +77,7 @@ const ACTION_ROW_CLASS: Record<ActionKey, string> = {
   notify: 'text-blue-700 data-[hovered=true]:bg-blue-50 data-[hovered=true]:text-blue-800 dark:text-blue-400 dark:data-[hovered=true]:bg-blue-950/30',
   quarantine: 'text-slate-700 data-[hovered=true]:bg-slate-50 data-[hovered=true]:text-slate-800 dark:text-slate-300 dark:data-[hovered=true]:bg-slate-900/40',
   block: 'text-orange-700 data-[hovered=true]:bg-orange-50 data-[hovered=true]:text-orange-800 dark:text-orange-400 dark:data-[hovered=true]:bg-orange-950/30',
+  redeliver: 'text-emerald-700 data-[hovered=true]:bg-emerald-50 data-[hovered=true]:text-emerald-800 dark:text-emerald-400 dark:data-[hovered=true]:bg-emerald-950/30',
 };
 
 // G9: batch bar 投递/丢弃 are filled (green/red); 召回/通知 keep the
@@ -82,6 +91,7 @@ const ACTION_BATCH_CLASS: Record<ActionKey, string> = {
   notify: '',
   quarantine: 'border-slate-300 text-slate-600 data-[hovered=true]:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:data-[hovered=true]:bg-slate-900/40',
   block: 'border-orange-300 text-orange-600 data-[hovered=true]:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:data-[hovered=true]:bg-orange-950/30',
+  redeliver: 'border-transparent bg-emerald-600 text-white data-[hovered=true]:bg-emerald-700',
 };
 
 // D3: number of recipient groups shown before the matrix collapses behind an
@@ -281,7 +291,11 @@ export function RecipientStatus({
                         <TooltipContent>{t('recipientStatus.missingObjectIdTooltip')}</TooltipContent>
                       </Tooltip>
                     ) : (
-                      <span className="text-xs text-muted-foreground">{t('recipientStatus.noContent')}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {g.status === 'deferred'
+                          ? t('recipientStatus.deferredRetrying')
+                          : t('recipientStatus.noContent')}
+                      </span>
                     )
                   ) : (
                     <div className="flex gap-1.5">
@@ -342,7 +356,7 @@ export function RecipientStatus({
           <div className="flex items-center gap-2 ml-auto">
             {/* RA-5: 批量隔离/批量阻断 added between deliver and discard,
                 matching the single-recipient header's action order. */}
-            {(['deliver', 'quarantine', 'block', 'discard', 'recall', 'notify'] as ActionKey[]).map((action) => {
+            {(['deliver', 'quarantine', 'block', 'discard', 'recall', 'notify', 'redeliver'] as ActionKey[]).map((action) => {
               const Icon = ACTION_ICONS[action];
               const btn = (
                 <Button

@@ -62,32 +62,37 @@ const fieldDefinitions: FieldDefinitionsResponse = {
       category: 'mail_basic',
       supported: true,
     },
-    subject: {
-      label: 'Subject',
+    sender_domain: {
+      label: 'Sender Domain',
       type: 'string',
-      min_stage: 'header',
-      operators: ['eq', 'ne', 'contain', 'match', 'within', 'wildcard'],
+      min_stage: 'mail',
+      operators: ['eq', 'ne', 'contain', 'not_contain', 'match', 'suffix', 'prefix', 'within'],
       category: 'mail_basic',
       supported: true,
     },
-    attachment_count: {
-      label: 'Attachment Count',
+    rcpt_count: {
+      label: 'Recipient Count',
       type: 'number',
-      min_stage: 'data',
-      operators: ['eq', 'ne', 'gt', 'lt', 'ge', 'le', 'between'],
-      category: 'attachment',
+      min_stage: 'rcpt',
+      operators: ['eq', 'ne', 'gt', 'lt', 'ge', 'le'],
+      category: 'mail_basic',
       supported: true,
     },
-    headers: {
-      label: 'Headers',
-      type: 'map_string',
-      min_stage: 'data',
-      operators: ['eq', 'ne', 'contain', 'match'],
+    auth_user: {
+      label: 'Auth User',
+      type: 'string',
+      min_stage: 'mail',
+      operators: ['eq', 'ne', 'contain', 'not_contain', 'match', 'suffix', 'prefix', 'within'],
       category: 'mail_basic',
       supported: true,
     },
   },
 };
+
+// 本 fixture 刻意**只**含投递规则白名单内的字段（GT-12780）：出站路由规则是
+// rule_class=route，后端字段目录已按写侧白名单收敛，正文/附件级字段（subject /
+// attachment_count / headers）根本不会下发。往这里加白名单外的字段，等于把
+// 「选得到、保存必被 400 拒」这个缺陷重新编码进测试。
 
 beforeEach(() => {
   mockGetFieldDefinitions.mockReset().mockResolvedValue(fieldDefinitions);
@@ -235,7 +240,33 @@ describe('RuleStep drawer', () => {
     expect(screen.getByTestId('mr-ob-rule-tls-level-select')).not.toBeDisabled();
   });
 
-  it('选择意图引擎“垃圾”标签并保存 → condition_tree 写入 cac_int_tag within 3/4', async () => {
+  it('GT-12854：意图引擎标签可勾选「正常 (1)」并保存 → condition_tree 写入 cac_int_tag within 1', async () => {
+    const user = userEvent.setup();
+    render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
+    await screen.findByTestId('mr-ob-rule-empty');
+    await user.click(screen.getByTestId('mr-ob-rule-create'));
+    await screen.findByTestId('mr-ob-rule-drawer');
+
+    await user.type(screen.getByTestId('mr-ob-rule-name-input'), '正常邮件走 proxysvr');
+    await user.type(screen.getByTestId('mr-ob-rule-target-host-input'), 'proxy-relay.example.net');
+    await user.click(screen.getByTestId('mr-ob-rule-intent-tag-select'));
+    await user.click(await screen.findByText('正常 (1)'));
+    await user.keyboard('{Escape}');
+    expect(screen.queryByTestId('mr-ob-rule-no-condition-warning')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('mr-ob-rule-save'));
+    await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());
+    const [, opts] = mockApiRequest.mock.calls[0];
+    const submitted = (opts as { body: { condition_tree: RuleNode } }).body.condition_tree;
+    expect((submitted.children ?? []).find((node) => node.field === 'cac_int_tag')).toEqual({
+      type: 'condition',
+      field: 'cac_int_tag',
+      operator: 'within',
+      value: '1',
+    });
+  });
+
+  it('GT-12854：意图引擎标签支持多选（勾选垃圾邮件 3 + 广告 4）→ within 3/4', async () => {
     const user = userEvent.setup();
     render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
     await screen.findByTestId('mr-ob-rule-empty');
@@ -245,7 +276,10 @@ describe('RuleStep drawer', () => {
     await user.type(screen.getByTestId('mr-ob-rule-name-input'), '垃圾邮件专用路由');
     await user.type(screen.getByTestId('mr-ob-rule-target-host-input'), 'spam-relay.example.com');
     await user.click(screen.getByTestId('mr-ob-rule-intent-tag-select'));
-    await user.click(await screen.findByRole('option', { name: '垃圾' }));
+    await user.click(await screen.findByText('垃圾邮件 (3)'));
+    await user.click(await screen.findByText('广告 (4)'));
+    await user.keyboard('{Escape}');
+    expect(screen.getByTestId('mr-ob-rule-intent-tag-select')).toHaveTextContent('已选 2 项');
     expect(screen.queryByTestId('mr-ob-rule-no-condition-warning')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('mr-ob-rule-save'));
@@ -260,7 +294,7 @@ describe('RuleStep drawer', () => {
     });
   });
 
-  it('更多条件从后端目录展示全部可用字段，并把新增条件合并进 condition_tree', async () => {
+  it('更多条件只展示投递规则白名单内字段，并把新增条件合并进 condition_tree', async () => {
     const user = userEvent.setup();
     render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
     await screen.findByTestId('mr-ob-rule-empty');
@@ -277,32 +311,35 @@ describe('RuleStep drawer', () => {
     // 先 await 一条，弹层落定后下面的同步查询才成立 —— 尤其是那两条
     // queryByRole().not.toBeInTheDocument() 负向断言：弹层没开时它们恒真，
     // 靠这条 await 才有区分力。
-    expect(await screen.findByRole('option', { name: /Subject.*subject/ })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: /Attachment Count.*attachment_count/ })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: /Headers.*headers/ })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: /Is Outbound.*is_outbound/ })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: /发件人域名.*sender_domain/ })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /收件人数量.*rcpt_count/ })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /是否出站.*is_outbound/ })).toBeInTheDocument();
+    // 正文级字段投递时刻重建不出来，后端按 rule_class=route 收敛目录时不下发，
+    // 选择器里不该出现（GT-12780：此前它们在这里，选中后保存必被 400 拒）。
+    expect(screen.queryByRole('option', { name: /Subject.*subject/ })).not.toBeInTheDocument();
     // 固定条件仍由原表单负责，不在“更多条件”的新增列表里重复出现。
     expect(screen.queryByRole('option', { name: /Client IP.*client_ip/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('option', { name: /CAC Int Tag.*cac_int_tag/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /Auth User.*auth_user/ })).not.toBeInTheDocument();
 
-    await user.click(await screen.findByRole('option', { name: /Subject.*subject/ }));
+    await user.click(await screen.findByRole('option', { name: /发件人域名.*sender_domain/ }));
     await user.click(screen.getByTestId('mr-ob-rule-more-condition-operator-0'));
     await user.click(await screen.findByRole('option', { name: '正则匹配' }));
-    fireEvent.change(screen.getByTestId('mr-ob-rule-more-condition-value-0'), { target: { value: '^财务.+审批$' } });
-    fireEvent.change(screen.getByTestId('mr-ob-rule-name-input'), { target: { value: '财务主题路由' } });
+    fireEvent.change(screen.getByTestId('mr-ob-rule-more-condition-value-0'), { target: { value: '^finance\\..+$' } });
+    fireEvent.change(screen.getByTestId('mr-ob-rule-name-input'), { target: { value: '财务发信域路由' } });
     fireEvent.change(screen.getByTestId('mr-ob-rule-target-host-input'), { target: { value: 'finance-relay.example.com' } });
     await user.click(screen.getByTestId('mr-ob-rule-save'));
 
     await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());
     const [, opts] = mockApiRequest.mock.calls[0];
     const submitted = (opts as { body: { condition_tree: RuleNode } }).body.condition_tree;
-    expect((submitted.children ?? []).find((node) => node.field === 'subject')).toEqual({
+    expect((submitted.children ?? []).find((node) => node.field === 'sender_domain')).toEqual({
       type: 'condition',
-      field: 'subject',
+      field: 'sender_domain',
       operator: 'match',
-      value: '^财务.+审批$',
+      value: '^finance\\..+$',
     });
-    expect(mockGetFieldDefinitions).toHaveBeenCalledWith('data', 'mail_routing_outbound', expect.any(Function));
+    expect(mockGetFieldDefinitions).toHaveBeenCalledWith('data', 'mail_routing_outbound', expect.any(Function), 'route');
   });
 
   it('更多条件未填写完整时阻断保存', async () => {
@@ -403,7 +440,7 @@ describe('RuleStep GT-12321: is_outbound preservation', () => {
     await user.click(screen.getByTestId('mr-ob-rule-edit-5958'));
     await screen.findByTestId('mr-ob-rule-drawer');
     await waitFor(() =>
-      expect(screen.getByTestId('mr-ob-rule-more-condition-field-0')).toHaveTextContent('Is Outbound'),
+      expect(screen.getByTestId('mr-ob-rule-more-condition-field-0')).toHaveTextContent('是否出站'),
     );
     expect(screen.getByTestId('mr-ob-rule-more-condition-value-0')).toHaveTextContent('否');
     await user.click(screen.getByTestId('mr-ob-rule-save'));
@@ -493,7 +530,72 @@ describe('RuleStep 条件树 review 修复：算子回填 + 同槽位多字段�
     expect(withinNode).toEqual({ type: 'condition', field: 'client_ip', operator: 'within', value: '10.0.0.0/8\n172.16.0.0/12' });
   });
 
-  it('回填标准钓鱼标签并原样保存；无法由下拉准确表达的 cac_int_tag eq 3 继续透传', async () => {
+  it('GT-12854：编辑态回填 cac_int_tag eq 3 为勾选「垃圾邮件 (3)」，未改选保存时原样保留 eq 节点', async () => {
+    const tree: RuleNode = {
+      type: 'AND',
+      children: [{ type: 'condition', field: 'cac_int_tag', operator: 'eq', value: '3' }],
+    };
+    mockGetUnifiedRules.mockReset().mockResolvedValue([
+      unifiedRule({
+        id: 6005,
+        name: '历史 eq 单值规则',
+        priority: 100,
+        conditionTree: tree,
+        metadata: JSON.stringify({ channel: 'smtp', next_hop_host: 'smtp.out.example.com', next_hop_port: 25, tls_level: 'prefer' }),
+      }),
+    ]);
+    const user = userEvent.setup();
+    render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
+
+    await screen.findByText('历史 eq 单值规则');
+    await user.click(screen.getByTestId('mr-ob-rule-edit-6005'));
+    await screen.findByTestId('mr-ob-rule-drawer');
+    expect(screen.getByTestId('mr-ob-rule-intent-tag-select')).toHaveTextContent('垃圾邮件 (3)');
+    await user.click(screen.getByTestId('mr-ob-rule-save'));
+
+    await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());
+    const [, opts] = mockApiRequest.mock.calls[0];
+    const submitted = (opts as { body: { condition_tree: RuleNode } }).body.condition_tree;
+    expect((submitted.children ?? []).filter((node) => node.field === 'cac_int_tag')).toEqual([
+      { type: 'condition', field: 'cac_int_tag', operator: 'eq', value: '3' },
+    ]);
+  });
+
+  it('GT-12854：编辑态改选标签集合后保存 → 生成规范化 within 节点（历史分隔符不保留）', async () => {
+    const tree: RuleNode = {
+      type: 'AND',
+      children: [{ type: 'condition', field: 'cac_int_tag', operator: 'within', value: '9,7' }],
+    };
+    mockGetUnifiedRules.mockReset().mockResolvedValue([
+      unifiedRule({
+        id: 6006,
+        name: '改选重写规则',
+        priority: 100,
+        conditionTree: tree,
+        metadata: JSON.stringify({ channel: 'smtp', next_hop_host: 'smtp.out.example.com', next_hop_port: 25, tls_level: 'prefer' }),
+      }),
+    ]);
+    const user = userEvent.setup();
+    render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
+
+    await screen.findByText('改选重写规则');
+    await user.click(screen.getByTestId('mr-ob-rule-edit-6006'));
+    await screen.findByTestId('mr-ob-rule-drawer');
+    expect(screen.getByTestId('mr-ob-rule-intent-tag-select')).toHaveTextContent('已选 2 项');
+    await user.click(screen.getByTestId('mr-ob-rule-intent-tag-select'));
+    await user.click(await screen.findByText('正常 (1)'));
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByTestId('mr-ob-rule-save'));
+
+    await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());
+    const [, opts] = mockApiRequest.mock.calls[0];
+    const submitted = (opts as { body: { condition_tree: RuleNode } }).body.condition_tree;
+    expect((submitted.children ?? []).filter((node) => node.field === 'cac_int_tag')).toEqual([
+      { type: 'condition', field: 'cac_int_tag', operator: 'within', value: '1\n7\n9' },
+    ]);
+  });
+
+  it('回填标准钓鱼标签并原样保存；同槽位第二个 cac_int_tag eq 3 节点继续透传', async () => {
     const tree: RuleNode = {
       type: 'AND',
       children: [
@@ -516,7 +618,7 @@ describe('RuleStep 条件树 review 修复：算子回填 + 同槽位多字段�
     await screen.findByText('意图标签兼容规则');
     await user.click(screen.getByTestId('mr-ob-rule-edit-6004'));
     await screen.findByTestId('mr-ob-rule-drawer');
-    expect(screen.getByTestId('mr-ob-rule-intent-tag-select')).toHaveTextContent('钓鱼');
+    expect(screen.getByTestId('mr-ob-rule-intent-tag-select')).toHaveTextContent('已选 2 项');
     await user.click(screen.getByTestId('mr-ob-rule-save'));
 
     await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());

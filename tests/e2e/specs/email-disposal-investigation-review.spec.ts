@@ -105,13 +105,11 @@ test.describe('Email Disposal Review E2E', () => {
     await expect(table).toBeVisible({ timeout: 10000 });
   });
 
-  // §5.1/§5.3: 17-state display status filter — regression for review
-  // finding 1 ("现有测试只检查是否存在一个'召回'选项，没有断言完整 17 态集合").
-  // Asserts the dropdown renders exactly the 17-state option set (labels
+  // GT-12955: Asserts the dropdown renders exactly the approved 13-state option set (labels
   // from webapp/messages/zh.json emailDisposal.filters.statuses) and that
   // the removed legacy buckets (处理中/延迟检测中, i.e. processing/
   // delay_detecting) no longer appear.
-  test('display status filter shows exactly the 17 states, not the legacy processing/delay_detecting buckets', async ({
+  test('display status filter shows exactly the GT-12955 13 states', async ({
     authenticatedPage,
   }) => {
     // 邮件状态 is a column-header filter (Popover + checkbox rows), not a
@@ -128,22 +126,17 @@ test.describe('Email Disposal Review E2E', () => {
     const options = authenticatedPage.locator('[data-slot="popover-content"] label');
     await expect(options.first()).toBeVisible({ timeout: 5000 });
     const labels = (await options.allTextContents()).map((l) => l.trim());
-    // 与 mail-list-table.tsx 的 statusOptions 一一对应（17 项，顺序无关）：
-    // rejected / bounced / discarded / quarantine_pending / sideline_pending /
-    // audit_pending / reviewed_rejected / expired / deleted / delivering /
-    // delivered / partial_delivered / delivery_failed / recall_pending /
-    // recall_success / recall_failed / partial_recall_success。
+    // 与 DISPLAY_STATUSES 一一对应（13 项，顺序无关）。
     // 文案取自 webapp/messages/zh.json emailDisposal.filters.statuses。
-    const expected17 = [
-      '拒收', '已退信', '已丢弃', '隔离中', '检测中', '待审核', '审核驳回',
-      '已过期', '已删除', '投递中', '投递成功', '部分投递成功', '投递失败',
-      '召回中', '召回成功', '召回失败', '部分召回成功',
+    const expected13 = [
+      '投递中', '隔离中', '检测中', '待审核', '拒收', '已丢弃', '投递中止',
+      '投递成功', '投递失败', '召回中', '召回成功', '召回失败', '已过期',
     ];
     // 精确集合比较，不用 includes 子串匹配：'投递成功' 是 '部分投递成功' 的子串，
     // 子串口径会互相误配，既数不准也发现不了改名（本次就是 rejected 由 已拒绝
     // 改成 拒收、以及漏了 sideline_pending=检测中，而旧断言只体现为数量对不上）。
-    expect([...labels].sort()).toEqual([...expected17].sort());
-    for (const legacy of ['处理中', '延迟检测中']) {
+    expect([...labels].sort()).toEqual([...expected13].sort());
+    for (const legacy of ['处理中', '延迟检测中', '已退信', '部分投递成功', '部分召回成功', '已删除', '审核驳回']) {
       expect(labels).not.toContain(legacy);
     }
 

@@ -24,14 +24,12 @@ import { useQuery } from '@tanstack/react-query';
 import { format, subDays, subHours } from 'date-fns';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { ApiError, type ApiRequestFn } from '@/lib/api/client';
-import { getDashboardSummary } from '@/lib/api/statistics';
-import { getSecurityOverview, type TrendSeriesPoint } from '@/lib/api/security-overview';
+import type { TrendSeriesPoint } from '@/lib/api/security-overview';
+import { fetchSystemStatusSummary } from '@/lib/api/system-status-summary';
 import { fetchOpsTop, type OpsTopRow } from '@/lib/api/ops-top';
 import { fetchNodes, fetchAlerts } from '@/lib/api/monitoring';
 import type { NodeInfo } from '@/types/monitoring';
 import type { AlertEvent, AlertSeverity } from '@/types/alerts';
-import { getDisposalList } from '@/components/email-disposal/lib/disposal-api';
-import { PENDING_DISPOSAL_FILTER } from '@/components/email-disposal/lib/pending-filter';
 import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 import { getDetectionStats } from '@/lib/api/phishing-detection';
 import { getSpoofingStats } from '@/lib/api/spoofing-detection';
@@ -56,10 +54,30 @@ export interface RangeDates {
   prevStart: string;
   prevEnd: string;
   interval: 'hour' | 'day';
+  /**
+   * Optional clock-of-day refinements (HH:mm:ss) for the `start_time` /
+   * `end_time` parameters of the homepage summary endpoint. Its backend scan
+   * computes both KPI cards from this one window, so they cannot disagree about
+   * what "24 小时" means. Only the
+   * '24h' range sets them; the calendar-day-aligned ranges (today / 7d / 30d)
+   * leave them undefined and keep the pure whole-day semantics.
+   *
+   * When present the window is [startDate startTime, endDate endTime) — the end
+   * clock is EXCLUSIVE, so a clock-bounded range is never rounded up to the end
+   * of the day.
+   */
+  startTime?: string;
+  endTime?: string;
+  prevStartTime?: string;
+  prevEndTime?: string;
 }
 
 function fmt(d: Date): string {
   return format(d, 'yyyy-MM-dd');
+}
+
+function fmtClock(d: Date): string {
+  return format(d, 'HH:mm:ss');
 }
 
 /**
@@ -76,13 +94,28 @@ function fmt(d: Date): string {
  */
 export function resolveRangeDates(range: SystemStatusRange, now: Date = new Date()): RangeDates {
   if (range === '24h') {
-    // 过去 24 小时：以小时为粒度，前一周期取再往前 24 小时用于环比计算。
-    // 日期字段复用 fmt（yyyy-MM-dd），后端以 startDate/endDate 加 interval=hour 区分。
+    // 过去 24 小时：真正的 24 小时，不是"两个自然日"。
+    //
+    // 日期粒度不足以表达这一档：统计接口只拿到日期时会把
+    // [start_date, end_date] 展开成 [start_date 00:00, end_date+1 00:00)，于是
+    // "24 小时"实际查 48 小时，而且当前周期 [昨天00:00,明天00:00) 与上一周期
+    // [前天00:00,今天00:00) 在"昨天"整天上完全重叠，环比彻底失真。
+    //
+    // 因此这一档额外带上时刻（start_time / end_time，后端可选参数，结束时刻为开
+    // 区间）：当前 [now-24h, now)、上一周期 [now-48h, now-24h)，各 24 小时且首尾
+    // 相接不重叠。时刻按部署/租户时区解释，与日期口径同源。
+    const curStart = subHours(now, 24);
+    const prevStart = subHours(now, 48);
     return {
-      startDate: fmt(subHours(now, 24)),
+      startDate: fmt(curStart),
+      startTime: fmtClock(curStart),
       endDate: fmt(now),
-      prevStart: fmt(subHours(now, 48)),
-      prevEnd: fmt(subHours(now, 24)),
+      endTime: fmtClock(now),
+      prevStart: fmt(prevStart),
+      prevStartTime: fmtClock(prevStart),
+      // 上一周期的结束时刻 = 当前周期的开始时刻（半开区间，互不重叠）。
+      prevEnd: fmt(curStart),
+      prevEndTime: fmtClock(curStart),
       interval: 'hour',
     };
   }
@@ -170,7 +203,7 @@ export interface SystemStatusData {
   // GT-12549: /monitor/nodes 数据源降级（TSDB 不可用/指标未初始化）时为 true，
   // KPI 与健康卡据此展示"数据源不可用"，不得把降级伪装成有效的 0/0。
   nodesDegraded: boolean;
-  // 威胁态势趋势 series (security-overview threat_type trend), aligned to the
+  // 威胁态势趋势 series (security-overview email_type trend), aligned to the
   // demo's 5-class stacked threat chart. See threat-trend-config.ts.
   threatTrend: TrendSeriesPoint[];
   top5: OpsTopRow[];
@@ -236,13 +269,13 @@ interface FetchArgs {
 // Promise.all, so a single rejected call took the whole query down and every
 // field fell back to 0 / [] / null — the "统计卡片数据全为 0" and "待办面板为空"
 // reports. A tenant_admin reliably hits this: /inbound-audit is RequireSystemAdmin
-// and 403s, even though /statistics/dashboard and /statistics/security-overview
-// happily return that tenant's real data (verified: 200 / 200 / 403).
+// and 403s, even though the homepage statistics endpoint returns that tenant's
+// real data.
 //
 // Auxiliary sources now degrade to a neutral value on failure instead of
-// destroying the page. The CORE KPI sources (summary + security-overview) are
-// deliberately NOT wrapped: if those are unavailable the dashboard genuinely has
-// nothing to show, and the existing isError banner is the honest answer.
+// destroying the page. The CORE summary source is deliberately NOT wrapped: if
+// it is unavailable the dashboard genuinely has nothing to show, and the
+// existing isError banner is the honest answer.
 async function optionalSource<T>(p: Promise<T>, fallback: T, label: string): Promise<T> {
   try {
     return await p;
@@ -254,8 +287,8 @@ async function optionalSource<T>(p: Promise<T>, fallback: T, label: string): Pro
     // Anything else (500 / timeout / network) is a REAL outage, and swallowing it
     // makes the dashboard lie: `isError` stays false, so HealthBanner renders the
     // green "系统运行正常" while /monitor/alerts is down and real alerts are hidden;
-    // a failing disposal query reports "无待办事项" while quarantined mail is
-    // actually queued. Silently-wrong is worse than an honest error banner, so
+    // a failing auxiliary query could otherwise hide real page content.
+    // Silently-wrong is worse than an honest error banner, so
     // rethrow and let the combined query reject.
     if (err instanceof ApiError && err.status === 403) {
       console.warn(`[dashboard] source "${label}" forbidden for this viewer, degrading`, err);
@@ -269,65 +302,56 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
   const { range, dates, apiRequest, isPlatform, agentAccess } = args;
 
   const [
-    summaryCur,
-    summaryPrev,
-    securityOverview,
-    securityOverviewPrev,
+    summary,
     top5Resp,
-    disposal,
     inboundAudit,
     agents,
   ] = await Promise.all([
-      getDashboardSummary(dates.startDate, dates.endDate, apiRequest),
-      getDashboardSummary(dates.prevStart, dates.prevEnd, apiRequest),
-      getSecurityOverview(
-        { startDate: dates.startDate, endDate: dates.endDate, interval: dates.interval },
-        apiRequest,
-      ),
-      // Previous equal-length period, so the threat KPI can show a 环比 just like
-      // the inbound-total KPI (spec §4.3: both 收信总量 and 拦截威胁数 are
-      // frontend-computed period-over-period — review finding 5).
-      getSecurityOverview(
-        { startDate: dates.prevStart, endDate: dates.prevEnd, interval: dates.interval },
-        apiRequest,
-      ),
-      // §7 威胁来源 TOP5: dimension=sender, ranked by intercepted-hit count
-      // (sort=threat) — spec §4.8 "命中次数降序". Without this the backend
-      // defaults to send-volume ranking and the card would list the highest-
-      // traffic senders (often 0-threat newsletters) instead of real threat
-      // sources.
-      optionalSource(
-        fetchOpsTop({ dimension: 'sender', direction: 'all', timeRange: range, top: '10', sort: 'threat' }, apiRequest),
-        { dimension: 'sender', total: 0, trendLabels: [], rows: [] as OpsTopRow[] },
-        'ops-top',
-      ),
-      optionalSource(
-        getDisposalList({ advanced: PENDING_DISPOSAL_FILTER, page: 1, pageSize: 1 }, apiRequest),
-        { items: [], page: 1, page_size: 1, total: 0 },
-        'disposal',
-      ),
-      // 403s for tenant_admin today (RequireSystemAdmin), even though spec §4.6
-      // lists 举报待审 as a TENANT-scope source. Kept unconditional so tenants
-      // pick it up automatically once the backend authz is relaxed; until then
-      // it degrades to 0 instead of blanking the dashboard.
-      optionalSource(
-        getInboundAuditItems({ status: 'pending', page: 1, page_size: 1 }, apiRequest),
-        { items: [], page: 1, page_size: 1, total: 0 },
-        'inbound-audit',
-      ),
-      // Request only the individually authorized agent sources. Each 403 is
-      // isolated inside fetchAgentStats, so one revoked capability cannot erase
-      // another agent's valid data.
-      fetchAgentStats(apiRequest, agentAccess),
-    ]);
+    // 首页专用聚合保持既有口径，但只返回页面实际消费的数据：当前/上一周期
+    // 收发信总量与威胁 KPI、当前 email_type 趋势、待处置数量。完整的
+    // delivery-traffic / security-overview 接口继续供各自详情页使用。
+    fetchSystemStatusSummary(
+      {
+        startDate: dates.startDate,
+        startTime: dates.startTime,
+        endDate: dates.endDate,
+        endTime: dates.endTime,
+        interval: dates.interval,
+      },
+      apiRequest,
+    ),
+    // §7 威胁来源 TOP5: dimension=sender, ranked by intercepted-hit count
+    // (sort=threat) — spec §4.8 "命中次数降序". Without this the backend
+    // defaults to send-volume ranking and the card would list the highest-
+    // traffic senders (often 0-threat newsletters) instead of real threat
+    // sources.
+    optionalSource(
+      fetchOpsTop({ dimension: 'sender', direction: 'all', timeRange: range, top: '10', sort: 'threat' }, apiRequest),
+      { dimension: 'sender', total: 0, trendLabels: [], rows: [] as OpsTopRow[] },
+      'ops-top',
+    ),
+    // 403s for tenant_admin today (RequireSystemAdmin), even though spec §4.6
+    // lists 举报待审 as a TENANT-scope source. Kept unconditional so tenants
+    // pick it up automatically once the backend authz is relaxed; until then
+    // it degrades to 0 instead of blanking the dashboard.
+    optionalSource(
+      getInboundAuditItems({ status: 'pending', page: 1, page_size: 1 }, apiRequest),
+      { items: [], page: 1, page_size: 1, total: 0 },
+      'inbound-audit',
+    ),
+    // Request only the individually authorized agent sources. Each 403 is
+    // isolated inside fetchAgentStats, so one revoked capability cannot erase
+    // another agent's valid data.
+    fetchAgentStats(apiRequest, agentAccess),
+  ]);
 
-  const inbound = summaryCur.metrics.total_emails;
-  const inboundDelta = computeDelta(inbound, summaryPrev.metrics.total_emails);
+  const inbound = summary.current.mail_volume;
+  const inboundDelta = computeDelta(inbound, summary.previous.mail_volume);
   // Global Constraint: 拦截威胁数用 blocked，不是 total_filtered.
-  const threats = securityOverview.kpi.blocked;
-  const threatsDelta = computeDelta(threats, securityOverviewPrev.kpi.blocked);
-  const blockRate = securityOverview.kpi.block_rate;
-  const pendingIsolated = disposal.total;
+  const threats = summary.current.threats;
+  const threatsDelta = computeDelta(threats, summary.previous.threats);
+  const blockRate = summary.current.block_rate;
+  const pendingIsolated = summary.pending_disposal;
   const pendingReport = inboundAudit.total;
   const top5 = top5Resp.rows.slice(0, 5);
 
@@ -487,7 +511,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     nodesOnline,
     nodesTotal,
     nodesDegraded,
-    threatTrend: securityOverview.trend?.email_type ?? [],
+    threatTrend: summary.threat_trend ?? [],
     top5,
     alerts: [...platformAlerts, ...tenantAlerts, ...platformTailAlerts],
     agents,
@@ -521,6 +545,10 @@ export function useSystemStatusData(range: SystemStatusRange): SystemStatusData 
       agentAccess['threat-retro'],
       dates.startDate,
       dates.endDate,
+      // '24h' 的窗口带时刻，日期相同而时刻不同的两次查询必须是不同的 query key
+      // （若首页 summary 后续增加缓存，缓存键也必须包含这两个字段）。
+      dates.startTime,
+      dates.endTime,
     ],
     enabled: scope.scopeResolved,
     queryFn: () => fetchSystemStatusData({ range, dates, apiRequest, isPlatform, agentAccess }),

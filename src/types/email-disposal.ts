@@ -12,7 +12,10 @@ export interface DisposalQuickFilter {
   sender?: string;
   recipient?: string;
   subject?: string;
+  /** @deprecated Kept only for loading older saved templates; use executionActions. */
   executionAction?: string;
+  /** Display-level execution actions; submitted as one `action in [...]` condition. */
+  executionActions?: ExecutionAction[];
   /** @deprecated Kept only for loading older saved templates. */
   emailStatus?: string;
   emailStatuses?: string[];
@@ -68,24 +71,43 @@ export const EXECUTION_ACTIONS = [
 
 export type ExecutionAction = (typeof EXECUTION_ACTIONS)[number];
 
-export type DisplayStatus =
-  | "rejected"
-  | "bounced"
-  | "discarded"
-  | "quarantine_pending"
-  | "sideline_pending"
-  | "audit_pending"
-  | "delivering"
-  | "delivered"
-  | "partial_delivered"
-  | "delivery_failed"
-  | "recall_pending"
-  | "recall_success"
-  | "recall_failed"
-  | "partial_recall_success"
-  | "deleted"
-  | "expired"
-  | "reviewed_rejected";
+/**
+ * GT-12955 批准的 13 个位置维度展示状态（纯契约类型）：取值与后端
+ * models.DisplayStatusValues / api/openapi.yaml 的 display_statuses 枚举
+ * 逐值一致，前端不再计算任何展示状态，只消费后端下发的列表。
+ * 一致性守卫：webapp/tests/unit/disposal-enum-label-coverage.test.ts
+ * （union ↔ openapi 枚举 ↔ i18n 键三方对拍）。
+ * 数组顺序即后端下发和筛选顺序。
+ */
+export const DISPLAY_STATUSES = [
+  "delivering",
+  "quarantine_pending",
+  "sideline_pending",
+  "audit_pending",
+  "rejected",
+  "discarded",
+  "delivery_cancelled",
+  "delivered",
+  "delivery_failed",
+  "recall_pending",
+  "recall_success",
+  "recall_failed",
+  "expired",
+] as const;
+
+export type DisplayStatus = (typeof DISPLAY_STATUSES)[number];
+
+/**
+ * 后端下发的展示状态列表条目（display_statuses）：一致邮件通常为单元素，
+ * mixed / 部分投递 / 部分召回为多元素。count 是该状态实际覆盖的对象数；召回态
+ * 只统计实际创建召回请求的收件人，不能用整封收件人数代替。
+ * **显示与筛选同源**：按状态筛选 = 列表包含该状态；mixed 的包含语义
+ * （一封信里有的状态就能筛到）是后端刻意设计，不是前后端漂移。
+ */
+export interface DisplayStatusEntry {
+  status: DisplayStatus;
+  count: number;
+}
 
 export interface DisposalBasis {
   policy_key?: string;
@@ -94,7 +116,41 @@ export interface DisposalBasis {
   action?: string;
   hit_values?: Record<string, string>;
   detection_tags?: string[];
+  /** 本条规则命中的收件人（仅出现在 modules 条目上）。 */
+  recipients?: string[];
+  /** @deprecated 旧 per_recipient[] 的单收件人字段，仅用于历史展示回落。 */
+  recipient?: string;
+  /**
+   * recipients 的子集：本条规则最终决定了动作的收件人。
+   * undefined 与 [] 语义不同（GT-12727 spec §7.10.3）：
+   *   undefined = 无归属信息（连接/MAIL 阶段，或老数据回落）→ 不打任何徽标
+   *   []        = 确知未生效
+   */
+  effective_for?: string[];
+  /** 本封邮件命中的模块清单（不是穷尽列表，见 GT-12727 spec §7.5）。 */
+  modules?: DisposalBasis[];
+  /** @deprecated 已停写（GT-12727 spec §7.9），仅老数据仍有。 */
   per_recipient?: DisposalBasis[];
+}
+
+export interface DisposalBasisEntrySummary {
+  rule_name?: string;
+  rule_id?: string;
+  action?: string;
+  hit_values?: Record<string, string>;
+  detection_tags?: string[];
+  recipient_count: number;
+  effective_count: number;
+  effective_known: boolean;
+}
+
+/** 列表专用轻量分组；不包含任何收件人地址数组。 */
+export interface DisposalBasisGroupSummary {
+  policy_key: string;
+  entries: DisposalBasisEntrySummary[];
+  recipient_count: number;
+  effective_count: number;
+  effective_known: boolean;
 }
 
 export interface DisposalMailItem {
@@ -107,7 +163,13 @@ export interface DisposalMailItem {
   subject: string;
   action: string;
   status: string;
-  displayStatus: DisplayStatus;
+  /**
+   * 后端下发的展示状态列表（display_statuses，GT-12782 Task 4）。前端不再
+   * 自己算状态：单元素 → 单徽章；多元素（mixed）→ 分段展示。
+   */
+  displayStatuses: DisplayStatusEntry[];
+  /** Raw recall fold retained for detail/audit; badges always use displayStatuses. */
+  recallStatusSummary?: string;
   similarity?: number;
   threatLevel?: string;
   intentLabel?: string;
@@ -121,6 +183,7 @@ export interface DisposalMailItem {
   emailTypeOriginal?: string;
   correctionSource?: string;
   disposalBasis?: DisposalBasis;
+  disposalBasisGroups?: DisposalBasisGroupSummary[];
   /** mail_log.reason 自由文本。disposalBasis 缺失时按落地 spec §4.1 回退显示（GT-12578/GT-12686）。 */
   reason?: string;
   disposalPolicyKeys?: string;
@@ -150,13 +213,35 @@ export interface BulkDisposeFailureItem {
   reason: string;
 }
 
+export interface RecipientOperationResult {
+  mail_log_id: number;
+  object_kind?: string;
+  object_id?: string;
+  recipients: string[];
+  status: "succeeded" | "failed" | "skipped";
+  reason?: string;
+}
+
 export interface BulkDisposeResponse {
   succeeded: number[];
   failed: BulkDisposeFailureItem[];
   not_applicable: number[];
+  /** Mixed messages where only part of the actionable recipient objects succeeded. */
+  partial?: number[];
+  /** Additive per-recipient/object outcomes; populated for mixed-message disposal. */
+  recipient_results?: RecipientOperationResult[];
   // Ids whose dispose succeeded but the bundled final_type reclassify failed
   // afterward (spec §6.1 "已处置，但改判失败"); dispose is not rolled back.
   reclassify_failed?: number[];
+}
+
+export interface RecallMailsResponse {
+  succeeded: number[];
+  failed: BulkDisposeFailureItem[];
+  /** Messages where at least one recallable recipient succeeded and another recipient failed or was unsupported. */
+  partial?: number[];
+  reclassify_failed?: number[];
+  recipient_results?: RecipientOperationResult[];
 }
 
 export interface SimilarSearchRequest {

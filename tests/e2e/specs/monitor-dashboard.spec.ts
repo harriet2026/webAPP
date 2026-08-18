@@ -36,13 +36,46 @@ test.describe('监控总览（monitor-dashboard）', () => {
       await expect(page.alertsHealth.getByText(/已解决|Resolved/)).toBeVisible();
     });
 
-    test('告警跑马灯使用后端最近告警（最多 4 条）', async ({ authenticatedPage }) => {
+    test('告警跑马灯无缝滚动、hover 暂停且克隆内容不重复进入焦点', async ({ authenticatedPage }) => {
+      await authenticatedPage.addInitScript(() => localStorage.setItem('osgateway_mock_enabled', '1'));
       const page = new MonitorDashboardPage(authenticatedPage);
       await page.goto();
       const items = authenticatedPage.locator('[data-testid^="monitor-dashboard-marquee-item-"]');
-      expect(await items.count()).toBeLessThanOrEqual(4);
+      await expect(items).toHaveCount(4);
       for (let index = 0; index < await items.count(); index += 1) {
         await expect(items.nth(index)).toHaveAttribute('href', /\/monitoring\/alerts\?id=\d+/);
+      }
+      await expect(page.alertMarqueeTrack).toHaveCSS('animation-name', 'marquee');
+      await expect(page.alertMarqueeTrack).toHaveCSS('animation-play-state', 'running');
+      // 动画中的元素永远不满足 Playwright 的 stable 条件；force 只跳过
+      // actionability 稳定性检查，仍由真实浏览器触发 :hover。
+      await page.alertMarqueeTrack.hover({ force: true });
+      await expect(page.alertMarqueeTrack).toHaveCSS('animation-play-state', 'paused');
+
+      const clones = page.alertMarqueeTrack.locator('[aria-hidden="true"]');
+      await expect(clones).toHaveCount(4);
+      for (let index = 0; index < await clones.count(); index += 1) {
+        await expect(clones.nth(index)).toHaveAttribute('tabindex', '-1');
+      }
+    });
+
+    test('模块卡和趋势卡头保持单行 flex 布局，趋势外链指向正确页面', async ({ authenticatedPage }) => {
+      const page = new MonitorDashboardPage(authenticatedPage);
+      await page.goto();
+      await expect(page.mailflowTrendLink).toHaveAttribute('href', /\/monitoring\/mailflow$/);
+      await expect(page.engineTrendLink).toHaveAttribute('href', /\/monitoring\/security$/);
+
+      for (const id of [
+        'monitor-dashboard-module-infrastructure',
+        'monitor-dashboard-module-mailflow',
+        'monitor-dashboard-module-engine',
+        'monitor-dashboard-module-alerts',
+        'monitor-dashboard-mailflow-trend',
+        'monitor-dashboard-engine-trend',
+      ]) {
+        const header = authenticatedPage.getByTestId(id).locator('[data-slot="card-header"]');
+        await expect(header).toHaveCSS('display', 'flex');
+        await expect(header).toHaveCSS('flex-wrap', 'nowrap');
       }
     });
 

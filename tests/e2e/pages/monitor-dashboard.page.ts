@@ -10,8 +10,11 @@ export class MonitorDashboardPage {
   readonly lastUpdate: Locator;
   readonly mailflowTrend: Locator;
   readonly engineTrend: Locator;
+  readonly mailflowTrendLink: Locator;
+  readonly engineTrendLink: Locator;
   readonly alertsHealth: Locator;
   readonly alertMarquee: Locator;
+  readonly alertMarqueeTrack: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -22,8 +25,11 @@ export class MonitorDashboardPage {
     this.lastUpdate = page.locator('[data-testid="monitor-dashboard-last-update"]');
     this.mailflowTrend = page.locator('[data-testid="monitor-dashboard-mailflow-trend"]');
     this.engineTrend = page.locator('[data-testid="monitor-dashboard-engine-trend"]');
+    this.mailflowTrendLink = page.locator('[data-testid="monitor-dashboard-mailflow-trend-link"]');
+    this.engineTrendLink = page.locator('[data-testid="monitor-dashboard-engine-trend-link"]');
     this.alertsHealth = page.locator('[data-testid="monitor-dashboard-alerts-health"]');
     this.alertMarquee = page.locator('[data-testid="monitor-dashboard-alert-marquee"]');
+    this.alertMarqueeTrack = page.locator('[data-testid="monitor-dashboard-marquee-track"]');
   }
 
   async goto() {

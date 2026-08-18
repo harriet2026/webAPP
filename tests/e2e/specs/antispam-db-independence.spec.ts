@@ -172,22 +172,10 @@ test.describe('Antispam DB Independence', () => {
   });
 
   test.describe('Internal API - Claim Endpoints', () => {
-    test('claim sideline items with valid request', async () => {
-      const resp = await hmacPost('/internal/v1/antispam/sideline/claim', {
-        node_id: 'test-node-e2e',
-        limit: 5,
-        lease_seconds: 300,
-      });
-      expect(resp.status).toBe(200);
-
-      const data = await resp.json();
-      expect(Array.isArray(data.items)).toBeTruthy();
-    });
-
-    test('claim sideline items without body returns 400', async () => {
+    test('claim outbound audit items without body returns 400', async () => {
       const body = '{}';
       const ts = Math.floor(Date.now() / 1000).toString();
-      const path = '/internal/v1/antispam/sideline/claim';
+      const path = '/internal/v1/antispam/outbound-audit/claim';
       const payload = `${ts}\nPOST\n${path}\n${body}`;
       const encoder = new TextEncoder();
       const key = await crypto.subtle.importKey(

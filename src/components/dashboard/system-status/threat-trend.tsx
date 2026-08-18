@@ -5,9 +5,9 @@
 // (钓鱼/仿冒/垃圾/病毒/恶意链接) with a click-to-toggle legend. Multi-bucket
 // ranges use a stacked-area chart; the single "today" bucket uses a stacked
 // bar so its non-zero values remain visible. Data is
-// `securityOverview.trend.threat_type` (TrendSeriesPoint[], one bucket per
-// point carrying a count per threat-type key), surfaced by hooks.ts as
-// `SystemStatusData.threatTrend`.
+// the homepage summary's security-overview-compatible `email_type` trend
+// (TrendSeriesPoint[], one bucket per point carrying all 11 type counts),
+// surfaced by hooks.ts as `SystemStatusData.threatTrend`.
 //
 // Built with `echarts-for-react` (the house chart lib) rather than recharts,
 // which is not a project dependency — same stacked-line + areaStyle technique

@@ -4,18 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
-  CheckCircle2,
   Clock,
   FileText,
   HelpCircle,
   Lightbulb,
   Loader2,
   Mail,
+  MinusCircle,
   Paperclip,
   Play,
   Search,
+  Target,
   Zap,
-  XCircle,
 } from 'lucide-react';
 import {
   Sheet,
@@ -59,6 +59,10 @@ import {
   toContentRuleUiAction,
 } from '@/lib/api/content-rules';
 import { useApiRequest } from '@/lib/api/client';
+import { apiErrorFieldPath } from '@/lib/api/error-message';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { useAuth } from '@/contexts/auth-context';
+import { getRulePriorityRange } from '@/components/security/advanced-filter-rules/priority-range';
 import type {
   ContentRuleDirections,
   ContentRuleFormData,
@@ -122,8 +126,22 @@ function cloneDirections(directions: ContentRuleDirections): ContentRuleDirectio
 
 function makeInitialState(rule: ContentRuleRuleView | null) {
   if (!rule?.resolved) {
+    // 复杂规则（条件树无法映射到简化抽屉）或新建：匹配/范围/方向用默认值，
+    // 但基础字段（名称/优先级/有效期/启用态）仍从原规则回填，编辑不从空白开始。
+    const base = rule?.rule;
     return {
-      draft: defaultDraft(),
+      draft: {
+        ...defaultDraft(),
+        ...(base ? {
+          name: base.name,
+          description: base.description ?? '',
+          priority: base.priority,
+          is_active: base.is_active,
+          valid_from: base.valid_from ? base.valid_from.slice(0, 16) : '',
+          valid_until: base.valid_until ? base.valid_until.slice(0, 10) : '',
+          email_type: base.email_type,
+        } : {}),
+      },
       uiAction: 'isolate' as ContentRuleUiAction,
       headerName: DEFAULT_HEADER_NAME,
       headerValue: DEFAULT_HEADER_VALUE,
@@ -171,6 +189,11 @@ export function ContentRuleDrawer({
 }: ContentRuleDrawerProps) {
   const t = useTranslations();
   const { apiRequest } = useApiRequest();
+  // 后端错误的本地化渲染器：正则不合法这类错误由后端给稳定错误码 +
+  // pattern/原因参数，前端按当前语言渲染，不直接展示后端英文 message。
+  const apiErrorMessage = useApiErrorMessage();
+  const { isSystemAdmin } = useAuth();
+  const range = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin]);
   const [draft, setDraft] = useState<ContentRuleFormData>(defaultDraft);
   const [uiAction, setUiAction] = useState<ContentRuleUiAction>('isolate');
   const [headerName, setHeaderName] = useState(DEFAULT_HEADER_NAME);
@@ -182,6 +205,9 @@ export function ContentRuleDrawer({
   const [testContent, setTestContent] = useState('');
   const [testMatch, setTestMatch] = useState<boolean | null>(null);
   const [testError, setTestError] = useState('');
+  // 与 testMatch（命中/未命中，均为正常测试结果）区分：仅接口失败、正则解析异常等
+  // 真正的执行错误才写入这里，渲染为 destructive 态；不会被误判为"未匹配"。
+  const [testRunError, setTestRunError] = useState('');
   const [isTesting, setIsTesting] = useState(false);
   const [examplesOpen, setExamplesOpen] = useState(false);
   const [testOpen, setTestOpen] = useState(false);
@@ -264,15 +290,12 @@ export function ContentRuleDrawer({
     setErrors((current) => ({ ...current, scope: undefined }));
   };
 
-  const regexError = useMemo(() => {
-    if (draft.match_type !== 'regex' || !draft.match_content) return '';
-    try {
-      new RegExp(draft.match_content);
-      return '';
-    } catch {
-      return t('contentRules.invalidRegex');
-    }
-  }, [draft.match_content, draft.match_type, t]);
+  // 这里曾经有一段 `new RegExp(draft.match_content)` 的本地预检。它已被删除：
+  // 浏览器的正则引擎与网关执行用的 Go(RE2) 引擎规矩不同，而且两个方向都会错 ——
+  // `(?=a)b` 浏览器接受、Go 拒绝（前端"假通过"，规则上线后永远不匹配却看不出来）；
+  // `(?P<x>a)` 浏览器拒绝、Go 接受（前端"假报错"，把一条后端完全支持的规则拦死）。
+  // 判定权只属于真正要执行它的一方，因此改由后端在保存 / 模拟测试时给出结论，
+  // 前端只负责把后端的原因显示清楚（见下面的 handleSubmit / runTest）。
 
   const validate = () => {
     const next: FormErrors = {};
@@ -280,14 +303,13 @@ export function ContentRuleDrawer({
     if (!name) next.name = t('contentRules.ruleNameRequired');
     else if (name.length > 50) next.name = t('contentRules.ruleNameTooLong');
     else if (/[<>&"]/.test(name)) next.name = t('contentRules.ruleNameForbiddenChars');
-    if (!Number.isInteger(draft.priority) || draft.priority < 1 || draft.priority > 9999) {
-      next.priority = t('contentRules.priorityInvalid');
+    if (!Number.isInteger(draft.priority) || draft.priority < range.min || draft.priority > range.max) {
+      next.priority = t('contentRules.priorityInvalid', { min: range.min, max: range.max });
     }
     if (!Object.values(draft.directions).some((config) => config?.enabled)) {
       next.direction = t('contentRules.atLeastOneDirection');
     }
     if (!draft.match_content.trim()) next.match_content = t('contentRules.matchContentRequired');
-    if (regexError) next.regex = regexError;
     if (!draft.scopes.length) next.scope = t('contentRules.atLeastOneScope');
     if (uiAction === 'tag_deliver' && (!headerName.trim() || !headerValue.trim())) {
       next.header = t('contentRules.headerRequired');
@@ -331,8 +353,14 @@ export function ContentRuleDrawer({
       });
       initialState.current = serializeState(draft, uiAction, headerName, headerValue);
       onOpenChange(false);
-    } catch {
+    } catch (error) {
       // The page-level submit handler owns the API error toast. Keep the drawer open.
+      // 但正则这类"某个输入框的值不合法"的后端错误只弹 toast 太弱：后端在
+      // params.field 里标了出错的字段，这里把本地化后的原因贴回那个输入框旁边，
+      // 用户才知道该改哪一行、为什么改。
+      if (apiErrorFieldPath(error) === 'match_content') {
+        setErrors((current) => ({ ...current, regex: apiErrorMessage(error) }));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -343,8 +371,11 @@ export function ContentRuleDrawer({
       setTestError(t('contentRules.testContentRequired'));
       return;
     }
-    if (!draft.match_content.trim() || regexError) return;
+    // 不再用浏览器引擎替后端判断"这条正则能不能用"。模拟测试本身就是问后端要
+    // 结论的动作：非法正则会得到 400 + 原因，正好当作即时反馈。
+    if (!draft.match_content.trim()) return;
     setTestError('');
+    setTestRunError('');
     setIsTesting(true);
     setTestMatch(null);
     try {
@@ -366,14 +397,19 @@ export function ContentRuleDrawer({
       }
       const result = await testContentRule(tree, attrs, apiRequest);
       setTestMatch(result.matched);
-    } catch {
-      setTestMatch(false);
+    } catch (error) {
+      // 接口失败 / 正则不合法等真正的执行错误：不写入 testMatch（否则会被渲染成
+      // "未匹配"的中性/成功态，掩盖真实故障），单独走 destructive 提示。
+      // 后端给了带 pattern 与原因的错误码时优先显示它——"测试执行失败"这种笼统
+      // 文案对着一条写错的正则毫无帮助。
+      setTestMatch(null);
+      setTestRunError(apiErrorMessage(error, t('contentRules.testFailed')));
     } finally {
       setIsTesting(false);
     }
   };
 
-  const legacyScopes = draft.scopes.filter((scope) => scope === 'attachment_types' || scope === 'urls');
+  const legacyScopes = draft.scopes.filter((scope) => scope === 'attachment_types' || scope === 'attachment_hash' || scope === 'urls');
   const actionLabel = (action: ContentRuleUiAction) => {
     const suffix = action.split('_').map((part) => part[0].toUpperCase() + part.slice(1)).join('');
     return t(`contentRules.action${suffix}` as 'contentRules.actionDeliver');
@@ -393,6 +429,7 @@ export function ContentRuleDrawer({
     updateAction(action);
     setErrors({});
     setTestMatch(null);
+    setTestRunError('');
   };
 
   const directionDescription = (['receive', 'send', 'internal'] as const)
@@ -456,6 +493,7 @@ export function ContentRuleDrawer({
                           <Checkbox
                             checked={draft.directions[direction]?.enabled ?? false}
                             onCheckedChange={(checked) => updateDirection(direction, checked === true)}
+                            data-testid={`content-rule-direction-${direction}`}
                           />
                           <span>{t(`contentRules.direction${direction[0].toUpperCase() + direction.slice(1)}Full` as 'contentRules.directionReceiveFull')}</span>
                         </label>
@@ -470,13 +508,13 @@ export function ContentRuleDrawer({
                     <Input
                       data-testid="content-rule-priority"
                       type="number"
-                      min={1}
-                      max={9999}
+                      min={range.min}
+                      max={range.max}
                       value={draft.priority}
                       onChange={(event) => setDraft((current) => ({ ...current, priority: Number(event.target.value) }))}
                       className="w-24"
                     />
-                    <span className="ml-2 text-xs text-muted-foreground">{t('contentRules.priorityRangeHint')}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{t('contentRules.priorityRangeHint', { min: range.min, max: range.max })}</span>
                   </Field>
                   <Field label={t('contentRules.effectiveUntil')} error={errors.valid_until} hint={t('contentRules.validUntilTip')}>
                     <div className="flex flex-wrap items-center gap-2">
@@ -506,16 +544,16 @@ export function ContentRuleDrawer({
                     >
                       <SelectTrigger className="w-48" data-testid="content-rule-match-type"><SelectValue /></SelectTrigger>
                       <SelectContent className="z-[80]" data-content-rule-layer="editor">
-                        <SelectItem value="keyword">{t('contentRules.matchTypeKeyword')}</SelectItem>
-                        <SelectItem value="regex">{t('contentRules.matchTypeRegex')}</SelectItem>
-                        <SelectItem value="content_group">{t('contentRules.matchTypeContentGroup')}</SelectItem>
+                        <SelectItem value="keyword" data-testid="content-rule-match-type-option-keyword">{t('contentRules.matchTypeKeyword')}</SelectItem>
+                        <SelectItem value="regex" data-testid="content-rule-match-type-option-regex">{t('contentRules.matchTypeRegex')}</SelectItem>
+                        <SelectItem value="content_group" data-testid="content-rule-match-type-option-content_group">{t('contentRules.matchTypeContentGroup')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </Field>
                   <Field
                     label={draft.match_type === 'content_group' ? t('contentRules.contentGroup') : t('contentRules.matchContent')}
                     required
-                    error={errors.match_content || errors.regex || regexError}
+                    error={errors.match_content || errors.regex}
                     hint={t('contentRules.matchContentTip')}
                     align="start"
                   >
@@ -538,7 +576,7 @@ export function ContentRuleDrawer({
                         data-testid="content-rule-match-content"
                         value={draft.match_content}
                         placeholder={draft.match_type === 'regex' ? t('contentRules.regexPlaceholder') : t('contentRules.keywordPlaceholder')}
-                        className={cn('min-h-20 font-mono text-sm', (errors.match_content || regexError) && 'border-destructive')}
+                        className={cn('min-h-20 font-mono text-sm', (errors.match_content || errors.regex) && 'border-destructive')}
                         onChange={(event) => {
                           setDraft((current) => ({ ...current, match_content: event.target.value }));
                           setErrors((current) => ({ ...current, match_content: undefined, regex: undefined }));
@@ -553,7 +591,11 @@ export function ContentRuleDrawer({
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-1">
                     {(['subject', 'body', 'header', 'attachment_names'] as ScopeChoice[]).map((scope) => (
                       <label key={scope} className="flex cursor-pointer items-center gap-2 whitespace-nowrap text-sm">
-                        <Checkbox checked={selectedScope(scope)} onCheckedChange={(checked) => updateScope(scope, checked === true)} />
+                        <Checkbox
+                          checked={selectedScope(scope)}
+                          onCheckedChange={(checked) => updateScope(scope, checked === true)}
+                          data-testid={`content-rule-scope-${scope}`}
+                        />
                         <span>{t(`contentRules.scopeDisplay${scope === 'attachment_names' ? 'AttachmentNames' : scope[0].toUpperCase() + scope.slice(1)}` as 'contentRules.scopeDisplaySubject')}</span>
                       </label>
                     ))}
@@ -584,7 +626,7 @@ export function ContentRuleDrawer({
                       </SelectTrigger>
                       <SelectContent className="z-[80]" data-content-rule-layer="editor">
                         {ACTIONS.map((action) => (
-                          <SelectItem key={action} value={action} className="items-start">
+                          <SelectItem key={action} value={action} className="items-start" data-testid={`content-rule-action-option-${action}`}>
                             <span className="flex flex-col gap-0.5">
                               <span className={actionTextClass(action)}>{actionLabel(action)}</span>
                               <span className="text-xs text-muted-foreground">{actionHint(action)}</span>
@@ -668,7 +710,12 @@ export function ContentRuleDrawer({
                   <CollapsibleContent className="mt-3 rounded-lg border bg-card p-4">
                     <Textarea
                       value={testContent}
-                      onChange={(event) => { setTestContent(event.target.value); setTestMatch(null); setTestError(''); }}
+                      onChange={(event) => {
+                        setTestContent(event.target.value);
+                        setTestMatch(null);
+                        setTestError('');
+                        setTestRunError('');
+                      }}
                       placeholder={t('contentRules.testContent')}
                       className="min-h-24"
                     />
@@ -677,12 +724,23 @@ export function ContentRuleDrawer({
                       {isTesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {t('contentRules.runTest')}
                     </Button>
-                    {testMatch !== null && (
+                    {/* 命中 / 未命中是模拟测试的两种正常结果，仅代表"测试文本是否触发该规则"，
+                        不代表处置结果的好坏，因此两者都不使用 destructive 红色：命中用中性
+                        信息色 + 靶心图标，未命中用 muted 中性灰。destructive 红色只保留给下方
+                        真正的执行错误（接口失败 / 正则解析异常等）。 */}
+                    {testRunError ? (
+                      <div className="mt-3 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        {testRunError}
+                      </div>
+                    ) : testMatch !== null && (
                       <div className={cn(
                         'mt-3 flex items-center gap-2 rounded-lg border p-3 text-sm',
-                        testMatch ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                        testMatch
+                          ? 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300'
+                          : 'border-border bg-muted text-muted-foreground',
                       )}>
-                        {testMatch ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                        {testMatch ? <Target className="h-4 w-4" /> : <MinusCircle className="h-4 w-4" />}
                         {testMatch ? t('contentRules.testMatched') : t('contentRules.testNotMatched')}
                       </div>
                     )}
