@@ -413,22 +413,16 @@ export function ContentRuleDrawer({
       <Sheet open={open} onOpenChange={(next) => next ? onOpenChange(true) : requestClose()}>
         <SheetContent
           side="right"
+          showCloseButton={false}
           className="z-[70] bg-card data-[side=right]:w-[min(920px,calc(100vw-24px))] data-[side=right]:sm:max-w-[920px] gap-0 overflow-hidden p-0"
           data-testid="content-rule-drawer"
         >
-          <SheetHeader className="flex-row items-center justify-between border-b px-6 py-4 pr-14">
+          <SheetHeader className="border-b px-6 py-4 max-sm:px-4">
             <div>
               <SheetTitle className="text-lg font-semibold">
                 {editingRule ? t('contentRules.editRuleTitle') : t('contentRules.createRuleTitle')}
               </SheetTitle>
               <SheetDescription className="mt-1">{t('contentRules.editorSubtitle')}</SheetDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={requestClose}>{t('common.cancel')}</Button>
-              <Button size="sm" onClick={handleSubmit} disabled={isSubmitting} data-testid="content-rule-save">
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('common.save')}
-              </Button>
             </div>
           </SheetHeader>
 
@@ -627,6 +621,13 @@ export function ContentRuleDrawer({
                   />
                   <div className="text-right text-xs text-muted-foreground">{draft.description?.length ?? 0}/200</div>
                 </Section>
+              </div>
+              <div className="mt-8 flex justify-end gap-2 border-t pt-4">
+                <Button type="button" variant="outline" onClick={requestClose}>{t('common.cancel')}</Button>
+                <Button type="button" onClick={handleSubmit} disabled={isSubmitting} data-testid="content-rule-save">
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t('common.save')}
+                </Button>
               </div>
             </div>
 
