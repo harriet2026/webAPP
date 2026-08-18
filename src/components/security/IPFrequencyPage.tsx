@@ -1233,7 +1233,7 @@ export function IPFrequencyPage({
         open={dialogOpen}
         onOpenChange={(open, eventDetails) => (open ? setDialogOpen(true) : requestCloseDialog(eventDetails))}
       >
-        <SheetContent side="right" className="data-[side=right]:w-[960px] data-[side=right]:sm:max-w-[960px] p-0 flex flex-col" showCloseButton>
+        <SheetContent side="right" className="data-[side=right]:w-[960px] data-[side=right]:sm:max-w-[960px] p-0 flex flex-col" showCloseButton={false}>
           <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
@@ -1244,24 +1244,15 @@ export function IPFrequencyPage({
                   {t('ipFrequency.description')}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTestDialogOpen(true)}
-                >
-                  <FlaskConical className="h-4 w-4 mr-2" />
-                  {t('ipFrequency.test')}
-                </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => requestCloseDialog()}>
-                  {t('common.cancel')}
-                </Button>
-                <Button type="button" size="sm" disabled={isSubmitting} onClick={onSubmit}>
-                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  {t('common.save')}
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setTestDialogOpen(true)}
+              >
+                <FlaskConical className="h-4 w-4 mr-2" />
+                {t('ipFrequency.test')}
+              </Button>
             </div>
           </SheetHeader>
 
@@ -1973,6 +1964,16 @@ export function IPFrequencyPage({
                 </div>
               </div>
             </div>
+          </div>
+
+          <div className="flex flex-shrink-0 justify-end gap-2 border-t px-6 py-4">
+            <Button type="button" variant="outline" onClick={() => requestCloseDialog()}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="button" disabled={isSubmitting} onClick={onSubmit}>
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {t('common.save')}
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
