@@ -326,6 +326,7 @@ export function AdvancedFilterRulesModule({
                 <TableHead className="min-w-[160px]">{t('name')}</TableHead>
                 <TableHead className="min-w-[180px]">{t('keywords')}</TableHead>
                 <TableHead className="w-[140px]">{t('scope')}</TableHead>
+                <TableHead className="w-[90px]">{t('priority')}</TableHead>
                 <TableHead className="w-[100px]">{t('status')}</TableHead>
                 <TableHead className="w-[110px]">{t('action')}</TableHead>
                 <TableHead className="w-[130px]">{t('expiresAt')}</TableHead>
@@ -335,13 +336,13 @@ export function AdvancedFilterRulesModule({
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                     {tc('loading')}
                   </TableCell>
                 </TableRow>
               ) : pagedRules.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                     {tc('noData')}
                   </TableCell>
                 </TableRow>
@@ -352,11 +353,9 @@ export function AdvancedFilterRulesModule({
                   const expiry = rule.valid_until ? dateFormatter.format(new Date(rule.valid_until)) : null;
 
                   return (
-                    <TableRow key={rule.id} data-testid={`rule-row-${rule.id}`}>
-                      <TableCell className="font-mono text-sm" data-testid={`rule-row-priority-${rule.id}`}>
-                        {rule.priority}
-                      </TableCell>
-                      <TableCell className="font-medium">{rule.name}</TableCell>
+                      <TableRow key={rule.id} data-testid={`rule-row-${rule.id}`}>
+                        <TableCell className="font-mono text-sm">{rule.id}</TableCell>
+                        <TableCell className="font-medium">{rule.name}</TableCell>
                       <TableCell>
                         {visible.length === 0 && more === 0 ? (
                           <span className="text-xs text-muted-foreground">-</span>
@@ -387,6 +386,9 @@ export function AdvancedFilterRulesModule({
                             ))}
                           </div>
                         )}
+                      </TableCell>
+                      <TableCell className="font-mono text-sm" data-testid={`rule-row-priority-${rule.id}`}>
+                        {rule.priority}
                       </TableCell>
                       <TableCell>
                         <Badge
