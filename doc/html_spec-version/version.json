@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 43,
+  "current_version": 44,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解����）��版本����史����加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解�����）��版本����史����加 v9。",
       "demo_version": 12
     },
     {
@@ -416,6 +416,15 @@
       "ticket": "GT-12938",
       "incremental": true,
       "summary": "GT-12938.html v1→v2：用户在本地真实浏览器环境（租户管理员视角）手动截取「策略流水线」页面截图并提供，中文文字正常显示，用于替换图 S-2（变更后）——原 S-2 因 agent-browser 沙箱缺少中文字体而文字方框化，新截图（GT-12938-S2-stage3-after-order-manual-zh.png）解决了该问题，可直接核对「内容规则→附件安全检测→URL检测与防护→意图引擎」的最终顺序与真实中文文案。同步更新 §1.2 figure/figcaption/alt 文字、A 节「沙箱渲染限制」行、D-001 差异标注（状态由「已知·环境限制」改为「部分解决」）；图 S-1（变更前）保持沙箱实拍原样未变。另修复文档中两处历史遗留乱码字符（变更 1 标题「左侧导航」、incr-meta「变更类型：」），已通过 Grep 全文自检确认 0 处「�」残留。文档标题与元信息表当前版本同步 v1→v2；version.json current_version 42→43。"
+    },
+    {
+      "version": 44,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13017",
+      "incremental": true,
+      "summary": "新建 GT-13017【0818】处理问题总工单，新增 GT-12888 内容规则优先级展示需求文档与 HTML 导航入口；记录优先级列位于状态列之前、复用 contentRules.priority 国际化键，并归档用户提供的真实页面截图。"
     }
   ]
 }

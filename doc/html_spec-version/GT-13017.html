@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GT-13017【0818】处理问题总工单</title>
+  <style>
+    :root { --primary:#2563eb; --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#64748b; --border:#dbe1ea; --success:#16794a; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:32px; background:var(--bg); color:var(--text); font:14px/1.65 "Geist", "Noto Sans SC", system-ui, sans-serif; }
+    main { max-width:1180px; margin:0 auto; }
+    header, nav, section { margin-bottom:24px; padding:24px; border:1px solid var(--border); border-radius:10px; background:var(--card); }
+    h1 { margin:0 0 8px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); font-size:20px; }
+    h3 { margin:20px 0 8px; font-size:17px; }
+    p { margin:8px 0; }
+    .meta { color:var(--muted); }
+    .toc ul { display:grid; gap:8px; margin:0; padding-left:20px; }
+    a { color:var(--primary); }
+    table { width:100%; border-collapse:collapse; margin:12px 0; }
+    th, td { padding:9px 10px; border:1px solid var(--border); text-align:left; vertical-align:top; }
+    th { background:#f1f3f7; white-space:nowrap; }
+    .preview { margin-top:16px; padding:16px; border:1px solid var(--border); border-left:4px solid var(--primary); border-radius:8px; }
+    figure { margin:16px 0; text-align:center; }
+    img { display:block; max-width:100%; height:auto; margin:0 auto; border:1px solid var(--border); border-radius:8px; }
+    figcaption { margin-top:8px; color:var(--muted); }
+    .done { color:var(--success); font-weight:650; }
+    @media (max-width:760px) { body { padding:12px; } header, nav, section { padding:16px; } table { display:block; overflow-x:auto; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>GT-13017【0818】处理问题总工单</h1>
+    <p class="meta">生成日期：2026-08-18　·　文档类型：问题处理总工单　·　关联页面：阶段3：内容层 / 内容规则</p>
+  </header>
+
+  <nav class="toc" aria-label="总工单目录">
+    <h2>目录</h2>
+    <ul>
+      <li><a href="#overview">A. 工单概览</a></li>
+      <li><a href="#gt-12888">GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</a></li>
+      <li><a href="#verification">C. 验证与范围边界</a></li>
+    </ul>
+  </nav>
+
+  <section id="overview">
+    <h2>A. 工单概览</h2>
+    <table>
+      <tbody>
+        <tr><th>总工单</th><td>GT-13017【0818】处理问题总工单</td></tr>
+        <tr><th>处理状态</th><td class="done">已落地</td></tr>
+        <tr><th>处理原则</th><td>仅处理用户明确提出的内容规则列表优先级展示问题，不修改其他功能模块。</td></tr>
+        <tr><th>国际化要求</th><td>中文文案使用项目国际化框架，UTF-8 编码，禁止出现 replacement character（�）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="gt-12888">
+    <h2>GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</h2>
+    <h3>1. 问题与目标</h3>
+    <p>内容规则列表此前缺少优先级信息，用户在新建规则后难以通过列表定位并核对规则执行顺序。本需求在列表中补充优先级展示，并保持既有列表功能不变。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>新增列</td><td>新增“优先级”列，读取规则数据中的 <code>priority</code> 字段。</td><td><code>ContentRulesTable.tsx</code></td></tr>
+        <tr><td>列顺序</td><td>“优先级”放在“状态”字段之前。</td><td>用户要求与页面截图</td></tr>
+        <tr><td>国际化</td><td>列标题读取 <code>contentRules.priority</code>，不硬编码中文文案。</td><td>项目 i18n 框架</td></tr>
+        <tr><td>范围控制</td><td>不修改新建规则流程、保存接口、分页、筛选、操作列及其他模块。</td><td>需求范围约束</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 截图式交互预览</h3>
+    <div class="preview">
+      <p><strong>状态：内容规则列表默认数据态</strong></p>
+      <p>触发路径：进入“阶段3：内容层” → 选择“内容规则” → 查看规则列表。</p>
+      <p>验证重点：表头出现“优先级”，且其横向位置位于“状态”之前；列表行展示对应优先级数值。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-fEpv0ZQGzGuUpWCZ7avpcjw1RSZbso.png" alt="内容规则列表中优先级位于状态之前的页面截图">
+        <figcaption>用户提供的真实页面截图：内容规则列表已展示优先级列，列顺序为优先级在状态之前。</figcaption>
+      </figure>
+    </div>
+
+    <h3>4. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-01</td><td>规则列表可见“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-02</td><td>“优先级”位于“状态”之前。</td><td class="done">通过</td></tr>
+        <tr><td>AC-03</td><td>使用国际化键 <code>contentRules.priority</code>。</td><td class="done">通过</td></tr>
+        <tr><td>AC-04</td><td>不改变其他功能模块与既有列表行为。</td><td class="done">通过</td></tr>
+        <tr><td>AC-05</td><td>乱码字符自检结果为 0。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="verification">
+    <h2>C. 验证与范围边界</h2>
+    <table>
+      <thead><tr><th>验证项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>源码列顺序</td><td><code>priority</code> 列定义位于 <code>status</code> 列之前。</td></tr>
+        <tr><td>国际化引用</td><td>列标题通过 <code>t('contentRules.priority')</code> 获取。</td></tr>
+        <tr><td>乱码自检</td><td>已对本次涉及文档与修改文件执行 <code>�</code> 搜索，未发现乱码。</td></tr>
+        <tr><td>范围边界</td><td>本工单仅覆盖内容规则列表优先级展示，不扩展至附件安全检测、URL 检测与防护、意图引擎等模块。</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>
