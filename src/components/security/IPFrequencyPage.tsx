@@ -2014,7 +2014,7 @@ export function IPFrequencyPage({
       )}
 
       <Dialog open={testDialogOpen} onOpenChange={setTestDialogOpen}>
-        <DialogContent className="max-w-md rounded-[28px]">
+        <DialogContent className="max-w-md rounded-[28px]" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>
               <TestTube className="h-5 w-5 inline mr-2" />
@@ -2066,7 +2066,7 @@ export function IPFrequencyPage({
 
       {/* Layer 2: Global suspended IPs dialog (from toolbar button) */}
       <Dialog open={suspendedDrawerOpen} onOpenChange={setSuspendedDrawerOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] rounded-[28px]">
+        <DialogContent className="max-w-3xl max-h-[80vh] rounded-[28px]" showCloseButton={false}>
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>{t('ipFrequency.suspendedIPs')}</DialogTitle>
@@ -2130,7 +2130,7 @@ export function IPFrequencyPage({
 
       {/* Layer 2: Per-rule suspended IPs Sheet (from expanded detail or more menu) */}
       <Sheet open={!!ruleSuspendedTarget} onOpenChange={(open) => { if (!open) setRuleSuspendedTarget(null); }}>
-        <SheetContent side="right" className="w-[500px] sm:w-[600px] p-0 flex flex-col" showCloseButton>
+        <SheetContent side="right" className="w-[500px] sm:w-[600px] p-0 flex flex-col" showCloseButton={false}>
           <SheetHeader className="px-4 py-4 border-b flex-shrink-0">
             <SheetTitle>
               {t('ipFrequency.currentSuspendedIPs', { count: ruleSuspendedIPs.length })}

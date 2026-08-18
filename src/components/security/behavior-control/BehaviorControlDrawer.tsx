@@ -318,7 +318,9 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent
+          <SheetContent
+            showCloseButton={false}
+
           className="data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
           side="right"
         >

@@ -119,7 +119,7 @@ export function GroupEditDialog({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md w-full flex flex-col p-0" data-testid="group-edit-drawer">
+      <SheetContent side="right" className="sm:max-w-md w-full flex flex-col p-0" data-testid="group-edit-drawer" showCloseButton={false}>
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle>{isEdit ? t('editGroup') : t('newGroup')}</SheetTitle>
         </SheetHeader>

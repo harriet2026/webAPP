@@ -31,7 +31,7 @@ import { useProductForm } from '@/contexts/product-form-context';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { useRouter } from '@/i18n/navigation';
 import type { Viewer } from '@/lib/product-form/resolve';
-import { RefreshCw, ArrowRight, Settings, ChevronLeft, ChevronRight, Lock, XCircle } from 'lucide-react';
+import { RefreshCw, ArrowRight, Settings, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -1001,9 +1001,7 @@ export function PolicyPipelinePage() {
                 {drawerTitle}
               </SheetTitle>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleDrawerClose} aria-label={t('pipeline.drawerClose')} data-testid="pipeline-config-drawer-close">
-              <XCircle className="h-5 w-5" />
-            </Button>
+
           </div>
 
           <TooltipProvider>
