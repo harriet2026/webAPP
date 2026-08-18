@@ -43,6 +43,7 @@
       <li><a href="#gt-13027">GT-13027 内容规则：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
       <li><a href="#gt-13033">GT-13033 IP频率限制：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
       <li><a href="#gt-13036">GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
+      <li><a href="#gt-13040">GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</a></li>
       <li><a href="#verification">C. 验证与范围边界</a></li>
     </ul>
   </nav>
@@ -260,6 +261,51 @@
 
     <h3>5. 范围边界</h3>
     <p>本需求仅涉及 IP 黑白名单新建/编辑页面的操作区布局和关闭入口，不涉及 IP 频率限制、RBL 过滤、海外邮件检测或其他安全模块。截图中的异常中文显示以项目 UTF-8 国际化资源为准。</p>
+  </section>
+
+  <section id="gt-13040">
+    <h2>GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</h2>
+    <h3>1. 需求目标</h3>
+    <p>安全策略模块阶段1至阶段5及页面内部二级弹窗统一移除右上角关闭 X 按钮，减少重复关闭入口，保持页面操作路径一致。</p>
+
+    <h3>2. 实施范围</h3>
+    <table>
+      <thead><tr><th>范围</th><th>处理内容</th><th>边界</th></tr></thead>
+      <tbody>
+        <tr><td>阶段主配置页面</td><td>移除统一配置抽屉右上角关闭 X。</td><td>保留取消、保存和既有业务关闭逻辑。</td></tr>
+        <tr><td>页面内部二级弹窗</td><td>移除 Sheet、Dialog、Drawer 默认关闭 X。</td><td>不修改弹窗数据、交互和接口逻辑。</td></tr>
+        <tr><td>自定义详情面板</td><td>移除标题栏或面板中的自定义关闭 X。</td><td>不改变详情内容和权限规则。</td></tr>
+        <tr><td>国际化</td><td>继续使用项目现有国际化框架。</td><td>不新增硬编码中文文案。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 页面与功能覆盖</h3>
+    <p>覆盖阶段1至阶段5的统一配置页面，以及 IP 频率限制、IP 黑白名单、RBL 过滤、发信人黑白名单、邮件标记、内容规则、行为管控、意图引擎、群组管理、群组策略、高级规则、认证探测与统计、IP 导入、地理库等页面内部二级弹窗。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>用户提供截图：安全策略页面标题栏右上角关闭 X</strong></p>
+      <p>截图用于确认红框关闭按钮的视觉位置与本次统一移除范围。文档及实现中文以项目 UTF-8 国际化资源为准。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-BNLGU71zMs90217gcY0juUhzzTnGPs.png" alt="安全策略页面标题栏右上角显示红框标注的关闭按钮">
+        <figcaption>安全策略页面关闭按钮示例。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13040-01</td><td>阶段1至阶段5主配置页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-02</td><td>安全策略范围内二级 Sheet、Dialog、Drawer 不显示默认关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-03</td><td>自定义详情面板关闭 X 已移除。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-04</td><td>取消、保存、确认及既有业务关闭逻辑保持可用。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-05</td><td>未修改接口、权限、表单校验和其他功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 编码与范围校验</h3>
+    <p>本需求涉及中文文档与页面说明均使用 UTF-8，禁止 replacement character（U+FFFD）和异常全角问号；仅覆盖安全策略阶段页面及其内部二级弹窗的关闭 X 视觉入口。</p>
   </section>
 
   <section id="verification">
