@@ -42,6 +42,7 @@
       <li><a href="#gt-12888">GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</a></li>
       <li><a href="#gt-13027">GT-13027 内容规则：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
       <li><a href="#gt-13033">GT-13033 IP频率限制：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
+      <li><a href="#gt-13036">GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
       <li><a href="#verification">C. 验证与范围边界</a></li>
     </ul>
   </nav>
@@ -215,6 +216,50 @@
         <tr><td>Q-13033-01</td><td>不同屏幕宽度下底部操作栏保持右对齐，沿用现有响应式规则。</td><td>实现时验证</td></tr>
       </tbody>
     </table>
+  </section>
+
+  <section id="gt-13036">
+    <h2>GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</h2>
+    <h3>1. 问题与目标</h3>
+    <p>IP黑白名单新建/编辑抽屉需要与同类规则页面统一操作布局。保存、取消按钮移至抽屉底部右侧，并移除右上角通用关闭入口，不改变既有表单和提交行为。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>标题区</td><td>保留新建/编辑标题与说明，不显示保存、取消按钮。</td><td><code>IPFilterPage.tsx</code></td></tr>
+        <tr><td>关闭入口</td><td>关闭 <code>SheetContent</code> 的右上角通用关闭按钮。</td><td><code>showCloseButton={false}</code></td></tr>
+        <tr><td>底部操作栏</td><td>增加底部右侧操作栏，取消在左、保存主操作在右。</td><td>用户提供截图</td></tr>
+        <tr><td>国际化</td><td>继续使用 <code>common.cancel</code> 与 <code>ipFilter.saveAndEnable</code>。</td><td>项目国际化框架</td></tr>
+        <tr><td>业务逻辑</td><td>保留 IP 地址/段、动作、优先级、有效期、校验和保存接口逻辑。</td><td>范围约束</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 截图式交互预览</h3>
+    <div class="preview">
+      <p><strong>状态：IP黑白名单新建规则默认态</strong></p>
+      <p>触发路径：进入 IP 策略 → 选择 IP 黑白名单 → 点击新建规则。</p>
+      <p>验证重点：右上角无关闭 X；底部右侧显示取消与保存；表单内容可滚动，底部操作栏保持可见。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rt8KZD9dt75XSnmiVH7G1NYFwdWZjF.png" alt="IP黑白名单新建规则页面底部右侧显示取消和保存按钮且右上角无关闭按钮">
+        <figcaption>用户提供的真实页面截图：IP 黑白名单新建规则页面的保存、取消按钮位于底部右侧，标题区右上角不显示关闭按钮。</figcaption>
+      </figure>
+    </div>
+
+    <h3>4. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13036-01</td><td>新建页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-02</td><td>编辑页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-03</td><td>保存、取消按钮显示在抽屉底部右侧。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-04</td><td>按钮继续使用项目国际化文案。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-05</td><td>其他功能模块与既有业务逻辑不变。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. 范围边界</h3>
+    <p>本需求仅涉及 IP 黑白名单新建/编辑页面的操作区布局和关闭入口，不涉及 IP 频率限制、RBL 过滤、海外邮件检测或其他安全模块。截图中的异常中文显示以项目 UTF-8 国际化资源为准。</p>
   </section>
 
   <section id="verification">
