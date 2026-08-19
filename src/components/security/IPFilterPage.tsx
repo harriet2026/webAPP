@@ -419,12 +419,6 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       },
     },
     {
-      id: 'priority',
-      header: t('ipFilter.priority'),
-      cell: ({ row }) => <span className="font-mono text-xs">{row.original.priority}</span>,
-      size: 80,
-    },
-    {
       id: 'status',
       header: t('common.status'),
       cell: ({ row }) => {
