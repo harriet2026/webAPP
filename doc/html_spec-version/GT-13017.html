@@ -48,6 +48,7 @@
       <li><a href="#gt-13061">GT-13061 海外邮件检查：自定义IP定位库空状态移除“立即创建”按钮</a></li>
       <li><a href="#gt-13065">GT-13065 发信行为管控：空数据状态移除“立即创建”按钮并默认展示表头字段</a></li>
       <li><a href="#gt-13031">GT-13031 邮件处置中心：哈希加黑后补充内容规则管理入口，支持定位已创建规则</a></li>
+      <li><a href="#gt-13070">GT-13070 七个安全策略模块规则列表状态字段样式统一</a></li>
       <li><a href="#verification">C. 验证与范围边界</a></li>
     </ul>
   </nav>
@@ -246,7 +247,7 @@
       <p>触发路径：进入 IP 策略 → 选择 IP 黑白名单 → 点击新建规则。</p>
       <p>验证重点：右上角无关闭 X；底部右侧显示取消与保存；表单内容可滚动，底部操作栏保持可见。</p>
       <figure>
-        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rt8KZD9dt75XSnmiVH7G1NYFwdWZjF.png" alt="IP黑白名单新建规则页面底部右侧显示取消和保存按钮且右上角无关闭按钮">
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rt8KZD9dt75XSnmiVH7G1NYFwdWZjF.png" alt="IP黑白名单新建规则页面底部右侧显示取消和保存按钮且右上角无���闭按钮">
         <figcaption>用户提供的真实页面截图：IP 黑白名单新建规则页面的保存、取消按钮位于底部右侧，标题区右上角不显示关闭按钮。</figcaption>
       </figure>
     </div>
@@ -337,7 +338,7 @@
       <p>截图展示“IP地址/段、操作、优先级、状态、修改时间、操作”等字段，优先级位于状态之前。</p>
       <figure>
         <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-3QxFhDKTMhC3RKrpyqTUNOHJulEPE5.png" alt="IP黑白名单规则列表展示优先级字段">
-        <figcaption>用户提供的 IP 黑白名单规则列表截图。</figcaption>
+        <figcaption>用户提供的 IP 黑白名单规则列表���图。</figcaption>
       </figure>
       <p><strong>事实源 2：发信行为管控规则列表</strong></p>
       <p>截图展示“执行动作、优先级、状态、修改时间”等字段，优先级位于状态之前。</p>
@@ -457,7 +458,7 @@
     <h3>2. 最终实现方案</h3>
     <ul>
       <li>在邮件处置中心的哈希加黑结果或相关操作反馈区域提供“内容规则管理”入口。</li>
-      <li>入口跳转至内容规则管理页面：<code>/zh/security/content-rules</code>，语言前缀沿用当前语言环境。</li>
+      <li>入口跳���至内容规则管理页面：<code>/zh/security/content-rules</code>，语言前缀沿用当前语言环境。</li>
       <li>进入内容规则管理后，用户可以查看已创建规则，并通过规则名称、作用域、匹配内容和执行动作确认哈希加黑对应规则。</li>
       <li>入口及定位相关文案使用项目国际化框架，不新增硬编码中文。</li>
       <li>保留现有哈希加黑、规则创建、规则编辑、删除和其他邮件处置能力，不改变既有接口和权限边界。</li>
@@ -493,6 +494,89 @@
       <li>入口具体展示位置：哈希加黑成功提示、操作结果详情或邮件处置记录详情。</li>
       <li>是否需要进入内容规则管理后自动带入筛选条件，以直接定位当前哈希对应规则。</li>
       <li>哈希匹配算法和展示格式沿用现有后端契约。</li>
+    </ul>
+  </section>
+
+  <section id="gt-13070">
+    <h2>GT-13070 IP频率限制，IP黑白名单，发信人黑白名单，发信行为管控，内容规则，高级过滤规则，邮件标记与声明这几个模块的“规则列表”的状态字段样式保持一致</h2>
+    <h3>1. 需求背景</h3>
+    <p>七个安全策略模块的规则列表均包含状态字段，但优化前部分模块使用 Badge 或 StatusBadge，部分模块使用 Switch，状态列的视觉样式和交互方式不一致。本增量需求以发信人黑白名单模块现有 Switch 为统一基准。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <ul>
+      <li>IP频率限制、IP黑白名单、发信人黑白名单、发信行为管控、内容规则、高级过滤规则、邮件标记与声明的规则列表状态列统一使用 Switch。</li>
+      <li>启用状态显示蓝色 Switch，停用状态显示灰色 Switch，状态可访问性文案使用项目国际化框架。</li>
+      <li>IP黑白名单保持原有只支持新建和删除的权限边界，状态列使用禁用 Switch 统一视觉形态，不新增启停能力。</li>
+      <li>IP频率限制和内容规则的已过期状态使用禁用 Switch，并通过辅助提示保留已过期语义。</li>
+      <li>发信行为管控使用已有 <code>toggleBehaviorControlRule</code> 状态更新能力。</li>
+      <li>高级过滤规则使用状态列 Switch 作为唯一启停入口，移除操作列重复的启用/停用文字按钮。</li>
+      <li>邮件标记与声明复用现有 <code>saveMailMarkingRule</code> 接口，通过 <code>is_active</code> 局部更新状态。</li>
+      <li>不改变规则创建、编辑、删除、筛选、分页、导入导出、权限和其他业务逻辑。</li>
+    </ul>
+
+    <h3>3. 模块与实现映射</h3>
+    <table>
+      <thead><tr><th>模块</th><th>主要实现文件</th><th>状态列规则</th></tr></thead>
+      <tbody>
+        <tr><td>IP频率限制</td><td><code>IPFrequencyPage.tsx</code></td><td>可切换 Switch；过期规则禁用并提示。</td></tr>
+        <tr><td>IP黑白名单</td><td><code>UserListTable.tsx</code></td><td>只读禁用 Switch，不新增启停能力。</td></tr>
+        <tr><td>发信人黑白名单</td><td><code>SenderFilterTable.tsx</code></td><td>作为统一样式和交互基准。</td></tr>
+        <tr><td>发信行为管控</td><td><code>BehaviorControlTable.tsx</code>、<code>BehaviorControlPage.tsx</code></td><td>可切换 Switch，接入既有启停接口。</td></tr>
+        <tr><td>内容规则</td><td><code>ContentRulesTable.tsx</code></td><td>可切换 Switch；过期状态使用辅助提示。</td></tr>
+        <tr><td>高级过滤规则</td><td><code>AdvancedFilterRulesModule.tsx</code></td><td>状态列 Switch，移除重复文字入口。</td></tr>
+        <tr><td>邮件标记与声明</td><td><code>RuleListTable.tsx</code>、<code>MailMarkingPage.tsx</code></td><td>Switch 复用规则保存接口局部更新。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p>以下用户提供截图用于确认七个模块的状态列视觉事实：蓝色表示启用，灰色表示停用；IP频率限制和内容规则截图同时展示了过期状态的辅助语义。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-Qqq5KUh7tUwwcDJvcovnjB30vBjUSw.png" alt="邮件标记与声明规则列表状态使用Switch">
+        <figcaption>邮件标记与声明状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pXmO1V1zMdD7sRFyX7hyFge0xmkodn.png" alt="IP频率限制规则列表状态使用Switch并展示过期提示">
+        <figcaption>IP频率限制状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-xKp8QiYI9h9t76cFPvw6JfpBTe7Qwa.png" alt="发信行为管控规则列表状态使用Switch">
+        <figcaption>发信行为管控状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-U5Sigat7N3thpd5wmeMCJnsiitNxA0.png" alt="发信人黑白名单规则列表状态使用Switch">
+        <figcaption>发信人黑白名单统一基准样式截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-AOh58JBzITBjw7eOkkkjOpVdVgABUq.png" alt="IP黑白名单规则列表状态展示">
+        <figcaption>IP黑白名单状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RegrJUedOQW9c578pqTSLnsH8obarr.png" alt="内容规则列表状态使用Switch">
+        <figcaption>内容规则状态列截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13070-01</td><td>七个模块的规则列表状态字段均使用 Switch 形态。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-02</td><td>启用状态显示蓝色 Switch，停用状态显示灰色 Switch。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-03</td><td>发信人黑白名单状态列作为统一样式基准。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-04</td><td>IP黑白名单保持只读约束，不新增启停能力。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-05</td><td>IP频率限制和内容规则的过期状态保留禁用及辅助提示语义。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-06</td><td>高级过滤规则移除操作列重复的启用/停用文字入口。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-07</td><td>状态文案和辅助提示使用项目国际化框架，中文内容使用 UTF-8 编码。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-08</td><td>未修改七个模块之外的其他功能范围。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 验证与范围边界</h3>
+    <ul>
+      <li>已完成涉及组件的 TypeScript 类型检查，未发现本次修改模块的类型错误。</li>
+      <li>已校验中文资源文件 JSON 格式有效。</li>
+      <li>本需求仅归档七个规则列表状态字段统一优化，不扩展其他安全策略模块的业务能力。</li>
     </ul>
   </section>
 
