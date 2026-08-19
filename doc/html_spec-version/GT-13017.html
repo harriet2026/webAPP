@@ -46,6 +46,7 @@
       <li><a href="#gt-13040">GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</a></li>
       <li><a href="#gt-13059">GT-13059 IP黑白名单，发信行为管控，高级过滤规则三个模块的规则列表补充优先级字段</a></li>
       <li><a href="#gt-13061">GT-13061 海外邮件检查：自定义IP定位库空状态移除“立即创建”按钮</a></li>
+      <li><a href="#gt-13065">GT-13065 发信行为管控：空数据状态移除“立即创建”按钮并默认展示表头字段</a></li>
       <li><a href="#verification">C. 验证与范围边界</a></li>
     </ul>
   </nav>
@@ -155,7 +156,7 @@
     <table>
       <thead><tr><th>编号</th><th>说明</th><th>状态</th></tr></thead>
       <tbody>
-        <tr><td>D-13027-01</td><td>用户截图中的部分中文由截图环境显示异常；需求文档与实现文案以项目 UTF-8 国际化资源为准。</td><td>已知环境表现</td></tr>
+        <tr><td>D-13027-01</td><td>用户截图中的���分中文由截图环境显示异常；需求文档与实现文案以项目 UTF-8 国际化资源为准。</td><td>已知环境表现</td></tr>
         <tr><td>Q-13027-01</td><td>不同屏幕宽度下底部操作栏保持右对齐，沿用参考页面的响应式规则。</td><td>实现时验证</td></tr>
       </tbody>
     </table>
@@ -401,6 +402,50 @@
 
     <h3>6. 编码与国际化</h3>
     <p>中文内容使用 UTF-8 编码，继续使用项目国际化框架，禁止 replacement character（U+FFFD），不引入异常全角问号。</p>
+  </section>
+
+  <section id="gt-13065">
+    <h2>GT-13065 发信行为管控：空数据状态移除“立即创建”按钮并默认展示表头字段</h2>
+    <h3>1. 需求背景</h3>
+    <p>发信行为管控规则列表为空时，空状态区域额外显示“立即创建”按钮，与页面顶部“新建规则”入口重复。本需求移除空状态中的重复按钮，并确保空数据状态仍默认展示完整规则列表表头。</p>
+
+    <h3>2. 需求范围</h3>
+    <table>
+      <thead><tr><th>范围</th><th>处理内容</th><th>边界</th></tr></thead>
+      <tbody>
+        <tr><td>空数据操作区域</td><td>移除“立即创建”按钮及其专属操作区域。</td><td>不影响页面顶部“新建规则”。</td></tr>
+        <tr><td>规则列表表头</td><td>空数据时默认保留完整九列表头。</td><td>不改变有数据时的表头和行渲染。</td></tr>
+        <tr><td>其他功能</td><td>保留搜索、方向/类型/状态筛选、重置、导入、导出和分页。</td><td>不修改接口、权限或其他安全策略模块。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 默认展示表头</h3>
+    <p>空数据状态下按以下顺序展示：规则ID、规则名称、管控方向、管控对象、执行动作、优先级、状态、修改时间、操作。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>用户提供截图：发信行为管控空数据状态优化</strong></p>
+      <p>截图展示优化后保留完整表头并移除“立即创建”按钮的结果页面。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-4FNM0RrLvMEAQDUKXfrFDQ2AQ6lrPP.png" alt="发信行为管控空数据状态展示完整表头且不显示立即创建按钮">
+        <figcaption>发信行为管控空数据状态截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13065-01</td><td>发信行为管控无数据时不显示“立即创建”按钮。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-02</td><td>无数据时仍显示规则ID、规则名称、管控方向、管控对象、执行动作、优先级、状态、修改时间、操作九个表头。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-03</td><td>表头顺序与有数据状态保持一致。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-04</td><td>页面顶部“新建规则”、筛选、重置、导入和导出保持可用。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-05</td><td>未修改其他功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 国际化与编码</h3>
+    <p>继续使用项目国际化框架，复用现有字段和空状态文案翻译键。中文内容使用 UTF-8 编码，不包含 replacement character 或异常全角问号。</p>
   </section>
 
   <section id="verification">
