@@ -965,13 +965,13 @@ export function IPFrequencyPage({
                     <TableHead className="w-[40px]" />
                     <TableHead className="w-[60px]">{t('ipFrequency.ruleId')}</TableHead>
                     <TableHead>{t('ipFrequency.name')}</TableHead>
-                    <TableHead className="w-[80px]">{t('ipFrequency.priority')}</TableHead>
                     <TableHead>{t('ipFrequency.ipAddress')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.concurrentHeader')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.timeWindowFreq')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.dailyLimitHeader')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.suspendPolicy')}</TableHead>
                     <TableHead>{t('ipFrequency.expireTimeHeader')}</TableHead>
+                    <TableHead className="w-[80px]">{t('ipFrequency.priority')}</TableHead>
                     <TableHead className="text-center">{t('common.status')}</TableHead>
                     <TableHead className="w-[120px]" />
                   </TableRow>
@@ -1022,11 +1022,6 @@ export function IPFrequencyPage({
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="font-mono text-blue-600 dark:text-blue-400">
-                                {rule.Rule.priority}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
                               <div className="flex items-center gap-2">
                                 <StatusBadge status={scopeTypeLabel(rule.ScopeType)} variant={scopeTypeVariant(rule.ScopeType)} />
                                 {rule.ScopeValue && (
@@ -1050,6 +1045,11 @@ export function IPFrequencyPage({
                               </Badge>
                             </TableCell>
                             <TableCell className="text-sm">{formatExpireTime(rule.Rule.valid_until)}</TableCell>
+                            <TableCell className="w-[80px]">
+                              <Badge variant="outline" className="font-mono text-blue-600 dark:text-blue-400">
+                                {rule.Rule.priority}
+                              </Badge>
+                            </TableCell>
                             <TableCell className="text-center">
                               {rule.IsExpired ? (
                                 <StatusBadge status={t('ipFrequency.expired')} variant="error" />
