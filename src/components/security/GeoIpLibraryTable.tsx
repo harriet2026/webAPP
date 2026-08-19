@@ -338,12 +338,6 @@ export function GeoIpLibraryTable() {
               </div>
             }
             title={t('geoipLibrary.emptyText')}
-            action={
-              <Button variant="outline" size="sm" onClick={openCreate}>
-                <Plus className="h-4 w-4 mr-1" />
-                {t('geoipLibrary.createNow')}
-              </Button>
-            }
           />
         </div>
       ) : (
