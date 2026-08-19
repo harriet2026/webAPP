@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { UserListView, UserListAction } from '@/lib/api/user-list';
@@ -92,9 +93,12 @@ export function UserListTable(props: {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={r.status === 'enabled' ? 'default' : 'secondary'}>
-                      {r.status === 'enabled' ? t('enabled') : t('disabled')}
-                    </Badge>
+                    {/* D-003: 用户黑白名单规则仅支持新建/删除，状态列为只读展示，与其他模块统一使用开关形态，但不可交互 */}
+                    <Switch
+                      checked={r.status === 'enabled'}
+                      disabled
+                      aria-label={r.status === 'enabled' ? t('enabled') : t('disabled')}
+                    />
                   </TableCell>
                   <TableCell className="font-mono text-xs">{r.createdBy}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
