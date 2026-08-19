@@ -1,8 +1,8 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Edit, Loader2, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -13,10 +13,11 @@ interface Props {
   scopeNames: Record<string, string>
   onEdit: (rule: MailMarkingRule) => void
   onDelete: (rule: MailMarkingRule) => void
+  onToggle: (rule: MailMarkingRule, isActive: boolean) => void
   loading?: boolean
 }
 
-export function RuleListTable({ rules, scopeNames, onEdit, onDelete, loading }: Props) {
+export function RuleListTable({ rules, scopeNames, onEdit, onDelete, onToggle, loading }: Props) {
   const t = useTranslations('mailMarking')
 
   return (
@@ -58,14 +59,11 @@ export function RuleListTable({ rules, scopeNames, onEdit, onDelete, loading }: 
                 </td>
                 <td className="px-4 py-3">{formatPositions(rule, t)}</td>
                 <td className="px-4 py-3">
-                  <Badge
-                    variant="outline"
-                    className={rule.is_active
-                      ? 'border-action-deliver/30 bg-action-deliver/10 text-action-deliver'
-                      : 'border-border bg-muted text-muted-foreground'}
-                  >
-                    {rule.is_active ? t('enabled') : t('disabled')}
-                  </Badge>
+                  <Switch
+                    checked={rule.is_active}
+                    onCheckedChange={(isActive) => onToggle(rule, isActive)}
+                    aria-label={rule.is_active ? t('disabled') : t('enabled')}
+                  />
                 </td>
                 <td className="px-4 py-3 text-right">
                   <TooltipProvider>

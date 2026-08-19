@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Globe, User, Server, Mail, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { BehaviorControlRuleView, BehaviorObjectType, BehaviorDirection, BehaviorProductAction } from '@/types/behavior-control';
 import { BACKEND_TO_PRODUCT } from '@/types/behavior-control';
@@ -14,6 +15,7 @@ interface Props {
   views: BehaviorControlRuleView[];
   onEdit: (view: BehaviorControlRuleView) => void;
   onDelete: (view: BehaviorControlRuleView) => void;
+  onToggle: (id: number, isActive: boolean) => void;
 }
 
 const DIR_BADGE: Record<BehaviorDirection, string> = {
@@ -53,7 +55,7 @@ function ObjectCell({ type, subType, value }: { type: BehaviorObjectType; subTyp
   );
 }
 
-export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
+export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Props) {
   const t = useTranslations();
 
   return (
@@ -109,9 +111,11 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
                 </TableCell>
                 <TableCell className="font-mono text-xs">{v.rule.priority}</TableCell>
                 <TableCell>
-                  <Badge variant={v.rule.is_active ? 'default' : 'secondary'}>
-                    {t(v.rule.is_active ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
-                  </Badge>
+                  <Switch
+                    checked={v.rule.is_active}
+                    onCheckedChange={(isActive) => onToggle(v.rule.id, isActive)}
+                    aria-label={t(v.rule.is_active ? 'common.disabled' : 'common.enabled')}
+                  />
                 </TableCell>
                 {/* GT-12500：本地时区分钟精度，不再裸渲染 UTC ISO 串 */}
                 <TableCell className="text-sm text-muted-foreground">{formatTimestamp(v.rule.updated_at)}</TableCell>

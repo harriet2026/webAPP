@@ -391,18 +391,12 @@ export function AdvancedFilterRulesModule({
                         {rule.priority}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="outline"
+                        <Switch
+                          checked={rule.is_active}
+                          onCheckedChange={(isActive) => toggleMutation.mutate({ id: rule.id, isActive })}
                           data-testid={`rule-row-toggle-${rule.id}`}
-                          className={cn(
-                            'text-xs',
-                            rule.is_active
-                              ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                              : 'border-border bg-muted/40 text-muted-foreground',
-                          )}
-                        >
-                          {rule.is_active ? t('enabled') : t('disabled')}
-                        </Badge>
+                          aria-label={rule.is_active ? tc('disabled') : tc('enabled')}
+                        />
                       </TableCell>
                       <TableCell>
                         {action === 'none' ? (
@@ -433,14 +427,6 @@ export function AdvancedFilterRulesModule({
                             data-testid={`rule-row-edit-${rule.id}`}
                           >
                             <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleMutation.mutate({ id: rule.id, isActive: !rule.is_active })}
-                            data-testid={`rule-row-toggle-btn-${rule.id}`}
-                          >
-                            {rule.is_active ? t('disabled') : t('enabled')}
                           </Button>
                           <Button
                             variant="ghost"

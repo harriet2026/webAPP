@@ -434,7 +434,7 @@
       "threat-retro": {
         "title": "威胁回溯智能体",
         "short": "阶段 4.8，异步回溯",
-        "description": "基于历史邮件窗口扫描泄漏邮件，并联动召回处置。"
+        "description": "基于历史邮件��口扫描泄漏邮件，并联动召回处置。"
       }
     },
     "collaboration": {
@@ -2460,7 +2460,7 @@
     },
     "failReasons": {
       "wrongPassword": "密码��误",
-      "userNotExist": "���号���存���",
+      "userNotExist": "���号���存�����",
       "accountLocked": "账��锁定",
       "serverTimeout": "服务器超时",
       "connectionRefused": "连接拒绝",
@@ -3184,7 +3184,7 @@
     "stepNames": {
       "get_mail_log": "加载目标邮件",
       "resolve_target": "解析目标集合",
-      "resolve_eml": "定位 EML 引用",
+      "resolve_eml": "���位 EML 引用",
       "parse_eml": "解析 EML",
       "find_similar": "搜索相似邮件",
       "search_similar_messages": "搜索相��邮件",
@@ -3390,7 +3390,7 @@
     "listTypeLegend": "名单类型",
     "blacklistType": "黑名单",
     "blacklistTypeDesc": "阻断/隔离/丢弃",
-    "whitelistType": "白名单",
+    "whitelistType": "���名单",
     "whitelistTypeDesc": "投递/标记投递",
     "flowTerminateDesc": "阻断/丢弃/隔离 → 终止并退出流水线",
     "flowContinueDesc": "投递/标记投递 → 继续检测",
@@ -3551,7 +3551,7 @@
       "suspend1hourText": "1小时",
       "suspend2hourText": "2小时",
       "actionReject": "拒绝连接",
-      "actionTempfail": "返回 421 临时拒绝",
+      "actionTempfail": "返回 421 临��拒绝",
       "actionDisconnect": "断开连接"
     },
     "examples": {
@@ -3704,7 +3704,7 @@
     "noIpGroups": "暂无平台 IP 组，可在「平台安全策略 → 群组策略」中创建",
     "groupCountBadge": "+{count} 组",
     "validUntilBeforeNow": "有效期不能早于当前时间",
-    "singleIpHint": "输入单个IP地址，如：192.168.1.1",
+    "singleIpHint": "输���单个IP地址，如：192.168.1.1",
     "ipFormatHint": "支持格式：192.168.1.0/24（网段）或包含多个IP段",
     "expireAt": "有效期至",
     "expireAtTip": "规则到期后自动失效，留空表示永久有效",
@@ -3712,7 +3712,7 @@
     "priorityTip": "数值越大越优先。建议常规规则设为 100-500，需要更优先的规则设更大数值。",
     "priorityHint": "数值越大越优先",
     "executeAction": "执行动作",
-    "executeActionBlacklistTip": "选择当IP命中黑名单规则时的处理方式。隔离/审核会暂存邮件待处理，阻断会退回邮件，丢弃会静默删除邮件。",
+    "executeActionBlacklistTip": "选择当IP命中黑名单规则时的处理方式。隔离/审核会暂存邮件待处理，阻断会退回邮件，���弃会静默删除邮件。",
     "executeActionWhitelistTip": "选择当IP命中白名单规则时的处理方式。投递会直接放行，标记投递会添加标记后放行���",
     "basicSettings": "基础设置",
     "remarkTitle": "备注说明",
@@ -4178,7 +4178,7 @@
     "ruleId": "规则ID",
     "ruleName": "规则名称",
     "description": "描述",
-    "priority": "优先级",
+    "priority": "优先���",
     "priorityHelp": "数值越大优先级越高，优先级高的规则先匹配",
     "status": "状态",
     "complexCondition": "复杂条件",
@@ -4431,7 +4431,7 @@
     "warning": "提示",
     "viewObserveStats": "���看观察统计",
     "restoreDefault": "恢复系统默认",
-    "moduleEnabled": "启用认证仿冒检测",
+    "moduleEnabled": "启用认证仿冒检���",
     "moduleEnabledHint": "关闭后，所有认��仿冒检测规则将不再��效",
     "observeModeTip": "观���模式：开启后，规则仅记录命中日���，不会对邮件执���拦截/隔离等动作。建议在首次部署或调整策略时开启观察模式，验证规则影响范围后再正式启用。",
     "probe": {
@@ -4781,7 +4781,7 @@
       "ipPlaceholder": "192.168.1.0/24\n10.0.0.0/8",
       "domainPlaceholder": "如：example.com",
       "save": "保存",
-      "cancel": "取消",
+      "cancel": "���消",
       "namePlaceholder": "如：销售部外发限���",
       "directionLabel": "管控方向",
       "objectTypeLabel": "管控对象类型",
@@ -4972,7 +4972,7 @@
     "moduleDisabled": "模块���停用",
     "moduleDisabledHint": "启用后可配置附件安全策略",
     "comingSoon": "即将推出",
-    "comingSoonHint": "此功能正在开发中，敬请期待",
+    "comingSoonHint": "此功能正���开发中，敬请期待",
     "tabs": {
       "basicLimit": "基础限制",
       "antivirus": "反病毒引擎",
@@ -5285,7 +5285,7 @@
       "cleanupError": "清理周期需在 30-365 天之间",
       "cloudIntel": "云端URL情报查询",
       "cloudIntelDesc": "启用后，查询云端威胁情报库；禁用后仅依赖本地沙箱",
-      "cloudIntelTip": "查询云端威胁情报库，获取更全面的URL风险评估"
+      "cloudIntelTip": "查询云端威胁情报库，获取更��面的URL风险评估"
     },
     "linkProtection": {
       "toggle": "链接保护",
@@ -5443,7 +5443,7 @@
       "label": "检测模式",
       "classification": "分类优先",
       "threshold": "分段阈值",
-      "classificationDesc": "只要识别��该意图即执行处置，忽���置信度��数。",
+      "classificationDesc": "只要识别��该意图即执行处置，忽���置信度����。",
       "thresholdDesc": "根据置信度分数落入的区间执��不同处置动作。"
     },
     "threshold": {
@@ -5578,7 +5578,7 @@
     "basicConfig": "基础配置",
     "ruleNamePlaceholder": "如：高管外站警示",
     "ruleNameTip": "用于识别规则，建议说明适用部门和用途",
-    "priorityTip": "必须为正整数；数值越大，规��越优先执行",
+    "priorityTip": "必须为正整数；数值越大，规则越优先执行",
     "selectGroup": "选择群组...",
     "selectDepartment": "选择部门...",
     "departments": "适用部门",
@@ -6033,7 +6033,7 @@
       "exportSelected": "导出已选 {n} 条",
       "exportAll": "导出全部筛选（{n} 条）",
       "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} 条）",
-      "exportLimitWarning": "筛选结果较���（{n} 条），将导出前 {limit} 条，建议缩��筛选范围",
+      "exportLimitWarning": "筛��结果较���（{n} 条），将导出前 {limit} 条，建议缩��筛选范围",
       "exportAllFiltered": "导出全部筛选",
       "crossPageSelected": "已���页选中 {n} 条"
     },
@@ -6490,7 +6490,7 @@
     "description": "基于多条件组合的灵活过滤规则",
     "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
     "incompleteCondition": "[配置不完整]",
-    "incompleteReasonMissingValue": "缺少取值：请填��该条件的匹配值",
+    "incompleteReasonMissingValue": "缺少��值：请填��该条件的匹配值",
     "incompleteReasonThreshold": "缺少阈值：请填写���值阈值",
     "incompleteReasonBetween": "区间不完整：请同时填写最小值和最���值",
     "incompleteReasonBetweenOrder": "区间无���：最小值不应大于最大值",
@@ -6825,7 +6825,7 @@
       "weekdayLabel": "星期",
       "timeStartLabel": "开始 (HH:MM)",
       "timeEndLabel": "结束 (HH:MM)",
-      "timeRangeHint": "时间范围使用 24 小时制 HH:MM。",
+      "timeRangeHint": "时间范围使用 24 小时�� HH:MM。",
       "exclude": "排�� (NOT)",
       "weekday_0": "周日",
       "weekday_1": "周一",
@@ -7009,7 +7009,7 @@
         "source": "邮件附件解析",
         "usage": "限制邮件包含的附件数量",
         "operators": "大于/大于等于：附件数达到或超过阈值即��中；小于/小于等于：附件数不超过阈值即命中；介于：命中数量落在区间内的邮件。",
-        "example": "比较方式「大于等于」，阈值「10」——命中附件数达到 10 个及以上的邮件。",
+        "example": "比较方式「大于等于」，阈值「10」——命中附件数达到 10 个及���上的邮件。",
         "recommended": "常规办公场景推荐阈值 10~20，可按业务附件习惯调整。",
         "note": "防止大量附件造成资源占用"
       },
@@ -7502,7 +7502,7 @@
     "searchGroups": "搜索收信人组",
     "searchDepts": "搜索部门",
     "noMatch": "无���配结果",
-    "noGroupsHint": "暂无收信人组，请��到「���组管理」创建",
+    "noGroupsHint": "暂无收信人组，请��到「���组���理」创建",
     "noDeptsHint": "组织通讯录暂未同步���请先到「组织通讯录」配置数据源",
     "invalidRef": "已失效",
     "clearAll": "清空",
@@ -7544,7 +7544,7 @@
     "timeoutMarkPositions": "标记位置",
     "markPosition_subject_prefix": "主题前缀",
     "markPosition_header": "邮件头",
-    "timeoutMarkText": "标记文本",
+    "timeoutMarkText": "���记文本",
     "senderNotification": "发件人通��管理",
     "queueEntryNotify": "进入队列通知",
     "queueEntryDesc": "邮件进入审核��列时通知发件人",
@@ -9204,7 +9204,7 @@
       "subtitle": "命中信封发件人即整封放行、不进检测（不以 Header-From 放行）",
       "value": "邮箱 / 域名",
       "valuePlaceholder": "boss@corp.com 或 corp.com",
-      "matchType": "类型",
+      "matchType": "类���",
       "email": "邮箱",
       "domain": "域名",
       "add": "添���",
@@ -9743,7 +9743,7 @@
     "fieldPort": "端口",
     "fieldPriority": "优先级",
     "fieldServer": "服务器地址",
-    "fieldSkipVerify": "跳过证书校���",
+    "fieldSkipVerify": "跳过证书校����",
     "fieldSkipVerifyHint": "仅用于自签证书的测试环境，生产请勿���启",
     "fieldSyncType": "同步方式",
     "fieldUpload": "上传文件",
@@ -10125,7 +10125,7 @@
       "attention": "待处理",
       "nodesNormal": "节点运行正常",
       "nodesIssue": "存在离线节点",
-      "nodesUnavailable": "数据源不可用",
+      "nodesUnavailable": "数据源不可���",
       "cta": {
         "inbound": "查看统计",
         "threats": "查看威胁",
@@ -10682,7 +10682,7 @@
       "csv_auto_sync_unsupported": "CSV 数据源不支持自动同步，请改用手动导入",
       "csv_preview_failed": "读取 CSV 预览失败，请确认文件格式正确后重试",
       "department_id_unmapped": "部门必填字段「部门ID」尚未映射，请在字段映射中指定它对应的列",
-      "email_field_unmapped": "必填字段「邮箱」尚未映射，请在字段映射中指定它对应的列",
+      "email_field_unmapped": "必填字段「邮箱」尚未映射，请���字段映射中指定它对应的列",
       "encryption_key_missing": "服务端未配置通讯录加密密钥（至少 32 字节），无法保存或测试含密码等敏感字段的配置，请联系管理员配置后重试",
       "file_store_uninitialized": "服务端未启用 CSV 文件存储，请联系管理员配置后重试",
       "multipart_parse_failed": "上传表单解析失败，请重新提交",
@@ -10782,8 +10782,8 @@
       "access_denied": "没有权限执行该操作",
       "match_type_invalid": "匹配方式取值无效",
       "name_and_pattern_required": "名称和匹���内容都必须填写",
-      "not_found": "链接黑名单规则不存在，可能已被删除",
-      "tenant_access_denied": "没有权限访问该租户的数据",
+      "not_found": "链接黑���单规则不存在，可能已被删除",
+      "tenant_access_denied": "没有权限访问��租户的数据",
       "tenant_id_required": "必须指定租户（平��管理员需通过 X-Tenant-ID 指定）",
       "verdict_invalid": "判定结果取值无效"
     },
@@ -11033,7 +11033,7 @@
       "request_body_unreadable": "请求内容读取失败",
       "scan_result_format_invalid": "附件扫描结果数据格式不正确",
       "scan_result_missing": "未提供附件扫描结果数据",
-      "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
+      "scan_result_all_invalid": "校验后没��任何有效的扫描结果"
     },
     "url_protection": {
       "deep_inspect_timeout_out_of_range": "深度检测超时时间必须在 {min}-{max} 秒��间",
@@ -11338,10 +11338,10 @@
     "roles": {
       "system_default_role_cannot_edited": "系统内置角色不可修改",
       "system_default_super_admin_role_cannot": "系统内置角色和超级管理员角色不可停用",
-      "system_default_role_cannot_deleted": "系统内置角色不可删除"
+      "system_default_role_cannot_deleted": "系统内置���色不可删除"
     },
     "smtp_auth_ip_lockout": {
-      "invalid_ip": "IP 地址无效"
+      "invalid_ip": "IP 地址无��"
     },
     "spoofing_notification_preview": {
       "admin_emails_invalid": "��理员邮箱列表中含有无效邮箱",

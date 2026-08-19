@@ -1051,26 +1051,30 @@ export function IPFrequencyPage({
                               </Badge>
                             </TableCell>
                             <TableCell className="text-center">
-                              {rule.IsExpired ? (
-                                <StatusBadge status={t('ipFrequency.expired')} variant="error" />
-                              ) : (
-                                <StatusBadge
-                                  status={rule.Rule.is_active ? t('ipFrequency.active') : t('ipFrequency.inactive')}
-                                  variant={rule.Rule.is_active ? 'success' : 'default'}
-                                />
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center justify-center gap-1.5">
                                 <Switch
                                   checked={rule.Rule.is_active}
+                                  disabled={rule.IsExpired}
                                   onCheckedChange={(checked) =>
                                     toggleMutation.mutate({
                                       id: rule.Rule.id,
                                       isActive: checked as boolean,
                                     })
                                   }
+                                  aria-label={rule.Rule.is_active ? t('common.disabled') : t('common.enabled')}
                                 />
+                                {rule.IsExpired && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger render={<AlertTriangle className="h-3.5 w-3.5 text-destructive" />} />
+                                      <TooltipContent>{t('ipFrequency.expired')}</TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenDialog(rule)}>
                                   <Pencil className="h-4 w-4" />
                                 </Button>
