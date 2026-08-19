@@ -76,7 +76,7 @@ interface ContentRuleDrawerProps {
   onSubmit: (data: ContentRuleFormData) => Promise<void>;
 }
 
-type ScopeChoice = 'subject' | 'body' | 'header' | 'attachment_names';
+type ScopeChoice = 'subject' | 'body' | 'header' | 'attachment_names' | 'attachment_hash';
 type FormErrors = Partial<Record<'name' | 'priority' | 'direction' | 'match_content' | 'regex' | 'scope' | 'header' | 'valid_until', string>>;
 
 const ACTIONS: ContentRuleUiAction[] = [
@@ -400,9 +400,9 @@ export function ContentRuleDrawer({
     .map((direction) => t(`contentRules.direction${direction[0].toUpperCase() + direction.slice(1)}Value` as 'contentRules.directionReceiveValue'))
     .join('、') || t('contentRules.notSelected');
 
-  const scopeDescription = (['subject', 'body', 'header', 'attachment_names'] as ScopeChoice[])
+  const scopeDescription = (['subject', 'body', 'header', 'attachment_names', 'attachment_hash'] as ScopeChoice[])
     .filter(selectedScope)
-    .map((scope) => t(`contentRules.scopeDisplay${scope === 'attachment_names' ? 'AttachmentNames' : scope[0].toUpperCase() + scope.slice(1)}` as 'contentRules.scopeDisplaySubject'))
+    .map((scope) => t(`contentRules.scopeDisplay${scope === 'attachment_names' ? 'AttachmentNames' : scope === 'attachment_hash' ? 'AttachmentHash' : scope[0].toUpperCase() + scope.slice(1)}` as 'contentRules.scopeDisplaySubject'))
     .join('、') || t('contentRules.notSelected');
 
   return (
@@ -545,20 +545,12 @@ export function ContentRuleDrawer({
                   </Field>
                   <Field label={t('contentRules.applyTo')} required error={errors.scope} hint={t('contentRules.applyToTip')}>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-1">
-                    {(['subject', 'body', 'header', 'attachment_names'] as ScopeChoice[]).map((scope) => (
+                    {(['subject', 'body', 'header', 'attachment_names', 'attachment_hash'] as ScopeChoice[]).map((scope) => (
                       <label key={scope} className="flex cursor-pointer items-center gap-2 whitespace-nowrap text-sm">
                         <Checkbox checked={selectedScope(scope)} onCheckedChange={(checked) => updateScope(scope, checked === true)} />
-                        <span>{t(`contentRules.scopeDisplay${scope === 'attachment_names' ? 'AttachmentNames' : scope[0].toUpperCase() + scope.slice(1)}` as 'contentRules.scopeDisplaySubject')}</span>
+                        <span>{t(`contentRules.scopeDisplay${scope === 'attachment_names' ? 'AttachmentNames' : scope === 'attachment_hash' ? 'AttachmentHash' : scope[0].toUpperCase() + scope.slice(1)}` as 'contentRules.scopeDisplaySubject')}</span>
                       </label>
                     ))}
-                    <Tooltip>
-                      <TooltipTrigger render={<span className="flex cursor-not-allowed items-center gap-2 whitespace-nowrap text-sm opacity-50" />}>
-                        <Checkbox disabled checked={false} />
-                        <span>{t('contentRules.scopeDisplayAttachmentContent')}</span>
-                        <HelpCircle className="h-3.5 w-3.5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="z-[80]" data-content-rule-layer="editor">{t('contentRules.attachmentContentUnavailable')}</TooltipContent>
-                    </Tooltip>
                     </div>
                   </Field>
                   {legacyScopes.length > 0 && (
@@ -654,7 +646,7 @@ export function ContentRuleDrawer({
                 </Collapsible>
 
                 <Collapsible open={testOpen} onOpenChange={setTestOpen}>
-                  {/* 柔和交互反馈规格 §2.3：语义绿不作装饰用途，模拟测试触发器与其余折叠区
+                  {/* 柔和交互��馈规格 §2.3：语义绿不作装饰用途，模拟测试触发器与其余折叠区
                       统一走共享触发器的 primary 文字 + muted 表面。 */}
                   <CollapsibleSectionTrigger className="h-9">
                     <Play className="h-4 w-4" />{t('contentRules.simulateTest')}

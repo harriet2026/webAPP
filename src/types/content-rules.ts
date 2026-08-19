@@ -1,7 +1,7 @@
 import type { Rule } from './unified-rules';
 
 export type ContentRuleMatchType = 'keyword' | 'regex' | 'content_group';
-export type ContentRuleScope = 'subject' | 'header' | 'text_body' | 'html_body' | 'attachment_names' | 'attachment_types' | 'urls';
+export type ContentRuleScope = 'subject' | 'header' | 'text_body' | 'html_body' | 'attachment_names' | 'attachment_hash' | 'attachment_types' | 'urls';
 export type ContentRuleAction = 'reject' | 'quarantine' | 'audit' | 'accept' | 'discard';
 export type ContentRuleUiAction = 'deliver' | 'tag_deliver' | 'isolate' | 'review' | 'block' | 'discard';
 

@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒邮件检测���������������能�������������",
+    "spoofingDetection": "仿冒邮件检测�����������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1112,7 +1112,7 @@
         "imap": "IMAP"
       },
       "toasts": {
-        "created": "认证配置已添加",
+        "created": "认证配置��添加",
         "updated": "认证���置已更���",
         "deleted": "认证配置已删除",
         "saveError": "请修正表单中的校验错误"
@@ -1336,7 +1336,7 @@
     "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色为「另行配置」。",
     "priorityHintAria": "优先级说明",
     "name": "名称",
-    "targetGroups": "适���对����",
+    "targetGroups": "适���������",
     "policyConfig": "策略配置",
     "priority": "优先��",
     "newPolicy": "新建群组策略",
@@ -1459,7 +1459,7 @@
     "previewSimulationNote": "基于策略配置的模拟推演，实际处置以引擎判定为准。",
     "previewEmpty": "该群组暂无已启用的命中策略。",
     "previewHitBadge": "优先级 {priority} · {name}",
-    "previewIgnoredHigher": "注意：���{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
+    "previewIgnoredHigher": "注意：�����{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
     "previewNotExecuted": "未执行（前序已短路）",
     "previewShortCircuitPoint": "短路点 · {action}",
     "previewNoGroupConfig": "无群组配置（按全局执行）",
@@ -1656,7 +1656,7 @@
     "statusPending": "待处理",
     "statusProcessing": "处理中",
     "statusQuarantined": "已隔离",
-    "statusFailed": "失败",
+    "statusFailed": "��败",
     "statusReinjected": "已重新��入",
     "statusReleasedPending": "已放行待复检",
     "statusManualHold": "人工保留",
@@ -2455,7 +2455,7 @@
     },
     "scenes": {
       "userspace": "用户空间认证",
-      "smtpsend": "SMTP 发信认证",
+      "smtpsend": "SMTP 发信��证",
       "mailsync": "邮件��步代理"
     },
     "failReasons": {
@@ -2728,7 +2728,7 @@
     },
     "trustedDevices": {
       "count": "授信终端（{n}）",
-      "empty": "暂无授信终端。登录时勾选「信任��设备」后，下次在此设备��跳过二次认证。",
+      "empty": "暂无���信终端。登录时勾选「信任��设备」后，下次在此设备��跳过二次认证。",
       "createdAt": "授信时间",
       "lastUsed": "最近使用",
       "expires": "到期时间",
@@ -2837,7 +2837,7 @@
   "advancedFilter": {
     "title": "高级搜索",
     "conditionGroup": "搜索条件组",
-    "match": "满足条件",
+    "match": "满足条��",
     "all": "所有条件",
     "any": "任一条件",
     "exclude": "排除",
@@ -3528,7 +3528,7 @@
       "allUnlimited": "当前规则未设置任何限制条件，建议至少配置一项阈值，否则规则无实际作用。",
       "whenIP": "当 IP 地址",
       "allIP": "全部 IP",
-      "notFilled": "未填写",
+      "notFilled": "未���写",
       "affectAbout": "（影响��� {count} 个 IP）",
       "triggerCondition": "触发以下任一条件时：",
       "noConditions": "暂未���置触发条件",
@@ -4383,8 +4383,8 @@
     "scopeDisplaySubject": "主题",
     "scopeDisplayBody": "正文",
     "scopeDisplayHeader": "信头",
-    "scopeDisplayAttachmentNames": "附件名称",
-    "scopeDisplayAttachmentContent": "附件内容",
+  "scopeDisplayAttachmentNames": "附件名称",
+  "scopeDisplayAttachmentHash": "附件哈希",
     "applyTo": "作用于",
     "applyToTip": "选择需要检查的邮件内容区域",
     "scopeDisplayAttachmentTypes": "附件类型",
@@ -5137,7 +5137,7 @@
       "mode_none": "不检测",
       "mode_deep": "深度检测（尝试解密并扫描内容）",
       "decryptFailAction": "解密失败处置",
-      "receiveDefault": "收信方向默认：继续流水线",
+      "receiveDefault": "收信方向默认：继���流水线",
       "advancedOptions": "高级选项",
       "recursiveDetectDepth": "解密成功后递归检测解压内容（深度限制：3层）",
       "markSuspicious": "通过��续检测仍标记为“可疑加密邮件”",
@@ -6826,7 +6826,7 @@
       "timeStartLabel": "开始 (HH:MM)",
       "timeEndLabel": "结束 (HH:MM)",
       "timeRangeHint": "时间范围使用 24 小时制 HH:MM。",
-      "exclude": "排除 (NOT)",
+      "exclude": "排�� (NOT)",
       "weekday_0": "周日",
       "weekday_1": "周一",
       "weekday_2": "周二",
@@ -6916,7 +6916,7 @@
         "note": "支持正则表达式和通配符匹配"
       },
       "desc_cc": {
-        "source": "邮件头 CC 字段",
+        "source": "邮件头 CC ���段",
         "usage": "识别抄送给哪些��件人",
         "note": "抄送���件人可见此字段"
       },
@@ -7370,7 +7370,7 @@
       }
     },
     "disposition": {
-      "primaryActionLabel": "执行动作",
+      "primaryActionLabel": "���行动作",
       "noneHint": "未设置执行动作，邮件将仅执行下方已启用的附加策略。",
       "configureActionButton": "配置「{action}」参数",
       "addonsHeading": "附加策略",
@@ -7944,7 +7944,7 @@
         "inboundTotal": "选定时段内接收方向的邮件总数。",
         "outboundTotal": "选定时段内外发方向的邮件总数。",
         "internalTotal": "选定时段内域内方向的邮件总数。",
-        "totalSuccessRate": "全部方向成功投递数 ÷ 投递总数。",
+        "totalSuccessRate": "全部方向成功投递�� ÷ 投递总数。",
         "queueBacklog": "基于邮件日志与旁路任务估算的当前积压。",
         "total": "当前方向在选定时段内的邮件总数。",
         "successRate": "当前方向成功投递数 ÷ 总数。",
@@ -8354,7 +8354,7 @@
     "reasonOther": "其他",
     "direction": {
       "all": "全部",
-      "receive": "接收",
+      "receive": "���收",
       "send": "外发",
       "internal": "域内"
     },
@@ -8676,7 +8676,7 @@
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "clickableAttachment": "邮件包含可点击附件",
       "clickableAttachmentDesc": "附件内含可点击链接/按钮时命中（如 HTML 附件、可交互 PDF 等）",
-      "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
+      "urlNotQRHint": "「包含 URL」不含二���码解码出的链接；若只想用二维码风险，建议关闭此项",
       "riskLabels": {
         "senderFirstSeen": "发信人���次出现",
         "qrcode": "含二维码",
@@ -8718,7 +8718,7 @@
   "timeoutEditTitle": "编辑超时策略",
   "timeoutEditDescription": "保存后仅更新本页草稿，点击页面底部「保存」才会真正生效；取消丢弃改动。",
 
-      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
+      "description": "运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略��所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败�����行模式仍按真实引擎配置展示。",
@@ -8882,7 +8882,7 @@
       "display_name_spoof": "发信人名称仿冒",
       "domain_typosquatting": "近似域名仿冒",
       "newly_registered_domain": "新注册域名",
-      "brand_keyword_abuse": "品牌关键词滥用"
+      "brand_keyword_abuse": "品牌关��词滥用"
     },
     "riskLevel": {
       "critical": "严重",
@@ -9207,7 +9207,7 @@
       "matchType": "类型",
       "email": "邮箱",
       "domain": "域名",
-      "add": "添加",
+      "add": "添���",
       "delete": "删除",
       "empty": "暂无放行名单",
       "errDup": "该条目已存在",
@@ -9375,7 +9375,7 @@
       }
     },
     "recall": {
-      "title": "确认召回",
+      "title": "确认���回",
       "description": "将对「{subject}」等 {count} 封邮件执行���删除召回，未读邮件可撤回，已读邮件仅告警。",
       "unreadPolicy": "未读邮件������",
       "readPolicy": "已读邮件策略",
@@ -9419,7 +9419,7 @@
       "messageUuid": "Message-UUID",
       "headers": "邮件头",
       "rationale": "复检依据",
-      "body": "邮件正文",
+      "body": "���件正文",
       "origDisposition": "原始处置",
       "origConfidence": "原始置信度",
       "recheckConfidence": "复检置信度",
@@ -9743,7 +9743,7 @@
     "fieldPort": "端口",
     "fieldPriority": "优先级",
     "fieldServer": "服务器地址",
-    "fieldSkipVerify": "跳过证书校验",
+    "fieldSkipVerify": "跳过证书校���",
     "fieldSkipVerifyHint": "仅用于自签证书的测试环境，生产请勿���启",
     "fieldSyncType": "同步方式",
     "fieldUpload": "上传文件",
@@ -10793,7 +10793,7 @@
       "helo_match_invalid": "HELO 匹配方式无效，只���是：{allowed}",
       "helo_pattern_regex_invalid": "HELO ��配的正则表达式不合法，请检查语���",
       "is_active_required": "请指定是否生效",
-      "not_found": "准入规则���存在，可能已被删除",
+      "not_found": "准入规则���存在，可��已被删除",
       "null_sender_requires_cidr": "允许���发件人的规则只按来源 IP 匹配，因此必须填写来源 IP ��",
       "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
@@ -10803,7 +10803,7 @@
       "source_auth_required": "至少要��定一种来源认证方式：来源 IP 段或 SPF 校验",
       "tenant_domain_cross_tenant": "所选域名属于其他租户",
       "tenant_domain_not_found": "所选域名不存在，可能已被删除",
-      "use_spf_requires_privileged": "启用 SPF 校验的规则必须同时设为特权规则——SPF 规则不受可信中继 IP 池的约束",
+      "use_spf_requires_privileged": "启用 SPF 校验的规则必须同时设为特权规则——SPF ���则不受可信中继 IP 池的约束",
       "use_spf_requires_sender_domain": "启用 SPF 校验必须指定具体的发件域，否则没有 SPF 记录可查",
       "tenant_domain_id_belongs_different_tenant": "所选域名属于其他租户"
     },

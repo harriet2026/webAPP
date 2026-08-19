@@ -4379,7 +4379,7 @@
     "scopeDisplayBody": "Body",
     "scopeDisplayHeader": "Header",
     "scopeDisplayAttachmentNames": "Attachment name",
-    "scopeDisplayAttachmentContent": "Attachment content",
+    "scopeDisplayAttachmentHash": "Attachment hash",
     "applyTo": "Apply To",
     "applyToTip": "Select the message areas that the rule should inspect",
     "scopeDisplayAttachmentTypes": "Attachment type",
