@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 51,
+  "current_version": 52,
   "history": [
     {
       "version": 1,
@@ -316,7 +316,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-11675",
       "incremental": true,
-      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续��加����号在 GT-12753 的������ 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与��更 13/14、C 范围更��为 D-001~D-016、D 范围���新��� Q-001~Q-006，标题追��� GT-11675（v5），版本���史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续��加����号在 GT-12753 的������ 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与����更 13/14、C 范围更��为 D-001~D-016、D 范围���新��� Q-001~Q-006，标题追��� GT-11675（v5），版本���史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
       "demo_version": 19
     },
     {
@@ -366,7 +366,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12865",
       "incremental": true,
-      "summary": "新建 GT-12865.html（doc 版本 v1），记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：目录含 A/B 固定章节 + GT-12514 一级需求 + 变更 1~3 二级 + 1.1/1.2/1.3 三级结构；变更 1 新增详情页顶部操作栏的状态文字 + Switch 总开关（复用既有 /phishing-agent/engine-config 接口，与「检测引擎配置」页共享查询缓存）；变更 2 新增关闭时的 destructive 二次确认弹窗与保存成功/失败 toast，关闭后 PhishingAgentPanel 顶部持续展示橙色禁用横幅；变更 3 新增重新开启前的准入规则前置校验（fail-closed），无已启用规则时弹出非破坏性门禁弹窗，点击「前往配置」后通过 ?action=create-admission-rule URL 参数联动「检测范围与准入规则」模块（AdmissionRulesSection）自动打开「新增规则」弹窗并即时清除该参数；补充真实 agent-browser 浏览器实测截图 S-1~S-6（Mock 模式 · AI版·单租户 · 平台管理员 · 浅色主题 · 1280×633，归档至 screenshots/GT-12514-S1~S6-*.png），逐元素说明表依据 messages/zh.json 真实 i18n 文案核对转录；新增差异标注 D-001~D-004（含 D-001 总开关可见性不受编辑权限约束的有意设计、D-004 沙箱缺中文字体导致截图文字方框化的环境限制说明）、待确认事项 Q-001~Q-003；同步在总索引 doc/html-spec/index.html 的「钓鱼邮件检测智能体」卡片下新增本文档链接；文档残留扫描（button/input/select/textarea/form/script/onClick 等）确认无匹配，���� UTF-8 ���码自���（grep \ufffd）确认无���留；version.json current_version 37→38。",
+      "summary": "新建 GT-12865.html（doc 版本 v1），记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：目录含 A/B 固定章节 + GT-12514 一级需求 + 变更 1~3 二级 + 1.1/1.2/1.3 三级结构；变更 1 新增详情页顶部操作栏的状态文字 + Switch 总开关（复用既有 /phishing-agent/engine-config 接口，与「检测引擎配置」页共享查询缓存）；变更 2 新增关闭时的 destructive 二次确认弹窗与保存成功/失败 toast，关闭后 PhishingAgentPanel 顶部持续展示橙色禁用横幅；变更 3 新增重新开启前的准入规则前置校验（fail-closed），无已启用规则时弹出非破坏性门禁弹窗，点击「前往配置」后通过 ?action=create-admission-rule URL 参数联动「检测范围与准入规则」模块（AdmissionRulesSection）自动打开「新增规则」弹窗并即时清除该参数；补充真实 agent-browser 浏览器实测截图 S-1~S-6（Mock 模式 · AI版·单租户 · 平台管理员 · 浅色主题 · 1280×633，归档至 screenshots/GT-12514-S1~S6-*.png），逐元素说明表依据 messages/zh.json 真实 i18n 文案核对转录；新增差异标注 D-001~D-004（含 D-001 总开关可见性不受编辑权限约束的有意设计、D-004 沙箱缺中文字体导致截图文字方框化的环境限制说明）、待确认事项 Q-001~Q-003；同步在总索引 doc/html-spec/index.html 的「钓鱼邮件检测智能体」卡片下新增本文档链接；文档残留扫描（button/input/select/textarea/form/script/onClick 等）确���无匹配，���� UTF-8 ���码自���（grep \ufffd）确认无���留；version.json current_version 37→38。",
       "demo_version": 24
     },
     {
@@ -406,7 +406,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12938",
       "incremental": true,
-      "summary": "新建 GT-12938.html（ticket=GT-12938，需求名称=GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略），记录 PolicyPipelinePage.tsx 中 stage3NavItems 与 stages.stage3.policies 两处顺序数组同步调整：「内容规则」由阶段3第 3 位提升为第 1 位，「附件安全检测」「URL检测与防护」依次后移一位，「意图引擎」固定保留末位不变，最终顺序为 内容规则→附件安全检测→URL检测与防护→意图引擎；卡片区与策略详情抽屉左侧导航共用同一顺序数据，两处入口同步生效。补充 agent-browser 变更前/变更后对照截图 S-1/S-2（浅色主题 1506×936，因沙箱缺少中文字体渲染为方框占位符，性质同既有 D-004），逐元素说明依据 messages/zh.json 真实 i18n 文案核对转录；新增差异标注 D-001（沙箱字体环境限制）、待确认事项 Q-001（其余产品形态/角色展示顺序待抽样复核）；version.json current_version 41→42。"
+      "summary": "新建 GT-12938.html（ticket=GT-12938，需求名称=GT-12940 内容规则顺序调整：调整到「阶段3：内容层」第一个策略），记录 PolicyPipelinePage.tsx 中 stage3NavItems 与 stages.stage3.policies 两处顺序数组同步调整：「内容规则」由阶段3第 3 位提升为第 1 位，「附件安全检测」「URL检测与防护」依次后移一位，「意图引擎」固定保留末位不变，最终顺序为 内容规则→附件安全检测→URL检测与防护→意图引擎；卡片区与策略详情抽屉左侧导航共用同一顺序数据，两处入口同步生效。补充 agent-browser 变更前/变更后对照截图 S-1/S-2（浅色主题 1506×936，因沙箱缺少中文字体渲染为方框占位符，性质同既有 D-004），逐元素说明依据 messages/zh.json 真实 i18n 文案核对转录；新增差异标注 D-001（沙箱字体环境限制）、待确认事项 Q-001（其余产品形���/角色展示顺序待抽样复核）；version.json current_version 41→42。"
     },
     {
       "version": 43,
@@ -488,6 +488,15 @@
       "ticket": "GT-13065",
       "incremental": true,
       "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13065：发信行为管控无数据时移除重复的“立即创建”按钮，同时默认展示规则ID、规则名称、管控方向、管控对象、执行动作、优先级、状态、修改时间、操作九列表头。"
+    },
+    {
+      "version": 52,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13031",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13031：邮件处置中心哈希加黑后补充内容规则管理入口，支持进入内容规则页面并定位已创建规则。"
     }
   ]
 }
