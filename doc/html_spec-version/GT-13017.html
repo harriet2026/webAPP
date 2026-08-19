@@ -44,6 +44,7 @@
       <li><a href="#gt-13033">GT-13033 IP频率限制：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
       <li><a href="#gt-13036">GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
       <li><a href="#gt-13040">GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</a></li>
+      <li><a href="#gt-13059">GT-13059 IP黑白名单，发信行为管控，高级过滤规则三个模块的规则列表补充优先级字段</a></li>
       <li><a href="#verification">C. 验证与范围边界</a></li>
     </ul>
   </nav>
@@ -128,7 +129,7 @@
       </figure>
     </div>
 
-    <h3>4. 形态与角色适用范围</h3>
+    <h3>4. 形态与���色适用范围</h3>
     <table>
       <thead><tr><th>产品形态</th><th>角色</th><th>适用结论</th></tr></thead>
       <tbody>
@@ -306,6 +307,55 @@
 
     <h3>6. 编码与范围校验</h3>
     <p>本需求涉及中文文档与页面说明均使用 UTF-8，禁止 replacement character（U+FFFD）和异常全角问号；仅覆盖安全策略阶段页面及其内部二级弹窗的关闭 X 视觉入口。</p>
+  </section>
+
+  <section id="gt-13059">
+    <h2>GT-13059 IP黑白名单，发信行为管控，高级过滤规则三个模块的规则列表补充优先级字段</h2>
+    <h3>1. 需求背景</h3>
+    <p>安全策略规则列表需要统一展示规则优先级，便于用户理解规则匹配顺序和策略执行顺序。本需求覆盖 IP 黑白名单、发信行为管控和高级过滤规则三个模块。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>模块</th><th>实现内容</th><th>列位置</th><th>数据来源</th></tr></thead>
+      <tbody>
+        <tr><td>IP 黑白名单</td><td>补充“优先级”列并展示现有规则优先级。</td><td>状态之前</td><td><code>priority</code></td></tr>
+        <tr><td>发信行为管控</td><td>补充“优先级”列并展示现有规则优先级。</td><td>状态之前</td><td><code>priority</code></td></tr>
+        <tr><td>高级过滤规则</td><td>补充“优先级”列并展示现有规则优先级。</td><td>状态之前</td><td><code>priority</code></td></tr>
+      </tbody>
+    </table>
+    <p>三个模块仅调整规则列表展示列，不新增接口、不改变排序、保存逻辑、权限、表单校验或其他功能模块。</p>
+
+    <h3>3. 国际化与编码</h3>
+    <p>列标题继续使用项目国际化框架，中文显示为“优先级”，并同步维护英文、泰文和俄文翻译。中文文档和页面文案使用 UTF-8 编码，不包含 replacement character 或异常全角问号。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>事实源 1：IP 黑白名单规则列表</strong></p>
+      <p>截图展示“IP地址/段、操作、优先级、状态、修改时间、操作”等字段，优先级位于状态之前。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-3QxFhDKTMhC3RKrpyqTUNOHJulEPE5.png" alt="IP黑白名单规则列表展示优先级字段">
+        <figcaption>用户提供的 IP 黑白名单规则列表截图。</figcaption>
+      </figure>
+      <p><strong>事实源 2：发信行为管控规则列表</strong></p>
+      <p>截图展示“执行动作、优先级、状态、修改时间”等字段，优先级位于状态之前。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pM46QRp0oJXGyY1UBqOe50WSMVVSz7.png" alt="发信行为管控规则列表展示优先级字段">
+        <figcaption>用户提供的发信行为管控规则列表截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13059-01</td><td>IP 黑白名单规则列表显示“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-02</td><td>发信行为管控规则列表显示“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-03</td><td>高级过滤规则规则列表显示“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-04</td><td>三个模块的优先级列均位于状态列之前。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-05</td><td>优先级显示现有规则的 <code>priority</code> 值。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-06</td><td>不修改接口、权限、排序、表单校验和其他功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <section id="verification">
