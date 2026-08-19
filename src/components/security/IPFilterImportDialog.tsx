@@ -233,7 +233,7 @@ export function IPFilterImportDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl" showCloseButton={false}>
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{t('ipFilter.importTitle')}</DialogTitle>
           <DialogDescription>{t('ipFilter.importDesc')}</DialogDescription>

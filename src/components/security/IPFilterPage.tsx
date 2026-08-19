@@ -285,7 +285,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           name: rule.name,
           description: rule.description || '',
           list_type: rule.list_type as IPFilterListType,
-          // 编辑回填：ip_config_type / ip_value / ip_groups 三个字段来自行数据
+          // 编辑回填：ip_config_type / ip_value / ip_groups 三字段来自行数据
           ...ipConfigFieldsFromView(rule),
           demo_action: fromGatewayView(rule.action, rule.add_headers, rule.list_type as IPFilterListType),
           priority: rule.priority,
@@ -417,12 +417,6 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           </TooltipProvider>
         );
       },
-    },
-    {
-      id: 'priority',
-      header: t('ipFilter.priority'),
-      cell: ({ row }) => <span className="font-mono text-xs">{row.original.priority}</span>,
-      size: 80,
     },
     {
       id: 'status',
@@ -621,11 +615,12 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
         <SheetContent
           side="right"
           className="data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
-          showCloseButton={false}
+          showCloseButton
         >
           <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
-            <div>
-              <SheetTitle className="text-lg font-semibold">
+            <div className="flex items-center justify-between">
+              <div>
+                <SheetTitle className="text-lg font-semibold">
                   {editingRule
                     ? t(listTypeTab === 'blacklist' ? 'ipFilter.editBlacklistRule' : 'ipFilter.editWhitelistRule')
                     : t(listTypeTab === 'blacklist' ? 'ipFilter.addBlacklistRule' : 'ipFilter.addWhitelistRule')}
@@ -634,6 +629,16 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                   {t(listTypeTab === 'blacklist' ? 'ipFilter.blacklistRuleDesc' : 'ipFilter.whitelistRuleDesc')}
                 </p>
               </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button size="sm" disabled={isSubmitting} onClick={onSubmit}>
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {t('ipFilter.saveAndEnable')}
+                </Button>
+              </div>
+            </div>
           </SheetHeader>
 
           <div className="flex flex-1 overflow-hidden">
@@ -1066,16 +1071,6 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="flex flex-shrink-0 justify-end gap-2 border-t px-6 py-4">
-            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="button" disabled={isSubmitting} onClick={onSubmit}>
-              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {t('ipFilter.saveAndEnable')}
-            </Button>
           </div>
         </SheetContent>
       </Sheet>

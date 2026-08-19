@@ -491,7 +491,7 @@ export function SenderFilterDrawer({
       <SheetContent
         side="right"
         className="data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
-        showCloseButton={false}
+        showCloseButton
       >
         <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
           <SheetTitle className="text-lg font-semibold">

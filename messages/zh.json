@@ -1459,7 +1459,7 @@
     "previewSimulationNote": "基于策略配置的模拟推演，实际处置以引擎判定为准。",
     "previewEmpty": "该群组暂无已启用的命中策略。",
     "previewHitBadge": "优先级 {priority} · {name}",
-    "previewIgnoredHigher": "注意：���{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
+    "previewIgnoredHigher": "注意：「{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
     "previewNotExecuted": "未执行（前序已短路）",
     "previewShortCircuitPoint": "短路点 · {action}",
     "previewNoGroupConfig": "无群组配置（按全局执行）",
@@ -2070,7 +2070,7 @@
       },
       "egress": {
         "senderDomain": "发信域",
-        "name": "出�� IP",
+        "name": "出口 IP",
         "nameRequired": "请选择出�� IP",
         "empty": "请先在网络设置配置出口 IP",
         "domainNotVerified": "发信域须先���成归属校验"
@@ -4429,7 +4429,7 @@
     "saveSuccess": "保存成功",
     "saveFailed": "保存失败",
     "warning": "提示",
-    "viewObserveStats": "���看观察统计",
+    "viewObserveStats": "查看观察统计",
     "restoreDefault": "恢复系统默认",
     "moduleEnabled": "启用认证仿冒检测",
     "moduleEnabledHint": "关闭后，所有认��仿冒检测规则将不再��效",
@@ -4683,7 +4683,6 @@
       "object": "管控对象",
       "detection": "检测条件",
       "action": "执行动作",
-      "priority": "优先级",
       "status": "状态",
       "modified": "修改时间",
       "operations": "操作"
@@ -5443,7 +5442,7 @@
       "label": "检测模式",
       "classification": "分类优先",
       "threshold": "分段阈值",
-      "classificationDesc": "只要识别��该意图即执行处置，忽���置信度��数。",
+      "classificationDesc": "只要识别为该意图即执行处置，忽���置信度��数。",
       "thresholdDesc": "根据置信度分数落入的区间执��不同处置动作。"
     },
     "threshold": {
@@ -6033,7 +6032,7 @@
       "exportSelected": "导出已选 {n} 条",
       "exportAll": "导出全部筛选（{n} 条）",
       "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} 条）",
-      "exportLimitWarning": "筛选结果较���（{n} 条），将导出前 {limit} 条，建议缩��筛选范围",
+      "exportLimitWarning": "筛选结果较多（{n} 条），将导出前 {limit} 条，建议缩��筛选范围",
       "exportAllFiltered": "导出全部筛选",
       "crossPageSelected": "已���页选中 {n} 条"
     },
@@ -6380,7 +6379,7 @@
           "outbound": "外发"
         },
         "senderRecipientInfo": "收发信息",
-        "envelopeFrom": "���际发信人",
+        "envelopeFrom": "实际发信人",
         "envelopeTo": "实际收信人",
         "senderIp": "发信 IP",
         "ipLocation": "IP 归属地",
@@ -6491,7 +6490,7 @@
     "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
     "incompleteCondition": "[配置不完整]",
     "incompleteReasonMissingValue": "缺少取值：请填��该条件的匹配值",
-    "incompleteReasonThreshold": "缺少阈值：请填写���值阈值",
+    "incompleteReasonThreshold": "缺少阈值：请填写数值阈值",
     "incompleteReasonBetween": "区间不完整：请同时填写最小值和最���值",
     "incompleteReasonBetweenOrder": "区间无���：最小值不应大于最大值",
     "incompleteReasonRange": "超出有效范围：请填�� {min} 至 {max} 之间的数值",
@@ -7502,7 +7501,7 @@
     "searchGroups": "搜索收信人组",
     "searchDepts": "搜索部门",
     "noMatch": "无���配结果",
-    "noGroupsHint": "暂无收信人组，请��到「���组管理」创建",
+    "noGroupsHint": "暂无收信人组，请��到「群组管理」创建",
     "noDeptsHint": "组织通讯录暂未同步���请先到「组织通讯录」配置数据源",
     "invalidRef": "已失效",
     "clearAll": "清空",
@@ -9376,7 +9375,7 @@
     },
     "recall": {
       "title": "确认召回",
-      "description": "将对「{subject}」等 {count} 封邮件执行���删除召回，未读邮件可撤回，已读邮件仅告警。",
+      "description": "将对「{subject}」等 {count} 封邮件执行软删除召回，未读邮件可撤回，已读邮件仅告警。",
       "unreadPolicy": "未读邮件������",
       "readPolicy": "已读邮件策略",
       "policy": {
@@ -9744,7 +9743,7 @@
     "fieldPriority": "优先级",
     "fieldServer": "服务器地址",
     "fieldSkipVerify": "跳过证书校验",
-    "fieldSkipVerifyHint": "仅用于自签证书的测试环境，生产请勿���启",
+    "fieldSkipVerifyHint": "仅用于自签证书的测试环境，生产请勿开启",
     "fieldSyncType": "同步方式",
     "fieldUpload": "上传文件",
     "fieldUseTls": "使用 TLS (LDAPS)",
@@ -10130,7 +10129,7 @@
         "inbound": "查看统计",
         "threats": "查看威胁",
         "pending": "去处置",
-        "nodes": "查看状���"
+        "nodes": "查看状态"
       }
     },
     "trend": {
@@ -10784,7 +10783,7 @@
       "name_and_pattern_required": "名称和匹���内容都必须填写",
       "not_found": "链接黑名单规则不存在，可能已被删除",
       "tenant_access_denied": "没有权限访问该租户的数据",
-      "tenant_id_required": "必须指定租户（平��管理员需通过 X-Tenant-ID 指定）",
+      "tenant_id_required": "必须指定租户（平台管理员需通过 X-Tenant-ID 指定）",
       "verdict_invalid": "判定结果取值无效"
     },
     "mail_admission": {
@@ -11344,7 +11343,7 @@
       "invalid_ip": "IP 地址无效"
     },
     "spoofing_notification_preview": {
-      "admin_emails_invalid": "��理员邮箱列表中含有无效邮箱",
+      "admin_emails_invalid": "管理员邮箱列表中含有无效邮箱",
       "sample_sender_invalid": "样本发件人必须是合法邮箱地址",
       "sample_subject_too_long": "样本主题最多 500 个字符",
       "sample_confidence_out_of_range": "样本置信度必须在 0-100 之间"

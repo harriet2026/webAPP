@@ -163,7 +163,7 @@ export function EffectivePathPreview({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-3xl w-full flex flex-col p-0" data-testid="group-policy-path-preview" showCloseButton={false}>
+      <SheetContent side="right" className="sm:max-w-3xl w-full flex flex-col p-0" data-testid="group-policy-path-preview">
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle className="flex items-center gap-2">
             <GitBranch className="h-5 w-5" />

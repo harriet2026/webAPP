@@ -622,7 +622,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
       </div>
 
       <Dialog open={greylistDialogOpen} onOpenChange={setGreylistDialogOpen}>
-                  <DialogContent showCloseButton={false} className="max-w-lg">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{t('rblFilter.greylistConfig')}</DialogTitle>
             <DialogDescription>{t('rblFilter.greylistConfigDesc')}</DialogDescription>

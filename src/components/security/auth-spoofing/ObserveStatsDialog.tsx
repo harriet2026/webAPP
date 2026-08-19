@@ -40,7 +40,7 @@ export function ObserveStatsDialog({ open, onOpenChange }: ObserveStatsDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]" showCloseButton={false}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{t('observeStats.title')}</DialogTitle>
           <DialogDescription>{t('observeStats.description')}</DialogDescription>

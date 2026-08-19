@@ -498,7 +498,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
         </Card>
       )}
       <Dialog open={batchImportOpen} onOpenChange={setBatchImportOpen}>
-        <DialogContent className="sm:max-w-md" data-testid="groups-batch-import-dialog" showCloseButton={false}>
+        <DialogContent className="sm:max-w-md" data-testid="groups-batch-import-dialog">
           <DialogHeader>
             <DialogTitle>{t('batchImport')}</DialogTitle>
           </DialogHeader>
@@ -573,7 +573,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
       />
       {/* GT-12260：导入部分成功时逐行展示失败值、行号与原因 */}
       <Dialog open={importFailures != null} onOpenChange={open => !open && setImportFailures(null)}>
-        <DialogContent className="max-w-2xl" data-testid="import-failures-dialog" showCloseButton={false}>
+        <DialogContent className="max-w-2xl" data-testid="import-failures-dialog">
           <DialogHeader>
             <DialogTitle>
               {t('importFailuresTitle', {

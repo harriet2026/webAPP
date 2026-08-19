@@ -413,21 +413,27 @@ export function ContentRuleDrawer({
       <Sheet open={open} onOpenChange={(next) => next ? onOpenChange(true) : requestClose()}>
         <SheetContent
           side="right"
-          showCloseButton={false}
-          className="z-[70] flex flex-col gap-0 overflow-hidden bg-card p-0 data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px]"
+          className="z-[70] bg-card data-[side=right]:w-[min(920px,calc(100vw-24px))] data-[side=right]:sm:max-w-[920px] gap-0 overflow-hidden p-0"
           data-testid="content-rule-drawer"
         >
-          <SheetHeader className="flex-shrink-0 border-b px-6 py-4 max-sm:px-4">
+          <SheetHeader className="flex-row items-center justify-between border-b px-6 py-4 pr-14">
             <div>
               <SheetTitle className="text-lg font-semibold">
                 {editingRule ? t('contentRules.editRuleTitle') : t('contentRules.createRuleTitle')}
               </SheetTitle>
               <SheetDescription className="mt-1">{t('contentRules.editorSubtitle')}</SheetDescription>
             </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={requestClose}>{t('common.cancel')}</Button>
+              <Button size="sm" onClick={handleSubmit} disabled={isSubmitting} data-testid="content-rule-save">
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('common.save')}
+              </Button>
+            </div>
           </SheetHeader>
 
-          <div className="flex min-h-0 flex-1 overflow-hidden max-[863px]:grid max-[863px]:grid-cols-1">
-            <div className="w-[560px] flex-shrink-0 overflow-y-auto border-r p-6 max-[863px]:w-auto max-[863px]:border-r-0 max-sm:p-4" data-testid="content-rule-form-pane">
+          <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,560px)_minmax(280px,1fr)] overflow-hidden max-[863px]:grid-cols-1">
+            <div className="overflow-y-auto border-r p-6 max-[863px]:border-r-0 max-sm:p-4" data-testid="content-rule-form-pane">
               <div className="space-y-6">
                 <Section title={t('contentRules.basicSettings')} accent="bg-blue-500" testId="content-rule-section-basic">
                   <Field label={t('contentRules.ruleName')} required error={errors.name} hint={t('contentRules.ruleNameTip')}>
@@ -624,7 +630,7 @@ export function ContentRuleDrawer({
               </div>
             </div>
 
-            <aside className="flex-1 overflow-y-auto bg-muted/60 p-6 max-[863px]:hidden" data-testid="content-rule-help-pane">
+            <aside className="overflow-y-auto bg-muted/60 p-6 max-[863px]:hidden" data-testid="content-rule-help-pane">
               <div className="space-y-6">
                 <div className="rounded-lg border bg-card p-5" data-testid="content-rule-current-effect">
                   <div className="mb-4 flex items-center gap-2">
@@ -693,16 +699,6 @@ export function ContentRuleDrawer({
                 </div>
               </div>
             </aside>
-          </div>
-
-          <div className="flex flex-shrink-0 justify-end gap-2 border-t px-6 py-4 max-sm:px-4">
-            <Button type="button" variant="outline" onClick={requestClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="button" onClick={handleSubmit} disabled={isSubmitting} data-testid="content-rule-save">
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('common.save')}
-            </Button>
           </div>
         </SheetContent>
       </Sheet>
