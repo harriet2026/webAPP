@@ -206,11 +206,6 @@ export function BehaviorControlPage({ embedded = false }: Props) {
             onEdit={handleEdit}
             onDelete={(v) => setDeleteTarget(v)}
           />
-          {filtered.length === 0 && (
-            <div className="flex justify-center pb-2">
-              <Button onClick={handleCreate}>{t('behaviorControl.createNow')}</Button>
-            </div>
-          )}
           {totalPages <= 1 ? (
             <div className="flex items-center justify-start px-4 py-3 border-t">
               <div className="text-sm text-muted-foreground">
