@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 49,
+  "current_version": 50,
   "history": [
     {
       "version": 1,
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（�����解������）��版本����史����加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（������解������）��版本����史����加 v9。",
       "demo_version": 12
     },
     {
@@ -286,7 +286,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12731",
       "incremental": true,
-      "summary": "GT-12731.html 补全 GT-12751 本轮全部条件配置优化（doc 版本 v2→v3），将用户提出的 10 个优化点全部落文档并加「10 点→区块」对照表：变更 5（catalogue 移除功能组 panel:featureGroup / urlSandbox:url_sandbox / shortLink:short_link 三条，目录基线 54→51，catalogue.test.ts 断言 byPanel('featureGroup')===0）、变更 6（值控件规范化：is_encrypted_attachment 与 mailfrom_empty 标为布尔字段→BooleanValueSelect 是/否；image_qr_code_result→[success,fail] 成功/失败；envelope_header_mismatch→[match,mismatch] 一致/不一致；virus_scan_result→[infected,clean] 有毒/无毒；四语补齐 booleanValues/qrResultValues/envelopeHeaderConsistencyValues/virusScanResultValues）、变更 7（修复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组 type=sender，MapValueSection useMapKeys 取到候选）、变更 8（发件组织 sender_dept_path panel:orgDept 组织通讯录部门树多选 OrgDepartmentSection）、变更 9（DescriptionCard 说明卡增强为输入类型/数据来源/格式示例/单位/有效范围/对象含义/运算符/示例/推荐配置多段，顺带修 inputType.intentEngine 缺失）、变更 10（修复选中过多无法再添加：已选区限高约45% overflow-y-auto 独立滚动、添加条件区 flex-1 min-h-0 常驻，ConditionsTab/ConditionTree）；新增浏览器实拍 S-4 病毒有毒/无毒值 + S-5 发���组织部门树 + S-6 发件人组群组下拉 + S-7 已选8条件仍可添加（浅色 1575×847）；差异新增 D-007~D-012（目录基线54链条、群组Mock来源待回归、一致性字段方向映射、布尔vs枚举取舍、发件组织树形包含语义、双滚动布局取舍）、待确认新增 Q-004（值/群组/组织真实后端契约与回显回归）；顺带修复本次编辑区 2 处 UTF-8 乱码（多段/C节注释分隔符）；乱码自检 CLEAN；version.json current_version 15→16。",
+      "summary": "GT-12731.html 补全 GT-12751 本轮全部条件配置优化（doc 版本 v2→v3），将用户提出的 10 个优化点全部落文档并加「10 点→区块」对照表：变更 5（catalogue 移除功能组 panel:featureGroup / urlSandbox:url_sandbox / shortLink:short_link 三条，目录基线 54→51，catalogue.test.ts 断言 byPanel('featureGroup')===0）、变更 6（值控件规范化：is_encrypted_attachment 与 mailfrom_empty 标为布尔字段→BooleanValueSelect 是/否；image_qr_code_result→[success,fail] 成功/失败；envelope_header_mismatch→[match,mismatch] 一致/不一致；virus_scan_result→[infected,clean] 有毒/无毒；四语补齐 booleanValues/qrResultValues/envelopeHeaderConsistencyValues/virusScanResultValues）、变更 7（修复发信人组下拉：dispatcher 为 sender_group 补正 map_keys_source 指向群组策略发信人组 type=sender，MapValueSection useMapKeys 取到候选）、变更 8（发件组织 sender_dept_path panel:orgDept 组织通讯录部门树多选 OrgDepartmentSection）、变更 9（DescriptionCard 说明卡增强为输入类型/数据来源/格式示例/单位/有效范围/对象含义/运算符/示例/推荐配置多段，顺带修 inputType.intentEngine 缺失）、变更 10（修复选中过多无法再添加：已选区限高约45% overflow-y-auto 独立滚动、添加条件区 flex-1 min-h-0 常驻，ConditionsTab/ConditionTree）；新增浏览器实拍 S-4 病毒有毒/无毒值 + S-5 发���组织部门树 + S-6 发件人组群组下拉 + S-7 已选8条件���可添加（浅色 1575×847）；差异新增 D-007~D-012（目录基线54链条、群组Mock来源待回归、一致性字段方向映射、布尔vs枚举取舍、发件组织树形包含语义、双滚动布局取舍）、待确认新增 Q-004（值/群组/组织真实后端契约与回显回归）；顺带修复本次编辑区 2 处 UTF-8 乱码（多段/C节注释分隔符）；乱码自检 CLEAN；version.json current_version 15→16。",
       "demo_version": 16
     },
     {
@@ -470,6 +470,15 @@
       "ticket": "GT-13059",
       "incremental": true,
       "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13059：IP黑白名单、发信行为管控和高级过滤规则三个模块的规则列表补充优先级字段，优先级位于状态字段之前，并使用项目国际化框架。"
+    },
+    {
+      "version": 50,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13061",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13061：海外邮件检查自定义 IP 定位库无数据状态移除重复的“立即创建”按钮，保留顶部新增规则和其他既有功能。"
     }
   ]
 }

@@ -45,6 +45,7 @@
       <li><a href="#gt-13036">GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
       <li><a href="#gt-13040">GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</a></li>
       <li><a href="#gt-13059">GT-13059 IP黑白名单，发信行为管控，高级过滤规则三个模块的规则列表补充优先级字段</a></li>
+      <li><a href="#gt-13061">GT-13061 海外邮件检查：自定义IP定位库空状态移除“立即创建”按钮</a></li>
       <li><a href="#verification">C. 验证与范围边界</a></li>
     </ul>
   </nav>
@@ -231,7 +232,7 @@
       <tbody>
         <tr><td>标题区</td><td>保留新建/编辑标题与说明，不显示保存、取消按钮。</td><td><code>IPFilterPage.tsx</code></td></tr>
         <tr><td>关闭入口</td><td>关闭 <code>SheetContent</code> 的右上角通用关闭按钮。</td><td><code>showCloseButton={false}</code></td></tr>
-        <tr><td>底部操作栏</td><td>增加底部右侧操作栏，取消在左、保存主操作在右。</td><td>用户提供截图</td></tr>
+        <tr><td>底部操��栏</td><td>增加底部右侧操作栏，取消在左、保存主操作在右。</td><td>用户提供截图</td></tr>
         <tr><td>国际化</td><td>继续使用 <code>common.cancel</code> 与 <code>ipFilter.saveAndEnable</code>。</td><td>项目国际化框架</td></tr>
         <tr><td>业务逻辑</td><td>保留 IP 地址/段、动作、优先级、有效期、校验和保存接口逻辑。</td><td>范围约束</td></tr>
       </tbody>
@@ -356,6 +357,50 @@
         <tr><td>AC-13059-06</td><td>不修改接口、权限、排序、表单校验和其他功能模块。</td><td class="done">通过</td></tr>
       </tbody>
     </table>
+  </section>
+
+  <section id="gt-13061">
+    <h2>GT-13061 海外邮件检查：自定义IP定位库空状态移除“立即创建”按钮</h2>
+    <h3>1. 需求背景</h3>
+    <p>海外邮件检查页面的自定义 IP 定位库没有数据时，空状态区域额外显示“立即创建”按钮。由于页面顶部已有“新增规则”入口，本需求移除空状态重复入口。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>范围</th><th>处理内容</th><th>边界</th></tr></thead>
+      <tbody>
+        <tr><td>自定义 IP 定位库空状态</td><td>移除空状态区域的“立即创建”按钮。</td><td>仅调整空状态展示。</td></tr>
+        <tr><td>页面工具栏</td><td>保留“新增规则”、搜索、重置、导入和导出。</td><td>不改变既有业务逻辑。</td></tr>
+        <tr><td>空状态内容</td><td>保留图标和“暂无自定义IP规则，系统将使用内置GeoIP库进行地域识别”文案。</td><td>继续使用项目国际化框架。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 功能路径</h3>
+    <p>安全策略模块 → 海外邮件检查 → 自定义 IP 定位库。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>用户提供截图：优化后的海外邮件检查页面</strong></p>
+      <p>截图显示自定义 IP 定位库无数据时仅保留空状态说明，不再显示“立即创建”按钮。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-olZ4fUzIIzVExJ7Sy2piNNDTSGWLt5.png" alt="海外邮件检查自定义IP定位库空状态不显示立即创建按钮">
+        <figcaption>海外邮件检查自定义 IP 定位库空状态截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13061-01</td><td>自定义 IP 定位库无数据时不显示“立即创建”按钮。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-02</td><td>空状态图标和说明文案保持显示。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-03</td><td>页面顶部“新增规则”入口保持可用。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-04</td><td>搜索、重置、导入、导出和已有规则操作不受影响。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-05</td><td>未修改其他页面或功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 编码与国际化</h3>
+    <p>中文内容使用 UTF-8 编码，继续使用项目国际化框架，禁止 replacement character（U+FFFD），不引入异常全角问号。</p>
   </section>
 
   <section id="verification">
