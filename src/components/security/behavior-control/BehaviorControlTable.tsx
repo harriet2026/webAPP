@@ -75,6 +75,7 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
             <TableHead className="w-[110px]">{t('behaviorControl.col.direction')}</TableHead>
             <TableHead className="min-w-[220px]">{t('behaviorControl.col.object')}</TableHead>
             <TableHead className="w-[90px]">{t('behaviorControl.col.action')}</TableHead>
+            <TableHead className="w-[80px]">{t('behaviorControl.col.priority')}</TableHead>
             <TableHead className="w-[80px]">{t('behaviorControl.col.status')}</TableHead>
             <TableHead className="w-[130px]">{t('behaviorControl.col.modified')}</TableHead>
             <TableHead className="w-[100px]">{t('behaviorControl.col.operations')}</TableHead>
@@ -108,6 +109,7 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
                 <TableCell>
                   <Badge className={ACTION_BADGE[productAction as BehaviorProductAction]}>{t(`behaviorControl.action.${productAction}`)}</Badge>
                 </TableCell>
+                <TableCell className="font-mono text-xs">{v.rule.priority}</TableCell>
                 <TableCell>
                   <Badge variant={v.rule.is_active ? 'default' : 'secondary'}>
                     {t(v.rule.is_active ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
