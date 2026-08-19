@@ -21,7 +21,7 @@ export function ResetDialog({ open, onOpenChange, direction, onConfirm }: ResetD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description', { dir: dirShort })}</DialogDescription>

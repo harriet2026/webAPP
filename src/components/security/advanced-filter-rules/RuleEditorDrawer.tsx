@@ -231,6 +231,7 @@ export function RuleEditorDrawer({
         side="right"
         className="data-[side=right]:w-[75vw] data-[side=right]:sm:max-w-[75vw] p-0 flex flex-col"
         data-testid="rule-editor-drawer"
+        showCloseButton={false}
       >
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle data-testid="rule-editor-title">

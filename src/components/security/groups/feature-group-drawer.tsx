@@ -144,7 +144,7 @@ export function FeatureGroupDrawer({
         onOpenChange(v);
       }}
     >
-      <SheetContent side="right" className="sm:max-w-[1152px] w-[96vw] flex flex-col p-0">
+      <SheetContent side="right" className="sm:max-w-[1152px] w-[96vw] flex flex-col p-0" showCloseButton={false}>
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle>
             {isEdit ? t('editGroup') : t('newGroup')} — {tFeat('v3Conditions.category_mailBasic')}

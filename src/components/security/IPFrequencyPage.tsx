@@ -11,7 +11,6 @@ import {
   Upload,
   TestTube,
   Ban,
-  FlaskConical,
   HelpCircle,
   AlertCircle,
   AlertTriangle,
@@ -966,13 +965,13 @@ export function IPFrequencyPage({
                     <TableHead className="w-[40px]" />
                     <TableHead className="w-[60px]">{t('ipFrequency.ruleId')}</TableHead>
                     <TableHead>{t('ipFrequency.name')}</TableHead>
-                    <TableHead className="w-[80px]">{t('ipFrequency.priority')}</TableHead>
                     <TableHead>{t('ipFrequency.ipAddress')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.concurrentHeader')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.timeWindowFreq')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.dailyLimitHeader')}</TableHead>
                     <TableHead className="text-center">{t('ipFrequency.suspendPolicy')}</TableHead>
                     <TableHead>{t('ipFrequency.expireTimeHeader')}</TableHead>
+                    <TableHead className="w-[80px]">{t('ipFrequency.priority')}</TableHead>
                     <TableHead className="text-center">{t('common.status')}</TableHead>
                     <TableHead className="w-[120px]" />
                   </TableRow>
@@ -1023,11 +1022,6 @@ export function IPFrequencyPage({
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="font-mono text-blue-600 dark:text-blue-400">
-                                {rule.Rule.priority}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
                               <div className="flex items-center gap-2">
                                 <StatusBadge status={scopeTypeLabel(rule.ScopeType)} variant={scopeTypeVariant(rule.ScopeType)} />
                                 {rule.ScopeValue && (
@@ -1051,6 +1045,11 @@ export function IPFrequencyPage({
                               </Badge>
                             </TableCell>
                             <TableCell className="text-sm">{formatExpireTime(rule.Rule.valid_until)}</TableCell>
+                            <TableCell className="w-[80px]">
+                              <Badge variant="outline" className="font-mono text-blue-600 dark:text-blue-400">
+                                {rule.Rule.priority}
+                              </Badge>
+                            </TableCell>
                             <TableCell className="text-center">
                               {rule.IsExpired ? (
                                 <StatusBadge status={t('ipFrequency.expired')} variant="error" />
@@ -1233,7 +1232,7 @@ export function IPFrequencyPage({
         open={dialogOpen}
         onOpenChange={(open, eventDetails) => (open ? setDialogOpen(true) : requestCloseDialog(eventDetails))}
       >
-        <SheetContent side="right" className="data-[side=right]:w-[960px] data-[side=right]:sm:max-w-[960px] p-0 flex flex-col" showCloseButton>
+        <SheetContent side="right" className="data-[side=right]:w-[960px] data-[side=right]:sm:max-w-[960px] p-0 flex flex-col" showCloseButton={false}>
           <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
@@ -1243,24 +1242,6 @@ export function IPFrequencyPage({
                 <p className="text-sm text-muted-foreground mt-1">
                   {t('ipFrequency.description')}
                 </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setTestDialogOpen(true)}
-                >
-                  <FlaskConical className="h-4 w-4 mr-2" />
-                  {t('ipFrequency.test')}
-                </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => requestCloseDialog()}>
-                  {t('common.cancel')}
-                </Button>
-                <Button type="button" size="sm" disabled={isSubmitting} onClick={onSubmit}>
-                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  {t('common.save')}
-                </Button>
               </div>
             </div>
           </SheetHeader>
@@ -1974,6 +1955,16 @@ export function IPFrequencyPage({
               </div>
             </div>
           </div>
+
+          <div className="flex flex-shrink-0 justify-end gap-2 border-t px-6 py-4">
+            <Button type="button" variant="outline" onClick={() => requestCloseDialog()}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="button" disabled={isSubmitting} onClick={onSubmit}>
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {t('common.save')}
+            </Button>
+          </div>
         </SheetContent>
       </Sheet>
 
@@ -2023,7 +2014,7 @@ export function IPFrequencyPage({
       )}
 
       <Dialog open={testDialogOpen} onOpenChange={setTestDialogOpen}>
-        <DialogContent className="max-w-md rounded-[28px]">
+        <DialogContent className="max-w-md rounded-[28px]" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>
               <TestTube className="h-5 w-5 inline mr-2" />
@@ -2075,7 +2066,7 @@ export function IPFrequencyPage({
 
       {/* Layer 2: Global suspended IPs dialog (from toolbar button) */}
       <Dialog open={suspendedDrawerOpen} onOpenChange={setSuspendedDrawerOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] rounded-[28px]">
+        <DialogContent className="max-w-3xl max-h-[80vh] rounded-[28px]" showCloseButton={false}>
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>{t('ipFrequency.suspendedIPs')}</DialogTitle>
@@ -2139,7 +2130,7 @@ export function IPFrequencyPage({
 
       {/* Layer 2: Per-rule suspended IPs Sheet (from expanded detail or more menu) */}
       <Sheet open={!!ruleSuspendedTarget} onOpenChange={(open) => { if (!open) setRuleSuspendedTarget(null); }}>
-        <SheetContent side="right" className="w-[500px] sm:w-[600px] p-0 flex flex-col" showCloseButton>
+        <SheetContent side="right" className="w-[500px] sm:w-[600px] p-0 flex flex-col" showCloseButton={false}>
           <SheetHeader className="px-4 py-4 border-b flex-shrink-0">
             <SheetTitle>
               {t('ipFrequency.currentSuspendedIPs', { count: ruleSuspendedIPs.length })}

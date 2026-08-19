@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 43,
+  "current_version": 48,
   "history": [
     {
       "version": 1,
@@ -126,7 +126,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12695",
       "incremental": true,
-      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开发菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单抽屉默认态（���收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。",
+      "summary": "GT-12695 v2（GT-12696 发信人黑白名单优化）：新增 GT-12695.html，完整重生成 6 个变更点规格；补充全部 7 张真实浏览器截图（S-12~S-18），覆盖：开发菜单 GT-12695 入口、策略流水线、黑名单列表8列（含优先级）、黑名单���屉默认态（���收）、执行动作下拉展开（含丢弃及说明文字）、白名单列表8列、白名单抽屉默认态（投递，无白名单模式）；D-1~D-3，Q-1~Q-2。",
       "demo_version": 5
     },
     {
@@ -196,7 +196,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12710",
       "incremental": true,
-      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（已解����）��版本����史����加 v9。",
+      "summary": "GT-12695 v9（GT-12710 发信行为管控新建规则保存取消按钮位置修复）：追加 GT-12710 需求节（1个变更点）：将 BehaviorControlDrawer 保存/取消按钮从 header 右侧移至底部独立 footer；仅修改 BehaviorControlDrawer.tsx（header 外层 div 移除 justify-between 和按钮组，在 </form> 前追加 flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0 独立 footer），沿用 common.cancel/common.save i18n key；目录追加 GT-12710 卡片块；补充截图 S-32（面板空态）/S-33（抽屉顶部 header 无按钮）/S-34（抽屉底部 footer 按钮）；差异标注新增 D-10（����解������）��版本����史����加 v9。",
       "demo_version": 12
     },
     {
@@ -316,7 +316,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-11675",
       "incremental": true,
-      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续��加����号在 GT-12753 的������ 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更新为 D-001~D-016、D 范围���新��� Q-001~Q-006，标题追��� GT-11675（v5），版本���史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
+      "summary": "将一级需求 GT-11675 附件安全检测-图片识别，OCR深度检测功能缺失从 GT-12695.html 移动到 GT-12731.html（doc 版本 GT-12731 v4→v5），并删除 GT-12695.html：GT-12695 原变更 1/2 作为 GT-12731 的变更 13/14 接续��加����号在 GT-12753 的������ 11/12 之后），差异 D-001~D-003 重排为 D-014~D-016、待确认 Q-001 重排为 Q-006；GT-12731 TOC 增加 GT-11675 一级需求条目与变更 13/14、C 范围更��为 D-001~D-016、D 范围���新��� Q-001~Q-006，标题追��� GT-11675（v5），版本���史新增 v5 行；截图 GT-11675-S1（检测模式下拉仅两项）/ GT-11675-S2（不检测时数量上限禁用+提示）文件名不变、仍由 GT-12731 引用（未删）；代码与四语文案未改动（本次仅文档搬迁）；version.json current_version 18→19。",
       "demo_version": 19
     },
     {
@@ -366,7 +366,7 @@
       "comparison_spec_commit": "not-used",
       "ticket": "GT-12865",
       "incremental": true,
-      "summary": "新建 GT-12865.html（doc 版本 v1），记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：目录含 A/B 固定章节 + GT-12514 一级需求 + 变更 1~3 二级 + 1.1/1.2/1.3 三级结构；变更 1 新增详情页顶部操作栏的状态文字 + Switch 总开关（复用既有 /phishing-agent/engine-config 接口，与「检测引擎配置」页共享查询缓存）；变更 2 新增关闭时的 destructive 二次确认弹窗与保存成功/失败 toast，关闭后 PhishingAgentPanel 顶部持续展示橙色禁用横幅；变更 3 新增重新开启前的准入规则前置校验（fail-closed），无已启用规则时弹出非破坏性门禁弹窗，点击「前往配置」后通过 ?action=create-admission-rule URL 参数联动「检测范围与准入规则」模块（AdmissionRulesSection）自动打开「新增规则」弹窗并即时清除该参数；补充真实 agent-browser 浏览器实测截图 S-1~S-6（Mock 模式 · AI版·单租户 · 平台管理员 · 浅色主题 · 1280×633，归档至 screenshots/GT-12514-S1~S6-*.png），逐元素说明表依据 messages/zh.json 真实 i18n 文案核对转录；新增差异标注 D-001~D-004（含 D-001 总开关可见性不受编辑权限约束的有意设计、D-004 沙箱缺中文字体导致截图文字方框化的环境限制说明）、待确认事项 Q-001~Q-003；同步在总索引 doc/html-spec/index.html 的「钓鱼邮件检测智能体」卡片下新增本文档链接；文档残留扫描（button/input/select/textarea/form/script/onClick 等）确认无匹配，全文 UTF-8 乱码自检（grep \ufffd）确认无���留；version.json current_version 37→38。",
+      "summary": "新建 GT-12865.html（doc 版本 v1），记录 GT-12514「钓鱼邮件检测智能体-缺少智能体总开关及关闭生命周期交互」的完整实现：目录含 A/B 固定章节 + GT-12514 一级需求 + 变更 1~3 二级 + 1.1/1.2/1.3 三级结构；变更 1 新增详情页顶部操作栏的状态文字 + Switch 总开关（复用既有 /phishing-agent/engine-config 接口，与「检测引擎配置」页共享查询缓存）；变更 2 新增关闭时的 destructive 二次确认弹窗与保存成功/失败 toast，关闭后 PhishingAgentPanel 顶部持续展示橙色禁用横幅；变更 3 新增重新开启前的准入规则前置校验（fail-closed），无已启用规则时弹出非破坏性门禁弹窗，点击「前往配置」后通过 ?action=create-admission-rule URL 参数联动「检测范围与准入规则」模块（AdmissionRulesSection）自动打开「新增规则」弹窗并即时清除该参数；补充真实 agent-browser 浏览器实测截图 S-1~S-6（Mock 模式 · AI版·单租户 · 平台管理员 · 浅色主题 · 1280×633，归档至 screenshots/GT-12514-S1~S6-*.png），逐元素说明表依据 messages/zh.json 真实 i18n 文案核对转录；新增差异标注 D-001~D-004（含 D-001 总开关可见性不受编辑权限约束的有意设计、D-004 沙箱缺中文字体导致截图文字方框化的环境限制说明）、待确认事项 Q-001~Q-003；同步在总索引 doc/html-spec/index.html 的「钓鱼邮件检测智能体」卡片下新增本文档链接；文档残留扫描（button/input/select/textarea/form/script/onClick 等）确认无匹配，全�� UTF-8 ���码自���（grep \ufffd）确认无���留；version.json current_version 37→38。",
       "demo_version": 24
     },
     {
@@ -416,6 +416,51 @@
       "ticket": "GT-12938",
       "incremental": true,
       "summary": "GT-12938.html v1→v2：用户在本地真实浏览器环境（租户管理员视角）手动截取「策略流水线」页面截图并提供，中文文字正常显示，用于替换图 S-2（变更后）——原 S-2 因 agent-browser 沙箱缺少中文字体而文字方框化，新截图（GT-12938-S2-stage3-after-order-manual-zh.png）解决了该问题，可直接核对「内容规则→附件安全检测→URL检测与防护→意图引擎」的最终顺序与真实中文文案。同步更新 §1.2 figure/figcaption/alt 文字、A 节「沙箱渲染限制」行、D-001 差异标注（状态由「已知·环境限制」改为「部分解决」）；图 S-1（变更前）保持沙箱实拍原样未变。另修复文档中两处历史遗留乱码字符（变更 1 标题「左侧导航」、incr-meta「变更类型：」），已通过 Grep 全文自检确认 0 处「�」残留。文档标题与元信息表当前版本同步 v1→v2；version.json current_version 42→43。"
+    },
+    {
+      "version": 44,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13017",
+      "incremental": true,
+      "summary": "新建 GT-13017【0818】处理问题总工单，新增 GT-12888 内容规则优先级展示需求文档与 HTML 导航入口；记录优先级列位于状态列之前、复用 contentRules.priority 国际化键，并归档用户提供的真实页面截图。"
+    },
+    {
+      "version": 45,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13027",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13027：内容规则保存/取消按钮从右上角移动到右下角，同时移除右上角关闭 X；保存与取消继续复用 common.save/common.cancel 国际化键，并归档用户提供的新建规则页面截图。"
+    },
+    {
+      "version": 46,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13033",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13033：IP频率限制保存/取消按钮移动至右下角，移除右上角关闭 X 与测试按钮；保存与取消继续复用 common.save/common.cancel 国际化键，并归档用户提供的新建规则页面截图。"
+    },
+    {
+      "version": 47,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13036",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13036：IP黑白名单保存/取消按钮移动至右下角，移除右上角关闭 X；保存与取消继续复用项目国际化键，并归档用户提供的新建规则页面截图。"
+    },
+    {
+      "version": 48,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13040",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13040：安全策略阶段1至阶段5主页面及页面内部二级弹窗统一移除右上角关闭 X，保留取消、保存、确认和既有业务关闭逻辑。"
     }
   ]
 }

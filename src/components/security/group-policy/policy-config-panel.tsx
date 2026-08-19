@@ -38,16 +38,6 @@ export function PolicyConfigPanel({ def, status, supportsCustom, onChange, onClo
     <div className="w-[320px] border-l p-4 overflow-y-auto bg-muted/30 shrink-0" data-testid="group-policy-config-panel">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium text-sm text-muted-foreground">{tGp('configDetail')}</h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0"
-          onClick={onClose}
-          aria-label={tGp('configDetailClose')}
-          data-testid="group-policy-config-panel-close"
-        >
-          <span className="text-muted-foreground text-lg">&times;</span>
-        </Button>
       </div>
 
       <div className="space-y-4">

@@ -235,6 +235,15 @@ export function ContentRulesTable({
       },
     },
     {
+      id: 'priority',
+      header: t('contentRules.priority'),
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap font-mono text-sm text-muted-foreground">
+          {row.original.rule.priority}
+        </span>
+      ),
+    },
+    {
       id: 'status',
       header: t('contentRules.status'),
       cell: ({ row }) => {
