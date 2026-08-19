@@ -56,15 +56,6 @@ function ObjectCell({ type, subType, value }: { type: BehaviorObjectType; subTyp
 export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
   const t = useTranslations();
 
-  if (views.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-muted-foreground mb-4">{t('behaviorControl.empty')}</div>
-        <p className="text-sm text-muted-foreground">{t('behaviorControl.emptyHint')}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
@@ -82,7 +73,14 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {views.map((v) => {
+          {views.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={9} className="h-32 text-center">
+                <div className="text-muted-foreground">{t('behaviorControl.empty')}</div>
+                <p className="text-sm text-muted-foreground">{t('behaviorControl.emptyHint')}</p>
+              </TableCell>
+            </TableRow>
+          ) : views.map((v) => {
             const productAction = BACKEND_TO_PRODUCT[v.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? v.rule.action;
             return (
               <TableRow key={v.rule.id}>
