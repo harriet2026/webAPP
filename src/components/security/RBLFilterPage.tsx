@@ -70,11 +70,11 @@ const SERVER_TIP_KEY: Record<string, string> = {
 const ACTION_TIP_KEY: Record<RblImmediateAction, string> = {
   reject: 'rblFilter.actionRejectTip',
   quarantine: 'rblFilter.actionQuarantineTip',
-  review: 'rblFilter.actionReviewTip',
+  audit: 'rblFilter.actionReviewTip',
   discard: 'rblFilter.actionDiscardTip',
 };
 
-const RBL_IMMEDIATE_ACTIONS: RblImmediateAction[] = ['reject', 'quarantine', 'review', 'discard'];
+const RBL_IMMEDIATE_ACTIONS: RblImmediateAction[] = ['reject', 'quarantine', 'audit', 'discard'];
 
 const DEFAULT_GREYLIST_CONFIG: GreylistFormConfig = {
   mode: 'delay',
@@ -170,7 +170,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     () => ({
       reject: t('rblFilter.actionReject'),
       quarantine: t('rblFilter.actionQuarantine'),
-      review: t('rblFilter.actionReview'),
+      audit: t('rblFilter.actionReview'),
       discard: t('rblFilter.actionDiscard'),
     }),
     [t],

@@ -1,24 +1,13 @@
-import { disabledAddons, type AddonKey, type PrimaryAction } from './conflict-matrix';
+import type { AddonKey, PrimaryAction } from './conflict-matrix';
 
 export type AddonsState = {
   [k in AddonKey]?: { enabled: boolean; params: Record<string, unknown> };
 };
 
-/**
- * A rule's actions are savable when either:
- * - the primary action is not 'none' (an action alone is enough), or
- * - at least one non-detailedLog addon is enabled AND not disabled by the
- *   current primary action's conflict matrix (detailedLog carries no UI and
- *   never counts as an "effective" addon on its own).
- */
+/** Every current primary action is complete on its own. Addons are optional. */
 export function canSaveActions(action: PrimaryAction, addons: AddonsState): boolean {
-  if (action !== 'none') return true;
-  const disabled = new Set(disabledAddons(action));
-  return (Object.keys(addons) as AddonKey[]).some((k) => {
-    if (k === 'detailedLog') return false;
-    if (disabled.has(k)) return false;
-    return addons[k]?.enabled === true;
-  });
+  void addons;
+  return action.length > 0;
 }
 
 /**

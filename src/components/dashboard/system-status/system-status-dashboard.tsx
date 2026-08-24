@@ -9,9 +9,10 @@
 // every card receives already-resolved data/visibility props.
 //
 // Layout follows spec §4.11.8's three tiers:
-//   1. Health banner (full width) + KPI grid (self-collapsing, see
-//      kpi-cards.tsx's own `showInfra`-derived column count — this component
-//      does not re-derive that grid).
+//   1. Health banner (full width, only while the product-form switcher is
+//      enabled) + KPI grid (self-collapsing, see kpi-cards.tsx's own
+//      `showInfra`-derived column count — this component does not re-derive
+//      that grid).
 //   2. "第二屏": ThreatTrend 独占全宽（已移除 TodoAlerts）。
 //   3. Bottom overview (§6/§7/§8): agent-overview (AI only) + threat-top5 +
 //      system-health-card (platform/infra only), `lg:grid-cols-${overviewCols}`
@@ -25,6 +26,7 @@ import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
+import { useProductForm } from '@/contexts/product-form-context';
 import {
   PageHeaderActionButton,
   PageHeaderSelectTrigger,
@@ -47,6 +49,7 @@ export function SystemStatusDashboard() {
   const t = useTranslations('systemStatus');
   const tRange = useTranslations('systemStatus.range');
   const queryClient = useQueryClient();
+  const { switcherEnabled } = useProductForm();
 
   const [range, setRange] = useState<SystemStatusRange>('24h');
   const [spinning, setSpinning] = useState(false);
@@ -102,20 +105,22 @@ export function SystemStatusDashboard() {
         }
       />
 
-      <HealthBanner
-        alerts={data.alerts}
-        threats={data.threats}
-        range={range}
-        isLoading={data.isLoading}
-        isError={data.isError}
-      />
+      {switcherEnabled && (
+        <HealthBanner
+          alerts={data.alerts}
+          threats={data.threats}
+          range={range}
+          isLoading={data.isLoading}
+          isError={data.isError}
+        />
+      )}
 
       <KpiCards data={data} showInfra={showInfra} />
 
       <ThreatTrend trend={data.threatTrend} isLoading={data.isLoading} isError={data.isError} />
 
       <div className={`grid grid-cols-1 gap-6 ${overviewGrid}`}>
-        {showAgents && <AgentOverview agents={data.agents} isLoading={data.isLoading} />}
+        {showAgents && <AgentOverview agents={data.agents} isLoading={data.agentsLoading} />}
         <ThreatTop5 top5={data.top5} isLoading={data.isLoading} range={range} />
         {showInfra && (
           <SystemHealthCard

@@ -12,7 +12,6 @@ vi.mock('@/lib/api/statistics', () => ({
 vi.mock('@/lib/api/system-status-summary', () => ({ fetchSystemStatusSummary: vi.fn() }));
 vi.mock('@/lib/api/ops-top', () => ({ fetchOpsTop: vi.fn() }));
 vi.mock('@/lib/api/monitoring', () => ({ fetchNodes: vi.fn(), fetchAlerts: vi.fn() }));
-vi.mock('@/lib/api/inbound-audit', () => ({ getInboundAuditItems: vi.fn() }));
 vi.mock('@/lib/api/phishing-detection', () => ({ getDetectionStats: vi.fn() }));
 vi.mock('@/lib/api/spoofing-detection', () => ({ getSpoofingStats: vi.fn() }));
 vi.mock('@/lib/api/threat-retro', () => ({ getThreatRetroStats: vi.fn() }));
@@ -43,7 +42,6 @@ import { getTypeStatistics } from '@/lib/api/statistics';
 import { fetchSystemStatusSummary } from '@/lib/api/system-status-summary';
 import { fetchOpsTop } from '@/lib/api/ops-top';
 import { fetchNodes, fetchAlerts } from '@/lib/api/monitoring';
-import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 
 const mock = (fn: unknown) => fn as unknown as ReturnType<typeof vi.fn>;
 
@@ -53,11 +51,11 @@ function baseMocks() {
     previous: { mail_volume: 41, threats: 6, block_rate: 10 },
     threat_trend: [],
     pending_disposal: 0,
+    pending_report: 0,
     generated_at: '2026-07-10T00:00:00Z',
   });
   mock(getTypeStatistics).mockResolvedValue({ series: [] });
   mock(fetchOpsTop).mockResolvedValue({ dimension: 'sender', total: 0, trendLabels: [], rows: [] });
-  mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
   mock(fetchNodes).mockResolvedValue({ items: [{ id: 'n1', last_seen_unix: 1, online: true }] });
   mock(fetchAlerts).mockResolvedValue({ items: [], total: 0, page: 1, page_size: 0 });
 }
@@ -68,7 +66,6 @@ function platformArgs(apiRequest: unknown) {
     dates: resolveRangeDates('7d', new Date('2026-07-10T12:00:00')),
     apiRequest: apiRequest as never,
     isPlatform: true,
-    agentAccess: { phishing: false, spoofing: false, 'threat-retro': false },
   };
 }
 

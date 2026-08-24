@@ -10,7 +10,7 @@ export type BehaviorDimension =
   | 'ip_count'
   | 'recipient_count'
   | 'attachment_size';
-export type BehaviorProductAction = 'review' | 'quarantine' | 'drop' | 'block';
+export type BehaviorProductAction = 'audit' | 'quarantine' | 'discard' | 'reject';
 export type BehaviorBackendAction = 'audit' | 'quarantine' | 'discard' | 'reject';
 export type RecipientLimitMode = 'detailed' | 'merged';
 export type RecipientLimitScope = 'local' | 'all';
@@ -109,15 +109,15 @@ export interface RecipientCheckConfig {
 }
 
 export const PRODUCT_TO_BACKEND: Record<BehaviorProductAction, BehaviorBackendAction> = {
-  review: 'audit',
+  audit: 'audit',
   quarantine: 'quarantine',
-  drop: 'discard',
-  block: 'reject',
+  discard: 'discard',
+  reject: 'reject',
 };
 
 export const BACKEND_TO_PRODUCT: Record<BehaviorBackendAction, BehaviorProductAction> = {
-  audit: 'review',
+  audit: 'audit',
   quarantine: 'quarantine',
-  discard: 'drop',
-  reject: 'block',
+  discard: 'discard',
+  reject: 'reject',
 };

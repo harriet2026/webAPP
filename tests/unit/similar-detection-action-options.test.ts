@@ -1,14 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { SIMILAR_DETECTION_ACTION_OPTIONS } from '@/components/security/similar-detection/action-options';
+import {
+  getSimilarDetectionActionOptions,
+  SIMILAR_DETECTION_ACTION_OPTIONS,
+} from '@/components/security/similar-detection/action-options';
 
 describe('similar detection action options', () => {
   it('matches the actions accepted by the similar-detection API', () => {
     expect(SIMILAR_DETECTION_ACTION_OPTIONS.map(({ value }) => value)).toEqual([
-      'mark-delivery',
+      'accept',
       'quarantine',
-      'review',
-      'block',
+      'audit',
       'discard',
     ]);
+  });
+
+  it('does not synthesize compatibility options', () => {
+    expect(getSimilarDetectionActionOptions('accept')).toHaveLength(4);
   });
 });

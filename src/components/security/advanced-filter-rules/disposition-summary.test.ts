@@ -13,7 +13,7 @@ function value(keys: string[]): AddonsState {
 
 describe('effectiveAddons', () => {
   it('drops detailedLog (no UI entry, excluded from the at-least-one rule)', () => {
-    expect(effectiveAddons('deliver', value(['detailedLog', 'disclaimer']))).toEqual(['disclaimer'])
+    expect(effectiveAddons('accept', value(['detailedLog', 'disclaimer']))).toEqual(['disclaimer'])
   })
 
   it('drops conflict-disabled addons for quarantine', () => {
@@ -21,7 +21,7 @@ describe('effectiveAddons', () => {
   })
 
   it('returns addons in UI_ADDON_KEYS order, not insertion order', () => {
-    expect(effectiveAddons('deliver', value(['modifyHeader', 'disclaimer']))).toEqual(['disclaimer', 'modifyHeader'])
+    expect(effectiveAddons('accept', value(['modifyHeader', 'disclaimer']))).toEqual(['disclaimer', 'modifyHeader'])
   })
 
   it('marks discard as terminal', () => {

@@ -16,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { DisposalSettings } from '@/types/disposal-settings';
 
 interface Props {
@@ -47,9 +46,7 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
   const senderNotifyOnResult = watch('review.sender_notify_on_result');
   const activeStart = watch('review.reviewer_active_start');
   const activeEnd = watch('review.reviewer_active_end');
-  // schema 里 timeout_temp_disposal 保持 optional（GET 可能省略该字段），UI 空值按
-  // 'deliver' 展示，不在 defaultDisposalSettings() 里硬编码默认值。
-  const timeoutTempDisposal = watch('review.timeout_temp_disposal') || 'deliver';
+  const timeoutMarkEnabled = watch('review.timeout_mark_enabled');
   const timeoutMarkPositions = watch('review.timeout_mark_positions') ?? [];
 
   const { errors } = useFormState({ control });
@@ -214,58 +211,70 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
 
         <div className="space-y-3">
           <Label className="font-medium">{t('timeoutTempDisposal')}</Label>
-          <RadioGroup
-            value={timeoutTempDisposal}
-            onValueChange={(v) => setValue('review.timeout_temp_disposal', v, { shouldDirty: true })}
+          <div
+            className="rounded-md border bg-muted/30 px-3 py-2 text-sm"
+            data-testid="disposal-settings-timeout-disposal-accept"
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="deliver" data-testid="disposal-settings-timeout-disposal-deliver" />
-              <Label className="font-normal cursor-pointer">{t('timeoutDisposal_deliver')}</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="mark" data-testid="disposal-settings-timeout-disposal-mark" />
-              <Label className="font-normal cursor-pointer">{t('timeoutDisposal_mark')}</Label>
-            </div>
-          </RadioGroup>
+            {t('timeoutDisposal_accept')}
+          </div>
 
-          {timeoutTempDisposal === 'mark' && (
-            <div className="ml-6 space-y-4">
-              <div className="space-y-2" data-testid="disposal-settings-timeout-mark-positions">
-                <Label className="text-sm text-muted-foreground">{t('timeoutMarkPositions')}</Label>
-                <div className="flex gap-4">
-                  {MARK_POSITIONS.map((position) => (
-                    <label key={position} className="flex items-center gap-2">
-                      <Checkbox
-                        checked={timeoutMarkPositions.includes(position)}
-                        onCheckedChange={(c) => toggleMarkPosition(position, c === true)}
-                        data-testid={`disposal-settings-timeout-mark-positions-${position}`}
-                      />
-                      <span className="text-sm">
-                        {position === 'subject_prefix'
-                          ? t('markPosition_subject_prefix')
-                          : t('markPosition_header')}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <Controller
-                control={control}
-                name="review.timeout_mark_text"
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    <Label className="text-sm text-muted-foreground">{t('timeoutMarkText')}</Label>
-                    <Input
-                      value={field.value ?? ''}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      data-testid="disposal-settings-timeout-mark-text"
-                    />
-                  </div>
-                )}
+          <div className="ml-6 space-y-4">
+            <div className="flex items-center justify-between rounded-md border p-3">
+              <Label className="font-normal">{t('timeoutMarkEnabled')}</Label>
+              <Switch
+                checked={timeoutMarkEnabled}
+                onCheckedChange={(checked) =>
+                  setValue('review.timeout_mark_enabled', checked, { shouldDirty: true })
+                }
+                data-testid="disposal-settings-timeout-mark-enabled"
               />
             </div>
-          )}
+            {timeoutMarkEnabled ? (
+              <>
+                <div
+                  className="space-y-2"
+                  data-testid="disposal-settings-timeout-mark-positions"
+                >
+                  <Label className="text-sm text-muted-foreground">
+                    {t('timeoutMarkPositions')}
+                  </Label>
+                  <div className="flex gap-4">
+                    {MARK_POSITIONS.map((position) => (
+                      <label key={position} className="flex items-center gap-2">
+                        <Checkbox
+                          checked={timeoutMarkPositions.includes(position)}
+                          onCheckedChange={(c) => toggleMarkPosition(position, c === true)}
+                          data-testid={`disposal-settings-timeout-mark-positions-${position}`}
+                        />
+                        <span className="text-sm">
+                          {position === 'subject_prefix'
+                            ? t('markPosition_subject_prefix')
+                            : t('markPosition_header')}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <Controller
+                  control={control}
+                  name="review.timeout_mark_text"
+                  render={({ field }) => (
+                    <div className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">
+                        {t('timeoutMarkText')}
+                      </Label>
+                      <Input
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        data-testid="disposal-settings-timeout-mark-text"
+                      />
+                    </div>
+                  )}
+                />
+              </>
+            ) : null}
+          </div>
         </div>
       </Card>
 

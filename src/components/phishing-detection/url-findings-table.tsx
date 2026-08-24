@@ -51,11 +51,11 @@ function verdictBadgeClass(kind: VerdictKind): string {
   switch (kind) {
     case 'phishing':
     case 'malicious':
-      return 'gap-1 border-red-200 bg-red-50 text-red-600 hover:bg-red-50';
+      return 'gap-1 border-destructive/30 bg-destructive/10 text-destructive';
     case 'suspicious':
-      return 'gap-1 border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-50';
+      return 'gap-1 border-warning/30 bg-warning/10 text-warning-foreground dark:text-warning';
     case 'benign':
-      return 'gap-1 border-green-200 bg-green-50 text-green-700 hover:bg-green-50';
+      return 'gap-1 border-success/30 bg-success/10 text-success';
     default:
       return 'gap-1';
   }
@@ -65,13 +65,13 @@ function verdictDotClass(kind: VerdictKind): string {
   switch (kind) {
     case 'phishing':
     case 'malicious':
-      return 'bg-red-500';
+      return 'bg-destructive';
     case 'suspicious':
-      return 'bg-amber-500';
+      return 'bg-warning';
     case 'benign':
-      return 'bg-green-500';
+      return 'bg-success';
     default:
-      return 'bg-slate-400';
+      return 'bg-muted-foreground';
   }
 }
 
@@ -93,13 +93,13 @@ export function UrlFindingsTable({ findings, emptyText, embedded = false }: UrlF
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="h-auto w-[62%] bg-card px-3.5 py-2 text-xs font-medium text-muted-foreground">
+            <TableHead className="h-auto w-[62%] bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground">
               {t('table.urlColumn')}
             </TableHead>
-            <TableHead className="h-auto bg-card px-3.5 py-2 text-xs font-medium text-muted-foreground">
+            <TableHead className="h-auto bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground">
               {t('table.urlResult')}
             </TableHead>
-            <TableHead className="h-auto bg-card px-3.5 py-2 text-xs font-medium text-muted-foreground">
+            <TableHead className="h-auto bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground">
               {t('table.threatType')}
             </TableHead>
           </TableRow>
@@ -113,11 +113,11 @@ export function UrlFindingsTable({ findings, emptyText, embedded = false }: UrlF
             return (
               <TableRow key={`url-finding-${index}`} className="hover:bg-transparent">
                 <TableCell className="whitespace-normal px-3.5 py-2.5">
-                  <div className="break-all text-xs text-blue-700">
+                  <div className="break-all text-sm text-primary">
                     {url || t('table.unknownUrl')}
                   </div>
                   {finalUrl ? (
-                    <div className="mt-1 break-all text-[11px] text-muted-foreground">
+                    <div className="mt-1 break-all text-xs text-muted-foreground">
                       {t('table.finalUrlPrefix')}: {finalUrl}
                     </div>
                   ) : null}
@@ -132,7 +132,7 @@ export function UrlFindingsTable({ findings, emptyText, embedded = false }: UrlF
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell className="px-3.5 py-2.5 text-xs text-muted-foreground">
+                <TableCell className="px-3.5 py-2.5 text-sm text-muted-foreground">
                   {threatType === 'unknown' ? '—' : t(`urlThreatType.${threatType}`)}
                 </TableCell>
               </TableRow>

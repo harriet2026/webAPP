@@ -8,21 +8,17 @@ vi.mock('@/lib/api/system-status-summary', () => ({
     previous: { mail_volume: 1, threats: 1, block_rate: 0 },
     threat_trend: [],
     pending_disposal: 0,
+    pending_report: 0,
     generated_at: '2026-07-03T00:00:00Z',
   })),
 }));
 vi.mock('@/lib/api/ops-top', () => ({
   fetchOpsTop: vi.fn(async () => ({ dimension: 'sender', total: 0, trendLabels: [], rows: [] })),
 }));
-vi.mock('@/lib/api/inbound-audit', () => ({
-  getInboundAuditItems: vi.fn(async () => ({ items: [], page: 1, page_size: 1, total: 0 })),
-}));
-
 import { fetchSystemStatusSummary } from '@/lib/api/system-status-summary';
 import { fetchSystemStatusData, resolveRangeDates } from '../hooks';
 
 const apiRequest = vi.fn(async () => ({})) as never;
-const noAgents = { phishing: false, spoofing: false, 'threat-retro': false };
 
 interface WindowParams {
   startDate?: string;
@@ -48,7 +44,6 @@ async function run(range: 'today' | '24h' | '7d') {
     dates,
     apiRequest,
     isPlatform: false,
-    agentAccess: noAgents,
   });
   return dates;
 }

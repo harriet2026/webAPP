@@ -52,14 +52,6 @@ export interface DiscardActionParams {
   notifyAdmin: boolean;
 }
 
-export interface TagDeliverActionParams {
-  content: string;
-  position: string;
-  style: string;
-  headerName?: string;
-  headerValue?: string;
-}
-
 export interface RuleForm {
   name: string;
   priority: number;
@@ -71,7 +63,6 @@ export interface RuleForm {
   primaryAction: PrimaryAction;
   actionParams: {
     deliver?: DeliverActionParams;
-    tagDeliver?: TagDeliverActionParams;
     review?: ReviewActionParams;
     discard?: DiscardActionParams;
   };
@@ -81,11 +72,10 @@ export interface RuleForm {
 const ALL_SCOPES: Scope[] = ['incoming', 'outgoing', 'internal'];
 
 const PRIMARY_ACTIONS: PrimaryAction[] = [
-  'none',
-  'deliver',
-  'tagDeliver',
+  'accept',
+  'proceed',
   'quarantine',
-  'review',
+  'audit',
   'discard',
 ];
 
@@ -97,13 +87,14 @@ function isScope(v: unknown): v is Scope {
   return v === 'incoming' || v === 'outgoing' || v === 'internal';
 }
 
-// Backend: MapPrimaryActionToUnifiedAction (advanced_rules_helper.go). 'none'
-// has no entry — it maps to rule_class=tag and action='' server-side.
-const ACTION_TO_RULE_ACTION: Record<Exclude<PrimaryAction, 'none'>, string> = {
-  deliver: 'accept',
-  tagDeliver: 'accept',
+// Backend: MapPrimaryActionToUnifiedAction (advanced_rules_helper.go).
+// Public policy actions are persisted natively; proceed remains non-terminal
+// in the unified engine and can still carry optional addons.
+const ACTION_TO_RULE_ACTION: Record<PrimaryAction, string> = {
+  accept: 'accept',
+  proceed: 'proceed',
   quarantine: 'quarantine',
-  review: 'audit',
+  audit: 'audit',
   discard: 'discard',
 };
 
@@ -120,10 +111,9 @@ export function emptyRuleForm(defaultPriority = 50): RuleForm {
     validUntil: null,
     description: '',
     conditions: { any: [], all: [] },
-    primaryAction: 'none',
+    primaryAction: 'proceed',
     actionParams: {
       deliver: { skipSubsequentRules: false },
-      tagDeliver: { content: '', position: 'subject_prefix', style: 'plain_text', headerName: '', headerValue: '' },
       review: { reviewers: '', timeoutHours: 24 },
       discard: { logEnabled: true, silent: true, notifyAdmin: false },
     },
@@ -133,26 +123,9 @@ export function emptyRuleForm(defaultPriority = 50): RuleForm {
 
 // ─── form → request ───────────────────────────────────────────────────────
 
-// The emailTag addon that a tagDeliver primary_action forces into
-// metadata.addons (backend requires it — see ValidateAdvancedRulesMetadata's
-// "tagDeliver primary action requires emailTag addon"). Key names
-// (tag_content/tag_position/tag_style) match the pre-rewrite addons editor's
-// serializeAddons for the emailTag type; header_name/header_value reuse the
-// modifyHeader addon's key naming for the optional "tag as header" variant.
-function buildForcedEmailTagAddon(p: TagDeliverActionParams): { type: string; params: Record<string, unknown> } {
-  const params: Record<string, unknown> = {
-    tag_content: p.content,
-    tag_position: p.position,
-    tag_style: p.style,
-  };
-  if (p.headerName) params.header_name = p.headerName;
-  if (p.headerValue) params.header_value = p.headerValue;
-  return { type: 'emailTag', params };
-}
-
 function buildPrimaryActionParams(f: RuleForm): Record<string, unknown> {
   switch (f.primaryAction) {
-    case 'deliver': {
+    case 'accept': {
       const d = f.actionParams.deliver ?? emptyRuleForm().actionParams.deliver!;
       return { skip_subsequent: d.skipSubsequentRules };
     }
@@ -170,14 +143,6 @@ function buildPrimaryActionParams(f: RuleForm): Record<string, unknown> {
 function buildMetadata(f: RuleForm): Record<string, unknown> {
   const addonsList: Array<{ type: string; params: Record<string, unknown> }> = serializeAddons(f.addons);
 
-  if (f.primaryAction === 'tagDeliver') {
-    const tagParams = f.actionParams.tagDeliver ?? emptyRuleForm().actionParams.tagDeliver!;
-    const forced = buildForcedEmailTagAddon(tagParams);
-    const idx = addonsList.findIndex((a) => a.type === 'emailTag');
-    if (idx >= 0) addonsList[idx] = forced;
-    else addonsList.push(forced);
-  }
-
   const metadata: Record<string, unknown> = {
     feature: 'advanced_rules',
     scope: f.scope,
@@ -186,7 +151,7 @@ function buildMetadata(f: RuleForm): Record<string, unknown> {
     addons: addonsList,
   };
 
-  if (f.primaryAction === 'review') {
+  if (f.primaryAction === 'audit') {
     const rp = f.actionParams.review ?? emptyRuleForm().actionParams.review!;
     metadata.review_params = {
       reviewers: rp.reviewers.split(',').map((s) => s.trim()).filter(Boolean),
@@ -197,8 +162,7 @@ function buildMetadata(f: RuleForm): Record<string, unknown> {
   return metadata;
 }
 
-function ruleAction(primaryAction: PrimaryAction): string | undefined {
-  if (primaryAction === 'none') return undefined;
+function ruleAction(primaryAction: PrimaryAction): string {
   return ACTION_TO_RULE_ACTION[primaryAction];
 }
 
@@ -215,7 +179,7 @@ export function formToCreateRequest(f: RuleForm, fieldDefs: Record<string, Field
     name: f.name,
     description: f.description || undefined,
     page: 'advanced_rules',
-    rule_class: 'action', // backend requires 'action' as the create-time gate value; it rewrites to 'tag' server-side when primary_action === 'none'.
+    rule_class: 'action',
     stage,
     priority: f.priority,
     condition_tree: conditionTree as RuleNode,
@@ -280,11 +244,11 @@ export function ruleToForm(rule: Rule): RuleForm {
     if (scopes.length > 0) form.scope = scopes;
   }
 
-  const primaryAction: PrimaryAction = meta && isPrimaryAction(meta.primary_action) ? meta.primary_action : 'none';
+  const primaryAction: PrimaryAction = meta && isPrimaryAction(meta.primary_action) ? meta.primary_action : 'proceed';
   form.primaryAction = primaryAction;
 
   const pap = (meta?.primary_action_params ?? {}) as Record<string, unknown>;
-  if (primaryAction === 'deliver') {
+  if (primaryAction === 'accept') {
     form.actionParams.deliver = { skipSubsequentRules: !!pap.skip_subsequent };
   } else if (primaryAction === 'discard') {
     const defaults = emptyRuleForm().actionParams.discard!;
@@ -295,7 +259,7 @@ export function ruleToForm(rule: Rule): RuleForm {
     };
   }
 
-  if (primaryAction === 'review') {
+  if (primaryAction === 'audit') {
     const rp = (meta?.review_params ?? {}) as Record<string, unknown>;
     const defaults = emptyRuleForm().actionParams.review!;
     form.actionParams.review = {
@@ -304,21 +268,7 @@ export function ruleToForm(rule: Rule): RuleForm {
     };
   }
 
-  const addonsState = parseAddons(meta ?? {});
-  if (primaryAction === 'tagDeliver' && addonsState.emailTag) {
-    // Owned by actionParams.tagDeliver (the forced addon), not the generic
-    // addons bag — see buildMetadata's tagDeliver handling.
-    const params = addonsState.emailTag.params;
-    form.actionParams.tagDeliver = {
-      content: typeof params.tag_content === 'string' ? params.tag_content : '',
-      position: typeof params.tag_position === 'string' ? params.tag_position : 'subject_prefix',
-      style: typeof params.tag_style === 'string' ? params.tag_style : 'plain_text',
-      ...(typeof params.header_name === 'string' && params.header_name ? { headerName: params.header_name } : {}),
-      ...(typeof params.header_value === 'string' && params.header_value ? { headerValue: params.header_value } : {}),
-    };
-    delete addonsState.emailTag;
-  }
-  form.addons = addonsState;
+  form.addons = parseAddons(meta ?? {});
 
   const tree = parseConditionTree(rule.condition_tree);
   form.conditions = deserializeGroups(tree);

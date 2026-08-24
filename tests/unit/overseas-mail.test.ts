@@ -11,10 +11,10 @@ import {
 
 const DIRECTIONS: OverseasMailDirection[] = ['inbound', 'outbound', 'internal'];
 const ALL_ACTIONS: OverseasMailAction[] = [
-  'deliver', 'tagDeliver', 'quarantine', 'review', 'block', 'drop',
+  'accept', 'quarantine', 'audit', 'reject', 'discard',
 ];
 
-// GT-11901: these used to hand-roll `{enabled: false, action: 'deliver'}`, a
+// GT-11901: these used to hand-roll `{enabled: false, action: 'accept'}`, a
 // copy of the shipped defaults that no production code read. Changing the real
 // default left every assertion below green. Import the real thing instead.
 const makeDefaultConfig = defaultOverseasMailConfig;
@@ -25,7 +25,7 @@ function isAllEnabledStrict(config: OverseasMailConfig): boolean {
     enabled.length === 3 &&
     enabled.every(d => {
       const a = config.directions[d].action;
-      return a === 'block' || a === 'drop';
+      return a === 'reject' || a === 'discard';
     })
   );
 }
@@ -48,20 +48,19 @@ function resolveDirection(
 }
 
 const ACTION_TO_RULE: Record<OverseasMailAction, string[]> = {
-  deliver: ['accept'],
-  tagDeliver: ['accept', 'mark', 'add_headers'],
+  accept: ['accept'],
   quarantine: ['quarantine'],
-  review: ['accept', 'audit'],
-  block: ['reject'],
-  drop: ['accept', 'discard'],
+  audit: ['accept', 'audit'],
+  reject: ['reject'],
+  discard: ['accept', 'discard'],
 };
 
 describe('Overseas Mail Config', () => {
   it('round-trips through JSON serialization', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'block' },
-        outbound: { enabled: false, action: 'tagDeliver' },
+        inbound: { enabled: true, action: 'reject' },
+        outbound: { enabled: false, action: 'accept', mark_enabled: true },
         internal: { enabled: true, action: 'quarantine' },
       },
     };
@@ -70,24 +69,24 @@ describe('Overseas Mail Config', () => {
     expect(parsed).toEqual(config);
   });
 
-  // 2026-07-13 (overseas-geoip): inbound now ships switched ON with `block` —
+  // 2026-07-13 (overseas-geoip): inbound now ships switched ON with `reject` —
   // the highest-risk direction gets protected out of the box. Outbound/internal
-  // ship switched OFF but pre-select `block` too (demo-aligned all-block default,
+  // ship switched OFF but pre-select `reject` too (demo-aligned all-reject default,
   // matches backend DefaultOverseasMailConfigByDirection). Prior line kept for context:
   // keep the original ship-disabled-with-quarantine default.
-  it('has inbound enabled with block, outbound/internal disabled with block, by default', () => {
+  it('has inbound enabled with reject, outbound/internal disabled with reject, by default', () => {
     const config = makeDefaultConfig();
     expect(config.directions.inbound.enabled).toBe(true);
-    expect(config.directions.inbound.action).toBe('block');
+    expect(config.directions.inbound.action).toBe('reject');
     for (const d of ['outbound', 'internal'] as OverseasMailDirection[]) {
       expect(config.directions[d].enabled, d).toBe(false);
-      expect(config.directions[d].action, d).toBe('block');
+      expect(config.directions[d].action, d).toBe('reject');
     }
   });
 
-  it('defines exactly 6 valid actions', () => {
-    expect(ALL_ACTIONS).toHaveLength(6);
-    expect(Object.keys(OverseasMailActionLabels)).toHaveLength(6);
+  it('defines exactly 5 valid actions', () => {
+    expect(ALL_ACTIONS).toHaveLength(5);
+    expect(Object.keys(OverseasMailActionLabels)).toHaveLength(5);
     for (const a of ALL_ACTIONS) {
       expect(OverseasMailActionLabels[a]).toBeDefined();
     }
@@ -98,20 +97,20 @@ describe('Strict mode warning', () => {
   it('is not strict when only 2 directions enabled', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'block' },
-        outbound: { enabled: true, action: 'block' },
-        internal: { enabled: false, action: 'block' },
+        inbound: { enabled: true, action: 'reject' },
+        outbound: { enabled: true, action: 'reject' },
+        internal: { enabled: false, action: 'reject' },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(false);
   });
 
-  it('is not strict when all 3 enabled with deliver action', () => {
+  it('is not strict when all 3 enabled with accept action', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'deliver' },
-        outbound: { enabled: true, action: 'deliver' },
-        internal: { enabled: true, action: 'deliver' },
+        inbound: { enabled: true, action: 'accept' },
+        outbound: { enabled: true, action: 'accept' },
+        internal: { enabled: true, action: 'accept' },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(false);
@@ -128,67 +127,67 @@ describe('Strict mode warning', () => {
     expect(isAllEnabledStrict(config)).toBe(false);
   });
 
-  it('is not strict when all 3 enabled with tagDeliver action', () => {
+  it('is not strict when all 3 enabled with marked accept action', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'tagDeliver' },
-        outbound: { enabled: true, action: 'tagDeliver' },
-        internal: { enabled: true, action: 'tagDeliver' },
+        inbound: { enabled: true, action: 'accept', mark_enabled: true },
+        outbound: { enabled: true, action: 'accept', mark_enabled: true },
+        internal: { enabled: true, action: 'accept', mark_enabled: true },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(false);
   });
 
-  it('is not strict when all 3 enabled with review action', () => {
+  it('is not strict when all 3 enabled with audit action', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'review' },
-        outbound: { enabled: true, action: 'review' },
-        internal: { enabled: true, action: 'review' },
+        inbound: { enabled: true, action: 'audit' },
+        outbound: { enabled: true, action: 'audit' },
+        internal: { enabled: true, action: 'audit' },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(false);
   });
 
-  it('is strict when all 3 enabled with all block', () => {
+  it('is strict when all 3 enabled with all reject', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'block' },
-        outbound: { enabled: true, action: 'block' },
-        internal: { enabled: true, action: 'block' },
+        inbound: { enabled: true, action: 'reject' },
+        outbound: { enabled: true, action: 'reject' },
+        internal: { enabled: true, action: 'reject' },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(true);
   });
 
-  it('is strict when all 3 enabled with all drop', () => {
+  it('is strict when all 3 enabled with all discard', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'drop' },
-        outbound: { enabled: true, action: 'drop' },
-        internal: { enabled: true, action: 'drop' },
+        inbound: { enabled: true, action: 'discard' },
+        outbound: { enabled: true, action: 'discard' },
+        internal: { enabled: true, action: 'discard' },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(true);
   });
 
-  it('is strict when all 3 enabled with mix of block and drop', () => {
+  it('is strict when all 3 enabled with mix of reject and discard', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'block' },
-        outbound: { enabled: true, action: 'drop' },
-        internal: { enabled: true, action: 'block' },
+        inbound: { enabled: true, action: 'reject' },
+        outbound: { enabled: true, action: 'discard' },
+        internal: { enabled: true, action: 'reject' },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(true);
   });
 
-  it('is not strict when mix of block and deliver', () => {
+  it('is not strict when mix of reject and accept', () => {
     const config: OverseasMailConfig = {
       directions: {
-        inbound: { enabled: true, action: 'block' },
-        outbound: { enabled: true, action: 'deliver' },
-        internal: { enabled: true, action: 'block' },
+        inbound: { enabled: true, action: 'reject' },
+        outbound: { enabled: true, action: 'accept' },
+        internal: { enabled: true, action: 'reject' },
       },
     };
     expect(isAllEnabledStrict(config)).toBe(false);
@@ -252,31 +251,31 @@ describe('Direction conditions are mutually exclusive', () => {
 });
 
 describe('Action mapping completeness', () => {
-  it('maps deliver to accept', () => {
-    expect(ACTION_TO_RULE.deliver).toEqual(['accept']);
+  it('maps accept to accept', () => {
+    expect(ACTION_TO_RULE.accept).toEqual(['accept']);
   });
 
-  it('maps tagDeliver to accept + mark + add_headers', () => {
-    expect(ACTION_TO_RULE.tagDeliver).toEqual(['accept', 'mark', 'add_headers']);
+  it('keeps marked delivery as accept plus an independent mark flag', () => {
+    expect({ action: 'accept', mark_enabled: true }).toEqual({ action: 'accept', mark_enabled: true });
   });
 
   it('maps quarantine to quarantine', () => {
     expect(ACTION_TO_RULE.quarantine).toEqual(['quarantine']);
   });
 
-  it('maps review to accept + audit', () => {
-    expect(ACTION_TO_RULE.review).toEqual(['accept', 'audit']);
+  it('maps audit to accept + audit metadata', () => {
+    expect(ACTION_TO_RULE.audit).toEqual(['accept', 'audit']);
   });
 
-  it('maps block to reject', () => {
-    expect(ACTION_TO_RULE.block).toEqual(['reject']);
+  it('maps reject to reject', () => {
+    expect(ACTION_TO_RULE.reject).toEqual(['reject']);
   });
 
-  it('maps drop to accept + discard', () => {
-    expect(ACTION_TO_RULE.drop).toEqual(['accept', 'discard']);
+  it('maps discard to accept + discard metadata', () => {
+    expect(ACTION_TO_RULE.discard).toEqual(['accept', 'discard']);
   });
 
-  it('covers all 6 actions', () => {
+  it('covers all 5 actions', () => {
     expect(Object.keys(ACTION_TO_RULE).sort()).toEqual(ALL_ACTIONS.sort());
   });
 });

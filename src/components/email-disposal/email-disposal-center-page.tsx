@@ -1108,6 +1108,7 @@ export function EmailDisposalCenterPage({
         aiInterpretEnabled={aiInterpretEnabled}
         readOnly={detailReadOnly}
         showSecurityAnalysis={switcherEnabled}
+        isTenantAdmin={isTenantAdmin}
         onFindSimilar={async (id) => {
           void runFindSimilar([id]);
         }}

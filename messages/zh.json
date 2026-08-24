@@ -383,6 +383,8 @@
     "summaryCount": "{count} 个智能体运行状态",
     "descriptionPhishingOnly": "汇总钓鱼邮件检测智能体的授权状态、配置状态和当日处理指标。",
     "summaryHitRate": "检出率",
+    "loadingAccess": "正在检查智能体访问权限",
+    "accessDenied": "当前账号没有查看智能体管理的权限。",
     "loadFailed": "智能体总览加载失败",
     "detailLockedTitle": "当前智能体未开通",
     "detailLockedDescription": "该智能体在当前产品形态或租户授权下不可配置，请返回总览查看可用智能体。",
@@ -1192,6 +1194,7 @@
     "quarantine": "隔离",
     "sideline": "旁路",
     "accept": "接收",
+    "proceed": "进行下一步",
     "reject": "拒绝",
     "discard": "丢弃",
     "audit": "审核",
@@ -4308,7 +4311,7 @@
     "actionBlockAlert": "阻断+告警",
     "actionQuarantine": "隔离",
     "actionAudit": "审核",
-    "actionAccept": "标记",
+    "actionAccept": "投递（白名单）",
     "validFrom": "生效时间",
     "validUntil": "失效时间",
     "effectiveUntil": "有效期至",
@@ -4476,19 +4479,19 @@
     "legacyDisabledHint": "这是旧版本遗留的关闭状态。新版本的认证仿冒检查没有「关闭」入口，一旦把此项改为其他动作，将无法再恢复为未启用。",
     "notAuthorized": "无权访问此页面",
     "action": {
-      "accept": "允许",
+      "accept": "投递",
       "quarantine": "隔离",
       "reject": "阻断",
       "audit": "审核",
-      "markDelivery": "进行下一步",
+      "proceed": "进行下一步",
       "discard": "丢弃"
     },
     "actionTooltip": {
-      "accept": "允许：不对此规则触发的情况采取拦截动作，邮件继续进入下一阶段检测。",
+      "accept": "投递：终止后续规则匹配并投递邮件。",
       "quarantine": "隔离：将匹配的邮件放入隔离区，待管理员审核后再决定放行或删除。",
       "reject": "阻断：在 SMTP 阶段直接拒绝该邮件，发件方会收到退信通知。",
       "audit": "审核：将邮件放入审核队列，等待管理员人工审批后再投递。",
-      "markDelivery": "进行下一步：不拦截该邮件，继续走后续检测流程，可选择附加标记后再投递。",
+      "proceed": "进行下一步：不拦截该邮件，继续走后续检测流程，可选择附加标记后再投递。",
       "discard": "丢弃：静默丢弃该邮件，不通知发件方也不投递给收件方。"
     },
     "formatChecks": {
@@ -4623,16 +4626,16 @@
     "formatActionLabel": {
       "quarantine": "隔离",
       "audit": "审核",
-      "markDelivery": "进行下一步",
+      "proceed": "进行下一步",
       "reject": "拒收",
       "discard": "丢弃"
     },
     "protocolActionLabel": {
-      "accept": "进行下一步检测",
+      "accept": "投递",
       "quarantine": "隔离（进垃圾箱）",
       "reject": "阻断（返回5xx）",
       "audit": "审核（待审批）",
-      "markDelivery": "进行下一步（可标记）",
+      "proceed": "进行下一步（可标记）",
       "discard": "丢弃（静默删除）"
     },
     "flowSub": {
@@ -4681,24 +4684,24 @@
     "formatActionDesc": {
       "quarantine": "邮件进入隔离区，管理员可审阅后决定是否放行",
       "audit": "邮件放入审核队列，等待管理员人工审批后再投递",
-      "markDelivery": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
+      "proceed": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
       "reject": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
       "discard": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃"
     },
     "protocolActionShort": {
-      "accept": "进行下一步",
+      "accept": "投递",
       "reject": "拒收",
       "quarantine": "隔离",
       "audit": "审核",
-      "markDelivery": "进行下一步",
+      "proceed": "进行下一步",
       "discard": "丢弃"
     },
     "protocolActionDesc": {
-      "accept": "不做处理，传递给下一个协议检查",
+      "accept": "终止后续规则匹配并投递邮件",
       "reject": "向发信方返回 SMTP 5xx 拒绝响应",
       "quarantine": "移入隔离区，等待管理员审阅",
       "audit": "放入审核队列，等待管理员人工审批后再投递",
-      "markDelivery": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
+      "proceed": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
       "discard": "静默丢弃，发信方收到投递成功响应"
     },
     "tagPanel": {
@@ -4803,10 +4806,10 @@
       "reset": "重置为默认"
     },
     "action": {
-      "review": "审核",
+      "audit": "审核",
       "quarantine": "隔离",
-      "drop": "丢弃",
-      "block": "阻断"
+      "discard": "丢弃",
+      "reject": "阻断"
     },
     "form": {
       "section": {
@@ -5231,7 +5234,7 @@
       "audit": "审核",
       "reject": "拒收",
       "discard": "丢弃",
-      "accept": "继续流水线",
+      "proceed": "进行下一步",
       "partial_skip": "超出部分不检测"
     },
     "actionDesc": {
@@ -5239,7 +5242,7 @@
       "audit": "邮件进入待审核队列，人工确认后投递或退回",
       "reject": "在 SMTP 阶段拒绝接收，发件方收到退信通知（452/550）",
       "discard": "静默丢弃，发件方无感知，无退信",
-      "accept": "不对此结果采取拦截动作，继续进入下一阶段检测"
+      "proceed": "不对此结果采取终止式处置，继续后续规则匹配"
     },
     "tooltips": {
       "attachmentCount": "单封邮件允许进入检测的附件数量，-1 表示不限制",
@@ -5309,12 +5312,13 @@
       "detectGroup": "检测结果处置（当前方向）",
       "maliciousLabel": "发现恶意URL",
       "maliciousTip": "当沙箱分析判定URL为恶意时执行的动作",
-      "actionIsolate": "隔离（邮件存入隔离区）",
-      "actionIsolateTip": "邮件存入隔离区，管理员可审核后释放或删除",
-      "actionBlock": "阻断（拒绝接收该邮件）",
-      "actionBlockTip": "拒绝接收该邮件，发件人收到退信通知",
-      "actionMark": "标记（投递但添加风险标签）",
-      "actionMarkTip": "邮件正常投递，但添加风险标签提醒用户",
+      "actionQuarantine": "隔离（邮件存入隔离区）",
+      "actionQuarantineTip": "邮件存入隔离区，管理员可审核后释放或删除",
+      "actionReject": "退信（拒绝接收该邮件）",
+      "actionRejectTip": "拒绝接收该邮件，发件人收到退信通知",
+      "actionAccept": "投递（白名单）",
+      "actionAcceptTip": "将邮件作为决定性白名单命中正常投递",
+      "markEnabled": "投递时添加风险标记",
       "actionDiscard": "丢弃（静默删除）",
       "actionDiscardTip": "静默删除邮件，不通知发件人",
       "anomalyGroup": "扫描异常处置",
@@ -5440,17 +5444,17 @@
     "statusEnabled": "已启用",
     "statusDisabled": "已禁用",
     "actionLabel": "处置动作",
-    "sendMarkUnsupported": "外发方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
-    "internalMarkUnsupported": "域内方向不支持\"标记投递\"动作，相关配置将自动降级为\"隔离\"",
-    "directionMarkUnsupported": "外发/域内方向不支持\"标记投递\"，相关动作将自动降级为\"隔离\"",
-    "highRiskWarning": "高危意图采用标记投递，邮件将投递至用户邮箱，请确认风险",
+    "sendMarkUnsupported": "外发方向不支持\"进行下一步\"动作，相关配置将自动降级为\"隔离\"",
+    "internalMarkUnsupported": "域内方向不支持\"进行下一步\"动作，相关配置将自动降级为\"隔离\"",
+    "directionMarkUnsupported": "外发/域内方向不支持\"进行下一步\"，相关动作将自动降级为\"隔离\"",
+    "highRiskWarning": "高危意图采用\"进行下一步\"时不会终止流水线，请确认附加标记与后续规则能够覆盖风险",
     "panel": {
       "high": "高危意图",
       "medium": "中危意图",
       "low": "低危意图",
       "highHint": "建议阻断或隔离",
       "mediumHint": "建议审核",
-      "lowHint": "建议标记后投递",
+      "lowHint": "建议标记后进行下一步",
       "highDesc": "包含 {n} 个分类，默认处置较为严格，请谨慎调整",
       "mediumDesc": "包含 {n} 个分类，建议使用标准处置策略",
       "lowDesc": "包含 {n} 个分类，可根据业务需要灵活调整",
@@ -5476,20 +5480,18 @@
       "low": "低危"
     },
     "action": {
-      "mark_deliver": "标记投递",
+      "accept": "投递",
+      "proceed": "进行下一步",
       "quarantine": "隔离",
       "audit": "审核",
-      "reject": "阻断",
       "discard": "丢弃"
     },
     "markConfig": {
-      "title": "标记投递配置",
-      "deliveryTarget": "投递目标",
-      "targetInbox": "收件箱（仅标记）",
-      "targetSpamFolder": "垃圾邮件文件夹",
+      "title": "进行下一步的附加标记",
       "subjectMark": "主题标记",
-      "bodyMark": "正文标记",
-      "markTextPlaceholder": "标记文案",
+      "headerMark": "信头标记",
+      "headerName": "信头名称",
+      "headerValue": "信头值",
       "prefix": "前缀",
       "suffix": "后缀"
     },
@@ -5526,7 +5528,7 @@
     "copyDialog": {
       "title": "复制配置到其他方向",
       "description": "选择目标方向，将当前【{src}】方向的配置复制过去。",
-      "downgradeNotice": "提示：外发/域内方向不支持\"标记投递\"，将自动降级为\"隔离\"",
+      "downgradeNotice": "提示：外发/域内方向不支持\"进行下一步\"，将自动降级为\"隔离\"",
       "confirm": "确认复制",
       "noTarget": "请至少选择一个目标方向"
     },
@@ -5578,8 +5580,8 @@
     "triggerCount": "触发数量",
     "emails": "封",
     "triggerAction": "触发动作",
-    "actionMarkDelivery": "进行下一步",
-    "actionReview": "审核",
+    "actionAccept": "投递（白名单）",
+    "actionAudit": "审核",
     "actionBlock": "拒收",
     "actionDiscard": "丢弃",
     "tagModeTitle": "标记方式",
@@ -5783,7 +5785,7 @@
     "investigationSubtitle": "查看和分析邮件安全事件，进行威胁调查和处置",
     "recipientStatusBar": {
       "delivered": "投递",
-      "sideline": "旁路",
+      "sideline": "待判定",
       "quarantine": "隔离",
       "rejected": "拒收",
       "discarded": "丢弃",
@@ -5875,7 +5877,7 @@
         "recall": "召回",
         "accept": "投递",
         "reject": "拒收",
-        "sideline": "灰名单",
+        "sideline": "待判定",
         "audit": "审核",
         "discard": "丢弃",
         "mixed": "混合"
@@ -6057,6 +6059,7 @@
       "direction": "收发类型",
       "senderIp": "发信 IP",
       "sender": "发信人",
+      "senderRecipient": "发件人 → 收件人",
       "recipient": "收信人",
       "subject": "主题",
       "mailType": "邮件类型",
@@ -6086,6 +6089,8 @@
       "total": "共 {n} 条",
       "settings": "设置",
       "columnSettings": "列设置",
+      "densitySettings": "显示密度",
+      "compactDensity": "紧凑模式",
       "headerFilters": "表头筛选",
       "clearFilter": "清除筛选"
     },
@@ -6152,6 +6157,12 @@
       "downloadEml": "下载 EML",
       "aiInterpret": "AI 解读",
       "breadcrumb": "邮件处置中心 / 详情",
+      "nav": {
+        "currentlyViewing": "当前查看",
+        "finalVerdict": "最终判定",
+        "collapseSidebar": "收起导航栏",
+        "expandSidebar": "展开导航栏"
+      },
       "fullscreen": "全屏",
       "exitFullscreen": "退出全屏",
       "findSimilar": "查找相似邮件",
@@ -6262,7 +6273,13 @@
             "delivering": "投递中",
             "delivery_failed": "投递失败",
             "deferred": "暂缓投递",
-            "bounced": "已退信"
+            "bounced": "已退信",
+            "quarantine_pending": "隔离中",
+            "audit_pending": "待审核",
+            "recall_failed": "召回失败",
+            "recall_success": "召回成功",
+            "recalled": "已召回",
+            "partial_recall_success": "部分召回成功"
           },
           "notOperable": "不可操作",
           "noContent": "(无原文)",
@@ -6336,7 +6353,7 @@
         "entityDetection": {
           "linksTab": "链接 ({n})",
           "attachmentsTab": "附件 ({n})",
-          "globalHint": "实体加黑会创建本租户、同邮件方向的内容规则，并影响后续命中的邮件。",
+          "globalHint": "实体加黑会创建本租户规则并影响后续命中的邮件。域名会加入“发信人黑名单”，URL 与附件哈希规则在“内容规则”中管理。",
           "noLinks": "未检测到链接",
           "noAttachments": "未检测到附件",
           "blacklistDomain": "域名加黑",
@@ -6350,7 +6367,11 @@
             "url": "确认将此 URL 加入黑名单？",
             "attachment_hash": "确认将此附件哈希加入黑名单？"
           },
-          "confirmImpact": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。",
+          "confirmImpact": {
+            "domain": "确认后将创建一条发信人域名黑名单拒绝规则；后续以该域名作为发信人域名的邮件会被拒绝，可在“发信人黑白名单”中管理。",
+            "url": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。",
+            "attachment_hash": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。"
+          },
           "confirm": "确认加黑",
           "confirming": "正在创建…",
           "vtScore": "VirusTotal检测：{score}",
@@ -6425,10 +6446,14 @@
         },
         "contentDetails": "内容详情",
         "detectionPipeline": "检测流程",
+        "recipientSwitcher": {
+          "allRecipients": "全部收件人（{count}）"
+        },
         "recipientGroupsBadge": "{n} 组",
         "recipientScopeLine": "{recipients}（{count} 人）",
         "recipientGroupLine": "{recipients}（{count} 人）",
         "multiBasisSummaryLabel": "{recipients} 位收件人 · {groups} 类处置依据",
+        "moreBasisGroups": "及其他 {n} 项",
         "analysisLoading": "正在加载检测结果…",
         "analysisLoadFailed": "检测结果加载失败",
         "retry": "重试",
@@ -6497,7 +6522,7 @@
       "features": {
         "basicInfo": "邮件基本信息",
         "tid": "TID",
-        "emailId": "邮件 ID",
+        "emailId": "邮件ID",
         "messageUuid": "邮件唯一ID",
         "sessionId": "会话ID",
         "queueId": "队列ID",
@@ -6597,7 +6622,18 @@
         "loadFailedBadge": "加载失败",
         "foundCount": "找到 {matched} / {total} 条记录",
         "truncated": "已截断至 10,000 行",
-        "partial": "部分网关节点未能查询，当前生命周期日志不完整。失败节点：{nodes}",
+        "partial": "部分节点或日志模块查询超时/失败，已返回的日志仍可查看。",
+        "elapsed": "{seconds} 秒",
+        "moduleCompleted": "已完成 · {count} 条",
+        "retryNode": "重试未完成模块",
+        "retryModule": "重试 {module}",
+        "status": {
+          "querying": "查询中",
+          "completed": "已完成",
+          "partial": "部分完成",
+          "timedOut": "已超时",
+          "failed": "失败"
+        },
         "searchPlaceholder": "搜索日志内容...",
         "copyAll": "复制全部",
         "downloadLog": "下载",
@@ -6687,18 +6723,16 @@
       "testAnalysis": "测试与分析"
     },
     "primaryActions": {
-      "deliver": "投递",
-      "deliverDesc": "正常投递邮件",
-      "tagDeliver": "标记投递",
-      "tagDeliverDesc": "投递邮件并添加标记",
+      "accept": "投递（白名单）",
+      "acceptDesc": "立即放行投递并停止后续规则匹配",
+      "proceed": "进行下一步",
+      "proceedDesc": "执行附加策略后继续匹配后续规则",
       "quarantine": "隔离",
       "quarantineDesc": "将邮件放入隔离区",
-      "review": "审核",
-      "reviewDesc": "将邮件提交管理员审核",
+      "audit": "审核",
+      "auditDesc": "将邮件提交管理员审核",
       "discard": "丢弃",
-      "discardDesc": "静默丢弃邮件",
-      "none": "无动作",
-      "noneDesc": "仅打标记的规则；不执行主动作"
+      "discardDesc": "静默丢弃邮件"
     },
     "addons": {
       "detailedLog": "详细日志",
@@ -6907,8 +6941,6 @@
       "name": "请填写规则名称",
       "scope": "请至少选择一个范围",
       "priority": "优先级需在 1–100 之间",
-      "actionOrAddon": "请选择一个主动作或至少启用一个附加项",
-      "tagDeliverEmailTag": "「标记后投递」需要启用「邮件标记」附加项",
       "incompleteCondition": "有一个或多个条件尚未配置完整"
     },
     "outgoingGatedByAction": "当前主动作不支持发件范围",
@@ -7496,7 +7528,6 @@
     },
     "disposition": {
       "primaryActionLabel": "执行动作",
-      "noneHint": "未设置执行动作，邮件将仅执行下方已启用的附加策略。",
       "configureActionButton": "配置「{action}」参数",
       "addonsHeading": "附加策略",
       "descCardTitle": "条件说明",
@@ -7507,7 +7538,6 @@
       "addonDisabledHint": "未勾选：表单已禁用；勾选后将自动展开并聚焦首个输入项",
       "quarantineHint": "邮件隔离无需配置参数；被隔离邮件可在邮件隔离模块查看。",
       "tagStyleLabel": "标记样式",
-      "tagDeliverStyleDisabledHint": "标记位置为信头时样式不生效",
       "previewTitle": "逻辑表达式预览",
       "orGroupTag": "OR 策略组",
       "fullExpressionTitle": "完整表达式",
@@ -7521,27 +7551,22 @@
       "summaryMergeWindow": "{recipientType}，合并{minutes}分钟",
       "summaryScope": "范围：{scope}",
       "actionDesc": {
-        "none": {
-          "source": "无",
-          "usage": "不对邮件执行任何主动作",
-          "note": "未设置执行动作，邮件将仅执行下方已启用的附加策略。"
-        },
-        "deliver": {
+        "accept": {
           "source": "投递引擎",
-          "usage": "正常投递到收件箱",
-          "note": "可选择跳过后续规则"
+          "usage": "作为白名单立即放行投递",
+          "note": "命中后停止后续规则匹配"
         },
-        "tagDeliver": {
+        "proceed": {
           "source": "投递引擎",
-          "usage": "投递并添加可疑标记",
-          "note": "标记位置为信头时样式不生效"
+          "usage": "执行可选附加策略并继续下一步匹配",
+          "note": "不是白名单；后续规则仍可处置邮件"
         },
         "quarantine": {
           "source": "隔离区",
           "usage": "移至隔离区待审",
           "note": "被隔离邮件可在邮件隔离模块查看"
         },
-        "review": {
+        "audit": {
           "source": "人工审核队列",
           "usage": "进入人工审核队列",
           "note": "超时未审按默认策略处理"
@@ -7654,8 +7679,8 @@
     "statusEnabled": "已启用",
     "statusDisabled": "已禁用",
     "timeoutTempDisposal": "超时临时处置",
-    "timeoutDisposal_deliver": "直接投递",
-    "timeoutDisposal_mark": "添加标记后投递",
+    "timeoutDisposal_accept": "投递",
+    "timeoutMarkEnabled": "投递时添加标记",
     "timeoutMarkPositions": "标记位置",
     "markPosition_subject_prefix": "主题前缀",
     "markPosition_header": "邮件头",
@@ -8387,7 +8412,10 @@
     "processes": {
       "running": "运行中",
       "stopped": "已停止",
-      "restarts": "重启次数",
+      "restarts": "重启中",
+      "detail": "详情",
+      "procCount": "进程数：{count}",
+      "overlay2Thresholds": ">85% 告警 · >95% 严重",
       "overlay2": "Overlay2 空间使用率",
       "coreProcs": "核心进程监控",
       "pid": "PID",
@@ -8556,16 +8584,37 @@
       "config": "检测引擎配置",
       "configPlaceholder": "检测引擎配置 — 配置模块上线后提供"
     },
+    "control": {
+      "ariaLabel": "钓鱼检测智能体总开关",
+      "readOnly": "当前账号只有查看权限",
+      "enableTitle": "开启钓鱼检测智能体？",
+      "enableDescription": "开启后，命中已启用准入规则的邮件将进入钓鱼检测。",
+      "disableTitle": "关闭钓鱼检测智能体？",
+      "disableDescription": "关闭后不再提交新的检测任务，已有任务继续完成。",
+      "updateSuccess": "智能体状态已更新",
+      "updateError": "智能体状态更新失败",
+      "gateTitle": "请先配置准入规则",
+      "gateDescription": "至少需要一条已启用的准入规则，才能开启钓鱼检测智能体。",
+      "goToConfig": "前往配置",
+      "disabledBanner": "钓鱼检测智能体当前已关闭。检测日志仍可查看，但不会提交新的检测任务。"
+    },
     "kpi": {
       "todayDetected": "今日检测",
       "todayQuarantined": "今日隔离",
       "pendingReview": "待审核",
       "todayRecalled": "今日召回",
       "recallSuccess": "召回成功",
+      "recallSucceeded": "召回成功",
+      "recallFailed": "召回失败",
       "accuracy": "准确率"
     },
     "filters": {
       "keywordPlaceholder": "搜索发件人、主题...",
+      "selectedCount": "已选 {count} 项",
+      "start": "开始时间",
+      "end": "结束时间",
+      "mailStatus": "邮件状态",
+      "invalidRange": "结束时间不能早于开始时间",
       "disposition": "处置结果",
       "detectionMode": "运行模式",
       "recallStatus": "召回状态",
@@ -8588,6 +8637,10 @@
       "manual_hold": "人工暂扣",
       "unknown": "未知"
     },
+    "policyDisposition": { "proceed": "进行下一步", "audit": "审核", "quarantine": "隔离", "discard": "丢弃", "undecided": "未判定" },
+    "taskStatus": { "submitting": "提交中", "pending": "等待中", "processing": "检测中", "running": "运行中", "completed": "已完成", "failed": "失败", "expired": "已过期", "needs_approval": "待批准", "cancelled": "已取消", "partial": "部分完成", "unknown": "未知" },
+    "directionValue": { "inbound": "入站", "outbound": "外发", "internal": "域内", "unknown": "未知" },
+    "evidenceSeverity": { "low": "低", "medium": "中", "high": "高", "critical": "严重", "unknown": "未知" },
     "detectionMode": {
       "realtime": "实时检测",
       "observe": "观察模式"
@@ -8601,6 +8654,7 @@
       "expanded": "已展开"
     },
     "riskLevel": {
+      "suspicious": "可疑",
       "critical": "极危",
       "high": "高危",
       "medium": "中危",
@@ -8612,6 +8666,9 @@
       "time": "时间",
       "sender": "发件人",
       "subject": "主题",
+      "mailStatus": "邮件状态",
+      "policyDisposition": "处置策略",
+      "invalidRange": "结束时间不能早于开始时间",
       "urlRisk": "URL检测",
       "urlPhishing": "钓鱼",
       "urlSuspicious": "可疑",
@@ -8629,7 +8686,7 @@
       "roundUnit": "轮",
       "confidence": "置信度",
       "detectionMode": "运行模式",
-      "disposition": "最终处置",
+      "disposition": "执行动作",
       "riskLevel": "风险",
       "recallStatus": "召回/通知",
       "evidenceBasis": "判定依据",
@@ -8647,6 +8704,8 @@
       "block": "拦截",
       "exempt": "误报豁免",
       "liveStateHint": "邮件仍在旁路处理中，请在旁路队列处置",
+      "noDisposalTarget": "当前记录没有可操作的邮件对象。",
+      "failureReason": "失败原因",
       "mailContext": "邮件上下文",
       "sender": "发件人",
       "recipients": "收件人",
@@ -8665,6 +8724,7 @@
       "runLog": "运行日志",
       "searchSteps": "搜索步骤...",
       "exportJson": "导出 JSON",
+      "exportFilename": "钓鱼检测-{id}.json",
       "noSteps": "暂无步骤记录",
       "noVerdictContent": "智能体已完成检测，详细研判内容暂未生成",
       "resultTruncatedHint": "调查明细可能因体量被截断，部分内容不完整"
@@ -8722,14 +8782,24 @@
   "phishingConfig": {
     "pageTitle": "检测引擎配置",
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
+    "readOnlyNotice": "当前账号只有查看权限，配置控件不可操作。",
     "admission": {
-      "title": "准入规则",
-      "description": "决定哪些邮件进入钓鱼邮件检测智能体。命中后使用当前部署级运行限制。",
+      "title": "检测范围与准入规则",
+      "description": "以规则列表方式管理准入条件，可创建多条规则。命中任一启用规则的邮件将进入本智能体检测。",
       "loading": "加载中...",
-      "empty": "暂无准入规则，点击「新建」添加。",
-      "create": "新建",
+      "empty": "暂无准入规则，点击「新增规则」添加。",
+      "loadFailed": "准入规则加载失败",
+      "searchPlaceholder": "搜索名称、方向或风险信号",
+      "noSearchResults": "没有符合条件的准入规则",
+      "create": "新增规则",
       "edit": "编辑",
       "delete": "删除",
+      "deleteTitle": "删除准入规则？",
+      "copy": "复制",
+      "copySuffix": " - 副本",
+      "copied": "已复制为停用规则",
+      "copyFailed": "复制失败",
+      "toggleRule": "切换规则 {name} 的启用状态",
       "toggled": "已切换启用状态",
       "toggleFailed": "切换失败",
       "deleted": "规则已删除",
@@ -8754,6 +8824,20 @@
       "removeTag": "移除",
       "tagSectionLabel": "收件人标签",
       "emailSectionLabel": "收件人邮箱（精确匹配）",
+      "groupSectionLabel": "群组",
+      "deptSectionLabel": "组织部门",
+      "selectGroups": "选择群组",
+      "searchGroups": "搜索群组",
+      "noGroupsHint": "暂无匹配方向的群组，请先到「群组管理」创建",
+      "noMatch": "无匹配结果",
+      "selectedCount": "已选 {count} 项",
+      "clearAll": "清空",
+      "searchDepartments": "搜索部门",
+      "searchPeople": "按姓名或邮箱搜索人员；也可输入完整邮箱后回车",
+      "noDepartmentsHint": "组织通讯录暂未同步部门",
+      "recipientScope": "收件人筛选",
+      "senderScope": "发件人筛选",
+      "mixedScope": "收发信人筛选",
       "emailPlaceholder": "输入邮箱后回车，例如 cfo@corp.com",
       "addEmail": "添加",
       "removeEmail": "移除",
@@ -8766,10 +8850,13 @@
       "basicScreen": "基础筛查条件",
       "requireUrl": "邮件包含 URL",
       "maxSize": "邮件大小 ≤",
+      "maxSizeHint": "0 表示不限制邮件大小",
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
+      "executable": "可执行文件",
+      "executableDesc": "检测邮件中可能执行代码或触发程序行为的文件。",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
       "validationFailed": "请检查必填字段。",
       "created": "准入规则已创建",
@@ -8779,11 +8866,12 @@
       "save": "保存",
       "cancel": "取消",
       "errors": {
+        "needName": "请输入规则名称",
         "needDirection": "请至少选择一个邮件流方向",
-        "qrNoOutbound": "二维码风险信号暂不支持外发方向",
         "needRiskSignal": "请至少启用一个风险信号",
         "needRecipientTarget": "开启收件人筛选时至少填写一个标签或邮箱",
-        "maxSizeTooLarge": "邮件大小上限不能超过 100000 MB"
+        "maxSizeTooLarge": "邮件大小上限必须在 0–100000 MB 之间",
+        "invalidEmail": "请输入有效的邮箱地址"
       },
       "direction": {
         "inbound": "入站",
@@ -8792,8 +8880,8 @@
       }
     },
     "runtime": {
-      "title": "运行模式与超时",
-      "description": "实时/观察模式、超时时间线与超时临时处置（对所有旁路检测生效）。",
+      "title": "智能体调查与处置",
+      "description": "运行模式决定是否执行处置，风险等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
@@ -8806,21 +8894,48 @@
       "cancel": "取消",
       "sheetTitle": "编辑运行模式与超时",
       "sheetDescription": "保存后立即生效；取消丢弃所有改动。",
+      "summary": "超时自动投递：{autoDeliver} · 分级策略：{count} 个区间",
+      "conflictTitle": "配置已被其他管理员修改",
+      "conflictDescription": "你的草稿已保留。请查看并重载最新配置后再次提交。",
+      "reloadLatest": "重载最新配置",
       "runMode": "运行模式",
-      "runModeSectionTitle": "运行模式",
+      "runModeFootnote": "两种模式互斥，同一时间仅生效一种",
       "runModeValue": {
         "realtime": "实时检测",
         "observe": "观察模式"
       },
       "runModeHint": {
-        "realtime": "按分级表执行处置（隔离/标记/放行）。",
-        "observe": "不执行分级处置，仅记录观察结果。"
+        "realtime": "按四档风险策略执行审核、隔离、丢弃或继续处理。",
+        "observe": "保留完整检测结论，但不执行风险策略处置。"
       },
+      "observeModeBanner": "观察模式不执行四档风险处置；已保存的隐藏策略值会保持不变。",
+      "timeoutPolicy": "超时时间线",
+      "timeoutMinutes": "实时等待（分钟）",
+      "maxRecheckMinutes": "后台续测（分钟）",
+      "timeoutAsync": "超时后后台续测",
+      "timeoutAsyncHint": "实时等待超时后先投递，并在后台继续检测与按需召回。",
+      "observeMark": "观察结果追加标记",
+      "observeMarkHint": "关闭时正常投递；开启时按观察动作追加标记。",
+      "confidencePolicy": "置信度分级处置",
+      "confidenceHint": "四档连续覆盖 0–100；只需调整三个共享分界点。",
+      "cutoff": { "low": "低风险起点", "medium": "中风险起点", "high": "高风险起点" },
+      "invalidCutoffs": "三个分界点必须严格递增，并位于 0–100 之间。",
+      "invalidTimeoutWindow": "实时等待须为 1–300 分钟，后台续测须为 1–60 分钟。",
+      "range": "置信度区间",
+      "risk": "风险等级",
+      "dispositionLabel": "处置策略",
+      "markSetting": "附加标记",
+      "riskLevel": { "suspicious": "可疑", "low": "低风险", "medium": "中风险", "high": "高风险" },
+      "disposition": { "proceed": "进行下一步", "audit": "审核", "quarantine": "隔离", "discard": "丢弃" },
+      "markText": "标记文本",
+      "markTextRequired": "启用附加标记时，标记文本不能为空。",
+      "markTextTooLong": "标记文本不能超过 20 个字符。",
+      "markTextLimit": "最多 20 个字符。",
       "observeAction": "观察动作",
       "observeActionValue": {
-        "deliver": "投递",
-        "mark": "标记"
+        "accept": "投递（白名单）"
       },
+      "observeMarkEnabled": "投递时添加风险标记",
       "timeoutSectionTitle": "超时时间线",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
@@ -8838,11 +8953,9 @@
       "timeoutTempDisposal": "超时临时处置",
       "timeoutTempSectionTitle": "超时临时处置",
       "timeoutTempValue": {
-        "deliver": "投递",
-        "mark": "标记",
-        "by_result": "按结果处置"
+        "accept": "投递"
       },
-      "timeoutTempByResultSoon": "按结果处置（即将支持）",
+      "timeoutMarkEnabled": "投递时添加标记",
       "timeoutMarkText": "标记前缀",
       "timeoutMarkTextHint": "最长 20 字符。",
       "markPosition": {
@@ -8850,6 +8963,18 @@
         "header": "邮件头"
       },
       "minutes": "分钟"
+    },
+    "analysis": {
+      "title": "分析参数",
+      "planned": "后期规划",
+      "description": "网盘识别能力尚未接入执行链；当前仅维护服务端占位配置，不能视为能力已启用。",
+      "loading": "加载中...",
+      "loadFailed": "分析参数加载失败",
+      "saved": "分析参数已保存",
+      "saveFailed": "分析参数保存失败",
+      "netdisk_domain": { "title": "网盘域名识别", "description": "识别邮件中的网盘域名线索。" },
+      "netdisk_extract": { "title": "网盘内容提取", "description": "允许提取可访问的网盘内容用于分析。" },
+      "netdisk_spoof": { "title": "网盘仿冒识别", "description": "识别疑似仿冒网盘页面的线索。" }
     },
     "bands": {
       "title": "置信度分级处置",
@@ -8872,6 +8997,7 @@
       "cancel": "取消",
       "apply": "应用",
       "markPositionLabel": "标记位置",
+      "markEnabled": "添加风险标记",
       "markPosition": {
         "subject_prefix": "主题前缀",
         "header": "邮件头",
@@ -8883,8 +9009,7 @@
       "prefixTruncated": "主题前缀超过 {max} 字，已自动截断。",
       "prefixTruncatedHint": "主题前缀最长 {max} 字。",
       "disposition": {
-        "accept": "放行",
-        "mark": "标记",
+        "accept": "投递（白名单）",
         "quarantine": "隔离",
         "audit": "审核"
       },
@@ -8940,7 +9065,7 @@
       }
     },
     "disposition": {
-      "mark": "标记投递",
+      "accept": "投递（白名单）",
       "quarantine": "隔离",
       "reject": "阻断",
       "discard": "丢弃",
@@ -10724,6 +10849,7 @@
     }
   },
   "apiErrors": {
+    "demo_unavailable": "演示模式暂不提供钓鱼智能体配置与控制功能",
     "redeliver": {
       "in_progress": "该邮件已有重投请求正在处理，请稍后再试",
       "original_expired": "原文未保留或已超保留期，无法重新投递",
@@ -11149,6 +11275,7 @@
       "rule_platform_admin_only": "仅平台管理员可修改平台规则",
       "ip_or_cidr_format_invalid": "请输入正确的 IP 地址或 CIDR 格式（如 192.168.1.0/24）",
       "rule_already_exists": "该 IP/CIDR 规则已存在",
+      "whitelist_would_lock_out_self": "该白名单不包含你当前的 IP 地址，保存后你将无法登录",
       "delete_would_lock_out_self": "删除后白名单将不再包含你当前的 IP 地址，你将无法登录",
       "rule_not_found": "规则不存在"
     },
@@ -11182,7 +11309,10 @@
     "phishing_admission": {
       "profile_id_invalid_for_tenant": "所选检测档案不存在或不属于当前租户",
       "rule_not_found": "准入规则不存在",
-      "rule_name_exists": "准入规则名称已存在，请使用其他名称"
+      "rule_name_exists": "准入规则名称已存在，请使用其他名称",
+      "revision_conflict": "准入规则已被其他人修改，请刷新后重试",
+      "integrity_error": "准入规则（ID {rule_id}）数据完整性校验失败，请联系管理员（规则标识：{rule_uid}）",
+      "group_invalid": "准入规则引用的群组无效（群组标识：{group_uid}）"
     },
     "mail_auth_config": {
       "overlaps_existing_active": "与已启用的邮件认证配置在相同域范围和场景下重叠",
@@ -11446,6 +11576,9 @@
       "bulk_add_limit_exceeded": "批量添加单次最多 20 人",
       "duplicate_email_in_group": "组内存在重复邮箱 {email}"
     },
+    "phishing_routes": {
+      "phishing_detection_capability_required": "需要钓鱼邮件检测能力"
+    },
     "spoofing_routes": {
       "spoofing_detection_capability_required": "需要开通仿冒检测能力"
     },
@@ -11510,7 +11643,9 @@
       "tenant_id_not_integer": "租户 ID 必须是整数",
       "tenant_id_required": "请先选择租户，再管理其设置",
       "tenant_id_invalid": "租户 ID 无效",
-      "tenant_access_denied": "无权访问该租户"
+      "tenant_access_denied": "无权访问该租户",
+      "agent_management_view_required": "需要智能体管理查看权限",
+      "agent_management_edit_required": "需要智能体管理权限才能执行该操作"
     },
     "login": {
       "rate_limited": "请求过于频繁，请稍后再试",
@@ -11532,6 +11667,13 @@
       "code_invalid_or_expired": "验证码错误或已过期",
       "ticket_invalid_or_expired": "凭证无效或已过期",
       "rate_limited": "请求过于频繁，请稍后再试"
+    },
+    "phishing_agent": {
+      "config_not_initialized": "钓鱼检测配置尚未初始化，请联系管理员",
+      "config_version_conflict": "配置已被其他人修改（冲突域：{conflict_domains}），请刷新后重试",
+      "control_revision_conflict": "开关状态已被其他人修改，请刷新后重试",
+      "admission_required": "启用钓鱼检测前，至少需要一条启用中的准入规则",
+      "rule_required_while_enabled": "钓鱼检测处于启用状态，不能删除或停用最后一条启用中的准入规则"
     }
   }
 }

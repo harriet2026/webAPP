@@ -17,24 +17,26 @@ import {
   UserRoundCheck,
 } from 'lucide-react';
 
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
 import { useProductForm } from '@/contexts/product-form-context';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
 import { cn } from '@/lib/utils';
 import type { AgentCenterCard, AgentCenterKey } from '@/types/agent-center';
 import { PageShell, PageSurface } from '@/components/shared/page-shell';
+import { AccessDeniedPanel, LoadingPanel } from '@/components/shared/state-panel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { PhishingAgentPanel, type PhishingAgentTab } from '@/components/phishing-detection/agent-management-page';
+import { PhishingAgentHeaderActions, PhishingAgentPanel, type PhishingAgentTab } from '@/components/phishing-detection';
 import {
   SpoofingAgentHeaderActions,
   SpoofingAgentPage,
   type SpoofingAgentTab,
 } from '@/components/spoofing-detection/spoofing-agent-page';
 import { ThreatRetroAgentPage, type ThreatRetroAgentTab } from '@/components/threat-retro/agent-management-page';
+import { useAgentManagementRoleAccess } from './use-agent-management-access';
 
 const AGENT_ICON: Record<AgentCenterKey, ElementType> = {
   phishing: ShieldAlert,
@@ -79,10 +81,12 @@ export function AgentCenterOverviewPage() {
   const overviewDescription = t(switcherEnabled ? 'description' : 'descriptionPhishingOnly');
   const locale = useLocale();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const agentParam = searchParams.get('agent');
   const selectedAgent = isAgentKey(agentParam) ? agentParam : null;
   const tab = searchParams.get('tab');
   const overviewQuery = useAgentCenterOverview();
+  const roleAccess = useAgentManagementRoleAccess();
 
   const visibleCards = useMemo(() => {
     return (overviewQuery.data?.agents ?? []).filter((card) => card.access !== 'hidden');
@@ -94,6 +98,13 @@ export function AgentCenterOverviewPage() {
   const showSelectedAgentDetail = Boolean(
     selectedAgent && (!overviewQuery.data || overviewQuery.isLoading || overviewQuery.isError || selectedVisibleCard),
   );
+
+  if (roleAccess.status === 'loading') {
+    return <LoadingPanel label={t('loadingAccess')} />;
+  }
+  if (roleAccess.status === 'error' || !roleAccess.canView) {
+    return <AccessDeniedPanel description={t('accessDenied')} />;
+  }
 
   if (selectedAgent && showSelectedAgentDetail) {
     const detailCard = selectedVisibleCard;
@@ -114,6 +125,9 @@ export function AgentCenterOverviewPage() {
           >
             <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
               <h2 className="text-lg font-semibold text-foreground">{detailTitle}</h2>
+              {selectedAgent === 'phishing' && !detailLocked
+                ? <PhishingAgentHeaderActions onGoToConfig={() => router.replace(`${agentHref('phishing', 'config')}&action=create-admission-rule`)} />
+                : null}
               {selectedAgent === 'spoofing' && !detailLocked && detailPresentation?.canConfigure
                 ? <SpoofingAgentHeaderActions />
                 : null}
@@ -132,6 +146,7 @@ export function AgentCenterOverviewPage() {
                   agent={selectedAgent}
                   tab={detailPresentation?.canConfigure ? tab : null}
                   configurationEnabled={detailPresentation?.canConfigure === true}
+                  hitRate={detailCard?.hit_rate ?? null}
                 />
               )}
             </div>
@@ -275,15 +290,17 @@ function AgentDetail({
   agent,
   tab,
   configurationEnabled,
+  hitRate,
 }: {
   agent: AgentCenterKey;
   tab: string | null;
   configurationEnabled: boolean;
+  hitRate: number | null;
 }) {
   if (agent === 'phishing') {
     return (
       <div className="min-h-[620px] overflow-hidden" data-testid="agent-center-phishing-panel">
-        <PhishingAgentPanel initialTab={phishingTab(tab)} configurationEnabled={configurationEnabled} />
+        <PhishingAgentPanel initialTab={phishingTab(tab)} configurationEnabled={configurationEnabled} hitRate={hitRate} />
       </div>
     );
   }

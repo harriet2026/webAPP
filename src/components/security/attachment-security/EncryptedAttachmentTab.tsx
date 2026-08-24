@@ -21,8 +21,10 @@ export const DEFAULT_ENCRYPTED_CONFIG: EncryptedConfig = {
 };
 
 export const DEFAULT_ENCRYPTED_ACTIONS: EncryptedActionConfig = {
-  decrypt_fail_action: 'accept',
+  decrypt_fail_action: 'proceed',
 };
+
+const DECRYPT_FAIL_ACTIONS: EncryptedActionConfig['decrypt_fail_action'][] = ['quarantine', 'proceed', 'audit'];
 
 interface EncryptedAttachmentTabProps {
   direction?: Direction;
@@ -75,9 +77,11 @@ export function EncryptedAttachmentTab({
         >
           <SelectTrigger className="w-[220px] max-w-full" data-testid="decrypt-fail-action"><SelectValue /></SelectTrigger>
           <SelectContent data-testid="decrypt-fail-action-options">
-            <SelectItem value="quarantine" data-testid="decrypt-fail-action-quarantine">{t('actions.quarantine')}</SelectItem>
-            <SelectItem value="accept" data-testid="decrypt-fail-action-accept">{t('actions.accept')}</SelectItem>
-            <SelectItem value="reject" data-testid="decrypt-fail-action-reject">{t('actions.reject')}</SelectItem>
+            {DECRYPT_FAIL_ACTIONS.map((action) => (
+              <SelectItem key={action} value={action} data-testid={`decrypt-fail-action-${action}`}>
+                {t(`actions.${action}` as `actions.quarantine`)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </section>

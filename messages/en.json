@@ -373,6 +373,8 @@
     "summaryCount": "{count} agents running status",
     "descriptionPhishingOnly": "A consolidated view of authorization, configuration state, and today metrics for the phishing detection agent.",
     "summaryHitRate": "detection rate",
+    "loadingAccess": "Checking agent access",
+    "accessDenied": "You do not have permission to view Agent Management.",
     "loadFailed": "Failed to load the agent overview",
     "detailLockedTitle": "This agent is not enabled",
     "detailLockedDescription": "This agent cannot be configured for the current product form or tenant grant. Return to the overview to see available agents.",
@@ -1582,6 +1584,7 @@
     "quarantine": "Quarantine",
     "sideline": "Sideline",
     "accept": "Accept",
+    "proceed": "Proceed",
     "reject": "Reject",
     "discard": "Discard",
     "audit": "Audit",
@@ -2063,7 +2066,7 @@
     "ruleMatches": "Rule Matches",
     "finalActionRule": "Final Action Rule",
     "actionLabels": {
-      "accept": "Accept",
+      "accept": "Deliver",
       "reject": "Reject",
       "quarantine": "Quarantine",
       "sideline": "Sideline",
@@ -4303,7 +4306,7 @@
     "actionBlockAlert": "Block+Alert",
     "actionQuarantine": "Isolate",
     "actionAudit": "Review",
-    "actionAccept": "Mark",
+    "actionAccept": "Deliver (Allowlist)",
     "validFrom": "Valid From",
     "validUntil": "Valid Until",
     "effectiveUntil": "Valid Until",
@@ -4475,15 +4478,15 @@
       "quarantine": "Quarantine",
       "reject": "Reject",
       "audit": "Audit",
-      "markDelivery": "Next Step",
+      "proceed": "Next Step",
       "discard": "Discard"
     },
     "actionTooltip": {
-      "accept": "Allow: No blocking action is taken for this rule's condition. The email continues to the next detection stage.",
+      "accept": "Deliver: Stop further rule matching and deliver the email.",
       "quarantine": "Quarantine: Move matching emails to the quarantine area for administrator review before release or deletion.",
       "reject": "Reject: Refuse the email at the SMTP stage; the sender receives a bounce notification.",
       "audit": "Audit: Route the email to an approval queue for manual administrator review before delivery.",
-      "markDelivery": "Next Step: Do not block the email; it continues through the remaining detection stages, with an optional tag applied before delivery.",
+      "proceed": "Next Step: Do not block the email; it continues through the remaining detection stages, with an optional tag applied before delivery.",
       "discard": "Discard: Silently drop the email without notifying the sender or delivering to the recipient."
     },
     "formatChecks": {
@@ -4618,16 +4621,16 @@
     "formatActionLabel": {
       "quarantine": "Quarantine",
       "audit": "Audit",
-      "markDelivery": "Next Step",
+      "proceed": "Next Step",
       "reject": "Reject",
       "discard": "Discard"
     },
     "protocolActionLabel": {
-      "accept": "Proceed to Next Check",
+      "accept": "Deliver",
       "quarantine": "Quarantine (to Junk)",
       "reject": "Block (5xx)",
       "audit": "Audit (Pending Approval)",
-      "markDelivery": "Next Step (Taggable)",
+      "proceed": "Next Step (Taggable)",
       "discard": "Discard (Silent Delete)"
     },
     "flowSub": {
@@ -4676,24 +4679,24 @@
     "formatActionDesc": {
       "quarantine": "Move the email to the quarantine queue for administrator review before release or deletion",
       "audit": "Route the email to an approval queue and wait for manual administrator review before delivery",
-      "markDelivery": "Do not block; continue through the remaining detection stages, with an optional tag applied before delivery",
+      "proceed": "Do not block; continue through the remaining detection stages, with an optional tag applied before delivery",
       "reject": "Return an SMTP rejection response to the sender; the email never enters the system",
       "discard": "Silently drop the email; the sender receives a delivery-success response but the email is discarded"
     },
     "protocolActionShort": {
-      "accept": "Pass",
+      "accept": "Deliver",
       "reject": "Reject",
       "quarantine": "Quarantine",
       "audit": "Audit",
-      "markDelivery": "Next Step",
+      "proceed": "Next Step",
       "discard": "Discard"
     },
     "protocolActionDesc": {
-      "accept": "No action taken; pass to next protocol check",
+      "accept": "Stop further rule matching and deliver the email",
       "reject": "Return an SMTP 5xx rejection to the sender",
       "quarantine": "Move to quarantine for administrator review",
       "audit": "Route to an approval queue and wait for manual administrator review before delivery",
-      "markDelivery": "Do not block; continue through the remaining detection stages, with an optional tag applied before delivery",
+      "proceed": "Do not block; continue through the remaining detection stages, with an optional tag applied before delivery",
       "discard": "Silently drop; sender receives delivery-success response"
     },
     "tagPanel": {
@@ -4798,10 +4801,10 @@
       "reset": "Reset to Default"
     },
     "action": {
-      "review": "Review",
+      "audit": "Review",
       "quarantine": "Quarantine",
-      "drop": "Drop",
-      "block": "Block"
+      "discard": "Drop",
+      "reject": "Block"
     },
     "form": {
       "section": {
@@ -5226,7 +5229,7 @@
       "audit": "Review",
       "reject": "Reject",
       "discard": "Discard",
-      "accept": "Continue pipeline",
+      "proceed": "Proceed",
       "partial_skip": "Skip excess items"
     },
     "actionDesc": {
@@ -5234,7 +5237,7 @@
       "audit": "Message enters the review queue; delivered or returned after manual approval",
       "reject": "Rejected at SMTP stage; sender receives a bounce notification (452/550)",
       "discard": "Silently dropped; sender has no awareness and receives no bounce",
-      "accept": "No blocking action taken; message continues to the next inspection stage"
+      "proceed": "No terminal disposition is applied; subsequent rules continue to be evaluated"
     },
     "tooltips": {
       "attachmentCount": "Number of attachments per message admitted to scanning; -1 means unlimited",
@@ -5304,12 +5307,13 @@
       "detectGroup": "Detection Result Handling (current direction)",
       "maliciousLabel": "Malicious URL Found",
       "maliciousTip": "Action taken when sandbox analysis judges a URL malicious",
-      "actionIsolate": "Quarantine (store email in quarantine)",
-      "actionIsolateTip": "Email is stored in quarantine; admins can review then release or delete",
-      "actionBlock": "Block (reject the email)",
-      "actionBlockTip": "Reject the email; the sender receives a bounce notice",
-      "actionMark": "Mark (deliver with a risk label)",
-      "actionMarkTip": "Email is delivered normally with a risk label to warn the user",
+      "actionQuarantine": "Quarantine (store email in quarantine)",
+      "actionQuarantineTip": "Email is stored in quarantine; admins can review then release or delete",
+      "actionReject": "Reject (reject the email)",
+      "actionRejectTip": "Reject the email; the sender receives a bounce notice",
+      "actionAccept": "Deliver (whitelist)",
+      "actionAcceptTip": "Deliver the email as a decisive whitelist match",
+      "markEnabled": "Add a risk mark when delivered",
       "actionDiscard": "Discard (silently delete)",
       "actionDiscardTip": "Silently delete the email without notifying the sender",
       "anomalyGroup": "Scan Anomaly Handling",
@@ -5435,17 +5439,17 @@
     "statusEnabled": "Enabled",
     "statusDisabled": "Disabled",
     "actionLabel": "Action",
-    "sendMarkUnsupported": "\"Mark & Deliver\" is not supported on outbound direction; it will be downgraded to \"Quarantine\".",
-    "internalMarkUnsupported": "\"Mark & Deliver\" is not supported on internal direction; it will be downgraded to \"Quarantine\".",
-    "directionMarkUnsupported": "\"Mark & Deliver\" is not supported on outbound/internal directions; it will be downgraded to \"Quarantine\".",
-    "highRiskWarning": "High-risk intents marked & delivered will reach users' inboxes — please confirm the risk.",
+    "sendMarkUnsupported": "\"Proceed\" is not supported on outbound direction; it will be downgraded to \"Quarantine\".",
+    "internalMarkUnsupported": "\"Proceed\" is not supported on internal direction; it will be downgraded to \"Quarantine\".",
+    "directionMarkUnsupported": "\"Proceed\" is not supported on outbound/internal directions; it will be downgraded to \"Quarantine\".",
+    "highRiskWarning": "Proceed does not stop the pipeline for high-risk intents. Confirm that marking and subsequent rules cover the risk.",
     "panel": {
       "high": "High-risk Intents",
       "medium": "Medium-risk Intents",
       "low": "Low-risk Intents",
       "highHint": "Recommend block or quarantine",
       "mediumHint": "Recommend review",
-      "lowHint": "Recommend mark and deliver",
+      "lowHint": "Recommend marking and proceeding",
       "highDesc": "Contains {n} categories with strict default handling; adjust carefully",
       "mediumDesc": "Contains {n} categories; standard handling recommended",
       "lowDesc": "Contains {n} categories; adjust freely per business needs",
@@ -5471,20 +5475,18 @@
       "low": "Low"
     },
     "action": {
-      "mark_deliver": "Mark & Deliver",
+      "accept": "Deliver",
+      "proceed": "Proceed",
       "quarantine": "Quarantine",
       "audit": "Review",
-      "reject": "Block",
       "discard": "Drop"
     },
     "markConfig": {
-      "title": "Mark & Deliver Configuration",
-      "deliveryTarget": "Delivery Target",
-      "targetInbox": "Inbox (mark only)",
-      "targetSpamFolder": "Spam Folder",
+      "title": "Proceed Marking",
       "subjectMark": "Subject Mark",
-      "bodyMark": "Body Mark",
-      "markTextPlaceholder": "Mark text",
+      "headerMark": "Header Mark",
+      "headerName": "Header name",
+      "headerValue": "Header value",
       "prefix": "Prefix",
       "suffix": "Suffix"
     },
@@ -5521,7 +5523,7 @@
     "copyDialog": {
       "title": "Copy configuration to other directions",
       "description": "Select target directions to copy the current [{src}] direction configuration to.",
-      "downgradeNotice": "Note: Outbound/Internal directions do not support \"Mark & Deliver\", which will be downgraded to \"Quarantine\"",
+      "downgradeNotice": "Note: Outbound/Internal directions do not support \"Proceed\", which will be downgraded to \"Quarantine\"",
       "confirm": "Confirm copy",
       "noTarget": "Please select at least one target direction"
     },
@@ -5573,8 +5575,8 @@
     "triggerCount": "Trigger Count",
     "emails": "emails",
     "triggerAction": "Trigger Action",
-    "actionMarkDelivery": "Next Step",
-    "actionReview": "Review",
+    "actionAccept": "Deliver (Allowlist)",
+    "actionAudit": "Review",
     "actionBlock": "Reject",
     "actionDiscard": "Discard",
     "tagModeTitle": "Tag Mode",
@@ -5778,7 +5780,7 @@
     "investigationSubtitle": "View and analyze mail security incidents for threat investigation and disposal",
     "recipientStatusBar": {
       "delivered": "Delivered",
-      "sideline": "Sidelined",
+      "sideline": "Pending decision",
       "quarantine": "Quarantined",
       "rejected": "Rejected",
       "discarded": "Discarded",
@@ -5870,7 +5872,7 @@
         "recall": "Recall",
         "accept": "Deliver",
         "reject": "Reject",
-        "sideline": "Greylist",
+        "sideline": "Pending decision",
         "audit": "Audit",
         "discard": "Discard",
         "mixed": "Mixed"
@@ -6052,6 +6054,7 @@
       "direction": "Direction",
       "senderIp": "Sender IP",
       "sender": "Sender",
+      "senderRecipient": "Sender → Recipient",
       "recipient": "Recipient",
       "subject": "Subject",
       "mailType": "Mail Type",
@@ -6091,6 +6094,8 @@
       "total": "Total {n}",
       "settings": "Settings",
       "columnSettings": "Columns",
+      "densitySettings": "Row density",
+      "compactDensity": "Compact mode",
       "headerFilters": "Header filters",
       "clearFilter": "Clear filters"
     },
@@ -6157,6 +6162,12 @@
       "downloadEml": "Download EML",
       "aiInterpret": "AI Interpret",
       "breadcrumb": "Email Disposal Center / Detail",
+      "nav": {
+        "currentlyViewing": "Currently viewing",
+        "finalVerdict": "Final verdict",
+        "collapseSidebar": "Collapse navigation",
+        "expandSidebar": "Expand navigation"
+      },
       "fullscreen": "Fullscreen",
       "exitFullscreen": "Exit Fullscreen",
       "findSimilar": "Find Similar Emails",
@@ -6267,7 +6278,13 @@
             "delivering": "Delivering",
             "delivery_failed": "Delivery Failed",
             "deferred": "Deferred",
-            "bounced": "Bounced"
+            "bounced": "Bounced",
+            "quarantine_pending": "Quarantine pending",
+            "audit_pending": "Audit pending",
+            "recall_failed": "Recall failed",
+            "recall_success": "Recall succeeded",
+            "recalled": "Recalled",
+            "partial_recall_success": "Partially recalled"
           },
           "notOperable": "Not Operable",
           "noContent": "(No original content)",
@@ -6341,7 +6358,7 @@
         "entityDetection": {
           "linksTab": "Links ({n})",
           "attachmentsTab": "Attachments ({n})",
-          "globalHint": "Blacklisting creates a tenant-level content rule for this mail direction and affects future matches.",
+          "globalHint": "Blacklisting creates a tenant-level rule that affects future matches. Domains are added to the Sender Blacklist; URL and attachment-hash rules are managed in Content Rules.",
           "noLinks": "No links detected",
           "noAttachments": "No attachments detected",
           "blacklistDomain": "Blacklist Domain",
@@ -6355,7 +6372,11 @@
             "url": "Blacklist this URL?",
             "attachment_hash": "Blacklist this attachment hash?"
           },
-          "confirmImpact": "This creates a content rule for the same mail direction. Future matches will be quarantined and can be managed in Content Rules.",
+          "confirmImpact": {
+            "domain": "This creates a sender-domain blacklist reject rule. Future mail sent from this domain will be rejected, and the rule can be managed in Sender Black/White Lists.",
+            "url": "This creates a content rule for the same mail direction. Future matches will be quarantined and can be managed in Content Rules.",
+            "attachment_hash": "This creates a content rule for the same mail direction. Future matches will be quarantined and can be managed in Content Rules."
+          },
           "confirm": "Add to blacklist",
           "confirming": "Creating…",
           "vtScore": "VirusTotal: {score}",
@@ -6430,10 +6451,14 @@
         },
         "contentDetails": "Content Details",
         "detectionPipeline": "Detection Pipeline",
+        "recipientSwitcher": {
+          "allRecipients": "All recipients ({count})"
+        },
         "recipientGroupsBadge": "{n} groups",
         "recipientScopeLine": "{recipients} ({count})",
         "recipientGroupLine": "{recipients} ({count})",
         "multiBasisSummaryLabel": "{recipients} recipients · {groups} disposal groups",
+        "moreBasisGroups": "+{n} more",
         "analysisLoading": "Loading detection results…",
         "analysisLoadFailed": "Failed to load detection results",
         "retry": "Retry",
@@ -6602,7 +6627,18 @@
         "loadFailedBadge": "Load failed",
         "foundCount": "Found {matched} / {total} entries",
         "truncated": "Truncated to 10,000 lines",
-        "partial": "Some gateway nodes could not be searched, so this lifecycle is incomplete. Failed nodes: {nodes}",
+        "partial": "Some nodes or log modules timed out or failed. Logs already returned remain available.",
+        "elapsed": "{seconds}s",
+        "moduleCompleted": "Completed · {count}",
+        "retryNode": "Retry incomplete modules",
+        "retryModule": "Retry {module}",
+        "status": {
+          "querying": "Querying",
+          "completed": "Completed",
+          "partial": "Partially completed",
+          "timedOut": "Timed out",
+          "failed": "Failed"
+        },
         "searchPlaceholder": "Search logs...",
         "copyAll": "Copy All",
         "downloadLog": "Download",
@@ -6692,18 +6728,16 @@
       "testAnalysis": "Test & Analysis"
     },
     "primaryActions": {
-      "deliver": "Deliver",
-      "deliverDesc": "Deliver email normally",
-      "tagDeliver": "Tag & Deliver",
-      "tagDeliverDesc": "Deliver email with a tag",
+      "accept": "Deliver (Allowlist)",
+      "acceptDesc": "Deliver immediately and stop matching subsequent rules",
+      "proceed": "Proceed",
+      "proceedDesc": "Apply addons and continue matching subsequent rules",
       "quarantine": "Quarantine",
       "quarantineDesc": "Quarantine the email",
-      "review": "Review",
-      "reviewDesc": "Submit email for admin review",
+      "audit": "Review",
+      "auditDesc": "Submit email for admin review",
       "discard": "Discard",
-      "discardDesc": "Silently discard the email",
-      "none": "No Action",
-      "noneDesc": "Tag-only rule; no primary action"
+      "discardDesc": "Silently discard the email"
     },
     "addons": {
       "title": "Addons",
@@ -6852,8 +6886,6 @@
       "name": "Name is required",
       "scope": "At least one scope is required",
       "priority": "Priority must be between 1 and 100",
-      "actionOrAddon": "Select a primary action or enable at least one addon",
-      "tagDeliverEmailTag": "Tag & Deliver requires the Email Tag addon",
       "incompleteCondition": "One or more conditions are not fully configured"
     },
     "outgoingGatedByAction": "Outgoing scope is not available with the selected primary action",
@@ -7441,7 +7473,6 @@
     },
     "disposition": {
       "primaryActionLabel": "Primary Action",
-      "noneHint": "No primary action set; the email will only run the enabled addons below.",
       "configureActionButton": "Configure \"{action}\" Parameters",
       "addonsHeading": "Addons",
       "descCardTitle": "Condition Notes",
@@ -7452,7 +7483,6 @@
       "addonDisabledHint": "Not enabled: form disabled; enabling it will auto-expand and focus the first field",
       "quarantineHint": "Mail quarantine requires no parameters; quarantined mail can be viewed in the Quarantine module.",
       "tagStyleLabel": "Tag Style",
-      "tagDeliverStyleDisabledHint": "Style has no effect when the tag position is a header",
       "previewTitle": "Logic Expression Preview",
       "orGroupTag": "OR Policy Group",
       "fullExpressionTitle": "Full Expression",
@@ -7466,27 +7496,22 @@
       "summaryMergeWindow": "{recipientType}, merge {minutes} min",
       "summaryScope": "Scope: {scope}",
       "actionDesc": {
-        "none": {
-          "source": "None",
-          "usage": "No primary action is applied to the email",
-          "note": "No primary action set; the email will only run the enabled addons below."
-        },
-        "deliver": {
+        "accept": {
           "source": "Delivery engine",
-          "usage": "Deliver normally to the inbox",
-          "note": "Optionally skip subsequent rules"
+          "usage": "Deliver immediately as an allowlist action",
+          "note": "Stops matching subsequent rules"
         },
-        "tagDeliver": {
+        "proceed": {
           "source": "Delivery engine",
-          "usage": "Deliver with a suspicious-mail tag added",
-          "note": "Style has no effect when the tag position is a header"
+          "usage": "Apply optional addons and continue to the next matching step",
+          "note": "Not an allowlist action; subsequent rules can still dispose the email"
         },
         "quarantine": {
           "source": "Quarantine area",
           "usage": "Move to quarantine pending review",
           "note": "Quarantined mail can be viewed in the Quarantine module"
         },
-        "review": {
+        "audit": {
           "source": "Manual review queue",
           "usage": "Enter the manual review queue",
           "note": "Handled by the default policy if not reviewed before the timeout"
@@ -7599,8 +7624,8 @@
     "statusEnabled": "Enabled",
     "statusDisabled": "Disabled",
     "timeoutTempDisposal": "Timeout Temporary Disposal",
-    "timeoutDisposal_deliver": "Deliver Directly",
-    "timeoutDisposal_mark": "Add Mark then Deliver",
+    "timeoutDisposal_accept": "Deliver",
+    "timeoutMarkEnabled": "Add a mark when delivered",
     "timeoutMarkPositions": "Mark Positions",
     "markPosition_subject_prefix": "Subject prefix",
     "markPosition_header": "Header",
@@ -8332,7 +8357,10 @@
     "processes": {
       "running": "Running",
       "stopped": "Stopped",
-      "restarts": "Restarts",
+      "restarts": "Restarting",
+      "detail": "Detail",
+      "procCount": "Processes: {count}",
+      "overlay2Thresholds": ">85% warning · >95% critical",
       "overlay2": "Overlay2 Usage",
       "coreProcs": "Core Process Monitor",
       "pid": "PID",
@@ -8501,16 +8529,37 @@
       "config": "Detection Engine Config",
       "configPlaceholder": "Detection engine configuration — available once the config module is online"
     },
+    "control": {
+      "ariaLabel": "Phishing Detection Agent master switch",
+      "readOnly": "Your account has view-only access",
+      "enableTitle": "Enable the Phishing Detection Agent?",
+      "enableDescription": "Messages matching an enabled admission rule will be submitted for phishing detection.",
+      "disableTitle": "Disable the Phishing Detection Agent?",
+      "disableDescription": "No new tasks will be submitted; existing tasks will continue to completion.",
+      "updateSuccess": "Agent status updated",
+      "updateError": "Failed to update agent status",
+      "gateTitle": "Configure an admission rule first",
+      "gateDescription": "At least one enabled admission rule is required before this agent can be enabled.",
+      "goToConfig": "Go to configuration",
+      "disabledBanner": "The Phishing Detection Agent is disabled. Existing logs remain available, but no new detection tasks are submitted."
+    },
     "kpi": {
       "todayDetected": "Detected Today",
       "todayQuarantined": "Quarantined Today",
       "pendingReview": "Pending Review",
       "todayRecalled": "Recalled Today",
       "recallSuccess": "Recall Success",
+      "recallSucceeded": "Recall succeeded",
+      "recallFailed": "Recall failed",
       "accuracy": "Accuracy"
     },
     "filters": {
       "keywordPlaceholder": "Search sender, subject...",
+      "selectedCount": "{count} selected",
+      "start": "Start time",
+      "end": "End time",
+      "mailStatus": "Mail status",
+      "invalidRange": "End time cannot be earlier than start time",
       "disposition": "Disposition",
       "detectionMode": "Run Mode",
       "recallStatus": "Recall Status",
@@ -8533,6 +8582,10 @@
       "manual_hold": "Manual Hold",
       "unknown": "Unknown"
     },
+    "policyDisposition": { "proceed": "Proceed", "audit": "Audit", "quarantine": "Quarantine", "discard": "Discard", "undecided": "Undecided" },
+    "taskStatus": { "submitting": "Submitting", "pending": "Pending", "processing": "Processing", "running": "Running", "completed": "Completed", "failed": "Failed", "expired": "Expired", "needs_approval": "Needs approval", "cancelled": "Cancelled", "partial": "Partially completed", "unknown": "Unknown" },
+    "directionValue": { "inbound": "Inbound", "outbound": "Outbound", "internal": "Internal", "unknown": "Unknown" },
+    "evidenceSeverity": { "low": "Low", "medium": "Medium", "high": "High", "critical": "Critical", "unknown": "Unknown" },
     "detectionMode": {
       "realtime": "Realtime",
       "observe": "Observe Mode"
@@ -8546,6 +8599,7 @@
       "expanded": "Expanded"
     },
     "riskLevel": {
+      "suspicious": "Suspicious",
       "critical": "Critical Risk",
       "high": "High Risk",
       "medium": "Medium Risk",
@@ -8557,6 +8611,8 @@
       "time": "Time",
       "sender": "Sender",
       "subject": "Subject",
+      "mailStatus": "Mail status",
+      "policyDisposition": "Policy disposition",
       "urlRisk": "URL Detection",
       "urlPhishing": "Phishing",
       "urlSuspicious": "Suspicious",
@@ -8574,7 +8630,7 @@
       "roundUnit": "rounds",
       "confidence": "Confidence",
       "detectionMode": "Run Mode",
-      "disposition": "Final Disposition",
+      "disposition": "Action",
       "riskLevel": "Risk",
       "invalidRange": "End time cannot be earlier than start time",
       "recallStatus": "Recall/Notification",
@@ -8593,6 +8649,8 @@
       "block": "Block",
       "exempt": "Mark as False Positive",
       "liveStateHint": "The mail is still being processed in the sideline queue; handle it there",
+      "noDisposalTarget": "This record has no operable mail object.",
+      "failureReason": "Failure reason",
       "mailContext": "Mail Context",
       "sender": "Sender",
       "recipients": "Recipients",
@@ -8611,6 +8669,7 @@
       "runLog": "Run Log",
       "searchSteps": "Search steps...",
       "exportJson": "Export JSON",
+      "exportFilename": "phishing-detection-{id}.json",
       "noSteps": "No step records",
       "noVerdictContent": "The agent completed detection; detailed verdict content is not yet available",
       "resultTruncatedHint": "Investigation details may be truncated due to size; some content may be incomplete."
@@ -8668,14 +8727,24 @@
   "phishingConfig": {
     "pageTitle": "Detection Engine Config",
     "pageDescription": "Tune the phishing detection engine's admission rules, runtime mode and confidence bands.",
+    "readOnlyNotice": "Your account has view-only access. Configuration controls are unavailable.",
     "admission": {
-      "title": "Admission Rules",
-      "description": "Decide which messages enter the Phishing Detection Agent. Hits use the current deployment-wide runtime limits.",
+      "title": "Detection Scope & Admission Rules",
+      "description": "Manage admission conditions as a rule list and create multiple rules. Messages matching any enabled rule enter this agent.",
       "loading": "Loading...",
-      "empty": "No admission rules yet; click Create to add one.",
-      "create": "Create",
+      "empty": "No admission rules yet; click Create rule to add one.",
+      "loadFailed": "Failed to load admission rules",
+      "searchPlaceholder": "Search name, direction, or risk signal",
+      "noSearchResults": "No matching admission rules",
+      "create": "Create rule",
       "edit": "Edit",
       "delete": "Delete",
+      "deleteTitle": "Delete admission rule?",
+      "copy": "Copy",
+      "copySuffix": " - Copy",
+      "copied": "Copied as a disabled rule",
+      "copyFailed": "Copy failed",
+      "toggleRule": "Toggle rule {name}",
       "toggled": "Enabled state toggled",
       "toggleFailed": "Toggle failed",
       "deleted": "Rule deleted",
@@ -8697,6 +8766,20 @@
       "namePlaceholder": "Rule name",
       "tagSectionLabel": "Recipient tags",
       "emailSectionLabel": "Recipient emails (exact match)",
+      "groupSectionLabel": "Groups",
+      "deptSectionLabel": "Organization departments",
+      "selectGroups": "Select groups",
+      "searchGroups": "Search groups",
+      "noGroupsHint": "No groups are available for this direction. Create one in Group Management first.",
+      "noMatch": "No matches",
+      "selectedCount": "{count} selected",
+      "clearAll": "Clear",
+      "searchDepartments": "Search departments",
+      "searchPeople": "Search people by name or email, or enter an exact email",
+      "noDepartmentsHint": "No departments have been synchronized",
+      "recipientScope": "Recipient filters",
+      "senderScope": "Sender filters",
+      "mixedScope": "Sender and recipient filters",
       "emailPlaceholder": "Type an email and press Enter, e.g. cfo@corp.com",
       "addEmail": "Add",
       "removeEmail": "Remove",
@@ -8712,10 +8795,13 @@
       "basicScreen": "Basic screening",
       "requireUrl": "Contains a URL",
       "maxSize": "Email size ≤",
+      "maxSizeHint": "Use 0 for no message-size limit",
       "senderFirstSeen": "First-seen sender",
       "senderFirstSeenHint": "Only senders with no prior correspondence — a common phishing/social-engineering source.",
       "qrcode": "Contains a QR code",
       "qrcodeDesc": "Hits when a QR code is decoded from an attachment or inline image (requires deep attachment scanning)",
+      "executable": "Executable file",
+      "executableDesc": "Detect files that may execute code or trigger program behavior.",
       "urlNotQRHint": "\"Contains a URL\" does not include links decoded from QR codes; if you only want the QR-code risk, consider turning this off",
       "validationFailed": "Please fill in all required fields.",
       "created": "Admission rule created",
@@ -8725,11 +8811,12 @@
       "save": "Save",
       "cancel": "Cancel",
       "errors": {
+        "needName": "Enter a rule name",
         "needDirection": "Select at least one mail-flow direction",
-        "qrNoOutbound": "The QR-code risk signal does not support the outbound direction",
         "needRiskSignal": "Please enable at least one risk signal",
         "needRecipientTarget": "Enable recipient filter requires at least one tag or email",
-        "maxSizeTooLarge": "Max email size cannot exceed 100000 MB"
+        "maxSizeTooLarge": "Message size must be between 0 and 100000 MB",
+        "invalidEmail": "Enter a valid email address"
       },
       "direction": {
         "inbound": "Inbound",
@@ -8738,8 +8825,8 @@
       }
     },
     "runtime": {
-      "title": "Runtime Mode & Timeouts",
-      "description": "Realtime / observe mode, timeout timeline and timeout temp disposition (applies to all sideline checks).",
+      "title": "Agent Investigation & Disposition",
+      "description": "The run mode controls whether disposition is applied; risk level and confidence bands determine the action. Timeout settings apply to all sideline checks.",
       "loading": "Loading...",
       "engineLoadFailed": "Failed to load detection engine config",
       "disposalLoadFailed": "Timeout settings failed to load; run mode is still shown from the engine config.",
@@ -8752,21 +8839,48 @@
       "cancel": "Cancel",
       "sheetTitle": "Edit runtime mode and timeouts",
       "sheetDescription": "Applies on save; Cancel discards all edits.",
+      "summary": "Auto-deliver on timeout: {autoDeliver} · Risk bands: {count}",
+      "conflictTitle": "Configuration changed by another administrator",
+      "conflictDescription": "Your draft is preserved. Review and reload the latest configuration before submitting again.",
+      "reloadLatest": "Reload latest",
       "runMode": "Run mode",
-      "runModeSectionTitle": "Run mode",
+      "runModeFootnote": "Only one mode is active at a time",
       "runModeValue": {
         "realtime": "Realtime",
         "observe": "Observe"
       },
       "runModeHint": {
-        "realtime": "Apply band dispositions (quarantine / mark / accept).",
-        "observe": "Skip band dispositions; only record observations."
+        "realtime": "Apply audit, quarantine, discard, or continue according to the four risk levels.",
+        "observe": "Keep complete findings without applying risk-policy actions."
       },
+      "observeModeBanner": "Observe mode does not apply four-level risk actions; hidden saved values are preserved.",
+      "timeoutPolicy": "Timeout timeline",
+      "timeoutMinutes": "Realtime wait (minutes)",
+      "maxRecheckMinutes": "Background recheck (minutes)",
+      "timeoutAsync": "Continue in background after timeout",
+      "timeoutAsyncHint": "Deliver after the realtime timeout, then continue analysis and recall when needed.",
+      "observeMark": "Add an observation mark",
+      "observeMarkHint": "Off delivers normally; on adds a mark using the observe action.",
+      "confidencePolicy": "Confidence disposition policy",
+      "confidenceHint": "Four levels continuously cover 0–100; edit only the three shared cutoffs.",
+      "cutoff": { "low": "Low starts", "medium": "Medium starts", "high": "High starts" },
+      "invalidCutoffs": "Cutoffs must be strictly increasing and remain between 0 and 100.",
+      "invalidTimeoutWindow": "Realtime wait must be 1–300 minutes and background recheck must be 1–60 minutes.",
+      "range": "Confidence range",
+      "risk": "Risk level",
+      "dispositionLabel": "Disposition",
+      "markSetting": "Add-on mark",
+      "riskLevel": { "suspicious": "Suspicious", "low": "Low", "medium": "Medium", "high": "High" },
+      "disposition": { "proceed": "Proceed", "audit": "Audit", "quarantine": "Quarantine", "discard": "Discard" },
+      "markText": "Mark text",
+      "markTextRequired": "Mark text is required when an add-on mark is enabled.",
+      "markTextTooLong": "Mark text cannot exceed 20 characters.",
+      "markTextLimit": "Up to 20 characters.",
       "observeAction": "Observe action",
       "observeActionValue": {
-        "deliver": "Deliver",
-        "mark": "Mark"
+        "accept": "Deliver (whitelist)"
       },
+      "observeMarkEnabled": "Add a risk mark when delivered",
       "timeoutSectionTitle": "Timeout timeline",
       "timeoutScopeNote": "Total timeout / async timeout apply to all sideline checks.",
       "soon": "Coming soon",
@@ -8784,11 +8898,9 @@
       "timeoutTempDisposal": "Timeout temp disposition",
       "timeoutTempSectionTitle": "Timeout temp disposition",
       "timeoutTempValue": {
-        "deliver": "Deliver",
-        "mark": "Mark",
-        "by_result": "By result"
+        "accept": "Deliver"
       },
-      "timeoutTempByResultSoon": "By result (coming soon)",
+      "timeoutMarkEnabled": "Add a mark when delivered",
       "timeoutMarkText": "Mark prefix",
       "timeoutMarkTextHint": "Up to 20 characters.",
       "markPosition": {
@@ -8796,6 +8908,18 @@
         "header": "Header"
       },
       "minutes": "minutes"
+    },
+    "analysis": {
+      "title": "Analysis parameters",
+      "planned": "Planned",
+      "description": "Cloud-drive analysis is not connected to the execution pipeline yet. These switches only maintain versioned server placeholders.",
+      "loading": "Loading...",
+      "loadFailed": "Failed to load analysis parameters",
+      "saved": "Analysis parameters saved",
+      "saveFailed": "Failed to save analysis parameters",
+      "netdisk_domain": { "title": "Cloud-drive domain detection", "description": "Detect cloud-drive domain signals in messages." },
+      "netdisk_extract": { "title": "Cloud-drive content extraction", "description": "Allow accessible cloud-drive content to be extracted for analysis." },
+      "netdisk_spoof": { "title": "Cloud-drive impersonation", "description": "Detect signals from suspected fake cloud-drive pages." }
     },
     "bands": {
       "title": "Confidence Bands",
@@ -8818,6 +8942,7 @@
       "cancel": "Cancel",
       "apply": "Apply",
       "markPositionLabel": "Mark positions",
+      "markEnabled": "Add a risk mark",
       "markPosition": {
         "subject_prefix": "Subject prefix",
         "header": "Header",
@@ -8829,8 +8954,7 @@
       "prefixTruncated": "Subject prefix exceeded {max} characters and was truncated.",
       "prefixTruncatedHint": "Subject prefix is capped at {max} characters.",
       "disposition": {
-        "accept": "Accept",
-        "mark": "Mark",
+        "accept": "Deliver (whitelist)",
         "quarantine": "Quarantine",
         "audit": "Audit"
       },
@@ -8886,7 +9010,7 @@
       }
     },
     "disposition": {
-      "mark": "Mark & deliver",
+      "accept": "Deliver (whitelist)",
       "quarantine": "Quarantine",
       "reject": "Reject",
       "discard": "Discard",
@@ -10670,6 +10794,7 @@
     }
   },
   "apiErrors": {
+    "demo_unavailable": "Phishing-agent configuration and controls are unavailable in demo mode",
     "redeliver": {
       "in_progress": "A redelivery for this mail is already in progress, please retry later",
       "original_expired": "The original message is not retained (or has expired); redelivery is unavailable",
@@ -11095,6 +11220,7 @@
       "rule_platform_admin_only": "Only platform admins may change platform rules",
       "ip_or_cidr_format_invalid": "Enter a valid IP address or CIDR (e.g. 192.168.1.0/24)",
       "rule_already_exists": "This IP/CIDR rule already exists",
+      "whitelist_would_lock_out_self": "The allowlist does not include your current IP address; saving it would lock you out",
       "delete_would_lock_out_self": "Deleting this rule would remove your current IP from the allowlist and lock you out",
       "rule_not_found": "Rule not found"
     },
@@ -11128,7 +11254,10 @@
     "phishing_admission": {
       "profile_id_invalid_for_tenant": "The selected detection profile does not exist or does not belong to the current tenant",
       "rule_not_found": "Admission rule not found",
-      "rule_name_exists": "An admission rule with this name already exists. Use a different name"
+      "rule_name_exists": "An admission rule with this name already exists. Use a different name",
+      "revision_conflict": "The admission rule was modified by someone else; please refresh and retry",
+      "integrity_error": "Admission rule (ID {rule_id}) failed the integrity check; please contact the administrator (rule UID: {rule_uid})",
+      "group_invalid": "The admission rule references an invalid group (group UID: {group_uid})"
     },
     "mail_auth_config": {
       "overlaps_existing_active": "This config overlaps an existing active mail-auth config with the same domain scope and scenes",
@@ -11392,6 +11521,9 @@
       "bulk_add_limit_exceeded": "At most 20 people can be added at once",
       "duplicate_email_in_group": "Duplicate email {email} within the group"
     },
+    "phishing_routes": {
+      "phishing_detection_capability_required": "The phishing detection capability is required"
+    },
     "spoofing_routes": {
       "spoofing_detection_capability_required": "The spoofing detection capability is required"
     },
@@ -11456,7 +11588,9 @@
       "tenant_id_not_integer": "The tenant ID must be an integer",
       "tenant_id_required": "Please select a tenant before managing its settings",
       "tenant_id_invalid": "Invalid tenant ID",
-      "tenant_access_denied": "Access to this tenant is denied"
+      "tenant_access_denied": "Access to this tenant is denied",
+      "agent_management_view_required": "Agent management view permission is required",
+      "agent_management_edit_required": "Agent management permission is required for this operation"
     },
     "login": {
       "rate_limited": "Too many requests, please try again later",
@@ -11478,6 +11612,13 @@
       "code_invalid_or_expired": "The verification code is incorrect or has expired",
       "ticket_invalid_or_expired": "The credential is invalid or has expired",
       "rate_limited": "Too many requests, please try again later"
+    },
+    "phishing_agent": {
+      "config_not_initialized": "Phishing detection configuration is not initialized; please contact the administrator",
+      "config_version_conflict": "The configuration was modified by someone else (conflicting domains: {conflict_domains}); please refresh and retry",
+      "control_revision_conflict": "The switch state was modified by someone else; please refresh and retry",
+      "admission_required": "At least one enabled admission rule is required before enabling phishing detection",
+      "rule_required_while_enabled": "Phishing detection is enabled; the last enabled admission rule cannot be deleted or disabled"
     }
   }
 }

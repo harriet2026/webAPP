@@ -94,11 +94,18 @@ export const stage2NavItems: { key: Stage2PolicyKey; nameKey: string; functional
   { key: 'userList', nameKey: 'pipeline.userBlackWhiteList', functional: true },
 ];
 
-const stage3NavItems: { key: Stage3PolicyKey; nameKey: string; functional: boolean }[] = [
+export const stage3NavItems: { key: Stage3PolicyKey; nameKey: string; functional: boolean }[] = [
+  { key: 'content', nameKey: 'pipeline.content', functional: true },
   { key: 'attachment', nameKey: 'pipeline.attachment', functional: true },
   { key: 'url', nameKey: 'pipeline.url', functional: true },
-  { key: 'content', nameKey: 'pipeline.content', functional: true },
   { key: 'intentEngine', nameKey: 'pipeline.intentEngine', functional: true },
+];
+
+export const stage3PipelinePolicies: PipelinePolicy[] = [
+  { key: 'content', nameKey: 'pipeline.content', descKey: 'pipeline.contentDesc', type: 'configurable', functional: true },
+  { key: 'attachment', nameKey: 'pipeline.attachment', descKey: 'pipeline.attachmentDesc', type: 'configurable', functional: true },
+  { key: 'url', nameKey: 'pipeline.url', descKey: 'pipeline.urlDesc', type: 'configurable', functional: true },
+  { key: 'intentEngine', nameKey: 'pipeline.intentEngine', descKey: 'pipeline.intentEngineDesc', type: 'forced', functional: true },
 ];
 
 // 阶段3 左导航与模块总开关联动的单一事实源（url/attachment/content/intentEngine）。
@@ -139,17 +146,17 @@ export const pipelineDrawerResponsiveClasses = {
  * supports (GT-11894 shipped four).
  */
 export const actionLegendItems: {
-  key: 'deliver' | 'quarantine' | 'review' | 'block' | 'drop' | 'nextStep';
+  key: 'accept' | 'proceed' | 'quarantine' | 'audit' | 'reject' | 'discard';
   color: string;
   labelKey: string;
   descKey: string;
 }[] = [
-  { key: 'deliver', color: 'var(--action-deliver)', labelKey: 'pipeline.actionDeliver', descKey: 'pipeline.actionDeliverDesc' },
-  { key: 'nextStep', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionNextStep', descKey: 'pipeline.actionNextStepDesc' },
+  { key: 'accept', color: 'var(--action-deliver)', labelKey: 'pipeline.actionDeliver', descKey: 'pipeline.actionDeliverDesc' },
+  { key: 'proceed', color: 'var(--action-mark-deliver)', labelKey: 'pipeline.actionNextStep', descKey: 'pipeline.actionNextStepDesc' },
   { key: 'quarantine', color: 'var(--action-quarantine)', labelKey: 'pipeline.actionQuarantine', descKey: 'pipeline.actionQuarantineDesc' },
-  { key: 'review', color: 'var(--action-review)', labelKey: 'pipeline.actionReview', descKey: 'pipeline.actionReviewDesc' },
-  { key: 'block', color: 'var(--action-block)', labelKey: 'pipeline.actionBlock', descKey: 'pipeline.actionBlockDesc' },
-  { key: 'drop', color: 'var(--action-drop)', labelKey: 'pipeline.actionDrop', descKey: 'pipeline.actionDropDesc' },
+  { key: 'audit', color: 'var(--action-review)', labelKey: 'pipeline.actionReview', descKey: 'pipeline.actionReviewDesc' },
+  { key: 'reject', color: 'var(--action-block)', labelKey: 'pipeline.actionBlock', descKey: 'pipeline.actionBlockDesc' },
+  { key: 'discard', color: 'var(--action-drop)', labelKey: 'pipeline.actionDrop', descKey: 'pipeline.actionDropDesc' },
 ];
 
 /**
@@ -412,13 +419,8 @@ export function PolicyPipelinePage() {
       nameKey: 'pipeline.phase3Content',
       bgClass: '',
       borderClass: 'border-x-0',
-      // html_spec §3.1 对齐：附件/URL/内容规则隔离 → configurable（橙）；意图引擎强制 → forced（红）。
-      policies: [
-        { key: 'attachment', nameKey: 'pipeline.attachment', descKey: 'pipeline.attachmentDesc', type: 'configurable', functional: true },
-        { key: 'url', nameKey: 'pipeline.url', descKey: 'pipeline.urlDesc', type: 'configurable', functional: true },
-        { key: 'content', nameKey: 'pipeline.content', descKey: 'pipeline.contentDesc', type: 'configurable', functional: true },
-        { key: 'intentEngine', nameKey: 'pipeline.intentEngine', descKey: 'pipeline.intentEngineDesc', type: 'forced', functional: true },
-      ],
+      // html_spec §3.1 对齐：内容规则优先展示；内容/附件/URL 隔离 → configurable（橙）；意图引擎强制 → forced（红）。
+      policies: stage3PipelinePolicies,
     },
     ...aiStages,
     {

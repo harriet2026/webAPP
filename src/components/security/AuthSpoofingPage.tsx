@@ -26,7 +26,7 @@ import { hasEmptyAuthSpoofingTag } from '@/lib/auth-spoofing-validation';
 const DEFAULT_CONFIG: AuthSpoofingConfig = {
   format_checks: {
     // MAIL FROM:<> 是退信/DSN 的合法用法，默认不得拦截。
-    mailfrom_empty: { enabled: true, action: 'mark-delivery', observe_mode: false },
+    mailfrom_empty: { enabled: true, action: 'proceed', observe_mode: false },
     mailfrom_invalid: { enabled: true, action: 'reject', observe_mode: false },
     envelope_header_mismatch: { enabled: true, action: 'quarantine', observe_mode: false },
   },
@@ -36,24 +36,24 @@ const DEFAULT_CONFIG: AuthSpoofingConfig = {
     spf: {
       fail: { enabled: true, action: 'reject', observe_mode: false },
       softfail: { enabled: true, action: 'quarantine', observe_mode: false },
-      none: { enabled: true, action: 'mark-delivery', observe_mode: false },
-      temperror: { enabled: true, action: 'mark-delivery', observe_mode: false },
+      none: { enabled: true, action: 'proceed', observe_mode: false },
+      temperror: { enabled: true, action: 'proceed', observe_mode: false },
     },
     dkim: {
       fail: { enabled: true, action: 'quarantine', observe_mode: false },
       neutral: { enabled: true, action: 'quarantine', observe_mode: false },
-      partial: { enabled: true, action: 'mark-delivery', observe_mode: false },
-      none: { enabled: true, action: 'mark-delivery', observe_mode: false },
+      partial: { enabled: true, action: 'proceed', observe_mode: false },
+      none: { enabled: true, action: 'proceed', observe_mode: false },
     },
     dmarc: {
       reject: { enabled: true, action: 'reject', observe_mode: false },
       quarantine: { enabled: true, action: 'quarantine', observe_mode: false },
-      none: { enabled: true, action: 'mark-delivery', observe_mode: false },
+      none: { enabled: true, action: 'proceed', observe_mode: false },
       no_record: { enabled: true, action: 'quarantine', observe_mode: false },
-      query_fail: { enabled: true, action: 'mark-delivery', observe_mode: false },
+      query_fail: { enabled: true, action: 'proceed', observe_mode: false },
     },
     ptr: {
-      noptr: { enabled: true, action: 'mark-delivery', observe_mode: false },
+      noptr: { enabled: true, action: 'proceed', observe_mode: false },
       nomatch: { enabled: true, action: 'quarantine', observe_mode: false },
       ehlo_mismatch: { enabled: true, action: 'quarantine', observe_mode: false },
     },
@@ -88,7 +88,7 @@ function mergeGroup(
  * 否则下拉里能选到的值会在下次加载时被下面的归一化悄悄改写掉。
  * accept 已废弃 → 回落到 quarantine。
  */
-const FORMAT_ACTION_SET = new Set(['quarantine', 'audit', 'mark-delivery', 'reject', 'discard']);
+const FORMAT_ACTION_SET = new Set(['quarantine', 'audit', 'proceed', 'reject', 'discard']);
 function normalizeFormatItem(item: CheckItem): CheckItem {
   return FORMAT_ACTION_SET.has(item.action) ? item : { ...item, action: 'quarantine' };
 }

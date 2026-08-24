@@ -8,241 +8,82 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { usePointerHover } from '@/hooks/use-pointer-hover';
+import { DISPLAY_STATUSES, type DisplayStatus } from '@/types/email-disposal';
+import type { DetectionMode, Disposition, RecallStatus, RiskLevel } from '@/types/phishing-detection';
 
-const DEFAULT_KEYWORD = '';
-
-interface MultiSelectOption {
-  value: string;
-  labelKey: string;
-}
-
-interface MultiSelectProps {
-  options: MultiSelectOption[];
-  value: string[];
-  onChange: (next: string[]) => void;
+function MultiSelect<T extends string>({ options, value, onChange, placeholder, selectedLabel }: {
+  options: ReadonlyArray<{ value: T; label: string }>;
+  value: T[];
+  onChange: (next: T[]) => void;
   placeholder: string;
-  labelPrefix: string;
-  t: ReturnType<typeof useTranslations>;
-  tc: ReturnType<typeof useTranslations>;
+  selectedLabel: (count: number) => string;
+}) {
+  const summary = value.length === 0 ? placeholder : value.length === 1 ? options.find((item) => item.value === value[0])?.label ?? value[0] : selectedLabel(value.length);
+  return <Popover><PopoverTrigger render={<Button variant="outline" className="h-9 w-full min-w-0 justify-between font-normal" />}><span className="truncate">{summary}</span><ChevronDown className="ml-2 size-4 shrink-0 opacity-60" /></PopoverTrigger><PopoverContent align="start" className="max-h-80 w-64 overflow-y-auto p-1">{options.map((option) => {
+    const checked = value.includes(option.value);
+    return <MultiSelectOption key={option.value} checked={checked} label={option.label} onToggle={() => onChange(checked ? value.filter((item) => item !== option.value) : [...value, option.value])} />;
+  })}</PopoverContent></Popover>;
 }
 
-function MultiSelect({ options, value, onChange, placeholder, labelPrefix, t, tc }: MultiSelectProps) {
-  const toggle = (val: string) => {
-    onChange(value.includes(val) ? value.filter((v) => v !== val) : [...value, val]);
-  };
-  const summary = value.length === 0
-    ? placeholder
-    : value.length === 1
-      ? t(`${labelPrefix}.${value[0]}`)
-      : `${value.length} ${tc('selected')}`;
+function MultiSelectOption({ checked, label, onToggle }: { checked: boolean; label: string; onToggle: () => void }) {
+  const { pointerHoverProps } = usePointerHover<HTMLLabelElement>();
+  return <label {...pointerHoverProps} className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm data-[hovered=true]:bg-accent"><Checkbox checked={checked} onCheckedChange={onToggle} /><span className="flex-1">{label}</span>{checked ? <Check className="size-3 opacity-50" /> : null}</label>;
+}
+
+function DateTimeRangeInput({ start, end, onStartChange, onEndChange, startLabel, endLabel }: {
+  start: string;
+  end: string;
+  onStartChange: (value: string) => void;
+  onEndChange: (value: string) => void;
+  startLabel: string;
+  endLabel: string;
+}) {
   return (
-    <Popover>
-      <PopoverTrigger
-        render={
-          <Button variant="outline" className="h-9 justify-between font-normal" />
-        }
-      >
-        <span className="truncate">{summary}</span>
-        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-60" />
-      </PopoverTrigger>
-      <PopoverContent align="start" className={cn('w-56 p-1')}>
-        {options.map((option) => {
-          const checked = value.includes(option.value);
-          return (
-            <label
-              key={option.value}
-              className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
-            >
-              <Checkbox
-                checked={checked}
-                onCheckedChange={() => toggle(option.value)}
-                className="shrink-0"
-              />
-              <span className="flex-1 truncate">{t(option.labelKey)}</span>
-              {checked ? <Check className="h-3 w-3 opacity-50" /> : null}
-            </label>
-          );
-        })}
-      </PopoverContent>
-    </Popover>
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center rounded-md border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
+      <input aria-label={startLabel} type="datetime-local" value={start} onChange={(event) => onStartChange(event.target.value)} className="h-9 min-w-0 bg-transparent px-3 text-sm outline-none" />
+      <span className="text-sm text-muted-foreground">—</span>
+      <input aria-label={endLabel} type="datetime-local" value={end} onChange={(event) => onEndChange(event.target.value)} className="h-9 min-w-0 bg-transparent px-3 text-sm outline-none" />
+    </div>
   );
 }
 
 export type TimeRangeKey = 'today' | '7d' | '30d' | 'custom';
-
 export interface DetectionFilterState {
   keyword: string;
-  disposition: string[];
-  detection_mode: string[];
-  recall_status: string[];
-  risk_level: string[];
+  disposition: Disposition[];
+  detection_mode: DetectionMode[];
+  recall_status: RecallStatus[];
+  risk_level: RiskLevel[];
+  mail_status: DisplayStatus[];
   rangeKey: TimeRangeKey;
   start: string;
   end: string;
 }
 
-interface DetectionLogFiltersProps {
+export function DetectionLogFilters({ value, onChange, onReset }: {
   value: DetectionFilterState;
   onChange: (next: DetectionFilterState) => void;
   onReset: () => void;
-}
-
-export function DetectionLogFilters({ value, onChange, onReset }: DetectionLogFiltersProps) {
+}) {
   const t = useTranslations('phishingDetection');
   const tc = useTranslations('common');
-  const [keywordDraft, setKeywordDraft] = useState(value.keyword);
-
-  const update = <K extends keyof DetectionFilterState>(key: K, next: DetectionFilterState[K]) => {
-    onChange({ ...value, [key]: next });
-  };
-  const submitKeyword = () => {
-    const nextKeyword = keywordDraft.trim();
-    setKeywordDraft(nextKeyword);
-    update('keyword', nextKeyword);
-  };
-  const resetFilters = () => {
-    setKeywordDraft(DEFAULT_KEYWORD);
-    onReset();
-  };
-
-  return (
-    <div className="space-y-3" data-testid="phishing-log-filters">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[240px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
-          <Input
-            data-testid="phishing-log-keyword"
-            value={keywordDraft}
-            onChange={(e) => setKeywordDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                submitKeyword();
-              }
-            }}
-            placeholder={t('filters.keywordPlaceholder')}
-            className="h-9 w-full pl-9"
-          />
-        </div>
-
-        <MultiSelect
-          options={[
-            { value: 'quarantine', labelKey: 'disposition.quarantine' },
-            { value: 'mark', labelKey: 'disposition.mark' },
-            { value: 'pass', labelKey: 'disposition.pass' },
-            { value: 'audit', labelKey: 'disposition.audit' },
-            { value: 'pending', labelKey: 'disposition.pending' },
-            { value: 'processing', labelKey: 'disposition.processing' },
-            { value: 'failed', labelKey: 'disposition.failed' },
-            { value: 'manual_hold', labelKey: 'disposition.manual_hold' },
-            { value: 'unknown', labelKey: 'disposition.unknown' },
-          ]}
-          value={value.disposition}
-          onChange={(next) => update('disposition', next)}
-          placeholder={t('filters.disposition')}
-          labelPrefix="disposition"
-          t={t}
-          tc={tc}
-        />
-
-        <MultiSelect
-          options={[
-            { value: 'realtime', labelKey: 'detectionMode.realtime' },
-            { value: 'observe', labelKey: 'detectionMode.observe' },
-          ]}
-          value={value.detection_mode}
-          onChange={(next) => update('detection_mode', next)}
-          placeholder={t('filters.detectionMode')}
-          labelPrefix="detectionMode"
-          t={t}
-          tc={tc}
-        />
-
-        <MultiSelect
-          options={[
-            { value: 'none', labelKey: 'recallStatus.none' },
-            { value: 'pending_processing', labelKey: 'recallStatus.pending_processing' },
-            { value: 'pending_recall', labelKey: 'recallStatus.pending_recall' },
-            { value: 'recalled', labelKey: 'recallStatus.recalled' },
-            { value: 'recall_failed', labelKey: 'recallStatus.recall_failed' },
-            { value: 'expanded', labelKey: 'recallStatus.expanded' },
-          ]}
-          value={value.recall_status}
-          onChange={(next) => update('recall_status', next)}
-          placeholder={t('filters.recallStatus')}
-          labelPrefix="recallStatus"
-          t={t}
-          tc={tc}
-        />
-
-        <MultiSelect
-          options={[
-            { value: 'critical', labelKey: 'riskLevel.critical' },
-            { value: 'high', labelKey: 'riskLevel.high' },
-            { value: 'medium', labelKey: 'riskLevel.medium' },
-            { value: 'low', labelKey: 'riskLevel.low' },
-            { value: 'none', labelKey: 'riskLevel.none' },
-          ]}
-          value={value.risk_level}
-          onChange={(next) => update('risk_level', next)}
-          placeholder={t('filters.riskLevel')}
-          labelPrefix="riskLevel"
-          t={t}
-          tc={tc}
-        />
-
-        <Button
-          data-testid="phishing-log-search"
-          size="sm"
-          className="h-9 flex-shrink-0 gap-1.5 bg-blue-600 px-4 text-white hover:bg-blue-700"
-          onClick={submitKeyword}
-        >
-          <Search className="h-4 w-4" />
-          {tc('search')}
-        </Button>
-
-        <Button data-testid="phishing-log-reset" variant="outline" size="sm" className="h-9 flex-shrink-0 gap-1.5 px-3" onClick={resetFilters}>
-          <RotateCcw className="h-4 w-4" />
-          {tc('reset')}
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex overflow-hidden rounded-md border border-border">
-          {(['today', '7d', '30d', 'custom'] as TimeRangeKey[]).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => update('rangeKey', key)}
-              className={cn(
-                'px-3 py-1.5 text-xs font-medium transition-colors',
-                value.rangeKey === key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-background text-muted-foreground hover:bg-accent',
-              )}
-            >
-              {t(`filters.range.${key}`)}
-            </button>
-          ))}
-        </div>
-        {value.rangeKey === 'custom' && (
-          <div className="flex items-center gap-2">
-            <Input
-              type="datetime-local"
-              value={value.start}
-              onChange={(e) => update('start', e.target.value)}
-              className="h-9 w-48"
-            />
-            <span className="text-xs text-muted-foreground">—</span>
-            <Input
-              type="datetime-local"
-              value={value.end}
-              onChange={(e) => update('end', e.target.value)}
-              className="h-9 w-48"
-            />
-          </div>
-        )}
-      </div>
+  const td = useTranslations('emailDisposal');
+  const [keyword, setKeyword] = useState(value.keyword);
+  const update = <K extends keyof DetectionFilterState>(key: K, next: DetectionFilterState[K]) => onChange({ ...value, [key]: next });
+  const submit = () => update('keyword', keyword.trim());
+  const selectedLabel = (count: number) => t('filters.selectedCount', { count });
+  return <div className="space-y-3">
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="relative min-w-[240px] flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={keyword} onChange={(event) => setKeyword(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') submit(); }} placeholder={t('filters.keywordPlaceholder')} className="h-9 w-full pl-9" /></div>
+      <div className="w-40 shrink-0"><MultiSelect value={value.mail_status} onChange={(next) => update('mail_status', next)} placeholder={t('filters.mailStatus')} selectedLabel={selectedLabel} options={DISPLAY_STATUSES.map((status) => ({ value: status, label: td(`filters.statuses.${status}`) }))} /></div>
+      <div className="w-40 shrink-0"><MultiSelect value={value.detection_mode} onChange={(next) => update('detection_mode', next)} placeholder={t('filters.detectionMode')} selectedLabel={selectedLabel} options={(['realtime', 'observe'] satisfies DetectionMode[]).map((mode) => ({ value: mode, label: t(`detectionMode.${mode}`) }))} /></div>
+      <div className="w-40 shrink-0"><MultiSelect value={value.risk_level} onChange={(next) => update('risk_level', next)} placeholder={t('filters.riskLevel')} selectedLabel={selectedLabel} options={(['suspicious', 'low', 'medium', 'high'] satisfies RiskLevel[]).map((risk) => ({ value: risk, label: t(`riskLevel.${risk}`) }))} /></div>
+      <Button size="sm" className="h-9 shrink-0 gap-1.5" onClick={submit}><Search className="size-4" />{tc('search')}</Button><Button variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={() => { setKeyword(''); onReset(); }}><RotateCcw className="size-4" />{tc('reset')}</Button>
     </div>
-  );
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="inline-flex overflow-hidden rounded-md border border-border">{(['today', '7d', '30d', 'custom'] as TimeRangeKey[]).map((range) => <Button key={range} type="button" size="sm" variant={value.rangeKey === range ? 'default' : 'ghost'} onClick={() => update('rangeKey', range)} className={cn('h-9 rounded-none border-0 px-4 text-sm shadow-none', value.rangeKey !== range && 'text-muted-foreground data-[hovered=true]:bg-accent')}>{t(`filters.range.${range}`)}</Button>)}</div>
+      {value.rangeKey === 'custom' ? <DateTimeRangeInput start={value.start} end={value.end} onStartChange={(next) => update('start', next)} onEndChange={(next) => update('end', next)} startLabel={t('filters.start')} endLabel={t('filters.end')} /> : null}
+    </div>
+  </div>;
 }

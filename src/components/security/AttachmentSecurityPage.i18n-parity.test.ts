@@ -11,8 +11,8 @@ const required = [
   'tabs.basicLimit', 'tabs.antivirus', 'tabs.image', 'tabs.encrypted',
   'direction.receiveFull',
   'toast.loadFailed', 'toast.saveSuccess', 'toast.saveFailed',
-  ...['quarantine', 'audit', 'reject', 'discard', 'accept', 'partial_skip'].map((key) => `actions.${key}`),
-  ...['quarantine', 'audit', 'reject', 'discard', 'accept'].map((key) => `actionDesc.${key}`),
+  ...['quarantine', 'audit', 'reject', 'discard', 'proceed', 'partial_skip'].map((key) => `actions.${key}`),
+  ...['quarantine', 'audit', 'reject', 'discard', 'proceed'].map((key) => `actionDesc.${key}`),
   ...[
     'attachmentStructure', 'currentDirection', 'items', 'levels', 'unlimited', 'unlimitedHint',
     'unlimitedWarning', 'nestedProtection', 'performanceProtection', 'seconds', 'receiveDefault',

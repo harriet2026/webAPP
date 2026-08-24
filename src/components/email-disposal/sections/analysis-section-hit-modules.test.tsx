@@ -77,6 +77,33 @@ beforeEach(() => {
 });
 
 describe('命中模块清单（GT-12727 §7.10）', () => {
+  it('AUTH proceed 只显示为命中模块，不生成处置依据卡片', () => {
+    const detail = detailWithModules();
+    detail.reason = 'accepted by rules: 22';
+    detail.disposal_basis = {
+      policy_key: 'AUTH',
+      rule_name: 'sysrule:auth_spoofing_spf_none',
+      rule_id: 'AUTH-22',
+      action: 'accept', // 历史根投影；modules[] 才是当前归属事实源。
+      modules: [{
+        policy_key: 'AUTH',
+        rule_name: 'sysrule:auth_spoofing_spf_none',
+        rule_id: 'AUTH-22',
+        action: 'proceed',
+        recipients: ['qfliu@dm163.cacter.com'],
+        effective_for: [],
+      }],
+    };
+
+    render(wrap(<AnalysisSection detail={detail} aiEnabled events={[]} />));
+
+    expect(screen.queryByTestId('analysis-disposal-basis')).not.toBeInTheDocument();
+    const hit = screen.getByTestId('analysis-hit-module-item');
+    expect(hit).toHaveTextContent('认证与仿冒检测');
+    expect(hit).toHaveTextContent('AUTH-22');
+    expect(hit).toHaveTextContent('进行下一步');
+  });
+
   it('渲染每条命中模块，并逐条标注生效 / 仅命中', () => {
     render(wrap(<AnalysisSection detail={detailWithModules()} aiEnabled events={[]} />));
     const items = screen.getAllByTestId('analysis-hit-module-item');

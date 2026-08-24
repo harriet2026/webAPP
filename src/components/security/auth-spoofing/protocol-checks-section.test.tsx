@@ -30,7 +30,7 @@ function makeConfig(overrides: Partial<ProtocolChecksConfig> = {}): ProtocolChec
     dkim: {
       fail: item('quarantine'),
       neutral: item('quarantine'),
-      partial: item('accept', false),
+      partial: item('proceed', false),
       none: item('audit'),
     },
     dmarc: {

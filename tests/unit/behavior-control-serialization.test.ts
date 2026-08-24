@@ -19,7 +19,7 @@ const baseForm: BehaviorControlFormData = {
   or_enabled: false,
   dim_a: 'mail_count',
   threshold_a: 50,
-  action: 'review',
+  action: 'audit',
 };
 
 describe('buildConditionTreeFromForm', () => {

@@ -12,11 +12,10 @@ import type { RuleForm } from './rule-form';
 // Pure read-only projection of `form` — no state of its own.
 
 const ACTION_COLOR_CLASS: Record<PrimaryAction, string> = {
-  none: 'bg-muted-foreground',
-  deliver: 'bg-action-deliver',
-  tagDeliver: 'bg-action-mark-deliver',
+  accept: 'bg-action-deliver',
+  proceed: 'bg-action-mark-deliver',
   quarantine: 'bg-action-quarantine',
-  review: 'bg-action-review',
+  audit: 'bg-action-review',
   discard: 'bg-action-drop',
 };
 
@@ -155,13 +154,7 @@ export function ActionSummary({ form }: Props) {
         data-testid="summary-full-expression"
       >
         <div className="mb-1 font-semibold">{t('disposition.fullExpressionTitle')}</div>
-        {action === 'none' ? (
-          <p>{t('disposition.noneHint')}</p>
-        ) : (
-          <p>
-            {t('disposition.willBeActioned', { action: actionLabel })}
-          </p>
-        )}
+        <p>{t('disposition.willBeActioned', { action: actionLabel })}</p>
         {enabledKeys.length > 0 && !terminal && (
           <>
             <p className="mt-1">{t('disposition.andExecuteAddons')}</p>
@@ -187,14 +180,12 @@ export function ActionSummary({ form }: Props) {
             </tr>
           </thead>
           <tbody>
-            {action !== 'none' && (
-              <tr>
-                <td className="border px-1.5 py-1">{actionLabel}</td>
-                <td className="border px-1.5 py-1">
-                  {t('disposition.summaryDefaultParams')}
-                </td>
-              </tr>
-            )}
+            <tr>
+              <td className="border px-1.5 py-1">{actionLabel}</td>
+              <td className="border px-1.5 py-1">
+                {t('disposition.summaryDefaultParams')}
+              </td>
+            </tr>
             {enabledKeys.map((k) => (
               <tr key={k}>
                 <td className="border px-1.5 py-1">{t(`addons.${k}` as never)}</td>

@@ -56,13 +56,12 @@ type ScopeFilter = 'all' | 'incoming' | 'outgoing' | 'internal';
 const PAGE_SIZE_OPTIONS = [50, 100, 200];
 
 // Same --action-* token mapping as ActionSummary.tsx / PolicyPipelinePage.tsx
-// (DESIGN.md's action-semantic palette); 'none' has no badge (rendered as
-// a plain "—" per layer-1's element list).
-const ACTION_BADGE_CLASS: Record<Exclude<PrimaryAction, 'none'>, string> = {
-  deliver: 'border-action-deliver/30 bg-action-deliver/10 text-action-deliver',
-  tagDeliver: 'border-action-mark-deliver/30 bg-action-mark-deliver/10 text-action-mark-deliver',
+// (DESIGN.md's action-semantic palette).
+const ACTION_BADGE_CLASS: Record<PrimaryAction, string> = {
+  accept: 'border-action-deliver/30 bg-action-deliver/10 text-action-deliver',
+  proceed: 'border-action-mark-deliver/30 bg-action-mark-deliver/10 text-action-mark-deliver',
   quarantine: 'border-action-quarantine/30 bg-action-quarantine/10 text-action-quarantine',
-  review: 'border-action-review/30 bg-action-review/10 text-action-review',
+  audit: 'border-action-review/30 bg-action-review/10 text-action-review',
   discard: 'border-action-drop/30 bg-action-drop/10 text-action-drop',
 };
 
@@ -402,13 +401,9 @@ export function AdvancedFilterRulesModule({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {action === 'none' ? (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        ) : (
-                          <Badge variant="outline" className={cn('text-xs', ACTION_BADGE_CLASS[action])}>
-                            {t(`primaryActions.${action}` as never)}
-                          </Badge>
-                        )}
+                        <Badge variant="outline" className={cn('text-xs', ACTION_BADGE_CLASS[action])}>
+                          {t(`primaryActions.${action}` as never)}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {expiry === null ? (

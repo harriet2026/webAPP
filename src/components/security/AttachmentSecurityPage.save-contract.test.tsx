@@ -144,16 +144,16 @@ beforeEach(() => {
   mocks.setSecurityModuleEnabled.mockResolvedValue(undefined);
   mocks.getTenantSettings.mockReset();
   mocks.getTenantSettings.mockResolvedValue({
-    antivirus: { virus_action: 'quarantine', timeout_action: 'accept' },
+    antivirus: { virus_action: 'quarantine', timeout_action: 'proceed' },
     image_detect: {
       ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light',
-      qr_max_count: 5, qr_light_action: 'quarantine', qr_deep_exceed_action: 'accept',
+      qr_max_count: 5, qr_light_action: 'quarantine', qr_deep_exceed_action: 'proceed',
       qr_deep_exceed_warn: true, qr_deep_routes: {},
     },
     encrypted: {
       detect_mode: 'detect_only', extract_password_from_body: true,
       extract_password_from_filename: true, use_password_book: true, recursive_detect: true,
-      max_password_attempts: 100, mark_suspicious: true, decrypt_fail_action: 'accept',
+      max_password_attempts: 100, mark_suspicious: true, decrypt_fail_action: 'proceed',
     },
   });
 });

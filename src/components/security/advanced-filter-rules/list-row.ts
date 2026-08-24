@@ -9,11 +9,10 @@ import type { PrimaryAction } from './conflict-matrix';
 // (deserializeGroups/parseAddons/...) that ruleToForm pulls in.
 
 const PRIMARY_ACTIONS: PrimaryAction[] = [
-  'none',
-  'deliver',
-  'tagDeliver',
+  'accept',
+  'proceed',
   'quarantine',
-  'review',
+  'audit',
   'discard',
 ];
 
@@ -35,7 +34,7 @@ export function parseRuleMetadata(metadata: Rule['metadata']): Record<string, un
 export function getRulePrimaryAction(rule: Pick<Rule, 'metadata'>): PrimaryAction {
   const meta = parseRuleMetadata(rule.metadata);
   const pa = meta?.primary_action;
-  return typeof pa === 'string' && (PRIMARY_ACTIONS as string[]).includes(pa) ? (pa as PrimaryAction) : 'none';
+  return typeof pa === 'string' && (PRIMARY_ACTIONS as string[]).includes(pa) ? (pa as PrimaryAction) : 'proceed';
 }
 
 export function getRuleScope(rule: Pick<Rule, 'metadata'>): string[] {

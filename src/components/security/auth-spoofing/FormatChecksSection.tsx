@@ -157,7 +157,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
             </div>
           )}
 
-          {!item.observe_mode && item.action === 'mark-delivery' && (
+          {!item.observe_mode && item.action === 'proceed' && (
             <div className="pl-12">
               <AuthSpoofingTagPanel
                 value={item}

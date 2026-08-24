@@ -19,7 +19,7 @@ vi.mock('@/i18n/navigation', () => ({
 // GT-12719: the second entry became "nextStep"（进行下一步）—— the legend no
 // longer advertises tagDeliver as a pipeline outcome, it explains that the mail
 // keeps flowing into the following policies.
-const EXPECTED_ORDER = ['deliver', 'nextStep', 'quarantine', 'review', 'block', 'drop'];
+const EXPECTED_ORDER = ['accept', 'proceed', 'quarantine', 'audit', 'reject', 'discard'];
 
 const LOCALES = { zh, en, th, ru } as Record<string, { pipeline: Record<string, string> }>;
 

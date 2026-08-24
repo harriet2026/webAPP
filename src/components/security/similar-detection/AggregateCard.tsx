@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import type { SimilarDetectionDirectionConfig, SimilarDetectionType } from './types';
-import { SIMILAR_DETECTION_ACTION_OPTIONS } from './action-options';
+import { getSimilarDetectionActionOptions } from './action-options';
 import { TagDeliveryPanel } from './TagDeliveryPanel';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -177,8 +177,8 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SIMILAR_DETECTION_ACTION_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
+              {getSimilarDetectionActionOptions(value.action).map((opt) => (
+                <SelectItem key={opt.value} value={opt.value} disabled={opt.disabled}>
                   {t(opt.labelKey)}
                 </SelectItem>
               ))}
@@ -187,8 +187,8 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
         </div>
       </div>
 
-      {/* 标记投递配置 */}
-      {value.action === 'mark-delivery' && !value.observe_mode && (
+      {/* 白名单投递的附加标记配置 */}
+      {value.action === 'accept' && !value.observe_mode && (
         <div className="mt-4">
           <TagDeliveryPanel value={value} onChange={onChange} disabled={disabled} />
         </div>

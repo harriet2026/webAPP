@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useApiRequest } from '@/lib/api/client';
 import type { MailLogDetail, MailChildEvent } from '@/types/email-disposal-detail';
@@ -7,6 +8,7 @@ import { ThreatSummaryCard } from './overview/threat-summary-card';
 import { SendReceiveContextCard } from './overview/send-receive-context-card';
 import { InvestigationWorkbench } from './overview/investigation-workbench';
 import { downloadAttachment } from '../lib/disposal-detail-api';
+import { groupDispositionBasisByPolicy, hasStructuredBasisFacts } from '../lib/disposal-basis-config';
 
 interface OverviewSectionProps {
   detail: MailLogDetail;
@@ -38,6 +40,7 @@ interface OverviewSectionProps {
 
 export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, events, readOnly = false, onViewBasis, onViewRawLogs }: OverviewSectionProps) {
   const { apiRequest } = useApiRequest();
+  const overviewRef = useRef<HTMLDivElement>(null);
   // GT-12584：附件「下载」的真实实现（此前无人注入 onDownload，点击只弹
   // 「暂未实现」toast）。translator 作用域与 downloadEml 的约定一致。
   const tOverview = useTranslations('emailDisposal.detail.overview');
@@ -46,9 +49,16 @@ export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, 
   // (SenderActions, threaded through ThreatSummaryCard) key off exactly one
   // recipient on the envelope -- mirrors the demo's `recipientEmails.length`.
   const isSingleRecipient = (detail.recipients?.length ?? 0) === 1;
+  const hasOverviewBasis = groupDispositionBasisByPolicy(detail.disposal_basis).length > 0 ||
+    (!hasStructuredBasisFacts(detail.disposal_basis) && Boolean(detail.reason));
+  const onViewPolicyDetail = onViewBasis ?? (hasOverviewBasis
+    ? () => overviewRef.current
+      ?.querySelector<HTMLElement>('[data-testid="email-disposal-overview-disposal-basis"]')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    : undefined);
 
   return (
-    <div className="space-y-4">
+    <div ref={overviewRef} className="space-y-4">
       <ThreatSummaryCard
         detail={detail}
         apiRequest={apiRequest}
@@ -64,7 +74,7 @@ export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, 
         onDisposed={onRefetch}
         readOnly={readOnly}
         events={events}
-        onViewPolicyDetail={onViewBasis}
+        onViewPolicyDetail={onViewPolicyDetail}
       />
 
       {/* 研判工作台（C1-C7）：左=邮件原文三视图，右=内容实体检测（Task 9 的
@@ -76,7 +86,7 @@ export function OverviewSection({ detail, onRefetch, aiInterpretEnabled = true, 
         onDisposed={onRefetch}
         onDownload={(a) => void downloadAttachment(detail.id, a, tOverview)}
         onViewSmtpSession={onViewRawLogs}
-        onViewPolicyDetail={onViewBasis}
+        onViewPolicyDetail={onViewPolicyDetail}
       />
     </div>
   );

@@ -98,7 +98,7 @@ describe('applyTemplate', () => {
     // 压根没配 PTR；严格档往往全量启用、误杀面反而更大，而缺少证据不足以支撑
     // 退信这种不可挽回的动作。后端有对应守卫
     // TestPTRNeutralConditions_NeverBlockInAnyTemplate。
-    expect(r.ptr.noptr.action).toBe('mark-delivery');
+    expect(r.ptr.noptr.action).toBe('proceed');
   });
 
   it('transforms strict to loose', () => {
@@ -107,16 +107,15 @@ describe('applyTemplate', () => {
     expect(r.template).toBe('loose');
     expect(r.spf.fail.action).toBe('quarantine');
     expect(r.dkim.fail.action).toBe('quarantine');
-    expect(r.spf.none.action).toBe('mark-delivery');
+    expect(r.spf.none.action).toBe('proceed');
   });
 
-  // GT-12833：模板不再产出 accept——原先用 accept 表达的「放行」场景一律改为
-  // mark-delivery（标记放行），且所有检查项恒为启用态，由动作本身决定处置强度。
-  it('maps former accept scenarios to mark-delivery and keeps them enabled', () => {
+  // 非决定性场景使用 proceed，命中后继续匹配后续规则；是否打标由附加配置决定。
+  it('maps non-decisive scenarios to proceed and keeps them enabled', () => {
     const r = applyTemplate(baseStandard, 'loose');
-    expect(r.spf.none.action).toBe('mark-delivery');
+    expect(r.spf.none.action).toBe('proceed');
     expect(r.spf.none.enabled).toBe(true);
-    expect(r.dkim.partial.action).toBe('mark-delivery');
+    expect(r.dkim.partial.action).toBe('proceed');
     expect(r.dkim.partial.enabled).toBe(true);
   });
 

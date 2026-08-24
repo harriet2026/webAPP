@@ -162,7 +162,7 @@ test.describe('Advanced Filter Rules Phase 2 — disposition gating & test-analy
       page: 'advanced_rules',
       priority: 50,
       condition_tree: { type: 'condition', field: 'subject', operator: 'contain', value: `hist-${uniqueSuffix()}` },
-      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'block' },
+      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'reject' },
       is_active: true,
     });
     expect(createResp.ok()).toBeTruthy();
@@ -215,7 +215,7 @@ test.describe('Advanced Filter Rules Phase 2 — disposition gating & test-analy
       page: 'advanced_rules',
       priority: 50,
       condition_tree: { type: 'condition', field: 'subject', operator: 'contain', value: `effect-${uniqueSuffix()}` },
-      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'block' },
+      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'reject' },
       is_active: true,
     });
     expect(createResp.ok()).toBeTruthy();

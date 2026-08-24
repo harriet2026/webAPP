@@ -25,7 +25,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useApiRequest } from '@/lib/api/client';
-import { useTenant } from '@/hooks/use-tenant';
 import {
   createStrategy,
   updateStrategy,
@@ -39,6 +38,7 @@ import { ResourceLimitsBlock } from './blocks/resource-limits-block';
 import { DispositionBlock } from './blocks/disposition-block';
 import type { ThreatRetroStrategy } from '@/types/threat-retro';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { useThreatRetroAccess } from '../access';
 
 interface Props {
   open: boolean;
@@ -57,7 +57,7 @@ export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Pr
   const t = useTranslations('threatRetroStrategy');
   const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
-  const { isAdmin } = useTenant();
+  const { canEdit } = useThreatRetroAccess();
 
   const { data: agentState } = useQuery({
     queryKey: ['tr-agent-state'],
@@ -176,8 +176,8 @@ export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Pr
                 fieldset disables every nested control so the whole strategy
                 form is greyed out, not just the save buttons (review P2-10). */}
             <fieldset
-              disabled={!isAdmin}
-              className={`m-0 min-w-0 space-y-6 border-0 p-0 ${!isAdmin ? 'opacity-60' : ''}`}
+              disabled={!canEdit}
+              className={`m-0 min-w-0 space-y-6 border-0 p-0 ${!canEdit ? 'opacity-60' : ''}`}
             >
               <BasicInfoBlock draft={draft} patch={patch} errors={{ name: errors.name }} />
               <TriggerBlock
@@ -195,7 +195,7 @@ export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Pr
               <ResourceLimitsBlock
                 draft={draft}
                 patch={patch}
-                isAdmin={isAdmin}
+                isAdmin={canEdit}
                 agentState={agentState}
                 errors={{ maxToolCalls: errors.maxToolCalls, maxUrlFetches: errors.maxUrlFetches }}
               />
@@ -221,7 +221,7 @@ export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Pr
             <Button
               data-testid="strategy-save"
               onClick={handleSave}
-              disabled={!isAdmin || saveMutation.isPending || saveAndTestMutation.isPending}
+              disabled={!canEdit || saveMutation.isPending || saveAndTestMutation.isPending}
             >
               {saveMutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -232,7 +232,7 @@ export function StrategySheet({ open, onOpenChange, initial, list, onSaved }: Pr
               <Button
                 variant="secondary"
                 onClick={handleSaveAndTest}
-                disabled={!isAdmin || !agentState?.enabled || saveMutation.isPending || saveAndTestMutation.isPending}
+                disabled={!canEdit || !agentState?.enabled || saveMutation.isPending || saveAndTestMutation.isPending}
                 data-testid="strategy-save-and-test"
               >
                 {saveAndTestMutation.isPending ? (

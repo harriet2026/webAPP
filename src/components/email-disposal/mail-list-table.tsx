@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useState, useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useTranslations, useLocale, useFormatter } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, ArrowUpDown, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
@@ -79,11 +79,23 @@ export interface TableHeaderFilters {
 // The leading select checkbox and the trailing operations column are
 // structural and always rendered.
 const TOGGLEABLE_COLUMNS = [
-  'time', 'direction', 'subject', 'senderIp', 'sender', 'recipient',
+  'time', 'direction', 'subject', 'senderIp', 'senderRecipient',
   'disposalBasis', 'mailType', 'similarity', 'action', 'status',
 ] as const;
 type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
 const COLUMN_PREF_KEY = 'osg.disposal.hiddenColumns';
+const DENSITY_PREF_KEY = 'osg.disposal.density';
+type TableDensity = 'comfortable' | 'compact';
+const DIRECTION_BADGE_CLASSES: Record<string, string> = {
+  incoming: 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400',
+  outgoing: 'border-emerald-500 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400',
+  internal: 'border-border text-muted-foreground',
+};
+const NEUTRAL_DIRECTION_BADGE_CLASS = 'border-border text-muted-foreground';
+
+const subscribeToClientEnvironment = () => () => undefined;
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 export function MailListTable({
   items,
@@ -109,6 +121,12 @@ export function MailListTable({
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
   const rawLocale = useLocale();
+  const format = useFormatter();
+  const mounted = useSyncExternalStore(
+    subscribeToClientEnvironment,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
   // Map next-intl locale to one of the disposal-basis dictionary's supported
   // langs; unknown locales fall back to zh (the dictionary's primary language).
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
@@ -123,6 +141,13 @@ export function MailListTable({
   const localizeEnum = useCallback((key: string, fallback: string) => {
     return t.has(key as never) ? t(key as never) : fallback;
   }, [t]);
+
+  const formatRelativeTime = useCallback((timestamp: string | undefined | null) => {
+    if (!timestamp) return formatDate(timestamp);
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime()) || !mounted) return formatDate(timestamp);
+    return format.relativeTime(date);
+  }, [format, mounted]);
 
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
   const hasSelection = selectedIds.size > 0;
@@ -181,6 +206,37 @@ export function MailListTable({
     (key: ToggleableColumn) => !hiddenColumns.has(key),
     [hiddenColumns],
   );
+
+  // Density is a browser-only display preference. Hydrate it after mount so
+  // the server render and first client render both use the comfortable mode.
+  const [density, setDensity] = useState<TableDensity>('comfortable');
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        const storedDensity = localStorage.getItem(DENSITY_PREF_KEY);
+        if (storedDensity === 'comfortable' || storedDensity === 'compact') {
+          setDensity(storedDensity);
+        }
+      } catch {
+        /* ignore unavailable storage */
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const toggleDensity = useCallback(() => {
+    setDensity((currentDensity) => {
+      const nextDensity: TableDensity = currentDensity === 'compact' ? 'comfortable' : 'compact';
+      try {
+        localStorage.setItem(DENSITY_PREF_KEY, nextDensity);
+      } catch {
+        /* ignore persistence failure */
+      }
+      return nextDensity;
+    });
+  }, []);
+  const isCompact = density === 'compact';
+  const headDensityClass = isCompact ? 'h-8' : undefined;
+  const cellDensityClass = isCompact ? 'py-1.5' : undefined;
 
   const directionOptions = ['incoming', 'outgoing', 'internal'];
   const emailTypeOptions = ['normal', 'subscription', 'advertising', 'spam', 'harmful', 'phishing', 'account_compromised', 'suspicious', 'spoofing', 'virus', 'sensitive'];
@@ -362,6 +418,18 @@ export function MailListTable({
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{t('table.densitySettings')}</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem
+                checked={isCompact}
+                onCheckedChange={toggleDensity}
+                onSelect={(event) => event.preventDefault()}
+                data-testid="disposal-density-toggle"
+              >
+                {t('table.compactDensity')}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -374,7 +442,7 @@ export function MailListTable({
       const nextSort: TimeSortOrder = timeSort === 'none' ? 'asc' : timeSort === 'asc' ? 'desc' : 'none';
       const SortIcon = timeSort === 'asc' ? ArrowUp : timeSort === 'desc' ? ArrowDown : ArrowUpDown;
       return (
-        <TableHead className="text-xs" data-testid="disposal-column-header-time">
+        <TableHead className={cn('text-xs', headDensityClass)} data-testid="disposal-column-header-time">
           <Button
             type="button"
             variant="ghost"
@@ -388,10 +456,10 @@ export function MailListTable({
         </TableHead>
       );
     }
-    if (key === 'direction') return <TableHead className="text-xs" data-testid="disposal-column-header-direction">{headerFilter(t('table.direction'), 'directions', directionOptions, (option) => localizeEnum(`filters.${option}`, option))}</TableHead>;
-    if (key === 'mailType') return <TableHead className="text-xs" data-testid="disposal-column-header-mailType">{headerFilter(t('table.mailType'), 'emailTypes', emailTypeOptions, (option) => t(`filters.mailTypes.${option}`))}</TableHead>;
-    if (key === 'status') return <TableHead className="text-xs" data-testid="disposal-column-header-status">{headerFilter(t('table.status'), 'statuses', statusOptions, (option) => t(`filters.statuses.${option}`))}</TableHead>;
-    return <TableHead className="text-xs" data-testid={`disposal-column-header-${key}`}>{t(`table.${key}`)}</TableHead>;
+    if (key === 'direction') return <TableHead className={cn('text-xs', headDensityClass)} data-testid="disposal-column-header-direction">{headerFilter(t('table.direction'), 'directions', directionOptions, (option) => localizeEnum(`filters.${option}`, option))}</TableHead>;
+    if (key === 'mailType') return <TableHead className={cn('text-xs', headDensityClass)} data-testid="disposal-column-header-mailType">{headerFilter(t('table.mailType'), 'emailTypes', emailTypeOptions, (option) => t(`filters.mailTypes.${option}`))}</TableHead>;
+    if (key === 'status') return <TableHead className={cn('text-xs', headDensityClass)} data-testid="disposal-column-header-status">{headerFilter(t('table.status'), 'statuses', statusOptions, (option) => t(`filters.statuses.${option}`))}</TableHead>;
+    return <TableHead className={cn('text-xs', headDensityClass)} data-testid={`disposal-column-header-${key}`}>{t(`table.${key}`)}</TableHead>;
   };
 
   // colSpan for the loading / empty message row: 1 select column + visible
@@ -407,7 +475,7 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r">
+                <TableHead className={cn('sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r', headDensityClass)}>
                   <div className="flex items-center justify-center h-full w-10">
                     <Checkbox checked={false} disabled aria-label="Select all" />
                   </div>
@@ -416,14 +484,13 @@ export function MailListTable({
                 {colHead('direction')}
                 {colHead('subject')}
                 {colHead('senderIp')}
-                {colHead('sender')}
-                {colHead('recipient')}
+                {colHead('senderRecipient')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
                 {colHead('action')}
                 {colHead('status')}
-                <TableHead className="sticky right-0 z-20 min-w-32 border-l bg-card text-xs">{t('table.operations')}</TableHead>
+                <TableHead className={cn('sticky right-0 z-20 min-w-20 border-l bg-card text-xs', headDensityClass)}>{t('table.operations')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -448,7 +515,7 @@ export function MailListTable({
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r">
+                <TableHead className={cn('sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r', headDensityClass)}>
                   <div className="flex items-center justify-center h-full w-10">
                     <Checkbox checked={false} disabled aria-label="Select all" />
                   </div>
@@ -457,14 +524,13 @@ export function MailListTable({
                 {colHead('direction')}
                 {colHead('subject')}
                 {colHead('senderIp')}
-                {colHead('sender')}
-                {colHead('recipient')}
+                {colHead('senderRecipient')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
                 {colHead('action')}
                 {colHead('status')}
-                <TableHead className="sticky right-0 z-20 min-w-32 border-l bg-card text-xs">{t('table.operations')}</TableHead>
+                <TableHead className={cn('sticky right-0 z-20 min-w-20 border-l bg-card text-xs', headDensityClass)}>{t('table.operations')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -560,7 +626,7 @@ export function MailListTable({
           <TableHeader>
             <TableRow>
               <TableHead
-                className="sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r"
+                className={cn('sticky left-0 z-30 w-10 min-w-[40px] max-w-[40px] p-0 bg-card border-r', headDensityClass)}
                 data-testid="disposal-select-column"
               >
                 <div className="flex items-center justify-center h-full w-10">
@@ -571,14 +637,13 @@ export function MailListTable({
               {colHead('direction')}
               {colHead('subject')}
               {colHead('senderIp')}
-              {colHead('sender')}
-              {colHead('recipient')}
+              {colHead('senderRecipient')}
               {colHead('disposalBasis')}
               {colHead('mailType')}
               {aiEnabled && similarMode && colHead('similarity')}
               {colHead('action')}
               {colHead('status')}
-              <TableHead className="sticky right-0 z-20 min-w-32 border-l bg-card text-xs" data-testid="disposal-operations-column">{t('table.operations')}</TableHead>
+              <TableHead className={cn('sticky right-0 z-20 min-w-20 border-l bg-card text-xs', headDensityClass)} data-testid="disposal-operations-column">{t('table.operations')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -603,6 +668,7 @@ export function MailListTable({
                   className={cn(
                     'sticky left-0 z-10 w-10 min-w-[40px] max-w-[40px] p-0 border-r bg-card transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
                     selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
+                    cellDensityClass,
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -615,46 +681,61 @@ export function MailListTable({
                   </div>
                 </TableCell>
                 {isColVisible('time') && (
-                <TableCell className="text-xs whitespace-nowrap" data-testid={`disposal-cell-${item.id}-time`}>
-                  {formatDate(item.timestamp)}
+                <TableCell className={cn('text-xs whitespace-nowrap', cellDensityClass)} data-testid={`disposal-cell-${item.id}-time`}>
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="cursor-default" />}>
+                      {formatRelativeTime(item.timestamp)}
+                    </TooltipTrigger>
+                    <TooltipContent>{formatDate(item.timestamp)}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
                 )}
                 {isColVisible('direction') && (
-                <TableCell className="text-xs" data-testid={`disposal-cell-${item.id}-direction`}>
-                  <Badge variant="outline">{localizeEnum(`filters.${item.direction}` as const, item.direction)}</Badge>
+                <TableCell className={cn('text-xs', cellDensityClass)} data-testid={`disposal-cell-${item.id}-direction`}>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      'h-5 px-1.5 py-0 text-[10px] font-normal',
+                      DIRECTION_BADGE_CLASSES[item.direction] ?? NEUTRAL_DIRECTION_BADGE_CLASS,
+                    )}
+                  >
+                    {localizeEnum(`filters.${item.direction}` as const, item.direction)}
+                  </Badge>
                 </TableCell>
                 )}
                 {isColVisible('subject') && (
-                <TableCell className="text-xs max-w-[300px] truncate" data-testid={`disposal-cell-${item.id}-subject`}>
+                <TableCell className={cn('text-xs max-w-[300px] truncate', cellDensityClass)} data-testid={`disposal-cell-${item.id}-subject`}>
                   {item.subject}
                 </TableCell>
                 )}
                 {isColVisible('senderIp') && (
-                <TableCell className="text-xs max-w-[160px] truncate font-mono" data-testid={`disposal-cell-${item.id}-senderIp`}>
+                <TableCell className={cn('text-xs max-w-[160px] truncate font-mono', cellDensityClass)} data-testid={`disposal-cell-${item.id}-senderIp`}>
                   <Tooltip>
                     <TooltipTrigger render={<span className="cursor-default" />}>{item.clientIp || '—'}</TooltipTrigger>
                     <TooltipContent className="max-w-md text-xs">{item.clientIp || '—'}</TooltipContent>
                   </Tooltip>
                 </TableCell>
                 )}
-                {isColVisible('sender') && (
-                <TableCell className="text-xs max-w-[200px] truncate" data-testid={`disposal-cell-${item.id}-sender`}>
-                  <Tooltip>
-                    <TooltipTrigger render={<span className="cursor-default" />}>{item.sender}</TooltipTrigger>
-                    <TooltipContent className="max-w-md text-xs">{item.sender}</TooltipContent>
-                  </Tooltip>
-                </TableCell>
-                )}
-                {isColVisible('recipient') && (
-                <TableCell className="text-xs max-w-[200px] truncate" data-testid={`disposal-cell-${item.id}-recipient`}>
-                  <Tooltip>
-                    <TooltipTrigger render={<span className="cursor-default" />}>{(item.recipientList ?? (item.recipient ? [item.recipient] : [])) .join(', ') || '—'}</TooltipTrigger>
-                    <TooltipContent className="max-w-md text-xs">{(item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—'}</TooltipContent>
-                  </Tooltip>
+                {isColVisible('senderRecipient') && (
+                <TableCell className={cn('text-xs max-w-[320px] truncate', cellDensityClass)} data-testid={`disposal-cell-${item.id}-senderRecipient`}>
+                  {(() => {
+                    const recipients = (item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—';
+                    const full = `${item.sender} → ${recipients}`;
+                    return (
+                      <Tooltip>
+                        <TooltipTrigger render={<span className="inline-flex items-center gap-1 cursor-default" />}>
+                          <span className="truncate">{item.sender}</span>
+                          <ArrowRight className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          <span className="truncate">{recipients}</span>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-md text-xs">{full}</TooltipContent>
+                      </Tooltip>
+                    );
+                  })()}
                 </TableCell>
                 )}
                 {isColVisible('disposalBasis') && (
-                <TableCell className="text-xs max-w-[280px] truncate" data-testid={`disposal-cell-${item.id}-disposalBasis`}>
+                <TableCell className={cn('text-xs max-w-[280px] truncate', cellDensityClass)} data-testid={`disposal-cell-${item.id}-disposalBasis`}>
                   <DisposalBasisCell
                     mailLogId={item.id}
                     basis={item.disposalBasis}
@@ -668,7 +749,7 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('mailType') && (
-                <TableCell className="text-xs whitespace-nowrap" data-testid={`disposal-cell-${item.id}-mailType`}>
+                <TableCell className={cn('text-xs whitespace-nowrap', cellDensityClass)} data-testid={`disposal-cell-${item.id}-mailType`}>
                   {item.emailType ? (
                     <span className="inline-flex items-center gap-1">
                       <span>{t(mailTypeLabelKey(item.emailType))}</span>
@@ -695,12 +776,12 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {aiEnabled && similarMode && isColVisible('similarity') && (
-                  <TableCell className="text-xs whitespace-nowrap" data-testid={`disposal-cell-${item.id}-similarity`}>
+                  <TableCell className={cn('text-xs whitespace-nowrap', cellDensityClass)} data-testid={`disposal-cell-${item.id}-similarity`}>
                     {item.similarity != null ? `${item.similarity}%` : '—'}
                   </TableCell>
                 )}
                 {isColVisible('action') && (
-                <TableCell className="text-xs" data-testid={`disposal-cell-${item.id}-action`}>
+                <TableCell className={cn('text-xs', cellDensityClass)} data-testid={`disposal-cell-${item.id}-action`}>
                   {/* mixed + 有逐收件人明细时展示一个主要动作 Badge，完整明细放在 tooltip；
                       否则走原 badge 路径（单一动作展开）。 */}
                   {item.action === 'mixed' && item.recipientDispositions && item.recipientDispositions.length > 0 ? (
@@ -730,7 +811,7 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('status') && (
-                <TableCell className="text-xs" data-testid={`disposal-cell-${item.id}-status`}>
+                <TableCell className={cn('text-xs', cellDensityClass)} data-testid={`disposal-cell-${item.id}-status`}>
                   {/* 状态列无条件消费后端权威 display_statuses。逐收件人明细只负责
                       “执行动作”列的 tooltip，不能在 mixed 分支重新推导状态；否则
                       召回后会出现筛选命中 recall_success、列表仍显示投递/隔离态的
@@ -746,22 +827,30 @@ export function MailListTable({
                 <TableCell
                   data-testid={`disposal-cell-${item.id}-operations`}
                   className={cn(
-                    'sticky right-0 z-10 min-w-32 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
+                    'sticky right-0 z-10 min-w-20 border-l bg-card text-xs transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:bg-[color-mix(in_srgb,var(--muted)_40%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--muted)_45%,var(--card))] motion-reduce:transition-none',
                     selectedIds.has(item.id) && 'bg-[color-mix(in_srgb,var(--primary)_5%,var(--card))] group-data-[hovered=true]:bg-[color-mix(in_srgb,var(--primary)_10%,var(--card))]',
+                    cellDensityClass,
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-end gap-1">
-                    <Button
-                      data-testid={`disposal-view-${item.id}`}
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 gap-1 px-2 text-sm text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
-                      onClick={() => onItemClick(item.id)}
-                    >
-                      <Eye />
-                      {t('table.view')}
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            data-testid={`disposal-view-${item.id}`}
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={t('table.view')}
+                            className="text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
+                            onClick={() => onItemClick(item.id)}
+                          >
+                            <Eye />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>{t('table.view')}</TooltipContent>
+                    </Tooltip>
                     {aiEnabled && (
                       <Tooltip>
                         <TooltipTrigger
@@ -769,12 +858,12 @@ export function MailListTable({
                             <Button
                               data-testid={`disposal-find-similar-${item.id}`}
                               variant="ghost"
-                              size="sm"
-                              className="h-7 gap-1 px-2 text-sm text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
+                              size="icon-xs"
+                              aria-label={t('table.findSimilar')}
+                              className="text-blue-600 data-[hovered=true]:bg-muted/65 data-[hovered=true]:text-blue-700"
                               onClick={() => onFindSimilar?.(item.id)}
                             >
                               <Search />
-                              {t('table.findSimilar')}
                             </Button>
                           }
                         />

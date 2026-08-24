@@ -4,8 +4,9 @@
 // 逐条展示 detail.entity_urls 的域名 + 威胁标注 + URL 原文，支持域名/URL 两级
 // 加黑；附件 tab（C7）逐条展示 detail.attachments 的文件名/大小/哈希 + AV 结论
 // （join detail.scan_results by md5），支持哈希加黑 + 下载。两个 tab 共用统一
-// 规则系统的邮件日志实体动作接口。后端校验实体归属并生成同方向、隔离动作的
-// content_rules 规则，前端不再拼条件树或硬编码优先级。
+// 规则系统的邮件日志实体动作接口。后端校验实体归属：域名生成可管理的
+// sender_filter 发信人域名黑名单，URL/附件哈希生成 content_rules；前端不再
+// 拼条件树或硬编码优先级。
 //
 // 威胁 badge 文案直接展示后端的 check_result/threat_type 原文；VirusTotal 分数
 // 独立渲染在 vt_score 字段存在时（"47/90" 形态，见 URLEntity.vt_score 注释）—
@@ -285,7 +286,9 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
             <AlertDialogTitle>
               {pending ? t(`confirmTitle.${pending.kind}`) : t('confirmTitle.domain')}
             </AlertDialogTitle>
-            <AlertDialogDescription>{t('confirmImpact')}</AlertDialogDescription>
+            <AlertDialogDescription>
+              {pending ? t(`confirmImpact.${pending.kind}`) : t('confirmImpact.domain')}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           {pending && (
             <div

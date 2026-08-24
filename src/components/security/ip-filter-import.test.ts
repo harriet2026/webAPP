@@ -13,7 +13,7 @@ import {
 // 原型要求：文本粘贴 + 文件上传 + 导入前预览 + 重复去重（覆盖/跳过）+ 上限 1000。
 // 复开（导入格式与导出一致）：文件格式为 rule-settings/v1 JSON envelope，见 parseExportEnvelope。
 
-const blOpts = (existing: string[] = [], defaultAction: 'block' | 'quarantine' = 'block') => ({
+const blOpts = (existing: string[] = [], defaultAction: 'reject' | 'quarantine' = 'reject') => ({
   listType: 'blacklist' as const,
   defaultAction,
   existingIpValues: existing,
@@ -27,7 +27,7 @@ describe('parseImportText - 基础解析', () => {
     expect(r.errorCount).toBe(0);
     expect(r.rows.map((x) => x.kind)).toEqual(['single', 'single', 'range']);
     // 无动作列 → 回退默认动作
-    expect(r.rows.every((x) => x.action === 'block')).toBe(true);
+    expect(r.rows.every((x) => x.action === 'reject')).toBe(true);
   });
 
   it('空行被忽略，不计入行号与总数', () => {
@@ -52,10 +52,10 @@ describe('parseImportText - 基础解析', () => {
 
 describe('parseImportText - CSV 三列', () => {
   it('IP,动作,备注 三列解析，动作别名生效', () => {
-    const r = parseImportText('1.2.3.4,隔离,可疑源\n5.6.7.8,block,黑IP', blOpts());
+    const r = parseImportText('1.2.3.4,隔离,可疑源\n5.6.7.8,reject,黑IP', blOpts());
     expect(r.rows[0].action).toBe('quarantine');
     expect(r.rows[0].remark).toBe('可疑源');
-    expect(r.rows[1].action).toBe('block');
+    expect(r.rows[1].action).toBe('reject');
   });
 
   it('CSV 动作列为空 → 回退默认动作', () => {
@@ -166,14 +166,14 @@ describe('parseExportEnvelope - 导出 JSON 解析', () => {
     const row = r.rules[0];
     expect(row.error).toBeNull();
     expect(row.ipValue).toBe('1.2.3.4');
-    expect(row.action).toBe('block'); // gateway reject → demo block
+    expect(row.action).toBe('reject');
     expect(row.remark).toBe('导出备注');
     expect(row.name).toBe('bl-rule-1');
     expect(row.priority).toBe(42);
     expect(row.isActive).toBe(false);
   });
 
-  it('metadata 为对象（非字符串）同样接受；accept+标记 header 反查为 tagDeliver', () => {
+  it('metadata 为对象（非字符串）同样接受；accept 与标记配置独立回填', () => {
     const rule = {
       name: 'wl-1', action: 'accept', priority: 7, is_active: true,
       metadata: {
@@ -183,7 +183,8 @@ describe('parseExportEnvelope - 导出 JSON 解析', () => {
     };
     const r = parseExportEnvelope(envelope([rule]), 'whitelist');
     if ('error' in r) throw new Error('unexpected envelope error');
-    expect(r.rules[0].action).toBe('tagDeliver');
+    expect(r.rules[0].action).toBe('accept');
+    expect(r.rules[0].addWhitelistTag).toBe(true);
     expect(r.rules[0].error).toBeNull();
   });
 
@@ -274,16 +275,16 @@ describe('parseImportInputs - 文本 + JSON 文件合并管线', () => {
 describe('工具函数', () => {
   it('parseActionAlias 识别中英与内部词表，空/未知返回 null', () => {
     expect(parseActionAlias('隔离')).toBe('quarantine');
-    expect(parseActionAlias('BLOCK')).toBe('block');
-    expect(parseActionAlias('标记投递')).toBe('tagDeliver');
+    expect(parseActionAlias('REJECT')).toBe('reject');
+    expect(parseActionAlias('投递')).toBe('accept');
     expect(parseActionAlias('')).toBeNull();
     expect(parseActionAlias('乱写')).toBeNull();
   });
 
   it('actionMatchesListType 区分黑白名单动作', () => {
-    expect(actionMatchesListType('block', 'blacklist')).toBe(true);
-    expect(actionMatchesListType('deliver', 'blacklist')).toBe(false);
-    expect(actionMatchesListType('tagDeliver', 'whitelist')).toBe(true);
+    expect(actionMatchesListType('reject', 'blacklist')).toBe(true);
+    expect(actionMatchesListType('accept', 'blacklist')).toBe(false);
+    expect(actionMatchesListType('accept', 'whitelist')).toBe(true);
     expect(actionMatchesListType('quarantine', 'whitelist')).toBe(false);
   });
 });

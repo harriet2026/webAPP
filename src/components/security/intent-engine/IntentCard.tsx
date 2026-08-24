@@ -10,12 +10,12 @@ import type {
   DetectionMode,
 } from '@/types/intent-engine';
 import {
-  RECEIVE_UI_ACTIONS,
-  NON_RECEIVE_UI_ACTIONS,
+  INTENT_UI_ACTIONS,
   RISK_LEVEL_OF,
   toUIAction,
   thresholdActionSummary,
   applyUIAction,
+  applyThresholdSegments,
 } from '@/types/intent-engine';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +26,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { ChevronDown, ChevronRight, AlertTriangle, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
-import { MarkDeliverConfig } from './MarkDeliverConfig';
+import { ProceedMarkConfig } from './ProceedMarkConfig';
 import { ThresholdSegmentConfig } from './ThresholdSegmentConfig';
 
 interface IntentCardProps {
@@ -61,10 +61,10 @@ const RISK_STYLES: Record<IntentRiskLevel, { border: string; bg: string; badge: 
 
 // GT-11743/D-09: 动作色映射 — 卡头 Badge + Select 选项文字色，对齐 demo 动作语义色
 const ACTION_TEXT_COLOR: Record<UIIntentAction, string> = {
-  mark_deliver: 'text-[var(--action-mark-deliver)]',
+  accept: 'text-[var(--action-deliver)]',
+  proceed: 'text-[var(--action-mark-deliver)]',
   quarantine: 'text-[var(--action-quarantine)]',
   audit: 'text-[var(--action-review)]',
-  reject: 'text-[var(--action-block)]',
   discard: 'text-red-700 dark:text-red-400',
 };
 
@@ -86,14 +86,14 @@ export function IntentCard({
 
   const risk = RISK_LEVEL_OF[intent];
   const riskStyles = RISK_STYLES[risk];
-  const uiActions = direction === 'receive' ? RECEIVE_UI_ACTIONS : NON_RECEIVE_UI_ACTIONS;
+  const uiActions = INTENT_UI_ACTIONS;
   const uiAction = toUIAction(value);
   const thresholdSummary = thresholdActionSummary(value.threshold_segments);
   const detectionMode: DetectionMode = value.detection_mode || 'classification';
   const dimmed = !value.enabled;
-  const showHighRiskWarning = uiAction === 'mark_deliver' && risk === 'high';
-  const showMarkDeliverConfig =
-    direction === 'receive' && uiAction === 'mark_deliver' && detectionMode === 'classification';
+  const showHighRiskWarning = uiAction === 'proceed' && risk === 'high';
+  const showProceedMarkConfig = uiAction === 'proceed' && detectionMode === 'classification';
+  const showThresholdMarkConfig = detectionMode === 'threshold' && thresholdSummary.includes('proceed');
 
   const handleActionChange = (v: string | null) => {
     if (!v) return;
@@ -105,7 +105,7 @@ export function IntentCard({
   };
 
   const handleThresholdChange = (segments: IntentSingleConfig['threshold_segments']) => {
-    onChange({ ...value, threshold_segments: segments });
+    onChange(applyThresholdSegments(value, segments, intent));
   };
 
   // 卡片头是唯一可点区域（展开/收起）——pointer 驱动 hover（柔和交互反馈规格 §6.4/§7.2）。
@@ -282,8 +282,8 @@ export function IntentCard({
                     )}
                   </div>
                 </div>
-                {showMarkDeliverConfig && value.mark_config && (
-                  <MarkDeliverConfig
+                {showProceedMarkConfig && value.mark_config && (
+                  <ProceedMarkConfig
                     value={value.mark_config}
                     intent={intent}
                     onChange={(mark_config) => onChange({ ...value, mark_config })}
@@ -295,12 +295,22 @@ export function IntentCard({
 
             {/* 分段阈值模式配置 */}
             {detectionMode === 'threshold' && value.threshold_segments && (
-              <ThresholdSegmentConfig
-                segments={value.threshold_segments}
-                onChange={handleThresholdChange}
-                direction={direction}
-                disabled={!value.enabled || !engineEnabled}
-              />
+              <div className="space-y-3">
+                <ThresholdSegmentConfig
+                  segments={value.threshold_segments}
+                  onChange={handleThresholdChange}
+                  direction={direction}
+                  disabled={!value.enabled || !engineEnabled}
+                />
+                {showThresholdMarkConfig && value.mark_config && (
+                  <ProceedMarkConfig
+                    value={value.mark_config}
+                    intent={intent}
+                    onChange={(mark_config) => onChange({ ...value, mark_config })}
+                    disabled={!value.enabled || !engineEnabled}
+                  />
+                )}
+              </div>
             )}
           </div>
         )}

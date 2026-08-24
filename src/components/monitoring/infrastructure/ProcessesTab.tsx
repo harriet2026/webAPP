@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
+import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,38 @@ interface ProcessesTabProps {
 }
 
 type DockerFilterState = 'running' | 'stopped' | 'restarting' | null;
+
+// Process status only expresses whether a monitored process exists. Resource
+// anomalies belong to their dedicated metrics and alerting rules, so this
+// table deliberately has no warning/error state.
+function useProcStatusBadge() {
+  const t = useTranslations('infrastructure.processes');
+  return (status: string): { className: string; label: string } => {
+    switch (status) {
+      case 'running':
+      case 'normal':
+      case 'green':
+      case 'success':
+        return {
+          className: 'border-transparent bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+          label: t('running'),
+        };
+      default:
+        return {
+          className: 'border-transparent bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
+          label: t('stopped'),
+        };
+    }
+  };
+}
+
+// Overlay2 usage ring color per html-spec §5: >85% warning yellow, >95%
+// critical red, otherwise green.
+function overlay2Color(pct: number): string {
+  if (pct > 95) return 'text-red-500';
+  if (pct > 85) return 'text-yellow-500';
+  return 'text-green-500';
+}
 
 // Distinct colors for up to 8 services
 const SERVICE_COLORS = [
@@ -137,6 +170,7 @@ function ServiceMultiSelect({
 
 export function ProcessesTab({ node, range }: ProcessesTabProps) {
   const t = useTranslations('infrastructure');
+  const procStatusBadge = useProcStatusBadge();
   const [dockerFilter, setDockerFilter] = useState<DockerFilterState>(null);
   const [selectedSvcs, setSelectedSvcs] = useState<string[] | null>(null); // null = all
 
@@ -232,9 +266,14 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
           onClick={() => setDockerFilter('running')}
           data-testid="monitor-infrastructure-container-running"
         >
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{docker?.running ?? '-'}</div>
-            <div className="text-sm text-muted-foreground">{t('processes.running')}</div>
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <CheckCircle2 className="w-6 h-6 text-green-500" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-green-500">{docker?.running ?? '-'}</div>
+              <div className="text-sm text-muted-foreground">{t('processes.running')}</div>
+            </div>
           </CardContent>
         </Card>
         <Card
@@ -242,9 +281,14 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
           onClick={() => setDockerFilter('stopped')}
           data-testid="monitor-infrastructure-container-stopped"
         >
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{docker?.stopped ?? '-'}</div>
-            <div className="text-sm text-muted-foreground">{t('processes.stopped')}</div>
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+              <XCircle className="w-6 h-6 text-gray-400" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-500">{docker?.stopped ?? '-'}</div>
+              <div className="text-sm text-muted-foreground">{t('processes.stopped')}</div>
+            </div>
           </CardContent>
         </Card>
         <Card
@@ -252,9 +296,14 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
           onClick={() => setDockerFilter('restarting')}
           data-testid="monitor-infrastructure-container-restarting"
         >
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{docker?.restarts ?? '-'}</div>
-            <div className="text-sm text-muted-foreground">{t('processes.restarts')}</div>
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+              <RefreshCw className="w-6 h-6 text-yellow-500" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-500">{docker?.restarts ?? '-'}</div>
+              <div className="text-sm text-muted-foreground">{t('processes.restarts')}</div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -304,15 +353,38 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
           <CardTitle>{t('processes.overlay2')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="h-3 flex-1 rounded-full bg-muted">
-              <div
-                className="h-3 rounded-full bg-primary transition-all"
-                style={{ width: `${Math.min((overlay2 ?? 0), 100)}%` }}
-              />
-            </div>
-            <span className="text-sm font-medium">{overlay2 ?? 0}%</span>
-          </div>
+          {(() => {
+            const pct = overlay2 ?? 0;
+            const circumference = 2 * Math.PI * 56;
+            const color = overlay2Color(pct);
+            return (
+              <div className="flex items-center gap-6">
+                <div className="relative h-[140px] w-[140px] shrink-0">
+                  <svg width="140" height="140" viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="56" fill="none" strokeWidth="12" className="stroke-muted" />
+                    <circle
+                      cx="70"
+                      cy="70"
+                      r="56"
+                      fill="none"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      strokeDasharray={`${(Math.min(pct, 100) / 100) * circumference} ${circumference}`}
+                      transform="rotate(-90 70 70)"
+                      className={`stroke-current transition-all ${color}`}
+                      data-testid="monitor-infrastructure-overlay-arc"
+                    />
+                  </svg>
+                  <div className={`absolute inset-0 flex items-center justify-center text-xl font-bold ${color}`}>
+                    {pct}%
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {t('processes.overlay2Thresholds')}
+                </div>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 
@@ -328,8 +400,8 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('processes.processName')}</TableHead>
-                  <TableHead>{t('processes.pid')}</TableHead>
                   <TableHead>{t('processes.status')}</TableHead>
+                  <TableHead>{t('processes.detail')}</TableHead>
                   <TableHead className="text-right">{t('processes.memory')}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -337,11 +409,13 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
                 {processes.map((p) => (
                   <TableRow key={p.name} data-testid={`monitor-infrastructure-process-row-${p.name.toLowerCase()}`}>
                     <TableCell className="font-mono">{p.name}</TableCell>
-                    <TableCell>{p.pid}</TableCell>
                     <TableCell>
-                      <Badge variant={p.status === 'running' ? 'default' : 'secondary'}>
-                        {p.status}
+                      <Badge className={procStatusBadge(p.status).className}>
+                        {procStatusBadge(p.status).label}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {(p.count ?? 0) > 1 ? t('processes.procCount', { count: p.count ?? 0 }) : `PID: ${p.pid}`}
                     </TableCell>
                     <TableCell className="text-right">
                       {p.memory > 0 ? `${(p.memory / 1024 / 1024).toFixed(1)} MB` : '-'}

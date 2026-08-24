@@ -15,7 +15,7 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-import { ActionsTab } from './ActionsTab';
+import { ActionsTab, getPrimaryActionOptions } from './ActionsTab';
 import { emptyRuleForm, type RuleForm } from './rule-form';
 
 // ActionsTab.test.ts(x) — manual smoke coverage for the layer-4 conflict
@@ -35,9 +35,19 @@ function rowIsDisabled(key: string): boolean {
 }
 
 describe('ActionsTab — conflict matrix three states', () => {
-  // GT-12185: 三项策略均已实测接通；none 不与任何 addon 冲突。
-  it('none: no addon row is conflict-disabled', () => {
-    renderTab('none');
+  it('offers only the canonical primary actions', () => {
+    expect(getPrimaryActionOptions()).toEqual([
+      { value: 'accept', disabled: false },
+      { value: 'proceed', disabled: false },
+      { value: 'quarantine', disabled: false },
+      { value: 'audit', disabled: false },
+      { value: 'discard', disabled: false },
+    ]);
+  });
+
+  // proceed 只表达继续匹配，不与任何 addon 冲突。
+  it('proceed: no addon row is conflict-disabled', () => {
+    renderTab('proceed');
     // Conflict-free rows must be clickable.
     expect(rowIsDisabled('disclaimer')).toBe(false);
     expect(rowIsDisabled('adminNotify')).toBe(false);
@@ -65,16 +75,9 @@ describe('ActionsTab — conflict matrix three states', () => {
     expect(rowIsDisabled('modifyHeader')).toBe(true);
   });
 
-  it('none-action left hint and required-hint render when nothing is savable', () => {
-    renderTab('none');
-    expect(screen.getByTestId('none-action-hint')).toBeTruthy();
-    expect(screen.getByTestId('actions-left-required-hint')).toBeTruthy();
-    expect(screen.queryByTestId('configure-action-button')).toBeNull();
-  });
-
-  it('configure-action-button appears once a non-none action is selected', () => {
-    renderTab('discard');
+  it('configure-action-button is available for proceed without requiring an addon', () => {
+    renderTab('proceed');
     expect(screen.getByTestId('configure-action-button')).toBeTruthy();
-    expect(screen.queryByTestId('none-action-hint')).toBeNull();
+    expect(screen.queryByTestId('actions-left-required-hint')).toBeNull();
   });
 });

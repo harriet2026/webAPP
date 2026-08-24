@@ -106,7 +106,7 @@ describe('AddonsPanel protocol matches rule-form.ts end to end', () => {
     expect(metadataAddons).toEqual(serializeAddons(f.addons));
   });
 
-  it('ruleToForm(...).addons matches parseAddons(metadata) directly (non-tagDeliver primary action)', () => {
+  it('ruleToForm(...).addons matches parseAddons(metadata) directly', () => {
     const metadata = {
       feature: 'advanced_rules',
       scope: ['incoming'],

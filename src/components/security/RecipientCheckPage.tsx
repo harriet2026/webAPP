@@ -47,7 +47,7 @@ const DEFAULT_RECIPIENT_LIMIT_CONFIG: RecipientLimitConfig = {
 };
 
 const DEFAULT_RECIPIENT_CHECK_CONFIG: RecipientCheckConfig = {
-  existence_enabled: true,
+  existence_enabled: false,
   existence_action: 'reject',
 };
 

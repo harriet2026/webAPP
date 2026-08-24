@@ -4,8 +4,6 @@ import type {
   DetectionLogFilters,
   DetectionLogListResponse,
   DetectionLogDetail,
-  BlockResponse,
-  ExemptResponse,
 } from '@/types/phishing-detection';
 
 export async function getDetectionStats(
@@ -46,6 +44,7 @@ export async function getDetectionLogs(
   appendMulti('disposition', filters.disposition);
   appendMulti('detection_mode', filters.detection_mode);
   appendMulti('recall_status', filters.recall_status);
+  appendMulti('mail_status', filters.mail_status);
   appendMulti('risk_level', filters.risk_level);
   return requestFn<DetectionLogListResponse>(`/phishing-agent/detection-logs?${query.toString()}`);
 }
@@ -55,26 +54,6 @@ export async function getDetectionLogDetail(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<DetectionLogDetail> {
   return requestFn<DetectionLogDetail>(`/phishing-agent/detection-logs/${id}`);
-}
-
-export async function blockDetection(
-  id: string,
-  requestFn: ApiRequestFn = apiRequest,
-): Promise<BlockResponse> {
-  return requestFn<BlockResponse>(`/phishing-agent/detection-logs/${id}/block`, {
-    method: 'POST',
-  });
-}
-
-export async function exemptDetection(
-  id: string,
-  reason: string,
-  requestFn: ApiRequestFn = apiRequest,
-): Promise<ExemptResponse> {
-  return requestFn<ExemptResponse>(`/phishing-agent/detection-logs/${id}/exempt`, {
-    method: 'POST',
-    body: { reason },
-  });
 }
 
 export function screenshotUrl(storageNode: string, key: string): string {

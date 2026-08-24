@@ -190,6 +190,36 @@ export interface MailLifecycleLogsResponse {
   failed_nodes: string[];
 }
 
+export type MailLifecycleModuleStatus = 'querying' | 'completed' | 'timed_out' | 'failed';
+export type MailLifecycleNodeStatus = 'querying' | 'completed' | 'partial' | 'timed_out' | 'failed';
+
+export interface MailLifecycleModuleProgress {
+  module: string;
+  status: MailLifecycleModuleStatus;
+  count: number;
+  elapsed_ms?: number;
+  error_code?: string;
+}
+
+export interface MailLifecycleNodeProgress {
+  node: string;
+  status: MailLifecycleNodeStatus;
+  elapsed_ms?: number;
+  error_code?: string;
+  modules: Record<string, MailLifecycleModuleProgress>;
+}
+
+export interface MailLifecycleModuleResult {
+  node: string;
+  module: string;
+  status: Exclude<MailLifecycleModuleStatus, 'querying'>;
+  items: MailLifecycleLog[];
+  total: number;
+  truncated: boolean;
+  elapsed_ms: number;
+  error_code?: string;
+}
+
 export interface EmailLogSearchParams {
   start_date?: string;
   end_date?: string;

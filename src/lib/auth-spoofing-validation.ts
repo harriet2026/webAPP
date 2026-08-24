@@ -14,7 +14,7 @@ type TaggableItem = Pick<
 >;
 
 function hasEmptyEnabledTag(item: TaggableItem): boolean {
-  if (!item.enabled || item.action !== 'mark-delivery') return false;
+  if (!item.enabled || item.action !== 'proceed') return false;
 
   return (
     (!!item.tag_subject_enabled && !item.tag_subject_content?.trim()) ||
@@ -25,7 +25,7 @@ function hasEmptyEnabledTag(item: TaggableItem): boolean {
 }
 
 /**
- * 认证仿冒的 mark-delivery 允许不启用任何标记（表示纯放行），但一旦启用某种
+ * 认证仿冒的 proceed 允许不启用任何标记（表示纯放行），但一旦启用某种
  * 标记，其内容就必须完整填写。此处镜像后端 validateASMarkDelivery 的空值规则，
  * 让保存请求在浏览器端就被拦截。
  */

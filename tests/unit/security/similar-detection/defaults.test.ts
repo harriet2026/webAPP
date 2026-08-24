@@ -17,10 +17,10 @@ describe('similar-detection defaultConfig（demo 运行态默认值）', () => {
     expect(cfg.version).toBe(0);
   });
 
-  it('similar_email.internal = mark-delivery + 主题前缀标记 "[相似邮件]"', () => {
+  it('similar_email.internal = accept + 主题前缀标记 "[相似邮件]"', () => {
     const cfg = defaultConfig();
     const internal = cfg.similar_email.internal;
-    expect(internal.action).toBe('mark-delivery');
+    expect(internal.action).toBe('accept');
     expect(internal.tag_subject_enabled).toBe(true);
     expect(internal.tag_subject_position).toBe('prefix');
     expect(internal.tag_subject_content).toBe('[相似邮件]');
@@ -36,12 +36,12 @@ describe('similar-detection defaultConfig（demo 运行态默认值）', () => {
     expect(cfg.similar_email.internal.observe_mode).toBe(false);
   });
 
-  it('same_subject：receive/send 观察模式开启，send 动作为 review，receive/internal 为 quarantine', () => {
+  it('same_subject：receive/send 观察模式开启，send 动作为 audit，receive/internal 为 quarantine', () => {
     const cfg = defaultConfig();
     expect(cfg.same_subject.receive.observe_mode).toBe(true);
     expect(cfg.same_subject.receive.action).toBe('quarantine');
     expect(cfg.same_subject.send.observe_mode).toBe(true);
-    expect(cfg.same_subject.send.action).toBe('review');
+    expect(cfg.same_subject.send.action).toBe('audit');
     expect(cfg.same_subject.internal.observe_mode).toBe(false);
     expect(cfg.same_subject.internal.action).toBe('quarantine');
     expect(cfg.same_subject.receive.window_minutes).toBe(60);

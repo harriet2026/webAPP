@@ -77,7 +77,7 @@ async function createRule(
     metadata: {
       feature: 'advanced_rules',
       scope: ['incoming'],
-      primary_action: 'block',
+      primary_action: 'reject',
     },
     is_active: true,
   });
@@ -149,7 +149,7 @@ test.describe('Advanced Filter Rules V3 — editor CRUD & conditions', () => {
 
     await editor.locator('[data-testid="tab-disposition"]').click();
     await editor.locator('[data-testid="primary-action-select"]').click();
-    await selectByValue(authenticatedPage, 'deliver').click();
+    await selectByValue(authenticatedPage, 'accept').click();
 
     await editor.locator('[data-testid="editor-confirm"]').click();
     await expect(editor).not.toBeVisible({ timeout: 10000 });
@@ -160,7 +160,7 @@ test.describe('Advanced Filter Rules V3 — editor CRUD & conditions', () => {
     await expect(authenticatedPage.locator('table').first()).toContainText(name);
   });
 
-  test('addon-only rule with none primary action saves', async ({ authenticatedPage }) => {
+  test('proceed rule saves with an optional addon', async ({ authenticatedPage }) => {
     const name = `${RULE_PREFIX}addon-only-${uniqueSuffix()}`;
     const editor = await openEditor(authenticatedPage);
 
@@ -173,9 +173,8 @@ test.describe('Advanced Filter Rules V3 — editor CRUD & conditions', () => {
     await editor.locator('[data-testid="config-text-values"]').fill('tagall@example.com');
 
     await editor.locator('[data-testid="tab-disposition"]').click();
-    // Default primary action is 'none'; the confirm button must stay disabled
-    // until an addon is enabled (canSaveActions).
-    await expect(editor.locator('[data-testid="editor-confirm"]')).toBeDisabled();
+    // Default primary action is proceed and is complete without an addon.
+    await expect(editor.locator('[data-testid="editor-confirm"]')).toBeEnabled();
 
     await editor.locator('[data-testid="addon-row-modifyHeader"]').getByRole('checkbox').click();
     await authenticatedPage.waitForTimeout(300);

@@ -121,6 +121,8 @@ async function routeMailLogAPI(
   page: Page,
   opts: {
     detailOverride?: (id: number) => Record<string, unknown>;
+    analysisOverride?: (id: number) => Record<string, unknown>;
+    eventsOverride?: (id: number) => Record<string, unknown>;
     capture?: CapturedRequest[];
   },
 ) {
@@ -133,6 +135,16 @@ async function routeMailLogAPI(
 
     if (opts.detailOverride && req.method() === 'GET' && restLen === 0 && /^\d+$/.test(seg)) {
       await route.fulfill({ json: opts.detailOverride(Number(seg)) });
+      return;
+    }
+
+    if (opts.analysisOverride && req.method() === 'GET' && restLen === 1 && parts[idx + 2] === 'analysis' && /^\d+$/.test(seg)) {
+      await route.fulfill({ json: opts.analysisOverride(Number(seg)) });
+      return;
+    }
+
+    if (opts.eventsOverride && req.method() === 'GET' && restLen === 1 && parts[idx + 2] === 'events' && /^\d+$/.test(seg)) {
+      await route.fulfill({ json: opts.eventsOverride(Number(seg)) });
       return;
     }
 
@@ -156,6 +168,82 @@ async function routeMailLogAPI(
     }
 
     await route.continue();
+  });
+}
+
+function lifecycleSSE(frames: Array<{ event: string; data: Record<string, unknown> }>): string {
+  return frames
+    .map((frame) => `event: ${frame.event}\ndata: ${JSON.stringify(frame.data)}\n\n`)
+    .join('');
+}
+
+async function routeLifecycleLogStream(page: Page, retryURLs: string[], subject: string): Promise<void> {
+  const messageUUID = '2540e741-0b50-4cf7-bbab-dc241df4e082';
+  await page.route('**/api/v1/mail-logs/*/lifecycle-logs**', async (route) => {
+    const url = new URL(route.request().url());
+    const retryingPostfix = url.searchParams.get('modules') === 'postfix';
+    if (retryingPostfix) retryURLs.push(url.toString());
+    const frames = retryingPostfix
+      ? [
+          { event: 'start', data: { nodes: ['node-a'] } },
+          { event: 'node_started', data: { node: 'node-a' } },
+          { event: 'node_modules', data: { node: 'node-a', modules: ['postfix'] } },
+          { event: 'module_done', data: {
+            node: 'node-a', module: 'postfix', status: 'completed', total: 1,
+            truncated: false, elapsed_ms: 24,
+            items: [{
+              event_uid: 'postfix-retry-1', message_uuid: messageUUID, node: 'node-a',
+              component: 'postfix', event_time: '2026-08-19T08:00:02Z',
+              raw_line: 'postfix retry completed',
+            }],
+          } },
+          { event: 'node_done', data: { node: 'node-a', status: 'completed', elapsed_ms: 25 } },
+          { event: 'done', data: {
+            total: 1, truncated: false, partial: false, searched_nodes: ['node-a'],
+            failed_nodes: [], elapsed_ms: 25,
+          } },
+        ]
+      : [
+          { event: 'start', data: { nodes: ['node-a', 'node-b'] } },
+          { event: 'node_started', data: { node: 'node-a' } },
+          { event: 'node_modules', data: { node: 'node-a', modules: ['antispam', 'postfix'] } },
+          { event: 'module_done', data: {
+            node: 'node-a', module: 'antispam', status: 'completed', total: 1,
+            truncated: false, elapsed_ms: 18,
+            items: [{
+              event_uid: 'antispam-1', message_uuid: messageUUID, node: 'node-a',
+              component: 'antispam', event_time: '2026-08-19T08:00:00Z',
+              raw_line: subject,
+            }],
+          } },
+          { event: 'module_timeout', data: {
+            node: 'node-a', module: 'postfix', status: 'timed_out', items: [], total: 0,
+            truncated: false, elapsed_ms: 8000, error_code: 'timeout',
+          } },
+          { event: 'node_done', data: { node: 'node-a', status: 'partial', elapsed_ms: 8001 } },
+          { event: 'node_started', data: { node: 'node-b' } },
+          { event: 'node_modules', data: { node: 'node-b', modules: ['antispam'] } },
+          { event: 'module_done', data: {
+            node: 'node-b', module: 'antispam', status: 'completed', total: 1,
+            truncated: false, elapsed_ms: 20,
+            items: [{
+              event_uid: 'antispam-2', message_uuid: messageUUID, node: 'node-b',
+              component: 'antispam', event_time: '2026-08-19T08:00:01Z',
+              raw_line: 'node-b completed independently',
+            }],
+          } },
+          { event: 'node_done', data: { node: 'node-b', status: 'completed', elapsed_ms: 21 } },
+          { event: 'done', data: {
+            total: 2, truncated: false, partial: true, searched_nodes: ['node-a', 'node-b'],
+            failed_nodes: ['node-a'], elapsed_ms: 8001,
+          } },
+        ];
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/event-stream',
+      headers: { 'Cache-Control': 'no-cache' },
+      body: lifecycleSSE(frames),
+    });
   });
 }
 
@@ -322,6 +410,107 @@ test.describe('Email Disposal Detail Drawer (DD-14)', () => {
     expect(tooltipText).toContain('钓鱼'); // original (email_type_original: phishing)
     expect(tooltipText).toContain('正常'); // current (email_type: normal)
     expect(tooltipText).toContain('管理员放行'); // source (correction_source: admin_release)
+  });
+
+  test('GT-12977: final verdict card matches the current email type', async ({ authenticatedPage }) => {
+    const subject = `GT-12977 Email Type ${Date.now()}`;
+
+    // Keep this regression independent of the internal mTLS ingest endpoint:
+    // mock the list row, detail and analysis responses at the browser boundary.
+    await authenticatedPage.route('**/api/v1/mail-logs?**', async (route) => {
+      await route.fulfill({
+        json: {
+          items: [mockDetail(12977, subject, {
+            email_type: 'phishing',
+            display_statuses: [{ status: 'quarantined', count: 1 }],
+          })],
+          total: 1,
+          page: 1,
+          page_size: 20,
+          total_pages: 1,
+        },
+      });
+    });
+
+    // Pin the current mail type to phishing while the analysis endpoint still
+    // returns the broad safe verdict.
+    // The detail card must use the same email_type source as the overview and
+    // disposal list, including any later administrator reclassification.
+    await routeMailLogAPI(authenticatedPage, {
+      detailOverride: (id) => mockDetail(id, subject, {
+        email_type: 'phishing',
+      }),
+      analysisOverride: () => ({
+        scope: 'all',
+        final_verdict: 'safe',
+        total_elapsed_ms: 10,
+        stages: [{
+          stage: 1,
+          key: 'connection',
+          status: 'pass',
+          duration_ms: 10,
+          checks: [],
+        }],
+      }),
+      eventsOverride: () => ({ items: [] }),
+    });
+    await authenticatedPage.reload({ waitUntil: 'networkidle' });
+
+    const dialog = await openRow(authenticatedPage, subject);
+    const verdictCard = dialog.getByTestId('analysis-verdict-card');
+    await expect(verdictCard).toContainText('最终判定：钓鱼邮件');
+    await expect(verdictCard).not.toContainText('安全邮件');
+  });
+
+  test('GT-12596: policy-detail entry scrolls to a real basis target', async ({ authenticatedPage, request }, testInfo) => {
+    const subject = `GT-12596 Policy Target ${Date.now()}`;
+    await seedDetailRow(request, subject);
+    await authenticatedPage.reload({ waitUntil: 'networkidle' });
+
+    await routeMailLogAPI(authenticatedPage, {
+      detailOverride: (id) => mockDetail(id, subject, {
+        action: 'discard',
+        status: 'discarded',
+        recipient_dispositions: [{
+          recipient: 'gt-12596@testdomain.local',
+          final_action: 'discard',
+          status: 'discarded',
+        }],
+        disposal_basis: {
+          policy_key: 'SENDER',
+          rule_id: 'SENDER-GT-12596',
+          rule_name: 'GT-12596 blocked sender',
+          action: 'discard',
+        },
+      }),
+    });
+
+    const dialog = await openRow(authenticatedPage, subject);
+    const analysisVisible = await dialog.getByTestId('disposal-detail-analysis').count() > 0;
+
+    await authenticatedPage.evaluate(() => {
+      const state = window as typeof window & { __gt12596ScrollTargets?: string[] };
+      state.__gt12596ScrollTargets = [];
+      const original = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = function scrollIntoView(options?: boolean | ScrollIntoViewOptions) {
+        state.__gt12596ScrollTargets?.push((this as HTMLElement).dataset.testid ?? '');
+        original.call(this, options);
+      };
+    });
+
+    const entry = dialog.getByTestId('email-disposal-overview-context-view-policy');
+    await expect(entry).toBeVisible({ timeout: 10000 });
+    await entry.click();
+
+    await expect.poll(() => authenticatedPage.evaluate(() => {
+      const state = window as typeof window & { __gt12596ScrollTargets?: string[] };
+      return state.__gt12596ScrollTargets?.at(-1) ?? '';
+    })).toBe(analysisVisible ? 'disposal-detail-analysis' : 'email-disposal-overview-disposal-basis');
+    await expect(authenticatedPage.getByText('暂未实现', { exact: true })).toHaveCount(0);
+    await authenticatedPage.screenshot({
+      path: testInfo.outputPath(`gt-12596-${analysisVisible ? 'analysis' : 'overview'}-target.png`),
+      fullPage: true,
+    });
   });
 
   test('recall confirmation defaults the reclassify type to "spam"', async ({ authenticatedPage, request }) => {
@@ -741,16 +930,31 @@ test.describe('Email Disposal Detail Drawer (DD-14)', () => {
     await seedDetailRow(request, subject);
     await authenticatedPage.reload({ waitUntil: 'networkidle' });
 
+    const retryURLs: string[] = [];
+    await routeLifecycleLogStream(authenticatedPage, retryURLs, subject);
+
     const dialog = await openRow(authenticatedPage, subject);
     await dialog.locator('nav').getByText('原始日志', { exact: true }).click();
+    await dialog.getByTestId('disposal-raw-logs-trigger').click();
 
-    // The count badge shows the TOTAL (unfiltered) synthesized-line count.
+    // A timed-out module remains isolated: both completed nodes stay visible,
+    // and only node-a/postfix offers a targeted retry.
     await expect(dialog.getByTestId('raw-logs-count-badge')).toBeVisible({ timeout: 10000 });
+    await expect(dialog.getByTestId('raw-logs-module-node-a-antispam')).toContainText('已完成 · 1 条');
+    const postfixModule = dialog.getByTestId('raw-logs-module-node-a-postfix');
+    await expect(postfixModule).toContainText('已超时');
+    await expect(dialog.getByTestId('raw-logs-module-node-b-antispam')).toContainText('已完成 · 1 条');
+    await expect(dialog.getByTestId('raw-logs-partial-warning')).toBeVisible();
 
-    // The seeded subject only ever appears in the synthesized
-    // `[DATA] subject="..."` line -- searching it is what actually exercises
-    // the <mark> highlight and the found-count readout (a bare sender/
-    // recipient search token would never have matched pre-subject-line).
+    await postfixModule.getByRole('button', { name: '重试 postfix' }).click();
+    await expect(postfixModule).toContainText('已完成 · 1 条');
+    await expect(dialog.getByTestId('raw-logs-partial-warning')).toHaveCount(0);
+    expect(retryURLs).toHaveLength(1);
+    expect(new URL(retryURLs[0]).searchParams.get('node')).toBe('node-a');
+    expect(new URL(retryURLs[0]).searchParams.get('modules')).toBe('postfix');
+
+    // The completed antispam result remains searchable after the independent
+    // postfix retry replaces only the postfix module's result.
     const searchInput = dialog.getByTestId('disposal-raw-logs-search');
     await searchInput.fill(subject);
     await expect(dialog.locator('mark').first()).toBeVisible({ timeout: 5000 });
@@ -770,12 +974,11 @@ test.describe('Email Disposal Detail Drawer (DD-14)', () => {
     const clipboardText = await authenticatedPage.evaluate(() => navigator.clipboard.readText());
     expect(clipboardText).toContain(subject);
 
-    // Download: filename is `email-log-{id}-{date}.log` (v2 alignment;
-    // was `mail-log-{id}.json` pre-v2).
+    // Download keeps the raw structured payload and deterministic filename.
     const downloadPromise = authenticatedPage.waitForEvent('download');
     await dialog.getByTestId('disposal-raw-logs-download').click();
     const download = await downloadPromise;
-    expect(download.suggestedFilename()).toMatch(/^email-log-\d+-\d{4}-\d{2}-\d{2}\.log$/);
+    expect(download.suggestedFilename()).toMatch(/^email-log-\d+-\d{4}-\d{2}-\d{2}\.json$/);
   });
 
   test('4-locale switch (en/th/ru): drawer renders without error, no Chinese-character leakage', async ({ authenticatedPage, request }) => {

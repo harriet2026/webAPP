@@ -3,9 +3,9 @@ export type IPFilterListType = 'blacklist' | 'whitelist';
 export type IPFilterIPConfigType = 'single' | 'range' | 'expression';
 export type IPFilterAction = 'accept' | 'reject' | 'quarantine' | 'sideline' | 'discard' | 'audit';
 
-// demo(html_spec) 展示层动作词表 —— UI 用它，api 层映射到网关统一 IPFilterAction。
-export type DemoBlacklistAction = 'block' | 'quarantine' | 'drop' | 'review';
-export type DemoWhitelistAction = 'deliver' | 'tagDeliver';
+// UI 与 API 共用规范动作值；邮件标记通过 add_headers 独立表达，不占用动作枚举。
+export type DemoBlacklistAction = 'reject' | 'quarantine' | 'discard' | 'audit';
+export type DemoWhitelistAction = 'accept';
 export type DemoAction = DemoBlacklistAction | DemoWhitelistAction;
 
 export interface HeaderKV {

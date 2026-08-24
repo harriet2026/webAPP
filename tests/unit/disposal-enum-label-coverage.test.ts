@@ -97,6 +97,30 @@ describe('emailDisposal.filters.actions covers every mail_log.action (GT-11583)'
     );
     expect(extra, `unknown action labels: ${extra.join(', ')}`).toEqual([]);
   });
+
+  it('labels raw sideline as pending decision instead of greylist in every locale', () => {
+    const expected = {
+      zh: '待判定',
+      en: 'Pending decision',
+      th: 'รอการตัดสิน',
+      ru: 'Ожидает решения',
+    } as const;
+
+    for (const [locale, messages] of Object.entries(LOCALES)) {
+      const emailDisposal = messages.emailDisposal as {
+        filters: { actions: Record<string, string> };
+        recipientStatusBar: Record<string, string>;
+      };
+      expect(emailDisposal.filters.actions.sideline).toBe(
+        expected[locale as keyof typeof expected],
+      );
+      // mixed rows use the recipient-status badge catalog instead of the
+      // aggregate action catalog; both branches must present the same meaning.
+      expect(emailDisposal.recipientStatusBar.sideline).toBe(
+        expected[locale as keyof typeof expected],
+      );
+    }
+  });
 });
 
 // GT-12782 Task 4：mapToDisplayStatus 已删除，展示状态由后端下发

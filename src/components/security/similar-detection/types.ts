@@ -3,10 +3,9 @@ export type SimilarDetectionMode = 'aggregate' | 'separate';
 export type SimilarDetectionType = 'similar_email' | 'same_subject';
 
 export type SimilarDetectionAction =
-  | 'mark-delivery'
+  | 'accept'
   | 'quarantine'
-  | 'review'
-  | 'block'
+  | 'audit'
   | 'discard';
 
 export interface SimilarDetectionDirectionConfig {

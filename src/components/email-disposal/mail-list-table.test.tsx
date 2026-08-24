@@ -1,8 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MailListTable } from "./mail-list-table";
 import type { DisposalMailItem } from "@/types/email-disposal";
+import { formatDate } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+const { relativeTimeMock } = vi.hoisted(() => ({
+  relativeTimeMock: vi.fn(),
+}));
 
 // Identity translator (keeps `namespace.key` / `namespace.key:{params}` visible)
 // so assertions stay decoupled from messages/*.json copy. `t.has` must exist
@@ -13,10 +19,15 @@ vi.mock("next-intl", () => {
       params
         ? `${namespace}.${key}:${JSON.stringify(params)}`
         : `${namespace}.${key}`;
-    (fn as unknown as { has: () => boolean }).has = () => true;
+    (fn as unknown as { has: (key: string) => boolean }).has = (key: string) =>
+      key !== "filters.external-relay";
     return fn;
   };
-  return { useTranslations, useLocale: () => "zh" };
+  return {
+    useTranslations,
+    useLocale: () => "zh",
+    useFormatter: () => ({ relativeTime: relativeTimeMock }),
+  };
 });
 
 vi.mock("./lib/disposal-api", () => ({
@@ -60,15 +71,19 @@ function renderTable(
     ...overrides,
   };
   return render(
-    <QueryClientProvider client={qc}>
-      <MailListTable {...props} />
-    </QueryClientProvider>,
+    <TooltipProvider>
+      <QueryClientProvider client={qc}>
+        <MailListTable {...props} />
+      </QueryClientProvider>
+    </TooltipProvider>,
   );
 }
 
 describe("MailListTable toolbar (GT-11580)", () => {
   beforeEach(() => {
     localStorage.clear();
+    relativeTimeMock.mockReset();
+    relativeTimeMock.mockImplementation((date: Date) => `relative:${date.toISOString()}`);
   });
 
   it("renders the batch toolbar permanently even with no selection", () => {
@@ -131,6 +146,220 @@ describe("MailListTable toolbar (GT-11580)", () => {
     renderTable({ timeSort: "none", onTimeSortChange });
     fireEvent.click(screen.getByTestId("disposal-time-sort"));
     expect(onTimeSortChange).toHaveBeenCalledWith("asc");
+  });
+
+  it("shows localized relative time with the absolute timestamp in a tooltip", async () => {
+    const item = makeItem(1);
+    renderTable({ items: [item], total: 1 });
+
+    const relativeText = `relative:${new Date(item.timestamp).toISOString()}`;
+    const timeCell = screen.getByTestId("disposal-cell-1-time");
+    await waitFor(() => expect(timeCell).toHaveTextContent(relativeText));
+    expect(relativeTimeMock).toHaveBeenCalledWith(new Date(item.timestamp));
+
+    const timeTrigger = screen.getByText(relativeText);
+    fireEvent.pointerEnter(timeTrigger, { pointerType: "mouse" });
+    fireEvent.mouseEnter(timeTrigger);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(formatDate(item.timestamp));
+  });
+
+  it("keeps the existing absolute fallback for an invalid timestamp", () => {
+    const item = { ...makeItem(1), timestamp: "not-a-date" };
+    renderTable({ items: [item], total: 1 });
+
+    expect(screen.getByTestId("disposal-cell-1-time")).toHaveTextContent(formatDate(item.timestamp));
+    expect(relativeTimeMock).not.toHaveBeenCalled();
+  });
+
+  it("renders unambiguous localized direction badges with a safe unknown fallback", () => {
+    const items = [
+      { ...makeItem(1), direction: "incoming" },
+      { ...makeItem(2), direction: "outgoing" },
+      { ...makeItem(3), direction: "internal" },
+      { ...makeItem(4), direction: "external-relay" },
+    ];
+    renderTable({ items, total: items.length });
+
+    expect(screen.getByTestId("disposal-cell-1-direction")).toHaveTextContent(
+      "emailDisposal.filters.incoming",
+    );
+    expect(screen.getByTestId("disposal-cell-2-direction")).toHaveTextContent(
+      "emailDisposal.filters.outgoing",
+    );
+    expect(screen.getByTestId("disposal-cell-3-direction")).toHaveTextContent(
+      "emailDisposal.filters.internal",
+    );
+    expect(screen.getByTestId("disposal-cell-4-direction")).toHaveTextContent(
+      "external-relay",
+    );
+  });
+
+  it("applies distinct direction colors and a compact neutral fallback", () => {
+    const items = [
+      { ...makeItem(1), direction: "incoming" },
+      { ...makeItem(2), direction: "outgoing" },
+      { ...makeItem(3), direction: "internal" },
+      { ...makeItem(4), direction: "external-relay" },
+    ];
+    renderTable({ items, total: items.length });
+
+    const badgeOf = (id: number) =>
+      screen.getByTestId(`disposal-cell-${id}-direction`).querySelector('[data-slot="badge"]');
+
+    expect(badgeOf(1)).toHaveClass("border-blue-500", "text-blue-600", "h-5", "font-normal");
+    expect(badgeOf(2)).toHaveClass("border-emerald-500", "text-emerald-600", "h-5", "font-normal");
+    expect(badgeOf(3)).toHaveClass("border-border", "text-muted-foreground", "h-5", "font-normal");
+    expect(badgeOf(4)).toHaveClass("border-border", "text-muted-foreground", "h-5", "font-normal");
+  });
+
+  it("combines the sender and all recipients into one column with a complete tooltip", async () => {
+    const item = {
+      ...makeItem(1),
+      recipientList: ["first@example.com", "second@example.com"],
+    };
+    renderTable({ items: [item], total: 1 });
+
+    expect(
+      screen.getByTestId("disposal-column-header-senderRecipient"),
+    ).toHaveTextContent("emailDisposal.table.senderRecipient");
+    expect(screen.queryByTestId("disposal-column-header-sender")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("disposal-column-header-recipient")).not.toBeInTheDocument();
+
+    const cell = screen.getByTestId("disposal-cell-1-senderRecipient");
+    expect(cell).toHaveTextContent(item.sender);
+    expect(cell).toHaveTextContent("first@example.com, second@example.com");
+    expect(cell.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.queryByTestId("disposal-cell-1-sender")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("disposal-cell-1-recipient")).not.toBeInTheDocument();
+
+    const trigger = cell.querySelector<HTMLElement>('[data-slot="tooltip-trigger"]');
+    expect(trigger).not.toBeNull();
+    fireEvent.pointerEnter(trigger!, { pointerType: "mouse" });
+    fireEvent.mouseEnter(trigger!);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      `${item.sender} → first@example.com, second@example.com`,
+    );
+  });
+
+  it("falls back to the single recipient in the combined column", () => {
+    const item = makeItem(1);
+    renderTable({ items: [item], total: 1 });
+
+    expect(screen.getByTestId("disposal-cell-1-senderRecipient")).toHaveTextContent(
+      item.recipient,
+    );
+  });
+
+  it("offers one combined sender-recipient option in column settings", async () => {
+    renderTable();
+    fireEvent.click(screen.getByTestId("disposal-column-settings"));
+
+    expect(
+      await screen.findByTestId("disposal-column-toggle-senderRecipient"),
+    ).toHaveTextContent("emailDisposal.table.senderRecipient");
+    expect(screen.queryByTestId("disposal-column-toggle-sender")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("disposal-column-toggle-recipient")).not.toBeInTheDocument();
+  });
+
+  it("switches to compact density without shrinking table text and persists the preference", async () => {
+    renderTable();
+
+    const timeHead = screen.getByTestId("disposal-column-header-time");
+    const timeCell = screen.getByTestId("disposal-cell-1-time");
+    expect(timeHead).toHaveClass("h-11", "text-xs");
+    expect(timeCell).toHaveClass("py-3", "text-xs");
+
+    fireEvent.click(screen.getByTestId("disposal-column-settings"));
+    expect(await screen.findByText("emailDisposal.table.densitySettings")).toBeInTheDocument();
+    const toggle = screen.getByTestId("disposal-density-toggle");
+    expect(toggle).toHaveTextContent("emailDisposal.table.compactDensity");
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+
+    fireEvent.click(toggle);
+
+    expect(localStorage.getItem("osg.disposal.density")).toBe("compact");
+    expect(toggle).toHaveAttribute("aria-checked", "true");
+    expect(timeHead).toHaveClass("h-8", "text-xs");
+    expect(timeCell).toHaveClass("py-1.5", "text-xs");
+    expect(screen.getByTestId("disposal-select-column")).toHaveClass("h-8");
+    expect(screen.getByTestId("disposal-operations-column")).toHaveClass("h-8");
+    expect(screen.getByTestId("disposal-cell-1-select")).toHaveClass("py-1.5");
+    expect(screen.getByTestId("disposal-cell-1-operations")).toHaveClass("py-1.5");
+  });
+
+  it("restores compact density from localStorage after client hydration", async () => {
+    localStorage.setItem("osg.disposal.density", "compact");
+    renderTable();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("disposal-column-header-time")).toHaveClass("h-8"),
+    );
+    expect(screen.getByTestId("disposal-cell-1-time")).toHaveClass("py-1.5");
+
+    fireEvent.click(screen.getByTestId("disposal-column-settings"));
+    expect(await screen.findByTestId("disposal-density-toggle")).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+  });
+
+  it("ignores an unsupported stored density and keeps the comfortable default", async () => {
+    localStorage.setItem("osg.disposal.density", "ultra-compact");
+    renderTable();
+
+    await waitFor(() =>
+      expect(localStorage.getItem("osg.disposal.hiddenColumns")).not.toBeNull(),
+    );
+    expect(screen.getByTestId("disposal-column-header-time")).toHaveClass("h-11");
+    expect(screen.getByTestId("disposal-cell-1-time")).toHaveClass("py-3");
+
+    fireEvent.click(screen.getByTestId("disposal-column-settings"));
+    expect(await screen.findByTestId("disposal-density-toggle")).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+  });
+
+  it("renders the compact view action as an accessible icon with a tooltip", async () => {
+    const onItemClick = vi.fn();
+    renderTable({ items: [makeItem(1)], total: 1, onItemClick });
+
+    const viewButton = screen.getByTestId("disposal-view-1");
+    expect(viewButton).toHaveAccessibleName("emailDisposal.table.view");
+    expect(viewButton.textContent).toBe("");
+
+    fireEvent.pointerEnter(viewButton, { pointerType: "mouse" });
+    fireEvent.mouseEnter(viewButton);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "emailDisposal.table.view",
+    );
+
+    fireEvent.click(viewButton);
+    expect(onItemClick).toHaveBeenCalledWith(1);
+  });
+
+  it("renders find-similar as an accessible icon without changing its action", async () => {
+    const onFindSimilar = vi.fn();
+    renderTable({
+      items: [makeItem(1)],
+      total: 1,
+      onFindSimilar,
+    });
+
+    const findSimilarButton = screen.getByTestId("disposal-find-similar-1");
+    expect(findSimilarButton).toHaveAccessibleName(
+      "emailDisposal.table.findSimilar",
+    );
+    expect(findSimilarButton.textContent).toBe("");
+
+    fireEvent.pointerEnter(findSimilarButton, { pointerType: "mouse" });
+    fireEvent.mouseEnter(findSimilarButton);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "emailDisposal.table.findSimilarTooltip",
+    );
+
+    fireEvent.click(findSimilarButton);
+    expect(onFindSimilar).toHaveBeenCalledWith(1);
   });
 
   it("keeps the operations header and cells pinned to the right", () => {
@@ -341,13 +570,10 @@ describe("处置依据列的 reason 回退 (GT-12578/GT-12686)", () => {
   });
 });
 
-// GT-12727：只命中 feature-processing（mail_marking / 高级过滤 tagDeliver）的邮件
-// 现在**会**拿到一个 disposal_basis 对象——policy_key 为空、只带 modules 命中清单。
-// 若这一列的门写成 `item.disposalBasis ?`（按对象是否存在开门），就会走进
-// formatListReason，而它在 !policy_key 时返回空串 → 单元格渲染成空白，
-// reason 兜底分支再也进不去，直接回退上面 GT-12578/GT-12686 修的那个问题。
-describe("处置依据列：policy_key 为空的 disposal_basis 不得吞掉 reason 回退 (GT-12727)", () => {
-  it("disposalBasis 存在但 policy_key 为空时仍显示 reason", () => {
+// GT-12970：只命中非终态/加工规则时，结构化 modules[] 已明确说明“有命中但
+// 没有最终处置依据”。此时不能再用 reason 把命中规则冒充为处置依据。
+describe("处置依据列：结构化 hit-only facts 不回退 reason (GT-12970)", () => {
+  it("disposalBasis 只有命中模块时显示占位符，不显示 reason", () => {
     const item: DisposalMailItem = {
       ...makeItem(1),
       disposalBasis: {
@@ -359,9 +585,7 @@ describe("处置依据列：policy_key 为空的 disposal_basis 不得吞掉 rea
       reason: "rule f01-receive-mark-001 matched at data stage",
     };
     renderTable({ items: [item] });
-    expect(
-      screen.getAllByText("rule f01-receive-mark-001 matched at data stage").length,
-    ).toBeGreaterThan(0);
+    expect(screen.queryByText("rule f01-receive-mark-001 matched at data stage")).not.toBeInTheDocument();
   });
 
   it("policy_key 非空时照常走 formatListReason", () => {

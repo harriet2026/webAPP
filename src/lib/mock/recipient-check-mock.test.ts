@@ -26,10 +26,10 @@ describe('recipient-check mock', () => {
     expect(cfg.merged_limit).toEqual({ limit: 50, action: 'audit' });
   });
 
-  it('recipient-check-config 默认：模块开、存在性开、失败动作 阻断', () => {
+  it('recipient-check-config 默认：存在性关、启用后的失败动作 阻断', () => {
     const res = dispatch({ method: 'GET', path: '/behavior-control/recipient-check-config' });
     const cfg = res.data as RecipientCheckConfig;
-    expect(cfg).toEqual({ existence_enabled: true, existence_action: 'reject' });
+    expect(cfg).toEqual({ existence_enabled: false, existence_action: 'reject' });
   });
 
   it('PUT recipient-check-config 返回 status', () => {

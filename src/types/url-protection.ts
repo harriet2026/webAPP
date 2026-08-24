@@ -1,11 +1,14 @@
+import type { PolicyAction } from '@/types/policy-action';
+
 export type Direction = 'receive' | 'send' | 'internal';
-export type SandboxMaliciousAction = 'isolate' | 'block' | 'mark' | 'discard';
-export type SandboxTimeoutAction = 'continue' | 'treat_malicious' | 'pass';
+export type SandboxMaliciousAction = Extract<PolicyAction, 'accept' | 'quarantine' | 'reject' | 'discard'>;
+export type SandboxTimeoutAction = 'proceed' | 'treat_malicious' | 'pass';
 export type DeepInspectTimeoutPolicy = 'block' | 'allow' | 'hold';
 
 export interface SandboxDirectionConfig {
   enabled: boolean;
   malicious_action: SandboxMaliciousAction;
+  mark_enabled?: boolean;
   timeout_action: SandboxTimeoutAction;
   local_intel_enabled: boolean;
   intel_cleanup_days: number;

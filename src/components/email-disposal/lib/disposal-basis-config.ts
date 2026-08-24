@@ -22,8 +22,17 @@ export type { DisposalBasis };
 // rendered the untranslated raw string, e.g. bare "audit", instead of a
 // localized label like "隔离").
 export type DisposalAction =
-  | 'quarantine' | 'discard' | 'tag' | 'deliver' | 'recall'
-  | 'audit' | 'reject' | 'bounce' | 'sideline' | 'accept';
+  | 'quarantine'
+  | 'discard'
+  | 'tag'
+  | 'deliver'
+  | 'recall'
+  | 'audit'
+  | 'reject'
+  | 'bounce'
+  | 'sideline'
+  | 'accept'
+  | 'proceed';
 
 // 命中动态变量集合（大括号变量的实际值），如
 //   { source_ip: '203.0.113.5', count: 500, limit: 100 }
@@ -77,6 +86,162 @@ const val = (v: HitValues | undefined, k: string, fallback = '-'): string => {
   return x !== undefined && x !== null && x !== '' ? String(x) : fallback;
 };
 
+// Optional evidence must stay optional all the way to the sentence. Filling a
+// missing backend fact with a fluent-looking default ("static", "display name",
+// "phishing", …) turns unknown data into a false conclusion.
+const optionalVal = (v: HitValues | undefined, k: string): string | undefined => {
+  if (!v) return undefined;
+  const x = v[k];
+  return x !== undefined && x !== null && x !== '' ? String(x) : undefined;
+};
+
+function ipFrequencyTriggerLabel(
+  token: string | undefined,
+  lang: DisposalLang,
+): string | undefined {
+  if (!token) return undefined;
+  const table: Record<string, Record<DisposalLang, string>> = {
+    daily_connections: {
+      zh: '日连接数',
+      en: 'daily connections',
+      th: 'จำนวนการเชื่อมต่อรายวัน',
+      ru: 'суточные подключения',
+    },
+    concurrent_connections: {
+      zh: '并发连接数',
+      en: 'concurrent connections',
+      th: 'จำนวนการเชื่อมต่อพร้อมกัน',
+      ru: 'одновременные подключения',
+    },
+    window_connections: {
+      zh: '窗口连接数',
+      en: 'window connections',
+      th: 'จำนวนการเชื่อมต่อในช่วงเวลา',
+      ru: 'подключения за окно',
+    },
+    hourly_auth_failures: {
+      zh: '每小时认证失败数',
+      en: 'hourly authentication failures',
+      th: 'การยืนยันตัวตนล้มเหลวต่อชั่วโมง',
+      ru: 'ошибки аутентификации за час',
+    },
+    connection_auth_failures: {
+      zh: '单连接认证失败数',
+      en: 'per-connection authentication failures',
+      th: 'การยืนยันตัวตนล้มเหลวต่อการเชื่อมต่อ',
+      ru: 'ошибки аутентификации в соединении',
+    },
+    connection_command_errors: {
+      zh: '单连接命令错误数',
+      en: 'per-connection command errors',
+      th: 'ข้อผิดพลาดคำสั่งต่อการเชื่อมต่อ',
+      ru: 'ошибки команд в соединении',
+    },
+  };
+  return table[token]?.[lang] ?? token;
+}
+
+function behaviorDimensionLabel(token: string | undefined, lang: DisposalLang): string | undefined {
+  if (!token) return undefined;
+  const table: Record<string, Record<DisposalLang, string>> = {
+    mail_count: {
+      zh: '发信量',
+      en: 'message count',
+      th: 'จำนวนอีเมล',
+      ru: 'количество писем',
+    },
+    ip_count: {
+      zh: '发信 IP 数',
+      en: 'sender IP count',
+      th: 'จำนวน IP ผู้ส่ง',
+      ru: 'количество IP отправителя',
+    },
+    recipient_count: {
+      zh: '收件人数',
+      en: 'recipient count',
+      th: 'จำนวนผู้รับ',
+      ru: 'количество получателей',
+    },
+    attachment_size: {
+      zh: '附件大小',
+      en: 'attachment size',
+      th: 'ขนาดไฟล์แนบ',
+      ru: 'размер вложений',
+    },
+    merged_mail: {
+      zh: '合并发信量',
+      en: 'merged message count',
+      th: 'จำนวนอีเมลรวม',
+      ru: 'сводное количество писем',
+    },
+    merged_recipient: {
+      zh: '合并收件人数',
+      en: 'merged recipient count',
+      th: 'จำนวนผู้รับรวม',
+      ru: 'сводное количество получателей',
+    },
+    merged_ip: {
+      zh: '合并发信 IP 数',
+      en: 'merged sender IP count',
+      th: 'จำนวน IP ผู้ส่งรวม',
+      ru: 'сводное количество IP отправителя',
+    },
+  };
+  return table[token]?.[lang] ?? token;
+}
+
+function senderMatchTypeLabel(token: string | undefined, lang: DisposalLang): string | undefined {
+  if (!token) return undefined;
+  const table: Record<string, Record<DisposalLang, string>> = {
+    individual: {
+      zh: '个人邮箱',
+      en: 'individual email address',
+      th: 'อีเมลส่วนบุคคล',
+      ru: 'индивидуальный адрес',
+    },
+    email: {
+      zh: '个人邮箱',
+      en: 'individual email address',
+      th: 'อีเมลส่วนบุคคล',
+      ru: 'индивидуальный адрес',
+    },
+    domain: { zh: '域名', en: 'domain', th: 'โดเมน', ru: 'домен' },
+    group: {
+      zh: '发件人组',
+      en: 'sender group',
+      th: 'กลุ่มผู้ส่ง',
+      ru: 'группа отправителей',
+    },
+  };
+  return table[token]?.[lang] ?? token;
+}
+
+function threatRetroTypeLabel(token: string | undefined, lang: DisposalLang): string | undefined {
+  if (!token) return undefined;
+  const table: Record<string, Record<DisposalLang, string>> = {
+    phishing: { zh: '钓鱼', en: 'phishing', th: 'ฟิชชิง', ru: 'фишинг' },
+    impersonation: {
+      zh: '身份仿冒',
+      en: 'identity spoofing',
+      th: 'การปลอมแปลงตัวตน',
+      ru: 'подмена личности',
+    },
+    malware: {
+      zh: '恶意软件',
+      en: 'malware',
+      th: 'มัลแวร์',
+      ru: 'вредоносное ПО',
+    },
+    unknown: {
+      zh: '未知类型威胁',
+      en: 'an unknown threat',
+      th: 'ภัยคุกคามที่ไม่ทราบประเภท',
+      ru: 'угроза неизвестного типа',
+    },
+  };
+  return table[token]?.[lang] ?? token;
+}
+
 // 策略模块字典（对照处置依据映射表整理）。
 // GT-12214: 发信人黑白名单共用一个 policy_key，命中的是黑还是白由
 // hit_values.list_type 决定（whitelist/allowlist 视为放行名单）。缺失时按黑名单
@@ -90,9 +255,24 @@ export function isAllowList(v: HitValues | undefined): boolean {
 // content_group），后端只发规范化 token 不发中文，文案映射是前端职责。
 function crMethodLabel(token: string, lang: DisposalLang): string {
   const table: Record<string, Record<DisposalLang, string>> = {
-    keyword: { zh: '关键词', en: 'keyword', th: 'คำสำคัญ', ru: 'ключевому слову' },
-    regex: { zh: '正则表达式', en: 'regular expression', th: 'นิพจน์ทั่วไป', ru: 'регулярному выражению' },
-    content_group: { zh: '内容组', en: 'content group', th: 'กลุ่มเนื้อหา', ru: 'контентной группе' },
+    keyword: {
+      zh: '关键词',
+      en: 'keyword',
+      th: 'คำสำคัญ',
+      ru: 'ключевому слову',
+    },
+    regex: {
+      zh: '正则表达式',
+      en: 'regular expression',
+      th: 'นิพจน์ทั่วไป',
+      ru: 'регулярному выражению',
+    },
+    content_group: {
+      zh: '内容组',
+      en: 'content group',
+      th: 'กลุ่มเนื้อหา',
+      ru: 'контентной группе',
+    },
   };
   return table[token]?.[lang] ?? table[token]?.zh ?? '';
 }
@@ -102,11 +282,36 @@ function crPositionLabel(token: string, lang: DisposalLang): string {
   const table: Record<string, Record<DisposalLang, string>> = {
     subject: { zh: '主题', en: 'subject', th: 'หัวเรื่อง', ru: 'тема' },
     header: { zh: '邮件头', en: 'header', th: 'ส่วนหัว', ru: 'заголовок' },
-    text_body: { zh: '纯文本正文', en: 'text body', th: 'เนื้อหาข้อความ', ru: 'текст письма' },
-    html_body: { zh: 'HTML 正文', en: 'HTML body', th: 'เนื้อหา HTML', ru: 'HTML-текст' },
-    attachment_names: { zh: '附件名称', en: 'attachment name', th: 'ชื่อไฟล์แนบ', ru: 'имя вложения' },
-    attachment_types: { zh: '附件类型', en: 'attachment type', th: 'ประเภทไฟล์แนบ', ru: 'тип вложения' },
-    attachment_hash: { zh: '附件哈希', en: 'attachment hash', th: 'แฮชไฟล์แนบ', ru: 'хеш вложения' },
+    text_body: {
+      zh: '纯文本正文',
+      en: 'text body',
+      th: 'เนื้อหาข้อความ',
+      ru: 'текст письма',
+    },
+    html_body: {
+      zh: 'HTML 正文',
+      en: 'HTML body',
+      th: 'เนื้อหา HTML',
+      ru: 'HTML-текст',
+    },
+    attachment_names: {
+      zh: '附件名称',
+      en: 'attachment name',
+      th: 'ชื่อไฟล์แนบ',
+      ru: 'имя вложения',
+    },
+    attachment_types: {
+      zh: '附件类型',
+      en: 'attachment type',
+      th: 'ประเภทไฟล์แนบ',
+      ru: 'тип вложения',
+    },
+    attachment_hash: {
+      zh: '附件哈希',
+      en: 'attachment hash',
+      th: 'แฮชไฟล์แนบ',
+      ru: 'хеш вложения',
+    },
     urls: { zh: '链接', en: 'URL', th: 'ลิงก์', ru: 'ссылка' },
   };
   return table[token]?.[lang] ?? table[token]?.zh ?? token;
@@ -124,22 +329,45 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     listSummary: (v, lang) => {
       const ip = val(v, 'source_ip');
       switch (lang) {
-        case 'en': return `${ip} exceeds rate limit`;
-        case 'th': return `${ip} เกินขีดจำกัดอัตรา`;
-        case 'ru': return `${ip} превышает лимит частоты`;
-        default: return `${ip} 发信频率超限`;
+        case 'en':
+          return `${ip} triggered rate limit`;
+        case 'th':
+          return `${ip} เรียกใช้ขีดจำกัดอัตรา`;
+        case 'ru':
+          return `${ip} вызвал ограничение частоты`;
+        default:
+          return `${ip} 触发频率限制`;
       }
     },
     hitDetail: (v, lang) => {
-      const ip = val(v, 'source_ip');
-      const w = val(v, 'time_window');
-      const c = val(v, 'count');
-      const l = val(v, 'limit');
+      const ip = optionalVal(v, 'source_ip');
+      const w = optionalVal(v, 'time_window');
+      const c = optionalVal(v, 'count');
+      const l = optionalVal(v, 'limit');
+      const trigger = ipFrequencyTriggerLabel(optionalVal(v, 'trigger_type'), lang);
+      if (c && l) {
+        const scope = trigger ? `${trigger}: ` : '';
+        const window = w ? ` (${w})` : '';
+        switch (lang) {
+          case 'en':
+            return `${ip ? `IP ${ip} ` : ''}${scope}measured ${c}, exceeding limit ${l}${window}`;
+          case 'th':
+            return `${ip ? `IP ${ip} ` : ''}${scope}วัดได้ ${c} เกินขีดจำกัด ${l}${window}`;
+          case 'ru':
+            return `${ip ? `IP ${ip}: ` : ''}${scope}${c}, превышает лимит ${l}${window}`;
+          default:
+            return `${ip ? `IP ${ip} ` : ''}${scope}当前计数 ${c}，超过阈值 ${l}${window}`;
+        }
+      }
       switch (lang) {
-        case 'en': return `IP ${ip} sent ${c} messages within ${w}, exceeding the threshold ${l}`;
-        case 'th': return `IP ${ip} ส่ง ${c} ฉบับภายใน ${w} เกินขีดจำกัด ${l}`;
-        case 'ru': return `IP ${ip} отправил ${c} писем за ${w}, превышая порог ${l}`;
-        default: return `IP ${ip} 在 ${w} 内发送 ${c} 封，超过阈值 ${l}`;
+        case 'en':
+          return `${ip ? `IP ${ip} hit` : 'Hit'} an IP rate-limit rule`;
+        case 'th':
+          return `${ip ? `IP ${ip} ` : ''}ตรงกับกฎจำกัดอัตรา IP`;
+        case 'ru':
+          return `${ip ? `IP ${ip} ` : ''}соответствует правилу ограничения частоты IP`;
+        default:
+          return `${ip ? `IP ${ip} ` : ''}命中 IP 频率限制规则`;
       }
     },
   },
@@ -154,22 +382,29 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       const ip = val(v, 'source_ip');
       const allow = isAllowList(v);
       switch (lang) {
-        case 'en': return `${ip} hit ${allow ? 'allowlist' : 'blocklist'}`;
-        case 'th': return `${ip} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}`;
-        case 'ru': return `${ip} в ${allow ? 'белом' : 'чёрном'} списке`;
-        default: return `${ip} 命中${allow ? '白名单' : '黑名单'}`;
+        case 'en':
+          return `${ip} hit ${allow ? 'allowlist' : 'blocklist'}`;
+        case 'th':
+          return `${ip} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}`;
+        case 'ru':
+          return `${ip} в ${allow ? 'белом' : 'чёрном'} списке`;
+        default:
+          return `${ip} 命中${allow ? '白名单' : '黑名单'}`;
       }
     },
     hitDetail: (v, lang) => {
       const ip = val(v, 'source_ip');
-      const entry = val(v, 'entry');
-      const type = val(v, 'entry_type', '静态');
+      const entry = optionalVal(v, 'entry');
       const allow = isAllowList(v);
       switch (lang) {
-        case 'en': return `IP ${ip} hit ${allow ? 'allowlist' : 'blocklist'} entry ${entry} (type: ${type})`;
-        case 'th': return `IP ${ip} ตรงกับรายการ${allow ? 'บัญชีขาว' : 'บัญชีดำ'} ${entry} (ประเภท: ${type})`;
-        case 'ru': return `IP ${ip} в записи ${allow ? 'белого' : 'чёрного'} списка ${entry} (тип: ${type})`;
-        default: return `IP ${ip} 命中${allow ? '白名单' : '黑名单'}条目 ${entry}（类型：${type}）`;
+        case 'en':
+          return `IP ${ip} hit the ${allow ? 'allowlist' : 'blocklist'}${entry ? ` entry ${entry}` : ''}`;
+        case 'th':
+          return `IP ${ip} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}${entry ? ` รายการ ${entry}` : ''}`;
+        case 'ru':
+          return `IP ${ip} в ${allow ? 'белом' : 'чёрном'} списке${entry ? `, запись ${entry}` : ''}`;
+        default:
+          return `IP ${ip} 命中${allow ? '白名单' : '黑名单'}${entry ? `条目 ${entry}` : ''}`;
       }
     },
   },
@@ -183,21 +418,27 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     listSummary: (v, lang) => {
       const ip = val(v, 'source_ip');
       switch (lang) {
-        case 'en': return `${ip} flagged by RBL`;
-        case 'th': return `${ip} ถูกทำเครื่องหมายโดย RBL`;
-        case 'ru': return `${ip} помечен RBL`;
-        default: return `${ip} 被RBL标记`;
+        case 'en':
+          return `${ip} flagged by RBL`;
+        case 'th':
+          return `${ip} ถูกทำเครื่องหมายโดย RBL`;
+        case 'ru':
+          return `${ip} помечен RBL`;
+        default:
+          return `${ip} 被RBL标记`;
       }
     },
     hitDetail: (v, lang) => {
-      const ip = val(v, 'source_ip');
-      const src = val(v, 'rbl_source');
-      const cat = val(v, 'category');
+      const ip = optionalVal(v, 'source_ip');
       switch (lang) {
-        case 'en': return `IP ${ip} was flagged as ${cat} by ${src}`;
-        case 'th': return `IP ${ip} ถูกทำเครื่องหมายเป็น ${cat} โดย ${src}`;
-        case 'ru': return `IP ${ip} помечен как ${cat} сервисом ${src}`;
-        default: return `IP ${ip} 被 ${src} 标记为 ${cat}`;
+        case 'en':
+          return `${ip ? `IP ${ip} was` : 'Source IP was'} flagged by an RBL rule`;
+        case 'th':
+          return `${ip ? `IP ${ip}` : 'IP ต้นทาง'} ถูกทำเครื่องหมายโดยกฎ RBL`;
+        case 'ru':
+          return `${ip ? `IP ${ip}` : 'IP источника'} помечен правилом RBL`;
+        default:
+          return `${ip ? `IP ${ip}` : '来源 IP'} 命中 RBL 过滤规则`;
       }
     },
   },
@@ -209,22 +450,29 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleRu: 'Зарубежная почта',
     idPrefix: 'OVERSEAS-',
     listSummary: (v, lang) => {
-      const c = val(v, 'country');
+      const ip = optionalVal(v, 'source_ip');
       switch (lang) {
-        case 'en': return `Origin ${c}`;
-        case 'th': return `แหล่งที่มา ${c}`;
-        case 'ru': return `Источник ${c}`;
-        default: return `来源地 ${c}`;
+        case 'en':
+          return `${ip ? `${ip} hit` : 'Hit'} overseas-mail rule`;
+        case 'th':
+          return `${ip ? `${ip} ` : ''}ตรงกับกฎอีเมลต่างประเทศ`;
+        case 'ru':
+          return `${ip ? `${ip} ` : ''}соответствует правилу зарубежной почты`;
+        default:
+          return `${ip ? `${ip} ` : ''}命中境外邮件规则`;
       }
     },
     hitDetail: (v, lang) => {
-      const c = val(v, 'country');
-      const ip = val(v, 'source_ip');
+      const ip = optionalVal(v, 'source_ip');
       switch (lang) {
-        case 'en': return `Country/region of origin ${c} (IP: ${ip})`;
-        case 'th': return `ประเทศ/ภูมิภาคต้นทาง ${c} (IP: ${ip})`;
-        case 'ru': return `Страна/регион источника ${c} (IP: ${ip})`;
-        default: return `来源国家/地区 ${c}（IP: ${ip}）`;
+        case 'en':
+          return `${ip ? `Source IP ${ip} hit` : 'Hit'} an overseas-mail rule`;
+        case 'th':
+          return `${ip ? `IP ต้นทาง ${ip} ` : ''}ตรงกับกฎอีเมลต่างประเทศ`;
+        case 'ru':
+          return `${ip ? `IP источника ${ip} ` : ''}соответствует правилу зарубежной почты`;
+        default:
+          return `${ip ? `来源 IP ${ip} ` : ''}命中境外邮件规则`;
       }
     },
   },
@@ -244,21 +492,31 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       const s = val(v, 'sender');
       const allow = isAllowList(v);
       switch (lang) {
-        case 'en': return `${s} hit ${allow ? 'allowlist' : 'blocklist'}`;
-        case 'th': return `${s} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}`;
-        case 'ru': return `${s} в ${allow ? 'белом' : 'чёрном'} списке`;
-        default: return `${s} 命中${allow ? '白名单' : '黑名单'}`;
+        case 'en':
+          return `${s} hit ${allow ? 'allowlist' : 'blocklist'}`;
+        case 'th':
+          return `${s} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}`;
+        case 'ru':
+          return `${s} в ${allow ? 'белом' : 'чёрном'} списке`;
+        default:
+          return `${s} 命中${allow ? '白名单' : '黑名单'}`;
       }
     },
     hitDetail: (v, lang) => {
       const s = val(v, 'sender');
-      const mt = val(v, 'match_type', lang === 'zh' ? '域名' : 'domain');
+      const mt = senderMatchTypeLabel(optionalVal(v, 'match_type'), lang);
       const allow = isAllowList(v);
       switch (lang) {
-        case 'en': return `Sender ${s} matched ${mt} ${allow ? 'allowlist' : 'blocklist'}`;
-        case 'th': return `ผู้ส่ง ${s} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}ระดับ${mt}`;
-        case 'ru': return `Отправитель ${s} в ${mt} ${allow ? 'белом' : 'чёрном'} списке`;
-        default: return `发件人 ${s} 命中 ${mt} ${allow ? '白名单' : '黑名单'}`;
+        case 'en':
+          return `Sender ${s} matched${mt ? ` ${mt}` : ''} ${allow ? 'allowlist' : 'blocklist'}`;
+        case 'th':
+          return `ผู้ส่ง ${s} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}${mt ? `ระดับ${mt}` : ''}`;
+        case 'ru':
+          return mt
+            ? `Отправитель ${s}: ${mt}, ${allow ? 'белый' : 'чёрный'} список`
+            : `Отправитель ${s} в ${allow ? 'белом' : 'чёрном'} списке`;
+        default:
+          return `发件人 ${s} 命中${mt ?? ''}${allow ? '白名单' : '黑名单'}`;
       }
     },
   },
@@ -269,52 +527,29 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleTh: 'การตรวจสอบและตรวจจับการปลอมแปลง',
     moduleRu: 'Аутентификация и подмена',
     idPrefix: 'AUTH-',
-    listSummary: (v, lang) => {
-      if (v?.protocol) {
-        const p = val(v, 'protocol');
-        switch (lang) {
-          case 'en': return `${p} verification failed`;
-          case 'th': return `การตรวจสอบ ${p} ล้มเหลว`;
-          case 'ru': return `Проверка ${p} не пройдена`;
-          default: return `${p} 验证失败`;
-        }
-      }
+    listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Sender format anomaly';
-        case 'th': return 'รูปแบบผู้ส่งผิดปกติ';
-        case 'ru': return 'Аномалия формата отправителя';
-        default: return '发件人格式异常';
+        case 'en':
+          return 'Hit authentication or spoofing rule';
+        case 'th':
+          return 'ตรงกับกฎการยืนยันตัวตนหรือการปลอมแปลง';
+        case 'ru':
+          return 'Сработало правило аутентификации или подмены';
+        default:
+          return '命中认证与仿冒检测规则';
       }
     },
     hitDetail: (v, lang) => {
-      const s = val(v, 'sender');
-      if (v?.protocol) {
-        const p = val(v, 'protocol');
-        const d = val(v, 'detail');
-        switch (lang) {
-          case 'en': return `Sender ${s}'s ${p} verification hard-failed (reason: ${d})`;
-          case 'th': return `การตรวจสอบ ${p} ของผู้ส่ง ${s} ล้มเหลว (เหตุผล: ${d})`;
-          case 'ru': return `Проверка ${p} отправителя ${s} жёстко не пройдена (причина: ${d})`;
-          default: return `发件人 ${s} 的 ${p} 验证硬失败（失败原因：${d}）`;
-        }
-      }
-      if (v?.feature_type) {
-        const ft = val(v, 'feature_type');
-        const sc = val(v, 'score');
-        switch (lang) {
-          case 'en': return `Matched ${ft} feature (sender: ${s}, similarity: ${sc}%)`;
-          case 'th': return `ตรงกับลักษณะ ${ft} (ผู้ส่ง: ${s}, ความคล้าย: ${sc}%)`;
-          case 'ru': return `Совпадение с признаком ${ft} (отправитель: ${s}, сходство: ${sc}%)`;
-          default: return `命中 ${ft} 特征（发件人：${s}，相似度：${sc}%）`;
-        }
-      }
-      const mf = val(v, 'mail_from');
-      const hf = val(v, 'header_from');
+      const sender = optionalVal(v, 'sender');
       switch (lang) {
-        case 'en': return `MAIL FROM empty/illegal or envelope/header mismatch (envelope: ${mf}, header: ${hf})`;
-        case 'th': return `MAIL FROM ว่าง/ผิดรูปแบบ หรือซอง/ส่วนหัวไม่ตรงกัน (ซอง: ${mf}, ส่วนหัว: ${hf})`;
-        case 'ru': return `MAIL FROM пуст/некорректен или конверт/заголовок не совпадают (конверт: ${mf}, заголовок: ${hf})`;
-        default: return `MAIL FROM 为空/格式非法/信封信头不一致（信封：${mf}，信头：${hf}）`;
+        case 'en':
+          return `${sender ? `Sender ${sender} hit` : 'Hit'} an authentication or spoofing detection rule`;
+        case 'th':
+          return `${sender ? `ผู้ส่ง ${sender} ` : ''}ตรงกับกฎการยืนยันตัวตนหรือการปลอมแปลง`;
+        case 'ru':
+          return `${sender ? `Отправитель ${sender} ` : ''}соответствует правилу аутентификации или подмены`;
+        default:
+          return `${sender ? `发件人 ${sender} ` : ''}命中认证与仿冒检测规则`;
       }
     },
   },
@@ -328,21 +563,42 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     listSummary: (v, lang) => {
       const s = val(v, 'sender');
       switch (lang) {
-        case 'en': return `${s} abnormal sending behavior`;
-        case 'th': return `${s} พฤติกรรมการส่งผิดปกติ`;
-        case 'ru': return `${s} аномальное поведение отправки`;
-        default: return `${s} 发信行为异常`;
+        case 'en':
+          return `${s} abnormal sending behavior`;
+        case 'th':
+          return `${s} พฤติกรรมการส่งผิดปกติ`;
+        case 'ru':
+          return `${s} аномальное поведение отправки`;
+        default:
+          return `${s} 发信行为异常`;
       }
     },
     hitDetail: (v, lang) => {
-      const s = val(v, 'sender');
-      const at = val(v, 'abnormal_type', lang === 'zh' ? '频率' : 'frequency');
-      const d = val(v, 'detail');
+      const s = optionalVal(v, 'sender');
+      const at = behaviorDimensionLabel(optionalVal(v, 'abnormal_type'), lang);
+      const count = optionalVal(v, 'count');
+      const threshold = optionalVal(v, 'threshold');
+      if (at && count && threshold) {
+        switch (lang) {
+          case 'en':
+            return `${s ? `Sender ${s}: ` : ''}${at} count ${count} reached trigger threshold ${threshold}`;
+          case 'th':
+            return `${s ? `ผู้ส่ง ${s}: ` : ''}${at} ${count} ถึงเกณฑ์ทริกเกอร์ ${threshold}`;
+          case 'ru':
+            return `${s ? `Отправитель ${s}: ` : ''}${at}: ${count}, достигнут порог срабатывания ${threshold}`;
+          default:
+            return `${s ? `发件人 ${s} ` : ''}${at}当前计数 ${count}，达到触发阈值 ${threshold}`;
+        }
+      }
       switch (lang) {
-        case 'en': return `Sender ${s} has abnormal ${at} (${d})`;
-        case 'th': return `ผู้ส่ง ${s} มี${at}ผิดปกติ (${d})`;
-        case 'ru': return `У отправителя ${s} аномальная ${at} (${d})`;
-        default: return `发件人 ${s} ${at} 异常（${d}）`;
+        case 'en':
+          return `${s ? `Sender ${s} hit` : 'Hit'} a sending-behavior rule`;
+        case 'th':
+          return `${s ? `ผู้ส่ง ${s} ` : ''}ตรงกับกฎพฤติกรรมการส่ง`;
+        case 'ru':
+          return `${s ? `Отправитель ${s} ` : ''}соответствует правилу поведения отправки`;
+        default:
+          return `${s ? `发件人 ${s} ` : ''}命中发送行为管控规则`;
       }
     },
   },
@@ -353,39 +609,42 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleTh: 'การตรวจสอบผู้รับ',
     moduleRu: 'Проверка получателей',
     idPrefix: 'RCPT-',
-    listSummary: (v, lang) => {
-      if (v?.rcpt) {
-        switch (lang) {
-          case 'en': return 'Recipient verification failed';
-          case 'th': return 'การตรวจสอบผู้รับล้มเหลว';
-          case 'ru': return 'Проверка получателя не пройдена';
-          default: return '收件人验证失败';
-        }
-      }
+    listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Recipient count exceeded';
-        case 'th': return 'จำนวนผู้รับเกินขีดจำกัด';
-        case 'ru': return 'Количество получателей превышено';
-        default: return '收件人数量超限';
+        case 'en':
+          return 'Hit recipient-check rule';
+        case 'th':
+          return 'ตรงกับกฎตรวจสอบผู้รับ';
+        case 'ru':
+          return 'Сработало правило проверки получателей';
+        default:
+          return '命中收件人检测规则';
       }
     },
     hitDetail: (v, lang) => {
-      const rcpt = val(v, 'rcpt');
-      if (v?.rcpt) {
+      const c = optionalVal(v, 'count');
+      const l = optionalVal(v, 'limit');
+      if (c && l) {
         switch (lang) {
-          case 'en': return `Recipient ${rcpt} verification failed`;
-          case 'th': return `การตรวจสอบผู้รับ ${rcpt} ล้มเหลว`;
-          case 'ru': return `Проверка получателя ${rcpt} не пройдена`;
-          default: return `收件人 ${rcpt} 验证失败`;
+          case 'en':
+            return `Recipient count ${c} exceeded limit ${l}`;
+          case 'th':
+            return `จำนวนผู้รับ ${c} เกินขีดจำกัด ${l}`;
+          case 'ru':
+            return `Количество получателей ${c} превышает лимит ${l}`;
+          default:
+            return `收件人数量 ${c} 超过限制 ${l}`;
         }
       }
-      const c = val(v, 'count');
-      const l = val(v, 'limit');
       switch (lang) {
-        case 'en': return `Recipient count ${c} exceeds limit ${l}`;
-        case 'th': return `จำนวนผู้รับ ${c} เกินขีดจำกัด ${l}`;
-        case 'ru': return `Количество получателей ${c} превышает лимит ${l}`;
-        default: return `收件人数量 ${c} 超过限制 ${l}`;
+        case 'en':
+          return 'Hit a recipient-check rule';
+        case 'th':
+          return 'ตรงกับกฎตรวจสอบผู้รับ';
+        case 'ru':
+          return 'Сработало правило проверки получателей';
+        default:
+          return '命中收件人检测规则';
       }
     },
   },
@@ -397,23 +656,29 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleRu: 'Белый/чёрный список пользователей',
     idPrefix: 'UBL-',
     listSummary: (v, lang) => {
-      const u = val(v, 'user');
       const allow = isAllowList(v);
       switch (lang) {
-        case 'en': return `${u} hit ${allow ? 'allowlist' : 'blocklist'}`;
-        case 'th': return `${u} ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}`;
-        case 'ru': return `${u} в ${allow ? 'белом' : 'чёрном'} списке`;
-        default: return `${u} 命中${allow ? '白名单' : '黑名单'}`;
+        case 'en':
+          return `Hit user ${allow ? 'allowlist' : 'blocklist'}`;
+        case 'th':
+          return `ตรงกับ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}ผู้ใช้`;
+        case 'ru':
+          return `Совпадение с ${allow ? 'белым' : 'чёрным'} списком пользователей`;
+        default:
+          return `命中用户${allow ? '白名单' : '黑名单'}`;
       }
     },
     hitDetail: (v, lang) => {
-      const u = val(v, 'user');
       const allow = isAllowList(v);
       switch (lang) {
-        case 'en': return `User ${u} is on the ${allow ? 'allowlist' : 'blocklist'}`;
-        case 'th': return `ผู้ใช้ ${u} อยู่ใน${allow ? 'บัญชีขาว' : 'บัญชีดำ'}`;
-        case 'ru': return `Пользователь ${u} в ${allow ? 'белом' : 'чёрном'} списке`;
-        default: return `用户 ${u} 命中${allow ? '白名单' : '黑名单'}`;
+        case 'en':
+          return `Matched a user ${allow ? 'allowlist' : 'blocklist'} rule`;
+        case 'th':
+          return `ตรงกับกฎ${allow ? 'บัญชีขาว' : 'บัญชีดำ'}ผู้ใช้`;
+        case 'ru':
+          return `Сработало правило ${allow ? 'белого' : 'чёрного'} списка пользователей`;
+        default:
+          return `命中用户${allow ? '白名单' : '黑名单'}规则`;
       }
     },
   },
@@ -426,41 +691,42 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
     moduleRu: 'Безопасность вложений',
     idPrefix: 'ATT-BASIC-',
-    listSummary: (v, lang) => {
-      if (v?.timeout) {
-        switch (lang) {
-          case 'en': return 'Scan timed out';
-          case 'th': return 'การสแกนหมดเวลา';
-          case 'ru': return 'Тайм-аут сканирования';
-          default: return '扫描超时';
-        }
-      }
-      const lt = val(v, 'limit_type', lang === 'zh' ? '大小' : 'size');
+    listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return `Attachment ${lt} exceeded`;
-        case 'th': return `ไฟล์แนบ${lt}เกินขีดจำกัด`;
-        case 'ru': return `${lt} вложения превышен`;
-        default: return `附件${lt}超限`;
+        case 'en':
+          return 'Hit attachment-security rule';
+        case 'th':
+          return 'ตรงกับกฎความปลอดภัยของไฟล์แนบ';
+        case 'ru':
+          return 'Сработало правило безопасности вложений';
+        default:
+          return '命中附件安全检测规则';
       }
     },
     hitDetail: (v, lang) => {
-      if (v?.timeout) {
+      const c = optionalVal(v, 'count');
+      const l = optionalVal(v, 'limit');
+      if (c && l) {
         switch (lang) {
-          case 'en': return 'Attachment scan timed out (configured to quarantine), safety unknown';
-          case 'th': return 'การสแกนไฟล์แนบหมดเวลา (กำหนดให้กักกัน) ความปลอดภัยไม่ทราบ';
-          case 'ru': return 'Тайм-аут сканирования вложения (настроено на карантин), безопасность неизвестна';
-          default: return '附件扫描超时（配置为隔离），安全性未知';
+          case 'en':
+            return `Attachment measurement ${c} exceeded configured limit ${l}`;
+          case 'th':
+            return `ค่าที่วัดได้ของไฟล์แนบ ${c} เกินขีดจำกัด ${l}`;
+          case 'ru':
+            return `Показатель вложения ${c} превышает лимит ${l}`;
+          default:
+            return `附件检测值 ${c} 超过配置限制 ${l}`;
         }
       }
-      const c = val(v, 'count');
-      const sz = val(v, 'size');
-      const lv = val(v, 'level');
-      const l = val(v, 'limit');
       switch (lang) {
-        case 'en': return `Attachments ${c} / size ${sz} / nesting ${lv} levels exceed limit ${l}`;
-        case 'th': return `ไฟล์แนบ ${c} รายการ / ขนาด ${sz} / ซ้อน ${lv} ระดับ เกินขีดจำกัด ${l}`;
-        case 'ru': return `Вложений ${c} / размер ${sz} / вложенность ${lv} превышает лимит ${l}`;
-        default: return `附件 ${c} 个 / 大小 ${sz} / 嵌套 ${lv} 层超过限制 ${l}`;
+        case 'en':
+          return 'Hit an attachment-security rule';
+        case 'th':
+          return 'ตรงกับกฎความปลอดภัยของไฟล์แนบ';
+        case 'ru':
+          return 'Сработало правило безопасности вложений';
+        default:
+          return '命中附件安全检测规则';
       }
     },
   },
@@ -472,41 +738,29 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleRu: 'Антивирусный движок',
     idPrefix: 'ATT-AV-',
     listSummary: (v, lang) => {
-      if (v?.timeout) {
-        switch (lang) {
-          case 'en': return 'Scan timed out';
-          case 'th': return 'การสแกนหมดเวลา';
-          case 'ru': return 'Тайм-аут сканирования';
-          default: return '扫描超时';
-        }
-      }
-      const fn = val(v, 'filename');
-      const vn = val(v, 'virus_name');
+      const vn = optionalVal(v, 'virus_name');
       switch (lang) {
-        case 'en': return `${fn} detected ${vn}`;
-        case 'th': return `${fn} ตรวจพบ ${vn}`;
-        case 'ru': return `${fn} обнаружен ${vn}`;
-        default: return `${fn} 检出 ${vn}`;
+        case 'en':
+          return vn ? `Detected ${vn}` : 'Antivirus detection hit';
+        case 'th':
+          return vn ? `ตรวจพบ ${vn}` : 'ตรงกับการตรวจจับไวรัส';
+        case 'ru':
+          return vn ? `Обнаружено: ${vn}` : 'Сработало антивирусное обнаружение';
+        default:
+          return vn ? `检出 ${vn}` : '反病毒检测命中';
       }
     },
     hitDetail: (v, lang) => {
-      if (v?.timeout) {
-        switch (lang) {
-          case 'en': return 'Antivirus scan timed out (configured to quarantine), safety unknown';
-          case 'th': return 'การสแกนป้องกันไวรัสหมดเวลา (กำหนดให้กักกัน) ความปลอดภัยไม่ทราบ';
-          case 'ru': return 'Тайм-аут антивирусного сканирования (настроено на карантин), безопасность неизвестна';
-          default: return '反病毒扫描超时（配置为隔离），安全性未知';
-        }
-      }
-      const fn = val(v, 'filename');
-      const vn = val(v, 'virus_name');
-      const e = val(v, 'engine');
-      const ver = val(v, 'version');
+      const vn = optionalVal(v, 'virus_name');
       switch (lang) {
-        case 'en': return `Attachment ${fn} detected ${vn} (engine: ${e}, version: ${ver})`;
-        case 'th': return `ไฟล์แนบ ${fn} ตรวจพบ ${vn} (เอนจิน: ${e}, เวอร์ชัน: ${ver})`;
-        case 'ru': return `Вложение ${fn}: обнаружено ${vn} (движок: ${e}, версия: ${ver})`;
-        default: return `附件 ${fn} 检出 ${vn}（引擎：${e}，版本：${ver}）`;
+        case 'en':
+          return vn ? `Antivirus engine detected ${vn}` : 'Antivirus detection hit';
+        case 'th':
+          return vn ? `เอนจินป้องกันไวรัสตรวจพบ ${vn}` : 'ตรงกับการตรวจจับไวรัส';
+        case 'ru':
+          return vn ? `Антивирус обнаружил ${vn}` : 'Сработало антивирусное обнаружение';
+        default:
+          return vn ? `反病毒引擎检出 ${vn}` : '反病毒检测命中';
       }
     },
   },
@@ -519,18 +773,26 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     idPrefix: 'ATT-QR-',
     listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'QR code detected';
-        case 'th': return 'ตรวจพบ QR code';
-        case 'ru': return 'Обнаружен QR-код';
-        default: return '检测到二维码';
+        case 'en':
+          return 'QR code detected';
+        case 'th':
+          return 'ตรวจพบ QR code';
+        case 'ru':
+          return 'Обнаружен QR-код';
+        default:
+          return '检测到二维码';
       }
     },
     hitDetail: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'QR code detected in attachment image (typical phishing carrier)';
-        case 'th': return 'ตรวจพบ QR code ในภาพไฟล์แนบ (พาหะฟิชชิงทั่วไป)';
-        case 'ru': return 'В изображении вложения обнаружен QR-код (типичный носитель фишинга)';
-        default: return '附件图片中检测到二维码（钓鱼邮件典型载体）';
+        case 'en':
+          return 'QR code detected in attachment image (typical phishing carrier)';
+        case 'th':
+          return 'ตรวจพบ QR code ในภาพไฟล์แนบ (พาหะฟิชชิงทั่วไป)';
+        case 'ru':
+          return 'В изображении вложения обнаружен QR-код (типичный носитель фишинга)';
+        default:
+          return '附件图片中检测到二维码（钓鱼邮件典型载体）';
       }
     },
   },
@@ -543,19 +805,26 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     idPrefix: 'ATT-ENC-',
     listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Encrypted attachment cannot be decrypted';
-        case 'th': return 'ไฟล์แนบเข้ารหัสไม่สามารถถอดรหัสได้';
-        case 'ru': return 'Зашифрованное вложение не удаётся расшифровать';
-        default: return '加密附件无法解密';
+        case 'en':
+          return 'Encrypted attachment cannot be decrypted';
+        case 'th':
+          return 'ไฟล์แนบเข้ารหัสไม่สามารถถอดรหัสได้';
+        case 'ru':
+          return 'Зашифрованное вложение не удаётся расшифровать';
+        default:
+          return '加密附件无法解密';
       }
     },
-    hitDetail: (v, lang) => {
-      const fn = val(v, 'filename');
+    hitDetail: (_v, lang) => {
       switch (lang) {
-        case 'en': return `Encrypted attachment ${fn} cannot be decrypted, content uninspectable`;
-        case 'th': return `ไฟล์แนบเข้ารหัส ${fn} ไม่สามารถถอดรหัสได้ ไม่สามารถตรวจสอบเนื้อหา`;
-        case 'ru': return `Зашифрованное вложение ${fn} не удаётся расшифровать, содержимое недоступно для проверки`;
-        default: return `检测到加密附件 ${fn} 且无法解密，内容不可检测`;
+        case 'en':
+          return 'An encrypted attachment could not be decrypted, so its content could not be inspected';
+        case 'th':
+          return 'ไม่สามารถถอดรหัสไฟล์แนบที่เข้ารหัสได้ จึงไม่สามารถตรวจสอบเนื้อหา';
+        case 'ru':
+          return 'Зашифрованное вложение не удалось расшифровать, поэтому содержимое не проверено';
+        default:
+          return '检测到无法解密的加密附件，内容不可检测';
       }
     },
   },
@@ -566,39 +835,42 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleTh: 'การป้องกัน URL',
     moduleRu: 'Защита URL',
     idPrefix: 'URL-',
-    listSummary: (v, lang) => {
-      if (v?.type) {
-        switch (lang) {
-          case 'en': return 'Malicious link detected';
-          case 'th': return 'ตรวจพบลิงก์ที่เป็นอันตราย';
-          case 'ru': return 'Обнаружена вредоносная ссылка';
-          default: return '检测到恶意链接';
-        }
-      }
+    listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Hit link protection';
-        case 'th': return 'ตรงกับการป้องกันลิงก์';
-        case 'ru': return 'Сработала защита ссылок';
-        default: return '命中链接保护';
+        case 'en':
+          return 'Hit link protection';
+        case 'th':
+          return 'ตรงกับการป้องกันลิงก์';
+        case 'ru':
+          return 'Сработала защита ссылок';
+        default:
+          return '命中链接保护';
       }
     },
     hitDetail: (v, lang) => {
-      const url = val(v, 'url');
-      if (v?.type) {
-        const ty = val(v, 'type');
+      const url = optionalVal(v, 'url');
+      const mt = optionalVal(v, 'match_type');
+      if (!url) {
         switch (lang) {
-          case 'en': return `Link ${url} verified as malicious by sandbox (threat type: ${ty})`;
-          case 'th': return `ลิงก์ ${url} ถูกตรวจสอบโดยแซนด์บ็อกซ์ว่าเป็นอันตราย (ประเภทภัยคุกคาม: ${ty})`;
-          case 'ru': return `Ссылка ${url} проверена песочницей и признана вредоносной (тип угрозы: ${ty})`;
-          default: return `链接 ${url} 经沙箱检测为恶意（威胁类型：${ty}）`;
+          case 'en':
+            return 'Hit a URL-protection rule';
+          case 'th':
+            return 'ตรงกับกฎการป้องกัน URL';
+          case 'ru':
+            return 'Сработало правило защиты URL';
+          default:
+            return '命中 URL 防护规则';
         }
       }
-      const mt = val(v, 'match_type', lang === 'zh' ? '未知' : 'unknown');
       switch (lang) {
-        case 'en': return `Link ${url} matched ${mt} URL rule`;
-        case 'th': return `ลิงก์ ${url} ตรงกับกฎ URL ${mt}`;
-        case 'ru': return `Ссылка ${url} совпала с ${mt} правилом URL`;
-        default: return `链接 ${url} 命中 ${mt} URL 规则`;
+        case 'en':
+          return `Link ${url} matched${mt ? ` ${mt}` : ''} URL rule`;
+        case 'th':
+          return `ลิงก์ ${url} ตรงกับกฎ URL${mt ? ` ${mt}` : ''}`;
+        case 'ru':
+          return `Ссылка ${url} совпала с правилом URL${mt ? ` (${mt})` : ''}`;
+        default:
+          return `链接 ${url} 命中${mt ? ` ${mt}` : ''} URL 规则`;
       }
     },
   },
@@ -613,17 +885,25 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       const mm = crMethodLabel(val(v, 'match_method', ''), lang);
       if (!mm) {
         switch (lang) {
-          case 'en': return 'Matched content rule';
-          case 'th': return 'ตรงกับกฎเนื้อหา';
-          case 'ru': return 'Совпадение с контентным правилом';
-          default: return '命中内容规则';
+          case 'en':
+            return 'Matched content rule';
+          case 'th':
+            return 'ตรงกับกฎเนื้อหา';
+          case 'ru':
+            return 'Совпадение с контентным правилом';
+          default:
+            return '命中内容规则';
         }
       }
       switch (lang) {
-        case 'en': return `Matched ${mm}`;
-        case 'th': return `ตรงกับ${mm}`;
-        case 'ru': return `Совпадение по ${mm}`;
-        default: return `命中 ${mm}`;
+        case 'en':
+          return `Matched ${mm}`;
+        case 'th':
+          return `ตรงกับ${mm}`;
+        case 'ru':
+          return `Совпадение по ${mm}`;
+        default:
+          return `命中 ${mm}`;
       }
     },
     hitDetail: (v, lang) => {
@@ -633,10 +913,14 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       // 走独立文案，不套"邮件 {位置} 匹配 {方式} {内容}"模板。
       if (method === 'content_group') {
         switch (lang) {
-          case 'en': return `Mail matched content group "${content}"`;
-          case 'th': return `อีเมลตรงกับกลุ่มเนื้อหา "${content}"`;
-          case 'ru': return `Письмо совпало с контентной группой "${content}"`;
-          default: return `邮件命中内容组 “${content}”`;
+          case 'en':
+            return `Mail matched content group "${content}"`;
+          case 'th':
+            return `อีเมลตรงกับกลุ่มเนื้อหา "${content}"`;
+          case 'ru':
+            return `Письмо совпало с контентной группой "${content}"`;
+          default:
+            return `邮件命中内容组 “${content}”`;
         }
       }
 
@@ -653,17 +937,25 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       if (positions.length === 0) {
         if (!mm) {
           switch (lang) {
-            case 'en': return 'Matched content rule';
-            case 'th': return 'ตรงกับกฎเนื้อหา';
-            case 'ru': return 'Совпадение с контентным правилом';
-            default: return '命中内容规则';
+            case 'en':
+              return 'Matched content rule';
+            case 'th':
+              return 'ตรงกับกฎเนื้อหา';
+            case 'ru':
+              return 'Совпадение с контентным правилом';
+            default:
+              return '命中内容规则';
           }
         }
         switch (lang) {
-          case 'en': return withQuoted(`Mail matched ${mm}`);
-          case 'th': return withQuoted(`อีเมลตรงกับ${mm}`);
-          case 'ru': return withQuoted(`Письмо совпало с ${mm}`);
-          default: return withQuoted(`邮件匹配 ${mm}`);
+          case 'en':
+            return withQuoted(`Mail matched ${mm}`);
+          case 'th':
+            return withQuoted(`อีเมลตรงกับ${mm}`);
+          case 'ru':
+            return withQuoted(`Письмо совпало с ${mm}`);
+          default:
+            return withQuoted(`邮件匹配 ${mm}`);
         }
       }
 
@@ -675,17 +967,28 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
 
       let head: string;
       switch (lang) {
-        case 'en': head = withQuoted(`Mail ${posLabels.join(', ')} matched ${mm}`); break;
-        case 'th': head = withQuoted(`อีเมล ${posLabels.join('、')} ตรงกับ${mm}`); break;
-        case 'ru': head = withQuoted(`${posLabels.join(', ')} письма совпало с ${mm}`); break;
-        default: head = withQuoted(`邮件 ${posLabels.join('、')} 匹配 ${mm}`);
+        case 'en':
+          head = withQuoted(`Mail ${posLabels.join(', ')} matched ${mm}`);
+          break;
+        case 'th':
+          head = withQuoted(`อีเมล ${posLabels.join('、')} ตรงกับ${mm}`);
+          break;
+        case 'ru':
+          head = withQuoted(`${posLabels.join(', ')} письма совпало с ${mm}`);
+          break;
+        default:
+          head = withQuoted(`邮件 ${posLabels.join('、')} 匹配 ${mm}`);
       }
       if (!detail) return head;
       switch (lang) {
-        case 'en': return `${head}\nMatched: ${detail}`;
-        case 'th': return `${head}\nที่ตรงกัน: ${detail}`;
-        case 'ru': return `${head}\nСовпадение: ${detail}`;
-        default: return `${head}\n实际命中：${detail}`;
+        case 'en':
+          return `${head}\nMatched: ${detail}`;
+        case 'th':
+          return `${head}\nที่ตรงกัน: ${detail}`;
+        case 'ru':
+          return `${head}\nСовпадение: ${detail}`;
+        default:
+          return `${head}\n实际命中：${detail}`;
       }
     },
   },
@@ -699,21 +1002,32 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     listSummary: (v, lang) => {
       const tl = val(v, 'tag_label', lang === 'zh' ? '垃圾邮件' : 'spam');
       switch (lang) {
-        case 'en': return `Classified as ${tl}`;
-        case 'th': return `จัดประเภทเป็น${tl}`;
-        case 'ru': return `Классифицировано как ${tl}`;
-        default: return `判定为${tl}`;
+        case 'en':
+          return `Classified as ${tl}`;
+        case 'th':
+          return `จัดประเภทเป็น${tl}`;
+        case 'ru':
+          return `Классифицировано как ${tl}`;
+        default:
+          return `判定为${tl}`;
       }
     },
     hitDetail: (v, lang) => {
       const ti = val(v, 'tag_id', 'Tag3');
       const tl = val(v, 'tag_label', lang === 'zh' ? '垃圾邮件' : 'spam');
-      const cf = val(v, 'confidence');
+      const rawConfidence = v.confidence;
+      const hasConfidence =
+        rawConfidence !== undefined && rawConfidence !== null && rawConfidence !== '';
+      const cf = hasConfidence ? String(rawConfidence) : '';
       switch (lang) {
-        case 'en': return `${ti} classified as ${tl} (confidence: ${cf}%)`;
-        case 'th': return `${ti} จัดประเภทเป็น${tl} (ความมั่นใจ: ${cf}%)`;
-        case 'ru': return `${ti} классифицировано как ${tl} (уверенность: ${cf}%)`;
-        default: return `${ti} 判定为${tl}（置信度：${cf}%）`;
+        case 'en':
+          return `${ti} classified as ${tl}${hasConfidence ? ` (confidence: ${cf}%)` : ''}`;
+        case 'th':
+          return `${ti} จัดประเภทเป็น${tl}${hasConfidence ? ` (ความมั่นใจ: ${cf}%)` : ''}`;
+        case 'ru':
+          return `${ti} классифицировано как ${tl}${hasConfidence ? ` (уверенность: ${cf}%)` : ''}`;
+        default:
+          return `${ti} 判定为${tl}${hasConfidence ? `（置信度：${cf}%）` : ''}`;
       }
     },
   },
@@ -728,20 +1042,27 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     idPrefix: 'AI-PHISH-',
     listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Classified as phishing';
-        case 'th': return 'จัดประเภทเป็นฟิชชิง';
-        case 'ru': return 'Классифицировано как фишинг';
-        default: return '判定为钓鱼邮件';
+        case 'en':
+          return 'Classified as phishing';
+        case 'th':
+          return 'จัดประเภทเป็นฟิชชิง';
+        case 'ru':
+          return 'Классифицировано как фишинг';
+        default:
+          return '判定为钓鱼邮件';
       }
     },
     hitDetail: (v, lang) => {
-      const cf = val(v, 'confidence');
-      const bec = val(v, 'bec', lang === 'zh' ? '否' : 'no');
+      const cf = optionalVal(v, 'confidence');
       switch (lang) {
-        case 'en': return `AI classified as phishing (confidence: ${cf}%, BEC: ${bec})`;
-        case 'th': return `AI จัดประเภทเป็นฟิชชิง (ความมั่นใจ: ${cf}%, BEC: ${bec})`;
-        case 'ru': return `AI классифицировал как фишинг (уверенность: ${cf}%, BEC: ${bec})`;
-        default: return `AI 判定为钓鱼邮件（置信度：${cf}%，BEC：${bec}）`;
+        case 'en':
+          return `AI classified the message as phishing${cf ? ` (confidence: ${cf}%)` : ''}`;
+        case 'th':
+          return `AI จัดประเภทอีเมลเป็นฟิชชิง${cf ? ` (ความมั่นใจ: ${cf}%)` : ''}`;
+        case 'ru':
+          return `AI классифицировал письмо как фишинг${cf ? ` (уверенность: ${cf}%)` : ''}`;
+        default:
+          return `AI 判定为钓鱼邮件${cf ? `（置信度：${cf}%）` : ''}`;
       }
     },
   },
@@ -754,20 +1075,27 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     idPrefix: 'AI-SPOOF-',
     listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Classified as identity spoofing';
-        case 'th': return 'จัดประเภทเป็นการปลอมแปลงตัวตน';
-        case 'ru': return 'Классифицировано как подмена личности';
-        default: return '判定为身份仿冒';
+        case 'en':
+          return 'Classified as identity spoofing';
+        case 'th':
+          return 'จัดประเภทเป็นการปลอมแปลงตัวตน';
+        case 'ru':
+          return 'Классифицировано как подмена личности';
+        default:
+          return '判定为身份仿冒';
       }
     },
     hitDetail: (v, lang) => {
-      const st = val(v, 'spoof_type', lang === 'zh' ? '显示名' : 'display name');
-      const cf = val(v, 'confidence');
+      const cf = optionalVal(v, 'confidence');
       switch (lang) {
-        case 'en': return `AI classified as ${st} spoofing (confidence: ${cf}%)`;
-        case 'th': return `AI จัดประเภทเป็นการปลอมแปลง${st} (ความมั่นใจ: ${cf}%)`;
-        case 'ru': return `AI классифицировал как подмену «${st}» (уверенность: ${cf}%)`;
-        default: return `AI 判定为 ${st} 仿冒（置信度：${cf}%）`;
+        case 'en':
+          return `AI classified the message as identity spoofing${cf ? ` (confidence: ${cf}%)` : ''}`;
+        case 'th':
+          return `AI จัดประเภทอีเมลเป็นการปลอมแปลงตัวตน${cf ? ` (ความมั่นใจ: ${cf}%)` : ''}`;
+        case 'ru':
+          return `AI классифицировал письмо как подмену личности${cf ? ` (уверенность: ${cf}%)` : ''}`;
+        default:
+          return `AI 判定为身份仿冒邮件${cf ? `（置信度：${cf}%）` : ''}`;
       }
     },
   },
@@ -779,22 +1107,32 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleRu: 'AI-агент отслеживания угроз',
     idPrefix: 'AI-TRACE-',
     listSummary: (v, lang) => {
-      const tt = val(v, 'threat_type', lang === 'zh' ? '威胁' : 'threat');
+      const threatType = threatRetroTypeLabel(optionalVal(v, 'threat_type'), lang);
       switch (lang) {
-        case 'en': return `Traceback found ${tt}`;
-        case 'th': return `การติดตามพบ${tt}`;
-        case 'ru': return `При отслеживании обнаружено: ${tt}`;
-        default: return `回溯发现 ${tt}`;
+        case 'en':
+          return threatType ? `Traceback found ${threatType}` : 'Threat found during traceback';
+        case 'th':
+          return threatType ? `การติดตามพบ${threatType}` : 'พบภัยคุกคามระหว่างการติดตาม';
+        case 'ru':
+          return threatType
+            ? `При ретроспективном анализе обнаружено: ${threatType}`
+            : 'При ретроспективном анализе обнаружена угроза';
+        default:
+          return threatType ? `回溯发现${threatType}风险` : '回溯发现威胁';
       }
     },
     hitDetail: (v, lang) => {
-      const tt = val(v, 'threat_type', lang === 'zh' ? '威胁' : 'threat');
-      const cap = val(v, 'capability');
+      const threatType = threatRetroTypeLabel(optionalVal(v, 'threat_type'), lang);
+      const confidence = optionalVal(v, 'confidence');
       switch (lang) {
-        case 'en': return `Traceback of delivered mail found ${tt} (capability: ${cap})`;
-        case 'th': return `การติดตามอีเมลที่ส่งแล้วพบ${tt} (ความสามารถ: ${cap})`;
-        case 'ru': return `При отслеживании доставленных писем обнаружено: ${tt} (возможность: ${cap})`;
-        default: return `回溯已投递邮件发现 ${tt}（回溯能力：${cap}）`;
+        case 'en':
+          return `Threat traceback found ${threatType ? `${threatType} risk` : 'a risk'} in previously delivered mail${confidence ? ` (confidence: ${confidence}%)` : ''}`;
+        case 'th':
+          return `การติดตามภัยคุกคามพบ${threatType ? `ความเสี่ยง${threatType}` : 'ความเสี่ยง'}ในอีเมลที่ส่งแล้ว${confidence ? ` (ความมั่นใจ: ${confidence}%)` : ''}`;
+        case 'ru':
+          return `Ретроспективный анализ выявил ${threatType ? `риск «${threatType}»` : 'риск'} в ранее доставленном письме${confidence ? ` (уверенность: ${confidence}%)` : ''}`;
+        default:
+          return `威胁回溯发现已投递邮件存在${threatType ? `${threatType}风险` : '风险'}${confidence ? `（置信度：${confidence}%）` : ''}`;
       }
     },
   },
@@ -807,39 +1145,28 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleTh: 'การตรวจจับอีเมลที่คล้ายกัน',
     moduleRu: 'Похожие письма',
     idPrefix: 'SIM-',
-    listSummary: (v, lang) => {
-      if (v?.subject_same) {
-        switch (lang) {
-          case 'en': return 'Batch identical subjects';
-          case 'th': return 'หัวข้อเดียวกันเป็นชุด';
-          case 'ru': return 'Пакет одинаковых тем';
-          default: return '批量相同主题';
-        }
-      }
+    listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Highly similar to known mail';
-        case 'th': return 'คล้ายกับอีเมลที่รู้จักอย่างมาก';
-        case 'ru': return 'Очень похоже на известное письмо';
-        default: return '与已知邮件高度相似';
+        case 'en':
+          return 'Highly similar to known mail';
+        case 'th':
+          return 'คล้ายกับอีเมลที่รู้จักอย่างมาก';
+        case 'ru':
+          return 'Очень похоже на известное письмо';
+        default:
+          return '与已知邮件高度相似';
       }
     },
-    hitDetail: (v, lang) => {
-      const sm = val(v, 'similarity');
-      if (v?.subject_same) {
-        switch (lang) {
-          case 'en': return `Subject identical to known spam (similarity ${sm}%)`;
-          case 'th': return `หัวข้อเหมือนกับสแปมที่รู้จัก (ความคล้าย ${sm}%)`;
-          case 'ru': return `Тема идентична известному спаму (сходство ${sm}%)`;
-          default: return `主题与已知垃圾邮件相同（相似度 ${sm}%）`;
-        }
-      }
-      const st = val(v, 'similar_type', lang === 'zh' ? '钓鱼' : 'phishing');
-      const dim = val(v, 'dimension', lang === 'zh' ? '内容' : 'content');
+    hitDetail: (_v, lang) => {
       switch (lang) {
-        case 'en': return `Similarity to known ${st} mail ${sm}% (dimension: ${dim})`;
-        case 'th': return `ความคล้ายกับอีเมล${st}ที่รู้จัก ${sm}% (มิติ: ${dim})`;
-        case 'ru': return `Сходство с известным ${st} письмом ${sm}% (измерение: ${dim})`;
-        default: return `与已知 ${st} 邮件相似度 ${sm}%（相似维度：${dim}）`;
+        case 'en':
+          return 'Hit a similar-mail detection rule';
+        case 'th':
+          return 'ตรงกับกฎตรวจจับอีเมลที่คล้ายกัน';
+        case 'ru':
+          return 'Сработало правило обнаружения похожих писем';
+        default:
+          return '命中相似邮件检测规则';
       }
     },
   },
@@ -855,19 +1182,58 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     idPrefix: 'ACF-',
     listSummary: (_v, lang) => {
       switch (lang) {
-        case 'en': return 'Rule matched';
-        case 'th': return 'ตรงกับกฎ';
-        case 'ru': return 'Совпадение правила';
-        default: return '命中规则';
+        case 'en':
+          return 'Rule matched';
+        case 'th':
+          return 'ตรงกับกฎ';
+        case 'ru':
+          return 'Совпадение правила';
+        default:
+          return '命中规则';
       }
     },
-    hitDetail: (v, lang) => {
-      const tags = val(v, 'detection_tags');
+    hitDetail: (_v, lang) => {
       switch (lang) {
-        case 'en': return `Condition matched, related detection tags: ${tags}`;
-        case 'th': return `เงื่อนไขตรง, แท็กการตรวจจับที่เกี่ยวข้อง: ${tags}`;
-        case 'ru': return `Условие выполнено, связанные теги обнаружения: ${tags}`;
-        default: return `条件命中，关联检测标签：${tags}`;
+        case 'en':
+          return 'Advanced-filter condition matched';
+        case 'th':
+          return 'ตรงกับเงื่อนไขตัวกรองขั้นสูง';
+        case 'ru':
+          return 'Условие расширенного фильтра выполнено';
+        default:
+          return '高级过滤规则条件命中';
+      }
+    },
+  },
+  'MAIL-MARK': {
+    stage: 5,
+    moduleZh: '邮件标记与声明',
+    moduleEn: 'Mail Marking & Disclaimer',
+    moduleTh: 'การทำเครื่องหมายและข้อจำกัดความรับผิดของอีเมล',
+    moduleRu: 'Маркировка писем и дисклеймер',
+    idPrefix: 'MAIL-MARK-',
+    listSummary: (_v, lang) => {
+      switch (lang) {
+        case 'en':
+          return 'Mail-marking rule executed';
+        case 'th':
+          return 'ดำเนินการกฎการทำเครื่องหมายอีเมล';
+        case 'ru':
+          return 'Выполнено правило маркировки письма';
+        default:
+          return '邮件标记规则已执行';
+      }
+    },
+    hitDetail: (_v, lang) => {
+      switch (lang) {
+        case 'en':
+          return 'The matched rule applied its configured mark or disclaimer';
+        case 'th':
+          return 'กฎที่ตรงกันใช้เครื่องหมายหรือข้อจำกัดความรับผิดตามที่กำหนด';
+        case 'ru':
+          return 'Совпавшее правило применило настроенную маркировку или дисклеймер';
+        default:
+          return '命中规则已按配置应用邮件标记或免责声明';
       }
     },
   },
@@ -885,6 +1251,12 @@ const ACTION_LABEL: Record<DisposalAction, Record<DisposalLang, string>> = {
   bounce: { zh: '退信', en: 'Bounce', th: 'ตีกลับ', ru: 'Отказ' },
   sideline: { zh: '旁路', en: 'Sideline', th: 'เบี่ยงเบน', ru: 'Обход' },
   accept: { zh: '放行', en: 'Accept', th: 'อนุญาต', ru: 'Принять' },
+  proceed: {
+    zh: '进行下一步',
+    en: 'Proceed',
+    th: 'ดำเนินการต่อ',
+    ru: 'Продолжить',
+  },
 };
 
 // 动作分色（Badge）。
@@ -899,14 +1271,19 @@ const ACTION_COLOR: Record<DisposalAction, string> = {
   bounce: 'bg-red-100 text-red-700',
   sideline: 'bg-orange-100 text-orange-700',
   accept: 'bg-green-100 text-green-700',
+  proceed: 'bg-blue-100 text-blue-700',
 };
 
 function moduleOf(meta: PolicyMeta, lang: DisposalLang): string {
   switch (lang) {
-    case 'en': return meta.moduleEn;
-    case 'th': return meta.moduleTh;
-    case 'ru': return meta.moduleRu;
-    default: return meta.moduleZh;
+    case 'en':
+      return meta.moduleEn;
+    case 'th':
+      return meta.moduleTh;
+    case 'ru':
+      return meta.moduleRu;
+    default:
+      return meta.moduleZh;
   }
 }
 
@@ -964,7 +1341,24 @@ export function formatHitDetail(basis: DisposalBasis, lang: DisposalLang = 'zh')
   const meta = DISPOSAL_POLICY_MAP[basis.policy_key];
   if (!meta) return '';
   const hv = toHitValues(basis.hit_values) ?? {};
-  return meta.hitDetail(hv, lang);
+  const detail = meta.hitDetail(hv, lang);
+  // ACF tags are a top-level Basis field, not hit_values. Keep that schema
+  // boundary explicit so a missing hit_values.detection_tags can never render
+  // as a fabricated "-" value.
+  if (basis.policy_key === 'ACF' && basis.detection_tags?.length) {
+    const tags = basis.detection_tags.join('、');
+    switch (lang) {
+      case 'en':
+        return `${detail}; related detection tags: ${tags}`;
+      case 'th':
+        return `${detail}; แท็กการตรวจจับที่เกี่ยวข้อง: ${tags}`;
+      case 'ru':
+        return `${detail}; связанные теги обнаружения: ${tags}`;
+      default:
+        return `${detail}，关联检测标签：${tags}`;
+    }
+  }
+  return detail;
 }
 
 // GT-12727 spec §7.10.3：命中模块清单的**唯一**取数口径，兼容两种行格式。
@@ -991,7 +1385,10 @@ export function resolveHitModules(basis?: DisposalBasis): DisposalBasis[] {
     // 坍缩成一条 —— 与后端 MF-3 同一个坑。前端拿不到数值 id，rule_name 是这里
     // 唯一还能区分它们的字段。
     const key = JSON.stringify([
-      item.policy_key ?? '', item.rule_id ?? '', item.action ?? '', item.rule_name ?? '',
+      item.policy_key ?? '',
+      item.rule_id ?? '',
+      item.action ?? '',
+      item.rule_name ?? '',
     ]);
     if (seen.has(key)) continue;
     seen.add(key);
@@ -1025,9 +1422,7 @@ export function groupDisposalModulesByStage(lang: DisposalLang = 'zh'): Disposal
   const groups: DisposalModuleGroup[] = [];
   for (const [key, meta] of Object.entries(DISPOSAL_POLICY_MAP)) {
     const moduleName = moduleOf(meta, lang);
-    const existing = groups.find(
-      (g) => g.stage === meta.stage && g.moduleName === moduleName,
-    );
+    const existing = groups.find((g) => g.stage === meta.stage && g.moduleName === moduleName);
     if (existing) {
       existing.keys.push(key);
     } else {
@@ -1061,7 +1456,10 @@ export function recipientsOfBasisEntry(entry: DisposalBasis): string[] {
 
 export type DisposalBasisRecipientState = 'effective' | 'hitOnly' | 'unknown';
 
-export function recipientBasisState(entry: DisposalBasis, recipient: string): DisposalBasisRecipientState {
+export function recipientBasisState(
+  entry: DisposalBasis,
+  recipient: string,
+): DisposalBasisRecipientState {
   if (entry.effective_for === undefined) return 'unknown';
   const normalized = normalizedRecipient(recipient);
   return entry.effective_for.some((item) => normalizedRecipient(item) === normalized)
@@ -1076,11 +1474,7 @@ export function groupRecipientBasisByPolicy(
   // 列表单元格还要兼容只有根处置依据的历史行；详情页的“命中模块清单”则
   // 必须继续只认 modules/per_recipient，不能把根依据伪装成一条模块明细。
   const resolved = resolveHitModules(basis);
-  const entries = resolved.length > 0
-    ? resolved
-    : basis.policy_key
-      ? [basis]
-      : [];
+  const entries = resolved.length > 0 ? resolved : basis.policy_key ? [basis] : [];
   const groups: DisposalBasisRecipientGroup[] = [];
   for (const entry of entries) {
     if (!entry.policy_key) continue;
@@ -1119,9 +1513,10 @@ export function groupRecipientBasisByPolicy(
     }
     group.recipientCount = recipients.size;
     group.effectiveCount = effective.size;
-    group.matchesRootBasis = group.entries.some((entry) =>
-      entry.policy_key === basis.policy_key &&
-      (!basis.rule_id || entry.rule_id === basis.rule_id),
+    group.matchesRootBasis = group.entries.some(
+      (entry) =>
+        entry.policy_key === basis.policy_key &&
+        (!basis.rule_id || entry.rule_id === basis.rule_id),
     );
   }
   return groups;
@@ -1141,16 +1536,20 @@ export function groupEffectiveRecipientBasisByRule(
   basis: DisposalBasis | undefined,
 ): DisposalBasisRuleRecipientGroup[] {
   if (!basis) return [];
+  const hasModules = Array.isArray(basis.modules) && basis.modules.length > 0;
+  const hasLegacyEntries =
+    !hasModules && Array.isArray(basis.per_recipient) && basis.per_recipient.length > 0;
   const modules = resolveHitModules(basis);
   const groups: DisposalBasisRuleRecipientGroup[] = [];
   const indexes = new Map<string, number>();
 
   for (const entry of modules) {
     if (!entry.policy_key) continue;
-    const recipients = entry.effective_for !== undefined
-      ? entry.effective_for
-      : recipientsOfBasisEntry(entry);
-    if (entry.effective_for !== undefined && recipients.length === 0) continue;
+    // modules[] is the new hit ledger: only a non-empty effective_for proves
+    // that this rule produced a final disposition. recipients alone means hit.
+    // Legacy per_recipient[] predates effective_for and contains winners.
+    const recipients = hasModules ? (entry.effective_for ?? []) : recipientsOfBasisEntry(entry);
+    if (entry.action === 'proceed' || recipients.length === 0) continue;
     const key = JSON.stringify([
       entry.policy_key,
       entry.rule_id ?? '',
@@ -1177,7 +1576,35 @@ export function groupEffectiveRecipientBasisByRule(
     });
   }
 
-  if (groups.length === 0 && basis.policy_key) {
+  // Early onconnect/MAIL rejection happens before recipients exist, so its
+  // matching module cannot carry effective_for. Keep the authoritative root
+  // only for a matching recipientless module. Never apply this fallback to a
+  // module that names recipients: that shape proves a hit, not final ownership.
+  if (groups.length === 0 && hasModules && basis.policy_key && basis.action !== 'proceed') {
+    const matchesRecipientlessFinal = basis.modules!.some(
+      (entry) =>
+        entry.effective_for === undefined &&
+        recipientsOfBasisEntry(entry).length === 0 &&
+        entry.policy_key === basis.policy_key &&
+        entry.action?.toLowerCase() === basis.action?.toLowerCase() &&
+        (!basis.rule_id || entry.rule_id === basis.rule_id),
+    );
+    if (matchesRecipientlessFinal) {
+      groups.push({
+        policyKey: basis.policy_key,
+        entry: basis,
+        recipients: [],
+      });
+    }
+  }
+
+  if (
+    groups.length === 0 &&
+    !hasModules &&
+    !hasLegacyEntries &&
+    basis.policy_key &&
+    basis.action !== 'proceed'
+  ) {
     groups.push({
       policyKey: basis.policy_key,
       entry: basis,
@@ -1187,29 +1614,102 @@ export function groupEffectiveRecipientBasisByRule(
   return groups;
 }
 
+// List/tooltip grouping for the product concept “处置依据”. It is deliberately
+// derived from final rule groups, not from resolveHitModules (the hit ledger).
+export function groupDispositionBasisByPolicy(
+  basis: DisposalBasis | undefined,
+): DisposalBasisRecipientGroup[] {
+  if (!basis) return [];
+  const ruleGroups = groupEffectiveRecipientBasisByRule(basis);
+  const groups: DisposalBasisRecipientGroup[] = [];
+  const recipientSets = new Map<string, Set<string>>();
+  for (const ruleGroup of ruleGroups) {
+    let group = groups.find((candidate) => candidate.policyKey === ruleGroup.policyKey);
+    if (!group) {
+      group = {
+        policyKey: ruleGroup.policyKey,
+        entries: [],
+        recipientCount: 0,
+        effectiveCount: 0,
+        effectiveKnown: false,
+        matchesRootBasis: false,
+      };
+      groups.push(group);
+      recipientSets.set(ruleGroup.policyKey, new Set<string>());
+    }
+    group.entries.push(ruleGroup.entry);
+    const recipients = recipientSets.get(ruleGroup.policyKey)!;
+    for (const recipient of ruleGroup.recipients) {
+      const normalized = normalizedRecipient(recipient);
+      if (normalized) recipients.add(normalized);
+    }
+    group.recipientCount = recipients.size;
+    group.effectiveCount = recipients.size;
+    group.effectiveKnown = group.effectiveKnown || ruleGroup.entry.effective_for !== undefined;
+    group.matchesRootBasis =
+      group.matchesRootBasis ||
+      (ruleGroup.entry.policy_key === basis.policy_key &&
+        (!basis.rule_id || ruleGroup.entry.rule_id === basis.rule_id));
+  }
+  return groups;
+}
+
+export function hasStructuredBasisFacts(basis: DisposalBasis | undefined): boolean {
+  return Boolean(
+    basis && (basis.policy_key || basis.modules?.length || basis.per_recipient?.length),
+  );
+}
+
 export function groupsFromSummaries(
   basis: DisposalBasis | undefined,
   summaries: DisposalBasisGroupSummary[] | undefined,
 ): DisposalBasisRecipientGroup[] {
-  if (!summaries?.length) return groupRecipientBasisByPolicy(basis);
-  return summaries.map((summary) => ({
-    policyKey: summary.policy_key,
-    entries: summary.entries.map((entry) => ({
-      policy_key: summary.policy_key,
-      rule_name: entry.rule_name,
-      rule_id: entry.rule_id,
-      action: entry.action,
-      hit_values: entry.hit_values,
-      detection_tags: entry.detection_tags,
-    })),
-    recipientCount: summary.recipient_count,
-    effectiveCount: summary.effective_count,
-    effectiveKnown: summary.effective_known,
-    matchesRootBasis: summary.entries.some((entry) =>
-      summary.policy_key === basis?.policy_key &&
-      (!basis?.rule_id || entry.rule_id === basis.rule_id),
-    ),
-  }));
+  if (!summaries?.length) return groupDispositionBasisByPolicy(basis);
+  return summaries.flatMap((summary) => {
+    const entries = summary.entries.filter(
+      (entry) =>
+        !(
+          entry.action === 'proceed' ||
+          (entry.effective_known && entry.effective_count === 0) ||
+          (summary.policy_key === 'AUTH' &&
+            entry.action === 'accept' &&
+            !entry.effective_known &&
+            entry.effective_count === 0)
+        ),
+    );
+    if (entries.length === 0) return [];
+    const filtered = entries.length !== summary.entries.length;
+    const recipientCount = filtered
+      ? entries.reduce((total, entry) => total + entry.recipient_count, 0)
+      : summary.recipient_count;
+    const effectiveCount = filtered
+      ? entries.reduce((total, entry) => total + entry.effective_count, 0)
+      : summary.effective_count;
+    const effectiveKnown = filtered
+      ? entries.some((entry) => entry.effective_known)
+      : summary.effective_known;
+    return [
+      {
+        policyKey: summary.policy_key,
+        entries: entries.map((entry) => ({
+          policy_key: summary.policy_key,
+          rule_name: entry.rule_name,
+          rule_id: entry.rule_id,
+          action: entry.action,
+          hit_values: entry.hit_values,
+          detection_tags: entry.detection_tags,
+        })),
+        recipientCount,
+        effectiveCount,
+        effectiveKnown,
+        matchesRootBasis: entries.some(
+          (entry) =>
+            summary.policy_key === basis?.policy_key &&
+            (!basis?.rule_id || entry.rule_id === basis.rule_id),
+        ),
+      },
+    ];
+  });
 }
 
 function groupMatchesHighlight(
@@ -1237,9 +1737,11 @@ export function pickPrimaryBasisGroup(
     );
     if (highlighted) return highlighted;
   }
-  return groups.find((group) => group.effectiveCount > 0)
-    ?? groups.find((group) => group.matchesRootBasis)
-    ?? groups[0];
+  return (
+    groups.find((group) => group.effectiveCount > 0) ??
+    groups.find((group) => group.matchesRootBasis) ??
+    groups[0]
+  );
 }
 
 export function sortBasisGroupsForTooltip(
@@ -1251,8 +1753,8 @@ export function sortBasisGroupsForTooltip(
   const highlighted = groups.filter((group) =>
     groupMatchesHighlight(group, highlightPolicyKeys, highlightRuleIds),
   );
-  const rest = groups.filter((group) =>
-    !groupMatchesHighlight(group, highlightPolicyKeys, highlightRuleIds),
+  const rest = groups.filter(
+    (group) => !groupMatchesHighlight(group, highlightPolicyKeys, highlightRuleIds),
   );
   return [...highlighted, ...rest];
 }
@@ -1267,7 +1769,8 @@ export function formatMultiBasisListReason(
   if (!primary?.entries.length) return '';
   const highlightedEntry = highlightRuleIds?.length
     ? primary.entries.find((entry) =>
-        Boolean(entry.rule_id && highlightRuleIds.includes(entry.rule_id)))
+        Boolean(entry.rule_id && highlightRuleIds.includes(entry.rule_id)),
+      )
     : undefined;
   const primaryText = formatListReason(highlightedEntry ?? primary.entries[0], lang);
   if (groups.length <= 1) return primaryText;

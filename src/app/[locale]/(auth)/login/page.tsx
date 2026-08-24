@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { CheckCircle2, Loader2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
@@ -61,7 +60,6 @@ export default function LoginPage() {
   const t = useTranslations();
   const apiErrorMessage = useApiErrorMessage();
   const { completeLogin } = useAuth();
-  const router = useRouter();
   const locale = useLocale();
 
   // Shared, hoisted form state. The credentials step owns username/password,
@@ -211,9 +209,9 @@ export default function LoginPage() {
       applyRemember(name);
       completeLogin(response, name, { showAdvancedRules });
       setStep({ kind: 'success' });
-      router.push(`/${locale}/dashboard`);
+      window.location.replace(`/${locale}/dashboard`);
     },
-    [applyRemember, completeLogin, locale, router],
+    [applyRemember, completeLogin, locale],
   );
 
   // ---- Two-factor resend countdown ----

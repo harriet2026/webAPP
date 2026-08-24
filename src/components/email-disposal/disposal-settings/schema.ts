@@ -50,7 +50,8 @@ export const disposalSettingsSchema = z.object({
     // 超时临时处置（旁路 Session worker 读取，见 task-8/task-12）：GET 可能省略
     // （json:"...,omitempty"），必须保持 optional，否则默认 z.object 的 strip
     // 模式会在 zodResolver 校验后把这些字段从提交数据里丢掉（GT-12056 同类问题）。
-    timeout_temp_disposal: z.string().optional(),
+    timeout_temp_disposal: z.literal('accept').optional(),
+    timeout_mark_enabled: z.boolean(),
     timeout_mark_positions: z.array(z.string()).optional(),
     timeout_mark_text: z.string().optional(),
   }),
@@ -175,6 +176,10 @@ export function defaultDisposalSettings(): DisposalSettings {
       reviewer_notify_interval_minutes: 30,
       reviewer_active_start: '00:00:00',
       reviewer_active_end: '23:59:59',
+      timeout_temp_disposal: 'accept',
+      timeout_mark_enabled: false,
+      timeout_mark_positions: [],
+      timeout_mark_text: '',
     },
     recall: {
       task_timeout_seconds: 30,

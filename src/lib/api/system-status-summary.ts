@@ -20,6 +20,7 @@ export interface SystemStatusSummaryResponse {
   previous: SystemStatusPeriodSummary;
   threat_trend: TrendSeriesPoint[];
   pending_disposal: number;
+  pending_report: number;
   generated_at: string;
 }
 

@@ -1,10 +1,19 @@
 import { toast } from 'sonner';
 import type { ApiRequestFn } from '@/lib/api/client';
 import { API_BASE } from '@/lib/api/client';
-import { getTenantHeader } from '@/lib/api/logs';
+import { fetchSSE, getTenantHeader } from '@/lib/api/logs';
 import { createUnifiedRule } from '@/lib/api/unified-rules';
 import { bulkDispose } from './disposal-api';
-import type { CheckStatus, FinalVerdict, MailLogDetail, MailLogAnalysis, MailChildEvent, MailLifecycleLogsResponse, ObjectDisposeResult } from '@/types/email-disposal-detail';
+import type {
+  CheckStatus,
+  FinalVerdict,
+  MailLogDetail,
+  MailLogAnalysis,
+  MailChildEvent,
+  MailLifecycleLogsResponse,
+  MailLifecycleModuleResult,
+  ObjectDisposeResult,
+} from '@/types/email-disposal-detail';
 import type { BulkDisposeResponse } from '@/types/email-disposal';
 import type { EmailPreviewResponse } from '@/types/email-preview';
 
@@ -181,6 +190,115 @@ export async function getMailLifecycleLogs(id: number, requestFn: ApiRequestFn, 
   };
 }
 
+export interface MailLifecycleStreamEvent {
+  event: 'start' | 'node_started' | 'node_modules' | 'module_done' | 'module_timeout' |
+    'module_failed' | 'node_done' | 'node_timeout' | 'node_failed' | 'done' | 'error';
+  data: Record<string, unknown> | MailLifecycleModuleResult;
+}
+
+export function legacyLifecycleStreamEvents(
+  response: MailLifecycleLogsResponse,
+): MailLifecycleStreamEvent[] {
+  const grouped = new Map<string, Map<string, MailLifecycleModuleResult['items']>>();
+  const nodes = [...(response.searched_nodes ?? [])];
+  const nodeSet = new Set(nodes);
+  for (const item of response.items ?? []) {
+    const node = item.node || 'local';
+    if (!nodeSet.has(node)) {
+      nodeSet.add(node);
+      nodes.push(node);
+    }
+    const modules = grouped.get(node) ?? new Map<string, MailLifecycleModuleResult['items']>();
+    const items = modules.get(item.component) ?? [];
+    items.push(item);
+    modules.set(item.component, items);
+    grouped.set(node, modules);
+  }
+
+  const failed = new Set(response.failed_nodes ?? []);
+  const events: MailLifecycleStreamEvent[] = [{ event: 'start', data: { nodes } }];
+  for (const node of nodes) {
+    events.push({ event: 'node_started', data: { node } });
+    const modules = grouped.get(node) ?? new Map<string, MailLifecycleModuleResult['items']>();
+    const names = [...modules.keys()].sort();
+    events.push({ event: 'node_modules', data: { node, modules: names } });
+    for (const moduleName of names) {
+      const items = modules.get(moduleName) ?? [];
+      events.push({
+        event: 'module_done',
+        data: {
+          node,
+          module: moduleName,
+          status: 'completed',
+          items,
+          total: items.length,
+          truncated: false,
+          elapsed_ms: 0,
+        },
+      });
+    }
+    if (failed.has(node) && names.length === 0) {
+      events.push({ event: 'node_failed', data: { node, status: 'failed', error_code: 'legacy_node_failed' } });
+    } else {
+      events.push({
+        event: 'node_done',
+        data: { node, status: failed.has(node) ? 'partial' : 'completed' },
+      });
+    }
+  }
+  events.push({
+    event: 'done',
+    data: {
+      total: response.total ?? response.items?.length ?? 0,
+      truncated: response.truncated ?? false,
+      partial: response.partial ?? false,
+      searched_nodes: nodes,
+      failed_nodes: response.failed_nodes ?? [],
+      elapsed_ms: 0,
+    },
+  });
+  return events;
+}
+
+export async function* streamMailLifecycleLogs(
+  id: number,
+  options: { node?: string; modules?: string[]; signal?: AbortSignal } = {},
+): AsyncGenerator<MailLifecycleStreamEvent> {
+  const query = new URLSearchParams({ stream: '1' });
+  if (options.node) query.set('node', options.node);
+  if (options.modules?.length) query.set('modules', options.modules.join(','));
+  const url = `${API_BASE}/mail-logs/${id}/lifecycle-logs?${query}`;
+  let sawEvent = false;
+  for await (const event of fetchSSE(url, options.signal)) {
+    let data: Record<string, unknown> = {};
+    try {
+      data = JSON.parse(event.data) as Record<string, unknown>;
+    } catch {
+      data = { error_code: 'invalid_stream_frame' };
+    }
+    sawEvent = true;
+    yield { event: event.event as MailLifecycleStreamEvent['event'], data };
+  }
+
+  // During a rolling upgrade an older apiserver ignores stream=1 and returns
+  // one JSON document. fetchSSE intentionally yields no frame for that body;
+  // fall back to the legacy endpoint so the new webapp never remains stuck in
+  // "loading" while its peer is still on the previous version.
+  if (!sawEvent && !options.signal?.aborted) {
+    const response = await fetch(`${API_BASE}/mail-logs/${id}/lifecycle-logs`, {
+      credentials: 'include',
+      headers: { ...getTenantHeader() },
+      signal: options.signal,
+    });
+    if (!response.ok) {
+      yield { event: 'error', data: { error_code: 'legacy_fallback_failed' } };
+      return;
+    }
+    const legacy = await response.json() as MailLifecycleLogsResponse;
+    for (const event of legacyLifecycleStreamEvents(legacy)) yield event;
+  }
+}
+
 export async function disposeOne(id: number, action: 'release' | 'delete', requestFn: ApiRequestFn): Promise<BulkDisposeResponse> {
   return bulkDispose({ mail_log_ids: [id], action }, requestFn);
 }
@@ -334,8 +452,9 @@ export function disposalRulePriority(isSystemAdmin: boolean): number {
 export type MailLogBlacklistEntityKind = 'domain' | 'url' | 'attachment_hash';
 
 // The detail page sends only the operator's intent. The backend owns tenant,
-// direction, priority, stage, exact matching semantics and the quarantine
-// action, and verifies that the value is actually present in this mail log.
+// destination page, priority, stage and matching semantics, and verifies that
+// the value is actually present in this mail log. Domain intents become sender
+// domain blacklist rules; URL and attachment hashes remain content rules.
 export async function blacklistMailLogEntity(mailLogId: number, kind: MailLogBlacklistEntityKind, value: string, requestFn: ApiRequestFn): Promise<void> {
   await requestFn(`/mail-logs/${mailLogId}/blacklist`, {
     method: 'POST',

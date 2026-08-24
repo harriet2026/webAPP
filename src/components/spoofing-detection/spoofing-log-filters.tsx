@@ -130,7 +130,7 @@ export function SpoofingLogFilters({ value, onChange, onReset, onSearch }: {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{t('filters.allDisposal')}</SelectItem>
-          <SelectItem value="mark">{t('disposition.mark')}</SelectItem>
+          <SelectItem value="accept">{t('disposition.accept')}</SelectItem>
           <SelectItem value="quarantine">{t('disposition.quarantine')}</SelectItem>
           <SelectItem value="reject">{t('disposition.reject')}</SelectItem>
           <SelectItem value="discard">{t('disposition.discard')}</SelectItem>

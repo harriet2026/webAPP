@@ -35,6 +35,7 @@ import {
 import {
   toGatewayPayload,
   fromGatewayView,
+  hasWhitelistTag,
   BLACKLIST_DEMO_ACTIONS,
   WHITELIST_DEMO_ACTIONS,
   DEMO_ACTION_LABEL_KEY,
@@ -107,7 +108,8 @@ export function createRuleSchema(range: PriorityRange) {
     ip_value: z.string().optional(),
     // 仅 expression 使用：全局 IP 组的数值规则 ID，≤20 个（与后端一致）。
     ip_groups: z.array(z.number()).max(MAX_IP_GROUPS, 'expressionTooManyGroups').optional(),
-    demo_action: z.enum(['block', 'quarantine', 'drop', 'review', 'deliver', 'tagDeliver']),
+    demo_action: z.enum(['reject', 'quarantine', 'discard', 'audit', 'accept']),
+    add_whitelist_tag: z.boolean(),
     priority: z.number().int().min(range.min, 'priorityOutOfRange').max(range.max, 'priorityOutOfRange'),
     is_active: z.boolean(),
     valid_until: z.string().optional(),
@@ -183,21 +185,19 @@ interface SimResult {
 // 动作在下拉/预览中的文字色（对齐 demo）
 const ACTION_TEXT_CLASS: Record<DemoAction, string> = {
   quarantine: 'text-orange-600',
-  review: 'text-purple-600',
-  block: 'text-red-600',
-  drop: 'text-red-700',
-  deliver: 'text-green-600',
-  tagDeliver: 'text-cyan-600',
+  audit: 'text-purple-600',
+  reject: 'text-red-600',
+  discard: 'text-red-700',
+  accept: 'text-green-600',
 };
 
 // 「系统将执行」的效果色（demo：投递类绿、阻断/丢弃红、其余琥珀）
 const ACTION_EFFECT_TEXT_CLASS: Record<DemoAction, string> = {
-  deliver: 'text-green-600 dark:text-green-400',
-  tagDeliver: 'text-green-600 dark:text-green-400',
-  block: 'text-red-600 dark:text-red-400',
-  drop: 'text-red-600 dark:text-red-400',
+  accept: 'text-green-600 dark:text-green-400',
+  reject: 'text-red-600 dark:text-red-400',
+  discard: 'text-red-600 dark:text-red-400',
   quarantine: 'text-amber-600 dark:text-amber-400',
-  review: 'text-amber-600 dark:text-amber-400',
+  audit: 'text-amber-600 dark:text-amber-400',
 };
 
 export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
@@ -239,7 +239,8 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       ip_config_type: 'range',
       ip_value: '',
       ip_groups: [],
-      demo_action: 'block',
+      demo_action: 'reject',
+      add_whitelist_tag: false,
       priority: range.defaultValue,
       is_active: true,
       valid_until: '',
@@ -302,6 +303,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           // 编辑回填：ip_config_type / ip_value / ip_groups 三字段来自行数据
           ...ipConfigFieldsFromView(rule),
           demo_action: fromGatewayView(rule.action, rule.add_headers, rule.list_type as IPFilterListType),
+          add_whitelist_tag: hasWhitelistTag(rule.add_headers),
           priority: rule.priority,
           is_active: rule.is_active,
           valid_until: rule.valid_until ? rule.valid_until.slice(0, 10) : '',
@@ -315,7 +317,8 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           ip_config_type: 'range',
           ip_value: '',
           ip_groups: [],
-          demo_action: listTypeTab === 'whitelist' ? 'deliver' : 'block',
+          demo_action: listTypeTab === 'whitelist' ? 'accept' : 'reject',
+          add_whitelist_tag: false,
           priority: Math.min(Math.max((rulesData?.items?.[0]?.priority ?? (range.defaultValue - 1)) + 1, range.min), range.max),
           is_active: true,
           valid_until: '',
@@ -331,7 +334,10 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
     setIsSubmitting(true);
     try {
       // expression 携带 ip_groups；single/range 不带（构造逻辑抽为纯函数便于测试）
-      const payload: IPFilterRulePayload = buildIPFilterRulePayload(data, toGatewayPayload(data.demo_action));
+      const payload: IPFilterRulePayload = buildIPFilterRulePayload(
+        data,
+        toGatewayPayload(data.demo_action, data.add_whitelist_tag),
+      );
       if (editingRule) {
         await apiRequest(`/ip-filter/rules/${editingRule.id}`, { method: 'PUT', body: payload });
       } else {
@@ -416,12 +422,16 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       header: t('common.actions'),
       cell: ({ row }) => {
         const demoAction = fromGatewayView(row.original.action, row.original.add_headers, row.original.list_type);
+        const tagged = hasWhitelistTag(row.original.add_headers);
         return (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <Badge className={DEMO_ACTION_BADGE_CLASS[demoAction]}>{t(DEMO_ACTION_LABEL_KEY[demoAction])}</Badge>
+                  <span className="inline-flex items-center gap-1">
+                    <Badge className={DEMO_ACTION_BADGE_CLASS[demoAction]}>{t(DEMO_ACTION_LABEL_KEY[demoAction])}</Badge>
+                    {tagged && <Badge variant="outline">{t('ipFilter.actionTagDeliver')}</Badge>}
+                  </span>
                 }
               />
               <TooltipContent side="top" className="max-w-[260px]">
@@ -485,6 +495,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
 
   // ===== 表单/预览派生值 =====
   const watchAction = form.watch('demo_action');
+  const watchWhitelistTag = form.watch('add_whitelist_tag');
   const watchIpConfigType = form.watch('ip_config_type');
   const watchIpValue = form.watch('ip_value') ?? '';
   const watchIpGroups = form.watch('ip_groups') ?? [];
@@ -520,6 +531,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
     form.setValue('ip_config_type', 'range');
     form.setValue('ip_value', example.ip);
     form.setValue('demo_action', example.action);
+    form.setValue('add_whitelist_tag', !!example.addWhitelistTag);
     form.setValue('name', t(example.remarkKey));
     setShowExamples(false);
   };
@@ -901,11 +913,20 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                           ))}
                         </SelectContent>
                       </Select>
-                      {watchAction === 'drop' && (
+                      {watchAction === 'discard' && (
                         <div className="flex items-start gap-2 mt-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
                           <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                           <p className="text-amber-700 dark:text-amber-300 text-sm">{t('ipFilter.effectDropWarning')}</p>
                         </div>
+                      )}
+                      {listTypeTab === 'whitelist' && (
+                        <label className="mt-3 flex items-center gap-2 text-sm">
+                          <Checkbox
+                            checked={watchWhitelistTag}
+                            onCheckedChange={(checked) => form.setValue('add_whitelist_tag', checked === true)}
+                          />
+                          {t('ipFilter.actionTagDeliver')}
+                        </label>
                       )}
                     </div>
                   </div>

@@ -59,7 +59,7 @@ vi.mock('./auth-spoofing/FormatChecksSection', () => ({
           ...config,
           mailfrom_empty: {
             ...config.mailfrom_empty,
-            action: 'mark-delivery',
+            action: 'proceed',
             tag_subject_enabled: true,
             tag_subject_content: '',
           },

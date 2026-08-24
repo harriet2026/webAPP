@@ -98,7 +98,7 @@ export function createBehaviorControlSchema(priorityRange: BehaviorControlPriori
     threshold_a: z.number().optional(),
     dim_b: behaviorDimensionSchema.optional(),
     threshold_b: z.number().optional(),
-    action: z.enum(['review', 'quarantine', 'drop', 'block']),
+    action: z.enum(['audit', 'quarantine', 'discard', 'reject']),
   }).superRefine((d, ctx) => {
     if (d.valid_until && new Date(d.valid_until) < new Date(new Date().toDateString())) {
       ctx.addIssue({ path: ['valid_until'], code: 'custom', message: 'validUntilPast' });

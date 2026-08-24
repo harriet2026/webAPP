@@ -15,7 +15,7 @@ function baseConfig(overrides: Partial<SimilarDetectionDirectionConfig> = {}): S
     window_minutes: 30,
     similarity_pct: 80,
     min_count: 10,
-    action: 'mark-delivery',
+    action: 'accept',
     ...overrides,
   };
 }

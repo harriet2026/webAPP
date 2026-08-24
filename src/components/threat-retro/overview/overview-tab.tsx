@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useApiRequest } from '@/lib/api/client';
-import { useTenant } from '@/hooks/use-tenant';
 import { getThreatRetroStats, getRuns, recallLeakMails, getAgentState } from '@/lib/api/threat-retro';
 import { KpiCards } from './kpi-cards';
 import { RunFilters, DEFAULT_FILTERS, type RunFilterState, type TimeRangeKey } from './run-filters';
@@ -15,6 +14,7 @@ import { RunsTable } from './runs-table';
 import { ManualScanDialog } from './manual-scan-dialog';
 import type { RecallStatus, RiskLevel, RunStatus } from '@/types/threat-retro';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { useThreatRetroAccess } from '../access';
 
 const PAGE_SIZE = 20;
 
@@ -71,7 +71,7 @@ export function OverviewTab({ manualScanOpen, onManualScanOpenChange }: Overview
   const t = useTranslations('threatRetro');
   const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
-  const { isAdmin } = useTenant();
+  const { canEdit } = useThreatRetroAccess();
   const qc = useQueryClient();
   const [filters, setFilters] = useState<RunFilterState>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
@@ -172,7 +172,7 @@ export function OverviewTab({ manualScanOpen, onManualScanOpenChange }: Overview
 	  <section className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">
 		<div className="flex items-center justify-between border-b px-4 py-3">
 		  <h3 className="font-medium">{t('table.title')}</h3>
-		  <Button size="sm" className="gap-1.5" data-testid="manual-scan-entry" disabled={!isAdmin || !stateQuery.data?.enabled} onClick={() => onManualScanOpenChange(true)}><Zap className="h-3.5 w-3.5" />{t('manualScan.entry')}</Button>
+		  <Button size="sm" className="gap-1.5" data-testid="manual-scan-entry" disabled={!canEdit || !stateQuery.data?.enabled} onClick={() => onManualScanOpenChange(true)}><Zap className="h-3.5 w-3.5" />{t('manualScan.entry')}</Button>
 		</div>
 		<div className="border-b px-4 py-3">
 		  <RunFilters
@@ -195,7 +195,7 @@ export function OverviewTab({ manualScanOpen, onManualScanOpenChange }: Overview
         pageSize={PAGE_SIZE}
         onPageChange={setPage}
         isLoading={runsQuery.isLoading}
-        isAdmin={isAdmin}
+        isAdmin={canEdit}
 		selected={actionableSelected}
         onSelectedChange={setSelected}
         onBatchRecall={() => batchRecall.mutate()}

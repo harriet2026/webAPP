@@ -1,6 +1,6 @@
 export type RuleClass = 'tag' | 'action' | 'route';
 export type StageType = 'onconnect' | 'mail' | 'rcpt' | 'header' | 'data' | 'sideline';
-export type RuleAction = 'accept' | 'reject' | 'quarantine' | 'sideline' | 'audit' | 'tempfail' | 'disconnect';
+export type RuleAction = 'accept' | 'proceed' | 'reject' | 'quarantine' | 'sideline' | 'audit' | 'tempfail' | 'disconnect';
 
 export interface RuleNode {
   type: 'AND' | 'OR' | 'NOT' | 'condition';

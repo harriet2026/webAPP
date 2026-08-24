@@ -1,13 +1,9 @@
 // Primary-action × addon conflict matrix (demo/V3, user-decided — do NOT copy
 // the pre-rewrite validation module's ADDON_CONFLICTS, that is a different/
 // older matrix).
-export type PrimaryAction =
-  | 'none'
-  | 'deliver'
-  | 'tagDeliver'
-  | 'quarantine'
-  | 'review'
-  | 'discard';
+import type { PolicyAction } from '@/types/policy-action';
+
+export type PrimaryAction = Exclude<PolicyAction, 'reject'>;
 
 export type AddonKey =
   | 'detailedLog'
@@ -49,10 +45,9 @@ export function disabledAddons(action: PrimaryAction): AddonKey[] {
       return [...QUARANTINE_DISABLED];
     case 'discard':
       return [...DISCARD_DISABLED];
-    case 'none':
-    case 'deliver':
-    case 'tagDeliver':
-    case 'review':
+    case 'accept':
+    case 'proceed':
+    case 'audit':
     default:
       return [];
   }

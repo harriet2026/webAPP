@@ -1,7 +1,7 @@
 export type IntentDirection = 'receive' | 'send' | 'internal';
 export type IntentType = 'porn_gambling' | 'political' | 'phishing' | 'spam' | 'subscription';
-export type IntentAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard';
-export type UIIntentAction = 'mark_deliver' | 'quarantine' | 'audit' | 'reject' | 'discard';
+export type IntentAction = 'accept' | 'proceed' | 'quarantine' | 'audit' | 'discard';
+export type UIIntentAction = IntentAction;
 export type IntentRiskLevel = 'high' | 'medium' | 'low';
 export type DetectionMode = 'classification' | 'threshold';
 
@@ -19,10 +19,15 @@ export interface IntentMark {
   position: MarkPosition;
 }
 
+export interface IntentHeaderMark {
+  enabled: boolean;
+  name: string;
+  value: string;
+}
+
 export interface IntentMarkConfig {
-  delivery_target: 'inbox' | 'spam_folder';
   subject_mark?: IntentMark;
-  body_mark?: IntentMark;
+  header_mark?: IntentHeaderMark;
 }
 
 export interface IntentSingleConfig {
@@ -64,22 +69,17 @@ export const HIGH_RISK_INTENTS: IntentType[] = ['porn_gambling', 'political', 'p
 export const MEDIUM_RISK_INTENTS: IntentType[] = ['spam'];
 export const LOW_RISK_INTENTS: IntentType[] = ['subscription'];
 
-export const RECEIVE_ACTIONS: IntentAction[] = ['accept', 'quarantine', 'audit', 'reject', 'discard'];
-export const NON_RECEIVE_ACTIONS: IntentAction[] = ['quarantine', 'audit', 'reject', 'discard'];
-
-export const RECEIVE_UI_ACTIONS: UIIntentAction[] = ['mark_deliver', 'quarantine', 'audit', 'reject', 'discard'];
-export const NON_RECEIVE_UI_ACTIONS: UIIntentAction[] = ['quarantine', 'audit', 'reject', 'discard'];
+/** Public action contract shared by receive, send, and internal directions. */
+export const INTENT_ACTIONS: IntentAction[] = ['accept', 'proceed', 'quarantine', 'audit', 'discard'];
+export const INTENT_UI_ACTIONS: UIIntentAction[] = [...INTENT_ACTIONS];
 
 export function toUIAction(cfg: IntentSingleConfig): UIIntentAction {
-  if (cfg.action === 'accept') {
-    return 'mark_deliver';
-  }
   return cfg.action;
 }
 
 /**
  * GT-12171 D-03：分段阈值模式下卡头 Badge 的"区间处置摘要"。
- * 按阈值区间升序取各段的处置动作（accept 归一到 mark_deliver 与卡内一致），
+ * 按阈值区间升序取各段的处置动作，去重后保留出现顺序。
  * 去重后保留出现顺序，让管理员一眼看清该意图在不同置信度区间会被怎么处置，
  * 而不是像分类模式那样只显示单一动作。
  */
@@ -91,7 +91,7 @@ export function thresholdActionSummary(segments: ThresholdSegment[] | undefined)
   const seen = new Set<UIIntentAction>();
   const out: UIIntentAction[] = [];
   for (const seg of sorted) {
-    const ui: UIIntentAction = seg.action === 'accept' ? 'mark_deliver' : seg.action;
+    const ui: UIIntentAction = seg.action;
     if (!seen.has(ui)) {
       seen.add(ui);
       out.push(ui);
@@ -159,22 +159,39 @@ export const DEFAULT_MARK_TEXT: Record<IntentType, string> = {
 export function createDefaultMarkConfig(intent: IntentType): IntentMarkConfig {
   const text = DEFAULT_MARK_TEXT[intent];
   return {
-    delivery_target: 'spam_folder',
     subject_mark: { enabled: true, text, position: 'prefix' },
-    body_mark: { enabled: false, text, position: 'prefix' },
+    header_mark: { enabled: false, name: 'X-OSG-Intent', value: text },
   };
 }
 
 export function applyUIAction(cfg: IntentSingleConfig, ui: UIIntentAction, intent: IntentType): IntentSingleConfig {
-  if (ui === 'mark_deliver') {
-    return { ...cfg, action: 'accept', mark_config: cfg.mark_config || createDefaultMarkConfig(intent) };
+  if (ui === 'proceed') {
+    return { ...cfg, action: 'proceed', mark_config: cfg.mark_config || createDefaultMarkConfig(intent) };
   }
   const next: IntentSingleConfig = { ...cfg, action: ui };
   delete next.mark_config;
   return next;
 }
 
-/** Threshold segment action options per direction (exclude 'accept' for non-receive). */
-export function thresholdActionsForDirection(direction: IntentDirection): IntentAction[] {
-  return direction === 'receive' ? RECEIVE_ACTIONS : NON_RECEIVE_ACTIONS;
+/** Keep marking configuration iff at least one threshold segment proceeds. */
+export function applyThresholdSegments(
+  cfg: IntentSingleConfig,
+  segments: ThresholdSegment[] | undefined,
+  intent: IntentType,
+): IntentSingleConfig {
+  if ((segments ?? []).some((segment) => segment.action === 'proceed')) {
+    return {
+      ...cfg,
+      threshold_segments: segments,
+      mark_config: cfg.mark_config || createDefaultMarkConfig(intent),
+    };
+  }
+  const next: IntentSingleConfig = { ...cfg, threshold_segments: segments };
+  delete next.mark_config;
+  return next;
+}
+
+/** All directions share the same public action contract. */
+export function thresholdActionsForDirection(_direction: IntentDirection): IntentAction[] {
+  return INTENT_ACTIONS;
 }

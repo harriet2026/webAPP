@@ -37,6 +37,7 @@ const DATA: SystemStatusData = {
   top5: [],
   alerts: [],
   agents: null,
+  agentsLoading: false,
   isLoading: false,
   isError: false,
 };

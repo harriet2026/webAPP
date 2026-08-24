@@ -43,6 +43,11 @@ describe('localizeApiError (GT-12606)', () => {
     expect(localizeApiError(e, t)).not.toBe('english fallback');
   });
 
+  it('demo_unavailable 在所有钓鱼配置面板复用同一条本地化提示', () => {
+    expect(localizeApiError(apiError('demo_unavailable', {}, 503), t))
+      .toBe('演示模式暂不提供钓鱼智能体配置与控制功能');
+  });
+
   it('没有 code 的错误（如网络失败）返回 null', () => {
     expect(localizeApiError(new ApiError(502, 'Bad Gateway', {}), t)).toBeNull();
     expect(localizeApiError(new Error('boom'), t)).toBeNull();

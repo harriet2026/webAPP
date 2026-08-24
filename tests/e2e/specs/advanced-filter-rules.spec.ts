@@ -58,7 +58,7 @@ test.describe('Advanced Filter Rules — list & drawer host', () => {
       page: 'advanced_rules',
       priority: 50,
       condition_tree: { type: 'condition', field: 'subject', operator: 'contain', value: conditionValue },
-      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'block' },
+      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'reject' },
       is_active: true,
       ...extra,
     });
@@ -201,10 +201,10 @@ test.describe('Advanced Filter Rules — list & drawer host', () => {
     const incomingName = `pw-afr-scope-in-${suffix}`;
     const outgoingName = `pw-afr-scope-out-${suffix}`;
     await createApiRule(request, incomingName, `scope-in-${suffix}`, {
-      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'block' },
+      metadata: { feature: 'advanced_rules', scope: ['incoming'], primary_action: 'reject' },
     });
     await createApiRule(request, outgoingName, `scope-out-${suffix}`, {
-      metadata: { feature: 'advanced_rules', scope: ['outgoing'], primary_action: 'block' },
+      metadata: { feature: 'advanced_rules', scope: ['outgoing'], primary_action: 'reject' },
     });
 
     await openAdvancedRulesDrawer(authenticatedPage);

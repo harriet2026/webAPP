@@ -2,9 +2,9 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 // GT-12005 / GT-12008: the dashboard fetched every source in one Promise.all, so
 // a single rejected call took the whole query down and every field fell back to
-// 0 / [] / null — "统计卡片数据全为0" and "待办面板为空". A tenant_admin hits this
-// reliably: /inbound-audit is RequireSystemAdmin and 403s, while
-// the homepage summary endpoint returns that tenant's real data.
+// 0 / [] / null — "统计卡片数据全为0" and "待办面板为空". Pending-report is
+// now part of the core homepage summary; auxiliary platform-only sources still
+// exercise the 403 fault-isolation path.
 
 vi.mock('@/lib/api/statistics', () => ({
   getDashboardSummary: vi.fn(),
@@ -13,17 +13,21 @@ vi.mock('@/lib/api/statistics', () => ({
 vi.mock('@/lib/api/system-status-summary', () => ({ fetchSystemStatusSummary: vi.fn() }));
 vi.mock('@/lib/api/ops-top', () => ({ fetchOpsTop: vi.fn() }));
 vi.mock('@/lib/api/monitoring', () => ({ fetchNodes: vi.fn(), fetchAlerts: vi.fn() }));
-vi.mock('@/lib/api/inbound-audit', () => ({ getInboundAuditItems: vi.fn() }));
 vi.mock('@/lib/api/phishing-detection', () => ({ getDetectionStats: vi.fn() }));
 vi.mock('@/lib/api/spoofing-detection', () => ({ getSpoofingStats: vi.fn() }));
 vi.mock('@/lib/api/threat-retro', () => ({ getThreatRetroStats: vi.fn() }));
 
-import { fetchSystemStatusData, resolveRangeDates } from '../hooks';
+import {
+  buildAgentAlerts,
+  fetchSystemStatusAgentStats,
+  fetchSystemStatusData,
+  mergeAgentAlerts,
+  resolveRangeDates,
+} from '../hooks';
 import { ApiError } from '@/lib/api/client';
 import { getTypeStatistics } from '@/lib/api/statistics';
 import { fetchSystemStatusSummary } from '@/lib/api/system-status-summary';
 import { fetchOpsTop } from '@/lib/api/ops-top';
-import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 import { getDetectionStats } from '@/lib/api/phishing-detection';
 import { getSpoofingStats } from '@/lib/api/spoofing-detection';
 import { getThreatRetroStats } from '@/lib/api/threat-retro';
@@ -36,7 +40,6 @@ function args() {
     dates: resolveRangeDates('7d', new Date('2026-07-10T12:00:00')),
     apiRequest: vi.fn() as never,
     isPlatform: false,
-    agentAccess: { phishing: false, spoofing: false, 'threat-retro': false },
   };
 }
 
@@ -49,6 +52,7 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
       previous: { mail_volume: 41, threats: 6, block_rate: 10 },
       threat_trend: [],
       pending_disposal: 5,
+      pending_report: 7,
       generated_at: '2026-07-10T00:00:00Z',
     });
     mock(getTypeStatistics).mockResolvedValue({ series: [] });
@@ -56,8 +60,6 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
   });
 
   it('requests hourly overview buckets for today and daily buckets for longer ranges', async () => {
-    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
-
     await fetchSystemStatusData({
       ...args(),
       range: 'today',
@@ -75,10 +77,10 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
       previous: { mail_volume: 41, threats: 6, block_rate: 10 },
       threat_trend: [],
       pending_disposal: 0,
+      pending_report: 0,
       generated_at: '2026-07-10T00:00:00Z',
     });
     mock(fetchOpsTop).mockResolvedValue({ dimension: 'sender', total: 0, trendLabels: [], rows: [] });
-    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
 
     await fetchSystemStatusData(args());
     expect(mock(fetchSystemStatusSummary)).toHaveBeenNthCalledWith(
@@ -88,23 +90,18 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
     );
   });
 
-  it('a 403 on /inbound-audit no longer zeroes every KPI', async () => {
-    // Exactly what a tenant_admin gets today.
-    mock(getInboundAuditItems).mockRejectedValue(new ApiError(403, 'forbidden'));
-
+  it('reads both pending backlogs from the core summary', async () => {
     const data = await fetchSystemStatusData(args());
 
-    // The KPIs sourced from the endpoints that DID succeed must survive.
     expect(data.inbound).toBe(82);
     expect(data.threats).toBe(12);
     expect(data.blockRate).toBe(14.6);
     expect(data.pendingIsolated).toBe(5);
-    // Only the failing source degrades.
-    expect(data.pendingReport).toBe(0);
+    expect(data.pendingReport).toBe(7);
+    expect(data.pending).toBe(12);
   });
 
   it('the whole fetch no longer rejects when auxiliary sources are FORBIDDEN', async () => {
-    mock(getInboundAuditItems).mockRejectedValue(new ApiError(403, 'forbidden'));
     mock(fetchOpsTop).mockRejectedValue(new ApiError(403, 'forbidden'));
 
     await expect(fetchSystemStatusData(args())).resolves.toBeTruthy();
@@ -131,85 +128,105 @@ describe('dashboard fault isolation (GT-12005 / GT-12008)', () => {
   });
 
   it('a 401/404 is not a 403 — it must surface, not degrade', async () => {
-    mock(getInboundAuditItems).mockRejectedValue(new ApiError(404, 'not found'));
+    mock(fetchOpsTop).mockRejectedValue(new ApiError(404, 'not found'));
 
     await expect(fetchSystemStatusData(args())).rejects.toThrow();
   });
 
-  it('still surfaces the pending-disposal todo item when inbound-audit is forbidden', async () => {
-    mock(getInboundAuditItems).mockRejectedValue(new ApiError(403, 'forbidden'));
-
+  it('surfaces pending-disposal and pending-report todo items from the core summary', async () => {
     const data = await fetchSystemStatusData(args());
 
-    // GT-12008: the 待办 panel read "当前无待办事项" because `alerts` was [].
-    // With disposal returning 5 pending, the panel must not be empty.
     expect(data.alerts.length).toBeGreaterThan(0);
     expect(data.alerts.some((a) => a.kind === 'pending_disposal')).toBe(true);
+    expect(data.alerts.some((a) => a.kind === 'pending_report')).toBe(true);
   });
 
   it('a CORE source failing still fails hard (the error banner must be honest)', async () => {
     mock(fetchSystemStatusSummary).mockReset();
     mock(fetchSystemStatusSummary).mockRejectedValue(new Error('db down'));
-    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
 
     await expect(fetchSystemStatusData(args())).rejects.toThrow();
   });
 
   it('does not probe any agent endpoint when the current scope has no agent capability', async () => {
-    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
-
-    const data = await fetchSystemStatusData(args());
+    const agents = await fetchSystemStatusAgentStats(args().apiRequest, {
+      phishing: false,
+      spoofing: false,
+      'threat-retro': false,
+    });
 
     expect(mock(getDetectionStats)).not.toHaveBeenCalled();
     expect(mock(getSpoofingStats)).not.toHaveBeenCalled();
     expect(mock(getThreatRetroStats)).not.toHaveBeenCalled();
-    expect(data.agents).toBeNull();
+    expect(agents).toBeNull();
   });
 
   it('requests only individually authorized agent stats', async () => {
-    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
     mock(getDetectionStats).mockResolvedValue({ today_detected: 9, pending_review: 2 });
 
-    const data = await fetchSystemStatusData({
-      ...args(),
-      agentAccess: { phishing: true, spoofing: false, 'threat-retro': false },
+    const agents = await fetchSystemStatusAgentStats(args().apiRequest, {
+      phishing: true,
+      spoofing: false,
+      'threat-retro': false,
     });
 
     expect(mock(getDetectionStats)).toHaveBeenCalledOnce();
     expect(mock(getSpoofingStats)).not.toHaveBeenCalled();
     expect(mock(getThreatRetroStats)).not.toHaveBeenCalled();
-    expect(data.agents).toEqual({
+    expect(agents).toEqual({
       phishing: { todayDetected: 9, pendingReview: 2 },
       spoofing: null,
       threatRetro: null,
     });
-    expect(data.alerts).toEqual(expect.arrayContaining([
+    expect(buildAgentAlerts(agents)).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: 'agent-phishing-pending', count: 2 }),
     ]));
   });
 
+  it('keeps agent pending items before the platform license/rule-library tail', () => {
+    const merged = mergeAgentAlerts(
+      [
+        { id: 'node', level: 'danger', scope: 'platform', kind: 'node_offline', href: '/nodes' },
+        { id: 'license-expiry', level: 'warning', scope: 'platform', kind: 'license_expiry', href: '' },
+        { id: 'rule-lib', level: 'info', scope: 'platform', kind: 'rule_lib', href: '' },
+      ],
+      {
+        phishing: { todayDetected: 9, pendingReview: 2 },
+        spoofing: null,
+        threatRetro: null,
+      },
+    );
+
+    expect(merged.map((alert) => alert.id)).toEqual([
+      'node',
+      'agent-phishing-pending',
+      'license-expiry',
+      'rule-lib',
+    ]);
+  });
+
   it('a raced 403 degrades only that agent and preserves other authorized data', async () => {
-    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
     mock(getDetectionStats).mockResolvedValue({ today_detected: 7, pending_review: 1 });
     mock(getSpoofingStats).mockRejectedValue(new ApiError(403, 'capability revoked'));
 
-    const data = await fetchSystemStatusData({
-      ...args(),
-      agentAccess: { phishing: true, spoofing: true, 'threat-retro': false },
+    const agents = await fetchSystemStatusAgentStats(args().apiRequest, {
+      phishing: true,
+      spoofing: true,
+      'threat-retro': false,
     });
 
-    expect(data.agents?.phishing).toEqual({ todayDetected: 7, pendingReview: 1 });
-    expect(data.agents?.spoofing).toBeNull();
-    expect(data.agents?.threatRetro).toBeNull();
+    expect(agents?.phishing).toEqual({ todayDetected: 7, pendingReview: 1 });
+    expect(agents?.spoofing).toBeNull();
+    expect(agents?.threatRetro).toBeNull();
   });
 
   it('a 500 from an authorized agent remains a real dashboard failure', async () => {
-    mock(getInboundAuditItems).mockResolvedValue({ items: [], page: 1, page_size: 1, total: 0 });
     mock(getSpoofingStats).mockRejectedValue(new ApiError(500, 'db down'));
 
-    await expect(fetchSystemStatusData({
-      ...args(),
-      agentAccess: { phishing: false, spoofing: true, 'threat-retro': false },
+    await expect(fetchSystemStatusAgentStats(args().apiRequest, {
+      phishing: false,
+      spoofing: true,
+      'threat-retro': false,
     })).rejects.toThrow();
   });
 });

@@ -9,26 +9,23 @@ import type {
 } from '@/types/intent-engine';
 import { RISK_LEVEL_OF, INTENT_TYPES, createDefaultMarkConfig } from '@/types/intent-engine';
 
-function defaultThresholdSegments(risk: IntentRiskLevel, dir: IntentDirection): ThresholdSegment[] {
-  const isReceive = dir === 'receive';
-  const downgrade = (action: ThresholdSegment['action']): ThresholdSegment['action'] =>
-    !isReceive && action === 'accept' ? 'quarantine' : action;
+function defaultThresholdSegments(risk: IntentRiskLevel, _dir: IntentDirection): ThresholdSegment[] {
   if (risk === 'high') {
     return [
       { min: 0, max: 0.3, action: 'audit' },
       { min: 0.3, max: 0.6, action: 'quarantine' },
-      { min: 0.6, max: 1, action: 'reject' },
+      { min: 0.6, max: 1, action: 'discard' },
     ];
   }
   if (risk === 'medium') {
     return [
-      { min: 0, max: 0.2, action: downgrade('accept') },
+      { min: 0, max: 0.2, action: 'proceed' },
       { min: 0.2, max: 0.6, action: 'quarantine' },
-      { min: 0.6, max: 1, action: 'reject' },
+      { min: 0.6, max: 1, action: 'discard' },
     ];
   }
   return [
-    { min: 0, max: 0.5, action: downgrade('accept') },
+    { min: 0, max: 0.5, action: 'proceed' },
     { min: 0.5, max: 0.8, action: 'quarantine' },
     { min: 0.8, max: 1, action: 'audit' },
   ];
@@ -44,22 +41,18 @@ export function createDefaultIntentConfig(it: IntentType, dir: IntentDirection):
   const isReceive = dir === 'receive';
   let action: IntentSingleConfig['action'];
   if (risk === 'high') {
-    action = isReceive ? 'quarantine' : 'reject';
+    action = isReceive ? 'quarantine' : 'discard';
   } else if (risk === 'medium') {
     action = isReceive ? 'quarantine' : 'audit';
   } else {
-    action = isReceive ? 'accept' : 'audit';
-  }
-  // Non-receive directions don't support 'accept' (mark_deliver)
-  if (!isReceive && action === 'accept') {
-    action = 'quarantine';
+    action = 'proceed';
   }
   return {
     enabled: true,
     action,
     detection_mode: 'classification',
     threshold_segments: defaultThresholdSegments(risk, dir),
-    mark_config: action === 'accept' ? createDefaultMarkConfig(it) : undefined,
+    mark_config: action === 'proceed' ? createDefaultMarkConfig(it) : undefined,
   };
 }
 
@@ -79,19 +72,4 @@ export function createDefaultIntentEngineConfig(): IntentEngineConfig {
       internal: createDefaultDirectionConfig('internal'),
     },
   };
-}
-
-export function downgradeForNonReceive(cfg: IntentSingleConfig): IntentSingleConfig {
-  const next: IntentSingleConfig = { ...cfg };
-  if (next.action === 'accept') {
-    next.action = 'quarantine';
-    delete next.mark_config;
-  }
-  if (next.threshold_segments) {
-    next.threshold_segments = next.threshold_segments.map((s) => ({
-      ...s,
-      action: s.action === 'accept' ? 'quarantine' : s.action,
-    }));
-  }
-  return next;
 }

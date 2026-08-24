@@ -10,7 +10,7 @@
 // 不引入第二套 IP 语义，避免与规则表单校验漂移。
 
 import { isValidIP, isValidIPv6 } from './ip-filter-expression';
-import { fromGatewayView } from '@/lib/api/ip-filter-action-map';
+import { fromGatewayView, hasWhitelistTag } from '@/lib/api/ip-filter-action-map';
 import type { DemoAction, DemoBlacklistAction, DemoWhitelistAction, HeaderKV, IPFilterAction, IPFilterListType } from '@/types/ip-filter';
 
 // 单次导入的硬上限（原型明确「单次不超过1000条」）。
@@ -30,6 +30,7 @@ export interface ParsedImportRow {
   ipValue: string;
   kind: ImportIpKind;
   action: DemoAction;
+  addWhitelistTag: boolean;
   remark: string;
   // 非空即该行非法，值为 i18n 错误码。
   error: string | null;
@@ -44,16 +45,15 @@ export interface ParsedImportRow {
 
 // CSV 动作列（中英与内部词表都接受）→ demo 动作。空/未知留给调用方回退到「默认动作」。
 const ACTION_ALIASES: Record<string, DemoAction> = {
-  block: 'block', 阻断: 'block', 拦截: 'block',
+  reject: 'reject', 阻断: 'reject', 拒绝: 'reject',
   quarantine: 'quarantine', 隔离: 'quarantine',
-  drop: 'drop', 丢弃: 'drop',
-  review: 'review', 审核: 'review',
-  deliver: 'deliver', 放行: 'deliver', 投递: 'deliver',
-  tagdeliver: 'tagDeliver', 标记投递: 'tagDeliver', 标记: 'tagDeliver',
+  discard: 'discard', 丢弃: 'discard',
+  audit: 'audit', 审核: 'audit',
+  accept: 'accept', 放行: 'accept', 投递: 'accept',
 };
 
-const BLACKLIST_ACTIONS: ReadonlySet<DemoAction> = new Set<DemoBlacklistAction>(['block', 'quarantine', 'drop', 'review']);
-const WHITELIST_ACTIONS: ReadonlySet<DemoAction> = new Set<DemoWhitelistAction>(['deliver', 'tagDeliver']);
+const BLACKLIST_ACTIONS: ReadonlySet<DemoAction> = new Set<DemoBlacklistAction>(['reject', 'quarantine', 'discard', 'audit']);
+const WHITELIST_ACTIONS: ReadonlySet<DemoAction> = new Set<DemoWhitelistAction>(['accept']);
 
 /** 该动作是否属于目标名单（黑名单页不能导入白名单动作，反之亦然）。 */
 export function actionMatchesListType(action: DemoAction, listType: IPFilterListType): boolean {
@@ -116,6 +116,7 @@ export interface ParseImportOptions {
   listType: IPFilterListType;
   // 无动作列时（及 CSV 动作为空/未识别时）回退的默认动作。
   defaultAction: DemoAction;
+  defaultAddWhitelistTag?: boolean;
   // 既有规则里已存在的 IP 文本集合（用于标记 existing 重复）。调用方传入已归一化前的原文即可。
   existingIpValues: Iterable<string>;
 }
@@ -143,7 +144,7 @@ function textToPreRows(text: string, opts: ParseImportOptions): PreRow[] {
     const parsed = parseIpToken(ip);
 
     if ('error' in parsed) {
-      rows.push({ raw: line, ipValue: ip, kind: 'single', action: opts.defaultAction, remark, error: parsed.error });
+      rows.push({ raw: line, ipValue: ip, kind: 'single', action: opts.defaultAction, addWhitelistTag: !!opts.defaultAddWhitelistTag, remark, error: parsed.error });
       continue;
     }
 
@@ -152,11 +153,11 @@ function textToPreRows(text: string, opts: ParseImportOptions): PreRow[] {
 
     // 动作与目标名单不符（如黑名单页导入了白名单动作）视为非法，避免静默落到错误名单。
     if (!actionMatchesListType(action, opts.listType)) {
-      rows.push({ raw: line, ipValue: parsed.ipValue, kind: parsed.kind, action, remark, error: 'importActionListMismatch' });
+      rows.push({ raw: line, ipValue: parsed.ipValue, kind: parsed.kind, action, addWhitelistTag: !!opts.defaultAddWhitelistTag, remark, error: 'importActionListMismatch' });
       continue;
     }
 
-    rows.push({ raw: line, ipValue: parsed.ipValue, kind: parsed.kind, action, remark, error: null });
+    rows.push({ raw: line, ipValue: parsed.ipValue, kind: parsed.kind, action, addWhitelistTag: !!opts.defaultAddWhitelistTag, remark, error: null });
   }
   return rows;
 }
@@ -282,7 +283,7 @@ export function parseExportEnvelope(jsonText: string, listType: IPFilterListType
     const priority = typeof rule.priority === 'number' && Number.isFinite(rule.priority) ? rule.priority : undefined;
     const isActive = typeof rule.is_active === 'boolean' ? rule.is_active : undefined;
     const badRule = (raw: string): EnvelopeRuleRow => ({
-      raw, ipValue: raw, kind: 'single', action: listType === 'blacklist' ? 'block' : 'deliver',
+      raw, ipValue: raw, kind: 'single', action: listType === 'blacklist' ? 'reject' : 'accept', addWhitelistTag: false,
       remark, error: 'importJsonBadRule', name: name || undefined, priority, isActive,
     });
 
@@ -306,29 +307,30 @@ export function parseExportEnvelope(jsonText: string, listType: IPFilterListType
     };
 
     if (meta.list_type !== listType) {
-      rows.push({ ...base, ipValue, kind: 'single', action: listType === 'blacklist' ? 'block' : 'deliver', error: 'importListTypeMismatch' });
+      rows.push({ ...base, ipValue, kind: 'single', action: listType === 'blacklist' ? 'reject' : 'accept', addWhitelistTag: false, error: 'importListTypeMismatch' });
       continue;
     }
     if (meta.ip_config_type === 'expression') {
-      rows.push({ ...base, ipValue, kind: 'single', action: listType === 'blacklist' ? 'block' : 'deliver', error: 'importExpressionUnsupported' });
+      rows.push({ ...base, ipValue, kind: 'single', action: listType === 'blacklist' ? 'reject' : 'accept', addWhitelistTag: false, error: 'importExpressionUnsupported' });
       continue;
     }
 
     const addHeaders = Array.isArray(meta.add_headers) ? (meta.add_headers as HeaderKV[]) : undefined;
     const action = fromGatewayView((typeof rule.action === 'string' ? rule.action : '') as IPFilterAction, addHeaders, listType);
+    const addWhitelistTag = hasWhitelistTag(addHeaders);
 
     const tokenParsed = parseIpToken(ipValue);
     if ('error' in tokenParsed) {
-      rows.push({ ...base, ipValue, kind: 'single', action, error: tokenParsed.error });
+      rows.push({ ...base, ipValue, kind: 'single', action, addWhitelistTag, error: tokenParsed.error });
       continue;
     }
     // 手工改过的文件里动作可能与名单不符（如黑名单文件里 accept），沿用文本路径的同款拦截。
     if (!actionMatchesListType(action, listType)) {
-      rows.push({ ...base, ipValue: tokenParsed.ipValue, kind: tokenParsed.kind, action, error: 'importActionListMismatch' });
+      rows.push({ ...base, ipValue: tokenParsed.ipValue, kind: tokenParsed.kind, action, addWhitelistTag, error: 'importActionListMismatch' });
       continue;
     }
 
-    rows.push({ ...base, ipValue: tokenParsed.ipValue, kind: tokenParsed.kind, action, error: null });
+    rows.push({ ...base, ipValue: tokenParsed.ipValue, kind: tokenParsed.kind, action, addWhitelistTag, error: null });
   }
 
   return { rules: rows };
@@ -340,6 +342,7 @@ export interface ImportPlanRow {
   ipValue: string;
   kind: ImportIpKind;
   action: DemoAction;
+  addWhitelistTag: boolean;
   remark: string;
   // overwrite：existing 重复且策略为覆盖 —— 需更新既有规则而非新建。
   mode: 'create' | 'overwrite';
@@ -370,6 +373,7 @@ export function buildImportPlan(
       ipValue: r.ipValue,
       kind: r.kind,
       action: r.action,
+      addWhitelistTag: r.addWhitelistTag,
       remark: r.remark,
       mode: r.duplicate === 'existing' ? 'overwrite' : 'create',
       name: r.name,

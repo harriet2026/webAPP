@@ -12,7 +12,6 @@ import {
 } from './rbl-config-serde';
 import type { DetectionProfile } from '@/lib/api/detection-profiles';
 import type {
-  RBLFilterLegacyProductAction,
   RBLFilterProductAction,
   RBLFilterRuleView,
   RBLGreylistConfig,
@@ -22,7 +21,7 @@ function profile(id: number, name: string, value?: string): DetectionProfile {
   return { id, config_type: 'rbl', name, value, is_active: true, created_at: '', updated_at: '' };
 }
 function canonRule(
-  action: RBLFilterProductAction | RBLFilterLegacyProductAction,
+  action: RBLFilterProductAction,
   active: boolean,
 ): RBLFilterRuleView {
   return {
@@ -45,11 +44,11 @@ describe('parseProfileValue', () => {
 
 describe('findCanonicalRule', () => {
   it('finds the canonical any-match rule by name', () => {
-    const other: RBLFilterRuleView = { ...canonRule('block', true), id: 2, name: 'user-made', match_mode: 'specific' };
+    const other: RBLFilterRuleView = { ...canonRule('reject', true), id: 2, name: 'user-made', match_mode: 'specific' };
     expect(findCanonicalRule([other, canonRule('reject', true)])?.product_action).toBe('reject');
   });
   it('ignores same-name rule that is not match_mode any', () => {
-    const weird = { ...canonRule('block', true), match_mode: 'specific' as const };
+    const weird = { ...canonRule('reject', true), match_mode: 'specific' as const };
     expect(findCanonicalRule([weird])).toBeUndefined();
   });
 });
@@ -81,11 +80,8 @@ describe('parseRblConfig', () => {
       greylist: undefined,
     });
   });
-  // GT-12682: product_action 由 block/quarantine/mark/greylist 改为
-  // reject/quarantine/review/discard + 独立的 greylistEnabled，存量规则需能读回来。
-  it('maps the legacy block/mark actions onto reject', () => {
-    expect(parseRblConfig([], [canonRule('block', true)], fallback).action).toBe('reject');
-    expect(parseRblConfig([], [canonRule('mark', true)], fallback).action).toBe('reject');
+  it('keeps canonical audit unchanged', () => {
+    expect(parseRblConfig([], [canonRule('audit', true)], fallback).action).toBe('audit');
   });
   it('preserves the greylist API contract when loading the canonical rule', () => {
     const rule = canonRule('greylist', true);
@@ -143,12 +139,12 @@ describe('buildProfileValue', () => {
 describe('diffRblConfig', () => {
   const base = [profile(1, 'keep.rbl'), profile(2, 'drop.rbl')];
   it('computes add/delete/retime sets', () => {
-    const draft = { enabled: true, servers: ['keep.rbl', 'new.rbl'], timeout: '9', action: 'review' as const, greylistEnabled: false };
+    const draft = { enabled: true, servers: ['keep.rbl', 'new.rbl'], timeout: '9', action: 'audit' as const, greylistEnabled: false };
     expect(diffRblConfig(base, draft, true)).toEqual({
       serversToAdd: ['new.rbl'],
       profileIdsToDelete: [2],
       profilesToRetime: [1],
-      action: 'review',
+      action: 'audit',
       greylist: undefined,
       enabled: true,
     });

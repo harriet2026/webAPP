@@ -11,15 +11,17 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { MailLogAnalysis, MailLogDetail, CheckStatus, FinalVerdict, MailChildEvent } from '@/types/email-disposal-detail';
 import { formatTimestamp } from '@/lib/format-time';
-import { formatBytes, tidOf, deriveDirection } from '../lib/detail-helpers';
+import { mailTypeConfig, stripDetailPrefix } from '../lib/detail-helpers';
 import {
   formatHitDetail,
   getModuleName,
   getActionLabel,
   getActionColor,
   groupEffectiveRecipientBasisByRule,
+  hasStructuredBasisFacts,
   getPolicyRoute,
   getPolicyMeta,
   getStageColor,
@@ -49,6 +51,11 @@ interface AnalysisSectionProps {
   // for the recipient delivery-detail line. Powers the 事后处置时间线
   // subsection (v2 spec gap 2.5): real per-event rows, not mock data.
   events?: MailChildEvent[];
+  // Multi-recipient mail can be inspected either as one aggregate or as one
+  // exact recipient. The parent owns this state because changing it changes
+  // the authoritative analysis query as well as the event scope.
+  selectedRecipient?: string;
+  onSelectedRecipientChange?: (recipient: string | undefined) => void;
   // 「查看原始日志」的回调，由 detail-modal.tsx 注入，滚动至原始日志区段。
   // 有值时替代 notImplementedToast；无值时（如独立挂载 AnalysisSection 的测试）
   // 退回 toast，保持向后兼容。
@@ -132,6 +139,7 @@ function connectorArrowClass(i: number, hitIndex: number): string {
 }
 
 const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
+const ALL_RECIPIENTS_SCOPE = '__all_recipients__';
 const STAGE_KEY_TO_NUM: Record<string, number> = {
   connection: 1,
   identity: 2,
@@ -167,16 +175,17 @@ function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
   return { bg: 'bg-gray-500', Icon: User };
 }
 
-// 事后处置时间线的来源过滤：排除投递流程来源，其余一律视为处置动作。
+// 事后处置时间线的来源过滤：排除投递流程来源和 Graph A 检测完成后的首次
+// 投递，其余事件才作为后续处置动作展示。
 //
-// 这里刻意用黑名单而不是白名单。原型稿用的是白名单
-// {admin_api, threat_retro_agent}，但后端从未把这两个值写进 event_source ——
-// 真实取值只有 postfix、workflow.{quarantine,sideline,audit,bounce}
-// （internal/models/delivery_events.go）以及 forwardworker / sideline_reinject
-// （internal/api/ingest_dispositions.go）。白名单会让本时间线在生产环境恒为空，
-// 只在 mock 数据下显得正常。黑名单则让后端真实的 workflow.* 处置事实
-//（放行/审核/退信）继续可见，同时把投递流水挡在外面。
-const DELIVERY_FLOW_SOURCES = new Set(['postfix', 'antispam']);
+// 这里刻意用黑名单而不是只收录已知处置来源的白名单：时间线既有
+// workflow.* 处置事实，也有 admin_api / threat_retro_agent / sideline_agent
+// 召回事实；将来新增处置来源也不应因前端词汇表未同步而静默消失。
+//
+// workflow.sideline.initial_delivery 必须单列：它是邮件仍被 Graph A 扣住时，
+// 检测完成后执行的首次 accept 投递，不是初次裁决之后的二次处置。后续管理员
+// 手工放行仍使用 workflow.sideline，因此继续显示为「旁路处置」。
+const DELIVERY_FLOW_SOURCES = new Set(['postfix', 'antispam', 'workflow.sideline.initial_delivery']);
 
 // ---- 「操作类型」/「执行结果」两栏的文案映射 ----
 //
@@ -274,9 +283,12 @@ export function AnalysisSection({
   onRetryAnalysis,
   aiEnabled = false,
   events = [],
+  selectedRecipient,
+  onSelectedRecipientChange,
   onViewRawLogs,
 }: AnalysisSectionProps) {
   const t = useTranslations('emailDisposal.detail.analysis');
+  const tDetail = useTranslations('emailDisposal.detail');
   const tFeatures = useTranslations('emailDisposal.detail.features');
   const { viewer, capabilities } = useProductForm();
   // Reuses §9-A's existing "暂未实现" copy (send-receive-context-card.tsx)
@@ -287,9 +299,43 @@ export function AnalysisSection({
   // Same locale mapping pattern as mail-list-table.tsx; the disposal-basis
   // dictionary only carries zh/en/th/ru, so unknown locales fall back to zh.
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang) ? (rawLocale as DisposalLang) : 'zh';
+  const recipientOptions = useMemo(() => {
+    const dispositions = new Map(
+      (detail.recipient_dispositions ?? []).map((item) => [
+        item.recipient.trim().toLowerCase(),
+        item.final_action || item.original_action,
+      ]),
+    );
+    const seen = new Set<string>();
+    const options: Array<{ recipient: string; action?: string }> = [];
+    for (const recipient of [
+      ...detail.recipients,
+      ...(detail.recipient_dispositions ?? []).map((item) => item.recipient),
+    ]) {
+      const normalized = recipient.trim().toLowerCase();
+      if (!normalized || seen.has(normalized)) continue;
+      seen.add(normalized);
+      options.push({ recipient, action: dispositions.get(normalized) });
+    }
+    return options;
+  }, [detail.recipient_dispositions, detail.recipients]);
 
   // --- Step 1: 5-stage detection pipeline (ported from tabs/analysis-tab.tsx) ---
-  const verdict = analysis?.final_verdict ?? 'safe';
+  // GT-12977: the overview and disposal list both expose the current
+  // mail_log.email_type (including an administrator's reclassification).
+  // analysis.final_verdict is only a broad malicious/suspicious/safe risk
+  // bucket, so using it here made the same message show two different types.
+  const emailTypeConfig = detail.email_type ? mailTypeConfig[detail.email_type] : null;
+  const verdictTone: FinalVerdict = emailTypeConfig
+    ? emailTypeConfig.tone === 'malicious'
+      ? 'malicious'
+      : emailTypeConfig.tone === 'graymail'
+        ? 'suspicious'
+        : 'safe'
+    : analysis?.final_verdict ?? 'safe';
+  const emailTypeLabel = emailTypeConfig
+    ? tDetail(stripDetailPrefix(emailTypeConfig.labelKey))
+    : '—';
   // GT-12575: 非 AI 形态滤掉 ai 阶段后重编号（综合显示为阶段4），与策略
   // 流水线的动态阶段号语义一致。
   const stages = useMemo(() => {
@@ -321,7 +367,7 @@ export function AnalysisSection({
       else next.add(id);
       return next;
     });
-  // 排除投递流程来源（postfix 投递状态、antispam 策略裁决），其余保留。
+  // 排除投递流程来源以及 Graph A 检测完成后的首次投递，其余保留。
   const disposalEvents = useMemo(() => events.filter((ev) => !DELIVERY_FLOW_SOURCES.has(ev.event_source ?? '')), [events]);
   // 同一次业务动作只占一行：召回是异步的，后端会先写一条「处置中」的发起事件，
   // 终态回调到达后再写一条（事件溯源只追加，不改写历史，审计需要完整过程）。
@@ -344,13 +390,6 @@ export function AnalysisSection({
   }, [disposalEvents]);
   const sortedEvents = useMemo(() => [...collapsedEvents].sort((a, b) => (a.event_time || '').localeCompare(b.event_time || '')), [collapsedEvents]);
 
-  // --- Step 2: content-layer expandable area (ported from tabs/features-tab.tsx) ---
-  const [contentExpanded, setContentExpanded] = useState(false);
-  const suspiciousUrls = new Set(detail.cac_result?.suspicious_urls ?? []);
-  const scans = detail.scan_results ?? [];
-  const direction = deriveDirection(detail.authenticated, detail.smtp_user);
-  const ipLocation = [detail.geo_region_name, detail.geo_city].filter(Boolean).join(' / ') || '—';
-
   // GT-12936: the phishing-agent details live under the corresponding stage-4
   // check instead of a disconnected card at the bottom of the page.
   const [phishAgentDetailExpanded, setPhishAgentDetailExpanded] = useState(false);
@@ -367,7 +406,42 @@ export function AnalysisSection({
   // 不伪造 effective_for），口径统一收在 resolveHitModules 里。
   const hitModules = useMemo(() => resolveHitModules(basis), [basis]);
   const basisRuleGroups = useMemo(() => groupEffectiveRecipientBasisByRule(basis), [basis]);
-  const isMultiBasis = basisRuleGroups.length > 1;
+  const displayBasisRuleGroups = useMemo(() => {
+    if (!selectedRecipient) return basisRuleGroups;
+    const normalized = selectedRecipient.trim().toLowerCase();
+    const attributedGroups = basisRuleGroups.filter((group) => group.recipients.length > 0);
+    const matches = attributedGroups.filter((group) =>
+      group.recipients.some((recipient) => recipient.trim().toLowerCase() === normalized),
+    );
+    return matches.length > 0 || attributedGroups.length > 0 ? matches : basisRuleGroups;
+  }, [basisRuleGroups, selectedRecipient]);
+  const displayHitModules = useMemo(() => {
+    if (!selectedRecipient) return hitModules;
+    const normalized = selectedRecipient.trim().toLowerCase();
+    return hitModules.filter((entry) => {
+      const attributedRecipients = [
+        ...(entry.recipients ?? []),
+        ...(entry.recipient ? [entry.recipient] : []),
+        ...(entry.effective_for ?? []),
+      ];
+      return attributedRecipients.length === 0 || attributedRecipients.some(
+        (recipient) => recipient.trim().toLowerCase() === normalized,
+      );
+    });
+  }, [hitModules, selectedRecipient]);
+  const hasRecipientAttributedBasis = basisRuleGroups.some((group) => group.recipients.length > 0);
+  // Root-only rows are already handled by groupEffectiveRecipientBasisByRule.
+  // The narrow fallback below is for old synthetic roots without policy_key;
+  // never revive ambiguous accept/proceed roots when modules[] proves that no
+  // rule owned a final recipient disposition.
+  const structuredBasisEntry = displayBasisRuleGroups[0]?.entry ?? (
+    (!selectedRecipient || !hasRecipientAttributedBasis) &&
+    basis && basis.action !== 'proceed' && basis.action !== 'accept' &&
+    (basis.rule_name || basis.rule_id || basis.action)
+      ? basis
+      : undefined
+  );
+  const isMultiBasis = displayBasisRuleGroups.length > 1;
   const totalBasisRecipients = useMemo(() => {
     const recipients = new Set<string>();
     for (const group of basisRuleGroups) {
@@ -375,6 +449,17 @@ export function AnalysisSection({
     }
     return recipients.size;
   }, [basisRuleGroups]);
+  // 多依据场景默认只展示摘要行，按需展开完整依据，避免群发邮件把详情页
+  // 撑成长达数十屏。Set 只记录当前展开的分组序号，允许同时对照多个分组。
+  const [expandedBasisRows, setExpandedBasisRows] = useState<Set<number>>(new Set());
+  const toggleBasisRow = (index: number) => {
+    setExpandedBasisRows((previous) => {
+      const next = new Set(previous);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
   // §7.10.1：租户可见性门必须**逐条**套用。若只看主基据，主基据是阶段 3
   // 内容规则时，清单里的阶段 1 平台策略
   // （IPBL/RBL/OVERSEAS）模块名与命中详情（含 source_ip）会照样暴露给租户
@@ -382,7 +467,10 @@ export function AnalysisSection({
   const isTenantScoped = viewer === 'tenant' && capabilities?.multiTenant === true;
   const maskModule = (policyKey?: string) => isTenantScoped && isStage1Policy(policyKey);
 
-  const renderDisposalBasisCard = (entry: NonNullable<MailLogDetail['disposal_basis']>, options?: { scope?: string[]; idSuffix?: string }) => {
+  const renderDisposalBasisCardBody = (
+    entry: NonNullable<MailLogDetail['disposal_basis']>,
+    options?: { scope?: string[]; idSuffix?: string; hideHeader?: boolean },
+  ) => {
     const masked = maskModule(entry.policy_key);
     const meta = entry.policy_key ? getPolicyMeta(entry.policy_key) : undefined;
     const route = entry.policy_key ? getPolicyRoute(entry.policy_key) : undefined;
@@ -390,16 +478,18 @@ export function AnalysisSection({
     const ruleLabel = hasRuleName ? (entry.rule_id ? `${entry.rule_name}（${entry.rule_id}）` : entry.rule_name!) : entry.rule_id || '—';
     const suffix = options?.idSuffix ? `-${options.idSuffix}` : '';
     return (
-      <div data-testid={`analysis-disposal-basis-card${suffix}`} className="rounded-lg border bg-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <ShieldAlert className="h-4 w-4 text-orange-600" />
-          <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
-          {entry.action && (
-            <span data-testid="analysis-disposal-basis-action" className={cn('text-xs font-medium px-2 py-0.5 rounded ml-auto', getActionColor(entry.action))}>
-              {getActionLabel(entry.action, disposalLang)}
-            </span>
-          )}
-        </div>
+      <>
+        {!options?.hideHeader && (
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldAlert className="h-4 w-4 text-orange-600" />
+            <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
+            {entry.action && (
+              <span data-testid={`analysis-disposal-basis-action${suffix}`} className={cn('text-xs font-medium px-2 py-0.5 rounded ml-auto', getActionColor(entry.action))}>
+                {getActionLabel(entry.action, disposalLang)}
+              </span>
+            )}
+          </div>
+        )}
         {options?.scope && options.scope.length > 0 && (
           <div className="mb-3 flex items-start gap-3 text-sm" data-testid={`analysis-disposal-basis-scope${suffix}`}>
             <span className="w-[72px] shrink-0 text-muted-foreground">{tFeatures('basisScope')}</span>
@@ -423,7 +513,7 @@ export function AnalysisSection({
             <InteractiveSurface asChild variant="text" className="min-w-0 text-primary data-[hovered=true]:text-primary/80">
               <button
                 type="button"
-                data-testid="analysis-disposal-basis-rule-link"
+                data-testid={`analysis-disposal-basis-rule-link${suffix}`}
                 className="flex items-center gap-1.5 text-left"
                 title={tFeatures('viewPolicyConfigTitle')}
                 onClick={() => router.push(route)}
@@ -450,6 +540,18 @@ export function AnalysisSection({
             </>
           )}
         </div>
+      </>
+    );
+  };
+
+  const renderDisposalBasisCard = (
+    entry: NonNullable<MailLogDetail['disposal_basis']>,
+    options?: { scope?: string[]; idSuffix?: string },
+  ) => {
+    const suffix = options?.idSuffix ? `-${options.idSuffix}` : '';
+    return (
+      <div data-testid={`analysis-disposal-basis-card${suffix}`} className="rounded-lg border bg-card p-4">
+        {renderDisposalBasisCardBody(entry, options)}
       </div>
     );
   };
@@ -460,9 +562,38 @@ export function AnalysisSection({
       <div>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h4 className="shrink-0 text-sm font-semibold">{t('detectionPipeline')}</h4>
-          <span data-testid="analysis-total-elapsed" className="shrink-0 text-xs text-muted-foreground">
-            {t('totalElapsed', { ms: totalElapsedMs })}
-          </span>
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+            {recipientOptions.length > 1 && onSelectedRecipientChange && (
+              <Select
+                value={selectedRecipient ?? ALL_RECIPIENTS_SCOPE}
+                onValueChange={(value) => onSelectedRecipientChange(
+                  value == null || value === ALL_RECIPIENTS_SCOPE ? undefined : String(value),
+                )}
+              >
+                <SelectTrigger data-testid="analysis-recipient-switcher" className="h-9 min-w-[16rem] max-w-[22.5rem]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent align="end" className="w-max min-w-(--anchor-width) max-w-[360px]">
+                  <SelectItem value={ALL_RECIPIENTS_SCOPE}>
+                    {t('recipientSwitcher.allRecipients', { count: recipientOptions.length })}
+                  </SelectItem>
+                  {recipientOptions.map((option) => (
+                    <SelectItem key={option.recipient.toLowerCase()} value={option.recipient}>
+                      <span className="min-w-0 truncate">{option.recipient}</span>
+                      {option.action && (
+                        <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-xs font-medium', getActionColor(option.action))}>
+                          {getActionLabel(option.action, disposalLang)}
+                        </span>
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <span data-testid="analysis-total-elapsed" className="shrink-0 text-xs text-muted-foreground">
+              {t('totalElapsed', { ms: totalElapsedMs })}
+            </span>
+          </div>
         </div>
         {analysisLoading ? (
           <div data-testid="analysis-loading" className="flex min-h-32 items-center justify-center gap-2 rounded-lg border text-sm text-muted-foreground">
@@ -481,17 +612,17 @@ export function AnalysisSection({
           </div>
         ) : (
           <>
-            {isMultiBasis && totalBasisRecipients > 0 && (
+            {!selectedRecipient && isMultiBasis && totalBasisRecipients > 0 && (
               <div
                 className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-violet-200 bg-violet-50/60 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/20"
                 data-testid="analysis-multi-basis-summary"
               >
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Users className="h-4 w-4 shrink-0 text-violet-600" />
-                  {t('multiBasisSummaryLabel', { recipients: totalBasisRecipients, groups: basisRuleGroups.length })}
+                  {t('multiBasisSummaryLabel', { recipients: totalBasisRecipients, groups: displayBasisRuleGroups.length })}
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {basisRuleGroups.map((group, groupIndex) => group.entry.action && (
+                  {displayBasisRuleGroups.map((group, groupIndex) => group.entry.action && (
                     <span key={`${group.policyKey}-${group.entry.rule_id ?? groupIndex}`} className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(group.entry.action))}>
                       {getActionLabel(group.entry.action, disposalLang)}（{group.recipients.length}）
                     </span>
@@ -503,8 +634,8 @@ export function AnalysisSection({
               {stages.map((st, i) => {
                 const isExpanded = expandedStages.includes(st.stage);
                 const maxCheckRecipientGroupCount = Math.max(0, ...st.checks.map((check) => check.recipientGroups?.length ?? 0));
-                const stageBasisGroups = isMultiBasis
-                  ? basisRuleGroups.filter((group) => getPolicyMeta(group.policyKey)?.stage === STAGE_KEY_TO_NUM[st.key])
+                const stageBasisGroups = !selectedRecipient && isMultiBasis
+                  ? displayBasisRuleGroups.filter((group) => getPolicyMeta(group.policyKey)?.stage === STAGE_KEY_TO_NUM[st.key])
                   : [];
                 const recipientSplitCount = Math.max(maxCheckRecipientGroupCount, stageBasisGroups.length);
                 const hasRecipientSplit = maxCheckRecipientGroupCount > 1 || stageBasisGroups.length > 0;
@@ -566,7 +697,6 @@ export function AnalysisSection({
                                         </div>
                                         <span className={cn('flex shrink-0 items-center gap-1 text-right', CHECK_RESULT_COLOR[check.status])}>
                                           {check.status === 'skipped' ? t('notIntegrated') : t(`status.${check.status}`)}
-                                          {!isSplit && check.ruleIds.length > 0 && <span className="ml-1 text-muted-foreground">#{check.ruleIds.join(', #')}</span>}
                                           {canExpandPhish && confidencePct != null && (
                                             <span className="ml-1 text-muted-foreground">
                                               {t('aiVerdict.confidence', {
@@ -604,7 +734,6 @@ export function AnalysisSection({
                                                 </span>
                                                 <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[group.status])}>
                                                   {group.status === 'skipped' ? t('notIntegrated') : t(`status.${group.status}`)}
-                                                  {group.ruleIds.length > 0 && <span className="ml-1 text-muted-foreground">#{group.ruleIds.join(', #')}</span>}
                                                 </span>
                                               </div>
                                             ))}
@@ -676,7 +805,7 @@ export function AnalysisSection({
                                     className="mt-2 space-y-1.5 rounded-md border border-violet-200 bg-violet-50/50 p-2 dark:border-violet-900 dark:bg-violet-950/20"
                                     data-testid={`analysis-stage-${st.stage}-basis-groups`}
                                   >
-                                    {stageBasisGroups.map((group, groupIndex) => (
+                                    {stageBasisGroups.slice(0, 3).map((group, groupIndex) => (
                                       <div key={`${group.policyKey}-${group.entry.rule_id ?? groupIndex}`} className="flex items-start justify-between gap-2 text-xs">
                                         <span className="min-w-0 break-all text-muted-foreground">
                                           {t('recipientGroupLine', { recipients: group.recipients.join('、'), count: group.recipients.length })}
@@ -689,6 +818,14 @@ export function AnalysisSection({
                                         )}
                                       </div>
                                     ))}
+                                    {stageBasisGroups.length > 3 && (
+                                      <div
+                                        className="text-xs text-muted-foreground/80"
+                                        data-testid={`analysis-stage-${st.stage}-basis-groups-overflow`}
+                                      >
+                                        {t('moreBasisGroups', { n: stageBasisGroups.length - 3 })}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </>
@@ -709,12 +846,12 @@ export function AnalysisSection({
             </div>
 
             {/* 最终判定摘要（管线内尾部）：判定卡 + 耗时 + 「时间线」按钮 */}
-            <div data-testid="analysis-verdict-card" className={cn('mt-4 p-3 rounded-lg border flex items-center justify-between', VERDICT_CARD_STYLE[verdict])}>
+            <div data-testid="analysis-verdict-card" className={cn('mt-4 p-3 rounded-lg border flex items-center justify-between', VERDICT_CARD_STYLE[verdictTone])}>
               <div className="flex items-center gap-2">
-                {VERDICT_ICON[verdict]}
+                {VERDICT_ICON[verdictTone]}
                 <div>
-                  <div className={cn('font-medium text-sm', VERDICT_TEXT_STYLE[verdict])}>
-                    {t('finalVerdict')}：{t(`verdict.${verdict}`)}
+                  <div className={cn('font-medium text-sm', VERDICT_TEXT_STYLE[verdictTone])}>
+                    {t('finalVerdict')}：{emailTypeLabel}
                   </div>
                   <div className="text-xs text-muted-foreground">{t('elapsed', { ms: totalElapsedMs })}</div>
                 </div>
@@ -727,11 +864,11 @@ export function AnalysisSection({
         )}
       </div>
 
-      {/* GT-12578 / GT-12686：落地 spec
-          design/implement/spec/2026-07-07-mail-disposal-investigation-center-design.md:168
-          规定 disposal_basis 为 null 时回退 MailLog.Reason 自由文本；
-          html-spec 对本卡片的规定也是「常显」。此前是硬门控整张卡片消失。 */}
-      {!basis?.policy_key && detail.reason && (
+      {/* GT-12578 / GT-12686：disposal_basis 为 null 时回退 MailLog.Reason。
+          GT-12970：已有结构化命中事实但没有最终 owner 时不回退，避免把
+          proceed/加工命中冒充为处置依据。 */}
+      {!structuredBasisEntry && !hasStructuredBasisFacts(basis) && detail.reason &&
+        (!selectedRecipient || !hasRecipientAttributedBasis) && (
         <div id="disposal-basis" data-testid="analysis-disposal-basis" className="rounded-lg border bg-card p-4 scroll-mt-4">
           <div className="flex items-center gap-2 mb-3">
             <ShieldAlert className="h-4 w-4 text-orange-600" />
@@ -741,31 +878,93 @@ export function AnalysisSection({
         </div>
       )}
 
-      {/* origin GT-12946：单一依据保持一张卡；群发分叉时按最终生效的
-          “模块 + 规则”组合渲染多张卡，并显示适用收件人。 */}
-      {basis?.policy_key && (
-        <div id="disposal-basis" data-testid={isMultiBasis ? 'analysis-disposal-basis-groups' : 'analysis-disposal-basis'} className="space-y-3 scroll-mt-4">
-          {isMultiBasis
-            ? basisRuleGroups.map((group, groupIndex) => renderDisposalBasisCard(group.entry, { scope: group.recipients, idSuffix: String(groupIndex) }))
-            : renderDisposalBasisCard(basis)}
-        </div>
+      {/* 单一依据保持完整卡片；群发分叉时改为默认收起的摘要列表，点击某行
+          才展示该“模块 + 规则”的完整依据和适用收件人。 */}
+      {structuredBasisEntry && (
+        isMultiBasis ? (
+          <div id="disposal-basis" data-testid="analysis-disposal-basis-groups" className="rounded-lg border bg-card scroll-mt-4">
+            <div className="flex items-center gap-2 border-b px-4 py-3">
+              <ShieldAlert className="h-4 w-4 text-orange-600" />
+              <h4 className="text-sm font-semibold">{tFeatures('disposalBasis')}</h4>
+            </div>
+            <div className="divide-y">
+              {displayBasisRuleGroups.map((group, groupIndex) => {
+                const expanded = expandedBasisRows.has(groupIndex);
+                const masked = maskModule(group.entry.policy_key);
+                const meta = group.entry.policy_key ? getPolicyMeta(group.entry.policy_key) : undefined;
+                const hasRuleName = !!group.entry.rule_name && group.entry.rule_name !== '—';
+                const moduleLabel = masked
+                  ? tFeatures('platformPolicyModule')
+                  : group.entry.policy_key
+                    ? getModuleName(group.entry.policy_key, disposalLang) || '—'
+                    : '—';
+                const ruleLabel = masked
+                  ? tFeatures('platformPolicyRuleName')
+                  : hasRuleName
+                    ? group.entry.rule_name!
+                    : group.entry.rule_id || '—';
+                const detailId = `analysis-disposal-basis-${groupIndex}`;
+                return (
+                  <div key={`${group.policyKey}-${group.entry.rule_id ?? groupIndex}-${group.entry.action ?? ''}`}>
+                    <InteractiveSurface asChild variant="control" className="w-full data-[hovered=true]:bg-muted/40">
+                      <button
+                        type="button"
+                        data-testid={`analysis-disposal-basis-row-${groupIndex}`}
+                        aria-expanded={expanded}
+                        aria-controls={detailId}
+                        onClick={() => toggleBasisRow(groupIndex)}
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm"
+                      >
+                        <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', expanded && 'rotate-180')} />
+                        {!masked && <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(meta?.stage ?? 0))} />}
+                        <span className="min-w-0 basis-32 truncate font-medium">{moduleLabel}</span>
+                        <span className="min-w-0 flex-1 truncate text-muted-foreground">{ruleLabel}</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {t('recipientScopeLine', { recipients: group.recipients.join('、'), count: group.recipients.length })}
+                        </span>
+                        {group.entry.action && (
+                          <span className={cn('shrink-0 rounded px-2 py-0.5 text-xs font-medium', getActionColor(group.entry.action))}>
+                            {getActionLabel(group.entry.action, disposalLang)}
+                          </span>
+                        )}
+                      </button>
+                    </InteractiveSurface>
+                    {expanded && (
+                      <div id={detailId} data-testid={detailId} className="border-t bg-muted/20 px-4 py-3">
+                        {renderDisposalBasisCardBody(group.entry, {
+                          scope: group.recipients,
+                          idSuffix: String(groupIndex),
+                          hideHeader: true,
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div id="disposal-basis" data-testid="analysis-disposal-basis" className="scroll-mt-4">
+            {renderDisposalBasisCard(structuredBasisEntry, selectedRecipient ? { scope: [selectedRecipient] } : undefined)}
+          </div>
+        )
       )}
 
       {/* GT-12727：本封邮件命中的模块清单。
           注意措辞纪律（spec §7.5）：这**不是**"全部命中模块"——因前序模块已产生
           决定性动作而从未被求值的规则不在其中，文案不得暗示这是穷尽列表。 */}
-      {hitModules.length > 0 && (
+      {displayHitModules.length > 0 && (
         <div id="disposal-hit-modules" data-testid="analysis-hit-modules" className="rounded-lg border bg-card p-4 scroll-mt-4">
           <div className="mb-1 flex items-center gap-2">
             <ShieldAlert className="h-4 w-4 text-muted-foreground" />
             <h4 className="text-sm font-semibold">{tFeatures('hitModules')}</h4>
             <Badge variant="outline" className="text-xs">
-              {hitModules.length}
+              {displayHitModules.length}
             </Badge>
           </div>
           <p className="mb-3 text-xs text-muted-foreground">{tFeatures('hitModulesHint')}</p>
           <div className="space-y-2.5">
-            {hitModules.map((m, i) => {
+            {displayHitModules.map((m, i) => {
               const masked = maskModule(m.policy_key);
               const meta = m.policy_key ? getPolicyMeta(m.policy_key) : undefined;
               const ruleLabel = m.rule_name ? (m.rule_id ? `${m.rule_name}（${m.rule_id}）` : m.rule_name) : m.rule_id || '—';
@@ -933,139 +1132,8 @@ export function AnalysisSection({
           ))}
       </div>
 
-      {/* Step 2: content-layer expandable area -- URL + attachment tables */}
-      <div className="rounded-lg border overflow-hidden">
-        <InteractiveSurface asChild variant="control" className="flex w-full items-center justify-between rounded-none p-3 data-[hovered=true]:bg-muted/50">
-          <button type="button" aria-expanded={contentExpanded} onClick={() => setContentExpanded((v) => !v)}>
-            <span className="font-medium">{t('contentDetails')}</span>
-            <ChevronDown className={cn('h-4 w-4 transition-transform duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', !contentExpanded && '-rotate-90')} />
-          </button>
-        </InteractiveSurface>
-        {contentExpanded && (
-          <div className="border-t p-4 space-y-4">
-            <Section title={tFeatures('basicInfo')}>
-              <KV label={tFeatures('tid')} value={tidOf(detail.message_uuid)} mono />
-              <KV label={tFeatures('emailId')} value={detail.message_id || '—'} mono />
-              {/* 完整关联键：用于在后端服务器日志中对应检索（GT-12651）。
-                  message_uuid 贯穿组件 JSONL，session_id 是 milter 运行日志的
-                  sid，queue_id 对应 Postfix mail.log。 */}
-              <KV label={tFeatures('messageUuid')} value={detail.message_uuid || '—'} mono />
-              <KV label={tFeatures('sessionId')} value={detail.session_id || '—'} mono />
-              <KV label={tFeatures('queueId')} value={detail.queue_id || '—'} mono />
-              <KV label={tFeatures('receiveTime')} value={detail.received_at} />
-              <KV label={tFeatures('direction')} value={tFeatures(`directionValue.${direction}`)} />
-              <KV label={tFeatures('emailSize')} value={formatBytes(detail.storage_size)} />
-              <KV label={tFeatures('action')} value={detail.action} />
-              <KV label={tFeatures('reason')} value={detail.reason || '—'} />
-            </Section>
-
-            <Section title={tFeatures('senderRecipientInfo')}>
-              <KV label={tFeatures('envelopeFrom')} value={detail.sender} mono />
-              <KV label={tFeatures('envelopeTo')} value={detail.recipients?.join(', ') || '—'} mono />
-              <KV label={tFeatures('senderIp')} value={detail.client_ip || '—'} mono />
-              <KV label={tFeatures('ipLocation')} value={ipLocation} />
-              <KV label={tFeatures('senderDomain')} value={detail.sender_domain || '—'} />
-            </Section>
-
-            <Section title={tFeatures('urlDetection')}>
-              {(detail.urls ?? []).length === 0 ? (
-                <Empty text={tFeatures('noData')} />
-              ) : (
-                <table className="w-full text-xs">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('urlIndex')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('originalUrl')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('securityStatus')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(detail.urls ?? []).map((u, i) => (
-                      <tr key={i} className="border-b">
-                        <td className="px-2 py-1.5">{i + 1}</td>
-                        <td className="px-2 py-1.5 truncate max-w-lg">{u}</td>
-                        <td className="px-2 py-1.5">
-                          <span className={suspiciousUrls.has(u) ? 'rounded bg-red-100 px-2 py-0.5 text-red-700' : 'rounded bg-emerald-100 px-2 py-0.5 text-emerald-700'}>
-                            {suspiciousUrls.has(u) ? tFeatures('urlSuspicious') : tFeatures('urlSafe')}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </Section>
-
-            <Section title={tFeatures('attachmentSecurity')}>
-              {(detail.attachments ?? []).length === 0 ? (
-                <Empty text={tFeatures('noData')} />
-              ) : (
-                <table className="w-full text-xs">
-                  <thead className="border-b bg-muted/50">
-                    <tr>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('attIndex')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('filename')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('contentType')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('size')}</th>
-                      <th className="px-2 py-1.5 text-left">MD5</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('encrypted')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('containsQr')}</th>
-                      <th className="px-2 py-1.5 text-left">{tFeatures('virusScan')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(detail.attachments ?? []).map((a, i) => {
-                      const scan = scans.find((s) => s.attachment_md5 && a.md5sum && s.attachment_md5 === a.md5sum);
-                      const virus = !scan ? 'unknown' : scan?.virus_name ? 'detected' : scan?.antivirus_result === 'error' ? 'error' : 'clean';
-                      return (
-                        <tr key={i} className="border-b">
-                          <td className="px-2 py-1.5">{i + 1}</td>
-                          <td className="px-2 py-1.5 truncate max-w-[16rem]">{a.filename}</td>
-                          <td className="px-2 py-1.5 truncate max-w-[14rem]">{a.content_type || '—'}</td>
-                          <td className="px-2 py-1.5">{formatBytes(a.size)}</td>
-                          <td className="px-2 py-1.5 font-mono">{a.md5sum || scan?.attachment_md5 || '—'}</td>
-                          <td className="px-2 py-1.5">{scan ? (scan.is_encrypted ? tFeatures('yes') : tFeatures('no')) : '—'}</td>
-                          <td className="px-2 py-1.5">{scan ? ((scan.qr_code_count ?? 0) > 0 ? tFeatures('yes') : tFeatures('no')) : '—'}</td>
-                          <td className="px-2 py-1.5">
-                            <span
-                              className={
-                                virus === 'unknown'
-                                  ? 'text-muted-foreground'
-                                  : virus === 'detected'
-                                    ? 'rounded bg-red-100 px-2 py-0.5 text-red-700'
-                                    : virus === 'error'
-                                      ? 'rounded bg-gray-100 px-2 py-0.5 text-gray-700'
-                                      : 'rounded bg-emerald-100 px-2 py-0.5 text-emerald-700'
-                              }
-                            >
-                              {virus === 'unknown' ? '—' : tFeatures(`virus.${virus}`)}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </Section>
-          </div>
-        )}
-      </div>
-      </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-lg border overflow-hidden">
-      <div className="border-b bg-muted/50 px-4 py-2 text-sm font-semibold">{title}</div>
-      <div className="p-4">{children}</div>
     </div>
   );
-}
-
-function Empty({ text }: { text: string }) {
-  return <p className="py-4 text-center text-sm text-muted-foreground">{text}</p>;
 }
 
 function KV({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {

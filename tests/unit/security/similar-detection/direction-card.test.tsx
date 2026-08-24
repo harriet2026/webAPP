@@ -102,12 +102,12 @@ describe('DirectionCard', () => {
     expect(onChange).toHaveBeenCalledExactlyOnceWith({ min_count: 8 });
   });
 
-  it('action=mark-delivery 且非观察态：渲染 TagDeliveryPanel', () => {
+  it('action=accept 且非观察态：渲染 TagDeliveryPanel', () => {
     render(
       <DirectionCard
         direction="internal"
         detectionType="similar_email"
-        value={baseConfig({ action: 'mark-delivery', observe_mode: false })}
+        value={baseConfig({ action: 'accept', observe_mode: false })}
         onChange={vi.fn()}
         onSync={vi.fn()}
       />,
@@ -115,12 +115,12 @@ describe('DirectionCard', () => {
     expect(screen.getByTestId('similar-detection-tag-panel')).toBeInTheDocument();
   });
 
-  it('action=mark-delivery 但观察态开启：TagDeliveryPanel 不渲染', () => {
+  it('action=accept 但观察态开启：TagDeliveryPanel 不渲染', () => {
     render(
       <DirectionCard
         direction="internal"
         detectionType="similar_email"
-        value={baseConfig({ action: 'mark-delivery', observe_mode: true })}
+        value={baseConfig({ action: 'accept', observe_mode: true })}
         onChange={vi.fn()}
         onSync={vi.fn()}
       />,

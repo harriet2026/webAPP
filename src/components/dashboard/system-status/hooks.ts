@@ -16,9 +16,9 @@
 // `viewer` context value — see resolveSecurityScope's own doc comment on why
 // the raw value under-normalizes "platform admin + viewer=tenant + no
 // selected tenant"). Tenant viewers only ever see tenant-scoped alert
-// sources (disposal backlog / inbound-audit backlog / per-agent pending
-// counts), which are not under `/monitor/*` and are already tenant-isolated
-// by `X-Tenant-ID` (via `useScopedApiRequest`).
+// sources (the core summary's disposal/report backlogs and per-agent pending
+// counts), which are not under `/monitor/*` and are already tenant-isolated by
+// `X-Tenant-ID` (via `useScopedApiRequest`).
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, subDays, subHours } from 'date-fns';
@@ -30,7 +30,6 @@ import { fetchOpsTop, type OpsTopRow } from '@/lib/api/ops-top';
 import { fetchNodes, fetchAlerts } from '@/lib/api/monitoring';
 import type { NodeInfo } from '@/types/monitoring';
 import type { AlertEvent, AlertSeverity } from '@/types/alerts';
-import { getInboundAuditItems } from '@/lib/api/inbound-audit';
 import { getDetectionStats } from '@/lib/api/phishing-detection';
 import { getSpoofingStats } from '@/lib/api/spoofing-detection';
 import { getThreatRetroStats } from '@/lib/api/threat-retro';
@@ -209,13 +208,21 @@ export interface SystemStatusData {
   top5: OpsTopRow[];
   alerts: SystemStatusAlertItem[];
   agents: SystemStatusAgentStats | null;
+  // Agent capability is resolved by /bootstrap after the core dashboard can
+  // already start loading. Keep its loading state separate so a slow agent
+  // stats endpoint never holds the KPI/trend cards in a page-wide skeleton.
+  agentsLoading: boolean;
   isLoading: boolean;
-  // The dashboard fetches all sources in one combined query; if it rejects,
-  // every field falls back to 0/[]/null. isError lets cards distinguish
-  // "genuinely healthy / empty" from "data failed to load" so the health
-  // banner doesn't render a false-green "系统运行正常" on a fetch failure.
+  // Core and capability-gated agent data use separate queries. isError joins
+  // their error states so the health banner never renders a false-green
+  // "系统运行正常" when either visible data source failed.
   isError: boolean;
 }
+
+export type SystemStatusCoreData = Omit<
+  SystemStatusData,
+  'agents' | 'agentsLoading' | 'isLoading' | 'isError'
+>;
 
 function severityToLevel(sev: AlertSeverity): SystemStatusAlertLevel {
   if (sev === 'p0' || sev === 'p1') return 'danger';
@@ -223,7 +230,7 @@ function severityToLevel(sev: AlertSeverity): SystemStatusAlertLevel {
   return 'info';
 }
 
-async function fetchAgentStats(
+export async function fetchSystemStatusAgentStats(
   apiRequest: ApiRequestFn,
   access: AgentStatsAccess,
 ): Promise<SystemStatusAgentStats | null> {
@@ -262,15 +269,14 @@ interface FetchArgs {
   dates: RangeDates;
   apiRequest: ApiRequestFn;
   isPlatform: boolean;
-  agentAccess: AgentStatsAccess;
 }
 
 // GT-12005 / GT-12008: the dashboard used to fetch every source in one
 // Promise.all, so a single rejected call took the whole query down and every
 // field fell back to 0 / [] / null — the "统计卡片数据全为 0" and "待办面板为空"
-// reports. A tenant_admin reliably hits this: /inbound-audit is RequireSystemAdmin
-// and 403s, even though the homepage statistics endpoint returns that tenant's
-// real data.
+// reports. Homepage pending-report data is now part of the core summary, so the
+// dashboard no longer probes the paginated /inbound-audit endpoint just to read
+// its total.
 //
 // Auxiliary sources now degrade to a neutral value on failure instead of
 // destroying the page. The CORE summary source is deliberately NOT wrapped: if
@@ -289,7 +295,7 @@ async function optionalSource<T>(p: Promise<T>, fallback: T, label: string): Pro
     // green "系统运行正常" while /monitor/alerts is down and real alerts are hidden;
     // a failing auxiliary query could otherwise hide real page content.
     // Silently-wrong is worse than an honest error banner, so
-    // rethrow and let the combined query reject.
+    // rethrow and let that source's owning query reject.
     if (err instanceof ApiError && err.status === 403) {
       console.warn(`[dashboard] source "${label}" forbidden for this viewer, degrading`, err);
       return fallback;
@@ -298,18 +304,14 @@ async function optionalSource<T>(p: Promise<T>, fallback: T, label: string): Pro
   }
 }
 
-export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<SystemStatusData, 'isLoading' | 'isError'>> {
-  const { range, dates, apiRequest, isPlatform, agentAccess } = args;
+export async function fetchSystemStatusData(args: FetchArgs): Promise<SystemStatusCoreData> {
+  const { range, dates, apiRequest, isPlatform } = args;
 
-  const [
-    summary,
-    top5Resp,
-    inboundAudit,
-    agents,
-  ] = await Promise.all([
+  const [summary, top5Resp] = await Promise.all([
     // 首页专用聚合保持既有口径，但只返回页面实际消费的数据：当前/上一周期
-    // 收发信总量与威胁 KPI、当前 email_type 趋势、待处置数量。完整的
-    // delivery-traffic / security-overview 接口继续供各自详情页使用。
+    // 收发信总量与威胁 KPI、当前 email_type 趋势、待处置与举报待审数量。
+    // 完整的 delivery-traffic / security-overview / inbound-audit 接口继续供
+    // 各自详情页使用。
     fetchSystemStatusSummary(
       {
         startDate: dates.startDate,
@@ -330,19 +332,6 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
       { dimension: 'sender', total: 0, trendLabels: [], rows: [] as OpsTopRow[] },
       'ops-top',
     ),
-    // 403s for tenant_admin today (RequireSystemAdmin), even though spec §4.6
-    // lists 举报待审 as a TENANT-scope source. Kept unconditional so tenants
-    // pick it up automatically once the backend authz is relaxed; until then
-    // it degrades to 0 instead of blanking the dashboard.
-    optionalSource(
-      getInboundAuditItems({ status: 'pending', page: 1, page_size: 1 }, apiRequest),
-      { items: [], page: 1, page_size: 1, total: 0 },
-      'inbound-audit',
-    ),
-    // Request only the individually authorized agent sources. Each 403 is
-    // isolated inside fetchAgentStats, so one revoked capability cannot erase
-    // another agent's valid data.
-    fetchAgentStats(apiRequest, agentAccess),
   ]);
 
   const inbound = summary.current.mail_volume;
@@ -352,7 +341,7 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
   const threatsDelta = computeDelta(threats, summary.previous.threats);
   const blockRate = summary.current.block_rate;
   const pendingIsolated = summary.pending_disposal;
-  const pendingReport = inboundAudit.total;
+  const pendingReport = summary.pending_report;
   const top5 = top5Resp.rows.slice(0, 5);
 
   let nodesOnline = 0;
@@ -463,42 +452,6 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
       count: pendingReport,
     });
   }
-  if (agents) {
-    if (agents.phishing && agents.phishing.pendingReview > 0) {
-      tenantAlerts.push({
-        id: 'agent-phishing-pending',
-        level: 'info',
-        scope: 'tenant',
-        kind: 'agent_pending',
-        href: '/agent-center/overview?agent=phishing',
-        agent: 'phishing',
-        count: agents.phishing.pendingReview,
-      });
-    }
-    if (agents.spoofing && agents.spoofing.pendingReview > 0) {
-      tenantAlerts.push({
-        id: 'agent-spoofing-pending',
-        level: 'info',
-        scope: 'tenant',
-        kind: 'agent_pending',
-        href: '/agent-center/overview?agent=spoofing',
-        agent: 'spoofing',
-        count: agents.spoofing.pendingReview,
-      });
-    }
-    if (agents.threatRetro && agents.threatRetro.pendingRecall > 0) {
-      tenantAlerts.push({
-        id: 'agent-threat-retro-pending',
-        level: 'info',
-        scope: 'tenant',
-        kind: 'agent_pending',
-        href: '/agent-center/overview?agent=threat-retro',
-        agent: 'threat-retro',
-        count: agents.threatRetro.pendingRecall,
-      });
-    }
-  }
-
   return {
     inbound,
     inboundDelta,
@@ -514,8 +467,67 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<Omit<Syste
     threatTrend: summary.threat_trend ?? [],
     top5,
     alerts: [...platformAlerts, ...tenantAlerts, ...platformTailAlerts],
-    agents,
   };
+}
+
+export function buildAgentAlerts(agents: SystemStatusAgentStats | null): SystemStatusAlertItem[] {
+  if (!agents) return [];
+
+  const alerts: SystemStatusAlertItem[] = [];
+  if (agents.phishing && agents.phishing.pendingReview > 0) {
+    alerts.push({
+      id: 'agent-phishing-pending',
+      level: 'info',
+      scope: 'tenant',
+      kind: 'agent_pending',
+      href: '/agent-center/overview?agent=phishing',
+      agent: 'phishing',
+      count: agents.phishing.pendingReview,
+    });
+  }
+  if (agents.spoofing && agents.spoofing.pendingReview > 0) {
+    alerts.push({
+      id: 'agent-spoofing-pending',
+      level: 'info',
+      scope: 'tenant',
+      kind: 'agent_pending',
+      href: '/agent-center/overview?agent=spoofing',
+      agent: 'spoofing',
+      count: agents.spoofing.pendingReview,
+    });
+  }
+  if (agents.threatRetro && agents.threatRetro.pendingRecall > 0) {
+    alerts.push({
+      id: 'agent-threat-retro-pending',
+      level: 'info',
+      scope: 'tenant',
+      kind: 'agent_pending',
+      href: '/agent-center/overview?agent=threat-retro',
+      agent: 'threat-retro',
+      count: agents.threatRetro.pendingRecall,
+    });
+  }
+  return alerts;
+}
+
+export function mergeAgentAlerts(
+  coreAlerts: SystemStatusAlertItem[],
+  agents: SystemStatusAgentStats | null,
+): SystemStatusAlertItem[] {
+  const agentAlerts = buildAgentAlerts(agents);
+  if (agentAlerts.length === 0) return coreAlerts;
+
+  // License/rule-library items are deliberately the platform list tail. Agent
+  // pending items are tenant-scoped and historically appeared before that tail.
+  const tailIndex = coreAlerts.findIndex(
+    (alert) => alert.kind === 'license_expiry' || alert.kind === 'rule_lib',
+  );
+  if (tailIndex < 0) return [...coreAlerts, ...agentAlerts];
+  return [
+    ...coreAlerts.slice(0, tailIndex),
+    ...agentAlerts,
+    ...coreAlerts.slice(tailIndex),
+  ];
 }
 
 export function useSystemStatusData(range: SystemStatusRange): SystemStatusData {
@@ -534,15 +546,18 @@ export function useSystemStatusData(range: SystemStatusRange): SystemStatusData 
 
   const dates = useMemo(() => resolveRangeDates(range), [range]);
 
-  const { data, isLoading, isError } = useQuery({
+  // GT-13021: /bootstrap resolves after the first dashboard render. Agent
+  // access therefore changes from all-false to the granted rows shortly after
+  // login. Keeping those booleans in the core key restarted the still-running
+  // summary/ops-top queries and doubled database work. Core statistics now
+  // have a stable key; only the lightweight agent query follows grant changes.
+  const coreQuery = useQuery({
     queryKey: [
       'system-status',
+      'core',
       range,
       scope.resolvedScopeTenant,
       isPlatform,
-      agentAccess.phishing,
-      agentAccess.spoofing,
-      agentAccess['threat-retro'],
       dates.startDate,
       dates.endDate,
       // '24h' 的窗口带时刻，日期相同而时刻不同的两次查询必须是不同的 query key
@@ -551,11 +566,32 @@ export function useSystemStatusData(range: SystemStatusRange): SystemStatusData 
       dates.endTime,
     ],
     enabled: scope.scopeResolved,
-    queryFn: () => fetchSystemStatusData({ range, dates, apiRequest, isPlatform, agentAccess }),
+    queryFn: () => fetchSystemStatusData({ range, dates, apiRequest, isPlatform }),
     staleTime: 30_000,
     refetchOnWindowFocus: false,
     retry: 1,
   });
+
+  const agentQueryEnabled = scope.scopeResolved && Object.values(agentAccess).some(Boolean);
+  const agentQuery = useQuery({
+    queryKey: [
+      'system-status',
+      'agents',
+      scope.resolvedScopeTenant,
+      isPlatform,
+      agentAccess.phishing,
+      agentAccess.spoofing,
+      agentAccess['threat-retro'],
+    ],
+    enabled: agentQueryEnabled,
+    queryFn: () => fetchSystemStatusAgentStats(apiRequest, agentAccess),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
+
+  const data = coreQuery.data;
+  const agents = agentQuery.data ?? null;
 
   return {
     inbound: data?.inbound ?? 0,
@@ -571,9 +607,10 @@ export function useSystemStatusData(range: SystemStatusRange): SystemStatusData 
     nodesDegraded: data?.nodesDegraded ?? false,
     threatTrend: data?.threatTrend ?? [],
     top5: data?.top5 ?? [],
-    alerts: data?.alerts ?? [],
-    agents: data?.agents ?? null,
-    isLoading,
-    isError,
+    alerts: mergeAgentAlerts(data?.alerts ?? [], agents),
+    agents,
+    agentsLoading: agentQueryEnabled && agentQuery.isLoading,
+    isLoading: coreQuery.isLoading,
+    isError: coreQuery.isError || agentQuery.isError,
   };
 }

@@ -24,10 +24,10 @@ const DIR_BADGE: Record<BehaviorDirection, string> = {
 };
 
 const ACTION_BADGE: Record<BehaviorProductAction, string> = {
-  review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200',
+  audit: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200',
   quarantine: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200',
-  drop: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200',
-  block: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200',
+  discard: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200',
+  reject: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200',
 };
 
 function ObjectCell({ type, subType, value }: { type: BehaviorObjectType; subType?: string; value?: string }) {

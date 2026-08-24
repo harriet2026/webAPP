@@ -12,8 +12,9 @@ import {
   formatListReason,
   formatMultiBasisListReason,
   getModuleName,
-  groupRecipientBasisByPolicy,
+  groupDispositionBasisByPolicy,
   groupsFromSummaries,
+  hasStructuredBasisFacts,
   isStage1Policy,
   recipientBasisState,
   recipientsOfBasisEntry,
@@ -69,7 +70,10 @@ export function DisposalBasisCell({
   });
 
   if (summaryGroups.length === 0) {
-    if (!reason) return <>{'—'}</>;
+    // A structured hit ledger with no final owner is an intentional empty
+    // disposition basis (for example AUTH proceed-only). Do not resurrect an
+    // obsolete “accepted by rules” reason as a false final basis.
+    if (!reason || hasStructuredBasisFacts(basis)) return <>{'—'}</>;
     return (
       <Tooltip>
         <TooltipTrigger render={<span className="block cursor-default truncate" />}>
@@ -107,7 +111,7 @@ export function DisposalBasisCell({
   const detailBasis = detailQuery.data ?? undefined;
   const hasDetailBasis = detailBasis !== undefined;
   const loadedGroups = detailBasis
-    ? groupRecipientBasisByPolicy(detailBasis)
+    ? groupDispositionBasisByPolicy(detailBasis)
     : summaryGroups;
   const orderedGroups = sortBasisGroupsForTooltip(
     loadedGroups,

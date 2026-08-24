@@ -33,6 +33,13 @@ function collectCodes(node: unknown, prefix = ''): string[] {
 describe('apiErrors 文案可被 next-intl 解析（GT-12614）', () => {
   const codes = collectCodes((zh as Record<string, unknown>).apiErrors);
 
+  it('GT-13082：白名单自锁错误在中文界面展示具体原因', () => {
+    const t = createTranslator({ locale: 'zh', messages: zh as never });
+    expect(t('apiErrors.login_policy.whitelist_would_lock_out_self' as never)).toBe(
+      '该白名单不包含你当前的 IP 地址，保存后你将无法登录',
+    );
+  });
+
   it('zh.json 的 apiErrors 至少覆盖数百个错误码（防止误删整节后本测试空跑通过）', () => {
     expect(codes.length).toBeGreaterThan(300);
   });

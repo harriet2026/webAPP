@@ -185,7 +185,7 @@ export async function saveMailMarkingRule(
     rule_class: 'action',
     stage: 'data',
     priority: p.priority,
-    action: 'accept',
+    action: 'proceed',
     condition_tree,
     metadata,
     page: PAGE,

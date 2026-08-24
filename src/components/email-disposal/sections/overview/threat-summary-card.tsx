@@ -32,7 +32,8 @@ import {
 } from '../../lib/detail-helpers';
 import {
   getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor,
-  groupRecipientBasisByPolicy, isStage1Policy, pickPrimaryBasisGroup,
+  groupEffectiveRecipientBasisByRule, groupRecipientBasisByPolicy, isStage1Policy, pickPrimaryBasisGroup,
+  hasStructuredBasisFacts,
   recipientBasisState, recipientsOfBasisEntry, sortBasisGroupsForTooltip,
   type DisposalLang,
 } from '../../lib/disposal-basis-config';
@@ -220,12 +221,28 @@ export function ThreatSummaryCard({
   // 特征，否则不渲染（后端暂无 whois/RDAP 数据，真实环境下这个字段本就缺席）。
   const domainAge = deriveDomainAge(detail);
 
-  const basisGroups = useMemo(() => groupRecipientBasisByPolicy(detail.disposal_basis), [detail.disposal_basis]);
+	const effectiveBasisRules = useMemo(
+		() => groupEffectiveRecipientBasisByRule(detail.disposal_basis),
+		[detail.disposal_basis],
+	);
+	const basisGroups = useMemo(() => {
+		if (!detail.disposal_basis || effectiveBasisRules.length === 0) return [];
+		return groupRecipientBasisByPolicy({
+			...detail.disposal_basis,
+			modules: effectiveBasisRules.map((group) => group.entry),
+		});
+	}, [detail.disposal_basis, effectiveBasisRules]);
   const primaryBasisGroup = pickPrimaryBasisGroup(basisGroups);
-  const primaryBasisEntry = primaryBasisGroup?.entries.find((entry) =>
+	const groupedPrimaryBasisEntry = primaryBasisGroup?.entries.find((entry) =>
     entry.policy_key === detail.disposal_basis?.policy_key &&
     (!detail.disposal_basis?.rule_id || entry.rule_id === detail.disposal_basis.rule_id),
   ) ?? primaryBasisGroup?.entries[0];
+	const primaryBasisEntry = groupedPrimaryBasisEntry ?? (
+		detail.disposal_basis && detail.disposal_basis.action !== 'proceed' &&
+		detail.disposal_basis.action !== 'accept' && (
+			detail.disposal_basis.rule_name || detail.disposal_basis.rule_id || detail.disposal_basis.action
+		) ? detail.disposal_basis : undefined
+	);
   const isMultiBasis = basisGroups.length > 1;
   const orderedBasisGroups = isMultiBasis ? sortBasisGroupsForTooltip(basisGroups) : [];
   const isPlatformPolicyContext = isTenantPlatformViewer && isStage1Policy(primaryBasisEntry?.policy_key);
@@ -335,10 +352,10 @@ export function ThreatSummaryCard({
           design/implement/spec/2026-07-07-mail-disposal-investigation-center-design.md:168
           规定「合成失败/无命中时 disposal_basis 存 null，前端回退现有
           MailLog.Reason 自由文本」。此前这里是硬门控直接隐藏整块，于是
-          mail_marking（接收标记）这类不参与 disposal_basis 合成的规则，
-          命中后处置依据处什么都看不到——尽管规则名早已由 decision.go 写进
-          mail_log.reason。html-spec 对该卡片的规定也是「常显」。 */}
-      {basisGroups.length === 0 && detail.reason && (
+          无结构化处置依据的历史行仍需用 mail_log.reason 兜底。新格式若已有
+          modules[] 但只有 proceed/加工命中，则这是“确知没有最终处置依据”，
+          不再用 reason 把命中事实冒充为依据。 */}
+	  {!primaryBasisEntry && !hasStructuredBasisFacts(detail.disposal_basis) && detail.reason && (
         <div
           className="flex flex-wrap items-start gap-2 border-t pt-3 text-sm"
           data-testid="email-disposal-overview-disposal-basis"
@@ -349,25 +366,29 @@ export function ThreatSummaryCard({
         </div>
       )}
 
-      {primaryBasisEntry?.policy_key && (
+	  {primaryBasisEntry && (
         <div
           className="flex flex-wrap items-center gap-2 border-t pt-3 text-sm"
           data-testid="email-disposal-overview-disposal-basis"
         >
           <ShieldAlert className="h-4 w-4 shrink-0 text-orange-600" />
           <span className="shrink-0 text-muted-foreground">{tFeatures('disposalBasis')}：</span>
-          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(stagePolicyMeta?.stage ?? 0))} />
+		  {primaryBasisEntry.policy_key && (
+			<span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(stagePolicyMeta?.stage ?? 0))} />
+		  )}
           {isPlatformPolicyContext ? (
             <span className="font-medium text-foreground">
               {tFeatures('platformPolicyModule')}
             </span>
           ) : (
-            <span className="font-medium text-foreground">
-              {getModuleName(primaryBasisEntry.policy_key, disposalLang) || primaryBasisEntry.policy_key}
-              {primaryBasisEntry.rule_name && primaryBasisEntry.rule_name !== '—' && (
-                <span className="font-normal text-muted-foreground">「{primaryBasisEntry.rule_name}」</span>
-              )}
-            </span>
+			<span className="font-medium text-foreground">
+			  {primaryBasisEntry.policy_key
+				? (getModuleName(primaryBasisEntry.policy_key, disposalLang) || primaryBasisEntry.policy_key)
+				: (primaryBasisEntry.rule_name || primaryBasisEntry.rule_id || '—')}
+			  {primaryBasisEntry.policy_key && primaryBasisEntry.rule_name && primaryBasisEntry.rule_name !== '—' && (
+				<span className="font-normal text-muted-foreground">「{primaryBasisEntry.rule_name}」</span>
+			  )}
+			</span>
           )}
           {primaryBasisEntry.action && (
             <span className={cn('rounded px-2 py-0.5 text-xs font-medium', getActionColor(primaryBasisEntry.action))}>

@@ -7,23 +7,22 @@ import {
   toContentRuleUiAction,
 } from './content-rules';
 
-describe('content rules demo contract mapping', () => {
-  it('maps the six product actions onto unified-rule actions', () => {
-    expect(fromContentRuleUiAction('deliver')).toBe('accept');
-    expect(fromContentRuleUiAction('tag_deliver')).toBe('accept');
-    expect(fromContentRuleUiAction('isolate')).toBe('quarantine');
-    expect(fromContentRuleUiAction('review')).toBe('audit');
-    expect(fromContentRuleUiAction('block')).toBe('reject');
+describe('content rules canonical action contract', () => {
+  it('uses the same action values in UI and API', () => {
+    expect(fromContentRuleUiAction('accept')).toBe('accept');
+    expect(fromContentRuleUiAction('quarantine')).toBe('quarantine');
+    expect(fromContentRuleUiAction('audit')).toBe('audit');
+    expect(fromContentRuleUiAction('reject')).toBe('reject');
     expect(fromContentRuleUiAction('discard')).toBe('discard');
   });
 
-  it('distinguishes plain delivery from header-tagged delivery', () => {
-    expect(toContentRuleUiAction('accept')).toBe('deliver');
+  it('keeps header tagging separate from the action', () => {
+    expect(toContentRuleUiAction('accept')).toBe('accept');
     expect(toContentRuleUiAction('accept', {
       add_headers: [{ name: 'X-OSG-Content-Tag', value: 'sensitive' }],
       notify_admin: false,
       notify_sender: false,
-    })).toBe('tag_deliver');
+    })).toBe('accept');
   });
 
   it('builds one content-group node regardless of selected display scopes', () => {

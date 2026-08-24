@@ -16,7 +16,7 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // 「允许」(accept) 已从认证仿冒移除（后端校验层会 400 掉它）；不拦截用「标记放行」。
-const ACTIONS: AuthSpoofingAction[] = ['quarantine', 'reject', 'audit', 'mark-delivery', 'discard'];
+const ACTIONS: AuthSpoofingAction[] = ['quarantine', 'reject', 'audit', 'proceed', 'discard'];
 
 interface SimilarDomainSectionProps {
   config: SimilarDomainConfig;
@@ -92,7 +92,7 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
               </div>
             </div>
 
-            {config.enabled && !config.observe_mode && config.action === 'mark-delivery' && (
+            {config.enabled && !config.observe_mode && config.action === 'proceed' && (
               <AuthSpoofingTagPanel
                 value={config}
                 onChange={(patch) => onChange({ ...config, ...patch })}

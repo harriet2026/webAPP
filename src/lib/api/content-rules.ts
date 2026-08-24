@@ -107,35 +107,12 @@ const scopeFields: Record<string, string> = {
   urls: 'urls',
 };
 
-export function toContentRuleUiAction(action: ContentRuleAction, markConfig?: MarkConfig): ContentRuleUiAction {
-  switch (action) {
-    case 'accept':
-      return markConfig?.add_headers?.length ? 'tag_deliver' : 'deliver';
-    case 'quarantine':
-      return 'isolate';
-    case 'audit':
-      return 'review';
-    case 'reject':
-      return 'block';
-    case 'discard':
-      return 'discard';
-  }
+export function toContentRuleUiAction(action: ContentRuleAction, _markConfig?: MarkConfig): ContentRuleUiAction {
+  return action;
 }
 
 export function fromContentRuleUiAction(action: ContentRuleUiAction): ContentRuleAction {
-  switch (action) {
-    case 'deliver':
-    case 'tag_deliver':
-      return 'accept';
-    case 'isolate':
-      return 'quarantine';
-    case 'review':
-      return 'audit';
-    case 'block':
-      return 'reject';
-    case 'discard':
-      return 'discard';
-  }
+  return action;
 }
 
 export function parseContentRulesRule(tree: RuleNode | null): {

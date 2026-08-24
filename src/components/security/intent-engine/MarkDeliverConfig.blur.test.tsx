@@ -8,7 +8,7 @@ vi.mock('next-intl', () => ({
   useTranslations: (ns: string) => (key: string) => `${ns}.${key}`,
 }));
 
-import { MarkDeliverConfig } from './MarkDeliverConfig';
+import { ProceedMarkConfig } from './ProceedMarkConfig';
 import { DEFAULT_MARK_TEXT } from '@/types/intent-engine';
 import type { IntentMarkConfig } from '@/types/intent-engine';
 
@@ -16,19 +16,18 @@ import type { IntentMarkConfig } from '@/types/intent-engine';
 // 默认文案（订阅类为 [订阅]）。此前只有 IntentEnginePage.handleSave 的 D-11 在
 // *保存时*兜底回填，输入框本身失焦后是空的——用户看到空框，误以为标记会落空，
 // 且在保存前无法确认最终生效文案。
-// MarkDeliverConfig 是受控组件：value 完全由父级提供。必须用有状态的包装器把
+// ProceedMarkConfig 是受控组件：value 完全由父级提供。必须用有状态的包装器把
 // onChange 真正写回 value，否则输入框永远显示初始文案，清空动作根本不生效，
 // 测出来的就不是产品行为（第一版用裸 vi.fn() 就踩了这个坑）。
 function renderCfg(intent: 'subscription' | 'phishing' = 'subscription') {
   const onChange = vi.fn();
   function Harness() {
     const [value, setValue] = useState<IntentMarkConfig>({
-      delivery_target: 'inbox',
       subject_mark: { enabled: true, text: DEFAULT_MARK_TEXT[intent], position: 'prefix' },
-      body_mark: { enabled: true, text: DEFAULT_MARK_TEXT[intent], position: 'prefix' },
-    } as unknown as IntentMarkConfig);
+      header_mark: { enabled: true, name: 'X-OSG-Intent', value: DEFAULT_MARK_TEXT[intent] },
+    });
     return (
-      <MarkDeliverConfig
+      <ProceedMarkConfig
         value={value}
         intent={intent}
         onChange={(next) => { onChange(next); setValue(next); }}
@@ -39,7 +38,7 @@ function renderCfg(intent: 'subscription' | 'phishing' = 'subscription') {
   return { onChange };
 }
 
-describe('MarkDeliverConfig 清空失焦回填默认文案 (GT-12204)', () => {
+describe('ProceedMarkConfig 清空失焦回填默认文案 (GT-12204)', () => {
   it('主题标记清空后失焦，回填该意图默认文案', async () => {
     const user = userEvent.setup();
     const { onChange } = renderCfg('subscription');
@@ -58,8 +57,8 @@ describe('MarkDeliverConfig 清空失焦回填默认文案 (GT-12204)', () => {
     renderCfg('subscription');
     const subInput = screen.getByTestId('ie-subject_mark-text') as HTMLInputElement;
     expect(subInput.placeholder).toBe(DEFAULT_MARK_TEXT.subscription);
-    const bodyInput = screen.getByTestId('ie-body_mark-text') as HTMLInputElement;
-    expect(bodyInput.placeholder).toBe(DEFAULT_MARK_TEXT.subscription);
+    const headerValue = screen.getByTestId('ie-header_mark-value') as HTMLInputElement;
+    expect(headerValue.placeholder).toBe('intentEngine.markConfig.headerValue');
   });
 
   it('只输入空白字符后失焦，同样回填默认文案', async () => {
@@ -75,16 +74,16 @@ describe('MarkDeliverConfig 清空失焦回填默认文案 (GT-12204)', () => {
     expect(last?.subject_mark?.text).toBe(DEFAULT_MARK_TEXT.subscription);
   });
 
-  it('正文标记同样回填（与保存期 D-11 的兜底范围一致）', async () => {
+  it('信头值清空后失焦回填默认文案', async () => {
     const user = userEvent.setup();
     const { onChange } = renderCfg('subscription');
 
-    const input = screen.getByTestId('ie-body_mark-text') as HTMLInputElement;
+    const input = screen.getByTestId('ie-header_mark-value') as HTMLInputElement;
     await user.clear(input);
     await user.tab();
 
     const last = onChange.mock.calls.at(-1)?.[0] as IntentMarkConfig;
-    expect(last?.body_mark?.text).toBe(DEFAULT_MARK_TEXT.subscription);
+    expect(last?.header_mark?.value).toBe(DEFAULT_MARK_TEXT.subscription);
   });
 
   it('用户填了非空文案时失焦不改写', async () => {

@@ -153,7 +153,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       return t('tooltipThreshold');
     }
     if (c.min_count < MIN_COUNT_MIN || c.min_count > MIN_COUNT_MAX) return t('errorMinCountRange');
-    if (c.action === 'mark-delivery' && !c.observe_mode) {
+    if (c.action === 'accept' && !c.observe_mode) {
       if (!c.tag_subject_enabled && !c.tag_header_enabled && !c.tag_body_enabled) return t('errorTagRequired');
       if (c.tag_subject_enabled && !c.tag_subject_content?.trim()) return t('errorTagFieldRequired');
       if (c.tag_header_enabled && (!c.tag_header_name?.trim() || !c.tag_header_value?.trim())) return t('errorTagFieldRequired');

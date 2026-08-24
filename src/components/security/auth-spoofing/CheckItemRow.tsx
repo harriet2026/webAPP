@@ -40,14 +40,14 @@ const ACTIONS: AuthSpoofingAction[] = [
   "quarantine",
   "reject",
   "audit",
-  "mark-delivery",
+  "proceed",
   "discard",
 ];
 
 export const FORMAT_ACTIONS: AuthSpoofingAction[] = [
   "quarantine",
   "audit",
-  "mark-delivery",
+  "proceed",
   "reject",
   "discard",
 ];
@@ -97,7 +97,7 @@ export function CheckItemRow({
     }
   };
 
-  const showTagPanel = item.enabled && item.action === "mark-delivery";
+  const showTagPanel = item.enabled && item.action === "proceed";
 
   return (
     <>

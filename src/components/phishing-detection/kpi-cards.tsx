@@ -1,11 +1,15 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { Info } from 'lucide-react';
+import { useFormatter, useTranslations } from 'next-intl';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { PhishingStats } from '@/types/phishing-detection';
 
 interface KpiCardsProps {
   stats?: PhishingStats;
+  hitRate?: number | null;
   isLoading?: boolean;
   onQuarantinedClick?: () => void;
   onPendingReviewClick?: () => void;
@@ -17,13 +21,15 @@ interface KpiCardData {
   key: string;
   label: string;
   value: number | string | null;
+  hint?: string;
   tone?: 'default' | 'red' | 'orange' | 'green';
   onClick?: () => void;
 }
 
-function KpiCard({ label, value, tone, onClick, isLoading }: {
+function KpiCard({ label, value, hint, tone, onClick, isLoading }: {
   label: string;
   value: number | string | null;
+  hint?: string;
   tone?: 'default' | 'red' | 'orange' | 'green';
   onClick?: () => void;
   isLoading?: boolean;
@@ -31,13 +37,13 @@ function KpiCard({ label, value, tone, onClick, isLoading }: {
   const display = value === null || value === undefined ? '—' : value;
   const toneCls = {
     default: 'text-foreground',
-    red: 'text-red-600',
-    orange: 'text-orange-500',
-    green: 'text-green-600',
+    red: 'text-destructive',
+    orange: 'text-warning',
+    green: 'text-success',
   }[tone ?? 'default'];
   const content = (
     <>
-      <p className="text-sm text-[#8C8C8C]">{label}</p>
+      <p className="flex items-center gap-1 text-sm text-muted-foreground">{label}{hint ? <Tooltip><TooltipTrigger aria-label={hint} render={<Info tabIndex={0} className="size-3.5 cursor-help" />} /><TooltipContent className="max-w-xs">{hint}</TooltipContent></Tooltip> : null}</p>
       <div className={cn('mt-2 text-2xl font-bold tabular-nums', toneCls, value === null && 'text-muted-foreground')}>
         {isLoading ? <span className="inline-block h-7 w-16 animate-pulse rounded-md bg-muted" /> : display}
       </div>
@@ -45,24 +51,26 @@ function KpiCard({ label, value, tone, onClick, isLoading }: {
   );
   if (onClick) {
     return (
-      <button
-        type="button"
+      <Button
+        variant="outline"
         onClick={onClick}
-        className="w-full rounded-lg border border-border bg-card p-4 text-left transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
+        className="h-auto w-full cursor-pointer flex-col items-stretch whitespace-normal rounded-xl border-border bg-card p-4 text-left shadow-sm data-[hovered=true]:bg-muted/35"
       >
         {content}
-      </button>
+      </Button>
     );
   }
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       {content}
     </div>
   );
 }
 
-export function KpiCards({ stats, isLoading, onQuarantinedClick, onPendingReviewClick, onRecalledClick, onRecallSuccessClick }: KpiCardsProps) {
+export function KpiCards({ stats, hitRate, isLoading, onQuarantinedClick, onPendingReviewClick, onRecalledClick, onRecallSuccessClick }: KpiCardsProps) {
   const t = useTranslations('phishingDetection');
+  const ta = useTranslations('agentCenterOverview.metrics');
+  const format = useFormatter();
 
   const cards: KpiCardData[] = [
     {
@@ -99,10 +107,10 @@ export function KpiCards({ stats, isLoading, onQuarantinedClick, onPendingReview
       onClick: onRecallSuccessClick,
     },
     {
-      key: 'accuracy',
-      label: t('kpi.accuracy'),
-      value: stats?.accuracy != null ? `${(stats.accuracy * 100).toFixed(1)}%` : null,
-      tone: 'green',
+      key: 'hit_rate',
+      label: ta('hitRate'),
+      hint: ta('hitRateTooltip.phishing'),
+      value: hitRate === null || hitRate === undefined ? null : format.number(hitRate, { style: 'percent', maximumFractionDigits: 1 }),
     },
   ];
 
@@ -113,6 +121,7 @@ export function KpiCards({ stats, isLoading, onQuarantinedClick, onPendingReview
           key={card.key}
           label={card.label}
           value={card.value}
+          hint={card.hint}
           tone={card.tone}
           onClick={card.onClick}
           isLoading={isLoading}

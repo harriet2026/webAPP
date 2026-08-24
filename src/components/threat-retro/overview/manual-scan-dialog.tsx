@@ -25,9 +25,9 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useApiRequest } from '@/lib/api/client';
-import { useTenant } from '@/hooks/use-tenant';
 import { listStrategies, startScan } from '@/lib/api/threat-retro';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { useThreatRetroAccess } from '../access';
 
 interface Props {
   open: boolean;
@@ -49,7 +49,7 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
   const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
   const { apiRequest } = useApiRequest();
-  const { isAdmin } = useTenant();
+  const { canEdit } = useThreatRetroAccess();
 
   const { data: allStrategies = [] } = useQuery({
     queryKey: ['tr-strategies'],
@@ -180,7 +180,7 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
           </Button>
           <Button
             onClick={submit}
-            disabled={!isAdmin || !strategyId || tooLarge || scan.isPending}
+            disabled={!canEdit || !strategyId || tooLarge || scan.isPending}
             data-testid="manual-scan-submit"
           >
             {scan.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

@@ -1,16 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Search, Loader2, AlertCircle } from 'lucide-react';
+import { Search, Loader2, AlertCircle, PanelLeftIcon, Inbox, ShieldAlert, ScrollText } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
-import { getMailLifecycleLogs, getMailLogAnalysis, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
+import { getMailLogAnalysis, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
+import { mailTypeConfig, stripDetailPrefix } from './lib/detail-helpers';
+import { useLifecycleLogStream } from './hooks/use-lifecycle-log-stream';
 import { OverviewSection } from './sections/overview-section';
 import { AnalysisSection } from './sections/analysis-section';
 import { RawLogsSection } from './sections/raw-logs-section';
@@ -31,6 +33,8 @@ interface DetailModalProps {
   // 安全分析属于 demo/产品形态切换器下的诊断界面。由服务端解析
   // OSGATEWAY_PRODUCT_FORM_SWITCHER 后通过 ProductFormContext 传入，默认关闭。
   showSecurityAnalysis?: boolean;
+  // 原始日志内的节点/组件聚合进度面板仅对平台管理员可见。
+  isTenantAdmin?: boolean;
 }
 
 type SectionKey = 'overview' | 'analysis' | 'rawlogs';
@@ -39,7 +43,6 @@ type SectionKey = 'overview' | 'analysis' | 'rawlogs';
 // otherwise spin the loading state forever instead of switching to the
 // inline error+retry UI spec §6.1 requires after >5s.
 const DETAIL_FETCH_TIMEOUT_MS = 5000;
-const RAW_LOG_FETCH_TIMEOUT_MS = 15000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -57,11 +60,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   });
 }
 
-function rawLogSearchSignal(signal: AbortSignal): AbortSignal {
-  return AbortSignal.any([signal, AbortSignal.timeout(RAW_LOG_FETCH_TIMEOUT_MS)]);
-}
-
-export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEnabled = true, aiInterpretEnabled = true, readOnly = false, showSecurityAnalysis = false }: DetailModalProps) {
+export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEnabled = true, aiInterpretEnabled = true, readOnly = false, showSecurityAnalysis = false, isTenantAdmin = false }: DetailModalProps) {
   const t = useTranslations('emailDisposal.detail');
   const { apiRequest } = useApiRequest();
   const queryClient = useQueryClient();
@@ -83,8 +82,19 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     analysis: null,
     rawlogs: null,
   });
+  const navButtonRefs = useRef<Record<SectionKey, HTMLButtonElement | null>>({
+    overview: null,
+    analysis: null,
+    rawlogs: null,
+  });
   const [activeSection, setActiveSection] = useState<SectionKey>('overview');
   const [rawLogsExpanded, setRawLogsExpanded] = useState(false);
+  const [navCollapsed, setNavCollapsed] = useState(false);
+  const [selectedAnalysisRecipient, setSelectedAnalysisRecipient] = useState<string>();
+  const lifecycleLogs = useLifecycleLogStream(
+    mailLogId,
+    open && mailLogId != null && rawLogsExpanded,
+  );
 
   // Reset to the overview section whenever the drawer (re)opens for a mail log,
   // including reopening for the same id. Adjusting state during render (the
@@ -97,6 +107,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     if (open) {
       setActiveSection('overview');
       setRawLogsExpanded(false);
+      setSelectedAnalysisRecipient(undefined);
     }
   }
 
@@ -111,30 +122,23 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     enabled: open && mailLogId != null,
   });
   const analysisQ = useQuery({
-    queryKey: ['mail-log-analysis', mailLogId],
-    queryFn: () => withTimeout(getMailLogAnalysis(mailLogId!, undefined, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
+    queryKey: ['mail-log-analysis', mailLogId, selectedAnalysisRecipient ?? 'all'],
+    queryFn: () => withTimeout(getMailLogAnalysis(mailLogId!, selectedAnalysisRecipient, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
     enabled: open && mailLogId != null && showSecurityAnalysis,
   });
-  const lifecycleLogsQ = useQuery({
-    queryKey: ['mail-lifecycle-logs', mailLogId],
-    queryFn: ({ signal }) => getMailLifecycleLogs(mailLogId!, apiRequest, rawLogSearchSignal(signal)),
-    // Disk-backed lifecycle collection can fan out to every gateway node.
-    // Keep it completely lazy: merely opening the detail drawer must not
-    // trigger that work.
-    enabled: open && mailLogId != null && rawLogsExpanded,
-  });
-
   const detail = detailQ.data ?? null;
-
-  // Collapse/close may happen while a multi-node grep is still in flight.
-  // Abort it promptly instead of letting an invisible search consume node
-  // I/O until the server deadline.
-  useEffect(() => {
-    if ((open && rawLogsExpanded) || mailLogId == null) return;
-    void queryClient.cancelQueries({
-      queryKey: ['mail-lifecycle-logs', mailLogId],
+  const analysisEvents = useMemo(() => {
+    const events = eventsQ.data ?? [];
+    if (!selectedAnalysisRecipient) return events;
+    const selected = selectedAnalysisRecipient.trim().toLowerCase();
+    return events.filter((event) => {
+      const recipients = [
+        ...(event.recipient ? [event.recipient] : []),
+        ...(event.recipients ? event.recipients.split(',') : []),
+      ];
+      return recipients.some((recipient) => recipient.trim().toLowerCase() === selected);
     });
-  }, [open, rawLogsExpanded, mailLogId, queryClient]);
+  }, [eventsQ.data, selectedAnalysisRecipient]);
 
   // A dispose action taken from inside the drawer (release/discard/recall via
   // RecipientStatus) must refresh BOTH the drawer's own detail/events queries
@@ -152,45 +156,53 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     void queryClient.invalidateQueries({
       queryKey: ['mail-log-analysis', mailLogId],
     });
-    void queryClient.invalidateQueries({
-      queryKey: ['mail-lifecycle-logs', mailLogId],
-    });
     void queryClient.invalidateQueries({ queryKey: ['email-disposal'] });
   }, [queryClient, mailLogId]);
 
-  const handleScroll = useCallback(() => {
-    const container = contentRef.current;
-    if (!container) return;
-    const containerTop = container.getBoundingClientRect().top;
-    const threshold = container.clientHeight * 0.3;
-    let current: SectionKey = 'overview';
-    const visibleSections: SectionKey[] = showSecurityAnalysis ? ['overview', 'analysis', 'rawlogs'] : ['overview', 'rawlogs'];
-    for (const key of visibleSections) {
-      const el = sectionRefs.current[key];
-      if (!el) continue;
-      const top = el.getBoundingClientRect().top - containerTop;
-      if (top <= threshold) current = key;
-    }
-    setActiveSection(current);
-  }, [showSecurityAnalysis]);
-
   useEffect(() => {
     const container = contentRef.current;
-    if (!container || !open) return;
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-    // `detail` is intentionally in the deps even though it's otherwise unused
-    // in this effect: the content pane (and contentRef itself) only mounts
-    // once detailQ resolves -- while the query is loading, the "isLoading"
-    // branch below renders a spinner instead, so contentRef.current is still
-    // null on the FIRST run of this effect (when `open` first flips true).
-    // Without `detail` here, the effect's deps never change again once that
-    // early, no-op run happens, so the scroll listener would never actually
-    // get attached to the real container -- permanently breaking scroll-spy.
-    // Found while writing DD-14's e2e smoke test (a manually-dispatched
-    // 'scroll' event on the content pane never reached this listener because
-    // it was simply never registered).
-  }, [open, handleScroll, detail]);
+    if (!container || !open || typeof IntersectionObserver === 'undefined') return;
+    const visibleSections: SectionKey[] = showSecurityAnalysis ? ['overview', 'analysis', 'rawlogs'] : ['overview', 'rawlogs'];
+    const intersecting = new Set<SectionKey>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const key = entry.target.getAttribute('data-section-key') as SectionKey | null;
+          if (!key) continue;
+          if (entry.isIntersecting) intersecting.add(key);
+          else intersecting.delete(key);
+        }
+        for (const key of [...visibleSections].reverse()) {
+          if (intersecting.has(key)) {
+            setActiveSection(key);
+            return;
+          }
+        }
+      },
+      {
+        root: container,
+        rootMargin: '0px 0px -80% 0px',
+        threshold: 0,
+      },
+    );
+
+    for (const key of visibleSections) {
+      const section = sectionRefs.current[key];
+      if (section) observer.observe(section);
+    }
+    return () => observer.disconnect();
+    // `detail` is required because the content and section refs mount only
+    // after the detail query resolves; the first open render still shows the
+    // loading branch and has no elements to observe.
+  }, [open, detail, showSecurityAnalysis]);
+
+  useEffect(() => {
+    navButtonRefs.current[activeSection]?.scrollIntoView?.({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest',
+    });
+  }, [activeSection]);
 
   const scrollToSection = (key: SectionKey) => {
     setActiveSection(key); // immediate feedback on click, ahead of the scroll-spy catching up
@@ -200,11 +212,32 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     });
   };
 
-  const navItems: { key: SectionKey; label: string }[] = [
-    { key: 'overview', label: t('overviewAndHandle') },
-    ...(showSecurityAnalysis ? [{ key: 'analysis' as const, label: t('securityAnalysis') }] : []),
-    { key: 'rawlogs', label: t('originalLog') },
+  const riskDotClass = {
+    malicious: 'bg-red-500',
+    graymail: 'bg-amber-500',
+    normal: 'bg-emerald-500',
+  } as const;
+  const finalVerdictTypeConfig = detail?.email_type ? mailTypeConfig[detail.email_type] : null;
+  const navItems: Array<{
+    key: SectionKey;
+    label: string;
+    icon: typeof Inbox;
+    dotClassName?: string;
+    dotTooltip?: string;
+  }> = [
+    { key: 'overview', label: t('overviewAndHandle'), icon: Inbox },
+    ...(showSecurityAnalysis ? [{
+      key: 'analysis' as const,
+      label: t('securityAnalysis'),
+      icon: ShieldAlert,
+      dotClassName: finalVerdictTypeConfig ? riskDotClass[finalVerdictTypeConfig.tone] : undefined,
+      dotTooltip: finalVerdictTypeConfig
+        ? `${t('nav.finalVerdict')}：${t(stripDetailPrefix(finalVerdictTypeConfig.labelKey))}`
+        : undefined,
+    }] : []),
+    { key: 'rawlogs', label: t('originalLog'), icon: ScrollText },
   ];
+  const activeSectionLabel = navItems.find((item) => item.key === activeSection)?.label ?? '';
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -216,10 +249,29 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
       >
         <div className="flex items-start justify-between gap-4 border-b py-4 pl-6 pr-14 shrink-0">
           <div className="min-w-0">
-            <div className="text-xs text-muted-foreground mb-1">{t('breadcrumb')}</div>
+            <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span>{t('breadcrumb')}</span>
+              {detail ? (
+                <>
+                  <span aria-hidden="true" className="text-muted-foreground/50">·</span>
+                  <span data-testid="disposal-detail-current-section" className="truncate">
+                    {t('nav.currentlyViewing')}：{activeSectionLabel}
+                  </span>
+                </>
+              ) : null}
+            </div>
             <SheetTitle ref={titleRef} tabIndex={-1} className="text-lg font-semibold truncate outline-none">
               {detail?.subject || (mailLogId ? `Email #${mailLogId}` : '')}
             </SheetTitle>
+            {detail?.message_uuid ? (
+              <div
+                data-testid="disposal-detail-mail-id"
+                className="mt-0.5 truncate text-xs text-muted-foreground"
+                title={detail.message_uuid}
+              >
+                {t('features.emailId')}：<span className="font-mono">{detail.message_uuid}</span>
+              </div>
+            ) : null}
           </div>
           {aiEnabled && onFindSimilar ? (
             <Tooltip>
@@ -263,29 +315,102 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                   horizontal, horizontally-scrollable bar (spec §5.2) so the
                   content pane isn't squeezed by a fixed-width side column on
                   narrow/fullscreen viewports. */}
-              <nav className="w-[200px] shrink-0 border-r py-3 max-lg:flex max-lg:w-full max-lg:overflow-x-auto max-lg:border-r-0 max-lg:border-b max-lg:py-0">
-                {navItems.map(({ key, label }) => (
-                  <InteractiveSurface
-                    key={key}
-                    asChild
-                    variant="control"
-                    className={cn(
-                      'w-full rounded-none border-l-2 px-4 py-2 text-left text-sm',
-                      'max-lg:w-auto max-lg:shrink-0 max-lg:whitespace-nowrap max-lg:border-l-0 max-lg:border-b-2',
-                      activeSection === key
-                        ? 'border-foreground/40 bg-muted font-medium text-foreground data-[hovered=true]:bg-muted/80'
-                        : 'border-transparent text-muted-foreground data-[hovered=true]:bg-muted/50 data-[hovered=true]:text-foreground',
-                    )}
-                  >
-                    <button data-testid={`disposal-detail-nav-${key}`} type="button" aria-current={activeSection === key ? 'location' : undefined} onClick={() => scrollToSection(key)}>
-                      {label}
-                    </button>
-                  </InteractiveSurface>
-                ))}
+              <nav
+                data-testid="disposal-detail-nav"
+                data-collapsed={navCollapsed ? 'true' : 'false'}
+                className={cn(
+                  'shrink-0 border-r py-3 transition-[width] duration-150',
+                  navCollapsed ? 'w-12' : 'w-[200px]',
+                  'max-lg:flex max-lg:w-full max-lg:overflow-x-auto max-lg:border-r-0 max-lg:border-b max-lg:py-0',
+                )}
+              >
+                <div className="hidden justify-end px-2 pb-2 lg:flex">
+                  <Tooltip>
+                    <TooltipTrigger render={<span />}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground"
+                        aria-expanded={!navCollapsed}
+                        data-testid="disposal-detail-nav-toggle"
+                        onClick={() => setNavCollapsed((collapsed) => !collapsed)}
+                      >
+                        <PanelLeftIcon className="h-4 w-4" aria-hidden="true" />
+                        <span className="sr-only">
+                          {navCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {navCollapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                {navItems.map(({ key, label, icon: Icon, dotClassName, dotTooltip }) => {
+                  const surface = (
+                    <InteractiveSurface
+                      key={key}
+                      asChild
+                      variant="control"
+                      className={cn(
+                        'w-full rounded-none border-l-2 px-4 py-2 text-left text-sm',
+                        'max-lg:w-auto max-lg:shrink-0 max-lg:whitespace-nowrap max-lg:border-l-0 max-lg:border-b-2',
+                        activeSection === key
+                          ? 'border-foreground/40 bg-muted font-medium text-foreground data-[hovered=true]:bg-muted/80'
+                          : 'border-transparent text-muted-foreground data-[hovered=true]:bg-muted/50 data-[hovered=true]:text-foreground',
+                      )}
+                    >
+                      <button
+                        ref={(element) => {
+                          navButtonRefs.current[key] = element;
+                        }}
+                        data-testid={`disposal-detail-nav-${key}`}
+                        type="button"
+                        aria-current={activeSection === key ? 'location' : undefined}
+                        aria-label={dotTooltip ? `${label}，${dotTooltip}` : undefined}
+                        onClick={() => scrollToSection(key)}
+                        className={cn(
+                          'flex w-full items-center gap-2',
+                          navCollapsed && 'justify-center max-lg:justify-start',
+                        )}
+                      >
+                        <Icon
+                          data-testid={`disposal-detail-nav-icon-${key}`}
+                          aria-hidden="true"
+                          className="h-4 w-4 shrink-0"
+                        />
+                        <span className={cn('truncate', navCollapsed && 'sr-only max-lg:not-sr-only')}>
+                          {label}
+                        </span>
+                        {dotClassName ? (
+                          <span
+                            data-testid={`disposal-detail-nav-${key}-risk`}
+                            aria-hidden="true"
+                            className={cn('inline-block h-2 w-2 shrink-0 rounded-full', dotClassName)}
+                          />
+                        ) : null}
+                      </button>
+                    </InteractiveSurface>
+                  );
+                  const tooltipText = navCollapsed
+                    ? [label, dotTooltip].filter(Boolean).join(' · ')
+                    : dotTooltip;
+                  if (!tooltipText) return surface;
+                  return (
+                    <Tooltip key={key}>
+                      <TooltipTrigger render={<span className="block" />}>
+                        {surface}
+                      </TooltipTrigger>
+                      <TooltipContent>{tooltipText}</TooltipContent>
+                    </Tooltip>
+                  );
+                })}
               </nav>
               <div ref={contentRef} className="flex-1 min-w-0 overflow-y-auto p-6 space-y-8">
                 <section
                   data-testid="disposal-detail-overview"
+                  data-section-key="overview"
                   ref={(el) => {
                     sectionRefs.current.overview = el;
                   }}
@@ -305,6 +430,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                 {showSecurityAnalysis && (
                   <section
                     data-testid="disposal-detail-analysis"
+                    data-section-key="analysis"
                     ref={(el) => {
                       sectionRefs.current.analysis = el;
                     }}
@@ -320,7 +446,9 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                         void analysisQ.refetch();
                       }}
                       aiEnabled={aiEnabled}
-                      events={eventsQ.data ?? []}
+                      events={analysisEvents}
+                      selectedRecipient={selectedAnalysisRecipient}
+                      onSelectedRecipientChange={setSelectedAnalysisRecipient}
                       onViewRawLogs={() => {
                         setRawLogsExpanded(true);
                         scrollToSection('rawlogs');
@@ -330,6 +458,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                 )}
                 <section
                   data-testid="disposal-detail-rawlogs"
+                  data-section-key="rawlogs"
                   ref={(el) => {
                     sectionRefs.current.rawlogs = el;
                   }}
@@ -340,13 +469,16 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                     detail={detail}
                     expanded={rawLogsExpanded}
                     onExpandedChange={setRawLogsExpanded}
-                    loaded={lifecycleLogsQ.isSuccess}
-                    logs={lifecycleLogsQ.data?.items ?? []}
-                    truncated={lifecycleLogsQ.data?.truncated ?? false}
-                    partial={lifecycleLogsQ.data?.partial ?? false}
-                    failedNodes={lifecycleLogsQ.data?.failed_nodes ?? []}
-                    loading={lifecycleLogsQ.isFetching}
-                    error={lifecycleLogsQ.isError}
+                    loaded={lifecycleLogs.loaded}
+                    logs={lifecycleLogs.logs}
+                    truncated={lifecycleLogs.truncated}
+                    partial={lifecycleLogs.partial}
+                    nodes={Object.values(lifecycleLogs.nodes)}
+                    loading={lifecycleLogs.loading}
+                    error={lifecycleLogs.error}
+                    onRetryModule={lifecycleLogs.retryModule}
+                    onRetryNode={lifecycleLogs.retryNode}
+                    isTenantAdmin={isTenantAdmin}
                   />
                 </section>
               </div>

@@ -132,7 +132,7 @@ describe('RecipientCheckPage', () => {
     await waitFor(() => expect(screen.getByText('recipientCheck.module.disabled')).toBeInTheDocument());
   });
 
-  it('重置为默认会持久化启用的详细模式和三方向默认值（GT-12159）', async () => {
+  it('重置为默认会启用数量限制，但保持收件人存在性检查停用', async () => {
     setupApi(
       {
         mode: 'merged',
@@ -167,7 +167,7 @@ describe('RecipientCheckPage', () => {
       '/behavior-control/recipient-check-config',
       expect.objectContaining({
         method: 'PUT',
-        body: { existence_enabled: true, existence_action: 'reject' },
+        body: { existence_enabled: false, existence_action: 'reject' },
       }),
     );
     expect(mockApiRequest).not.toHaveBeenCalledWith(

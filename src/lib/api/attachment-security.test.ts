@@ -89,14 +89,14 @@ describe('attachment-security config save (GT-12197)', () => {
 // 断言的是**传给公共请求层的 body 形态**，不是"函数被调到了" —— 缺陷正是发生在
 // 形态上，只断言调用次数的测试对它是恒真的。
 const TENANT_SETTINGS: TenantAttachmentSecuritySettings = {
-  antivirus: { virus_action: 'quarantine', timeout_action: 'accept' },
+  antivirus: { virus_action: 'quarantine', timeout_action: 'proceed' },
   image_detect: {
     ocr_mode: 'none',
     ocr_max_count: 2,
     qr_mode: 'light',
     qr_max_count: 5,
     qr_light_action: 'quarantine',
-    qr_deep_exceed_action: 'accept',
+    qr_deep_exceed_action: 'proceed',
     qr_deep_exceed_warn: true,
     qr_deep_routes: {},
   },
@@ -108,7 +108,7 @@ const TENANT_SETTINGS: TenantAttachmentSecuritySettings = {
     recursive_detect: true,
     max_password_attempts: 100,
     mark_suspicious: true,
-    decrypt_fail_action: 'accept',
+    decrypt_fail_action: 'proceed',
   },
 };
 

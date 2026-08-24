@@ -1,5 +1,5 @@
 import type { CACResult, EmailType, MailLogDetail } from '@/types/email-disposal-detail';
-import { isAllowList } from './disposal-basis-config';
+import { groupEffectiveRecipientBasisByRule, isAllowList } from './disposal-basis-config';
 
 export type ThreatLevel = 'high' | 'medium' | 'low' | 'none';
 
@@ -237,14 +237,23 @@ export function deriveHitSource(detail: MailLogDetail): 'blacklist' | 'rule' | u
   // defer before returning a policy-derived label.
   if (deriveIntentEngineScore(detail.cac_result) !== undefined) return undefined;
 
-  const policyKey = detail.disposal_basis?.policy_key;
-  if (!policyKey) return undefined;
-  if (BLACKLIST_POLICY_KEYS.has(policyKey)) {
+  const basis = detail.disposal_basis;
+  const effectiveEntry = basis?.policy_key
+    ? basis
+    : groupEffectiveRecipientBasisByRule(basis)[0]?.entry;
+  const policyKey = effectiveEntry?.policy_key;
+  if (!policyKey) {
+    // Upgrade compatibility: old baseline rows persisted a structured rule
+    // name/action but an empty policy_key. That is still a deterministic rule
+    // hit and must not make the confidence label disappear.
+    return basis && (basis.rule_name || basis.rule_id || basis.action) ? 'rule' : undefined;
+  }
+	if (BLACKLIST_POLICY_KEYS.has(policyKey)) {
     // GT-12214: SBL/IPBL/UBL/RBL are shared black/allow-list policy_keys --
     // an allow-listed (accept) hit is not a blacklist hit at all, and there
     // is no allow-list confidence badge, so it must resolve to undefined
     // rather than the misleading 「黑名单命中（无置信度）」.
-    if (isAllowList(detail.disposal_basis?.hit_values)) return undefined;
+    if (isAllowList(effectiveEntry?.hit_values)) return undefined;
     return 'blacklist';
   }
   if (AI_POLICY_KEYS.has(policyKey)) return undefined;

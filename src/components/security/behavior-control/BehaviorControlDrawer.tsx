@@ -79,7 +79,7 @@ function defaultForm(priority: number): BehaviorControlFormData {
     or_enabled: false,
     // 旧字段由 conditions[0] 派生，保持兼容
     dim_a: 'mail_count', threshold_a: 0,
-    action: 'review',
+    action: 'audit',
   };
 }
 
@@ -215,7 +215,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       threshold_a: m.threshold_a,
       dim_b: m.dim_b,
       threshold_b: m.threshold_b,
-      action: BACKEND_TO_PRODUCT[editing.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? 'review',
+      action: BACKEND_TO_PRODUCT[editing.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? 'audit',
     };
   }, [editing, defaults, priorityRange]);
 
@@ -843,7 +843,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             >
                               <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
                               <SelectContent>
-                                {(['review', 'quarantine', 'drop', 'block'] as BehaviorProductAction[]).map((a) => (
+                                {(['audit', 'quarantine', 'discard', 'reject'] as BehaviorProductAction[]).map((a) => (
                                   <SelectItem key={a} value={a}>{t(`behaviorControl.action.${a}`)}</SelectItem>
                                 ))}
                               </SelectContent>

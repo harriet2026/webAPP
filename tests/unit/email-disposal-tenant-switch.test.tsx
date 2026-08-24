@@ -34,6 +34,9 @@ vi.mock("next-intl", () => ({
     return translate;
   },
   useLocale: () => "zh",
+  useFormatter: () => ({
+    relativeTime: (value: Date) => value.toISOString(),
+  }),
 }));
 
 vi.mock("next/navigation", () => ({

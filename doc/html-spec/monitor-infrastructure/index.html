@@ -364,7 +364,7 @@ graph LR
     <thead><tr><th>数据</th><th>关键字段（demo 常量）</th><th>落地所需 API（待定义）</th></tr></thead>
     <tbody>
       <tr><td>硬件资源</td><td>cpuUsage 45 · memoryUsage 62 · buffCache 28.5G · ksoftirqd 12 · networkTop5[5]</td><td>主机指标查询（CPU/内存/网卡 pps/丢包/重传）</td></tr>
-      <tr><td>服务进程</td><td>docker{running 8, stopped 1, restarts 2} · overlay2 72% · processes[5]（Postfix/ClamAV/ES/Kingbase）</td><td>容器状态 + 进程清单</td></tr>
+      <tr><td>服务进程</td><td>docker{running 8, stopped 1, restarting 2} · overlay2 72% · processes（当前节点真实服务进程）</td><td>容器状态 + 动态进程清单</td></tr>
       <tr><td>数据库与缓存</td><td>kingbase{同步延迟0.3s, 连接45/100, P50/95/99} · redis{偏移0B, 连接28, P99 2ms} · slowQueries[3] · lockWaits[1]</td><td>数据库性能指标 + 慢查询 + 锁等待</td></tr>
       <tr><td>存储与备份</td><td>partitions[4]（/ 45%、/var/spool/postfix 78%、/home/coremail/data 88%、/backup 62%）· backupTasks[3]</td><td>分区用量 + 备份任务记录</td></tr>
     </tbody>
@@ -391,7 +391,7 @@ graph LR
     <tbody>
       <tr><td>Overlay2 占用着色</td><td>&gt;85% 黄（警告）· &gt;95% 红（严重）；当前 72% 绿</td></tr>
       <tr><td>分区状态着色</td><td>normal=绿 / warning=黄（78%、88% 两分区为 warning）</td></tr>
-      <tr><td>进程状态徽标</td><td>running/normal/green/success=绿「运行中」· warning=黄「告警」· error/critical=红「错误」</td></tr>
+      <tr><td>进程状态徽标</td><td>running=绿「运行中」· stopped=灰「已停止」；资源异常由独立指标和告警中心负责，不混入进程存在性状态</td></tr>
       <tr><td>慢查询行交互</td><td>【demo 现状】行 hover 高亮 + cursor-pointer，源码无点击处理。【目标行为·2026-07-22 用户决定】<b>hover 时以 Tooltip 显示该条 SQL 详情</b>（完整 SQL 语句 + 执行次数 + 平均耗时 + 最后执行时间；SQL 在表格单元格中 truncate 截断，Tooltip 展示全文），无需点击 —— 见差异 D-06</td></tr>
     </tbody>
   </table>

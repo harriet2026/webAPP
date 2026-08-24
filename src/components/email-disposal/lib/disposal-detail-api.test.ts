@@ -1,5 +1,10 @@
 import { describe, expect, test, vi } from 'vitest';
-import { blacklistMailLogEntity, disposeByObject, getMailLogAnalysis } from './disposal-detail-api';
+import {
+  blacklistMailLogEntity,
+  disposeByObject,
+  getMailLogAnalysis,
+  legacyLifecycleStreamEvents,
+} from './disposal-detail-api';
 import type { ApiRequestFn } from '@/lib/api/client';
 
 describe('getMailLogAnalysis', () => {
@@ -59,6 +64,38 @@ describe('disposeByObject', () => {
 
     const [, opts] = (requestFn as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(opts.body).toEqual({ action: 'release', mail_log_ids: [42], object_id: 'obj-1', final_type: 'normal' });
+  });
+});
+
+describe('legacyLifecycleStreamEvents', () => {
+  test('keeps a successful node/module result when a sibling node failed', () => {
+    const events = legacyLifecycleStreamEvents({
+      items: [{
+        event_uid: 'event-a',
+        message_uuid: '2540e741-0b50-4cf7-bbab-dc241df4e082',
+        node: 'node-a',
+        component: 'antispam',
+        event_time: '2026-08-19T08:00:00Z',
+        raw_line: 'kept',
+      }],
+      total: 1,
+      truncated: false,
+      partial: true,
+      searched_nodes: ['node-a', 'node-b'],
+      failed_nodes: ['node-b'],
+    });
+
+    expect(events).toContainEqual(expect.objectContaining({
+      event: 'module_done',
+      data: expect.objectContaining({ node: 'node-a', module: 'antispam' }),
+    }));
+    expect(events).toContainEqual(expect.objectContaining({
+      event: 'node_failed',
+      data: expect.objectContaining({ node: 'node-b' }),
+    }));
+    expect(events.at(-1)).toEqual(expect.objectContaining({
+      event: 'done', data: expect.objectContaining({ partial: true }),
+    }));
   });
 });
 

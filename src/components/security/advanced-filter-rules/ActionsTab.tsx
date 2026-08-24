@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { canSaveActions } from './validation';
 import type { PrimaryAction, AddonKey } from './conflict-matrix';
 import type { RuleForm } from './rule-form';
 import type { FieldDef } from '@/types/unified-rules';
@@ -27,7 +26,11 @@ import { ActionSummary } from './ActionSummary';
 // 本 Tab 使用，保留仅为与 F6 ConditionsTab 一致的容器签名(RuleEditorDrawer
 // 对所有 Tab 统一传参).
 
-const PRIMARY_ACTIONS: PrimaryAction[] = ['none', 'deliver', 'tagDeliver', 'quarantine', 'review', 'discard'];
+const PRIMARY_ACTIONS: PrimaryAction[] = ['accept', 'proceed', 'quarantine', 'audit', 'discard'];
+
+export function getPrimaryActionOptions(): Array<{ value: PrimaryAction; disabled: boolean }> {
+  return PRIMARY_ACTIONS.map((value) => ({ value, disabled: false }));
+}
 
 type Selection = { type: 'action' } | { type: 'addon'; key: AddonKey };
 
@@ -43,8 +46,6 @@ export function ActionsTab({ form, setForm }: Props) {
   const midRef = useContainerRef();
 
   const primaryAction = form.primaryAction;
-  const canSave = canSaveActions(primaryAction, form.addons);
-
   useAutoFocusFirstField(midRef, selection);
 
   function handleActionChange(v: string | null) {
@@ -89,35 +90,23 @@ export function ActionsTab({ form, setForm }: Props) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {PRIMARY_ACTIONS.map((a) => (
-                <SelectItem key={a} value={a} data-testid={`primary-action-option-${a}`}>
-                  {t(`primaryActions.${a}` as never)}
+              {getPrimaryActionOptions().map(({ value, disabled }) => (
+                <SelectItem key={value} value={value} disabled={disabled} data-testid={`primary-action-option-${value}`}>
+                  {t(`primaryActions.${value}` as never)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {primaryAction === 'none' && (
-            <p className="text-xs text-muted-foreground" data-testid="none-action-hint">
-              {t('disposition.noneHint')}
-            </p>
-          )}
-          {!canSave && (
-            <p className="text-xs text-destructive" data-testid="actions-left-required-hint">
-              {t('cannotSave.actionOrAddon')}
-            </p>
-          )}
-          {primaryAction !== 'none' && (
-            <button
-              type="button"
-              data-testid="configure-action-button"
-              onClick={() => setSelection({ type: 'action' })}
-              className={cn(
-                'w-full rounded-md border-0 border-l-[3px] border-l-primary bg-primary/10 px-3 py-1.5 text-left text-xs font-medium text-primary transition-colors hover:bg-primary/15',
-              )}
-            >
-              {t('disposition.configureActionButton', { action: t(`primaryActions.${primaryAction}` as never) })}
-            </button>
-          )}
+          <button
+            type="button"
+            data-testid="configure-action-button"
+            onClick={() => setSelection({ type: 'action' })}
+            className={cn(
+              'w-full rounded-md border-0 border-l-[3px] border-l-primary bg-primary/10 px-3 py-1.5 text-left text-xs font-medium text-primary transition-colors hover:bg-primary/15',
+            )}
+          >
+            {t('disposition.configureActionButton', { action: t(`primaryActions.${primaryAction}` as never) })}
+          </button>
         </div>
 
         <div className="border-t pt-3">
@@ -184,18 +173,6 @@ function ActionParamsPanel({ form, setForm }: { form: RuleForm; setForm: Props['
       actionParams: { ...f.actionParams, deliver: { ...(f.actionParams.deliver ?? { skipSubsequentRules: false }), ...patch } },
     }));
   }
-  function patchTagDeliver(patch: Partial<NonNullable<RuleForm['actionParams']['tagDeliver']>>) {
-    setForm((f) => ({
-      ...f,
-      actionParams: {
-        ...f.actionParams,
-        tagDeliver: {
-          ...(f.actionParams.tagDeliver ?? { content: '', position: 'subject_prefix', style: 'plain_text' }),
-          ...patch,
-        },
-      },
-    }));
-  }
   function patchReview(patch: Partial<NonNullable<RuleForm['actionParams']['review']>>) {
     setForm((f) => ({
       ...f,
@@ -219,7 +196,7 @@ function ActionParamsPanel({ form, setForm }: { form: RuleForm; setForm: Props['
       </div>
       <DescCard actionKey={action} />
 
-      {action === 'deliver' && (
+      {action === 'accept' && (
         <label className="flex items-center gap-2 text-sm cursor-pointer" data-testid="deliver-skip-subsequent">
           <Checkbox
             checked={!!form.actionParams.deliver?.skipSubsequentRules}
@@ -229,17 +206,13 @@ function ActionParamsPanel({ form, setForm }: { form: RuleForm; setForm: Props['
         </label>
       )}
 
-      {action === 'tagDeliver' && (
-        <TagDeliverForm value={form.actionParams.tagDeliver} onPatch={patchTagDeliver} />
-      )}
-
       {action === 'quarantine' && (
         <p className="text-xs text-muted-foreground" data-testid="quarantine-hint">
           {t('disposition.quarantineHint')}
         </p>
       )}
 
-      {action === 'review' && (
+      {action === 'audit' && (
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs font-normal text-muted-foreground">{t('review.reviewers')}</Label>
@@ -283,70 +256,6 @@ function ActionParamsPanel({ form, setForm }: { form: RuleForm; setForm: Props['
         </div>
       )}
 
-    </div>
-  );
-}
-
-function TagDeliverForm({
-  value,
-  onPatch,
-}: {
-  value: RuleForm['actionParams']['tagDeliver'];
-  onPatch: (p: Partial<NonNullable<RuleForm['actionParams']['tagDeliver']>>) => void;
-}) {
-  const t = useTranslations('advancedRulesFeature');
-  const position = value?.position ?? 'subject_prefix';
-  const isHeader = position === 'header';
-  return (
-    <div className="space-y-3" data-testid="tagdeliver-params">
-      <div className="space-y-1.5">
-        <Label className="text-xs font-normal text-muted-foreground">
-          {t('addons.tagContent')} <span className="text-destructive">*</span>
-        </Label>
-        <Input autoFocus value={value?.content ?? ''} onChange={(e) => onPatch({ content: e.target.value })} />
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs font-normal text-muted-foreground">{t('addons.tagPosition')}</Label>
-        <Select value={position} onValueChange={(v) => v && onPatch({ position: v })}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="subject_prefix">{t('addons.tagPositionPrefix')}</SelectItem>
-            <SelectItem value="subject_suffix">{t('addons.tagPositionSuffix')}</SelectItem>
-            <SelectItem value="body_start">{t('addons.tagPositionBodyStart')}</SelectItem>
-            <SelectItem value="body_end">{t('addons.tagPositionBodyEnd')}</SelectItem>
-            <SelectItem value="header">{t('addons.tagPositionHeader')}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs font-normal text-muted-foreground">{t('disposition.tagStyleLabel')}</Label>
-        <Select value={value?.style ?? 'plain_text'} onValueChange={(v) => v && onPatch({ style: v })} disabled={isHeader}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="plain_text">{t('addons.tagStylePlainText')}</SelectItem>
-            <SelectItem value="html_red">{t('addons.tagStyleHtmlRed')}</SelectItem>
-            <SelectItem value="html_orange">{t('addons.tagStyleHtmlOrange')}</SelectItem>
-            <SelectItem value="html_yellow">{t('addons.tagStyleHtmlYellow')}</SelectItem>
-          </SelectContent>
-        </Select>
-        {isHeader && <p className="text-xs text-muted-foreground">{t('disposition.tagDeliverStyleDisabledHint')}</p>}
-      </div>
-      {isHeader && (
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-normal text-muted-foreground">{t('addons.headerName')}</Label>
-            <Input value={value?.headerName ?? ''} onChange={(e) => onPatch({ headerName: e.target.value })} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-normal text-muted-foreground">{t('addons.headerValue')}</Label>
-            <Input value={value?.headerValue ?? ''} onChange={(e) => onPatch({ headerValue: e.target.value })} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -4,479 +4,242 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { X } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { GROUPS_LIST_QUERY, ruleToGroup } from '@/lib/api/groups';
-import { createAdmissionRule, updateAdmissionRule, getAdmissionTagSuggestions } from '@/lib/api/phishing-config';
-import type { PhishAdmissionRule } from '@/types/phishing-config';
+import { listContactDepartments } from '@/lib/api/contacts';
+import { createAdmissionRule, updateAdmissionRule } from '@/lib/api/phishing-admission-rules';
+import { DepartmentScopeSelect, GroupScopeSelect } from './scope-selectors';
+import { useUnsavedDraftRegistration } from './use-unsaved-draft-registration';
+import type { PhishAdmissionRule, PhishAdmissionRuleWrite } from '@/types/phishing-config';
 import type { Rule } from '@/types/unified-rules';
 
 interface Props {
   open: boolean;
-  onOpenChange: (v: boolean) => void;
-  rule: PhishAdmissionRule | null; // null = create
+  onOpenChange: (open: boolean) => void;
+  rule: PhishAdmissionRule | null;
   onSaved: () => void;
+  readOnly?: boolean;
 }
 
 type Direction = PhishAdmissionRule['directions'][number];
+type ScopeSide = 'recipient' | 'sender';
 const DIRECTIONS: Direction[] = ['inbound', 'outbound', 'internal'];
 
-function emptyDraft(): PhishAdmissionRule {
+function emptyDraft(): PhishAdmissionRuleWrite {
   return {
-    name: '',
-    directions: ['inbound'],
-    recipient_tags: [],
-    recipient_emails: [],
-    require_url: true,
-    max_size_mb: 0,
-    sender_first_seen: true,
-    require_qrcode: false,
-    enabled: true,
-    priority: 0,
+    name: '', enabled: true, directions: ['inbound'], filter_on: false,
+    recipient_groups: [], recipient_depts: [], recipient_emails: [],
+    sender_groups: [], sender_depts: [], sender_emails: [],
+    require_url: true, max_size_mb: 0, sender_first_seen: true,
+    require_qrcode: false, require_executable: false,
   };
 }
 
-export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved }: Props) {
+function draftFromRule(rule: PhishAdmissionRule | null): PhishAdmissionRuleWrite {
+  if (!rule) return emptyDraft();
+  return {
+    name: rule.name,
+    enabled: rule.enabled,
+    directions: [...rule.directions],
+    filter_on: rule.filter_on ?? false,
+    recipient_groups: [...(rule.recipient_groups ?? [])],
+    recipient_depts: [...(rule.recipient_depts ?? [])],
+    recipient_emails: [...(rule.recipient_emails ?? [])],
+    sender_groups: [...(rule.sender_groups ?? [])],
+    sender_depts: [...(rule.sender_depts ?? [])],
+    sender_emails: [...(rule.sender_emails ?? [])],
+    require_url: rule.require_url,
+    max_size_mb: rule.max_size_mb ?? 0,
+    sender_first_seen: rule.sender_first_seen,
+    require_qrcode: rule.require_qrcode,
+    require_executable: rule.require_executable ?? false,
+  };
+}
+
+export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly = false }: Props) {
   const t = useTranslations('phishingConfig.admission');
   const tdir = useTranslations('phishingConfig.admission.direction');
-  const { apiRequest } = useApiRequest();
+  const { apiRequest, effectiveTenantId } = useApiRequest();
   const apiErrorMessage = useApiErrorMessage();
-
-  const [draft, setDraft] = useState<PhishAdmissionRule>(emptyDraft());
-  const [tagInput, setTagInput] = useState('');
-  const [emailInput, setEmailInput] = useState('');
-  const [filterOn, setFilterOn] = useState(false);
+  const baseline = useMemo(() => draftFromRule(rule), [rule]);
+  const [draft, setDraft] = useState<PhishAdmissionRuleWrite>(baseline);
+  const [lastLoadKey, setLastLoadKey] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // 收件人/内容群组供下拉多选（spec §4.1：两类群组均可作为收件人筛选目标）。
-  // 注意：后端 ListUnifiedRules 不读 group_type 参数，按 rule_class/stage/page 过滤，
-  // 所以只发一次请求、在客户端按 g.type 区分（与 ContentRulesPage 一致），并按名字去重，
-  // 避免重复渲染以及把 ip/sender 群组错误地暴露为收件人筛选目标。
-  const { data: groups = [] } = useQuery<string[]>({
-    queryKey: ['recipient-content-groups'],
-    queryFn: async () => {
-      const resp = await apiRequest<{ items: unknown[] }>(
-        `/unified-rules?${new URLSearchParams(GROUPS_LIST_QUERY)}`,
-      );
-      const seen = new Set<string>();
-      const names: string[] = [];
-      for (const item of resp.items ?? []) {
-        const g = ruleToGroup(item as Rule);
-        if (!g || (g.type !== 'recipient' && g.type !== 'content')) continue;
-        if (seen.has(g.name)) continue;
-        seen.add(g.name);
-        names.push(`grp:${g.name}`);
-      }
-      return names;
-    },
-  });
-
-  const { data: tagSuggestions = [] } = useQuery<string[]>({
-    queryKey: ['admission-tag-suggestions'],
-    queryFn: () => getAdmissionTagSuggestions(apiRequest),
-  });
-
-  // 进抽屉时快照 draft（keyed by open + rule identity，无 useEffect）。
-  const baseKey = `${open ? 'open' : 'closed'}:${rule?.id ?? 'new'}:${rule?.name ?? ''}`;
-  const [lastKey, setLastKey] = useState('');
-  if (open && baseKey !== lastKey) {
-    setLastKey(baseKey);
-    const d = rule
-      ? {
-          ...rule,
-          directions: [...rule.directions],
-          recipient_tags: [...(rule.recipient_tags ?? [])],
-          recipient_emails: [...(rule.recipient_emails ?? [])],
-        }
-      : emptyDraft();
-    setDraft(d);
-    // Prefer the persisted filter_on (round-trips from rule metadata); fall
-    // back to deriving from recipient_tags/emails for rules saved before the
-    // field existed. Keeps the toggle faithful to what was saved.
-    setFilterOn(d.filter_on ?? ((d.recipient_tags ?? []).length > 0 || (d.recipient_emails ?? []).length > 0));
-    setTagInput('');
-    setEmailInput('');
-  } else if (!open && lastKey !== '') {
-    setLastKey('');
+  const loadKey = `${open}:${rule?.id ?? 'new'}:${rule?.revision ?? ''}`;
+  if (open && loadKey !== lastLoadKey) {
+    setLastLoadKey(loadKey);
+    setDraft(draftFromRule(rule));
+  } else if (!open && lastLoadKey) {
+    setLastLoadKey('');
   }
 
-  const validationError = useMemo<string | null>(() => {
-    if (draft.directions.length === 0) {
-      return t('errors.needDirection');
-    }
-    if (draft.require_qrcode && draft.directions.includes('outbound')) {
-      return t('errors.qrNoOutbound');
-    }
-    if (!draft.sender_first_seen && !draft.require_qrcode) {
-      return t('errors.needRiskSignal');
-    }
-    // 收件人筛选开启时至少选一个对象（spec §4.1 / §7；review D1）。
-    if (filterOn && (draft.recipient_tags ?? []).length === 0 && (draft.recipient_emails ?? []).length === 0) {
-      return t('errors.needRecipientTarget');
-    }
-    // 邮件大小上限镜像后端校验（phishing_admission.go validateAdmissionDTO：0..100000）。
-    if ((draft.max_size_mb ?? 0) > 100000) {
-      return t('errors.maxSizeTooLarge');
-    }
+  const dirty = open && JSON.stringify(draft) !== JSON.stringify(baseline);
+  useUnsavedDraftRegistration(open, dirty);
+
+  const groupsQuery = useQuery({
+    queryKey: ['phish-scope-groups', effectiveTenantId],
+    queryFn: async () => {
+      const response = await apiRequest<{ items: Array<Rule & { rule_uid?: string }> }>(
+        `/unified-rules?${new URLSearchParams(GROUPS_LIST_QUERY)}`,
+      );
+      return (response.items ?? []).flatMap((item) => {
+        const group = ruleToGroup(item);
+        if (!group || !item.rule_uid || !['sender', 'recipient'].includes(group.type)) return [];
+        return [{ uid: item.rule_uid, name: group.name, type: group.type }];
+      });
+    },
+  });
+  const departmentsQuery = useQuery({
+    queryKey: ['contacts', 'departments', effectiveTenantId],
+    queryFn: () => listContactDepartments(apiRequest),
+  });
+
+  const patch = (next: Partial<PhishAdmissionRuleWrite>) => setDraft((current) => ({ ...current, ...next }));
+  const hasRecipientDirections = draft.directions.some((direction) => direction !== 'outbound');
+  const hasSenderDirection = draft.directions.includes('outbound');
+  const mixedSides = hasRecipientDirections && hasSenderDirection;
+
+  const targetCount = [
+    ...(hasRecipientDirections ? [draft.recipient_groups, draft.recipient_depts, draft.recipient_emails] : []),
+    ...(hasSenderDirection ? [draft.sender_groups, draft.sender_depts, draft.sender_emails] : []),
+  ].reduce((sum, values) => sum + (values?.length ?? 0), 0);
+  const validationError = useMemo(() => {
+    if (!draft.name.trim()) return t('errors.needName');
+    if (draft.directions.length === 0) return t('errors.needDirection');
+    if (!draft.sender_first_seen && !draft.require_qrcode && !draft.require_executable) return t('errors.needRiskSignal');
+    if (draft.filter_on && targetCount === 0) return t('errors.needRecipientTarget');
+    if ((draft.max_size_mb ?? 0) < 0 || (draft.max_size_mb ?? 0) > 100000) return t('errors.maxSizeTooLarge');
     return null;
-  }, [draft, filterOn, t]);
+  }, [draft, t, targetCount]);
 
-  const valid = useMemo(() => {
-    if (!draft.name.trim()) return false;
-    if (draft.directions.length === 0) return false;
-    if (validationError) return false;
-    if ((draft.max_size_mb ?? 0) < 0) return false;
-    if ((draft.max_size_mb ?? 0) > 100000) return false;
-    return true;
-  }, [draft, validationError]);
+  const toggleDirection = (direction: Direction) => patch({
+    directions: draft.directions.includes(direction)
+      ? draft.directions.filter((item) => item !== direction)
+      : [...draft.directions, direction],
+  });
 
-  const patch = (p: Partial<PhishAdmissionRule>) => setDraft((cur) => ({ ...cur, ...p }));
-
-  const toggleDirection = (d: Direction) => {
-    const has = draft.directions.includes(d);
-    const next = has ? draft.directions.filter((x) => x !== d) : [...draft.directions, d];
-    patch({ directions: next });
-  };
-
-  const addTag = (v: string) => {
-    const tag = v.trim();
-    if (!tag) return;
-    const cur = draft.recipient_tags ?? [];
-    if (!cur.includes(tag)) patch({ recipient_tags: [...cur, tag] });
-    setTagInput('');
-  };
-  const removeTag = (tag: string) =>
-    patch({ recipient_tags: (draft.recipient_tags ?? []).filter((x) => x !== tag) });
-
-  const addEmail = (v: string) => {
-    const email = v.trim().toLowerCase();
-    if (!email || !email.includes('@')) return;
-    const cur = draft.recipient_emails ?? [];
-    if (!cur.includes(email)) patch({ recipient_emails: [...cur, email] });
-    setEmailInput('');
-  };
-  const removeEmail = (em: string) =>
-    patch({ recipient_emails: (draft.recipient_emails ?? []).filter((x) => x !== em) });
-
-  const onSave = async () => {
-    if (!valid) {
-      toast.error(t('validationFailed'));
-      return;
-    }
-    const payload: PhishAdmissionRule = {
+  const save = async () => {
+    if (validationError || readOnly) return;
+    const normalized: PhishAdmissionRuleWrite = {
       ...draft,
-      filter_on: filterOn,
-      recipient_tags: filterOn ? draft.recipient_tags ?? [] : [],
-      recipient_emails: filterOn ? draft.recipient_emails ?? [] : [],
+      name: draft.name.trim(),
+      recipient_groups: draft.filter_on && hasRecipientDirections ? draft.recipient_groups ?? [] : [],
+      recipient_depts: draft.filter_on && hasRecipientDirections ? draft.recipient_depts ?? [] : [],
+      recipient_emails: draft.filter_on && hasRecipientDirections ? (draft.recipient_emails ?? []).map((value) => value.toLowerCase()) : [],
+      sender_groups: draft.filter_on && hasSenderDirection ? draft.sender_groups ?? [] : [],
+      sender_depts: draft.filter_on && hasSenderDirection ? draft.sender_depts ?? [] : [],
+      sender_emails: draft.filter_on && hasSenderDirection ? (draft.sender_emails ?? []).map((value) => value.toLowerCase()) : [],
     };
     setSaving(true);
     try {
-      if (payload.id !== undefined) {
-        await updateAdmissionRule(payload.id, payload, apiRequest);
+      if (rule?.id != null) {
+        await updateAdmissionRule(rule.id, { ...normalized, expected_revision: rule.revision ?? '' }, apiRequest);
       } else {
-        await createAdmissionRule(payload, apiRequest);
+        await createAdmissionRule(normalized, apiRequest);
       }
-      toast.success(payload.id !== undefined ? t('updated') : t('created'));
+      toast.success(rule ? t('updated') : t('created'));
       onSaved();
-    } catch (err) {
-      toast.error(apiErrorMessage(err, t('saveFailed')));
+    } catch (error) {
+      toast.error(apiErrorMessage(error, t('saveFailed')));
     } finally {
       setSaving(false);
     }
   };
 
+  const renderScope = (side: ScopeSide) => {
+    const groupField = `${side}_groups` as 'recipient_groups' | 'sender_groups';
+    const deptField = `${side}_depts` as 'recipient_depts' | 'sender_depts';
+    const emailField = `${side}_emails` as 'recipient_emails' | 'sender_emails';
+    const expectedGroupType = side === 'sender' ? 'sender' : 'recipient';
+    const groupOptions = (groupsQuery.data ?? [])
+      .filter((group) => group.type === expectedGroupType)
+      .map((group) => ({ uid: group.uid, name: group.name }));
+    const labels = {
+      noMatch: t('noMatch'),
+      clearAll: t('clearAll'),
+      selectedCount: (count: number) => t('selectedCount', { count }),
+    };
+    return (
+      <div className="space-y-4 rounded-lg border border-border bg-card p-4" data-testid={`rule-scope-${side}`}>
+        <p className="text-sm font-medium">{t(side === 'sender' ? 'senderScope' : 'recipientScope')}</p>
+        <div className="space-y-2">
+          <Label>{t('groupSectionLabel')}</Label>
+          <GroupScopeSelect
+            {...labels}
+            options={groupOptions}
+            selected={draft[groupField] ?? []}
+            onChange={(values) => patch({ [groupField]: values })}
+            placeholder={t('selectGroups')}
+            searchPlaceholder={t('searchGroups')}
+            emptyHint={t('noGroupsHint')}
+            testIdPrefix={`rule-${side}-group`}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>{t('deptSectionLabel')}</Label>
+          <DepartmentScopeSelect
+            {...labels}
+            rows={departmentsQuery.data?.items ?? []}
+            selected={draft[deptField] ?? []}
+            onChange={(values) => patch({ [deptField]: values })}
+            selectedEmails={draft[emailField] ?? []}
+            onEmailsChange={(values) => patch({ [emailField]: values })}
+            onInvalidEmail={() => toast.error(t('errors.invalidEmail'))}
+            personSearchPlaceholder={t('searchPeople')}
+            loadingLabel={t('loading')}
+            searchPlaceholder={t('searchDepartments')}
+            emptyHint={t('noDepartmentsHint')}
+            testIdPrefix={`rule-${side}-dept`}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="sm:max-w-[560px] flex flex-col gap-0 p-0"
-        data-testid="admission-rule-sheet"
-      >
-        <SheetHeader className="border-b px-6 py-4">
+      <SheetContent side="right" className="flex flex-col gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-[560px]" data-testid="admission-rule-sheet">
+        <SheetHeader className="shrink-0 border-b border-border px-6 py-4">
           <SheetTitle>{rule ? t('editTitle') : t('createTitle')}</SheetTitle>
           <SheetDescription>{t('sheetDescription')}</SheetDescription>
         </SheetHeader>
-
         <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
-          {/* 规则名称 */}
-          <div className="space-y-1.5">
-            <Label htmlFor="rule-name">{t('colName')}</Label>
-            <Input
-              id="rule-name"
-              data-testid="rule-name-input"
-              value={draft.name}
-              onChange={(e) => patch({ name: e.target.value })}
-              placeholder={t('namePlaceholder')}
-            />
-          </div>
-
-          {/* ① 检测范围 */}
+          <div className="space-y-2"><Label htmlFor="rule-name">{t('colName')}</Label><Input id="rule-name" data-testid="rule-name-input" value={draft.name} onChange={(event) => patch({ name: event.target.value })} /></div>
           <section className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-100 text-xs font-semibold text-blue-700">
-                1
-              </span>
-              <h4 className="text-sm font-semibold">{t('sectionScope')}</h4>
+            <div className="flex items-center gap-2"><span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">1</span><h4 className="text-sm font-semibold">{t('sectionScope')}</h4></div>
+            <div className="flex flex-wrap gap-2" data-testid="rule-direction-group">
+              {DIRECTIONS.map((direction) => <Button key={direction} type="button" size="sm" variant={draft.directions.includes(direction) ? 'default' : 'outline'} data-testid={`rule-direction-${direction}`} onClick={() => toggleDirection(direction)}>{tdir(direction)}</Button>)}
             </div>
-
-            <div className="space-y-1.5">
-              <Label>{t('colDirection')}</Label>
-              <div className="flex flex-wrap gap-2" data-testid="rule-direction-group">
-                {DIRECTIONS.map((d) => (
-                  <Button
-                    key={d}
-                    type="button"
-                    size="sm"
-                    variant={draft.directions.includes(d) ? 'default' : 'outline'}
-                    onClick={() => toggleDirection(d)}
-                    data-testid={`rule-direction-${d}`}
-                  >
-                    {tdir(d)}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3 rounded-lg border p-4">
-              <div className="flex items-center justify-between">
-                <Label>{t('recipientFilter')}</Label>
-                <Switch
-                  checked={filterOn}
-                  onCheckedChange={setFilterOn}
-                  data-testid="rule-recipient-filter"
-                />
-              </div>
-              {filterOn && (
-                <div className="space-y-4">
-                  {/* Tag sub-section */}
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">{t('tagSectionLabel')}</p>
-                    {/* Suggestion buttons from API */}
-                    {tagSuggestions.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {tagSuggestions.map((tag) => {
-                          const on = (draft.recipient_tags ?? []).includes(tag);
-                          return (
-                            <Button key={tag} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                              onClick={() => (on ? removeTag(tag) : addTag(tag))}>
-                              {tag}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    )}
-                    {/* grp: groups */}
-                    {groups.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {groups.map((g) => {
-                          const on = (draft.recipient_tags ?? []).includes(g);
-                          return (
-                            <Button key={g} type="button" size="sm" variant={on ? 'default' : 'outline'}
-                              onClick={() => (on ? removeTag(g) : addTag(g))}>
-                              {g.replace(/^grp:/, '')}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    )}
-                    {/* Free-text input for custom tags */}
-                    <div className="flex gap-2">
-                      <Input
-                        data-testid="rule-tag-input"
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addTag(tagInput);
-                          }
-                        }}
-                        placeholder={t('tagPlaceholder')}
-                      />
-                      <Button type="button" variant="outline" size="sm" onClick={() => addTag(tagInput)}>
-                        {t('addTag')}
-                      </Button>
-                    </div>
-                    {(draft.recipient_tags ?? []).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1" data-testid="rule-tag-list">
-                        {(draft.recipient_tags ?? []).map((tag) => (
-                          <Badge key={tag} variant="secondary" className="gap-1">
-                            {tag}
-                            <button
-                              type="button"
-                              onClick={() => removeTag(tag)}
-                              aria-label={t('removeTag')}
-                              className="ml-0.5"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Email sub-section */}
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">{t('emailSectionLabel')}</p>
-                    <div className="flex gap-2">
-                      <Input
-                        data-testid="rule-email-input"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            addEmail(emailInput);
-                          }
-                        }}
-                        placeholder={t('emailPlaceholder')}
-                      />
-                      <Button type="button" variant="outline" size="sm" onClick={() => addEmail(emailInput)}>
-                        {t('addEmail')}
-                      </Button>
-                    </div>
-                    {(draft.recipient_emails ?? []).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5" data-testid="rule-email-list">
-                        {(draft.recipient_emails ?? []).map((em) => (
-                          <Badge key={em} variant="secondary" className="gap-1">
-                            {em}
-                            <button
-                              type="button"
-                              onClick={() => removeEmail(em)}
-                              aria-label={t('removeEmail')}
-                              className="ml-0.5"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-xs text-muted-foreground">{t('recipientTagsHint')}</p>
-                </div>
-              )}
-            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border p-4"><div><Label>{t(mixedSides ? 'mixedScope' : hasSenderDirection ? 'senderScope' : 'recipientScope')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('recipientTagsHint')}</p></div><Switch checked={draft.filter_on ?? false} onCheckedChange={(filter_on) => patch({ filter_on })} data-testid="rule-recipient-filter" /></div>
+            {draft.filter_on ? <div className="space-y-3">{hasRecipientDirections ? renderScope('recipient') : null}{hasSenderDirection ? renderScope('sender') : null}</div> : null}
           </section>
-
-          {/* ② 风险信号 */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-100 text-xs font-semibold text-amber-700">
-                2
-              </span>
-              <h4 className="text-sm font-semibold">{t('sectionRisk')}</h4>
+          <section className="space-y-3">
+            <div className="flex items-center gap-2"><span className="flex size-6 items-center justify-center rounded-md bg-warning/15 text-xs font-semibold text-warning">2</span><h4 className="text-sm font-semibold">{t('sectionRisk')}</h4></div>
+            <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
+              <div className="flex items-center justify-between gap-3"><div><Label>{t('requireUrl')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('urlNotQRHint')}</p></div><Switch checked={draft.require_url} data-testid="rule-require-url" onCheckedChange={(require_url) => patch({ require_url })} /></div>
+              <div className="space-y-2 border-t border-border pt-4"><div><Label htmlFor="rule-maxsize">{t('maxSize')}</Label><p className="mt-1 text-sm text-muted-foreground">{t('maxSizeHint')}</p></div><div className="relative min-w-0"><Input id="rule-maxsize" type="number" min={0} max={100000} className="w-full pr-12" value={draft.max_size_mb ?? 0} onChange={(event) => patch({ max_size_mb: Number(event.target.value) || 0 })} /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">MB</span></div></div>
             </div>
-
-            {/* 基础筛查 */}
-            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-              <h5 className="text-sm font-medium">{t('basicScreen')}</h5>
-              <div className="flex items-center justify-between">
-                <Label>{t('requireUrl')}</Label>
-                <Switch
-                  checked={draft.require_url}
-                  data-testid="rule-require-url"
-                  onCheckedChange={(v) => patch({ require_url: v })}
-                />
-              </div>
-              {draft.require_url && draft.require_qrcode && (
-                <p className="text-xs text-muted-foreground">{t('urlNotQRHint')}</p>
-              )}
-              <div className="flex items-center justify-between gap-2">
-                <Label htmlFor="rule-maxsize">{t('maxSize')}</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="rule-maxsize"
-                    type="number"
-                    min={0}
-                    className="h-8 w-20"
-                    data-testid="rule-maxsize-input"
-                    value={draft.max_size_mb ?? 0}
-                    onChange={(e) =>
-                      patch({ max_size_mb: Math.max(0, Number(e.target.value) || 0) })
-                    }
-                  />
-                  <span className="text-sm text-muted-foreground">MB</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 发信人特征 */}
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <Label>{t('senderFirstSeen')}</Label>
-                <p className="mt-1 text-xs text-muted-foreground">{t('senderFirstSeenHint')}</p>
-              </div>
-              <Switch
-                checked={draft.sender_first_seen}
-                data-testid="rule-first-seen"
-                onCheckedChange={(v) => patch({ sender_first_seen: v })}
-              />
-            </div>
-
-            {/* 邮件内容：二维码 */}
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <Label>{t('qrcode')}</Label>
-                <p className="mt-1 text-xs text-muted-foreground">{t('qrcodeDesc')}</p>
-              </div>
-              <Switch
-                checked={draft.require_qrcode}
-                data-testid="rule-qrcode"
-                onCheckedChange={(v) => patch({ require_qrcode: v })}
-              />
-            </div>
-
-            {validationError && (
-              <p
-                className="text-sm text-destructive"
-                data-testid="rule-validation-error"
-              >
-                {validationError}
-              </p>
-            )}
+            {([
+              ['sender_first_seen', 'senderFirstSeen', 'senderFirstSeenHint'],
+              ['require_qrcode', 'qrcode', 'qrcodeDesc'],
+              ['require_executable', 'executable', 'executableDesc'],
+            ] as const).map(([field, label, description]) => (
+              <div key={field} className="flex items-center justify-between rounded-lg border border-border p-4"><div><Label>{t(label)}</Label><p className="mt-1 text-xs text-muted-foreground">{t(description)}</p></div><Switch checked={Boolean(draft[field])} data-testid={`rule-${field.replaceAll('_', '-')}`} onCheckedChange={(value) => patch({ [field]: value })} /></div>
+            ))}
+            {validationError ? <p className="text-sm text-destructive" data-testid="rule-validation-error">{validationError}</p> : null}
           </section>
-
-          {/* 启用 */}
-          <div className="flex items-center gap-3">
-            <Switch
-              id="rule-enabled"
-              checked={draft.enabled}
-              data-testid="rule-enabled-checkbox"
-              onCheckedChange={(v) => patch({ enabled: v })}
-            />
-            <Label htmlFor="rule-enabled">{t('enabledLabel')}</Label>
-          </div>
+          <div className="flex items-center gap-3"><Switch id="rule-enabled" checked={draft.enabled} onCheckedChange={(enabled) => patch({ enabled })} /><Label htmlFor="rule-enabled">{t('enabledLabel')}</Label></div>
         </div>
-
-        <SheetFooter className="flex-row justify-end gap-2 border-t px-6 py-3">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={saving}
-            data-testid="rule-cancel"
-          >
-            {t('cancel')}
-          </Button>
-          <Button onClick={onSave} disabled={!valid || saving} data-testid="rule-save">
-            {saving ? t('saving') : t('save')}
-          </Button>
+        <SheetFooter className="shrink-0 flex-row justify-between gap-2 border-t border-border px-6 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>{t('cancel')}</Button>
+          <Button onClick={save} disabled={Boolean(validationError) || saving || readOnly} data-testid="rule-save">{saving ? t('saving') : t('save')}</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

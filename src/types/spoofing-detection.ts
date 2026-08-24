@@ -1,9 +1,11 @@
 // Types mirror the P3 /spoofing-agent/* JSON contracts (snake_case json tags).
 // confidence_threshold is 0-100 (UI scale); detection-log confidence is 0-1.
 
+import type { PolicyAction } from '@/types/policy-action';
+
 export type SpoofMatchType = 'exact' | 'wildcard' | 'regex';
 export type SpoofDispositionMode = 'observe' | 'standard' | 'strict' | 'custom';
-export type SpoofDispositionAction = 'mark' | 'quarantine' | 'reject' | 'discard';
+export type SpoofDispositionAction = Extract<PolicyAction, 'accept' | 'quarantine' | 'reject' | 'discard'>;
 export type SpoofMarkPosition = 'subject' | 'header' | 'banner';
 export type SpoofProtectionLevel = 'high' | 'medium' | 'low';
 export type SpoofSensitivity = 60 | 75 | 85 | 95;

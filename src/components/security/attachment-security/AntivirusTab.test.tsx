@@ -29,7 +29,7 @@ function renderTab(hidePlatformConfig: boolean) {
     <TooltipProvider>
       <AntivirusTab
         config={{ host: 'av-server', port: '6600' }}
-        actions={{ virus_action: 'quarantine', timeout_action: 'accept' }}
+        actions={{ virus_action: 'quarantine', timeout_action: 'proceed' }}
         onChange={vi.fn()}
         onActionsChange={vi.fn()}
         hidePlatformConfig={hidePlatformConfig}

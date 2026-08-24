@@ -17,8 +17,13 @@ import {
   DEFAULT_IMAGE_DETECT_CONFIG,
   DEFAULT_QR_DEEP_ROUTES,
 } from '@/components/security/attachment-security/ImageDetectTab';
+import {
+  DEFAULT_ENCRYPTED_ACTIONS,
+  DEFAULT_ENCRYPTED_CONFIG,
+  EncryptedAttachmentTab,
+} from '@/components/security/attachment-security/EncryptedAttachmentTab';
 
-describe('附件安全处置动作下拉(GT-12729)', () => {
+describe('附件安全处置动作下拉(GT-12729/GT-12938)', () => {
   // GT-12818 起「发现病毒后的处置」下拉去掉「拒收」、重新提供「审核」，
   // 覆盖了 GT-12729 当时"audit 已下线"的口径。超时处置与二维码轻量检测不变。
   it('反病毒处置下拉提供 audit、不再提供 reject', async () => {
@@ -39,26 +44,7 @@ describe('附件安全处置动作下拉(GT-12729)', () => {
     expect(screen.queryByTestId('antivirus-virus-action-reject')).toBeNull();
   });
 
-  // GT-12818 产品裁决：「拒收」只是新建不给选，**存量继续生效**（后端仍接受并执行）。
-  // 所以存量配置为 reject 的租户必须还能在下拉里看到自己当前的动作，只是选不中——
-  // 否则触发器上写着「拒收」、列表里却没有这一项，管理员无从确认自己现在是什么行为。
-  it('存量 reject 以禁用项形式可见（新建仍不可选）', async () => {
-    const user = userEvent.setup();
-    render(
-      <AntivirusTab
-        config={DEFAULT_ANTIVIRUS_CONFIG}
-        actions={{ ...DEFAULT_ANTIVIRUS_ACTIONS, virus_action: 'reject' as never }}
-        onChange={() => {}}
-        onActionsChange={() => {}}
-      />,
-    );
-    await user.click(screen.getByTestId('antivirus-virus-action'));
-    const legacy = await screen.findByTestId('antivirus-virus-action-reject');
-    expect(legacy).toBeTruthy();
-    expect(legacy.getAttribute('data-disabled')).not.toBeNull();
-  });
-
-  it('反病毒扫描超时处置下拉不再提供已下线的 audit 选项', async () => {
+  it('反病毒扫描超时处置提供 proceed/audit，不再提供 accept/reject', async () => {
     const user = userEvent.setup();
     render(
       <AntivirusTab
@@ -69,12 +55,14 @@ describe('附件安全处置动作下拉(GT-12729)', () => {
       />,
     );
     await user.click(screen.getByTestId('antivirus-timeout-action'));
-    expect(screen.queryByTestId('antivirus-timeout-action-audit')).toBeNull();
+    expect(await screen.findByTestId('antivirus-timeout-action-audit')).toBeTruthy();
+    expect(screen.queryByTestId('antivirus-timeout-action-reject')).toBeNull();
+    expect(screen.queryByTestId('antivirus-timeout-action-accept')).toBeNull();
     expect(await screen.findByTestId('antivirus-timeout-action-quarantine')).toBeTruthy();
-    expect(await screen.findByTestId('antivirus-timeout-action-accept')).toBeTruthy();
+    expect(await screen.findByTestId('antivirus-timeout-action-proceed')).toBeTruthy();
   });
 
-  it('二维码轻量检测处置下拉不再提供已下线的 audit 选项', async () => {
+  it('二维码轻量检测处置提供 audit、不再提供 reject', async () => {
     const user = userEvent.setup();
     render(
       <ImageDetectTab
@@ -87,7 +75,26 @@ describe('附件安全处置动作下拉(GT-12729)', () => {
       />,
     );
     await user.click(screen.getByTestId('qr-light-action'));
-    expect(screen.queryByTestId('qr-light-action-audit')).toBeNull();
+    expect(await screen.findByTestId('qr-light-action-audit')).toBeTruthy();
+    expect(screen.queryByTestId('qr-light-action-reject')).toBeNull();
     expect(await screen.findByTestId('qr-light-action-quarantine')).toBeTruthy();
+  });
+
+  it('加密附件解密失败处置提供 proceed/audit，不再提供 accept/reject', async () => {
+    const user = userEvent.setup();
+    render(
+      <EncryptedAttachmentTab
+        config={{ ...DEFAULT_ENCRYPTED_CONFIG, use_password_book: false }}
+        actions={DEFAULT_ENCRYPTED_ACTIONS}
+        onChange={() => {}}
+        onActionsChange={() => {}}
+      />,
+    );
+    await user.click(screen.getByTestId('decrypt-fail-action'));
+    expect(await screen.findByTestId('decrypt-fail-action-audit')).toBeTruthy();
+    expect(screen.queryByTestId('decrypt-fail-action-reject')).toBeNull();
+    expect(screen.queryByTestId('decrypt-fail-action-accept')).toBeNull();
+    expect(await screen.findByTestId('decrypt-fail-action-quarantine')).toBeTruthy();
+    expect(await screen.findByTestId('decrypt-fail-action-proceed')).toBeTruthy();
   });
 });

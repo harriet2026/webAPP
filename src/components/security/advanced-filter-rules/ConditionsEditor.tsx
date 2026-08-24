@@ -26,11 +26,9 @@ import type { FieldDef } from '@/types/unified-rules';
 //
 // Deliberately drops the pre-rewrite conditions editor's `primaryAction`-driven
 // sidelineConditionsDisabled gating: every call site of that old editor
-// that migrated to this component (feature-group-drawer.tsx) always
-// passed primaryAction="none", and sidelineConditionsDisabled('none') is
-// always false (its DATA_ONLY_ACTIONS list did not include 'none') — so the
-// gate never actually fired at that call site. Dropping the unused concept
-// here is behavior-neutral.
+// that migrated to this component (feature-group-drawer.tsx) has no action
+// concept, so the gate never actually affected that call site. Dropping the
+// unused concept here is behavior-neutral.
 
 export interface ConditionsEditorProps {
   groups: ConditionGroups;

@@ -145,7 +145,18 @@ describe('SendReceiveContextCard', () => {
       ],
     }));
     expect(screen.getByTestId('email-disposal-overview-context-not-operable')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-context-view-policy')).toHaveTextContent('查看策略命中详情');
+  });
+
+  // GT-12596 回归：产品形态开关关闭后安全分析区被隐藏，父组件曾把跳转
+  // callback 变成 undefined，但 B4 仍渲染按钮并回退到「暂未实现」toast。
+  // 没有真实目标时不应提供一个假的可点击入口。
+  it('GT-12596: hides 查看策略命中详情 when no real target callback is available', () => {
+    renderCard(baseDetail({
+      recipient_dispositions: [
+        { recipient: 'victim@company.com', final_action: 'reject', status: 'blocked', object_id: '' },
+      ],
+    }));
+    expect(screen.queryByTestId('email-disposal-overview-context-view-policy')).not.toBeInTheDocument();
   });
 
   // GT-12596 防回归：B4「查看策略命中详情」注入 onViewPolicyDetail 后必须走

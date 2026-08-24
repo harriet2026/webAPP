@@ -14,7 +14,7 @@ interface Props {
   disabled?: boolean;
 }
 
-// 标记投递（action === "mark-delivery"）配置面板：主题标记 + 信头标记，
+// 白名单投递（action === "accept"）的附加标记面板：主题标记 + 信头标记，
 // 结构与 demo renderTagDeliveryConfig 一致（青色虚线框）。
 export function TagDeliveryPanel({ value, onChange, disabled }: Props) {
   const t = useTranslations('similarDetection');

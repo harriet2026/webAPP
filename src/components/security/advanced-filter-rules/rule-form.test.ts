@@ -60,8 +60,8 @@ describe('emptyRuleForm', () => {
     expect(f.conditions).toEqual({ any: [], all: [] });
   });
 
-  it('primaryAction defaults to none', () => {
-    expect(f.primaryAction).toBe('none');
+  it('primaryAction defaults to proceed', () => {
+    expect(f.primaryAction).toBe('proceed');
   });
 
   it('review defaults', () => {
@@ -74,16 +74,6 @@ describe('emptyRuleForm', () => {
 
   it('discard defaults', () => {
     expect(f.actionParams.discard).toEqual({ logEnabled: true, silent: true, notifyAdmin: false });
-  });
-
-  it('tagDeliver defaults', () => {
-    expect(f.actionParams.tagDeliver).toEqual({
-      content: '',
-      position: 'subject_prefix',
-      style: 'plain_text',
-      headerName: '',
-      headerValue: '',
-    });
   });
 
   it('addons all unchecked', () => {
@@ -115,18 +105,18 @@ describe('formToCreateRequest — basic mapping', () => {
     expect((req.metadata as Record<string, unknown>).feature).toBe('advanced_rules');
   });
 
-  it('primaryAction none → action undefined, primary_action "none"', () => {
+  it('default proceed → native action proceed', () => {
     const f = { ...emptyRuleForm(), conditions: leafConditions() };
     const req = formToCreateRequest(f, fieldDefs);
-    expect(req.action).toBeUndefined();
-    expect((req.metadata as Record<string, unknown>).primary_action).toBe('none');
+    expect(req.action).toBe('proceed');
+    expect((req.metadata as Record<string, unknown>).primary_action).toBe('proceed');
   });
 
   it('primaryAction deliver → action "accept" + skip_subsequent', () => {
     const f: RuleForm = {
       ...emptyRuleForm(),
       conditions: leafConditions(),
-      primaryAction: 'deliver',
+      primaryAction: 'accept',
       actionParams: { ...emptyRuleForm().actionParams, deliver: { skipSubsequentRules: true } },
     };
     const req = formToCreateRequest(f, fieldDefs);
@@ -157,7 +147,7 @@ describe('formToCreateRequest — basic mapping', () => {
     const f: RuleForm = {
       ...emptyRuleForm(),
       conditions: leafConditions(),
-      primaryAction: 'review',
+      primaryAction: 'audit',
       actionParams: {
         ...emptyRuleForm().actionParams,
         review: { reviewers: ' alice@x.com , bob@x.com ,', timeoutHours: 48 },
@@ -197,35 +187,31 @@ describe('formToCreateRequest — addons', () => {
     ]);
   });
 
-  it('tagDeliver auto-adds emailTag addon built from actionParams.tagDeliver', () => {
+  it('proceed does not force an emailTag addon', () => {
     const f: RuleForm = {
       ...emptyRuleForm(),
       conditions: leafConditions(),
-      primaryAction: 'tagDeliver',
-      actionParams: {
-        ...emptyRuleForm().actionParams,
-        tagDeliver: { content: '[SPAM]', position: 'subject_prefix', style: 'plain_text' },
-      },
+      primaryAction: 'proceed',
     };
     const req = formToCreateRequest(f, fieldDefs);
-    expect((req.metadata as Record<string, unknown>).addons).toEqual([
-      { type: 'emailTag', params: { tag_content: '[SPAM]', tag_position: 'subject_prefix', tag_style: 'plain_text' } },
-    ]);
+    expect((req.metadata as Record<string, unknown>).addons).toEqual([]);
   });
 
-  it('tagDeliver with header position includes header_name/header_value when provided', () => {
+  it('emailTag is serialized only when enabled as an addon', () => {
     const f: RuleForm = {
       ...emptyRuleForm(),
       conditions: leafConditions(),
-      primaryAction: 'tagDeliver',
-      actionParams: {
-        ...emptyRuleForm().actionParams,
-        tagDeliver: {
-          content: '[SPAM]',
-          position: 'header',
-          style: 'plain_text',
-          headerName: 'X-Spam-Flag',
-          headerValue: 'YES',
+      primaryAction: 'proceed',
+      addons: {
+        emailTag: {
+          enabled: true,
+          params: {
+            tag_content: '[SPAM]',
+            tag_position: 'header',
+            tag_style: 'plain_text',
+            header_name: 'X-Spam-Flag',
+            header_value: 'YES',
+          },
         },
       },
     };
@@ -244,27 +230,6 @@ describe('formToCreateRequest — addons', () => {
     ]);
   });
 
-  it('tagDeliver overrides a user-supplied emailTag entry already in addons state', () => {
-    const f: RuleForm = {
-      ...emptyRuleForm(),
-      conditions: leafConditions(),
-      primaryAction: 'tagDeliver',
-      actionParams: {
-        ...emptyRuleForm().actionParams,
-        tagDeliver: { content: 'canonical', position: 'subject_prefix', style: 'plain_text' },
-      },
-      addons: {
-        emailTag: { enabled: true, params: { tag_content: 'stale', tag_position: 'header', tag_style: 'plain_text' } },
-      },
-    };
-    const req = formToCreateRequest(f, fieldDefs);
-    const addons = (req.metadata as Record<string, unknown>).addons as unknown[];
-    expect(addons).toHaveLength(1);
-    expect(addons[0]).toEqual({
-      type: 'emailTag',
-      params: { tag_content: 'canonical', tag_position: 'subject_prefix', tag_style: 'plain_text' },
-    });
-  });
 });
 
 describe('formToUpdateRequest', () => {
@@ -290,7 +255,7 @@ describe('ruleToForm', () => {
       metadata: JSON.stringify({
         feature: 'advanced_rules',
         scope: ['incoming'],
-        primary_action: 'none',
+        primary_action: 'proceed',
         primary_action_params: {},
       }),
     });
@@ -308,12 +273,12 @@ describe('ruleToForm', () => {
       metadata: JSON.stringify({
         feature: 'advanced_rules',
         scope: ['incoming', 'outgoing', 'internal'],
-        primary_action: 'review',
+        primary_action: 'audit',
         review_params: { reviewers: ['alice@x.com', 'bob@x.com'], review_timeout_hours: 48 },
       }),
     });
     const f = ruleToForm(rule);
-    expect(f.primaryAction).toBe('review');
+    expect(f.primaryAction).toBe('audit');
     expect(f.actionParams.review).toEqual({ reviewers: 'alice@x.com, bob@x.com', timeoutHours: 48 });
   });
 
@@ -322,7 +287,7 @@ describe('ruleToForm', () => {
       metadata: JSON.stringify({
         feature: 'advanced_rules',
         scope: ['incoming', 'outgoing', 'internal'],
-        primary_action: 'none',
+        primary_action: 'proceed',
         addons: [
           { type: 'disclaimer', params: { content: 'foo', position: 'body_bottom' } },
           { type: 'detailedLog', params: {} },
@@ -334,22 +299,20 @@ describe('ruleToForm', () => {
     expect(f.addons.detailedLog).toEqual({ enabled: true, params: {} });
   });
 
-  it('routes an emailTag addon into actionParams.tagDeliver when primary_action is tagDeliver, not into addons', () => {
+  it('keeps an emailTag as an independent addon for proceed', () => {
     const rule = baseRule({
       metadata: JSON.stringify({
         feature: 'advanced_rules',
         scope: ['incoming', 'outgoing', 'internal'],
-        primary_action: 'tagDeliver',
+        primary_action: 'proceed',
         addons: [{ type: 'emailTag', params: { tag_content: '[SPAM]', tag_position: 'subject_prefix', tag_style: 'plain_text' } }],
       }),
     });
     const f = ruleToForm(rule);
-    expect(f.actionParams.tagDeliver).toEqual({
-      content: '[SPAM]',
-      position: 'subject_prefix',
-      style: 'plain_text',
+    expect(f.addons.emailTag).toEqual({
+      enabled: true,
+      params: { tag_content: '[SPAM]', tag_position: 'subject_prefix', tag_style: 'plain_text' },
     });
-    expect(f.addons.emailTag).toBeUndefined();
   });
 
   it('parses condition_tree via deserializeGroups', () => {
@@ -358,7 +321,7 @@ describe('ruleToForm', () => {
         type: 'OR',
         children: [{ type: 'condition', field: 'subject', operator: 'contain', value: 'invoice', note: 'subject' }],
       }),
-      metadata: JSON.stringify({ feature: 'advanced_rules', scope: ['incoming'], primary_action: 'none' }),
+      metadata: JSON.stringify({ feature: 'advanced_rules', scope: ['incoming'], primary_action: 'proceed' }),
     });
     const f = ruleToForm(rule);
     expect(f.conditions.any).toHaveLength(1);
@@ -369,7 +332,7 @@ describe('ruleToForm', () => {
   it('is resilient to unparsable metadata/condition_tree (falls back to defaults)', () => {
     const rule = baseRule({ metadata: 'not json', condition_tree: 'not json either' });
     const f = ruleToForm(rule);
-    expect(f.primaryAction).toBe('none');
+    expect(f.primaryAction).toBe('proceed');
     expect(f.conditions).toEqual({ any: [], all: [] });
   });
 });
@@ -419,22 +382,20 @@ describe('round trip: ruleToForm(formToCreateRequest-shaped Rule) ≈ original f
     expect(back.conditions.any).toEqual(f.conditions.any);
   });
 
-  it('tagDeliver action round-trips (addons stays empty, actionParams.tagDeliver recovered)', () => {
+  it('proceed with an emailTag addon round-trips', () => {
     const f: RuleForm = {
       ...emptyRuleForm(),
       name: 'rt-tag',
       conditions: leafConditions(),
-      primaryAction: 'tagDeliver',
-      actionParams: {
-        ...emptyRuleForm().actionParams,
-        tagDeliver: { content: '[SPAM]', position: 'subject_prefix', style: 'plain_text' },
+      primaryAction: 'proceed',
+      addons: {
+        emailTag: { enabled: true, params: { tag_content: '[SPAM]', tag_position: 'subject_prefix', tag_style: 'plain_text' } },
       },
     };
     const req = formToCreateRequest(f, fieldDefs);
     const back = ruleToForm(requestToFakeRule(req));
-    expect(back.primaryAction).toBe('tagDeliver');
-    expect(back.actionParams.tagDeliver).toEqual(f.actionParams.tagDeliver);
-    expect(back.addons).toEqual({});
+    expect(back.primaryAction).toBe('proceed');
+    expect(back.addons).toEqual(f.addons);
   });
 
   it('review action round-trips', () => {
@@ -442,7 +403,7 @@ describe('round trip: ruleToForm(formToCreateRequest-shaped Rule) ≈ original f
       ...emptyRuleForm(),
       name: 'rt-review',
       conditions: leafConditions(),
-      primaryAction: 'review',
+      primaryAction: 'audit',
       actionParams: {
         ...emptyRuleForm().actionParams,
         review: { reviewers: 'alice@x.com, bob@x.com', timeoutHours: 12 },
@@ -450,7 +411,7 @@ describe('round trip: ruleToForm(formToCreateRequest-shaped Rule) ≈ original f
     };
     const req = formToCreateRequest(f, fieldDefs);
     const back = ruleToForm(requestToFakeRule(req));
-    expect(back.primaryAction).toBe('review');
+    expect(back.primaryAction).toBe('audit');
     expect(back.actionParams.review).toEqual(f.actionParams.review);
   });
 
@@ -459,7 +420,7 @@ describe('round trip: ruleToForm(formToCreateRequest-shaped Rule) ≈ original f
       ...emptyRuleForm(),
       name: 'rt-addons',
       conditions: leafConditions(),
-      primaryAction: 'none',
+      primaryAction: 'proceed',
       addons: {
         disclaimer: { enabled: true, params: { content: 'hi', position: 'body_top' } },
       },

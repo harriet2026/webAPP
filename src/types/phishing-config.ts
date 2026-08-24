@@ -1,82 +1,109 @@
-// DTO types for the Tab B "检测引擎配置" feature. Field names mirror the
-// backend JSON tags (snake_case) so the API client can pass them through
-// verbatim — see internal/models/investigation_config.go and
-// internal/api/phishing_{admission,bands}.go.
+// Phishing deep-module DTOs. Field names mirror the versioned server contract
+// exactly; UI drafts do not translate or invent defaults for these domains.
 
 export type PhishRunMode = 'realtime' | 'observe';
-export type PhishObserveAction = 'deliver' | 'mark';
-// Kept for the disposal-settings UI (Plan 5 C11: the timeout-temp-disposal
-// knob lives on disposal-settings.Review, NOT on engine params — the sideline
-// worker reads disposal_settings, not engine_config).
-export type PhishTimeoutTempDisposal = 'deliver' | 'mark' | 'by_result';
+export type PhishObserveAction = 'accept';
 
-export interface PhishEngineParams {
-  trace_steps_budget_bytes: number;
-  result_json_budget_bytes: number;
-  tool_call_budget: number;
-  netdisk_domain: boolean;
-  netdisk_extract: boolean;
-  netdisk_spoof: boolean;
-  run_mode: PhishRunMode;
-  observe_action: PhishObserveAction;
+export type PhishRiskLevel = 'suspicious' | 'low' | 'medium' | 'high';
+export type PhishPolicyDisposition = 'proceed' | 'audit' | 'quarantine' | 'discard';
+export type PhishMarkPosition = 'subject_prefix' | 'header';
+
+export interface PhishRiskBandPolicy {
+  base_disposition: PhishPolicyDisposition;
+  mark_positions?: PhishMarkPosition[];
+  mark_text?: string;
 }
 
-// Tenant-owned engine settings exposed by /phishing-agent/engine-config.
-// Deployment-wide runtime limits are intentionally absent; they are managed
-// only through apiserver.cf and the generic config-management override UI.
-export interface PhishTenantEngineParams {
-  netdisk_domain: boolean;
-  netdisk_extract: boolean;
-  netdisk_spoof: boolean;
-  run_mode: PhishRunMode;
-  observe_action: PhishObserveAction;
+export interface PhishRiskPolicy {
+  cutoffs: { low: number; medium: number; high: number };
+  policies: Record<PhishRiskLevel, PhishRiskBandPolicy>;
 }
 
-// Deployment-wide [phishing_agent] limits retained in effective task
-// snapshots. They are not exposed by the tenant engine-config endpoint.
-export interface PhishProfileParams {
-  max_track_level: number;
-  url_fetch_budget: number;
-  max_llm_ranked_urls: number;
-}
-
-export interface PhishEngineConfigResponse {
-  engine: PhishTenantEngineParams;
+export interface PhishRiskPolicyView extends PhishRiskPolicy {
   version: number;
+  updated_at: string;
 }
 
+export interface PhishRuntimePolicy {
+  run_mode: PhishRunMode;
+  observe_action: PhishObserveAction;
+  observe_mark_enabled: boolean;
+  timeout_minutes: number;
+  max_recheck_minutes: number;
+  timeout_async_enabled: boolean;
+}
+
+export interface PhishRuntimePolicyView extends PhishRuntimePolicy {
+  version: number;
+  updated_at: string;
+}
+
+export interface PhishAgentConfig {
+  risk_policy: PhishRiskPolicyView;
+  runtime_policy: PhishRuntimePolicyView;
+}
+
+export interface PhishAgentConfigPutRequest {
+  risk_policy: PhishRiskPolicy & { expected_version: number };
+  runtime_policy: PhishRuntimePolicy & { expected_version: number };
+}
+
+export interface PhishConfigConflictResponse extends PhishAgentConfig {
+  error: {
+    code: string;
+    message: string;
+    params: { conflict_domains: Array<'risk_policy' | 'runtime_policy'> };
+  };
+}
+
+export interface PhishAnalysisConfig {
+  netdisk_domain: boolean;
+  netdisk_extract: boolean;
+  netdisk_spoof: boolean;
+  version: number;
+  updated_at: string;
+}
+
+export interface PhishAnalysisConfigPutRequest {
+  netdisk_domain: boolean;
+  netdisk_extract: boolean;
+  netdisk_spoof: boolean;
+  expected_version: number;
+}
+
+export interface PhishAgentControl {
+  enabled: boolean;
+  desired_state: 'enabled' | 'disabled';
+  runtime_state: 'unspecified' | 'running' | 'draining' | 'stopped';
+  revision: number;
+  updated_at?: string;
+}
+
+export interface PhishAgentControlPutRequest {
+  enabled: boolean;
+  expected_revision: number;
+  operation_id?: string;
+}
 export interface PhishAdmissionRule {
   id?: number;
+  rule_uid?: string;
+  revision?: string;
   name: string;
   directions: Array<'inbound' | 'outbound' | 'internal'>;
-  recipient_tags?: string[];
+  recipient_groups?: string[];
+  recipient_depts?: string[];
   recipient_emails?: string[];
+  sender_groups?: string[];
+  sender_depts?: string[];
+  sender_emails?: string[];
   filter_on?: boolean;
   require_url: boolean;
   max_size_mb?: number;
   sender_first_seen: boolean;
   require_qrcode: boolean;
+  require_executable?: boolean;
   enabled: boolean;
-  profile_id?: number | null;
-  priority?: number;
 }
 
-export type BandDisposition = 'accept' | 'mark' | 'quarantine';
-
-export interface PhishBand {
-  min: number;
-  max: number;
-  disposition: BandDisposition;
-  mark_positions?: string[];
-  mark_text?: string;
-}
-
-// PhishEffectiveConfigSnapshot mirrors internal/models.PhishEffectiveConfig —
-// the frozen "派发时生效配置" exposed as `config_snapshot` on the detection
-// detail endpoint (Tab A A6).
-export interface PhishEffectiveConfigSnapshot {
-  profile_id?: number;
-  profile: PhishProfileParams;
-  engine: PhishEngineParams;
-  matched_rule_id?: number;
-}
+export type PhishAdmissionRuleWrite = Omit<PhishAdmissionRule, 'id' | 'rule_uid' | 'revision'>;
+export type PhishAdmissionRuleUpdate = PhishAdmissionRuleWrite & { expected_revision: string };

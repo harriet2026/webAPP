@@ -5,13 +5,14 @@ import th from '../../messages/th.json';
 import ru from '../../messages/ru.json';
 import {
   OVERSEAS_MAIL_ACTION_NONE,
+  OverseasMailActionDescriptions,
   defaultOverseasMailConfig,
   defaultOverseasMailDirConfig,
   overseasMailDirectionView,
 } from '@/types/overseas-mail';
 import type { OverseasMailAction, OverseasMailDirection } from '@/types/overseas-mail';
 
-const ALL_ACTIONS: OverseasMailAction[] = ['deliver', 'tagDeliver', 'quarantine', 'review', 'block', 'drop'];
+const ALL_ACTIONS: OverseasMailAction[] = ['accept', 'quarantine', 'audit', 'reject', 'discard'];
 const LOCALES = { zh, en, th, ru } as Record<string, { overseasMail: Record<string, string> }>;
 
 // GT-11901. Two defects, both in how a switched-off direction is presented:
@@ -28,7 +29,7 @@ const LOCALES = { zh, en, th, ru } as Record<string, { overseasMail: Record<stri
 //      pre-select `quarantine`, which is reversible where `block` is not.
 describe('overseasMailDirectionView', () => {
   it('hides the action and announces the skip when a direction is off', () => {
-    const view = overseasMailDirectionView({ enabled: false, action: 'block' });
+    const view = overseasMailDirectionView({ enabled: false, action: 'reject' });
 
     expect(view.actionLabel).toBe(OVERSEAS_MAIL_ACTION_NONE);
     expect(view.effectKey).toBe('overseasMail.effectSkipped');
@@ -50,7 +51,7 @@ describe('overseasMailDirectionView', () => {
       expect(view.actionLabel, action).not.toBe(OVERSEAS_MAIL_ACTION_NONE);
       expect(view.actionEditable, action).toBe(true);
       expect(view.muted, action).toBe(false);
-      expect(view.effectKey, action).toBe(`overseasMail.action${action[0].toUpperCase()}${action.slice(1)}Desc`);
+      expect(view.effectKey, action).toBe(OverseasMailActionDescriptions[action]);
     }
   });
 
@@ -62,7 +63,7 @@ describe('overseasMailDirectionView', () => {
 });
 
 // 2026-07-13 (design/implement/spec/2026-07-13-overseas-geoip*): inbound now
-// ships switched ON with `block` by default — unsolicited overseas mail into
+// ships switched ON with `reject` by default — unsolicited overseas mail into
 // the org is the highest-risk direction, so a fresh gateway protects it out
 // of the box rather than waiting for an operator to opt in. Outbound/internal
 // keep the original ship-disabled-with-quarantine default described above.
@@ -77,17 +78,17 @@ describe('overseas mail defaults', () => {
     }
   });
 
-  it('defaults all directions to block (inbound enabled, outbound/internal disabled)', () => {
-    expect(defaultOverseasMailDirConfig().action).toBe('block');
+  it('defaults all directions to reject (inbound enabled, outbound/internal disabled)', () => {
+    expect(defaultOverseasMailDirConfig().action).toBe('reject');
     const config = defaultOverseasMailConfig();
-    expect(config.directions.inbound.action).toBe('block');
+    expect(config.directions.inbound.action).toBe('reject');
     for (const dir of OFF_BY_DEFAULT) {
-      expect(config.directions[dir].action, dir).toBe('block');
+      expect(config.directions[dir].action, dir).toBe('reject');
     }
   });
 
-  it('never defaults to deliver, which would make enabling a no-op', () => {
-    expect(defaultOverseasMailDirConfig().action).not.toBe('deliver');
+  it('never defaults to accept, which would make enabling a no-op', () => {
+    expect(defaultOverseasMailDirConfig().action).not.toBe('accept');
   });
 });
 
@@ -101,7 +102,7 @@ describe('overseas mail i18n', () => {
 });
 
 // GT-12114 Q-04：产品拍板"阻断全部方向时弹窗提示并禁止保存"。判定条件：
-// 三个方向全部启用且动作均为阻断类（block/drop）——此时所有海外邮件流
+// 三个方向全部启用且动作均为阻断类（reject/discard）——此时所有海外邮件流
 // 都会被切断。任一方向禁用（该方向邮件正常放行）或使用非阻断动作则不拦。
 describe('isOverseasBlockAllConfig (GT-12114 Q-04)', () => {
   const cfg = (actions: Partial<Record<OverseasMailDirection, { enabled: boolean; action: OverseasMailAction }>>) => {
@@ -112,30 +113,30 @@ describe('isOverseasBlockAllConfig (GT-12114 Q-04)', () => {
     return base;
   };
 
-  it('三方向全启用且全为 block/drop → true', async () => {
+  it('三方向全启用且全为 reject/discard → true', async () => {
     const { isOverseasBlockAllConfig } = await import('@/types/overseas-mail');
     expect(isOverseasBlockAllConfig(cfg({
-      inbound: { enabled: true, action: 'block' },
-      outbound: { enabled: true, action: 'drop' },
-      internal: { enabled: true, action: 'block' },
+      inbound: { enabled: true, action: 'reject' },
+      outbound: { enabled: true, action: 'discard' },
+      internal: { enabled: true, action: 'reject' },
     }))).toBe(true);
   });
 
   it('任一方向禁用 → false（禁用方向邮件正常放行）', async () => {
     const { isOverseasBlockAllConfig } = await import('@/types/overseas-mail');
     expect(isOverseasBlockAllConfig(cfg({
-      inbound: { enabled: true, action: 'block' },
-      outbound: { enabled: true, action: 'block' },
-      internal: { enabled: false, action: 'block' },
+      inbound: { enabled: true, action: 'reject' },
+      outbound: { enabled: true, action: 'reject' },
+      internal: { enabled: false, action: 'reject' },
     }))).toBe(false);
   });
 
   it('任一方向为非阻断动作 → false', async () => {
     const { isOverseasBlockAllConfig } = await import('@/types/overseas-mail');
     expect(isOverseasBlockAllConfig(cfg({
-      inbound: { enabled: true, action: 'block' },
+      inbound: { enabled: true, action: 'reject' },
       outbound: { enabled: true, action: 'quarantine' },
-      internal: { enabled: true, action: 'drop' },
+      internal: { enabled: true, action: 'discard' },
     }))).toBe(false);
   });
 

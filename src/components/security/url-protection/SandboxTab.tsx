@@ -6,6 +6,7 @@ import { Globe, Database, Cloud } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -20,8 +21,9 @@ import type {
 // demo createDefaultSandboxConfig("receive") 的默认值
 const DEFAULT_SANDBOX: SandboxDirectionConfig = {
   enabled: true,
-  malicious_action: 'isolate',
-  timeout_action: 'continue',
+  malicious_action: 'quarantine',
+  mark_enabled: false,
+  timeout_action: 'proceed',
   local_intel_enabled: true,
   intel_cleanup_days: 180,
   cloud_intel_enabled: true,
@@ -102,12 +104,22 @@ export function SandboxTab({ direction, settings, onPatch }: Props) {
               >
                 <SelectTrigger aria-label="sandbox-malicious-action" data-testid="sandbox-malicious-action-trigger"><SelectValue /></SelectTrigger>
                 <SelectContent data-testid="sandbox-malicious-action-content">
-                  <SelectItem value="isolate" title={t('actionIsolateTip')} data-testid="sandbox-malicious-action-isolate">{t('actionIsolate')}</SelectItem>
-                  <SelectItem value="block" title={t('actionBlockTip')} data-testid="sandbox-malicious-action-block">{t('actionBlock')}</SelectItem>
-                  <SelectItem value="mark" title={t('actionMarkTip')} data-testid="sandbox-malicious-action-mark">{t('actionMark')}</SelectItem>
+                  <SelectItem value="quarantine" title={t('actionQuarantineTip')} data-testid="sandbox-malicious-action-quarantine">{t('actionQuarantine')}</SelectItem>
+                  <SelectItem value="reject" title={t('actionRejectTip')} data-testid="sandbox-malicious-action-reject">{t('actionReject')}</SelectItem>
+                  <SelectItem value="accept" title={t('actionAcceptTip')} data-testid="sandbox-malicious-action-accept">{t('actionAccept')}</SelectItem>
                   <SelectItem value="discard" title={t('actionDiscardTip')} data-testid="sandbox-malicious-action-discard">{t('actionDiscard')}</SelectItem>
                 </SelectContent>
               </Select>
+              {cfg.malicious_action === 'accept' && (
+                <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Checkbox
+                    checked={!!cfg.mark_enabled}
+                    onCheckedChange={(checked) => update({ mark_enabled: checked === true })}
+                    data-testid="sandbox-malicious-mark-enabled"
+                  />
+                  {t('markEnabled')}
+                </label>
+              )}
             </div>
           </div>
         </div>
@@ -122,7 +134,7 @@ export function SandboxTab({ direction, settings, onPatch }: Props) {
             >
               <SelectTrigger className="w-full md:w-[300px]" aria-label="sandbox-timeout-action" data-testid="sandbox-timeout-action-trigger"><SelectValue /></SelectTrigger>
               <SelectContent data-testid="sandbox-timeout-action-content">
-                <SelectItem value="continue" title={t('timeoutContinueTip')} data-testid="sandbox-timeout-action-continue">{t('timeoutContinue')}</SelectItem>
+                <SelectItem value="proceed" title={t('timeoutContinueTip')} data-testid="sandbox-timeout-action-proceed">{t('timeoutContinue')}</SelectItem>
                 <SelectItem value="treat_malicious" title={t('timeoutTreatMaliciousTip')} data-testid="sandbox-timeout-action-treat-malicious">{t('timeoutTreatMalicious')}</SelectItem>
                 <SelectItem value="pass" data-testid="sandbox-timeout-action-pass">{t('timeoutPass')}</SelectItem>
               </SelectContent>

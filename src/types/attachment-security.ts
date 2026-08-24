@@ -19,7 +19,7 @@ export type AttachmentAction =
   | 'audit'
   | 'reject'
   | 'discard'
-  | 'accept'
+  | 'proceed'
   | 'partial_skip';
 
 export interface AntivirusConfig {
@@ -33,8 +33,8 @@ export interface AVStatusResponse {
 
 export interface AntivirusActionConfig {
   // 「发现病毒后的处置」不提供“拒收”动作，仅支持隔离/审核/丢弃等。
-  virus_action: Exclude<AttachmentAction, 'accept' | 'partial_skip' | 'reject'>;
-  timeout_action: Exclude<AttachmentAction, 'partial_skip'>;
+  virus_action: Exclude<AttachmentAction, 'proceed' | 'partial_skip' | 'reject'>;
+  timeout_action: Exclude<AttachmentAction, 'partial_skip' | 'reject'>;
 }
 
 export interface ImageDetectConfig {
@@ -58,8 +58,8 @@ export interface QrDeepRoutesConfig {
 }
 
 export interface ImageDetectActionConfig {
-  qr_light_action: Exclude<AttachmentAction, 'accept' | 'partial_skip'>;
-  qr_deep_exceed_action: 'accept' | 'quarantine';
+  qr_light_action: Exclude<AttachmentAction, 'proceed' | 'partial_skip' | 'reject'>;
+  qr_deep_exceed_action: 'proceed' | 'quarantine';
   qr_deep_exceed_warn: boolean;
 }
 
@@ -74,7 +74,7 @@ export interface EncryptedConfig {
 }
 
 export interface EncryptedActionConfig {
-  decrypt_fail_action: 'quarantine' | 'accept' | 'reject';
+  decrypt_fail_action: 'quarantine' | 'proceed' | 'audit';
 }
 
 export interface PasswordBookEntry {

@@ -16,10 +16,10 @@ import { Plus, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ACTION_COLOR: Record<IntentAction, string> = {
-  accept: 'bg-[var(--action-mark-deliver)]',
+  accept: 'bg-[var(--action-deliver)]',
+  proceed: 'bg-[var(--action-mark-deliver)]',
   quarantine: 'bg-[var(--action-quarantine)]',
   audit: 'bg-[var(--action-review)]',
-  reject: 'bg-[var(--action-block)]',
   discard: 'bg-red-700',
 };
 
@@ -67,24 +67,23 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
   };
 
   const actionLabel = (a: IntentAction) => {
-    if (a === 'accept') return tAction('mark_deliver');
     return tAction(a as 'quarantine');
   };
 
   const applyPreset = (preset: 'strict' | 'standard' | 'loose') => {
-    const dirAcc: IntentAction = direction === 'receive' ? 'accept' : 'audit';
+    const dirProceed: IntentAction = 'proceed';
     let next: ThresholdSegment[];
     if (preset === 'strict') {
       next = [
-        { min: 0, max: 0.3, action: 'quarantine' }, { min: 0.3, max: 0.6, action: 'reject' }, { min: 0.6, max: 1, action: 'discard' },
+        { min: 0, max: 0.3, action: 'quarantine' }, { min: 0.3, max: 1, action: 'discard' },
       ];
     } else if (preset === 'standard') {
       next = [
-        { min: 0, max: 0.3, action: dirAcc }, { min: 0.3, max: 0.7, action: 'quarantine' }, { min: 0.7, max: 1, action: 'reject' },
+        { min: 0, max: 0.3, action: dirProceed }, { min: 0.3, max: 0.7, action: 'quarantine' }, { min: 0.7, max: 1, action: 'discard' },
       ];
     } else {
       next = [
-        { min: 0, max: 0.5, action: dirAcc }, { min: 0.5, max: 0.8, action: 'audit' }, { min: 0.8, max: 1, action: 'quarantine' },
+        { min: 0, max: 0.5, action: dirProceed }, { min: 0.5, max: 0.8, action: 'audit' }, { min: 0.8, max: 1, action: 'quarantine' },
       ];
     }
     onChange(next);

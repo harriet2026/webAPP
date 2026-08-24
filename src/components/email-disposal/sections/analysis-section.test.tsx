@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { NextIntlClientProvider } from 'next-intl';
 import zh from '@/../messages/zh.json';
@@ -58,6 +59,40 @@ function baseDetail(overrides: Partial<MailLogDetail> = {}): MailLogDetail {
   };
 }
 
+function multiRecipientDetail(): MailLogDetail {
+  return baseDetail({
+    recipients: ['blocked@example.test', 'review@example.test'],
+    recipient_dispositions: [
+      { recipient: 'blocked@example.test', final_action: 'discard', status: 'discarded' },
+      { recipient: 'review@example.test', final_action: 'audit', status: 'auditing' },
+    ],
+    disposal_basis: {
+      policy_key: 'CR',
+      rule_name: '恶意链接规则',
+      rule_id: 'CR-10',
+      action: 'discard',
+      modules: [
+        {
+          policy_key: 'CR',
+          rule_name: '恶意链接规则',
+          rule_id: 'CR-10',
+          action: 'discard',
+          recipients: ['blocked@example.test'],
+          effective_for: ['blocked@example.test'],
+        },
+        {
+          policy_key: 'ACF',
+          rule_name: '财务审核规则',
+          rule_id: 'ACF-20',
+          action: 'audit',
+          recipients: ['review@example.test'],
+          effective_for: ['review@example.test'],
+        },
+      ],
+    },
+  });
+}
+
 // Component tests receive the same already-folded shape as production. The
 // legacy client builder is used only to keep unrelated rendering fixtures
 // compact; recipient correctness is covered by the backend Go tests and the
@@ -94,8 +129,76 @@ function sampleEvents(): MailChildEvent[] {
 }
 
 describe('AnalysisSection (v2 spec alignment)', () => {
-  it('renders the backend-authored verdict instead of deriving it from the mail-wide action', () => {
-    const detail = baseDetail({ action: 'quarantine', status: 'quarantined' });
+  it('shows a multi-recipient selector with disposal actions and reports the selected value', async () => {
+    const user = userEvent.setup();
+    const onSelectedRecipientChange = vi.fn();
+
+    render(wrap(
+      <TestAnalysisSection
+        detail={multiRecipientDetail()}
+        aiEnabled
+        events={[]}
+        onSelectedRecipientChange={onSelectedRecipientChange}
+      />,
+    ));
+
+    const selector = screen.getByTestId('analysis-recipient-switcher');
+    expect(selector).toHaveTextContent('全部收件人（2）');
+
+    await user.click(selector);
+    await user.click(await screen.findByRole('option', { name: /review@example\.test.*审核/ }));
+    expect(onSelectedRecipientChange).toHaveBeenCalledWith('review@example.test');
+  });
+
+  it('hides the recipient selector when the message only has one recipient', () => {
+    render(wrap(
+      <TestAnalysisSection
+        detail={baseDetail()}
+        aiEnabled
+        events={[]}
+        onSelectedRecipientChange={vi.fn()}
+      />,
+    ));
+
+    expect(screen.queryByTestId('analysis-recipient-switcher')).not.toBeInTheDocument();
+  });
+
+  it('narrows disposal basis and hit modules to the selected recipient', () => {
+    const detail = multiRecipientDetail();
+    const authoritative = analysisFor(detail);
+    authoritative.scope = 'recipient';
+    authoritative.recipient = 'review@example.test';
+    authoritative.action = 'audit';
+    authoritative.status = 'auditing';
+
+    render(wrap(
+      <TestAnalysisSection
+        detail={detail}
+        analysis={authoritative}
+        aiEnabled
+        events={[]}
+        selectedRecipient="review@example.test"
+        onSelectedRecipientChange={vi.fn()}
+      />,
+    ));
+
+    expect(screen.queryByTestId('analysis-multi-basis-summary')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('analysis-disposal-basis-groups')).not.toBeInTheDocument();
+    const basis = screen.getByTestId('analysis-disposal-basis');
+    expect(basis).toHaveTextContent('财务审核规则');
+    expect(basis).not.toHaveTextContent('恶意链接规则');
+    const modules = screen.getByTestId('analysis-hit-modules');
+    expect(modules).toHaveTextContent('财务审核规则');
+    expect(modules).not.toHaveTextContent('恶意链接规则');
+    expect(screen.queryByTestId('analysis-stage-3-recipient-split-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders the current email type instead of the broad analysis verdict (GT-12977)', () => {
+    const detail = baseDetail({
+      action: 'quarantine',
+      status: 'quarantined',
+      email_type: 'phishing',
+    });
     const authoritative = analysisFor(detail);
     authoritative.final_verdict = 'safe';
     authoritative.stages = authoritative.stages.map((stage) => ({
@@ -106,7 +209,8 @@ describe('AnalysisSection (v2 spec alignment)', () => {
 
     render(wrap(<TestAnalysisSection detail={detail} analysis={authoritative} aiEnabled events={[]} />));
 
-    expect(screen.getByTestId('analysis-verdict-card')).toHaveTextContent('安全邮件');
+    expect(screen.getByTestId('analysis-verdict-card')).toHaveTextContent('钓鱼邮件');
+    expect(screen.getByTestId('analysis-verdict-card')).not.toHaveTextContent('安全邮件');
     expect(screen.getByTestId('analysis-stage-3')).toHaveTextContent('通过');
   });
 
@@ -136,7 +240,7 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(screen.getByTestId('analysis-check-phishingAgent-detail')).toHaveTextContent('降低暴露面');
   });
 
-  it('matches the origin multi-recipient summary, stage groups and basis cards', () => {
+  it('renders multi-recipient basis groups as collapsed rows and expands one row on demand', () => {
     const detail = baseDetail({
       recipients: ['blocked@example.test', 'review@example.test'],
       disposal_basis: {
@@ -189,13 +293,104 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(screen.getByTestId('analysis-stage-3-recipient-split-badge')).toHaveTextContent('2 组');
     expect(screen.getByTestId('analysis-check-contentRules-recipient-groups')).toHaveTextContent('blocked@example.test');
     expect(screen.getByTestId('analysis-check-contentRules-recipient-groups')).toHaveTextContent('review@example.test');
-    expect(screen.getByTestId('analysis-disposal-basis-groups').querySelectorAll('[data-testid^="analysis-disposal-basis-card-"]')).toHaveLength(2);
+    expect(screen.getByTestId('analysis-disposal-basis-row-0')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('analysis-disposal-basis-row-1')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByTestId('analysis-disposal-basis-0')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('analysis-disposal-basis-1')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('analysis-disposal-basis-row-0'));
+    expect(screen.getByTestId('analysis-disposal-basis-row-0')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('analysis-disposal-basis-0')).toHaveTextContent('恶意链接规则');
     expect(screen.getByTestId('analysis-disposal-basis-scope-0')).toHaveTextContent('blocked@example.test');
-    expect(screen.getByTestId('analysis-disposal-basis-scope-1')).toHaveTextContent('review@example.test');
+    expect(screen.queryByTestId('analysis-disposal-basis-1')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('analysis-disposal-basis-row-0'));
+    expect(screen.queryByTestId('analysis-disposal-basis-0')).not.toBeInTheDocument();
+  });
+
+  it('limits stage basis details to three rows and reports the remaining count', () => {
+    const detail = baseDetail({
+      recipients: ['a@example.test', 'b@example.test', 'c@example.test', 'd@example.test'],
+      disposal_basis: {
+        policy_key: 'ATT-AV',
+        rule_name: '恶意附件哈希黑名单',
+        rule_id: 'ATT-AV-001',
+        action: 'discard',
+        modules: [
+          {
+            policy_key: 'ATT-BASIC',
+            rule_name: '附件类型策略',
+            rule_id: 'ATT-BASIC-001',
+            action: 'accept',
+            recipients: ['a@example.test'],
+            effective_for: ['a@example.test'],
+          },
+          {
+            policy_key: 'ATT-AV',
+            rule_name: '恶意附件哈希黑名单',
+            rule_id: 'ATT-AV-001',
+            action: 'discard',
+            recipients: ['b@example.test'],
+            effective_for: ['b@example.test'],
+          },
+          {
+            policy_key: 'ATT-QR',
+            rule_name: '二维码风险识别',
+            rule_id: 'ATT-QR-001',
+            action: 'quarantine',
+            recipients: ['c@example.test'],
+            effective_for: ['c@example.test'],
+          },
+          {
+            policy_key: 'ATT-ENC',
+            rule_name: '加密附件策略',
+            rule_id: 'ATT-ENC-001',
+            action: 'sideline',
+            recipients: ['d@example.test'],
+            effective_for: ['d@example.test'],
+          },
+        ],
+      },
+    });
+
+    render(wrap(<TestAnalysisSection detail={detail} aiEnabled events={[]} />));
+
+    const stageGroups = screen.getByTestId('analysis-stage-3-basis-groups');
+    expect(stageGroups).toHaveTextContent('附件类型策略');
+    expect(stageGroups).toHaveTextContent('恶意附件哈希黑名单');
+    expect(stageGroups).toHaveTextContent('二维码风险识别');
+    expect(stageGroups).not.toHaveTextContent('加密附件策略');
+    expect(screen.getByTestId('analysis-stage-3-basis-groups-overflow')).toHaveTextContent('及其他 1 项');
+  });
+
+  it('prefers structured legacy basis over a stale no-rules-matched reason', () => {
+    const detail = baseDetail({
+      reason: 'no rules matched',
+      disposal_basis: {
+        policy_key: '',
+        rule_name: 'baseline:cac_high_score',
+        action: 'quarantine',
+        modules: [{
+          policy_key: 'INTENT',
+          rule_name: 'sysrule:intent_engine:spam:receive',
+          action: 'quarantine',
+          effective_for: [],
+        }],
+      },
+    });
+
+    render(wrap(<TestAnalysisSection detail={detail} aiEnabled events={[]} />));
+
+    const card = screen.getByTestId('analysis-disposal-basis');
+    expect(card).toHaveTextContent('baseline:cac_high_score');
+    expect(card).not.toHaveTextContent('no rules matched');
   });
 
   it('renders all 5 stage cards default-expanded (gap 2.1/2.2)', () => {
-    render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={[]} />));
+    const detail = baseDetail({
+      matched_tag_rule_pages: { identity: { auth_spoofing: [22] } },
+    });
+    render(wrap(<TestAnalysisSection detail={detail} aiEnabled events={[]} />));
     for (const n of [1, 2, 3, 4, 5]) {
       expect(screen.getByTestId(`analysis-stage-${n}`)).toBeInTheDocument();
       // Inline hit-strategy detail is present without any click (default expanded).
@@ -205,6 +400,7 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     // 是命中阶段 -- 威胁 badge; others 通过.
     expect(screen.getByTestId('analysis-stage-4').textContent).toContain('威胁');
     expect(screen.getByTestId('analysis-stage-1').textContent).toContain('通过');
+    expect(screen.getByTestId('analysis-stage-2-detail')).not.toHaveTextContent('#22');
 
     // Clicking a card collapses only that card's own detail.
     fireEvent.click(screen.getByTestId('analysis-stage-1'));
@@ -263,7 +459,34 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(screen.getByTestId('analysis-timeline-event-501-view-log')).toHaveTextContent('查看原始日志');
   });
 
-  it('内容详情展开后展示可供后端日志检索的完整关联ID (GT-12651)', () => {
+  it('does not classify the Graph A initial delivery as post-disposal, but keeps a later sideline release', () => {
+    const event = (id: number, source: string): MailChildEvent => ({
+      id,
+      event_source: source,
+      event_type: 'workflow',
+      event_result: 'released',
+      queue_id: `q${id}`,
+      event_time: `2026-07-20T09:2${id - 700}:00.000Z`,
+      correlation_status: 'matched',
+    });
+
+    render(wrap(
+      <TestAnalysisSection
+        detail={baseDetail()}
+        aiEnabled
+        events={[
+          event(700, 'workflow.sideline.initial_delivery'),
+          event(701, 'workflow.sideline'),
+        ]}
+      />,
+    ));
+
+    expect(screen.queryByTestId('analysis-timeline-event-700')).not.toBeInTheDocument();
+    expect(screen.getByTestId('analysis-timeline-event-701')).toHaveTextContent('旁路处置');
+    expect(screen.getByText('1 个事件')).toBeInTheDocument();
+  });
+
+  it('does not duplicate basic, sender, URL, and attachment data in 内容详情', () => {
     render(
       wrap(
         <TestAnalysisSection
@@ -277,15 +500,9 @@ describe('AnalysisSection (v2 spec alignment)', () => {
         />,
       ),
     );
-    fireEvent.click(screen.getByText('内容详情'));
-    // TID 是 message_uuid 截断（8 位），完整 UUID/会话ID/队列ID 必须原样可见，
-    // 否则无法拿去 grep 后端服务器日志。
-    expect(screen.getByText('邮件唯一ID')).toBeInTheDocument();
-    expect(screen.getByText('0d9c2f4e-8a31-4b6b-9f0e-1234567890ab')).toBeInTheDocument();
-    expect(screen.getByText('会话ID')).toBeInTheDocument();
-    expect(screen.getByText('a1b2c3d4-e5f')).toBeInTheDocument();
-    expect(screen.getByText('队列ID')).toBeInTheDocument();
-    expect(screen.getByText('4XyZ12AbCd')).toBeInTheDocument();
+
+    expect(screen.queryByText('内容详情')).not.toBeInTheDocument();
+    expect(screen.queryByText('0d9c2f4e-8a31-4b6b-9f0e-1234567890ab')).not.toBeInTheDocument();
   });
 
   // 召回回调超时（后端 internal/api/recall_timeout_worker.go）：同一次召回的

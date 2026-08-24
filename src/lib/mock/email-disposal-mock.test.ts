@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { resolveSenderFilterRule } from '@/lib/api/sender-filter';
 import {
   isMockActiveRecallState,
   mockEmailDisposalDetail,
   mockEmailDisposalBlacklistEntity,
+  mockContentRulesList,
   mockEmailDisposalEvents,
   mockEmailDisposalFields,
   mockEmailDisposalList,
@@ -158,32 +160,38 @@ describe('email disposal center mock contract', () => {
     expect(mockEmailDisposalEvents(1)).toMatchObject({ total: 13, page_size: 100 });
   });
 
-  it('creates semantic content rules for visible entities and handles retries idempotently', () => {
+  it('routes domain entities to domain blacklist management and keeps retries idempotent', () => {
     const domain = mockEmailDisposalBlacklistEntity(1, {
       kind: 'domain',
       value: 'evil.com',
     });
     expect(domain.status).toBe(201);
     expect(domain.data).toMatchObject({
-      page: 'content_rules',
-      stage: 'data',
-      action: 'quarantine',
+      page: 'sender_filter',
+      stage: 'rcpt',
+      priority: 500,
+      action: 'reject',
       is_active: true,
     });
-    if (!('metadata' in domain.data)) throw new Error('expected a content rule');
+    if (!('metadata' in domain.data)) throw new Error('expected a domain blacklist rule');
     expect(JSON.parse(domain.data.metadata ?? '{}')).toMatchObject({
+      feature: 'sender_filter',
       source: 'email_disposal_center',
       source_mail_log_id: 1,
-      entity_kind: 'domain',
-      match_content: 'evil.com',
-      scopes: ['urls'],
-      directions: { receive: { enabled: true, action: 'quarantine' } },
+      list_type: 'blacklist',
+      sender_config: { type: 'domain', value: 'evil.com' },
+      ip_range: { type: 'all' },
     });
     expect(JSON.parse(domain.data.condition_tree)).toMatchObject({
-      type: 'AND',
-      children: expect.arrayContaining([
-        expect.objectContaining({ field: 'url_entities', operator: 'url_domain', value: 'evil.com' }),
-      ]),
+      field: 'senderdomain',
+      operator: 'eq',
+      value: 'evil.com',
+    });
+    expect(resolveSenderFilterRule(domain.data)).toMatchObject({
+      feature: 'sender_filter',
+      list_type: 'blacklist',
+      sender_config: { type: 'domain', value: 'evil.com' },
+      ip_range: { type: 'all' },
     });
 
     const retry = mockEmailDisposalBlacklistEntity(1, {
@@ -192,6 +200,17 @@ describe('email disposal center mock contract', () => {
     });
     expect(retry.status).toBe(200);
     expect('id' in retry.data && retry.data.id).toBe(domain.data.id);
+
+    const contentRulesAfterDomain = mockContentRulesList(new URLSearchParams({
+      page: '1',
+      page_size: '100',
+    })).items.filter((rule) => {
+      const metadata = JSON.parse(rule.metadata ?? '{}') as Record<string, unknown>;
+      return metadata.source === 'email_disposal_center'
+        && metadata.source_mail_log_id === 1
+        && metadata.entity_kind === 'domain';
+    });
+    expect(contentRulesAfterDomain).toHaveLength(0);
 
     const md5 = mockEmailDisposalDetail(1)?.attachments?.[0]?.md5sum;
     const attachment = mockEmailDisposalBlacklistEntity(1, {

@@ -24,7 +24,7 @@ interface AuthSpoofingTagPanelProps {
   disabled?: boolean;
 }
 
-// "进行下一步"（action === "mark-delivery"）的附加标记策略面板：支持主题、
+// "进行下一步"（action === "proceed"）的附加标记策略面板：支持主题、
 // 信头、正文三种标记方式，视觉与结构对齐相似检测模块的 TagDeliveryPanel
 // （青色虚线框），保持系统内"标记策略"组件的一致性。
 export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofingTagPanelProps) {

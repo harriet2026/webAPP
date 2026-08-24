@@ -276,21 +276,23 @@ test.describe('处置设置', () => {
     await expect(maxRecheck).toHaveValue(/^\d+$/);
 
     await expect(
-      authenticatedPage.getByTestId('disposal-settings-timeout-disposal-deliver'),
+      authenticatedPage.getByTestId('disposal-settings-timeout-disposal-accept'),
     ).toBeVisible();
-    const markRadio = authenticatedPage.getByTestId('disposal-settings-timeout-disposal-mark');
-    await expect(markRadio).toBeVisible();
-    // 选择「添加标记后投递」→ 标记位置/标记文本出现。
-    await markRadio.scrollIntoViewIfNeeded();
-    await markRadio.click();
+    await expect(
+      authenticatedPage.getByTestId('disposal-settings-timeout-disposal-by-result'),
+    ).toHaveCount(0);
+    const markSwitch = authenticatedPage.getByTestId('disposal-settings-timeout-mark-enabled');
+    await expect(markSwitch).toBeVisible();
+    const wasChecked = (await markSwitch.getAttribute('data-state')) === 'checked';
+    if (!wasChecked) await markSwitch.click();
     await expect(
       authenticatedPage.getByTestId('disposal-settings-timeout-mark-positions'),
     ).toBeVisible();
     await expect(
       authenticatedPage.getByTestId('disposal-settings-timeout-mark-text'),
     ).toBeVisible();
-    // 还原为直接投递，避免污染后续保存类用例。
-    await authenticatedPage.getByTestId('disposal-settings-timeout-disposal-deliver').click();
+    // 还原本地表单状态（本用例不保存）。
+    if (!wasChecked) await markSwitch.click();
   });
 
   test('用户权限开关可切换且影响有效天数输入框', async ({

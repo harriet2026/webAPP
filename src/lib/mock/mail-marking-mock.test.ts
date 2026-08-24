@@ -6,6 +6,7 @@ describe('mail_marking mock', () => {
   it('provides the six demo rules', () => {
     const result = mockMailMarkingRulesList();
     expect(result.items).toHaveLength(6);
+    expect(result.items.every((rule) => rule.action === 'proceed')).toBe(true);
     expect(result.items.map((rule) => rule.name)).toEqual([
       '高管外站警示', '财务专用提示', '默认外站提示', '研发静默标记',
       '销售部免责声明', '法务部专用声明',
@@ -39,6 +40,7 @@ describe('mail_marking mock', () => {
       },
     });
     expect(create?.status).toBe(201);
+    expect((create?.data as { action?: string }).action).toBe('proceed');
     const id = (create?.data as { id: number }).id;
     expect(dispatch({ method: 'PUT', path: `/unified-rules/${id}?scope=mail_marking`, body: { name: '已更新' } })?.status).toBe(200);
     expect(dispatch({ method: 'DELETE', path: `/unified-rules/${id}?scope=mail_marking` })?.status).toBe(200);

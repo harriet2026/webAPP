@@ -98,8 +98,7 @@ test.describe('Phishing Detection Tab B — config', () => {
     await expect(authenticatedPage.getByTestId('max-track-level-input')).toHaveCount(0);
     await expect(authenticatedPage.getByTestId('tool-call-budget-input')).toHaveCount(0);
     await expect(authenticatedPage.getByTestId('admission-rules-section')).toBeVisible();
-    await expect(authenticatedPage.getByTestId('runtime-mode-section')).toBeVisible();
-    await expect(authenticatedPage.getByTestId('confidence-bands-editor')).toBeVisible();
+    await expect(authenticatedPage.getByTestId('runtime-risk-section')).toBeVisible();
   });
 
   test('admission rule draft cancel discards changes (TC-08)', async ({ authenticatedPage }) => {
@@ -403,32 +402,32 @@ test.describe('Phishing Detection Tab B — config', () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
-  test('QR + outbound shows validation error', async ({ authenticatedPage }) => {
+  test('QR + outbound rule can be created (GT-12841)', async ({ authenticatedPage }) => {
+    // GT-12841：QR + outbound 的 stale 限制已全清——二维码风险信号对全部方向
+    // 开放。正向回归：外发方向 + QR 规则无校验错误、可保存并出现在列表。
     await openConfigTab(authenticatedPage);
     await authenticatedPage.getByTestId('admission-rule-create').click();
     const sheet = authenticatedPage.getByTestId('admission-rule-sheet');
     await expect(sheet).toBeVisible({ timeout: 5000 });
 
-    await sheet.getByTestId('rule-name-input').fill('e2e-qr-outbound-blocked');
+    const name = `e2e-qr-outbound-${Date.now()}`;
+    await sheet.getByTestId('rule-name-input').fill(name);
 
-    // Select outbound direction (the QR signal doesn't support outbound).
+    // Select outbound direction. QR now supports it.
     await sheet.getByTestId('rule-direction-outbound').click();
 
-    // Toggle QR on — this trips the client-side qrNoOutbound validator.
+    // Toggle QR on — no client-side validation error any more.
     await sheet.getByTestId('rule-qrcode').click();
     await expect(sheet.getByTestId('rule-qrcode')).toHaveAttribute('aria-checked', 'true');
+    await expect(sheet.getByTestId('rule-validation-error')).toBeHidden();
+    await expect(sheet.getByTestId('rule-save')).toBeEnabled();
 
-    // Inline error surfaces (zh value of errors.qrNoOutbound) and Save stays
-    // disabled, so no round-trip is made.
-    await expect(sheet.getByTestId('rule-validation-error')).toBeVisible({ timeout: 5000 });
-    await expect(sheet.getByTestId('rule-validation-error')).toContainText(
-      /二维码风险信号暂不支持外发方向/,
-    );
-    await expect(sheet.getByTestId('rule-save')).toBeDisabled();
-
-    // Drawer stays open (save did not fire).
-    await expect(sheet).toBeVisible();
-    await sheet.getByTestId('rule-cancel').click();
+    await sheet.getByTestId('rule-save').click();
+    await expect(
+      authenticatedPage
+        .getByTestId('admission-rule-row')
+        .filter({ hasText: name }),
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test('require_url can be turned off when another risk signal is on', async ({ authenticatedPage }) => {

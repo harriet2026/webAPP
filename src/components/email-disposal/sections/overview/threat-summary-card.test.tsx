@@ -138,6 +138,29 @@ describe('ThreatSummaryCard', () => {
     expect(confEl.textContent).toContain('规则命中（无置信度）');
   });
 
+  it('keeps legacy structured basis visible and does not fall back to stale reason text', () => {
+    renderCard(baseDetail({
+      cac_result: undefined,
+      reason: 'no rules matched',
+      disposal_basis: {
+        policy_key: '',
+        rule_name: 'baseline:cac_high_score',
+        action: 'quarantine',
+        modules: [{
+          policy_key: 'INTENT',
+          rule_name: 'sysrule:intent_engine:spam:receive',
+          action: 'quarantine',
+          effective_for: [],
+        }],
+      },
+    }));
+
+    const basis = screen.getByTestId('email-disposal-overview-disposal-basis');
+    expect(basis).toHaveTextContent('baseline:cac_high_score');
+    expect(basis).not.toHaveTextContent('no rules matched');
+    expect(screen.getByTestId('email-disposal-overview-confidence')).toHaveTextContent('规则命中（无置信度）');
+  });
+
   it('a real score still wins over a blacklist policy_key (G3 priority)', () => {
     renderCard(baseDetail({
       cac_result: { prob: ['0.001', '0.002', '0.91'] },
@@ -256,6 +279,28 @@ describe('ThreatSummaryCard', () => {
     }));
     const basis = screen.getByTestId('email-disposal-overview-disposal-basis');
     expect(basis.textContent).toContain('rule f01-receive-mark-001 matched at data stage');
+  });
+
+  it('AUTH proceed-only history does not render its legacy accept root as disposition basis', () => {
+    renderCard(baseDetail({
+      reason: 'accepted by rules: 22',
+      disposal_basis: {
+        policy_key: 'AUTH',
+        rule_name: 'sysrule:auth_spoofing_spf_none',
+        rule_id: 'AUTH-22',
+        action: 'accept',
+        modules: [{
+          policy_key: 'AUTH',
+          rule_name: 'sysrule:auth_spoofing_spf_none',
+          rule_id: 'AUTH-22',
+          action: 'proceed',
+          recipients: ['qfliu@dm163.cacter.com'],
+          effective_for: [],
+        }],
+      },
+    }));
+    expect(screen.queryByTestId('email-disposal-overview-disposal-basis')).not.toBeInTheDocument();
+    expect(screen.queryByText('accepted by rules: 22')).not.toBeInTheDocument();
   });
 
   it('renders 处置依据 INSIDE the threat summary card, with a module/rule/action inline row', () => {

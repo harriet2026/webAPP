@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { SimilarDetectionDirection, SimilarDetectionDirectionConfig, SimilarDetectionType } from './types';
-import { SIMILAR_DETECTION_ACTION_OPTIONS } from './action-options';
+import { getSimilarDetectionActionOptions } from './action-options';
 import { TagDeliveryPanel } from './TagDeliveryPanel';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -216,8 +216,8 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SIMILAR_DETECTION_ACTION_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} data-testid={`similar-detection-action-${direction}-option-${opt.value}`}>
+              {getSimilarDetectionActionOptions(value.action).map((opt) => (
+                <SelectItem key={opt.value} value={opt.value} disabled={opt.disabled} data-testid={`similar-detection-action-${direction}-option-${opt.value}`}>
                   {t(opt.labelKey)}
                 </SelectItem>
               ))}
@@ -225,8 +225,8 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
           </Select>
         </div>
 
-        {/* 标记投递配置 */}
-        {value.action === 'mark-delivery' && !value.observe_mode && (
+        {/* 白名单投递的附加标记配置 */}
+        {value.action === 'accept' && !value.observe_mode && (
           <TagDeliveryPanel value={value} onChange={onChange} disabled={disabled} />
         )}
       </div>

@@ -219,16 +219,18 @@ export function InvestigationWorkbench({
                   <Shield className="mr-1 h-3.5 w-3.5" />
                   {t('workbench.viewSmtpSession')}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onViewPolicyDetail?.()}
-                  data-testid="email-disposal-workbench-view-policy-detail"
-                >
-                  <Shield className="mr-1 h-3.5 w-3.5" />
-                  {t('context.viewPolicyDetail')}
-                </Button>
+                {onViewPolicyDetail && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onViewPolicyDetail}
+                    data-testid="email-disposal-workbench-view-policy-detail"
+                  >
+                    <Shield className="mr-1 h-3.5 w-3.5" />
+                    {t('context.viewPolicyDetail')}
+                  </Button>
+                )}
               </div>
             </div>
           )}

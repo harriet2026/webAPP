@@ -22,10 +22,10 @@ describe('list-row metadata readers', () => {
     expect(getRulePrimaryAction({ metadata: '{"primary_action":"quarantine"}' })).toBe('quarantine');
   });
 
-  it('falls back to none for a missing/unknown primary_action', () => {
-    expect(getRulePrimaryAction({ metadata: '{}' })).toBe('none');
-    expect(getRulePrimaryAction({ metadata: '{"primary_action":"bogus"}' })).toBe('none');
-    expect(getRulePrimaryAction({ metadata: undefined })).toBe('none');
+  it('falls back to proceed for a missing/unknown primary_action', () => {
+    expect(getRulePrimaryAction({ metadata: '{}' })).toBe('proceed');
+    expect(getRulePrimaryAction({ metadata: '{"primary_action":"bogus"}' })).toBe('proceed');
+    expect(getRulePrimaryAction({ metadata: undefined })).toBe('proceed');
   });
 
   it('reads scope as a string array', () => {

@@ -50,62 +50,55 @@ export function DispositionSummary({
   const t = useTranslations('advancedRulesFeature')
   const addons = effectiveAddons(primaryAction, addonsValue)
   const terminal = TERMINAL_ACTIONS.has(primaryAction)
-  const empty = primaryAction === 'none' && addons.length === 0
 
   return (
     <div className="border rounded-md p-3 space-y-3 overflow-y-auto" data-testid="disposition-summary">
-      {empty ? (
-        <p className="text-xs text-muted-foreground">{t('disposition.emptySummary')}</p>
-      ) : (
-        <>
-          <section className="rounded-md border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20 p-2">
-            <h4 className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
-              {t('disposition.policyGroup')}
-            </h4>
-            <p className="text-xs" data-testid="summary-action">
-              {t(`primaryActions.${primaryAction}` as never)}
-              {actionSummary ? ` — ${actionSummary}` : ''}
-            </p>
-          </section>
+      <section className="rounded-md border border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20 p-2">
+        <h4 className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
+          {t('disposition.policyGroup')}
+        </h4>
+        <p className="text-xs" data-testid="summary-action">
+          {t(`primaryActions.${primaryAction}` as never)}
+          {actionSummary ? ` — ${actionSummary}` : ''}
+        </p>
+      </section>
 
-          <section className="rounded-md border border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20 p-2">
-            <h4 className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">
-              {t('disposition.fullExpression')}
-            </h4>
-            {terminal ? (
-              <p className="text-xs text-muted-foreground" data-testid="summary-terminal">
-                {t('disposition.terminalNoAddons')}
-              </p>
-            ) : (
-              <ol className="text-xs list-decimal list-inside space-y-0.5" data-testid="summary-addon-list">
-                {addons.map((k) => (
-                  <li key={k}>{t(`addons.${k}` as never)}</li>
-                ))}
-              </ol>
-            )}
-          </section>
+      <section className="rounded-md border border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20 p-2">
+        <h4 className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">
+          {t('disposition.fullExpression')}
+        </h4>
+        {terminal ? (
+          <p className="text-xs text-muted-foreground" data-testid="summary-terminal">
+            {t('disposition.terminalNoAddons')}
+          </p>
+        ) : (
+          <ol className="text-xs list-decimal list-inside space-y-0.5" data-testid="summary-addon-list">
+            {addons.map((k) => (
+              <li key={k}>{t(`addons.${k}` as never)}</li>
+            ))}
+          </ol>
+        )}
+      </section>
 
-          <section>
-            <h4 className="text-xs font-semibold mb-1">{t('disposition.configSummary')}</h4>
-            <table className="w-full text-xs" data-testid="summary-config-table">
-              <thead>
-                <tr className="text-muted-foreground">
-                  <th className="text-left font-medium py-1">{t('disposition.columnPolicy')}</th>
-                  <th className="text-left font-medium py-1">{t('disposition.columnConfig')}</th>
+      <section>
+        <h4 className="text-xs font-semibold mb-1">{t('disposition.configSummary')}</h4>
+        <table className="w-full text-xs" data-testid="summary-config-table">
+          <thead>
+            <tr className="text-muted-foreground">
+              <th className="text-left font-medium py-1">{t('disposition.columnPolicy')}</th>
+              <th className="text-left font-medium py-1">{t('disposition.columnConfig')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {addons.map((k) => (
+              <tr key={k} className="border-t">
+                <td className="py-1 pr-2 align-top">{t(`addons.${k}` as never)}</td>
+                <td className="py-1 align-top break-all">{summarizeAddon(k, addonsValue)}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {addons.map((k) => (
-                  <tr key={k} className="border-t">
-                    <td className="py-1 pr-2 align-top">{t(`addons.${k}` as never)}</td>
-                    <td className="py-1 align-top break-all">{summarizeAddon(k, addonsValue)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        </>
-      )}
+            ))}
+          </tbody>
+        </table>
+      </section>
     </div>
   )
 }

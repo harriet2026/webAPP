@@ -8,15 +8,15 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { useApiRequest } from '@/lib/api/client';
-import { useTenant } from '@/hooks/use-tenant';
 import { getAgentState, putAgentState, getModelInfo } from '@/lib/api/threat-retro';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { useThreatRetroAccess } from './access';
 
 export function TopBar() {
   const t = useTranslations('threatRetro');
   const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
-  const { isAdmin } = useTenant();
+  const { canEdit } = useThreatRetroAccess();
   const qc = useQueryClient();
 
   const stateQuery = useQuery({
@@ -88,7 +88,7 @@ export function TopBar() {
           <span className="text-sm text-muted-foreground">{t('toggle.label')}</span>
           <Switch
             checked={enabled}
-            disabled={!isAdmin || toggle.isPending}
+            disabled={!canEdit || toggle.isPending}
             onCheckedChange={(c) => toggle.mutate(c)}
           />
         </div>

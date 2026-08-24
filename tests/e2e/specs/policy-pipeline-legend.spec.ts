@@ -13,12 +13,12 @@ test.use({ asRole: 'tenant_admin' });
 // decode them, and no action carried the one-line description the prototype
 // pairs with each swatch.
 const LEGEND = [
-  { key: 'deliver', label: '投递', desc: '正常投递收件箱' },
-  { key: 'tagDeliver', label: '标记投递', desc: '投递并标记可疑' },
+  { key: 'accept', label: '投递', desc: '正常投递收件箱' },
+  { key: 'proceed', label: '进行下一步', desc: '继续执行后续策略' },
   { key: 'quarantine', label: '隔离', desc: '移至隔离区待审' },
-  { key: 'review', label: '审核', desc: '进入人工审核队列' },
-  { key: 'block', label: '阻断', desc: '拒绝并退信' },
-  { key: 'drop', label: '丢弃', desc: '直接删除不通知' },
+  { key: 'audit', label: '审核', desc: '进入人工审核队列' },
+  { key: 'reject', label: '拒收', desc: '拒绝并退信' },
+  { key: 'discard', label: '丢弃', desc: '直接删除不通知' },
 ];
 
 test.describe('Policy pipeline action legend (/security/pipeline)', () => {

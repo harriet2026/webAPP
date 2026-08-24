@@ -61,16 +61,16 @@ describe('AggregateCard', () => {
     expect(onChange).toHaveBeenCalledExactlyOnceWith({ window_minutes: 1 });
   });
 
-  it('action=mark-delivery 且非观察态：TagDeliveryPanel 渲染在栅格下方', () => {
-    render(<AggregateCard detectionType="similar_email" value={baseConfig({ action: 'mark-delivery' })} onChange={vi.fn()} />);
+  it('action=accept 且非观察态：TagDeliveryPanel 渲染在栅格下方', () => {
+    render(<AggregateCard detectionType="similar_email" value={baseConfig({ action: 'accept' })} onChange={vi.fn()} />);
     expect(screen.getByTestId('similar-detection-tag-panel')).toBeInTheDocument();
   });
 
-  it('action=mark-delivery 但观察态开启：TagDeliveryPanel 不渲染', () => {
+  it('action=accept 但观察态开启：TagDeliveryPanel 不渲染', () => {
     render(
       <AggregateCard
         detectionType="similar_email"
-        value={baseConfig({ action: 'mark-delivery', observe_mode: true })}
+        value={baseConfig({ action: 'accept', observe_mode: true })}
         onChange={vi.fn()}
       />,
     );

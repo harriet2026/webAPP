@@ -37,7 +37,7 @@ export function defaultConfig(): SimilarDetectionConfig {
         window_minutes: 30,
         similarity_pct: 80,
         min_count: 10,
-        action: 'mark-delivery',
+        action: 'accept',
         tag_subject_enabled: true,
         tag_subject_position: 'prefix',
         tag_subject_content: '[相似邮件]',
@@ -45,7 +45,7 @@ export function defaultConfig(): SimilarDetectionConfig {
     },
     same_subject: {
       receive: { observe_mode: true, window_minutes: 60, similarity_pct: 90, min_count: 50, action: 'quarantine' },
-      send: { observe_mode: true, window_minutes: 60, similarity_pct: 90, min_count: 50, action: 'review' },
+      send: { observe_mode: true, window_minutes: 60, similarity_pct: 90, min_count: 50, action: 'audit' },
       internal: { observe_mode: false, window_minutes: 60, similarity_pct: 90, min_count: 50, action: 'quarantine' },
     },
     subject_normalization: {

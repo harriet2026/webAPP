@@ -2,6 +2,7 @@ export type NotifyFrequency = 'daily' | 'never' | 'custom';
 export type DurationMode = 'unlimited' | 'custom';
 export type RecallPolicyValue = 'recall' | 'notify' | 'wait';
 export type RecallNotifyFrequency = 'realtime' | 'hourly' | 'daily' | 'weekly';
+export type TimeoutTempDisposal = 'accept';
 
 // 顺序 = 后端 AllEmailTypes 顺序去掉 normal/subscription（这两类不进入隔离通知配置）。
 export const DISPOSAL_CATEGORY_KEYS = [
@@ -88,7 +89,8 @@ export interface DisposalReviewSettings {
   reviewer_active_end: string;
   // Plan 5 C11: the timeout-temp-disposal knobs live here (not on engine
   // params) because the sideline Session worker reads disposal_settings.
-  timeout_temp_disposal?: string;
+  timeout_temp_disposal?: TimeoutTempDisposal;
+  timeout_mark_enabled: boolean;
   timeout_mark_positions?: string[];
   timeout_mark_text?: string;
 }

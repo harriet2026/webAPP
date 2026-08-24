@@ -128,7 +128,7 @@ test.describe('RBL Filter', () => {
     const createResp = await apiClient.post('/rbl-filter/rules', {
       name: `pw-rbl-test-${uniqueSuffix()}`,
       match_mode: 'any',
-      product_action: 'block',
+      product_action: 'reject',
       priority: 100,
       is_active: true,
     });
@@ -170,7 +170,7 @@ test.describe('RBL Filter', () => {
     const createResp = await apiClient.post('/rbl-filter/rules', {
       name: ruleName,
       match_mode: 'any',
-      product_action: 'block',
+      product_action: 'reject',
       priority: 100,
       is_active: true,
     });
@@ -244,7 +244,7 @@ test.describe('RBL Filter', () => {
     const resp = await apiClient.post('/rbl-filter/rules', {
       name: `pw-del-${uniqueSuffix()}`,
       match_mode: 'any',
-      product_action: 'block',
+      product_action: 'reject',
       priority: 100,
       is_active: true,
     });
@@ -292,7 +292,7 @@ test.describe('RBL Filter', () => {
       const resp = await apiClient.post('/rbl-filter/rules', {
         name: `pw-bulk-${uniqueSuffix()}-${i}`,
         match_mode: 'any',
-        product_action: 'block',
+        product_action: 'reject',
         priority: 100 + i,
         is_active: true,
       });
@@ -329,7 +329,7 @@ test.describe('RBL Filter', () => {
     const resp = await apiClient.post('/rbl-filter/rules', {
       name: `pw-toggle-${uniqueSuffix()}`,
       match_mode: 'any',
-      product_action: 'block',
+      product_action: 'reject',
       priority: 100,
       is_active: true,
     });

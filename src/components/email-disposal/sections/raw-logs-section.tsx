@@ -8,6 +8,8 @@ import {
   ChevronRight,
   Copy,
   Download,
+  Loader2,
+  RefreshCw,
   Search,
   Server,
 } from 'lucide-react';
@@ -17,7 +19,11 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type { MailLifecycleLog, MailLogDetail } from '@/types/email-disposal-detail';
+import type {
+  MailLifecycleLog,
+  MailLifecycleNodeProgress,
+  MailLogDetail,
+} from '@/types/email-disposal-detail';
 
 interface RawLogsSectionProps {
   detail: MailLogDetail;
@@ -35,8 +41,13 @@ interface RawLogsSectionProps {
   // lines; otherwise an incomplete lifecycle looks authoritative.
   partial?: boolean;
   failedNodes?: string[];
+  nodes?: MailLifecycleNodeProgress[];
   loading?: boolean;
   error?: boolean;
+  onRetryModule?: (node: string, module: string) => void;
+  onRetryNode?: (node: string) => void;
+  // 节点/组件进度面板（原始日志顶部按服务聚合的完成情况）对租户管理员隐藏。
+  isTenantAdmin?: boolean;
 }
 
 function escapeRe(s: string): string {
@@ -496,8 +507,12 @@ export function RawLogsSection({
   truncated = false,
   partial = false,
   failedNodes = [],
+  nodes = [],
   loading = false,
   error = false,
+  onRetryModule,
+  onRetryNode,
+  isTenantAdmin = false,
 }: RawLogsSectionProps) {
   const t = useTranslations('emailDisposal.detail.rawLogs');
   const [query, setQuery] = useState('');
@@ -601,8 +616,10 @@ export function RawLogsSection({
       : loaded
         ? t('entriesBadge', { count: totalCount })
         : t('notLoaded');
-  const showInitialLoading = loading && !loaded;
-  const controlsDisabled = !loaded || loading || error || totalCount === 0;
+  const showInitialLoading = loading && totalCount === 0;
+  // Completed modules remain fully usable while slower siblings continue.
+  // Streaming must not turn already returned logs into a read-only preview.
+  const controlsDisabled = !loaded || error || totalCount === 0;
   const hasSearch = query.trim().length > 0;
 
   return (
@@ -645,7 +662,90 @@ export function RawLogsSection({
       </CollapsibleTrigger>
 
       <CollapsibleContent className="h-[var(--collapsible-panel-height)] overflow-hidden border-t opacity-100 transition-[height,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] data-[ending-style]:h-0 data-[ending-style]:opacity-0 data-[starting-style]:h-0 data-[starting-style]:opacity-0 motion-reduce:transition-none">
-        {partial && (
+        {nodes.length > 0 && !isTenantAdmin && (
+          <div data-testid="raw-logs-node-progress" className="space-y-2 border-b bg-muted/10 p-3">
+            {nodes.map((node) => {
+              const retryableModules = Object.values(node.modules).filter(
+                (module) => module.status === 'timed_out' || module.status === 'failed',
+              );
+              const retryableNode = node.status === 'timed_out' || node.status === 'failed' || retryableModules.length > 0;
+              return (
+                <div key={node.node} data-testid={`raw-logs-node-${node.node}`} className="rounded-lg border bg-background p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Server className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">{node.node}</span>
+                    <Badge variant={node.status === 'failed' ? 'destructive' : 'secondary'}>
+                      {node.status === 'querying'
+                        ? t('status.querying')
+                        : node.status === 'completed'
+                          ? t('status.completed')
+                          : node.status === 'partial'
+                            ? t('status.partial')
+                            : node.status === 'timed_out'
+                              ? t('status.timedOut')
+                              : t('status.failed')}
+                    </Badge>
+                    {node.elapsed_ms != null && (
+                      <span className="text-xs text-muted-foreground">
+                        {t('elapsed', { seconds: (node.elapsed_ms / 1000).toFixed(1) })}
+                      </span>
+                    )}
+                    {retryableNode && onRetryNode && (
+                      <Button type="button" variant="ghost" size="sm" onClick={() => onRetryNode(node.node)}>
+                        <RefreshCw className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                        {t('retryNode')}
+                      </Button>
+                    )}
+                  </div>
+                  {Object.keys(node.modules).length > 0 && (
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                      {Object.values(node.modules).map((module) => (
+                        <div
+                          key={module.module}
+                          data-testid={`raw-logs-module-${node.node}-${module.module}`}
+                          className="flex min-w-0 items-center gap-2 rounded-md border px-2.5 py-2 text-xs"
+                        >
+                          {module.status === 'querying' && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+                          <span className="min-w-0 flex-1 truncate font-medium">{module.module}</span>
+                          <span className={cn(
+                            module.status === 'timed_out' && 'text-amber-600 dark:text-amber-400',
+                            module.status === 'failed' && 'text-destructive',
+                            module.status === 'completed' && 'text-emerald-600 dark:text-emerald-400',
+                          )}>
+                            {module.status === 'querying'
+                              ? t('status.querying')
+                              : module.status === 'completed'
+                                ? t('moduleCompleted', { count: module.count })
+                                : module.status === 'timed_out'
+                                  ? t('status.timedOut')
+                                  : t('status.failed')}
+                          </span>
+                          {module.elapsed_ms != null && (
+                            <span className="text-muted-foreground">
+                              {t('elapsed', { seconds: (module.elapsed_ms / 1000).toFixed(1) })}
+                            </span>
+                          )}
+                          {(module.status === 'timed_out' || module.status === 'failed') && onRetryModule && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={t('retryModule', { module: module.module })}
+                              onClick={() => onRetryModule(node.node, module.module)}
+                            >
+                              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {partial && !isTenantAdmin && (
           <div
             data-testid="raw-logs-partial-warning"
             className="flex items-start gap-2 border-b border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"

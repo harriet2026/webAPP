@@ -1,10 +1,5 @@
 import type { AuthSpoofingAction } from '@/types/auth-spoofing';
 
-// i18n message keys cannot contain hyphens (next-intl treats `.` as the only
-// nesting separator, but a literal `-` inside a segment breaks key lookup and
-// falls back to showing the raw key string). Storage values like
-// 'mark-delivery' must stay hyphenated, so we camelCase only when building the
-// message key, e.g. 'mark-delivery' -> 'markDelivery'.
 export const toMessageKeySegment = (a: AuthSpoofingAction): string =>
   a.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
 
@@ -22,7 +17,7 @@ export function flowSubKey(a: AuthSpoofingAction, isPtr: boolean): string {
   if (a === 'reject') return 'flowSub.block';
   if (a === 'quarantine') return 'flowSub.quarantine';
   if (a === 'audit') return 'flowSub.review';
-  if (a === 'mark-delivery') return 'flowSub.tag';
+  if (a === 'proceed') return 'flowSub.tag';
   return 'flowSub.pass';
 }
 
@@ -32,8 +27,7 @@ const ACTION_SEVERITY: Record<AuthSpoofingAction, number> = {
   reject: 4,
   audit: 3.5,
   quarantine: 3,
-  'mark-delivery': 2,
-  accept: 1,
+  proceed: 2,
 };
 
 /**
@@ -43,7 +37,7 @@ const ACTION_SEVERITY: Record<AuthSpoofingAction, number> = {
  */
 export function dominantAction(
   group: Record<string, { action: AuthSpoofingAction }> | undefined,
-  fallback: AuthSpoofingAction = 'mark-delivery',
+  fallback: AuthSpoofingAction = 'proceed',
 ): AuthSpoofingAction {
   if (!group) return fallback;
   const actions = Object.values(group).map((item) => item.action);

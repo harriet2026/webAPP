@@ -44,13 +44,11 @@ describe('applyCopyToDirections (GT-11753 / GT-12208)', () => {
     expect(changed).toEqual([]);
   });
 
-  it('从 receive 复制时对目标做非接收方向降级', () => {
+  it('从 receive 复制时保留 proceed 语义', () => {
     const prev = base();
     const { directions, changed } = applyCopyToDirections(prev, 'receive', ['send']);
-    // 降级后的结果不应等于 receive 原样（否则说明降级没生效）。
-    if (changed.length > 0) {
-      expect(directions.send).not.toEqual(prev.receive);
-    }
+    expect(changed).toEqual(['send']);
+    expect(directions.send).toEqual(prev.receive);
   });
 
   it('复制产生的是深拷贝，后续改目标不串改源', () => {

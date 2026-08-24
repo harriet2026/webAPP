@@ -21,7 +21,6 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { AlertTriangle, ChevronDown, Mail, MapPin, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,8 +38,8 @@ interface SendReceiveContextCardProps {
   // Per-recipient delivery events, threaded straight through to
   // RecipientStatus (delivered-status detail line, DD-11 part 2).
   events?: MailChildEvent[];
-  // GT-12596：B4「查看策略命中详情」跳转安全分析区的处置依据卡（detail-modal
-  // 的 scrollToSection('analysis')）。未注入时回退「暂未实现」toast。
+  // GT-12596：B4「查看策略命中详情」只在存在真实跳转目标时展示。
+  // 目标由父层按产品开关选择安全分析区或概览处置依据。
   onViewPolicyDetail?: () => void;
 }
 
@@ -122,11 +121,6 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
   const statusCounts: Record<string, number> = {};
   for (const d of dispositions) statusCounts[d.status] = (statusCounts[d.status] ?? 0) + 1;
 
-  function notImplemented() {
-    toast.info(t('senderActions.notImplementedToast'));
-  }
-  // notImplemented 仍保留供 B4「查看策略命中详情」fallback 使用
-
   return (
     <div className="rounded-lg border bg-muted/30 p-4 space-y-3" data-testid="email-disposal-overview-context-card">
       <h3 className="flex items-center gap-2 text-sm font-semibold">
@@ -207,16 +201,18 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
           >
             <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
             <span>{t('context.notOperableWarning')}</span>
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0 text-xs"
-              data-testid="email-disposal-overview-context-view-policy"
-              onClick={onViewPolicyDetail ?? notImplemented}
-            >
-              <Shield className="mr-1 h-3 w-3" />
-              {t('context.viewPolicyDetail')}
-            </Button>
+            {onViewPolicyDetail && (
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-xs"
+                data-testid="email-disposal-overview-context-view-policy"
+                onClick={onViewPolicyDetail}
+              >
+                <Shield className="mr-1 h-3 w-3" />
+                {t('context.viewPolicyDetail')}
+              </Button>
+            )}
           </div>
         )}
 

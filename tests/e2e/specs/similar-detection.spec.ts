@@ -166,7 +166,7 @@ test.describe('相似检测 similarDetection（阶段5 综合策略，html_spec 
   test('同步到其他方向复制整份配置；域内卡默认展开标记面板；全不选后空态提示', async ({ authenticatedPage: page }) => {
     const drawer = await openSimilarDetectionDrawer(page);
 
-    // 域内卡默认 action=mark-delivery，标记面板展开，主题标记开启且内容为「[相似邮件]」。
+    // 域内卡默认 action=accept，标记面板展开，主题标记开启且内容为「[相似邮件]」。
     const internalCard = drawer.getByTestId('similar-detection-card-internal');
     const tagPanel = internalCard.getByTestId('similar-detection-tag-panel');
     await expect(tagPanel).toBeVisible();

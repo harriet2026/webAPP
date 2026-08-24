@@ -32,12 +32,11 @@ export function ipInRangeSimple(testIp: string, ruleIp: string): boolean {
 
 /** demo 动作 → 效果描述 i18n key（当前配置效果区）。 */
 export const DEMO_ACTION_EFFECT_KEY: Record<DemoAction, string> = {
-  block: 'ipFilter.effectBlock',
+  reject: 'ipFilter.effectBlock',
   quarantine: 'ipFilter.effectQuarantine',
-  drop: 'ipFilter.effectDrop',
-  review: 'ipFilter.effectReview',
-  deliver: 'ipFilter.effectDeliver',
-  tagDeliver: 'ipFilter.effectTagDeliver',
+  discard: 'ipFilter.effectDrop',
+  audit: 'ipFilter.effectReview',
+  accept: 'ipFilter.effectDeliver',
 };
 
 export interface IPConfigExample {
@@ -48,6 +47,7 @@ export interface IPConfigExample {
   effectKey: string;
   ip: string;
   action: DemoAction;
+  addWhitelistTag?: boolean;
 }
 
 /** 配置示例（对齐 demo configExamples）。 */
@@ -61,7 +61,7 @@ export function getConfigExamples(listType: IPFilterListType): IPConfigExample[]
         remarkKey: 'ipFilter.exampleSpamSourceRemark',
         effectKey: 'ipFilter.exampleSpamSourceEffect',
         ip: '203.0.113.0/24',
-        action: 'block' satisfies DemoBlacklistAction,
+        action: 'reject' satisfies DemoBlacklistAction,
       },
       {
         id: 'suspicious-ip',
@@ -82,7 +82,7 @@ export function getConfigExamples(listType: IPFilterListType): IPConfigExample[]
       remarkKey: 'ipFilter.exampleInternalNetworkRemark',
       effectKey: 'ipFilter.exampleInternalNetworkEffect',
       ip: '192.168.0.0/16',
-      action: 'deliver' satisfies DemoWhitelistAction,
+      action: 'accept' satisfies DemoWhitelistAction,
     },
     {
       id: 'partner-ip',
@@ -91,7 +91,8 @@ export function getConfigExamples(listType: IPFilterListType): IPConfigExample[]
       remarkKey: 'ipFilter.examplePartnerIpRemark',
       effectKey: 'ipFilter.examplePartnerIpEffect',
       ip: '10.0.0.0/8',
-      action: 'tagDeliver' satisfies DemoWhitelistAction,
+      action: 'accept' satisfies DemoWhitelistAction,
+      addWhitelistTag: true,
     },
   ];
 }

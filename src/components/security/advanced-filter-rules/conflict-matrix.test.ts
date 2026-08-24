@@ -28,7 +28,7 @@ describe('UI_ADDON_KEYS', () => {
 });
 
 describe('disabledAddons', () => {
-  const unrestricted: PrimaryAction[] = ['none', 'deliver', 'tagDeliver', 'review'];
+  const unrestricted: PrimaryAction[] = ['accept', 'proceed', 'audit'];
   it.each(unrestricted)('%s has no addon restrictions', (action) => {
     expect(disabledAddons(action)).toEqual([]);
   });

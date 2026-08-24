@@ -61,10 +61,6 @@ function mapApiErrorMessage(
     return t("errors.nameRequired");
   if (message.includes("condition_tree must not be empty"))
     return t("errors.conditionRequired");
-  if (message.includes("primary_action none requires at least one addon"))
-    return t("cannotSave.actionOrAddon");
-  if (message.includes("tagDeliver primary action requires emailTag addon"))
-    return t("cannotSave.tagDeliverEmailTag");
   // GT-12181: surface the role-aware range rather than the old fixed 1–100 text.
   if (message.includes("priority must be between")) {
     return t("errors.priorityRange", {
@@ -221,9 +217,7 @@ export function RuleEditorDrawer({
           })
         : conditionError
           ? t("errors.conditionRequired")
-          : !saveActionsOk
-            ? t("cannotSave.actionOrAddon")
-            : "";
+          : "";
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

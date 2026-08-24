@@ -134,3 +134,8 @@ export function useUnsavedGuard() {
   if (!ctx) throw new Error('useUnsavedGuard must be used within UnsavedGuardProvider');
   return ctx;
 }
+
+/** Module-local editors may be rendered in isolated tests/previews without the app shell. */
+export function useOptionalUnsavedGuard() {
+  return useContext(UnsavedGuardContext);
+}

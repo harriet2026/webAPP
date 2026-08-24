@@ -12,7 +12,7 @@ const base = {
   // GT-12707：检测条件从固定的 dim_a/dim_b 两条改为 conditions 数组（1~4 条），
   // dim_a/threshold_a 等旧字段降级为 API 映射用的可选字段，不再参与前端校验。
   conditions: [{ dim: 'ip_count' as const, threshold: 5 }],
-  or_enabled: false, action: 'review' as const,
+  or_enabled: false, action: 'audit' as const,
 };
 
 describe('behaviorControlSchema', () => {

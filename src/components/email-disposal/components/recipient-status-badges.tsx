@@ -18,7 +18,7 @@ import {
   normalizeRawStatusToDisplayStatus,
 } from '@/lib/email-log-action';
 import type { DisplayStatusEntry } from '@/types/email-disposal';
-import type { RecipientDisposition } from '@/types/phishing-detection';
+import type { RecipientDisposition } from '@/types/email-disposal-detail';
 
 export type Dimension = 'action' | 'status';
 // GT-12835：状态维度新增 delivering / failed 两类——accept 收件人 milter 时点
@@ -55,6 +55,10 @@ const STATUS_CATEGORY: Record<string, Category> = {
   in_delivery: 'delivering',
   deferred: 'delivering',
   quarantined: 'quarantine',
+  quarantine_pending: 'quarantine',
+  audit_pending: 'audit',
+  partial_recall_success: 'delivered',
+  recalled: 'delivered',
   sidelined: 'sideline',
   pending: 'sideline',
   reinjected: 'delivered',
@@ -65,9 +69,7 @@ const STATUS_CATEGORY: Record<string, Category> = {
   delivery_failed: 'failed',
   cancelled: 'cancelled',
   delivery_cancelled: 'cancelled',
-  quarantine_pending: 'quarantine',
   sideline_pending: 'sideline',
-  audit_pending: 'audit',
   recall_pending: 'delivering',
   recall_success: 'delivered',
   recall_failed: 'failed',

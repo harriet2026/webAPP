@@ -16,6 +16,7 @@ import {
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -34,7 +35,7 @@ const DIRECTIONS: { key: OverseasMailDirection; emoji: string; labelKey: string;
   { key: 'internal', emoji: '🔄', labelKey: 'overseasMail.directionInternal', descKey: 'overseasMail.directionInternalDesc' },
 ];
 
-const ACTIONS: OverseasMailAction[] = ['deliver', 'tagDeliver', 'quarantine', 'review', 'block', 'drop'];
+const ACTIONS: OverseasMailAction[] = ['accept', 'quarantine', 'audit', 'reject', 'discard'];
 
 const ACTION_LABEL_KEYS = OverseasMailActionLabels;
 
@@ -125,6 +126,17 @@ export function OverseasMailPage({ embedded, onDirtyChange }: { embedded?: boole
       directions: {
         ...prev.directions,
         [dir]: { ...prev.directions[dir], action },
+      },
+    }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleMarkChange = (dir: OverseasMailDirection, markEnabled: boolean) => {
+    setLocalConfig((prev) => ({
+      ...prev,
+      directions: {
+        ...prev.directions,
+        [dir]: { ...prev.directions[dir], mark_enabled: markEnabled },
       },
     }));
     setHasUnsavedChanges(true);
@@ -223,7 +235,7 @@ export function OverseasMailPage({ embedded, onDirtyChange }: { embedded?: boole
                           <SelectItem key={action} value={action}>
                             <div className="flex items-center gap-2">
                               <span>{t(ACTION_LABEL_KEYS[action])}</span>
-                              {(action === 'block' || action === 'drop') && (
+                              {(action === 'reject' || action === 'discard') && (
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger render={<AlertTriangle className="h-3 w-3 text-amber-500" />} />
@@ -236,6 +248,15 @@ export function OverseasMailPage({ embedded, onDirtyChange }: { embedded?: boole
                         ))}
                       </SelectContent>
                     </Select>
+                    {view.actionEditable && dirConfig?.action === 'accept' && (
+                      <label className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                        <Checkbox
+                          checked={!!dirConfig.mark_enabled}
+                          onCheckedChange={(checked) => handleMarkChange(dir.key, checked === true)}
+                        />
+                        {t('overseasMail.actionTagDeliver')}
+                      </label>
+                    )}
                   </TableCell>
                   <TableCell className="whitespace-normal">
                     <span

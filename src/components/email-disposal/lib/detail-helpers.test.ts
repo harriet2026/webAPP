@@ -277,6 +277,23 @@ describe('deriveHitSource', () => {
     expect(deriveHitSource({} as unknown as MailLogDetail)).toBeUndefined();
   });
 
+	test('uses the effective module when the legacy root policy_key is empty', () => {
+		expect(deriveHitSource({
+			disposal_basis: {
+				policy_key: '', rule_name: 'legacy-root', action: 'quarantine',
+				modules: [
+					{ policy_key: 'INTENT', rule_name: 'intent', action: 'quarantine', effective_for: ['a@example.test'] },
+				],
+			},
+		} as unknown as MailLogDetail)).toBe('rule');
+	});
+
+	test('a structured legacy rule with no policy_key is still a deterministic rule hit', () => {
+		expect(deriveHitSource({
+			disposal_basis: { policy_key: '', rule_name: 'baseline:cac_high_score', action: 'quarantine' },
+		} as unknown as MailLogDetail)).toBe('rule');
+	});
+
   // Only an intent-engine score wins over a policy-derived hitSource. Agent
   // confidence is displayed separately and must not replace this value.
   test('phish_agent_check.confidence does not replace a missing intent score', () => {

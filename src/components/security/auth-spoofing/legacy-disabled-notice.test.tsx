@@ -10,7 +10,9 @@ import en from '@/../messages/en.json';
 import ru from '@/../messages/ru.json';
 import th from '@/../messages/th.json';
 
-const wrap = (ui: React.ReactNode, messages: any = zh, locale = 'zh') => (
+type IntlMessages = React.ComponentProps<typeof NextIntlClientProvider>['messages'];
+
+const wrap = (ui: React.ReactNode, messages: IntlMessages = zh, locale = 'zh') => (
   <NextIntlClientProvider locale={locale} messages={messages}>
     {ui}
   </NextIntlClientProvider>
@@ -29,20 +31,19 @@ function protocolConfig(overrides: Partial<ProtocolChecksConfig> = {}): Protocol
     spf: {
       fail: item('reject'),
       softfail: item('quarantine'),
-      // 存量行：旧 UI 的「允许」写成 {enabled:false, action:'accept'}，含义是这项检查关着。
-      none: item('accept', false),
-      temperror: item('mark-delivery'),
+      none: item('proceed', false),
+      temperror: item('proceed'),
     },
-    dkim: { fail: item('quarantine'), neutral: item('quarantine'), partial: item('mark-delivery'), none: item('mark-delivery') },
-    dmarc: { reject: item('reject'), quarantine: item('quarantine'), none: item('mark-delivery') },
-    ptr: { noptr: item('mark-delivery'), nomatch: item('quarantine'), ehlo_mismatch: item('quarantine') },
+    dkim: { fail: item('quarantine'), neutral: item('quarantine'), partial: item('proceed'), none: item('proceed') },
+    dmarc: { reject: item('reject'), quarantine: item('quarantine'), none: item('proceed') },
+    ptr: { noptr: item('proceed'), nomatch: item('quarantine'), ehlo_mismatch: item('quarantine') },
     ...overrides,
   };
 }
 
 function formatConfig(overrides: Partial<FormatChecksConfig> = {}): FormatChecksConfig {
   return {
-    mailfrom_empty: item('accept', false),
+    mailfrom_empty: item('proceed', false),
     mailfrom_invalid: item('reject'),
     envelope_header_mismatch: item('quarantine'),
     ...overrides,
@@ -59,7 +60,7 @@ describe('存量 {enabled:false} 检查项的未启用提示', () => {
 
   it('协议检查：全部启用时不出现未启用提示', () => {
     const cfg = protocolConfig();
-    cfg.spf.none = item('mark-delivery');
+    cfg.spf.none = item('proceed');
     render(wrap(<ProtocolChecksSection config={cfg} onChange={() => {}} />));
     expect(screen.queryByTestId('legacy-disabled-spf-none')).toBeNull();
     expect(screen.queryByText(/一旦把此项改为其他动作/)).toBeNull();
@@ -91,14 +92,14 @@ describe('存量 {enabled:false} 检查项的未启用提示', () => {
   });
 });
 
-describe('「允许」已从认证仿冒的动作下拉里移除', () => {
+describe('「投递」已从认证仿冒的动作下拉里移除', () => {
   it('CheckItemRow 的动作下拉不再包含 accept', () => {
     render(
       wrap(
         <CheckItemRow label="显示名仿冒" item={item('quarantine')} onChange={() => {}} />,
       ),
     );
-    // 「允许」是 accept 的中文文案（authSpoofing.action.accept）
-    expect(screen.queryByRole('option', { name: '允许' })).toBeNull();
+    // 「投递」是 accept 的中文文案（authSpoofing.action.accept）
+    expect(screen.queryByRole('option', { name: '投递' })).toBeNull();
   });
 });

@@ -1,5 +1,14 @@
 import type { DisplayStatus, DisposalBasis } from './email-disposal';
-import type { MailChildEvent, MailLifecycleLog, MailLifecycleLogsResponse } from './log';
+import type {
+  MailChildEvent,
+  MailLifecycleLog,
+  MailLifecycleLogsResponse,
+  MailLifecycleModuleProgress,
+  MailLifecycleModuleResult,
+  MailLifecycleModuleStatus,
+  MailLifecycleNodeProgress,
+  MailLifecycleNodeStatus,
+} from './log';
 
 export interface CACResult {
   result_code?: string;
@@ -234,7 +243,15 @@ export interface PhishAgentRecommendedAction {
 }
 
 export type { MailChildEvent };
-export type { MailLifecycleLog, MailLifecycleLogsResponse };
+export type {
+  MailLifecycleLog,
+  MailLifecycleLogsResponse,
+  MailLifecycleModuleProgress,
+  MailLifecycleModuleResult,
+  MailLifecycleModuleStatus,
+  MailLifecycleNodeProgress,
+  MailLifecycleNodeStatus,
+};
 
 export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped';
 

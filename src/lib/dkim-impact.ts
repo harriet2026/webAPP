@@ -1,9 +1,9 @@
 // DKIM impact detection for advanced filter rules editor
 
-export type PrimaryAction = 'block' | 'quarantine' | 'review' | 'accept' | 'discard' | 'tagDeliver' | 'sideline'
+export type PrimaryAction = 'reject' | 'quarantine' | 'audit' | 'accept' | 'discard' | 'proceed' | 'sideline'
 export type AddonKey = 'detailedLog' | 'emailTag' | 'disclaimer' | 'modifyHeader' | 'adminNotify' | 'deleteAttachment' | 'forwardServer' | 'externalReminder'
 
-const DKIM_IMPACTING_ACTIONS: Set<PrimaryAction> = new Set(['tagDeliver'])
+const DKIM_IMPACTING_ACTIONS: Set<PrimaryAction> = new Set(['proceed'])
 const DKIM_IMPACTING_ADDONS: Set<AddonKey> = new Set(['deleteAttachment', 'disclaimer', 'externalReminder', 'emailTag', 'modifyHeader'])
 
 export interface DkimImpactForm {

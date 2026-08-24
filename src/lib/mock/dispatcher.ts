@@ -62,6 +62,19 @@ import {
   mockDisposalPendingProbe,
   mockInboundAuditPending,
   mockPhishingStats,
+  mockPhishingDetectionLogs,
+  mockPhishingDetectionDetail,
+  mockPhishingControl,
+  mockPutPhishingControl,
+  mockPhishingConfig,
+  mockPutPhishingConfig,
+  mockPhishingAnalysisConfig,
+  mockPutPhishingAnalysisConfig,
+  mockPhishingAdmissionRules,
+  mockCreatePhishingAdmissionRule,
+  mockUpdatePhishingAdmissionRule,
+  mockDeletePhishingAdmissionRule,
+  mockSetPhishingAdmissionRuleStatus,
   mockSpoofingStats,
   mockThreatRetroStats,
   mockAgentCenterOverview,
@@ -225,6 +238,40 @@ import type { OpsDimension, OpsTopCount } from '@/lib/api/ops-top';
 import { rbacSubmodulesForScope, type RbacScope } from '@/lib/rbac/rbac-modules';
 import { CONDITIONS, type PanelKind } from '@/components/security/advanced-filter-rules/catalogue';
 import type { FieldDef } from '@/types/unified-rules';
+import type { PhishAdmissionRuleUpdate, PhishAdmissionRuleWrite, PhishAgentConfigPutRequest, PhishAgentControlPutRequest, PhishAnalysisConfigPutRequest } from '@/types/phishing-config';
+
+type MockPhishingConfigRequest = PhishAgentConfigPutRequest;
+type MockPhishingAnalysisRequest = PhishAnalysisConfigPutRequest;
+type MockPhishingAdmissionCreateRequest = PhishAdmissionRuleWrite;
+type MockPhishingAdmissionUpdateRequest = PhishAdmissionRuleUpdate;
+
+function bodyAs<T>(body: unknown): T | undefined {
+  return body && typeof body === 'object' ? body as T : undefined;
+}
+
+function admissionCreateRequest(body: unknown): PhishAdmissionRuleWrite {
+  const value = bodyAs<MockPhishingAdmissionCreateRequest>(body);
+  if (!value) throw new Error('mock admission rule request body required');
+  return value;
+}
+
+function admissionUpdateRequest(body: unknown): PhishAdmissionRuleUpdate {
+  const value = bodyAs<MockPhishingAdmissionUpdateRequest>(body);
+  if (!value) throw new Error('mock admission rule request body required');
+  return value;
+}
+
+function configRequest(body: unknown): PhishAgentConfigPutRequest {
+  const value = bodyAs<MockPhishingConfigRequest>(body);
+  if (!value) throw new Error('mock phishing config request body required');
+  return value;
+}
+
+function analysisRequest(body: unknown): PhishAnalysisConfigPutRequest {
+  const value = bodyAs<MockPhishingAnalysisRequest>(body);
+  if (!value) throw new Error('mock phishing analysis config request body required');
+  return value;
+}
 
 export interface MockRequest {
   method: string;
@@ -1637,10 +1684,12 @@ const routes: Route[] = [
           ? (params.match_mode as 'any' | 'specific')
           : undefined;
       const productAction =
-        params.product_action === 'block' ||
+        params.product_action === 'reject' ||
         params.product_action === 'quarantine' ||
-        params.product_action === 'mark'
-          ? (params.product_action as 'block' | 'quarantine' | 'mark')  // 旧枚举，与 mock 存量数据保持一致
+        params.product_action === 'audit' ||
+        params.product_action === 'discard' ||
+        params.product_action === 'greylist'
+          ? params.product_action
           : undefined;
       return {
         status: 200,
@@ -2345,6 +2394,55 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/phishing-agent/stats',
     handler: () => ({ status: 200, data: mockPhishingStats() }),
+  },
+  {
+    method: 'GET',
+    pattern: '/phishing-agent/detection-logs',
+    handler: () => ({ status: 200, data: mockPhishingDetectionLogs() }),
+  },
+  {
+    method: 'GET',
+    pattern: /^\/phishing-agent\/detection-logs\/[^/]+$/,
+    handler: (req) => {
+      const detail = mockPhishingDetectionDetail(req.path.split('?')[0].split('/').at(-1) ?? '');
+      return detail ? { status: 200, data: detail } : { status: 404, data: { error: { code: 'not_found', message: 'not found' } } };
+    },
+  },
+  {
+    method: 'GET', pattern: '/phishing-agent/control', handler: () => ({ status: 200, data: mockPhishingControl() }),
+  },
+  {
+    method: 'PUT', pattern: '/phishing-agent/control', handler: (req) => {
+      const body = bodyAs<PhishAgentControlPutRequest>(req.body);
+      return { status: 200, data: mockPutPhishingControl(body?.enabled === true) };
+    },
+  },
+  {
+    method: 'GET', pattern: '/phishing-agent/config', handler: () => ({ status: 200, data: mockPhishingConfig() }),
+  },
+  {
+    method: 'PUT', pattern: '/phishing-agent/config', handler: (req) => ({ status: 200, data: mockPutPhishingConfig(configRequest(req.body)) }),
+  },
+  {
+    method: 'GET', pattern: '/phishing-agent/analysis-config', handler: () => ({ status: 200, data: mockPhishingAnalysisConfig() }),
+  },
+  {
+    method: 'PUT', pattern: '/phishing-agent/analysis-config', handler: (req) => ({ status: 200, data: mockPutPhishingAnalysisConfig(analysisRequest(req.body)) }),
+  },
+  {
+    method: 'GET', pattern: '/phishing-agent/admission-rules', handler: () => ({ status: 200, data: { items: mockPhishingAdmissionRules() } }),
+  },
+  {
+    method: 'POST', pattern: '/phishing-agent/admission-rules', handler: (req) => ({ status: 201, data: mockCreatePhishingAdmissionRule(admissionCreateRequest(req.body)) }),
+  },
+  {
+    method: 'PUT', pattern: /^\/phishing-agent\/admission-rules\/\d+\/status$/, handler: (req) => { const id = Number(req.path.split('/').at(-2)); const body = bodyAs<{ enabled?: boolean }>(req.body); return mockSetPhishingAdmissionRuleStatus(id, body?.enabled === true) ? { status: 204, data: null } : { status: 404, data: { error: { code: 'not_found', message: 'admission rule not found' } } }; },
+  },
+  {
+    method: 'PUT', pattern: /^\/phishing-agent\/admission-rules\/\d+$/, handler: (req) => { const id = Number(req.path.split('/').at(-1)); return mockUpdatePhishingAdmissionRule(id, admissionUpdateRequest(req.body)) ? { status: 204, data: null } : { status: 404, data: { error: { code: 'not_found', message: 'admission rule not found' } } }; },
+  },
+  {
+    method: 'DELETE', pattern: /^\/phishing-agent\/admission-rules\/\d+$/, handler: (req) => mockDeletePhishingAdmissionRule(Number(req.path.split('/').at(-1))) ? { status: 204, data: null } : { status: 404, data: { error: { code: 'not_found', message: 'admission rule not found' } } },
   },
   {
     method: 'GET',

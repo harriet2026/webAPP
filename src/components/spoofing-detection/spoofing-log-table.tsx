@@ -34,7 +34,7 @@ function scoreClass(score: number): string {
 }
 function dispositionClass(d: string): string {
   if (d === 'reject' || d === 'discard' || d === 'quarantine') return 'bg-rose-500/15 text-rose-700 dark:text-rose-300';
-  if (d === 'mark') return 'bg-amber-500/15 text-amber-700 dark:text-amber-300';
+  if (d === 'accept') return 'bg-amber-500/15 text-amber-700 dark:text-amber-300';
   return 'bg-muted text-muted-foreground';
 }
 

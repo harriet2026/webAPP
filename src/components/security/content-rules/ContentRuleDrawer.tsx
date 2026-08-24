@@ -84,10 +84,10 @@ type ScopeChoice = 'subject' | 'body' | 'header' | 'attachment_names';
 type FormErrors = Partial<Record<'name' | 'priority' | 'direction' | 'match_content' | 'regex' | 'scope' | 'header' | 'valid_until', string>>;
 
 const ACTIONS: ContentRuleUiAction[] = [
-  'deliver',
-  'isolate',
-  'review',
-  'block',
+  'accept',
+  'quarantine',
+  'audit',
+  'reject',
   'discard',
 ];
 
@@ -142,7 +142,8 @@ function makeInitialState(rule: ContentRuleRuleView | null) {
           email_type: base.email_type,
         } : {}),
       },
-      uiAction: 'isolate' as ContentRuleUiAction,
+      uiAction: 'quarantine' as ContentRuleUiAction,
+      markEnabled: false,
       headerName: DEFAULT_HEADER_NAME,
       headerValue: DEFAULT_HEADER_VALUE,
     };
@@ -166,6 +167,7 @@ function makeInitialState(rule: ContentRuleRuleView | null) {
       email_type: rule.rule.email_type,
     },
     uiAction: toContentRuleUiAction(action, rule.resolved.mark_config),
+    markEnabled: !!rule.resolved.mark_config?.add_headers?.length,
     headerName: header?.name || DEFAULT_HEADER_NAME,
     headerValue: header?.value || DEFAULT_HEADER_VALUE,
   };
@@ -176,8 +178,9 @@ function serializeState(
   uiAction: ContentRuleUiAction,
   headerName: string,
   headerValue: string,
+  markEnabled: boolean,
 ) {
-  return JSON.stringify({ draft, uiAction, headerName, headerValue });
+  return JSON.stringify({ draft, uiAction, headerName, headerValue, markEnabled });
 }
 
 export function ContentRuleDrawer({
@@ -195,7 +198,8 @@ export function ContentRuleDrawer({
   const { isSystemAdmin } = useAuth();
   const range = useMemo(() => getRulePriorityRange(isSystemAdmin), [isSystemAdmin]);
   const [draft, setDraft] = useState<ContentRuleFormData>(defaultDraft);
-  const [uiAction, setUiAction] = useState<ContentRuleUiAction>('isolate');
+  const [uiAction, setUiAction] = useState<ContentRuleUiAction>('quarantine');
+  const [markEnabled, setMarkEnabled] = useState(false);
   const [headerName, setHeaderName] = useState(DEFAULT_HEADER_NAME);
   const [headerValue, setHeaderValue] = useState(DEFAULT_HEADER_VALUE);
   const [actionTouched, setActionTouched] = useState(false);
@@ -220,7 +224,8 @@ export function ContentRuleDrawer({
     setUiAction(next.uiAction);
     setHeaderName(next.headerName);
     setHeaderValue(next.headerValue);
-    initialState.current = serializeState(next.draft, next.uiAction, next.headerName, next.headerValue);
+    setMarkEnabled(next.markEnabled);
+    initialState.current = serializeState(next.draft, next.uiAction, next.headerName, next.headerValue, next.markEnabled);
     setActionTouched(false);
     setErrors({});
     setTestContent('');
@@ -230,7 +235,7 @@ export function ContentRuleDrawer({
     setTestOpen(false);
   }, [editingRule, open]);
 
-  const dirty = initialState.current !== serializeState(draft, uiAction, headerName, headerValue);
+  const dirty = initialState.current !== serializeState(draft, uiAction, headerName, headerValue, markEnabled);
 
   const requestClose = useCallback(() => {
     if (dirty) {
@@ -311,7 +316,7 @@ export function ContentRuleDrawer({
     }
     if (!draft.match_content.trim()) next.match_content = t('contentRules.matchContentRequired');
     if (!draft.scopes.length) next.scope = t('contentRules.atLeastOneScope');
-    if (uiAction === 'tag_deliver' && (!headerName.trim() || !headerValue.trim())) {
+    if (uiAction === 'accept' && markEnabled && (!headerName.trim() || !headerValue.trim())) {
       next.header = t('contentRules.headerRequired');
     }
     if (draft.valid_until && Number.isNaN(new Date(draft.valid_until).getTime())) {
@@ -342,7 +347,7 @@ export function ContentRuleDrawer({
         name: draft.name.trim(),
         match_content: draft.match_content.trim(),
         directions,
-        mark_config: uiAction === 'tag_deliver'
+        mark_config: uiAction === 'accept' && markEnabled
           ? {
               add_headers: [{ name: headerName.trim(), value: headerValue.trim() }],
               notify_admin: false,
@@ -351,7 +356,7 @@ export function ContentRuleDrawer({
           : undefined,
         block_alert_config: actionTouched ? undefined : draft.block_alert_config,
       });
-      initialState.current = serializeState(draft, uiAction, headerName, headerValue);
+      initialState.current = serializeState(draft, uiAction, headerName, headerValue, markEnabled);
       onOpenChange(false);
     } catch (error) {
       // The page-level submit handler owns the API error toast. Keep the drawer open.
@@ -410,14 +415,16 @@ export function ContentRuleDrawer({
   };
 
   const legacyScopes = draft.scopes.filter((scope) => scope === 'attachment_types' || scope === 'attachment_hash' || scope === 'urls');
-  const actionLabel = (action: ContentRuleUiAction) => {
-    const suffix = action.split('_').map((part) => part[0].toUpperCase() + part.slice(1)).join('');
-    return t(`contentRules.action${suffix}` as 'contentRules.actionDeliver');
+  const actionLabelKeys: Record<ContentRuleUiAction, string> = {
+    accept: 'contentRules.actionAccept', quarantine: 'contentRules.actionQuarantine', audit: 'contentRules.actionAudit',
+    reject: 'contentRules.actionReject', discard: 'contentRules.actionDiscard',
   };
-  const actionHint = (action: ContentRuleUiAction) => {
-    const suffix = action.split('_').map((part) => part[0].toUpperCase() + part.slice(1)).join('');
-    return t(`contentRules.action${suffix}Hint` as 'contentRules.actionDeliverHint');
+  const actionHintKeys: Record<ContentRuleUiAction, string> = {
+    accept: 'contentRules.actionDeliverHint', quarantine: 'contentRules.actionIsolateHint', audit: 'contentRules.actionReviewHint',
+    reject: 'contentRules.actionBlockHint', discard: 'contentRules.actionDiscardHint',
   };
+  const actionLabel = (action: ContentRuleUiAction) => t(actionLabelKeys[action] as 'contentRules.actionAccept');
+  const actionHint = (action: ContentRuleUiAction) => t(actionHintKeys[action] as 'contentRules.actionDeliverHint');
 
   const applyExample = (
     matchType: ContentRuleFormData['match_type'],
@@ -637,10 +644,15 @@ export function ContentRuleDrawer({
                     </Select>
                     <p className="mt-2 text-xs text-muted-foreground">{t('contentRules.actionHint')}</p>
                   </Field>
-                  {uiAction === 'tag_deliver' && (
+                  {uiAction === 'accept' && (
                     <div className="grid grid-cols-[100px_minmax(0,1fr)] gap-3">
                       <span />
                       <div className="space-y-3 rounded-md border border-dashed border-cyan-300 bg-cyan-50/40 p-4 dark:border-cyan-800 dark:bg-cyan-950/20">
+                        <label className="flex items-center gap-2 text-sm">
+                          <Checkbox checked={markEnabled} onCheckedChange={(checked) => setMarkEnabled(checked === true)} />
+                          {t('contentRules.actionTagDeliver')}
+                        </label>
+                        {markEnabled && <>
                         <p className="text-xs text-muted-foreground">{t('contentRules.headerOnlyTagHint')}</p>
                         <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
                           <div className="space-y-1">
@@ -653,6 +665,7 @@ export function ContentRuleDrawer({
                           </div>
                         </div>
                         {errors.header && <p className="text-xs text-destructive">{errors.header}</p>}
+                        </>}
                       </div>
                     </div>
                   )}
@@ -695,9 +708,9 @@ export function ContentRuleDrawer({
                     <Lightbulb className="h-4 w-4" />{t('contentRules.viewExamples')}
                   </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-3 space-y-2">
-                    <ExampleButton title={t('contentRules.exampleKeywordReject')} description={t('contentRules.exampleKeywordRejectDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{17}[\\dXx]', ['text_body', 'html_body'], 'block')} />
-                    <ExampleButton title={t('contentRules.exampleRegexQuarantine')} description={t('contentRules.exampleRegexQuarantineDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{16,19}', ['text_body', 'html_body'], 'review')} />
-                    <ExampleButton title={t('contentRules.exampleContentGroupAudit')} description={t('contentRules.exampleContentGroupAuditDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('keyword', '敏感词1|敏感词2', ['subject', 'text_body', 'html_body'], 'block')} />
+                    <ExampleButton title={t('contentRules.exampleKeywordReject')} description={t('contentRules.exampleKeywordRejectDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{17}[\\dXx]', ['text_body', 'html_body'], 'reject')} />
+                    <ExampleButton title={t('contentRules.exampleRegexQuarantine')} description={t('contentRules.exampleRegexQuarantineDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{16,19}', ['text_body', 'html_body'], 'audit')} />
+                    <ExampleButton title={t('contentRules.exampleContentGroupAudit')} description={t('contentRules.exampleContentGroupAuditDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('keyword', '敏感词1|敏感词2', ['subject', 'text_body', 'html_body'], 'reject')} />
                   </CollapsibleContent>
                 </Collapsible>
 
@@ -847,22 +860,20 @@ function Field({
 
 function actionTextClass(action: ContentRuleUiAction) {
   switch (action) {
-    case 'deliver': return 'text-emerald-600 dark:text-emerald-400';
-    case 'tag_deliver': return 'text-cyan-600 dark:text-cyan-400';
-    case 'isolate': return 'text-orange-600 dark:text-orange-400';
-    case 'review': return 'text-amber-600 dark:text-amber-400';
-    case 'block': return 'text-red-600 dark:text-red-400';
+    case 'accept': return 'text-emerald-600 dark:text-emerald-400';
+    case 'quarantine': return 'text-orange-600 dark:text-orange-400';
+    case 'audit': return 'text-amber-600 dark:text-amber-400';
+    case 'reject': return 'text-red-600 dark:text-red-400';
     case 'discard': return 'text-slate-600 dark:text-slate-300';
   }
 }
 
 function actionBadgeClass(action: ContentRuleUiAction) {
   switch (action) {
-    case 'deliver': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300';
-    case 'tag_deliver': return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300';
-    case 'isolate': return 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300';
-    case 'review': return 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
-    case 'block': return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300';
+    case 'accept': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300';
+    case 'quarantine': return 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300';
+    case 'audit': return 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
+    case 'reject': return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300';
     case 'discard': return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200';
   }
 }

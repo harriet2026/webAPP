@@ -129,7 +129,9 @@ describe('EntityDetection', () => {
     await user.click(screen.getByTestId(`email-disposal-overview-entity-link-${key}-blacklist-domain`));
 
     expect(requestFn).not.toHaveBeenCalled();
-    expect(screen.getByTestId('email-disposal-entity-blacklist-dialog')).toBeInTheDocument();
+    const dialog = screen.getByTestId('email-disposal-entity-blacklist-dialog');
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveTextContent('emailDisposal.detail.overview.entityDetection.confirmImpact.domain');
     expect(screen.getByTestId('email-disposal-entity-blacklist-value')).toHaveTextContent('evil.com');
     await user.click(screen.getByTestId('email-disposal-entity-blacklist-confirm'));
 

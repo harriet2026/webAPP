@@ -111,10 +111,12 @@ interface RecipientStatusProps {
   // Delivery events (mail_child_events) for the per-recipient delivery-detail
   // line rendered on delivered groups only -- see tDelivery below (DD-11 part 2).
   events?: MailChildEvent[];
+  /** Render the same live disposition actions in the detail-sheet header. */
+  showHeaderActions?: boolean;
 }
 
 export function RecipientStatus({
-  recipient_dispositions, mailLogId, sender, apiRequest, onDisposed, readOnly, events,
+  recipient_dispositions, mailLogId, sender, apiRequest, onDisposed, readOnly, events, showHeaderActions = false,
 }: RecipientStatusProps) {
   const t = useTranslations('emailDisposal.detail.overview');
   // Separate scope reusing tabs/delivery-tab.tsx's existing, already-translated
@@ -157,6 +159,7 @@ export function RecipientStatus({
   // operable subset -- otherwise it could never reach a fully-checked state
   // once a non-operable row exists.
   const operableGroups = groups.filter((g) => g.actions.length > 0);
+  const headerActions = Array.from(new Set(operableGroups.flatMap((group) => group.actions)));
 
   const toggleGroup = useCallback((key: string) => {
     setSelected((prev) => {
@@ -180,6 +183,14 @@ export function RecipientStatus({
 
   return (
     <div className="space-y-3" data-testid="email-disposal-recipient-status">
+      {showHeaderActions && headerActions.length > 0 ? (
+        <div className="flex flex-wrap gap-2" data-testid="email-disposal-recipient-header-actions">
+          {headerActions.map((action) => {
+            const Icon = ACTION_ICONS[action];
+            return <Button key={action} size="sm" variant={action === 'discard' ? 'destructive' : 'outline'} disabled={readOnly} onClick={() => openAction(action, operableGroups.map((group) => group.key))} className={cn(action === 'deliver' && 'border-transparent bg-emerald-600 text-white data-[hovered=true]:bg-emerald-700')}><Icon className="mr-1.5 size-3.5" />{t(`recipientStatus.action.${action}`)}</Button>;
+          })}
+        </div>
+      ) : null}
       {/* D1: matrix header bar -- "收件人状态 (N 人)" + per-status distribution */}
       <div
         className="flex flex-wrap items-center gap-2 text-sm"

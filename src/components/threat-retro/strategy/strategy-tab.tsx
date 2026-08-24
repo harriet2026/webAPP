@@ -5,7 +5,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useApiRequest } from '@/lib/api/client';
-import { useTenant } from '@/hooks/use-tenant';
 import {
   listStrategies,
   updateStrategy,
@@ -17,12 +16,13 @@ import { StrategySheet } from './strategy-sheet';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import type { ThreatRetroStrategy } from '@/types/threat-retro';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { useThreatRetroAccess } from '../access';
 
 export function StrategyTab() {
   const t = useTranslations('threatRetroStrategy');
   const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
-  const { isAdmin } = useTenant();
+  const { canEdit } = useThreatRetroAccess();
   const qc = useQueryClient();
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -79,7 +79,7 @@ export function StrategyTab() {
       <StrategyListTable
         data={listQuery.data ?? []}
         isLoading={listQuery.isLoading}
-        isAdmin={isAdmin}
+        isAdmin={canEdit}
         onEdit={(s) => {
           setEditing(s);
           setSheetOpen(true);

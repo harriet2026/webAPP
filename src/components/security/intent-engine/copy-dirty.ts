@@ -1,6 +1,4 @@
 import type { IntentDirection, IntentEngineConfig } from '@/types/intent-engine';
-import { INTENT_TYPES } from '@/types/intent-engine';
-import { downgradeForNonReceive } from './defaults';
 
 type Directions = IntentEngineConfig['directions'];
 
@@ -47,13 +45,6 @@ export function applyCopyToDirections(
     if (target === source) continue;
 
     const copied = structuredClone(prev[source]);
-    // 接收方向独有的能力在外发/域内不适用，需降级后再落地。
-    if (source === 'receive') {
-      for (const it of INTENT_TYPES) {
-        copied[it] = downgradeForNonReceive(copied[it]);
-      }
-    }
-
     // 目标方向本来就等于复制结果时不标脏，避免 v1 的「无需修改却报未保存」误报。
     if (JSON.stringify(prev[target]) === JSON.stringify(copied)) continue;
 

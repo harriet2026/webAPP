@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 48,
+  "current_version": 49,
   "history": [
     {
       "version": 1,
@@ -454,6 +454,15 @@
       "ticket": "GT-12556",
       "incremental": true,
       "summary": "GT-12807.html v14→v15：新增 GT-12556「攻击时段分析：去掉雍总的邮件类型陈列模块」独立一级需求目录。移除邮件安全总览攻击时段分析堆叠柱状图底部的攻击类型图例及其布局预留空间；保留方向筛选、日内/周内切换、峰值提示、柱状图和高峰时段列表；采用用户提供的修改后页面截图 gt12556-attack-time-after.png 作为结果态证据。"
+    },
+    {
+      "version": 49,
+      "generated_at": "2026-08-13",
+      "webapp_commit": "9ec9dc4",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-12938",
+      "incremental": true,
+      "summary": "合并 GT-12938 源分支在 9d960cba42936bfabcd48b7b7c31bf0df0edb442 之后的全部变更：策略流水线 Stage 3 内容规则调整为首个模块；附件安全反病毒、扫描超时、加密附件解密失败及图片检测动作按审核/进行下一步语义统一；意图引擎分类与阈值动作收敛为 proceed/quarantine/audit/discard，proceed 仅表示执行可选附加策略后继续匹配，不是白名单投递；同步清理旧动作标签与枚举值，并导入源分支最终版 GT-12938 HTML 规格及 11 张截图。"
     }
   ]
 }

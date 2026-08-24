@@ -24,7 +24,6 @@ import { useApiRequest } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Info, CheckCircle2, Copy, RotateCcw, AlertTriangle } from 'lucide-react';
 import { PipelinePanelHeader } from '../PipelinePanelHeader';
 import { useModuleMaster } from '../useModuleMaster';
@@ -217,8 +216,12 @@ export function IntentEnginePage({
     for (const d of ['receive', 'send', 'internal'] as IntentDirection[]) {
       for (const it of INTENT_TYPES) {
         const mc = payload.directions[d][it].mark_config;
-        for (const m of [mc?.subject_mark, mc?.body_mark]) {
-          if (m?.enabled && !m.text.trim()) m.text = DEFAULT_MARK_TEXT[it];
+        if (mc?.subject_mark?.enabled && !mc.subject_mark.text.trim()) {
+          mc.subject_mark.text = DEFAULT_MARK_TEXT[it];
+        }
+        if (mc?.header_mark?.enabled) {
+          if (!mc.header_mark.name.trim()) mc.header_mark.name = 'X-OSG-Intent';
+          if (!mc.header_mark.value.trim()) mc.header_mark.value = DEFAULT_MARK_TEXT[it];
         }
       }
     }
@@ -346,16 +349,6 @@ export function IntentEnginePage({
                 </span>
               )}
             </div>
-
-            {/* GT-11752: 非接收方向显示对应方向的标记降级提示（demo 为蓝色信息条，用 info token 对齐） */}
-            {direction !== 'receive' && (
-              <Alert className="border-info/30 bg-info/5 text-info [&>svg]:text-info">
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  {direction === 'send' ? t('sendMarkUnsupported') : t('internalMarkUnsupported')}
-                </AlertDescription>
-              </Alert>
-            )}
 
             {/* 三个风险面板（engineEnabled 恒传 true——整体禁用已由容器 pointer-events 处理） */}
             <RiskLevelPanel

@@ -36,69 +36,11 @@ const source = readFileSync(CONFIG_PATH, 'utf8');
 const contract: Contract = JSON.parse(readFileSync(CONTRACT_PATH, 'utf8'));
 
 // ---------------------------------------------------------------------------
-// 已知未实现项（明账）。
-//
-// 这些 `<policy_key>.<hit_values 键>` 是前端已经在读、但**后端至今不产出**的
-// 键。它们不是本次引入的，而是 GT-12727 揭出来的既有欠账 —— formatter 里的兜底
-// 默认值会把它们渲染成看似正常的文案（`-`、"频率"、"未知"…），与 GT-12727 同类。
-//
-// 刻意不为了让测试变绿而删掉前端读取、也不把它们塞进契约：那等于把问题藏回去。
-// 记在这里的每一项都是一笔明账：将来后端补上产出（在
-// internal/disposalbasis/hitvalues_registry.go 的 policyHitValues 里声明并实际
-// 采集）后，从本清单删掉即可 —— 清单只减不增，新增的违规会立刻红。
-//
-// 条目数 36（覆盖 21 个模块中的 17 个），即当前有 17 个模块的命中原因是部分或
-// 完全没实现的。
+// 已知未实现项（明账）。当前已清零：没有事实源的字段已从 formatter 移除，
+// 有事实源的 IP 频率、发送行为、AI 置信度由后端采集并在契约中声明。
+// 后续若出现新缺口，测试应直接失败；不要重新加入例外来掩盖它。
 // ---------------------------------------------------------------------------
-const KNOWN_UNIMPLEMENTED = new Set<string>([
-  // 阶段一：IP 策略
-  'IPFREQ.time_window', // 频率统计窗口，ipfrequency 未写入 metadata
-  'IPBL.entry_type', // 命中条目是静态/动态，未透出
-  'RBL.category', // RBL 标记类别
-  'RBL.rbl_source', // 命中的 RBL 源
-  'OVERSEAS.country', // 来源国家/地区，geoip 结果未透出
-
-  // 阶段二：身份层
-  'AUTH.protocol', // SPF/DKIM/DMARC 中的哪一个
-  'AUTH.detail', // 验证失败原因
-  'AUTH.feature_type', // 仿冒特征类型
-  'AUTH.score', // 仿冒相似度
-  'AUTH.mail_from', // 信封发件人
-  'AUTH.header_from', // 信头发件人
-  'BEHAVIOR.abnormal_type', // 异常维度（频率/收件人数/…）
-  'BEHAVIOR.detail', // 异常明细
-  'RCPT.rcpt', // 校验失败的收件人
-  'UBL.user', // 命中名单的用户
-
-  // 阶段三：内容层
-  'ATT-BASIC.timeout', // 扫描超时标记
-  'ATT-BASIC.limit_type', // 超限维度（大小/数量/嵌套）
-  'ATT-BASIC.size', // 附件大小
-  'ATT-BASIC.level', // 嵌套层数
-  'ATT-AV.timeout', // 扫描超时标记
-  'ATT-AV.filename', // 检出病毒的附件名
-  'ATT-AV.engine', // 反病毒引擎名
-  'ATT-AV.version', // 引擎/病毒库版本
-  'ATT-ENC.filename', // 加密附件名
-  'URL.type', // 沙箱判定的威胁类型
-  'INTENT.tag_id', // 意图引擎标签 id
-  'INTENT.tag_label', // 意图引擎标签名
-
-  // 阶段四：AI 检测
-  'AI-PHISH.bec', // 是否 BEC
-  'AI-SPOOF.spoof_type', // 仿冒类型（显示名/域名/…）
-  'AI-TRACE.threat_type', // 回溯发现的威胁类型
-  'AI-TRACE.capability', // 回溯能力
-
-  // 阶段五：综合策略
-  'SIM.subject_same', // 是否相同主题批量
-  'SIM.similarity', // 相似度
-  'SIM.similar_type', // 相似的已知邮件类型
-  'SIM.dimension', // 相似维度
-  // ACF 读的是 hit_values.detection_tags，但检测标签实际是 DisposalBasis 顶层的
-  // detection_tags 字段，从来不进 hit_values —— 恒渲染成兜底的 "-"。
-  'ACF.detection_tags',
-]);
+const KNOWN_UNIMPLEMENTED = new Set<string>();
 
 /** DISPOSAL_POLICY_MAP 里每个 policy_key 条目的源码块。 */
 function policyBlocks(): { key: string; body: string }[] {
@@ -120,10 +62,10 @@ function policyBlocks(): { key: string; body: string }[] {
   }));
 }
 
-/** 一个条目块里读取的全部 hit_values 键：val(v, 'k') 与 v?.k / v.k 两种写法。 */
+/** 一个条目块里读取的全部 hit_values 键：val/optionalVal 与 v?.k / v.k。 */
 function readKeys(body: string): string[] {
   const keys = new Set<string>();
-  for (const m of body.matchAll(/val\(\s*_?\w+\s*,\s*'([^']+)'/g)) keys.add(m[1]);
+  for (const m of body.matchAll(/(?:val|optionalVal)\(\s*_?\w+\s*,\s*'([^']+)'/g)) keys.add(m[1]);
   for (const m of body.matchAll(/(?<![A-Za-z0-9_])_?v\??\.([A-Za-z_][A-Za-z0-9_]*)/g)) {
     keys.add(m[1]);
   }
@@ -137,7 +79,7 @@ describe('处置依据 hit_values 契约守卫 (GT-12727)', () => {
   it('静态扫描确实解析到了 policy_key 条目与 val() 读取', () => {
     expect(blocks.length).toBe(Object.keys(contract.hit_values).length);
     const total = blocks.reduce((n, b) => n + readKeys(b.body).length, 0);
-    expect(total).toBeGreaterThan(50);
+    expect(total).toBeGreaterThan(20);
   });
 
   it('每个 policy_key 条目都在后端契约里有声明', () => {
@@ -182,8 +124,8 @@ describe('处置依据 hit_values 契约守卫 (GT-12727)', () => {
     expect(stale, `KNOWN_UNIMPLEMENTED 有陈旧条目，请删除:\n${stale.join('\n')}`).toEqual([]);
   });
 
-  it('例外清单条目数与注释保持一致（改动清单时提醒同步注释）', () => {
-    expect(KNOWN_UNIMPLEMENTED.size).toBe(36);
+  it('例外清单保持清零', () => {
+    expect(KNOWN_UNIMPLEMENTED.size).toBe(0);
   });
 });
 

@@ -1,10 +1,11 @@
 export type OverseasMailDirection = 'inbound' | 'outbound' | 'internal';
 
-export type OverseasMailAction = 'deliver' | 'tagDeliver' | 'quarantine' | 'review' | 'block' | 'drop';
+export type OverseasMailAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard';
 
 export interface OverseasMailDirConfig {
   enabled: boolean;
   action: OverseasMailAction;
+  mark_enabled?: boolean;
 }
 
 export interface OverseasMailConfigResponse {
@@ -42,21 +43,19 @@ export interface GeoIpRuleListResponse {
 }
 
 export const OverseasMailActionLabels: Record<OverseasMailAction, string> = {
-  deliver: 'overseasMail.actionDeliver',
-  tagDeliver: 'overseasMail.actionTagDeliver',
+  accept: 'overseasMail.actionDeliver',
   quarantine: 'overseasMail.actionQuarantine',
-  review: 'overseasMail.actionReview',
-  block: 'overseasMail.actionBlock',
-  drop: 'overseasMail.actionDrop',
+  audit: 'overseasMail.actionReview',
+  reject: 'overseasMail.actionBlock',
+  discard: 'overseasMail.actionDrop',
 };
 
 export const OverseasMailActionDescriptions: Record<OverseasMailAction, string> = {
-  deliver: 'overseasMail.actionDeliverDesc',
-  tagDeliver: 'overseasMail.actionTagDeliverDesc',
+  accept: 'overseasMail.actionDeliverDesc',
   quarantine: 'overseasMail.actionQuarantineDesc',
-  review: 'overseasMail.actionReviewDesc',
-  block: 'overseasMail.actionBlockDesc',
-  drop: 'overseasMail.actionDropDesc',
+  audit: 'overseasMail.actionReviewDesc',
+  reject: 'overseasMail.actionBlockDesc',
+  discard: 'overseasMail.actionDropDesc',
 };
 
 /** Placeholder shown in the action column while a direction is switched off. */
@@ -66,25 +65,25 @@ export const OVERSEAS_MAIL_ACTION_NONE = '--';
  * Directions ship switched off, so a fresh gateway performs no geo filtering
  * until an operator opts in. The pre-selected action is a real one all the
  * same: flipping a direction on must do the protective thing the operator
- * meant, rather than silently resolving to `deliver`, which is
- * indistinguishable from leaving the direction off. `block` matches the
+ * meant, rather than silently resolving to `accept`, which is
+ * indistinguishable from leaving the direction off. `reject` matches the
  * inbound default (see `defaultOverseasMailInboundDirConfig`) and the demo
  * prototype's default for outbound/internal, keeping the three directions'
  * pre-selected action consistent.
  */
 export function defaultOverseasMailDirConfig(): OverseasMailDirConfig {
-  return { enabled: false, action: 'block' };
+  return { enabled: false, action: 'reject', mark_enabled: false };
 }
 
 /**
- * Inbound ships switched on with the strict `block` action: unsolicited
+ * Inbound ships switched on with the strict `reject` action: unsolicited
  * overseas mail into the org is the highest-risk direction, so a fresh
  * gateway protects it out of the box rather than waiting for an operator to
  * opt in (unlike outbound/internal, which stay off — see
  * `defaultOverseasMailDirConfig`).
  */
 export function defaultOverseasMailInboundDirConfig(): OverseasMailDirConfig {
-  return { enabled: true, action: 'block' };
+  return { enabled: true, action: 'reject', mark_enabled: false };
 }
 
 export function defaultOverseasMailConfig(): OverseasMailConfig {
@@ -132,12 +131,12 @@ export function overseasMailDirectionView(dir: OverseasMailDirConfig | undefined
 }
 
 /**
- * GT-12114 Q-04（产品拍板）：三个方向全部启用且动作均为阻断类（block/drop）
+ * GT-12114 Q-04（产品拍板）：三个方向全部启用且动作均为阻断类（reject/discard）
  * 时，所有海外邮件流都会被切断——保存前必须弹窗提示并禁止保存。
  * 任一方向禁用（该方向邮件正常放行）或使用非阻断动作则不构成"全阻断"。
  */
 export function isOverseasBlockAllConfig(config: OverseasMailConfig): boolean {
   const dirs = Object.values(config.directions);
   if (dirs.length === 0) return false;
-  return dirs.every((d) => d.enabled && (d.action === 'block' || d.action === 'drop'));
+  return dirs.every((d) => d.enabled && (d.action === 'reject' || d.action === 'discard'));
 }

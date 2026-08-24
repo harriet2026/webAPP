@@ -141,6 +141,8 @@ describe('InvestigationWorkbench', () => {
       }),
     })} />);
     expect(screen.getByTestId('email-disposal-workbench-blocked-overlay')).toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-workbench-view-smtp-session')).toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-workbench-view-policy-detail')).not.toBeInTheDocument();
   });
 
   // GT-12600 防回归：阻断/丢弃遮罩上的两个入口不再是死按钮——分别调用

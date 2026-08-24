@@ -21,7 +21,7 @@ import type {
 import { SpoofingNotificationPreviewDialog } from './spoofing-notification-preview-dialog';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
-const ACTIONS: SpoofDispositionAction[] = ['mark', 'quarantine', 'reject', 'discard'];
+const ACTIONS: SpoofDispositionAction[] = ['accept', 'quarantine', 'reject', 'discard'];
 const MARK_POSITIONS: SpoofMarkPosition[] = ['subject', 'header', 'banner'];
 const MAX_KEYWORDS = 20;
 const MAX_KEYWORD_LEN = 30;
@@ -103,20 +103,20 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
     { key: 'standard' as const, title: tsd('brand.mode.standard'), description: tsd('brandForm.modeStandardDesc'), bar: 'bg-blue-500' },
     { key: 'strict' as const, title: tsd('brand.mode.strict'), description: tsd('brandForm.modeStrictDesc'), bar: 'bg-rose-500' },
   ];
-  const availableActions = mode === 'observe' ? (['mark'] as SpoofDispositionAction[])
+  const availableActions = mode === 'observe' ? (['accept'] as SpoofDispositionAction[])
     : mode === 'standard' ? (['quarantine'] as SpoofDispositionAction[])
       : mode === 'strict' ? (['reject', 'discard'] as SpoofDispositionAction[])
         : ACTIONS;
 
   function onModeChange(next: SpoofDispositionMode) {
     setMode(next);
-    if (next === 'observe') setAction('mark');
+    if (next === 'observe') setAction('accept');
     else if (next === 'standard') setAction('quarantine');
     else if (next === 'strict') setAction('reject');
   }
   function onActionChange(next: SpoofDispositionAction) {
     setAction(next);
-    const obs: SpoofDispositionAction[] = ['mark'];
+    const obs: SpoofDispositionAction[] = ['accept'];
     const std: SpoofDispositionAction[] = ['quarantine'];
     const strict: SpoofDispositionAction[] = ['reject', 'discard'];
     if (mode === 'observe' && !obs.includes(next)) setMode('custom');
@@ -307,7 +307,7 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
                 ))}
               </div>
             </div>
-            {(mode === 'observe' || action === 'mark') ? (
+            {(mode === 'observe' || action === 'accept') ? (
               <div className="space-y-2">
                 <Label>{tsd('personForm.markStyle')}</Label>
                 <div className="flex flex-wrap gap-3">

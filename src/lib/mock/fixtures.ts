@@ -38,7 +38,6 @@ import type {
   RBLFilterRuleView,
   RBLFilterMatchMode,
   RBLFilterProductAction,
-  RBLFilterLegacyProductAction,
 } from "@/types/rbl-filter";
 import type { DetectionProfile } from "@/lib/api/detection-profiles";
 import type {
@@ -143,7 +142,8 @@ import type {
   SmtpConfigPayload,
 } from "@/types/alerts";
 import type { InboundAuditListResponse } from "@/lib/api/inbound-audit";
-import type { PhishingStats } from "@/types/phishing-detection";
+import type { DetectionLogDetail, DetectionLogItem, DetectionLogListResponse, PhishingStats } from "@/types/phishing-detection";
+import type { PhishAdmissionRule, PhishAdmissionRuleUpdate, PhishAdmissionRuleWrite, PhishAgentConfig, PhishAgentConfigPutRequest, PhishAgentControl, PhishAnalysisConfig, PhishAnalysisConfigPutRequest } from "@/types/phishing-config";
 import type { SpoofingStats } from "@/types/spoofing-detection";
 import type { ThreatRetroStats } from "@/types/threat-retro";
 import type { MonitorDashboardOverview, MonitorDashboardRange } from "@/lib/api/monitor-dashboard";
@@ -222,7 +222,7 @@ function mailMarkingRule(o: {
     condition_tree: JSON.stringify(
       mailMarkingCondition(o.direction, [...departments, ...groups]),
     ),
-    action: "accept",
+    action: "proceed",
     page: "mail_marking",
     is_active: o.active,
     tags: [],
@@ -379,7 +379,7 @@ export function mockCreateMailMarkingRule(body: unknown): Rule {
     stage: "data",
     priority: Number(raw.priority ?? 1),
     condition_tree: JSON.stringify(raw.condition_tree ?? {}),
-    action: "accept",
+    action: "proceed",
     page: "mail_marking",
     is_active: raw.is_active !== false,
     tags: [],
@@ -835,6 +835,7 @@ export function mockSystemStatusSummaryFor(
     },
     threat_trend: security.trend.email_type ?? [],
     pending_disposal: DISPOSAL_PENDING[range],
+    pending_report: AUDIT_PENDING[range],
     generated_at: new Date().toISOString(),
   };
 }
@@ -1365,11 +1366,11 @@ export const mockMonitorProcesses: ProcessesResp = {
   docker: { running: 8, stopped: 1, restarts: 2 },
   overlay2_usage: 72,
   processes: [
-    { name: "Postfix", status: "running", pid: 1024, memory: 256 * 1024 * 1024 },
-    { name: "ClamAV", status: "running", pid: 1108, memory: 1536 * 1024 * 1024 },
-    { name: "Elasticsearch", status: "warning", pid: 1216, memory: 4096 * 1024 * 1024 },
-    { name: "Kingbase", status: "running", pid: 1324, memory: 2048 * 1024 * 1024 },
-    { name: "Redis", status: "running", pid: 1412, memory: 384 * 1024 * 1024 },
+    { name: "apiserver", status: "running", pid: 1024, memory: 256 * 1024 * 1024, count: 1 },
+    { name: "antispam", status: "running", pid: 1108, memory: 128 * 1024 * 1024, count: 1 },
+    { name: "postfix", status: "running", pid: 1216, memory: 64 * 1024 * 1024, count: 12 },
+    { name: "gaussdb", status: "running", pid: 1324, memory: 2048 * 1024 * 1024, count: 1 },
+    { name: "redis-server", status: "running", pid: 1412, memory: 384 * 1024 * 1024, count: 1 },
   ],
 };
 
@@ -1842,8 +1843,8 @@ export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
 }
 
 // ─── 待处置邮件 / 举报待审（KPI）──────────────────────────────────────────────
-// 隔离（disposal.total）：today 3 / 7d 11 / 30d 19；举报待审（inbound-audit.total）：
-// today 2 / 7d 6 / 30d 13。两个查询都不带范围参数，故按模块级 currentSystemStatusRange 分支。
+// 隔离：today 3 / 7d 11 / 30d 19；举报待审：today 2 / 7d 6 / 30d 13。
+// 首页聚合响应按模块级 currentSystemStatusRange 返回对应的演示数据。
 const DISPOSAL_PENDING: Record<SystemStatusRangeKey, number> = {
   today: 3,
   "7d": 11,
@@ -1882,13 +1883,182 @@ export function mockInboundAuditPending(): InboundAuditListResponse {
 // demo DASHBOARD_AGENTS：全部运行；今日处理量与待审数照抄。
 export function mockPhishingStats(): PhishingStats {
   return {
+    // The log endpoint is a paged slice of the day. Keep the KPI aggregate in
+    // the same deterministic demo dataset as the prototype rather than
+    // pretending the visible page is the whole day's volume.
     today_detected: 12450,
     today_quarantined: 12450,
-    pending_review: 0,
-    today_recalled: 0,
-    recall_success: 0,
-    accuracy: null,
+    pending_review: 5,
+    today_recalled: 3,
+    recall_success: 2,
   };
+}
+
+// The demo fixture keeps a fixed row ordering and relative timestamps matching
+// the prototype's loaded-at timeline. Rows with no completed investigation keep
+// confidence/risk/policy empty, while completed rows carry the full consistent
+// derived facts used by the overview table.
+const PHISHING_LOG_LOADED_AT = Date.now();
+const DEMO_PHISHING_TIME = new Date(PHISHING_LOG_LOADED_AT).toISOString();
+const phishingHoursAgo = (hours: number): string => new Date(PHISHING_LOG_LOADED_AT - hours * 60 * 60 * 1000).toISOString();
+const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
+  {
+    sideline_id: 'ph-100001', message_id: '<8f2c1a0001@corp-outlook-mail.com>', sender: 'ceo.office@corp-outlook-mail.com',
+    subject: 'CEO紧急付款指示，请尽快处理', recipients: ['finance-manager@example.com'], direction: 'inbound', status: 'sidelined',
+    sidelined_at: phishingHoursAgo(0.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.96, mail_log_id: 9001,
+    display_statuses: [{ status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'finance-manager@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-1' }],
+    recalls: [], disposition_actions: ['quarantine'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'none', agent_rounds: 5, url_summary: { total: 4, phishing: 3, suspicious: 1, normal: 0 }, result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
+    subject: '薪资平台安全升级，请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
+    display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
+    recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
+  },
+  {
+    sideline_id: 'ph-100003', message_id: '<8f2c1a0003@corp-passwd-reset.cn>', sender: 'it-support@corp-passwd-reset.cn', subject: '【重要】密码即将到期，请点击链接重置', recipients: ['hr@example.com'], direction: 'inbound', status: 'sidelined', sidelined_at: phishingHoursAgo(3), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'medium', policy_disposition: 'audit', confidence: 0.79, mail_log_id: 9003,
+    display_statuses: [{ status: 'audit_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr@example.com', final_action: 'audit', status: 'audit_pending' }], recalls: [], disposition_actions: ['audit'], disposition: 'audit', detection_mode: 'realtime', recall_status: 'none', agent_rounds: 4, url_summary: { total: 2, phishing: 1, suspicious: 0, normal: 1 }, result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100004', message_id: '<8f2c1a0004@invoice-verify-service.cn>', sender: 'finance@invoice-verify-service.cn', subject: '发票红字信息表待确认（含链接）', recipients: ['licheng@example.com', 'wangfang@example.com'], direction: 'inbound', status: 'sidelined', sidelined_at: phishingHoursAgo(4), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'medium', policy_disposition: 'audit', confidence: 0.88, mail_log_id: 9004,
+    display_statuses: [{ status: 'recall_failed', count: 1 }], recipient_dispositions: [{ recipient: 'licheng@example.com', final_action: 'audit', status: 'recall_failed' }, { recipient: 'wangfang@example.com', final_action: 'audit', status: 'recall_failed' }], recalls: [{ receiver: 'licheng@example.com', operate_result: 'failed' }, { receiver: 'wangfang@example.com', operate_result: 'failed' }], disposition_actions: ['audit', 'recall'], disposition: 'audit', detection_mode: 'realtime', recall_status: 'recall_failed', agent_rounds: 3, url_summary: { total: 2, phishing: 1, suspicious: 1, normal: 0 }, result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100005', message_id: '<8f2c1a0005@oa-portal-cn.com>', sender: 'security-noreply@oa-portal-cn.com', subject: '紧急：您的OA账号将于今日过期，请立即验证', recipients: ['zhangwei@example.com'], direction: 'inbound', status: 'recalled', sidelined_at: phishingHoursAgo(6), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.94, mail_log_id: 9005,
+    display_statuses: [{ status: 'recall_success', count: 1 }], recipient_dispositions: [{ recipient: 'zhangwei@example.com', final_action: 'recall', status: 'recall_success', object_kind: 'mail_log', object_id: '9005' }], recalls: [{ receiver: 'zhangwei@example.com', operate_result: 'success' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'recalled', agent_rounds: 4, url_summary: { total: 3, phishing: 2, suspicious: 1, normal: 0 }, result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100006', message_id: '<8f2c1a0006@bank-verify-alert.com>', sender: 'security@bank-verify-alert.com', subject: '银行账户异常登录提醒，请核实身份', recipients: ['accounting@example.com'], direction: 'inbound', status: 'sidelined', sidelined_at: phishingHoursAgo(8), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'medium', policy_disposition: 'audit', confidence: 0.85, mail_log_id: 9006,
+    display_statuses: [{ status: 'delivered', count: 1 }], recipient_dispositions: [{ recipient: 'accounting@example.com', final_action: 'accept', status: 'delivered' }], recalls: [], disposition_actions: [], disposition: 'pass', detection_mode: 'observe', recall_status: 'none', agent_rounds: 3, url_summary: { total: 2, phishing: 2, suspicious: 0, normal: 0 }, result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100007', message_id: '<8f2c1a0007@drive-share-cn.net>', sender: 'notify@drive-share-cn.net', subject: '您有一份共享文档待查看', recipients: ['chenjing@example.com'], direction: 'inbound', status: 'delivered', sidelined_at: phishingHoursAgo(9), task_status: 'completed', failure_reason: null, verdict: 'suspicious', risk_level: 'low', policy_disposition: 'proceed', confidence: 0.62, mail_log_id: 9007,
+    display_statuses: [{ status: 'delivered', count: 1 }], recipient_dispositions: [{ recipient: 'chenjing@example.com', final_action: 'accept', status: 'delivered' }], recalls: [], disposition_actions: ['accept'], disposition: 'pass', detection_mode: 'realtime', recall_status: 'none', agent_rounds: 2, url_summary: { total: 1, phishing: 0, suspicious: 1, normal: 0 }, result_truncated: false,
+  },
+  {
+    sideline_id: 'ph-100008', message_id: '<8f2c1a0008@example-internal.com>', sender: 'survey@example-internal.com', subject: '内部问卷调研（限时填写）', recipients: ['allstaff@example.com'], direction: 'inbound', status: 'audit_pending', sidelined_at: phishingHoursAgo(11), task_status: 'completed', failure_reason: null, verdict: '', risk_level: null, policy_disposition: null, confidence: null, mail_log_id: 9008,
+    display_statuses: [{ status: 'delivered', count: 1 }], recipient_dispositions: [{ recipient: 'allstaff@example.com', final_action: 'accept', status: 'delivered' }], recalls: [], disposition_actions: ['accept'], disposition: 'pass', detection_mode: 'realtime', recall_status: 'none', agent_rounds: 1, url_summary: { total: 0, phishing: 0, suspicious: 0, normal: 0 }, result_truncated: false,
+  },
+];
+
+export function mockPhishingDetectionLogs(): DetectionLogListResponse {
+  return { items: structuredClone(MOCK_PHISHING_DETECTIONS), total: MOCK_PHISHING_DETECTIONS.length, page: 1, page_size: 20 };
+}
+
+export function mockPhishingDetectionDetail(id: string): DetectionLogDetail | null {
+  const summary = MOCK_PHISHING_DETECTIONS.find((item) => item.sideline_id === id);
+  if (!summary) return null;
+  const prototypeInvestigation = id === 'ph-100001' ? {
+    summary: '邮件冒充公司 CEO 要求财务人员紧急转账，发件域名与真实域名高度相似（同形字替换），命中 BEC 诈骗特征库。',
+    resultSummary: '典型 CEO 冒充诈骗，要求非常规紧急转账，建议直接拦截并提醒财务核实。',
+    evidence: [
+      { type: 'sender_domain', severity: 'critical', title: '发件域名疑似仿冒', detail: 'corp-outlook-mail.com 与公司真实域名视觉高度相似' },
+      { type: 'content', severity: 'high', title: '异常转账指令', detail: '邮件正文要求跳过正常审批流程紧急付款' },
+    ],
+    findings: [
+      { url: 'https://corp-outlook-mail.com/verify-payment', final_url: 'https://pay-confirm-secure.cn/form', agent: { verdict: 'phishing', risk_level: 'critical' } },
+      { url: 'https://corp-outlook-mail.com/invoice.pdf', agent: { verdict: 'phishing', risk_level: 'high' } },
+      { url: 'https://corp-outlook-mail.com/contract', agent: { verdict: 'phishing', risk_level: 'high' } },
+      { url: 'https://corp-outlook-mail.com/help', agent: { verdict: 'suspicious', risk_level: 'medium' } },
+    ],
+    steps: [
+      { name: 'fetch_mail', status: 'completed' },
+      { name: 'sender_domain_check', status: 'completed', message: '发件域名 corp-outlook-mail.com 非公司备案域名，命中相似域名规则' },
+      { name: 'llm_verdict', status: 'completed', message: '文本要素判定为商务邮件诈骗（BEC），置信度 96%' },
+      { name: 'dispatch_action', status: 'completed', message: '转人工审核（audit_hold）' },
+    ],
+  } : null;
+  const findings = summary.url_summary.total > 0
+    ? Array.from({ length: summary.url_summary.total }, (_, index) => ({
+      url: index === 0 ? 'https://secure-account.example.test/login' : `https://link-${index}.example.test/verify`,
+      final_url: index === 0 && summary.risk_level === 'high' ? 'https://capture.example.test/session' : undefined,
+      agent: { verdict: index < summary.url_summary.phishing ? 'phishing' : index < summary.url_summary.phishing + summary.url_summary.suspicious ? 'suspicious' : 'benign', risk_level: summary.risk_level ?? 'low' },
+    }))
+    : [];
+  return {
+    summary: structuredClone(summary),
+    investigation: summary.task_status === 'completed' ? {
+      id: summary.investigation_id ?? `investigation-${id}`,
+      status: 'completed', summary: prototypeInvestigation?.summary ?? (summary.verdict === 'phishing' ? '发现可疑链接和仿冒登录页面' : '未发现明确的钓鱼迹象'),
+      result: { verdict: summary.verdict, summary: prototypeInvestigation?.resultSummary ?? (summary.verdict === 'phishing' ? '链接证据支持钓鱼风险' : '邮件内容风险较低'), confidence: summary.confidence, evidence: prototypeInvestigation?.evidence ?? [{ type: 'url', severity: summary.risk_level === 'high' ? 'high' : 'low', title: '链接研判', detail: summary.url_summary.total ? `检测到 ${summary.url_summary.total} 个链接` : '未检测到链接' }], details: { url_findings: prototypeInvestigation?.findings ?? findings } },
+      steps: prototypeInvestigation?.steps ?? [{ name: '基础邮件事实', status: 'completed', message: '已完成发件人与收件人范围校验' }, { name: '链接调查', status: 'completed', message: '已完成 URL 证据汇总' }],
+    } : null,
+    config_snapshot: null,
+  };
+}
+
+function initialPhishingControl(): PhishAgentControl {
+  return { enabled: true, desired_state: 'enabled', runtime_state: 'running', revision: 1, updated_at: DEMO_PHISHING_TIME };
+}
+function initialPhishingConfig(): PhishAgentConfig {
+  return {
+    risk_policy: { version: 1, updated_at: DEMO_PHISHING_TIME, cutoffs: { low: 40, medium: 70, high: 90 }, policies: {
+      suspicious: { base_disposition: 'proceed' }, low: { base_disposition: 'proceed' }, medium: { base_disposition: 'audit' }, high: { base_disposition: 'quarantine' },
+    } },
+    runtime_policy: { version: 1, updated_at: DEMO_PHISHING_TIME, run_mode: 'realtime', observe_action: 'accept', observe_mark_enabled: true, timeout_minutes: 5, max_recheck_minutes: 30, timeout_async_enabled: true },
+  };
+}
+function initialPhishingAnalysisConfig(): PhishAnalysisConfig {
+  return { netdisk_domain: false, netdisk_extract: false, netdisk_spoof: false, version: 1, updated_at: DEMO_PHISHING_TIME };
+}
+function initialPhishingAdmissionRules(): PhishAdmissionRule[] { return []; }
+
+let phishingControl = initialPhishingControl();
+let phishingConfig = initialPhishingConfig();
+let phishingAnalysisConfig = initialPhishingAnalysisConfig();
+let phishingAdmissionRules = initialPhishingAdmissionRules();
+export function resetPhishingMockState(): void {
+  phishingControl = initialPhishingControl();
+  phishingConfig = initialPhishingConfig();
+  phishingAnalysisConfig = initialPhishingAnalysisConfig();
+  phishingAdmissionRules = initialPhishingAdmissionRules();
+}
+export function mockPhishingControl(): PhishAgentControl { return structuredClone(phishingControl); }
+export function mockPutPhishingControl(enabled: boolean): PhishAgentControl { phishingControl = { ...phishingControl, enabled, desired_state: enabled ? 'enabled' : 'disabled', runtime_state: enabled ? 'running' : 'stopped', revision: phishingControl.revision + 1, updated_at: DEMO_PHISHING_TIME }; return mockPhishingControl(); }
+export function mockPhishingConfig(): PhishAgentConfig { return structuredClone(phishingConfig); }
+export function mockPutPhishingConfig(value: PhishAgentConfigPutRequest): PhishAgentConfig {
+  const { expected_version: _riskExpectedVersion, ...riskPolicy } = value.risk_policy;
+  const { expected_version: _runtimeExpectedVersion, ...runtimePolicy } = value.runtime_policy;
+  void _riskExpectedVersion;
+  void _runtimeExpectedVersion;
+  phishingConfig = {
+    risk_policy: { ...riskPolicy, version: phishingConfig.risk_policy.version + 1, updated_at: DEMO_PHISHING_TIME },
+    runtime_policy: { ...runtimePolicy, version: phishingConfig.runtime_policy.version + 1, updated_at: DEMO_PHISHING_TIME },
+  };
+  return mockPhishingConfig();
+}
+export function mockPhishingAnalysisConfig(): PhishAnalysisConfig { return structuredClone(phishingAnalysisConfig); }
+export function mockPutPhishingAnalysisConfig(value: PhishAnalysisConfigPutRequest): PhishAnalysisConfig {
+  const { expected_version: _expectedVersion, ...config } = value;
+  void _expectedVersion;
+  phishingAnalysisConfig = { ...config, version: phishingAnalysisConfig.version + 1, updated_at: DEMO_PHISHING_TIME };
+  return mockPhishingAnalysisConfig();
+}
+export function mockPhishingAdmissionRules(): PhishAdmissionRule[] { return structuredClone(phishingAdmissionRules); }
+export function mockCreatePhishingAdmissionRule(value: PhishAdmissionRuleWrite): PhishAdmissionRule {
+  const id = Math.max(...phishingAdmissionRules.map((rule) => rule.id ?? 0), 0) + 1;
+  const next = { ...value, id, rule_uid: `demo-rule-${id}`, revision: `demo-rev-${id}` };
+  phishingAdmissionRules.push(next);
+  return structuredClone(next);
+}
+export function mockUpdatePhishingAdmissionRule(id: number, value: PhishAdmissionRuleUpdate): boolean {
+  const current = phishingAdmissionRules.find((rule) => rule.id === id);
+  if (!current) return false;
+  const { expected_revision: _expectedRevision, ...ruleUpdate } = value;
+  void _expectedRevision;
+  phishingAdmissionRules = phishingAdmissionRules.map((rule) => rule.id === id ? { ...rule, ...ruleUpdate, id, revision: `demo-rev-${id}` } : rule);
+  return true;
+}
+export function mockDeletePhishingAdmissionRule(id: number): boolean {
+  const exists = phishingAdmissionRules.some((rule) => rule.id === id);
+  if (exists) phishingAdmissionRules = phishingAdmissionRules.filter((rule) => rule.id !== id);
+  return exists;
+}
+export function mockSetPhishingAdmissionRuleStatus(id: number, enabled: boolean): boolean {
+  const exists = phishingAdmissionRules.some((rule) => rule.id === id);
+  if (exists) phishingAdmissionRules = phishingAdmissionRules.map((rule) => rule.id === id ? { ...rule, enabled } : rule);
+  return exists;
 }
 
 export function mockSpoofingStats(): SpoofingStats {
@@ -2942,8 +3112,7 @@ function makeRBLRule(input: {
   description?: string;
   match_mode: RBLFilterMatchMode;
   match_servers: string[];
-  // 允许旧枚举值：下面的 mock 规则刻意保留 block/mark 存量数据
-  product_action: RBLFilterProductAction | RBLFilterLegacyProductAction;
+  product_action: RBLFilterProductAction;
   action: string;
   priority: number;
   is_active: boolean;
@@ -2977,7 +3146,7 @@ function makeMockRBLFilterRules(): RBLFilterRuleView[] {
       description: "通过 Spamhaus + SpamCop 共同命中后拦截",
       match_mode: "specific",
       match_servers: ["zen.spamhaus.org", "bl.spamcop.net"],
-      product_action: "block",
+      product_action: "reject",
       action: "reject",
       priority: 100,
       is_active: true,
@@ -2995,12 +3164,12 @@ function makeMockRBLFilterRules(): RBLFilterRuleView[] {
     }),
     makeRBLRule({
       id: 3,
-      name: "开放转发源标记",
-      description: "公共 RBL 命中后添加 header 标记",
+      name: "开放转发源审核",
+      description: "公共 RBL 命中后进入审核",
       match_mode: "specific",
       match_servers: ["zen.spamhaus.org"],
-      product_action: "mark",
-      action: "tag",
+      product_action: "audit",
+      action: "audit",
       priority: 300,
       is_active: true,
     }),
@@ -3010,7 +3179,7 @@ function makeMockRBLFilterRules(): RBLFilterRuleView[] {
       description: "任意一个 RBL 命中都触发阻断",
       match_mode: "any",
       match_servers: [],
-      product_action: "block",
+      product_action: "reject",
       action: "reject",
       priority: 50,
       is_active: true,
@@ -3021,7 +3190,7 @@ function makeMockRBLFilterRules(): RBLFilterRuleView[] {
       description: "已禁用，保留以备恢复",
       match_mode: "specific",
       match_servers: ["zen.spamhaus.org"],
-      product_action: "block",
+      product_action: "reject",
       action: "reject",
       priority: 999,
       is_active: false,
@@ -3037,8 +3206,7 @@ export function mockRBLFilterRulesList(query: {
   page_size?: number;
   q?: string;
   match_mode?: RBLFilterMatchMode;
-  // 允许旧枚举值：mock 规则里保留 block/mark 存量数据，用于覆盖 parseRblConfig 的兼容读路径
-  product_action?: RBLFilterProductAction | RBLFilterLegacyProductAction;
+  product_action?: RBLFilterProductAction;
   is_active?: boolean;
 }) {
   let items = [...mockRBLFilterRules];
@@ -3122,9 +3290,9 @@ const defaultOverseasDirections: Record<
   "inbound" | "outbound" | "internal",
   OverseasMailDirConfig
 > = {
-  inbound: { enabled: true, action: "block" },
-  outbound: { enabled: false, action: "block" },
-  internal: { enabled: false, action: "block" },
+  inbound: { enabled: true, action: "reject", mark_enabled: false },
+  outbound: { enabled: false, action: "reject", mark_enabled: false },
+  internal: { enabled: false, action: "reject", mark_enabled: false },
 };
 
 export function mockOverseasMailConfig(): OverseasMailConfigResponse {
@@ -3694,17 +3862,7 @@ export function mockDeleteGroupPolicyRule(id: number): boolean {
 // CRUD、测试和导入导出共享同一份可变 fixture，便于浏览器完整走通规格交互。
 // ════════════════════════════════════════════════════════════════════════════════
 
-type ContentFixtureAction =
-  "deliver" | "tag_deliver" | "isolate" | "review" | "block" | "discard";
-
-const CONTENT_ACTION_MAP: Record<ContentFixtureAction, string> = {
-  deliver: "accept",
-  tag_deliver: "accept",
-  isolate: "quarantine",
-  review: "audit",
-  block: "reject",
-  discard: "discard",
-};
+type ContentFixtureAction = "accept" | "quarantine" | "audit" | "reject" | "discard";
 
 function contentFixtureRule(o: {
   id: number;
@@ -3716,6 +3874,7 @@ function contentFixtureRule(o: {
   directions: Partial<
     Record<"receive" | "send" | "internal", ContentFixtureAction>
   >;
+  marked?: boolean;
   active?: boolean;
   validUntil?: string;
   createdAt: string;
@@ -3728,19 +3887,18 @@ function contentFixtureRule(o: {
       direction,
       {
         enabled: true,
-        action: CONTENT_ACTION_MAP[action as ContentFixtureAction],
+        action,
       },
     ]),
   );
-  const firstProductAction = Object.values(o.directions)[0] ?? "isolate";
-  const firstAction = CONTENT_ACTION_MAP[firstProductAction];
+  const firstAction = Object.values(o.directions)[0] ?? "quarantine";
   const metadata = {
     feature: "content_rules",
     match_type: o.matchType,
     match_content: o.matchContent,
     scopes,
     directions,
-    ...(firstProductAction === "tag_deliver"
+    ...(firstAction === "accept" && o.marked
       ? {
           mark_config: {
             add_headers: [{ name: "X-OSG-Content-Tag", value: "[广告]" }],
@@ -3800,7 +3958,7 @@ let mockContentRules: Rule[] = [
     matchType: "regex",
     matchContent: "\\d{17}[\\dXx]",
     scopes: ["subject", "body"],
-    directions: { send: "block" },
+    directions: { send: "reject" },
     createdAt: "2026-03-20T14:30:00Z",
   }),
   contentFixtureRule({
@@ -3810,7 +3968,7 @@ let mockContentRules: Rule[] = [
     matchType: "keyword",
     matchContent: "敏感词1|敏感词2|敏感词3",
     scopes: ["subject", "body"],
-    directions: { receive: "block", send: "block", internal: "isolate" },
+    directions: { receive: "reject", send: "reject", internal: "quarantine" },
     validUntil: "2026-06-30T00:00:00Z",
     createdAt: "2026-03-19T09:00:00Z",
   }),
@@ -3821,7 +3979,8 @@ let mockContentRules: Rule[] = [
     matchType: "content_group",
     matchContent: "培训广告词库",
     scopes: ["subject", "body", "header"],
-    directions: { receive: "tag_deliver", internal: "tag_deliver" },
+    directions: { receive: "accept", internal: "accept" },
+    marked: true,
     active: false,
     createdAt: "2026-03-18T16:00:00Z",
   }),
@@ -3832,7 +3991,7 @@ let mockContentRules: Rule[] = [
     matchType: "regex",
     matchContent: "\\d{16,19}",
     scopes: ["body"],
-    directions: { receive: "review", send: "block", internal: "review" },
+    directions: { receive: "audit", send: "reject", internal: "audit" },
     createdAt: "2026-03-17T10:00:00Z",
   }),
   contentFixtureRule({
@@ -3842,7 +4001,7 @@ let mockContentRules: Rule[] = [
     matchType: "keyword",
     matchContent: "竞品A|竞品B|商业机密",
     scopes: ["subject", "body", "attachment_names"],
-    directions: { send: "block", internal: "review" },
+    directions: { send: "reject", internal: "audit" },
     validUntil: "2026-04-15T00:00:00Z",
     createdAt: "2026-03-16T09:00:00Z",
   }),
@@ -3864,11 +4023,12 @@ let mockContentRules: Rule[] = [
       scopes: id % 2 === 0 ? ["subject", "body"] : ["body", "attachment_names"],
       directions:
         id % 2 === 0
-          ? { receive: id % 4 === 0 ? "block" : "isolate" }
+          ? { receive: id % 4 === 0 ? "reject" : "quarantine" }
           : {
-              send: id % 4 === 1 ? "block" : "review",
-              internal: "tag_deliver",
+              send: id % 4 === 1 ? "reject" : "audit",
+              internal: "accept",
             },
+      marked: id % 2 !== 0,
       active: id % 5 !== 0,
       createdAt: `2026-03-${String(Math.max(1, 20 - (id % 15))).padStart(2, "0")}T10:00:00Z`,
     });
@@ -4168,7 +4328,7 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
       dkim: {
         fail: { enabled: true, action: "quarantine", observe_mode: false },
         neutral: { enabled: true, action: "quarantine", observe_mode: false },
-        partial: { enabled: false, action: "accept", observe_mode: false },
+        partial: { enabled: false, action: "proceed", observe_mode: false },
         none: { enabled: true, action: "audit", observe_mode: false },
       },
       dmarc: {
@@ -4383,7 +4543,7 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
       dimensionA: "recipient_count",
       thresholdA: 1000,
       enableOrCondition: false,
-      action: "block",
+      action: "reject",
       priority: 2001,
       enabled: true,
       createdAt: "2024-03-14 09:15",
@@ -4421,7 +4581,7 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
       dimensionA: "mail_count",
       thresholdA: 100,
       enableOrCondition: false,
-      action: "drop",
+      action: "discard",
       priority: 2003,
       enabled: true,
       createdAt: "2024-03-12 11:00",
@@ -4439,7 +4599,7 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
       dimensionA: "attachment_size",
       thresholdA: 500,
       enableOrCondition: false,
-      action: "review",
+      action: "audit",
       priority: 2004,
       enabled: true,
       createdAt: "2024-03-11 16:45",
@@ -4473,7 +4633,7 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
       enableOrCondition: true,
       dimensionB: "recipient_count",
       thresholdB: 5000,
-      action: "block",
+      action: "reject",
       priority: 2020,
       enabled: true,
       createdAt: "2024-03-09 15:00",
@@ -4524,7 +4684,7 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
       enableOrCondition: i % 3 === 0,
       dimensionB: i % 3 === 0 ? "recipient_count" : undefined,
       thresholdB: i % 3 === 0 ? 100 + i * 5 : undefined,
-      action: (["review", "quarantine", "drop", "block"] as const)[i % 4],
+      action: (["audit", "quarantine", "discard", "reject"] as const)[i % 4],
       priority: 2000 + i,
       enabled: i % 5 !== 0,
       createdAt: `2024-03-${String(28 - (i % 28)).padStart(2, "0")} ${String(8 + (i % 12)).padStart(2, "0")}:${String((i * 7) % 60).padStart(2, "0")}`,
@@ -4610,10 +4770,10 @@ export function mockRecipientLimitConfig(): RecipientLimitConfig {
   };
 }
 
-// 收信人检测模块级 + 存在性验证配置（demo：模块开、存在性开、失败动作 阻断）。
+// 收信人检测模块级 + 存在性验证配置（默认：存在性关、启用后的失败动作 阻断）。
 export function mockRecipientCheckConfig(): RecipientCheckConfig {
   return {
-    existence_enabled: true,
+    existence_enabled: false,
     existence_action: "reject",
   };
 }
@@ -4882,8 +5042,9 @@ let urlProtectionSettingsState: Record<string, unknown> = {
   sandbox_config: JSON.stringify({
     receive: {
       enabled: true,
-      malicious_action: "isolate",
-      timeout_action: "continue",
+      malicious_action: "quarantine",
+      mark_enabled: false,
+		timeout_action: "proceed",
       local_intel_enabled: true,
       intel_cleanup_days: 180,
       cloud_intel_enabled: true,
@@ -5078,7 +5239,7 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
   ...attachmentConfigSeed("antivirus", { host: "av-server", port: "6600" }),
   ...attachmentConfigSeed("antivirus_actions_receive", {
     virus_action: "quarantine",
-    timeout_action: "accept",
+    timeout_action: "proceed",
   }),
   ...attachmentConfigSeed("image_detect", {
     ocr_mode: "light",
@@ -5097,7 +5258,7 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
   }),
   ...attachmentConfigSeed("image_detect_actions_receive", {
     qr_light_action: "quarantine",
-    qr_deep_exceed_action: "accept",
+    qr_deep_exceed_action: "proceed",
     qr_deep_exceed_warn: true,
   }),
   ...attachmentConfigSeed("encrypted", {
@@ -5110,7 +5271,7 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     mark_suspicious: true,
   }),
   ...attachmentConfigSeed("encrypted_actions_receive", {
-    decrypt_fail_action: "accept",
+    decrypt_fail_action: "proceed",
   }),
 ];
 
@@ -6759,10 +6920,12 @@ type MockRecipientDisposition =
   MockDisposalMailLog["recipient_dispositions"][number];
 
 let mockDisposalMailLogs = MOCK_DISPOSAL_SEEDS.map(mockMailLog);
+let mockEmailDisposalSenderDomainRules: Rule[] = [];
 
 /** Reset mutable fixture state so unit tests never depend on declaration order. */
 export function resetMockEmailDisposalStateForTests() {
   mockDisposalMailLogs = MOCK_DISPOSAL_SEEDS.map(mockMailLog);
+  mockEmailDisposalSenderDomainRules = [];
   mockContentRules = mockContentRules.filter(
     (rule) => readObject(rule.metadata).source !== "email_disposal_center",
   );
@@ -7311,6 +7474,60 @@ export function mockEmailDisposalBlacklistEntity(
     return { status: 400, data: { message: "kind must be domain, url, or attachment_hash" } };
   }
 
+  if (kind === "domain") {
+    const existing = mockEmailDisposalSenderDomainRules.find((rule) => {
+      const metadata = readObject(rule.metadata);
+      const senderConfig = readObject(metadata.sender_config);
+      return metadata.list_type === "blacklist"
+        && senderConfig.type === "domain"
+        && senderConfig.value === value;
+    });
+    if (existing) return { status: 200, data: existing };
+
+    const now = "2026-08-17T00:00:00Z";
+    const rule: Rule = {
+      id: 9000 + mockEmailDisposalSenderDomainRules.length + 1,
+      name: `域名加黑 ${value}-sender-filter-mock`,
+      description: `由邮件处置中心的邮件日志 #${id} 创建发信人域名黑名单`,
+      tenant_id: 1,
+      page: "sender_filter",
+      rule_class: "action",
+      stage: "rcpt",
+      priority: 500,
+      condition_tree: JSON.stringify({
+        type: "condition",
+        field: "senderdomain",
+        operator: "eq",
+        value,
+      }),
+      action: "reject",
+      metadata: JSON.stringify({
+        feature: "sender_filter",
+        list_type: "blacklist",
+        sender_config: { type: "domain", value },
+        ip_range: { type: "all" },
+        source: "email_disposal_center",
+        source_mail_log_id: id,
+      }),
+      is_active: true,
+      created_at: now,
+      updated_at: now,
+    };
+    mockEmailDisposalSenderDomainRules.push(rule);
+    return { status: 201, data: rule };
+  }
+
+  const direction = item.authenticated ? "send" : "receive";
+  const directionNode: RuleNode = direction === "receive"
+    ? { type: "condition", field: "is_outbound", operator: "eq", value: "false" }
+    : {
+        type: "AND",
+        children: [
+          { type: "condition", field: "is_outbound", operator: "eq", value: "true" },
+          { type: "condition", field: "is_internal", operator: "eq", value: "false" },
+        ],
+      };
+
   const existing = mockContentRules.find((rule) => {
     const metadata = readObject(rule.metadata);
     return metadata.source === "email_disposal_center"
@@ -7327,27 +7544,16 @@ export function mockEmailDisposalBlacklistEntity(
     return { status: 409, data: { message: "all tenant content-rule priorities are in use" } };
   }
 
-  const direction = item.authenticated ? "send" : "receive";
   const directionConfig = { enabled: true, action: "quarantine" };
-  const directionNode: RuleNode = direction === "receive"
-    ? { type: "condition", field: "is_outbound", operator: "eq", value: "false" }
-    : {
-        type: "AND",
-        children: [
-          { type: "condition", field: "is_outbound", operator: "eq", value: "true" },
-          { type: "condition", field: "is_internal", operator: "eq", value: "false" },
-        ],
-      };
   const entityNode: RuleNode = kind === "attachment_hash"
     ? { type: "condition", field: "attachment_md5", operator: "csv_has", value }
     : {
         type: "condition",
         field: "url_entities",
-        operator: kind === "domain" ? "url_domain" : "url_exact",
+        operator: "url_exact",
         value,
       };
   const labels: Record<string, string> = {
-    domain: "域名加黑",
     url: "URL加黑",
     attachment_hash: "附件哈希加黑",
   };
@@ -7872,7 +8078,8 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
       reviewer_notify_interval_minutes: 30,
       reviewer_active_start: "00:00:00",
       reviewer_active_end: "23:59:59",
-      timeout_temp_disposal: "deliver",
+      timeout_temp_disposal: "accept",
+      timeout_mark_enabled: false,
       timeout_mark_positions: [],
       timeout_mark_text: "",
     },

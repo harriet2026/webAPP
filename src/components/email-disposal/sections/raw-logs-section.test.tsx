@@ -217,7 +217,7 @@ describe('RawLogsSection', () => {
     expect(screen.getByText('已截断至 10,000 行')).toBeInTheDocument();
   });
 
-  it('marks multi-node partial results and names the failed gateways', () => {
+  it('marks node-or-module partial results without hiding returned logs', () => {
     render(wrap(
       <RawLogsSection
         detail={baseDetail()}
@@ -231,8 +231,42 @@ describe('RawLogsSection', () => {
     ));
 
     const warning = screen.getByTestId('raw-logs-partial-warning');
-    expect(warning).toHaveTextContent('当前生命周期日志不完整');
-    expect(warning).toHaveTextContent('node-b, node-c');
+    expect(warning).toHaveTextContent('部分节点或日志模块查询超时/失败');
+    expandAllLogGroups();
+    expect(screen.getByTestId('raw-logs-viewer')).toHaveTextContent('status=failed');
+  });
+
+  it('shows independent node-module states and retries only the selected scope', () => {
+    const retryModule = vi.fn();
+    const retryNode = vi.fn();
+    render(wrap(
+      <RawLogsSection
+        detail={baseDetail()}
+        expanded
+        onExpandedChange={vi.fn()}
+        loaded
+        partial
+        logs={rawLogs()}
+        nodes={[{
+          node: 'node-a',
+          status: 'partial',
+          elapsed_ms: 10_000,
+          modules: {
+            antispam: { module: 'antispam', status: 'completed', count: 22, elapsed_ms: 1200 },
+            postfix: { module: 'postfix', status: 'timed_out', count: 0, elapsed_ms: 10_000 },
+          },
+        }]}
+        onRetryModule={retryModule}
+        onRetryNode={retryNode}
+      />,
+    ));
+
+    expect(screen.getByTestId('raw-logs-module-node-a-antispam')).toHaveTextContent('已完成 · 22 条');
+    expect(screen.getByTestId('raw-logs-module-node-a-postfix')).toHaveTextContent('已超时');
+    fireEvent.click(screen.getByRole('button', { name: '重试 postfix' }));
+    expect(retryModule).toHaveBeenCalledWith('node-a', 'postfix');
+    fireEvent.click(screen.getByRole('button', { name: '重试未完成模块' }));
+    expect(retryNode).toHaveBeenCalledWith('node-a');
     expandAllLogGroups();
     expect(screen.getByTestId('raw-logs-viewer')).toHaveTextContent('status=failed');
   });

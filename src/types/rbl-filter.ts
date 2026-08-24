@@ -1,12 +1,5 @@
 export type RBLFilterMatchMode = 'any' | 'specific';
-export type RBLFilterProductAction = 'reject' | 'quarantine' | 'review' | 'discard' | 'greylist';
-
-/**
- * 旧数据兼容：GT-12682 之前后端写入过的 product_action 取值。
- * 只出现在读路径（存量规则），写入一律用 RBLFilterProductAction。
- * rbl-config-serde.parseRblConfig 负责把它们映射到新枚举。
- */
-export type RBLFilterLegacyProductAction = 'block' | 'mark';
+export type RBLFilterProductAction = 'reject' | 'quarantine' | 'audit' | 'discard' | 'greylist';
 
 export interface RBLGreylistConfig {
   mode: 'delay' | 'rateLimit';
@@ -38,7 +31,7 @@ export interface RBLFilterRuleView {
   description: string;
   match_mode: RBLFilterMatchMode;
   match_servers: string[];
-  product_action: RBLFilterProductAction | RBLFilterLegacyProductAction;
+  product_action: RBLFilterProductAction;
   action: string;
   greylist?: RBLGreylistConfig;
   priority: number;
@@ -80,7 +73,7 @@ export interface RBLFilterRuleTestResponse {
 export const RBLProductActionLabels: Record<RBLFilterProductAction, string> = {
   reject: 'rblFilter.actionReject',
   quarantine: 'rblFilter.actionQuarantine',
-  review: 'rblFilter.actionReview',
+  audit: 'rblFilter.actionReview',
   discard: 'rblFilter.actionDiscard',
   greylist: 'rblFilter.actionGreylist',
 };

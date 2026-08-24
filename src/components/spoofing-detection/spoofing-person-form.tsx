@@ -167,7 +167,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
 
   function onModeChange(next: SpoofDispositionMode) {
     setMode(next);
-    if (next === 'observe') setAction('mark');
+    if (next === 'observe') setAction('accept');
     else if (next === 'standard') setAction('quarantine');
     else if (next === 'strict') setAction('reject');
   }

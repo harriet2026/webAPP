@@ -87,10 +87,9 @@ function getDisplayAction(resolved: ContentRuleRuleView['resolved']): ContentRul
 }
 
 function actionVariant(action: ContentRuleUiAction): 'success' | 'error' | 'warning' | 'info' | 'default' {
-  if (action === 'deliver') return 'success';
-  if (action === 'tag_deliver') return 'info';
-  if (action === 'isolate' || action === 'review') return 'warning';
-  if (action === 'block' || action === 'discard') return 'error';
+  if (action === 'accept') return 'success';
+  if (action === 'quarantine' || action === 'audit') return 'warning';
+  if (action === 'reject' || action === 'discard') return 'error';
   return 'default';
 }
 

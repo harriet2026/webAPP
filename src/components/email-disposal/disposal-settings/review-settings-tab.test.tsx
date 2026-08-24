@@ -20,11 +20,20 @@ function Harness() {
 }
 
 describe('ReviewSettingsTab timeout mark positions (task-12 fix: subject_prefix/header)', () => {
+  it('shows fixed timeout delivery and does not expose the removed by_result option', () => {
+    render(<Harness />);
+
+    expect(screen.getByTestId('disposal-settings-timeout-disposal-accept')).toBeVisible();
+    expect(
+      screen.queryByTestId('disposal-settings-timeout-disposal-by-result'),
+    ).not.toBeInTheDocument();
+  });
+
   it('checking both position checkboxes writes ["subject_prefix", "header"] to the form, not the old subject/body values', async () => {
     render(<Harness />);
 
-    // switch to mark first so the checkbox group renders
-    await userEvent.click(screen.getByTestId('disposal-settings-timeout-disposal-mark'));
+    // accept is the action; marking is an independent overlay switch.
+    await userEvent.click(screen.getByTestId('disposal-settings-timeout-mark-enabled'));
 
     const subjectPrefixBox = screen.getByTestId(
       'disposal-settings-timeout-mark-positions-subject_prefix',

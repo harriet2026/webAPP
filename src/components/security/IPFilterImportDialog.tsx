@@ -30,6 +30,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -69,16 +70,15 @@ interface IPFilterImportDialogProps {
   onImported: () => void;
 }
 
-const BLACKLIST_ACTIONS: DemoBlacklistAction[] = ['block', 'quarantine', 'drop', 'review'];
-const WHITELIST_ACTIONS: DemoWhitelistAction[] = ['deliver', 'tagDeliver'];
+const BLACKLIST_ACTIONS: DemoBlacklistAction[] = ['reject', 'quarantine', 'discard', 'audit'];
+const WHITELIST_ACTIONS: DemoWhitelistAction[] = ['accept'];
 
 const ACTION_LABEL_KEY: Record<DemoAction, string> = {
-  block: 'ipFilter.actionBlock',
+  reject: 'ipFilter.actionReject',
   quarantine: 'ipFilter.actionQuarantine',
-  drop: 'ipFilter.actionDrop',
-  review: 'ipFilter.actionReview',
-  deliver: 'ipFilter.actionDeliver',
-  tagDeliver: 'ipFilter.actionTagDeliver',
+  discard: 'ipFilter.actionDiscard',
+  audit: 'ipFilter.actionAudit',
+  accept: 'ipFilter.actionAccept',
 };
 
 export function IPFilterImportDialog({
@@ -96,8 +96,9 @@ export function IPFilterImportDialog({
   const [fileRows, setFileRows] = useState<EnvelopeRuleRow[]>([]);
   const [fileName, setFileName] = useState('');
   const [defaultAction, setDefaultAction] = useState<DemoAction>(
-    listType === 'blacklist' ? 'block' : 'deliver',
+    listType === 'blacklist' ? 'reject' : 'accept',
   );
+  const [defaultAddWhitelistTag, setDefaultAddWhitelistTag] = useState(false);
   const [strategy, setStrategy] = useState<ExistingDuplicateStrategy>('skip');
   const [submitting, setSubmitting] = useState(false);
 
@@ -109,8 +110,11 @@ export function IPFilterImportDialog({
   );
 
   const parsed = useMemo(
-    () => parseImportInputs({ text, envelopeRows: fileRows }, { listType, defaultAction, existingIpValues }),
-    [text, fileRows, listType, defaultAction, existingIpValues],
+    () => parseImportInputs(
+      { text, envelopeRows: fileRows },
+      { listType, defaultAction, defaultAddWhitelistTag, existingIpValues },
+    ),
+    [text, fileRows, listType, defaultAction, defaultAddWhitelistTag, existingIpValues],
   );
 
   const plan = useMemo(() => buildImportPlan(parsed.rows, strategy), [parsed.rows, strategy]);
@@ -120,6 +124,7 @@ export function IPFilterImportDialog({
     setFileRows([]);
     setFileName('');
     setStrategy('skip');
+    setDefaultAddWhitelistTag(false);
     setSubmitting(false);
   }, []);
 
@@ -175,7 +180,7 @@ export function IPFilterImportDialog({
     const basePriority = 100;
     for (let i = 0; i < plan.length; i += 1) {
       const row = plan[i];
-      const { action, add_headers } = toGatewayPayload(row.action);
+      const { action, add_headers } = toGatewayPayload(row.action, row.addWhitelistTag);
       // JSON（导出格式）行保留原始 name/priority/启用状态，导出→导入闭环不丢属性；
       // 文本行沿用 import-<ip> 命名 + 递增优先级。
       const payload = {
@@ -253,6 +258,15 @@ export function IPFilterImportDialog({
                   ))}
                 </SelectContent>
               </Select>
+              {listType === 'whitelist' && (
+                <label className="flex items-center gap-2 text-xs">
+                  <Checkbox
+                    checked={defaultAddWhitelistTag}
+                    onCheckedChange={(checked) => setDefaultAddWhitelistTag(checked === true)}
+                  />
+                  {t('ipFilter.actionTagDeliver')}
+                </label>
+              )}
             </div>
             <div className="flex-1" />
             {fileName && (

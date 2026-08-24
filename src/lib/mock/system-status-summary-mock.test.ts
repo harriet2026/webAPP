@@ -12,5 +12,6 @@ describe('system-status summary mock coverage', () => {
     expect(data.previous.mail_volume).toBeGreaterThan(0);
     expect(data.threat_trend.length).toBeGreaterThan(0);
     expect(data.pending_disposal).toBeGreaterThanOrEqual(0);
+    expect(data.pending_report).toBeGreaterThanOrEqual(0);
   });
 });

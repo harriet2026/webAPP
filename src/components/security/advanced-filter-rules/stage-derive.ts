@@ -17,7 +17,7 @@ function maxStage(a: string, b: string): string {
   return ia >= ib ? a : b;
 }
 
-const DATA_ONLY_ACTIONS: PrimaryAction[] = ['quarantine', 'review', 'discard', 'tagDeliver'];
+const DATA_ONLY_ACTIONS: PrimaryAction[] = ['quarantine', 'audit', 'discard', 'proceed'];
 
 /**
  * Derive the rule's persisted stage from its conditions and primary action.
@@ -25,7 +25,7 @@ const DATA_ONLY_ACTIONS: PrimaryAction[] = ['quarantine', 'review', 'discard', '
  *
  * Precedence:
  * 1. Any leaf whose field has availability === 'sideline_async' → 'sideline'.
- * 2. Else, if the action is one of quarantine/review/discard/tagDeliver → 'data'.
+ * 2. Else, if the action is one of quarantine/audit/discard/proceed → 'data'.
  * 3. Else, the max of all leaves' fieldDefs[field].min_stage, floored at 'data'.
  *    Empty leaves, or leaves with no matching/known stage, fall back to 'data'.
  */

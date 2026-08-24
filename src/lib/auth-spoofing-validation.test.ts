@@ -44,7 +44,7 @@ describe('hasEmptyAuthSpoofingTag', () => {
   it('rejects an enabled subject tag whose content is empty or whitespace', () => {
     const cfg = config();
     cfg.format_checks.mailfrom_empty = item({
-      action: 'mark-delivery',
+      action: 'proceed',
       tag_subject_enabled: true,
       tag_subject_content: '   ',
     });
@@ -56,7 +56,7 @@ describe('hasEmptyAuthSpoofingTag', () => {
     const cases: Array<(cfg: AuthSpoofingConfig) => void> = [
       (cfg) => {
         cfg.protocol_checks.spf.fail = item({
-          action: 'mark-delivery',
+          action: 'proceed',
           tag_header_enabled: true,
           tag_header_name: 'X-Spoof-Warning',
           tag_header_value: '',
@@ -66,14 +66,14 @@ describe('hasEmptyAuthSpoofingTag', () => {
         cfg.similar_domain = {
           ...cfg.similar_domain,
           enabled: true,
-          action: 'mark-delivery',
+          action: 'proceed',
           tag_body_enabled: true,
           tag_body_content: '',
         };
       },
       (cfg) => {
         cfg.display_name_spoof.internal = item({
-          action: 'mark-delivery',
+          action: 'proceed',
           tag_subject_enabled: true,
           tag_subject_content: '',
         });
@@ -87,12 +87,12 @@ describe('hasEmptyAuthSpoofingTag', () => {
     }
   });
 
-  it('allows pure mark-delivery and ignores tag fields on inactive items', () => {
+  it('allows pure proceed and ignores tag fields on inactive items', () => {
     const cfg = config();
-    cfg.format_checks.mailfrom_empty = item({ action: 'mark-delivery' });
+    cfg.format_checks.mailfrom_empty = item({ action: 'proceed' });
     cfg.protocol_checks.spf.fail = item({
       enabled: false,
-      action: 'mark-delivery',
+      action: 'proceed',
       tag_subject_enabled: true,
       tag_subject_content: '',
     });
@@ -103,7 +103,7 @@ describe('hasEmptyAuthSpoofingTag', () => {
   it('accepts complete enabled tag fields', () => {
     const cfg = config();
     cfg.format_checks.mailfrom_empty = item({
-      action: 'mark-delivery',
+      action: 'proceed',
       tag_subject_enabled: true,
       tag_subject_content: '[疑似仿冒]',
       tag_header_enabled: true,

@@ -9,8 +9,7 @@ const LOCALES = { zh, en, ru, th } as Record<string, any>;
 
 describe('auth-spoofing protocol action labels (GT-12650)', () => {
   // `protocolActionLabel.*`是协议检查下拉框的文案，`action.*`是同一 namespace 里
-  // 该动作的规范名。两者描述的是**同一个后端动作字符串**，所以除 accept 外
-  // (accept 刻意渲染成「进行下一步检测」，见 internal/api/auth_spoofing.go 的设计说明)
+  // 该动作的规范名。两者描述的是**同一个后端动作字符串**，所以
   // 下拉文案必须以规范名开头，只允许追加括号补充说明。
   //
   // 这条不变量正是 GT-12650 的红灯：audit 的后端语义是「扣住邮件进审核队列等审批」
@@ -75,7 +74,7 @@ describe('auth-spoofing label mapping', () => {
     expect(flowSubKey('discard', true)).toBe('flowSub.drop');
   });
   it('context keys', () => {
-    expect(formatActionKey('accept')).toBe('formatActionLabel.accept');
+    expect(formatActionKey('proceed')).toBe('formatActionLabel.proceed');
     expect(protocolActionKey('audit')).toBe('protocolActionLabel.audit');
   });
 });

@@ -2,11 +2,14 @@ import type { SimilarDetectionAction } from './types';
 
 export const SIMILAR_DETECTION_ACTION_OPTIONS: ReadonlyArray<{
   value: SimilarDetectionAction;
-  labelKey: 'actionMarkDelivery' | 'actionQuarantine' | 'actionReview' | 'actionBlock' | 'actionDiscard';
+  labelKey: 'actionAccept' | 'actionQuarantine' | 'actionAudit' | 'actionDiscard';
 }> = [
-  { value: 'mark-delivery', labelKey: 'actionMarkDelivery' },
+  { value: 'accept', labelKey: 'actionAccept' },
   { value: 'quarantine', labelKey: 'actionQuarantine' },
-  { value: 'review', labelKey: 'actionReview' },
-  { value: 'block', labelKey: 'actionBlock' },
+  { value: 'audit', labelKey: 'actionAudit' },
   { value: 'discard', labelKey: 'actionDiscard' },
 ];
+
+export function getSimilarDetectionActionOptions(_current: SimilarDetectionAction) {
+  return SIMILAR_DETECTION_ACTION_OPTIONS.map((option) => ({ ...option, disabled: false }));
+}

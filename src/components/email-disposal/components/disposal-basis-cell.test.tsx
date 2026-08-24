@@ -48,6 +48,16 @@ const summaries: DisposalBasisGroupSummary[] = [
       hit_values: { source_ip: '203.0.113.7' },
     }],
   },
+  {
+    policy_key: 'ACF',
+    recipient_count: 1,
+    effective_count: 1,
+    effective_known: true,
+    entries: [{
+      rule_name: '财务审核', rule_id: 'ACF-2', action: 'audit',
+      recipient_count: 1, effective_count: 1, effective_known: true,
+    }],
+  },
 ];
 
 function renderCell(requestFn: ApiRequestFn) {
@@ -70,15 +80,40 @@ function renderCell(requestFn: ApiRequestFn) {
 }
 
 describe('DisposalBasisCell (GT-12935)', () => {
+  it('does not resurrect reason text when structured facts contain only proceed hits', () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <TooltipProvider>
+          <DisposalBasisCell
+            mailLogId={99}
+            basis={{
+              modules: [{
+                policy_key: 'AUTH', rule_id: 'AUTH-22', action: 'proceed',
+                recipients: ['qfliu@dm163.cacter.com'], effective_for: [],
+              }],
+            }}
+            groups={undefined}
+            reason="accepted by rules: 22"
+            lang="zh"
+            requestFn={vi.fn() as unknown as ApiRequestFn}
+          />
+        </TooltipProvider>
+      </QueryClientProvider>,
+    );
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.queryByText('accepted by rules: 22')).not.toBeInTheDocument();
+  });
+
   it('renders from the lightweight summary and does not load details while closed', () => {
     const requestFn = vi.fn();
     renderCell(requestFn as unknown as ApiRequestFn);
 
-    expect(screen.getByTestId('disposal-basis-42')).toHaveTextContent('IP黑白名单');
+    expect(screen.getByTestId('disposal-basis-42')).toHaveTextContent('内容规则');
     expect(requestFn).not.toHaveBeenCalled();
   });
 
-  it('loads full modules only when opened and renders per-recipient effective states', async () => {
+  it('loads full modules only when opened and excludes hit-only rules from disposition basis', async () => {
     const requestFn = vi.fn().mockResolvedValue({
       id: 42,
       disposal_basis: {
@@ -98,6 +133,14 @@ describe('DisposalBasisCell (GT-12935)', () => {
             recipients: ['a@example.com'],
             effective_for: [],
           },
+          {
+            policy_key: 'ACF',
+            rule_name: '财务审核',
+            rule_id: 'ACF-2',
+            action: 'audit',
+            recipients: ['c@example.com'],
+            effective_for: ['c@example.com'],
+          },
         ],
       },
     });
@@ -108,13 +151,17 @@ describe('DisposalBasisCell (GT-12935)', () => {
 
     await waitFor(() => expect(requestFn).toHaveBeenCalledWith('/mail-logs/42'));
     const hitOnlyLines = await screen.findAllByText(/a@example\.com/);
-    expect(hitOnlyLines).toHaveLength(2);
+    expect(hitOnlyLines).toHaveLength(1);
     expect(hitOnlyLines.every((line) =>
       line.textContent?.includes('emailDisposal.table.disposalBasisState.hitOnly')))
       .toBe(true);
     expect(screen.getByText(/b@example\.com/)).toHaveTextContent(
       'emailDisposal.table.disposalBasisState.effective',
     );
+    expect(screen.getByText(/c@example\.com/)).toHaveTextContent(
+      'emailDisposal.table.disposalBasisState.effective',
+    );
+    expect(screen.queryByTestId('disposal-basis-group-IPBL')).not.toBeInTheDocument();
   });
 
   it('highlights a second rule in the same policy group and lazy-loads its details', async () => {

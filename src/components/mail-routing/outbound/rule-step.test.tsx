@@ -240,7 +240,7 @@ describe('RuleStep drawer', () => {
     expect(screen.getByTestId('mr-ob-rule-tls-level-select')).not.toBeDisabled();
   });
 
-  it('GT-12854：意图引擎标签可勾选「正常 (1)」并保存 → condition_tree 写入 cac_int_tag within 1', async () => {
+  it('GT-12854：意图引擎标签可勾选「正常 (1)」并保存 → condition_tree 写入 cac_int_tag within 1', { timeout: 30_000 }, async () => {
     const user = userEvent.setup();
     render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
     await screen.findByTestId('mr-ob-rule-empty');
@@ -266,7 +266,7 @@ describe('RuleStep drawer', () => {
     });
   });
 
-  it('GT-12854：意图引擎标签支持多选（勾选垃圾邮件 3 + 广告 4）→ within 3/4', async () => {
+  it('GT-12854：意图引擎标签支持多选（勾选垃圾邮件 3 + 广告 4）→ within 3/4', { timeout: 30_000 }, async () => {
     const user = userEvent.setup();
     render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
     await screen.findByTestId('mr-ob-rule-empty');

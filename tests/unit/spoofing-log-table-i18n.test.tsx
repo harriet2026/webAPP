@@ -37,7 +37,7 @@ const row: SpoofingLogItem = {
   direction: 'receive',
   sidelined_at: '2026-06-22T00:00:00Z',
   confidence: 0.9,
-  disposition: 'mark',
+  disposition: 'accept',
   actionable: true,
   target_name: 'CEO',
   target_type: 'person',

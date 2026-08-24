@@ -39,11 +39,11 @@ export const DEFAULT_QR_DEEP_ROUTES: QrDeepRoutesConfig = {
 
 export const DEFAULT_IMAGE_DETECT_ACTIONS: ImageDetectActionConfig = {
   qr_light_action: 'quarantine',
-  qr_deep_exceed_action: 'accept',
+  qr_deep_exceed_action: 'proceed',
   qr_deep_exceed_warn: true,
 };
 
-const LIGHT_ACTIONS: AttachmentAction[] = ['quarantine', 'reject', 'discard'];
+const LIGHT_ACTIONS: AttachmentAction[] = ['quarantine', 'audit', 'discard'];
 
 interface ImageDetectTabProps {
   direction?: Direction;
@@ -267,10 +267,10 @@ export function ImageDetectTab({
               <div className="space-y-2">
                 <Label>{t('imageDetect.exceedAction')}</Label>
                 <Select
-                  value={actions.qr_deep_exceed_action === 'accept' ? 'pass_warn' : 'quarantine'}
+                  value={actions.qr_deep_exceed_action === 'proceed' ? 'pass_warn' : 'quarantine'}
                   onValueChange={(action) => onActionsChange({
                     ...actions,
-                    qr_deep_exceed_action: action === 'pass_warn' ? 'accept' : 'quarantine',
+                    qr_deep_exceed_action: action === 'pass_warn' ? 'proceed' : 'quarantine',
                     qr_deep_exceed_warn: action === 'pass_warn',
                   })}
                 >
@@ -281,7 +281,7 @@ export function ImageDetectTab({
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground" data-testid="qr-deep-exceed-action-hint">
-                  {actions.qr_deep_exceed_action === 'accept'
+                  {actions.qr_deep_exceed_action === 'proceed'
                     ? t('imageDetect.exceedActionHint_pass')
                     : t('imageDetect.exceedActionHint_quarantine')}
                 </p>

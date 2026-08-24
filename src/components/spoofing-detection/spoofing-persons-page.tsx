@@ -98,7 +98,7 @@ export function SpoofingPersonsPage({ auditOnly }: { auditOnly?: boolean }) {
                   <Users className="mr-2 h-4 w-4" />{tsd('batch.selected', { n: selectedIds.length })}
                 </Button>
               ) : null}
-              <Button disabled={readonly} onClick={() => { setEditing(null); setFormOpen(true); }}>
+              <Button data-testid="spoof-person-add" disabled={readonly} onClick={() => { setEditing(null); setFormOpen(true); }}>
                 <Plus className="mr-2 h-4 w-4" />{tsd('person.add')}
               </Button>
             </div>
