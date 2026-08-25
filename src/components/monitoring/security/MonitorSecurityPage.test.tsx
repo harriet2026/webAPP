@@ -42,6 +42,7 @@ vi.mock('./hooks', () => ({
 }));
 
 vi.mock('next-intl', () => ({
+  useLocale: () => 'zh',
   useTranslations: () => (key: string, values?: Record<string, string>) => {
     const labels: Record<string, string> = {
       title: '检测引擎状态',

@@ -26,6 +26,7 @@ import {
 import { EmptyState, DegradedBanner, TimeoutBanner } from './StateBanners';
 import { useMailflowDelivery, useMailflowBounce, isTimeoutError } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 import type { TimeRange, MailflowDirection } from '@/types/monitoring';
 
 interface DeliveryTabProps {
@@ -75,7 +76,10 @@ export function DeliveryTab({ range, direction }: DeliveryTabProps) {
       xAxis: {
         type: 'category' as const,
         data: xs,
-        axisLabel: { showMaxLabel: true },
+        axisLabel: {
+          showMaxLabel: true,
+          formatter: createTimeAxisFormatter(locale, range === '7d'),
+        },
       },
       yAxis: {
         type: 'value' as const,
@@ -91,7 +95,7 @@ export function DeliveryTab({ range, direction }: DeliveryTabProps) {
         data: trend.map((p) => p[k]),
       })),
     };
-  }, [data, t]);
+  }, [data, t, locale, range]);
 
   const reasonOption = useMemo(() => {
     const reasons = bounceData?.reasons ?? [];

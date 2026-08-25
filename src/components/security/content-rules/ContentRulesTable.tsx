@@ -3,6 +3,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { useTranslations } from 'next-intl';
 import {
+  AlertTriangle,
   Copy,
   MoreHorizontal,
   Pencil,
@@ -11,8 +12,10 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { DataTable } from '@/components/shared/data-table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -246,12 +249,47 @@ export function ContentRulesTable({
       },
     },
     {
+      id: 'priority',
+      header: t('contentRules.priority'),
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap font-mono text-sm text-muted-foreground">
+          {row.original.rule.priority}
+        </span>
+      ),
+    },
+    {
       id: 'status',
       header: t('contentRules.status'),
       cell: ({ row }) => {
         const status = deriveContentRuleStatus(row.original.rule.is_active, row.original.rule.valid_until);
-        const variant = status === 'enabled' ? 'success' : status === 'expiringSoon' ? 'warning' : status === 'expired' ? 'error' : 'default';
-        return <StatusBadge status={t(`contentRules.status${status[0].toUpperCase() + status.slice(1)}` as 'contentRules.statusEnabled')} variant={variant} />;
+        const hint = status === 'expiringSoon' ? t('contentRules.statusExpiringSoon')
+          : status === 'expired' ? t('contentRules.statusExpired')
+          : null;
+        return (
+          <div className="flex items-center gap-1.5">
+            <Switch
+              checked={row.original.rule.is_active}
+              disabled={status === 'expired'}
+              onCheckedChange={(isActive) => onToggle(row.original.rule.id, isActive)}
+              aria-label={row.original.rule.is_active ? t('common.disabled') : t('common.enabled')}
+            />
+            {hint && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <AlertTriangle
+                      className={cn(
+                        'h-3.5 w-3.5',
+                        status === 'expired' ? 'text-destructive' : 'text-amber-500',
+                      )}
+                    />
+                  }
+                />
+                <TooltipContent>{hint}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        );
       },
     },
     {
@@ -325,26 +363,28 @@ export function ContentRulesTable({
   ];
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      pageCount={Math.max(1, pageCount)}
-      pageIndex={pageIndex}
-      onPageChange={onPageChange}
-      pageSize={pageSize}
-      pageSizeOptions={[10, 20, 50, 100]}
-      onPageSizeChange={onPageSizeChange}
-      rowTestId={(row) => `content-rule-row-${row.rule.id}`}
-      noDataText={t('contentRules.noRules')}
-      totalCount={totalCount}
-      pageJumpLabel={t('contentRules.jumpToPage')}
-      rowClassName={(row) => {
-        const status = deriveContentRuleStatus(row.rule.is_active, row.rule.valid_until);
-        return cn(
-          selectedIds.includes(row.rule.id) && 'bg-primary/5',
-          status === 'expired' && 'opacity-60',
-        );
-      }}
-    />
+    <TooltipProvider>
+      <DataTable
+        columns={columns}
+        data={data}
+        pageCount={Math.max(1, pageCount)}
+        pageIndex={pageIndex}
+        onPageChange={onPageChange}
+        pageSize={pageSize}
+        pageSizeOptions={[10, 20, 50, 100]}
+        onPageSizeChange={onPageSizeChange}
+        rowTestId={(row) => `content-rule-row-${row.rule.id}`}
+        noDataText={t('contentRules.noRules')}
+        totalCount={totalCount}
+        pageJumpLabel={t('contentRules.jumpToPage')}
+        rowClassName={(row) => {
+          const status = deriveContentRuleStatus(row.rule.is_active, row.rule.valid_until);
+          return cn(
+            selectedIds.includes(row.rule.id) && 'bg-primary/5',
+            status === 'expired' && 'opacity-60',
+          );
+        }}
+      />
+    </TooltipProvider>
   );
 }

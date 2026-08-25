@@ -127,6 +127,7 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
         side="right"
         className="data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
         data-testid="mail-marking-rule-editor"
+        showCloseButton={false}
       >
         <SheetHeader className="shrink-0 border-b px-6 py-4 text-left">
           <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>

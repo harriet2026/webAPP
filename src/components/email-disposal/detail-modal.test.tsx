@@ -195,12 +195,13 @@ describe('DetailModal raw lifecycle logs', () => {
     );
 
     const trigger = await screen.findByTestId('disposal-raw-logs-trigger');
-    expect(screen.queryByTestId('disposal-detail-nav-analysis')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('disposal-detail-analysis')).not.toBeInTheDocument();
-    expect(screen.getByTestId('overview-section-stub')).toHaveAttribute('data-has-view-basis', 'false');
+    expect(screen.getByTestId('disposal-detail-nav-analysis')).toBeInTheDocument();
+    expect(screen.getByTestId('disposal-detail-analysis')).toBeInTheDocument();
+    expect(screen.getByTestId('overview-section-stub')).toHaveAttribute('data-has-view-basis', 'true');
     await waitFor(() => expect(intersectionObservers.length).toBeGreaterThan(0));
     expect(intersectionObservers.at(-1)!.observe.mock.calls.map(([target]) => target.getAttribute('data-section-key'))).toEqual([
       'overview',
+      'analysis',
       'rawlogs',
     ]);
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
@@ -218,7 +219,7 @@ describe('DetailModal raw lifecycle logs', () => {
     });
   });
 
-  it('shows security analysis and its jump entry only when explicitly enabled', async () => {
+  it('always shows security analysis and its jump entry', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -226,7 +227,7 @@ describe('DetailModal raw lifecycle logs', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
@@ -256,7 +257,7 @@ describe('DetailModal raw lifecycle logs', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
@@ -276,7 +277,7 @@ describe('DetailModal raw lifecycle logs', () => {
     const { rerender } = render(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
@@ -302,14 +303,14 @@ describe('DetailModal raw lifecycle logs', () => {
     rerender(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open={false} mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open={false} mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
     rerender(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
@@ -325,7 +326,7 @@ describe('DetailModal raw lifecycle logs', () => {
     const { rerender } = render(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
@@ -351,14 +352,14 @@ describe('DetailModal raw lifecycle logs', () => {
     rerender(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open={false} mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open={false} mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
     rerender(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
@@ -394,7 +395,7 @@ describe('DetailModal raw lifecycle logs', () => {
     const { rerender } = render(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
@@ -417,14 +418,14 @@ describe('DetailModal raw lifecycle logs', () => {
     rerender(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open={false} mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open={false} mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );
     rerender(
       <QueryClientProvider client={queryClient}>
         <NextIntlClientProvider locale="zh" messages={zh as never}>
-          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} showSecurityAnalysis />
+          <DetailModal open mailLogId={1} onOpenChange={vi.fn()} />
         </NextIntlClientProvider>
       </QueryClientProvider>,
     );

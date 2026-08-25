@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Info } from 'lucide-react';
@@ -19,12 +18,11 @@ export interface PolicyConfigPanelProps {
   status: PolicyStatus;
   supportsCustom: boolean; // 形态门控：cloud 无自定义档（连置灰项也不显示）
   onChange: (next: PolicyStatus) => void;
-  onClose: () => void;
 }
 
 // 群组策略抽屉右栏（demo renderConfigPanel）：全局默认参照卡 → 策略状态单选 →
 // 意图引擎禁用高风险警告 → 海外检测禁用豁免原因。
-export function PolicyConfigPanel({ def, status, supportsCustom, onChange, onClose }: PolicyConfigPanelProps) {
+export function PolicyConfigPanel({ def, status, supportsCustom, onChange }: PolicyConfigPanelProps) {
   const t = useTranslations();
   const tGp = useTranslations('groupPolicy');
   // 意图引擎禁用确认勾选（demo：仅 UI 勾选，不持久化）
@@ -38,16 +36,6 @@ export function PolicyConfigPanel({ def, status, supportsCustom, onChange, onClo
     <div className="w-[320px] border-l p-4 overflow-y-auto bg-muted/30 shrink-0" data-testid="group-policy-config-panel">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium text-sm text-muted-foreground">{tGp('configDetail')}</h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0"
-          onClick={onClose}
-          aria-label={tGp('configDetailClose')}
-          data-testid="group-policy-config-panel-close"
-        >
-          <span className="text-muted-foreground text-lg">&times;</span>
-        </Button>
       </div>
 
       <div className="space-y-4">

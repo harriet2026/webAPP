@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/table';
 import { EmptyState, DegradedBanner, TimeoutBanner } from './StateBanners';
 import { degradeMessage } from '@/lib/monitoring/degrade';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 import {
   useMailflowConnection,
   useMailflowConnectionTrend,
@@ -108,7 +109,10 @@ export function ConnectionTab({ node, range, direction }: ConnectionTabProps) {
       xAxis: {
         type: 'category' as const,
         data: points.map((p) => p.ts),
-        axisLabel: { showMaxLabel: true },
+        axisLabel: {
+          showMaxLabel: true,
+          formatter: createTimeAxisFormatter(locale, range === '7d'),
+        },
       },
       yAxis: { type: 'value' as const, min: 0 },
       series: [
@@ -122,7 +126,7 @@ export function ConnectionTab({ node, range, direction }: ConnectionTabProps) {
         },
       ],
     };
-  }, [trendData, t]);
+  }, [trendData, t, locale, range]);
 
   if (isLoading) {
     return <Skeleton className="h-[600px] w-full rounded-lg" />;

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Box, Bug, Globe, Loader2, RefreshCw, Shield } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,7 @@ import {
   DegradedBanner,
   EmptyState,
 } from '@/components/monitoring/infrastructure/StateBanners';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 import { cn } from '@/lib/utils';
 import type {
   SecurityEngine,
@@ -115,6 +116,7 @@ function detailCells(engine: SecurityEngine, row: SecurityEngineDetailRow): Arra
 
 export function MonitorSecurityPage() {
   const t = useTranslations('monitorSecurity');
+  const locale = useLocale();
   const { isSystemAdmin } = useAuth();
   const [engine, setEngine] = useState<SecurityEngine>('antispam');
   const [range, setRange] = useState<SecurityTimeRange>('24h');
@@ -136,7 +138,12 @@ export function MonitorSecurityPage() {
       ],
     },
     grid: { left: 54, right: 54, top: 24, bottom: 54 },
-    xAxis: { type: 'category', boundaryGap: false, data: trend.map((item) => item.ts) },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: trend.map((item) => item.ts),
+      axisLabel: { formatter: createTimeAxisFormatter(locale, range === '7d' || range === '30d') },
+    },
     yAxis: [
       { type: 'value', name: t(`unit.${config.leftUnit}`), splitLine: { lineStyle: { opacity: 0.18 } } },
       { type: 'value', name: t(`unit.${config.rightUnit}`), splitLine: { show: false } },
@@ -159,7 +166,7 @@ export function MonitorSecurityPage() {
         data: trend.map((item) => item.secondary),
       },
     ],
-  }), [config, t, trend]);
+  }), [config, t, trend, locale, range]);
 
   if (!isSystemAdmin) {
     return (

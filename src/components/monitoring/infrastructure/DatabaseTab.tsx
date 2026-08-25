@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,6 +23,7 @@ import {
 import { EmptyState, DegradedBanner } from './StateBanners';
 import { useDatabase } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 import type { TimeRange } from '@/types/monitoring';
 
 interface DatabaseTabProps {
@@ -32,7 +33,12 @@ interface DatabaseTabProps {
 
 export function DatabaseTab({ node, range }: DatabaseTabProps) {
   const t = useTranslations('infrastructure');
+  const locale = useLocale();
   const { data, isLoading, isError } = useDatabase(node, range);
+  const timeAxisFormatter = useMemo(
+    () => createTimeAxisFormatter(locale, range === '7d'),
+    [locale, range],
+  );
 
   const connOption = useMemo(() => {
     if (!data?.conn_trend?.points?.length) return null;
@@ -40,11 +46,11 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
     return {
       tooltip: { trigger: 'axis' as const },
       grid: { left: 48, right: 16, top: 24, bottom: 32 },
-      xAxis: { type: 'category' as const, data: pts.map((p) => p.ts), axisLabel: { showMaxLabel: true } },
+      xAxis: { type: 'category' as const, data: pts.map((p) => p.ts), axisLabel: { showMaxLabel: true, formatter: timeAxisFormatter } },
       yAxis: { type: 'value' as const },
       series: [{ type: 'line', data: pts.map((p) => p.value), smooth: true, lineStyle: { width: 2 }, itemStyle: { color: '#3b82f6' }, areaStyle: { opacity: 0.1 } }],
     };
-  }, [data]);
+  }, [data, timeAxisFormatter]);
 
   const latOption = useMemo(() => {
     if (!data?.latency_trend?.points?.length) return null;
@@ -52,11 +58,11 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
     return {
       tooltip: { trigger: 'axis' as const },
       grid: { left: 48, right: 16, top: 24, bottom: 32 },
-      xAxis: { type: 'category' as const, data: pts.map((p) => p.ts), axisLabel: { showMaxLabel: true } },
+      xAxis: { type: 'category' as const, data: pts.map((p) => p.ts), axisLabel: { showMaxLabel: true, formatter: timeAxisFormatter } },
       yAxis: { type: 'value' as const, axisLabel: { formatter: '{value} ms' } },
       series: [{ type: 'line', data: pts.map((p) => p.value), smooth: true, lineStyle: { width: 2 }, itemStyle: { color: '#f59e0b' }, areaStyle: { opacity: 0.1 } }],
     };
-  }, [data]);
+  }, [data, timeAxisFormatter]);
 
   if (isLoading) {
     return (
@@ -170,7 +176,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
               option={{
                 tooltip: { trigger: 'axis' as const },
                 grid: { left: 48, right: 16, top: 24, bottom: 32 },
-                xAxis: { type: 'category' as const, data: data.dml_rate.points.map((p) => p.ts), axisLabel: { showMaxLabel: true } },
+                xAxis: { type: 'category' as const, data: data.dml_rate.points.map((p) => p.ts), axisLabel: { showMaxLabel: true, formatter: timeAxisFormatter } },
                 yAxis: { type: 'value' as const },
                 series: [{ type: 'line', data: data.dml_rate.points.map((p) => p.value), smooth: true, lineStyle: { width: 2 }, itemStyle: { color: '#10b981' }, areaStyle: { opacity: 0.1 } }],
               }}

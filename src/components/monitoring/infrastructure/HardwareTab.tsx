@@ -16,6 +16,7 @@ import {
 import { EmptyState, DegradedBanner } from './StateBanners';
 import { useHardware } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 import type { TimeRange } from '@/types/monitoring';
 
 interface HardwareTabProps {
@@ -35,9 +36,6 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
     const ts = (cpuPts.length >= memPts.length ? cpuPts : memPts).map((p) => p.ts);
     const cpuMap = new Map(cpuPts.map((p) => [p.ts, p.value]));
     const memMap = new Map(memPts.map((p) => [p.ts, p.value]));
-    const timeFormatter = new Intl.DateTimeFormat(locale, range === '7d'
-      ? { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }
-      : { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
     return {
       tooltip: { trigger: 'axis' as const },
       legend: { data: ['CPU', t('hardware.memory')], top: 0 },
@@ -47,10 +45,7 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
         data: ts,
         axisLabel: {
           showMaxLabel: true,
-          formatter: (value: string) => {
-            const date = new Date(value);
-            return Number.isNaN(date.getTime()) ? value : timeFormatter.format(date);
-          },
+          formatter: createTimeAxisFormatter(locale, range === '7d'),
         },
       },
       yAxis: { type: 'value' as const, min: 0, max: 100, axisLabel: { formatter: '{value}%' } },

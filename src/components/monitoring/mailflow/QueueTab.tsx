@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { EmptyState, DegradedBanner, TimeoutBanner } from './StateBanners';
 import { useMailflowQueue, useMailflowQueueTrend } from './hooks';
 import { isTimeoutError } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 import type { MailflowDirection, TimeRange } from '@/types/monitoring';
 
 interface QueueTabProps {
@@ -66,6 +67,7 @@ function StatusBadge({ status, label }: { status: string; label: string }) {
 
 export function QueueTab({ node, range, direction }: QueueTabProps) {
   const t = useTranslations('mailflow');
+  const locale = useLocale();
   const { data, isLoading, isError, error, refetch } = useMailflowQueue(node, range, direction);
   const { data: trendData } = useMailflowQueueTrend(node, range);
 
@@ -92,7 +94,10 @@ export function QueueTab({ node, range, direction }: QueueTabProps) {
       xAxis: {
         type: 'category' as const,
         data: timestamps,
-        axisLabel: { showMaxLabel: true },
+        axisLabel: {
+          showMaxLabel: true,
+          formatter: createTimeAxisFormatter(locale, range === '7d'),
+        },
       },
       yAxis: { type: 'value' as const, min: 0 },
       series: QUEUE_KEYS.map((key) => ({
@@ -106,7 +111,7 @@ export function QueueTab({ node, range, direction }: QueueTabProps) {
         data: timestamps.map((ts) => valueMaps[key].get(ts) ?? 0),
       })),
     };
-  }, [trendData, t]);
+  }, [trendData, t, locale, range]);
 
   const ageOption = useMemo(() => {
     const buckets = data?.age ?? [];

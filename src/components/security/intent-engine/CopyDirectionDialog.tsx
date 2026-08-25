@@ -56,7 +56,7 @@ export function CopyDirectionDialog({ open, onOpenChange, source, onConfirm }: C
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description', { src: dirShort(source) })}</DialogDescription>

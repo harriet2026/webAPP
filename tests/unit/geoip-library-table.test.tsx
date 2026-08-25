@@ -98,13 +98,14 @@ describe('GeoIpLibraryTable (D2)', () => {
     expect(screen.getByText('114.114.0.0/16')).toBeInTheDocument();
   });
 
-  it('shows the empty state with a create-now button when there are no rules', async () => {
+  it('shows the empty state without a duplicate create-now button when there are no rules', async () => {
     mockListGeoIpRules.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 10 });
     renderTable();
     await waitFor(() => {
       expect(screen.getByText('geoipLibrary.emptyText')).toBeInTheDocument();
     });
-    expect(screen.getByText('geoipLibrary.createNow')).toBeInTheDocument();
+    expect(screen.queryByText('geoipLibrary.createNow')).not.toBeInTheDocument();
+    expect(screen.getByText('geoipLibrary.createRule')).toBeInTheDocument();
   });
 
   it('resets page to 1 and passes search to the query', async () => {

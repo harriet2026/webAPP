@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GT-13017【0818】处理问题总工单</title>
+  <style>
+    :root { --primary:#2563eb; --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#64748b; --border:#dbe1ea; --success:#16794a; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:32px; background:var(--bg); color:var(--text); font:14px/1.65 "Geist", "Noto Sans SC", system-ui, sans-serif; }
+    main { max-width:1180px; margin:0 auto; }
+    header, nav, section { margin-bottom:24px; padding:24px; border:1px solid var(--border); border-radius:10px; background:var(--card); }
+    h1 { margin:0 0 8px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); font-size:20px; }
+    h3 { margin:20px 0 8px; font-size:17px; }
+    p { margin:8px 0; }
+    .meta { color:var(--muted); }
+    .toc ul { display:grid; gap:8px; margin:0; padding-left:20px; }
+    a { color:var(--primary); }
+    table { width:100%; border-collapse:collapse; margin:12px 0; }
+    th, td { padding:9px 10px; border:1px solid var(--border); text-align:left; vertical-align:top; }
+    th { background:#f1f3f7; white-space:nowrap; }
+    .preview { margin-top:16px; padding:16px; border:1px solid var(--border); border-left:4px solid var(--primary); border-radius:8px; }
+    figure { margin:16px 0; text-align:center; }
+    img { display:block; max-width:100%; height:auto; margin:0 auto; border:1px solid var(--border); border-radius:8px; }
+    figcaption { margin-top:8px; color:var(--muted); }
+    .done { color:var(--success); font-weight:650; }
+    @media (max-width:760px) { body { padding:12px; } header, nav, section { padding:16px; } table { display:block; overflow-x:auto; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>GT-13017【0818】处理问题总工单</h1>
+    <p class="meta">生成日期：2026-08-18　·　文档类型：问题处理总工单　·　关联页面：阶段3：内容层 / 内容规则</p>
+  </header>
+
+  <nav class="toc" aria-label="总工单目录">
+    <h2>目录</h2>
+    <ul>
+      <li><a href="#overview">A. 工单概览</a></li>
+      <li><a href="#gt-12888">GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</a></li>
+      <li><a href="#gt-13027">GT-13027 内容规则：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
+      <li><a href="#gt-13033">GT-13033 IP频率限制：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
+      <li><a href="#gt-13036">GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a></li>
+      <li><a href="#gt-13040">GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</a></li>
+      <li><a href="#gt-13059">GT-13059 IP黑白名单，发信行为管控，高级过滤规则三个模块的规则列表补充优先级字段</a></li>
+      <li><a href="#gt-13061">GT-13061 海外邮件检查：自定义IP定位库空状态移除“立即创建”按钮</a></li>
+      <li><a href="#gt-13065">GT-13065 发信行为管控：空数据状态移除“立即创建”按钮并默认展示表头字段</a></li>
+      <li><a href="#gt-13031">GT-13031 邮件处置中心：哈希加黑后补充内容规则管理入口，支持定位已创建规则</a></li>
+      <li><a href="#gt-13070">GT-13070 七个安全策略模块规则列表状态字段样式统一</a></li>
+      <li><a href="#verification">C. 验证与范围边界</a></li>
+    </ul>
+  </nav>
+
+  <section id="overview">
+    <h2>A. 工单概览</h2>
+    <table>
+      <tbody>
+        <tr><th>总工单</th><td>GT-13017【0818】处理问题总工单</td></tr>
+        <tr><th>处理状态</th><td class="done">已落地</td></tr>
+        <tr><th>处理原则</th><td>仅处理用户明确提出的内容规则列表优先级展示问题，不修改其他功能模块。</td></tr>
+        <tr><th>国际化要求</th><td>中文文案使用项目国际化框架，UTF-8 编码，禁止出现 replacement character（U+FFFD）。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="gt-12888">
+    <h2>GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</h2>
+    <h3>1. 问题与目标</h3>
+    <p>内容规则列表此前缺少优先级信息，用户在新建规则后难以通过列表定位并核对规则执行顺序。本需求在列表中补充优先级展示，并保持既有列表功能不变。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>新增列</td><td>新增“优先级”列，读取规则数据中的 <code>priority</code> 字段。</td><td><code>ContentRulesTable.tsx</code></td></tr>
+        <tr><td>列顺序</td><td>“优先级”放在“状态”字段之前。</td><td>用户要求与页面截图</td></tr>
+        <tr><td>国际化</td><td>列标题读取 <code>contentRules.priority</code>，不硬编码中文文案。</td><td>项目 i18n 框架</td></tr>
+        <tr><td>范围控制</td><td>不修改新建规则流程、保存接口、分页、筛选、操作列及其他模块。</td><td>需求范围约束</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 截图式交互预览</h3>
+    <div class="preview">
+      <p><strong>状态：内容规则列表默认数据态</strong></p>
+      <p>触发路径：进入“阶段3：内容层” → 选择“内容规则” → 查看规则列表。</p>
+      <p>验证重点：表头出现“优先级”，且其横向位置位于“状态”之前；列表行展示对应优先级数值。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-fEpv0ZQGzGuUpWCZ7avpcjw1RSZbso.png" alt="内容规则列表中优先级位于状态之前的页面截图">
+        <figcaption>用户提供的真实页面截图：内容规则列表已展示优先级列，列顺序为优先级在状态之前。</figcaption>
+      </figure>
+    </div>
+
+    <h3>4. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-01</td><td>规则列表可见“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-02</td><td>“优先级”位于“状态”之前。</td><td class="done">通过</td></tr>
+        <tr><td>AC-03</td><td>使用国际化键 <code>contentRules.priority</code>。</td><td class="done">通过</td></tr>
+        <tr><td>AC-04</td><td>不改变其他功能模块与既有列表行为。</td><td class="done">通过</td></tr>
+        <tr><td>AC-05</td><td>乱码字符自检结果为 0。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="gt-13027">
+    <h2>GT-13027 内容规则：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</h2>
+    <h3>1. 问题与目标</h3>
+    <p>内容规则新建/编辑抽屉的保存、取消操作位于标题区右上角，且右上角同时存在通用关闭入口。需求目标是参考发信人黑白名单规则的新建/编辑页面，将操作区统一调整为抽屉底部右侧，并移除右上角关闭 X 按钮。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>标题区</td><td>仅保留新建/编辑标题与说明文案，不显示保存、取消按钮。</td><td><code>ContentRuleDrawer.tsx</code></td></tr>
+        <tr><td>关闭入口</td><td>关闭 <code>SheetContent</code> 的通用右上角关闭按钮。</td><td><code>showCloseButton={false}</code></td></tr>
+        <tr><td>底部操作栏</td><td>在抽屉底部增加独立操作栏，按钮右对齐，顺序为“取消”在左、“保存”在右。</td><td>用户提供截图与参考页面</td></tr>
+        <tr><td>国际化</td><td>继续使用 <code>common.cancel</code> 与 <code>common.save</code>，不硬编码中文文案。</td><td>项目国际化框架</td></tr>
+        <tr><td>业务逻辑</td><td>保留既有保存、取消事件、表单校验、提交状态和接口逻辑。</td><td>范围约束</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 截图式交互预览</h3>
+    <div class="preview">
+      <p><strong>状态：内容规则新建抽屉默认态</strong></p>
+      <p>触发路径：进入“阶段3：内容层” → 选择“内容规则” → 点击“新建规则”。</p>
+      <p>验证重点：右上角无关闭 X；底部右侧显示“取消”“保存”；保存为主操作样式，取消为次要描边样式。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-wt1rBJ1z3m8DDjZtfFCQfAnlzT4Lu0.png" alt="内容规则新建抽屉底部右侧显示取消和保存按钮且右上角无关闭按钮的页面截图">
+        <figcaption>用户提供的真实页面截图：内容规则新建抽屉的取消、保存按钮位于底部右侧，标题区右上角不显示关闭按钮。</figcaption>
+      </figure>
+    </div>
+
+    <h3>4. 形态与主题色适用范围</h3>
+    <table>
+      <thead><tr><th>产品形态</th><th>角色</th><th>适用结论</th></tr></thead>
+      <tbody>
+        <tr><td>AI版 / 传统版</td><td>平台管理员 / 租户管理员</td><td>统一沿用内容规则抽屉的底部操作栏与无右上角关闭按钮布局。</td></tr>
+        <tr><td>单租户 / 多租户</td><td>具备内容规则编辑权限的用户</td><td>不改变权限判断与数据范围，仅调整操作区布局。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13027-01</td><td>新建内容规则页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13027-02</td><td>编辑内容规则页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13027-03</td><td>保存、取消按钮显示在抽屉底部右侧。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13027-04</td><td>按钮文案使用国际化键 <code>common.cancel</code> 与 <code>common.save</code>。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13027-05</td><td>既有保存、取消业务行为与其他功能模块不变。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 差异与待确认事项</h3>
+    <table>
+      <thead><tr><th>编号</th><th>说明</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td>D-13027-01</td><td>用户截图中的部分中文由截图环境显示异常；需求文档与实现文案以项目 UTF-8 国际化资源为准。</td><td>已知环境表现</td></tr>
+        <tr><td>Q-13027-01</td><td>不同屏幕宽度下底部操作栏保持右对齐，沿用参考页面的响应式规则。</td><td>实现时验证</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="gt-13033">
+    <h2>GT-13033 IP频率限制：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</h2>
+    <h3>1. 问题与目标</h3>
+    <p>IP频率限制新建/编辑抽屉原先将保存、取消操作放在标题区右上角，同时显示测试按钮与通用关闭入口。需求目标是将保存、取消统一移动到抽屉底部右侧，移除右上角关闭 X，并移除标题区测试按钮。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>标题区</td><td>保留新建/编辑标题与说明文案，不显示测试、保存、取消按钮。</td><td><code>IPFrequencyPage.tsx</code></td></tr>
+        <tr><td>关闭入口</td><td>关闭 <code>SheetContent</code> 的通用右上角关闭按钮。</td><td><code>showCloseButton={false}</code></td></tr>
+        <tr><td>底部操作栏</td><td>在抽屉底部增加独立操作栏，按钮右对齐，顺序为“取消”在左、“保存”在右。</td><td>用户提供截图</td></tr>
+        <tr><td>国际化</td><td>继续使用 <code>common.cancel</code> 与 <code>common.save</code>，不硬编码中文文案。</td><td>项目国际化框架</td></tr>
+        <tr><td>业务逻辑</td><td>保留既有保存、取消事件、表单校验、提交状态和接口逻辑。</td><td>范围约束</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 截图式交互预览</h3>
+    <div class="preview">
+      <p><strong>状态：IP频率限制新建规则默认态</strong></p>
+      <p>触发路径：进入“阶段3：内容层” → 选择“IP频率限制配置” → 点击“新建规则”。</p>
+      <p>验证重点：右上角无关闭 X；标题区无测试按钮；底部右侧显示“取消”“保存”；保存为主操作样式，取消为次要描边样式。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-2LuevJMtgc6LcxFA6kaDofSeEjuMNg.png" alt="IP频率限制新建规则页面底部右侧显示取消和保存按钮且标题区无测试按钮的页面截图">
+        <figcaption>用户提供的真实页面截图：IP频率限制新建规则页面的保存、取消按钮位于底部右侧，标题区不显示测试按钮，右上角不显示关闭按钮。</figcaption>
+      </figure>
+    </div>
+
+    <h3>4. 适用范围</h3>
+    <table>
+      <thead><tr><th>页面形态</th><th>适用结论</th></tr></thead>
+      <tbody>
+        <tr><td>新建 IP 频率限制规则</td><td>采用底部右侧操作栏，移除标题区测试按钮与右上角关闭按钮。</td></tr>
+        <tr><td>编辑 IP 频率限制规则</td><td>采用相同布局，不改变既有数据、权限与提交行为。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13033-01</td><td>新建页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13033-02</td><td>编辑页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13033-03</td><td>标题区不显示测试按钮。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13033-04</td><td>保存、取消按钮显示在抽屉底部右侧。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13033-05</td><td>按钮文案使用国际化键 <code>common.cancel</code> 与 <code>common.save</code>。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13033-06</td><td>其他模块与既有保存、取消业务行为不变。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 差异与待确认事项</h3>
+    <table>
+      <thead><tr><th>编号</th><th>说明</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td>D-13033-01</td><td>用户截图中的部分中文由截图环境显示异常；需求文档与实现文案以项目 UTF-8 国际化资源为准。</td><td>已知环境表现</td></tr>
+        <tr><td>Q-13033-01</td><td>不同屏幕宽度下底部操作栏保持右对齐，沿用现有响应式规则。</td><td>实现时验证</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="gt-13036">
+    <h2>GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</h2>
+    <h3>1. 问题与目标</h3>
+    <p>IP黑白名单新建/编辑抽屉需要与同类规则页面统一操作布局。保存、取消按钮移至抽屉底部右侧，并移除右上角通用关闭入口，不改变既有表单和提交行为。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>标题区</td><td>保留新建/编辑标题与说明，不显示保存、取消按钮。</td><td><code>IPFilterPage.tsx</code></td></tr>
+        <tr><td>关闭入口</td><td>关闭 <code>SheetContent</code> 的右上角通用关闭按钮。</td><td><code>showCloseButton={false}</code></td></tr>
+        <tr><td>底部操作栏</td><td>增加底部右侧操作栏，取消在左、保存主操作在右。</td><td>用户提供截图</td></tr>
+        <tr><td>国际化</td><td>继续使用 <code>common.cancel</code> 与 <code>ipFilter.saveAndEnable</code>。</td><td>项目国际化框架</td></tr>
+        <tr><td>业务逻辑</td><td>保留 IP 地址/段、动作、优先级、有效期、校验和保存接口逻辑。</td><td>范围约束</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 截图式交互预览</h3>
+    <div class="preview">
+      <p><strong>状态：IP黑白名单新建规则默认态</strong></p>
+      <p>触发路径：进入 IP 策略 → 选择 IP 黑白名单 → 点击新建规则。</p>
+      <p>验证重点：右上角无关闭 X；底部右侧显示取消与保存；表单内容可滚动，底部操作栏保持可见。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-rt8KZD9dt75XSnmiVH7G1NYFwdWZjF.png" alt="IP黑白名单新建规则页面底部右侧显示取消和保存按钮且右上角无关闭按钮">
+        <figcaption>用户提供的真实页面截图：IP 黑白名单新建规则页面的保存、取消按钮位于底部右侧，标题区右上角不显示关闭按钮。</figcaption>
+      </figure>
+    </div>
+
+    <h3>4. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13036-01</td><td>新建页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-02</td><td>编辑页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-03</td><td>保存、取消按钮显示在抽屉底部右侧。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-04</td><td>按钮继续使用项目国际化文案。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13036-05</td><td>其他功能模块与既有业务逻辑不变。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. 范围边界</h3>
+    <p>本需求仅涉及 IP 黑白名单新建/编辑页面的操作区布局和关闭入口，不涉及 IP 频率限制、RBL 过滤、海外邮件检测或其他安全模块。截图中的异常中文显示以项目 UTF-8 国际化资源为准。</p>
+  </section>
+
+  <section id="gt-13040">
+    <h2>GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</h2>
+    <h3>1. 需求目标</h3>
+    <p>安全策略模块阶段1至阶段5及页面内部二级弹窗统一移除右上角关闭 X 按钮，减少重复关闭入口，保持页面操作路径一致。</p>
+
+    <h3>2. 实施范围</h3>
+    <table>
+      <thead><tr><th>范围</th><th>处理内容</th><th>边界</th></tr></thead>
+      <tbody>
+        <tr><td>阶段主配置页面</td><td>移除统一配置抽屉右上角关闭 X。</td><td>保留取消、保存和既有业务关闭逻辑。</td></tr>
+        <tr><td>页面内部二级弹窗</td><td>移除 Sheet、Dialog、Drawer 默认关闭 X。</td><td>不修改弹窗数据、交互和接口逻辑。</td></tr>
+        <tr><td>自定义详情面板</td><td>移除标题栏或面板中的自定义关闭 X。</td><td>不改变详情内容和权限规则。</td></tr>
+        <tr><td>国际化</td><td>继续使用项目现有国际化框架。</td><td>不新增硬编码中文文案。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 页面与功能覆盖</h3>
+    <p>覆盖阶段1至阶段5的统一配置页面，以及 IP 频率限制、IP 黑白名单、RBL 过滤、发信人黑白名单、邮件标记、内容规则、行为管控、意图引擎、群组管理、群组策略、高级规则、认证探测与统计、IP 导入、地理库等页面内部二级弹窗。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>用户提供截图：安全策略页面标题栏右上角关闭 X</strong></p>
+      <p>截图用于确认红框关闭按钮的视觉位置与本次统一移除范围。文档及实现中文以项目 UTF-8 国际化资源为准。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-BNLGU71zMs90217gcY0juUhzzTnGPs.png" alt="安全策略页面标题栏右上角显示红框标注的关闭按钮">
+        <figcaption>安全策略页面关闭按钮示例。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13040-01</td><td>阶段1至阶段5主配置页面右上角不显示关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-02</td><td>安全策略范围内二级 Sheet、Dialog、Drawer 不显示默认关闭 X。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-03</td><td>自定义详情面板关闭 X 已移除。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-04</td><td>取消、保存、确认及既有业务关闭逻辑保持可用。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13040-05</td><td>未修改接口、权限、表单校验和其他功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 编码与范围校验</h3>
+    <p>本需求涉及中文文档与页面说明均使用 UTF-8，禁止 replacement character（U+FFFD）和异常全角问号；仅覆盖安全策略阶段页面及其内部二级弹窗的关闭 X 视觉入口。</p>
+  </section>
+
+  <section id="gt-13059">
+    <h2>GT-13059 IP黑白名单，发信行为管控，高级过滤规则三个模块的规则列表补充优先级字段</h2>
+    <h3>1. 需求背景</h3>
+    <p>安全策略规则列表需要统一展示规则优先级，便于用户理解规则匹配顺序和策略执行顺序。本需求覆盖 IP 黑白名单、发信行为管控和高级过滤规则三个模块。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>模块</th><th>实现内容</th><th>列位置</th><th>数据来源</th></tr></thead>
+      <tbody>
+        <tr><td>IP 黑白名单</td><td>补充“优先级”列并展示现有规则优先级。</td><td>状态之前</td><td><code>priority</code></td></tr>
+        <tr><td>发信行为管控</td><td>补充“优先级”列并展示现有规则优先级。</td><td>状态之前</td><td><code>priority</code></td></tr>
+        <tr><td>高级过滤规则</td><td>补充“优先级”列并展示现有规则优先级。</td><td>状态之前</td><td><code>priority</code></td></tr>
+      </tbody>
+    </table>
+    <p>三个模块仅调整规则列表展示列，不新增接口、不改变排序、保存逻辑、权限、表单校验或其他功能模块。</p>
+
+    <h3>3. 国际化与编码</h3>
+    <p>列标题继续使用项目国际化框架，中文显示为“优先级”，并同步维护英文、泰文和俄文翻译。中文文档和页面文案使用 UTF-8 编码，不包含 replacement character 或异常全角问号。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>事实源 1：IP 黑白名单规则列表</strong></p>
+      <p>截图展示“IP地址/段、操作、优先级、状态、修改时间、操作”等字段，优先级位于状态之前。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-3QxFhDKTMhC3RKrpyqTUNOHJulEPE5.png" alt="IP黑白名单规则列表展示优先级字段">
+        <figcaption>用户提供的 IP 黑白名单规则列表截图。</figcaption>
+      </figure>
+      <p><strong>事实源 2：发信行为管控规则列表</strong></p>
+      <p>截图展示“执行动作、优先级、状态、修改时间”等字段，优先级位于状态之前。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pM46QRp0oJXGyY1UBqOe50WSMVVSz7.png" alt="发信行为管控规则列表展示优先级字段">
+        <figcaption>用户提供的发信行为管控规则列表截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13059-01</td><td>IP 黑白名单规则列表显示“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-02</td><td>发信行为管控规则列表显示“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-03</td><td>高级过滤规则规则列表显示“优先级”列。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-04</td><td>三个模块的优先级列均位于状态列之前。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-05</td><td>优先级显示现有规则的 <code>priority</code> 值。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13059-06</td><td>不修改接口、权限、排序、表单校验和其他功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="gt-13061">
+    <h2>GT-13061 海外邮件检查：自定义IP定位库空状态移除“立即创建”按钮</h2>
+    <h3>1. 需求背景</h3>
+    <p>海外邮件检查页面的自定义 IP 定位库没有数据时，空状态区域额外显示“立即创建”按钮。由于页面顶部已有“新增规则”入口，本需求移除空状态重复入口。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <table>
+      <thead><tr><th>范围</th><th>处理内容</th><th>边界</th></tr></thead>
+      <tbody>
+        <tr><td>自定义 IP 定位库空状态</td><td>移除空状态区域的“立即创建”按钮。</td><td>仅调整空状态展示。</td></tr>
+        <tr><td>页面工具栏</td><td>保留“新增规则”、搜索、重置、导入和导出。</td><td>不改变既有业务逻辑。</td></tr>
+        <tr><td>空状态内容</td><td>保留图标和“暂无自定义IP规则，系统将使用内置GeoIP库进行地域识别”文案。</td><td>继续使用项目国际化框架。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 功能路径</h3>
+    <p>安全策略模块 → 海外邮件检查 → 自定义 IP 定位库。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>用户提供截图：优化后的海外邮件检查页面</strong></p>
+      <p>截图显示自定义 IP 定位库无数据时仅保留空状态说明，不再显示“立即创建”按钮。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-olZ4fUzIIzVExJ7Sy2piNNDTSGWLt5.png" alt="海外邮件检查自定义IP定位库空状态不显示立即创建按钮">
+        <figcaption>海外邮件检查自定义 IP 定位库空状态截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13061-01</td><td>自定义 IP 定位库无数据时不显示“立即创建”按钮。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-02</td><td>空状态图标和说明文案保持显示。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-03</td><td>页面顶部“新增规则”入口保持可用。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-04</td><td>搜索、重置、导入、导出和已有规则操作不受影响。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13061-05</td><td>未修改其他页面或功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 编码与国际化</h3>
+    <p>中文内容使用 UTF-8 编码，继续使用项目国际化框架，禁止 replacement character（U+FFFD），不引入异常全角问号。</p>
+  </section>
+
+  <section id="gt-13065">
+    <h2>GT-13065 发信行为管控：空数据状态移除“立即创建”按钮并默认展示表头字段</h2>
+    <h3>1. 需求背景</h3>
+    <p>发信行为管控规则列表为空时，空状态区域额外显示“立即创建”按钮，与页面顶部“新建规则”入口重复。本需求移除空状态中的重复按钮，并确保空数据状态仍默认展示完整规则列表表头。</p>
+
+    <h3>2. 需求范围</h3>
+    <table>
+      <thead><tr><th>范围</th><th>处理内容</th><th>边界</th></tr></thead>
+      <tbody>
+        <tr><td>空数据操作区域</td><td>移除“立即创建”按钮及其专属操作区域。</td><td>不影响页面顶部“新建规则”。</td></tr>
+        <tr><td>规则列表表头</td><td>空数据时默认保留完整九列表头。</td><td>不改变有数据时的表头和行渲染。</td></tr>
+        <tr><td>其他功能</td><td>保留搜索、方向/类型/状态筛选、重置、导入、导出和分页。</td><td>不修改接口、权限或其他安全策略模块。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. 默认展示表头</h3>
+    <p>空数据状态下按以下顺序展示：规则ID、规则名称、管控方向、管控对象、执行动作、优先级、状态、修改时间、操作。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>用户提供截图：发信行为管控空数据状态优化</strong></p>
+      <p>截图展示优化后保留完整表头并移除“立即创建”按钮的结果页面。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-4FNM0RrLvMEAQDUKXfrFDQ2AQ6lrPP.png" alt="发信行为管控空数据状态展示完整表头且不显示立即创建按钮">
+        <figcaption>发信行为管控空数据状态截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13065-01</td><td>发信行为管控无数据时不显示“立即创建”按钮。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-02</td><td>无数据时仍显示规则ID、规则名称、管控方向、管控对象、执行动作、优先级、状态、修改时间、操作九个表头。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-03</td><td>表头顺序与有数据状态保持一致。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-04</td><td>页面顶部“新建规则”、筛选、重置、导入和导出保持可用。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13065-05</td><td>未修改其他功能模块。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 国际化与编码</h3>
+    <p>继续使用项目国际化框架，复用现有字段和空状态文案翻译键。中文内容使用 UTF-8 编码，不包含 replacement character 或异常全角问号。</p>
+  </section>
+
+  <section id="gt-13031">
+    <h2>GT-13031 邮件处置中心：哈希加黑后补充内容规则管理入口，支持定位已创建规则</h2>
+    <h3>1. 需求背景</h3>
+    <p>邮件处置中心执行哈希加黑后，用户缺少进入内容规则管理页面的明确入口，无法快速定位或确认已创建的内容规则。内容规则模块已支持“附件哈希”作用域，本需求补充邮件处置中心到内容规则管理的可发现路径。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <ul>
+      <li>在邮件处置中心的哈希加黑结果或相关操作反馈区域提供“内容规则管理”入口。</li>
+      <li>入口跳转至内容规则管理页面：<code>/zh/security/content-rules</code>，语言前缀沿用当前语言环境。</li>
+      <li>进入内容规则管理后，用户可以查看已创建规则，并通过规则名称、作用域、匹配内容和执行动作确认哈希加黑对应规则。</li>
+      <li>入口及定位相关文案使用项目国际化框架，不新增硬编码中文。</li>
+      <li>保留现有哈希加黑、规则创建、规则编辑、删除和其他邮件处置能力，不改变既有接口和权限边界。</li>
+    </ul>
+
+    <h3>3. 功能路径</h3>
+    <p>邮件处置中心 → 哈希加黑 → 内容规则管理 → 查看已创建规则。</p>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p><strong>用户提供截图：内容规则新建页面</strong></p>
+      <p>截图显示“作用于”支持“附件哈希”，右侧当前配置效果能够展示“主题、正文、附件哈希”，作为哈希加黑规则定位内容规则的事实依据。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-53RUlUUkfwsfIwpJXUqOi1QI5oLFve.png" alt="内容规则新建页面显示附件哈希作用域">
+        <figcaption>内容规则新建页面与当前配置效果截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13031-01</td><td>邮件处置中心哈希加黑相关区域提供内容规则管理入口。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13031-02</td><td>点击入口可以进入内容规则管理页面。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13031-03</td><td>内容规则管理页面可以查看并定位已创建规则。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13031-04</td><td>已创建规则能够展示附件哈希作用域。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13031-05</td><td>不改变哈希加黑、规则编辑、删除、权限和其他邮件处置功能。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 待确认项</h3>
+    <ul>
+      <li>入口具体展示位置：哈希加黑成功提示、操作结果详情或邮件处置记录详情。</li>
+      <li>是否需要进入内容规则管理后自动带入筛选条件，以直接定位当前哈希对应规则。</li>
+      <li>哈希匹配算法和展示格式沿用现有后端契约。</li>
+    </ul>
+  </section>
+
+  <section id="gt-13070">
+    <h2>GT-13070 IP频率限制，IP黑白名单，发信人黑白名单，发信行为管控，内容规则，高级过滤规则，邮件标记与声明这几个模块的“规则列表”的状态字段样式保持一致</h2>
+    <h3>1. 需求背景</h3>
+    <p>七个安全策略模块的规则列表均包含状态字段，但优化前部分模块使用 Badge 或 StatusBadge，部分模块使用 Switch，状态列的视觉样式和交互方式不一致。本增量需求以发信人黑白名单模块现有 Switch 为统一基准。</p>
+
+    <h3>2. 最终实现方案</h3>
+    <ul>
+      <li>IP频率限制、IP黑白名单、发信人黑白名单、发信行为管控、内容规则、高级过滤规则、邮件标记与声明的规则列表状态列统一使用 Switch。</li>
+      <li>启用状态显示蓝色 Switch，停用状态显示灰色 Switch，状态可访问性文案使用项目国际化框架。</li>
+      <li>IP黑白名单保持原有只支持新建和删除的权限边界，状态列使用禁用 Switch 统一视觉形态，不新增启停能力。</li>
+      <li>IP频率限制和内容规则的已过期状态使用禁用 Switch，并通过辅助提示保留已过期语义。</li>
+      <li>发信行为管控使用已有 <code>toggleBehaviorControlRule</code> 状态更新能力。</li>
+      <li>高级过滤规则使用状态列 Switch 作为唯一启停入口，移除操作列重复的启用/停用文字按钮。</li>
+      <li>邮件标记与声明复用现有 <code>saveMailMarkingRule</code> 接口，通过 <code>is_active</code> 局部更新状态。</li>
+      <li>不改变规则创建、编辑、删除、筛选、分页、导入导出、权限和其他业务逻辑。</li>
+    </ul>
+
+    <h3>3. 模块与实现映射</h3>
+    <table>
+      <thead><tr><th>模块</th><th>主要实现文件</th><th>状态列规则</th></tr></thead>
+      <tbody>
+        <tr><td>IP频率限制</td><td><code>IPFrequencyPage.tsx</code></td><td>可切换 Switch；过期规则禁用并提示。</td></tr>
+        <tr><td>IP黑白名单</td><td><code>UserListTable.tsx</code></td><td>只读禁用 Switch，不新增启停能力。</td></tr>
+        <tr><td>发信人黑白名单</td><td><code>SenderFilterTable.tsx</code></td><td>作为统一样式和交互基准。</td></tr>
+        <tr><td>发信行为管控</td><td><code>BehaviorControlTable.tsx</code>、<code>BehaviorControlPage.tsx</code></td><td>可切换 Switch，接入既有启停接口。</td></tr>
+        <tr><td>内容规则</td><td><code>ContentRulesTable.tsx</code></td><td>可切换 Switch；过期状态使用辅助提示。</td></tr>
+        <tr><td>高级过滤规则</td><td><code>AdvancedFilterRulesModule.tsx</code></td><td>状态列 Switch，移除重复文字入口。</td></tr>
+        <tr><td>邮件标记与声明</td><td><code>RuleListTable.tsx</code>、<code>MailMarkingPage.tsx</code></td><td>Switch 复用规则保存接口局部更新。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>4. 截图事实源</h3>
+    <div class="preview">
+      <p>以下用户提供截图用于确认七个模块的状态列视觉事实：蓝色表示启用，灰色表示停用；IP频率限制和内容规则截图同时展示了过期状态的辅助语义。</p>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-Qqq5KUh7tUwwcDJvcovnjB30vBjUSw.png" alt="邮件标记与声明规则列表状态使用Switch">
+        <figcaption>邮件标记与声明状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pXmO1V1zMdD7sRFyX7hyFge0xmkodn.png" alt="IP频率限制规则列表状态使用Switch并展示过期提示">
+        <figcaption>IP频率限制状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-xKp8QiYI9h9t76cFPvw6JfpBTe7Qwa.png" alt="发信行为管控规则列表状态使用Switch">
+        <figcaption>发信行为管控状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-U5Sigat7N3thpd5wmeMCJnsiitNxA0.png" alt="发信人黑白名单规则列表状态使用Switch">
+        <figcaption>发信人黑白名单统一基准样式截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-AOh58JBzITBjw7eOkkkjOpVdVgABUq.png" alt="IP黑白名单规则列表状态展示">
+        <figcaption>IP黑白名单状态列截图。</figcaption>
+      </figure>
+      <figure>
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-RegrJUedOQW9c578pqTSLnsH8obarr.png" alt="内容规则列表状态使用Switch">
+        <figcaption>内容规则状态列截图。</figcaption>
+      </figure>
+    </div>
+
+    <h3>5. 验收标准</h3>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13070-01</td><td>七个模块的规则列表状态字段均使用 Switch 形态。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-02</td><td>启用状态显示蓝色 Switch，停用状态显示灰色 Switch。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-03</td><td>发信人黑白名单状态列作为统一样式基准。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-04</td><td>IP黑白名单保持只读约束，不新增启停能力。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-05</td><td>IP频率限制和内容规则的过期状态保留禁用及辅助提示语义。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-06</td><td>高级过滤规则移除操作列重复的启用/停用文字入口。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-07</td><td>状态文案和辅助提示使用项目国际化框架，中文内容使用 UTF-8 编码。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13070-08</td><td>未修改七个模块之外的其他功能范围。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. 验证与范围边界</h3>
+    <ul>
+      <li>已完成涉及组件的 TypeScript 类型检查，未发现本次修改模块的类型错误。</li>
+      <li>已校验中文资源文件 JSON 格式有效。</li>
+      <li>本需求仅归档七个规则列表状态字段统一优化，不扩展其他安全策略模块的业务能力。</li>
+    </ul>
+  </section>
+
+  <section id="verification">
+    <h2>C. 验证与范围边界</h2>
+    <table>
+      <thead><tr><th>验证项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>源码列顺序</td><td><code>priority</code> 列定义位于 <code>status</code> 列之前。</td></tr>
+        <tr><td>国际化引用</td><td>列标题通过 <code>t('contentRules.priority')</code> 获取。</td></tr>
+        <tr><td>乱码自检</td><td>已对本次涉及文档与修改文件执行 replacement character 搜索，未发现乱码。</td></tr>
+        <tr><td>范围边界</td><td>本工单仅覆盖内容规则列表优先级展示，不扩展至附件安全检测、URL 检测与防护、意图引擎等模块。</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

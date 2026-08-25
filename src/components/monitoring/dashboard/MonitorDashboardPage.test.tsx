@@ -86,6 +86,7 @@ vi.mock('@/lib/api/monitor-dashboard', () => ({
 
 // Mock next-intl：返回 key 路径本身便于断言（monitorDashboard.* / 嵌套）
 vi.mock('next-intl', () => ({
+  useLocale: () => 'zh',
   useTranslations: () => (key: string) => {
     const map: Record<string, string> = {
       title: '监控总览', lastUpdate: '最近更新', refreshOff: '关闭',

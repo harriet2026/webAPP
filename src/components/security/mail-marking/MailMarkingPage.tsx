@@ -14,7 +14,7 @@ import {
 import { RuleListTable } from './RuleListTable'
 import { RuleEditDrawer } from './RuleEditDrawer'
 import {
-  deleteMailMarkingRule, listMailMarkingRules, listMailMarkingScopes,
+  deleteMailMarkingRule, listMailMarkingRules, listMailMarkingScopes, saveMailMarkingRule,
   type MailMarkingScope,
 } from '@/lib/api/mail-marking'
 import type { MailMarkingDirection, MailMarkingRule } from './types'
@@ -86,6 +86,25 @@ export function MailMarkingPage({ embedded }: Props) {
     toast.success(t('saved'))
   }, [loadRules, t])
 
+  const handleToggle = useCallback(async (rule: MailMarkingRule, isActive: boolean) => {
+    try {
+      await saveMailMarkingRule({
+        id: rule.id,
+        name: rule.name,
+        description: rule.description,
+        priority: rule.priority,
+        is_active: isActive,
+        metadata: rule.metadata,
+        departments: rule.departments,
+        groups: rule.groups,
+      }, apiRequest)
+      toast.success(t('saved'))
+      await loadRules()
+    } catch (error: unknown) {
+      toast.error(t('saveFailed') + ': ' + errorMessage(error))
+    }
+  }, [apiRequest, loadRules, t])
+
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return
     setDeleting(true)
@@ -143,6 +162,7 @@ export function MailMarkingPage({ embedded }: Props) {
               loading={loading}
               onEdit={(rule) => { setEditing(rule); setEditorOpen(true) }}
               onDelete={setDeleteTarget}
+              onToggle={handleToggle}
             />
 
             {rules.length > pageSize && (

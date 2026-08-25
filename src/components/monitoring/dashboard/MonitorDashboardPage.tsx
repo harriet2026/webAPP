@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +18,7 @@ import {
   type MonitorDashboardRange,
 } from '@/lib/api/monitor-dashboard';
 import { DegradedBanner, TimeoutBanner } from '@/components/monitoring/infrastructure/StateBanners';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 
 const ENGINE_COLORS = { antispam: '#1890FF', antivirus: '#52C41A', sandbox: '#FA8C16', rbl: '#722ED1' } as const;
 
@@ -51,6 +52,7 @@ function statusDotClass(status?: DashboardStatus) {
 
 export function MonitorDashboardPage() {
   const t = useTranslations('monitorDashboard');
+  const locale = useLocale();
   const [timeRange, setTimeRange] = useState('today');
   const [refreshInterval, setRefreshInterval] = useState('30s');
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
@@ -117,22 +119,26 @@ export function MonitorDashboardPage() {
   };
 
   const mailflowData = (api?.mailflow_trend ?? []).map((point) => ({
-    hour: point.time.length >= 16 ? point.time.slice(11, 16) : point.time,
+    time: point.time,
     volume: point.volume,
     latencyP95: point.latency_p95,
   }));
   const engineData = (api?.engine_trend ?? []).map((point) => ({
-    hour: point.time.length >= 16 ? point.time.slice(11, 16) : point.time,
+    time: point.time,
     antispam: point.antispam,
     antivirus: point.antivirus,
     sandbox: point.sandbox,
     rbl: point.rbl,
   }));
+  const timeAxisFormatter = createTimeAxisFormatter(
+    locale,
+    timeRange === '7d' || timeRange === '30d',
+  );
 
   const mailflowOption = {
     grid: { left: 40, right: 16, top: 24, bottom: 24 },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: mailflowData.map((d) => d.hour) },
+    xAxis: { type: 'category', data: mailflowData.map((d) => d.time), axisLabel: { formatter: timeAxisFormatter } },
     yAxis: [{ type: 'value', name: t('mailflowVolume') }, { type: 'value', name: t('latencyP95') }],
     series: [
       { name: t('mailflowVolume'), type: 'line', areaStyle: {}, smooth: true, data: mailflowData.map((d) => d.volume), color: '#1890FF' },
@@ -144,7 +150,7 @@ export function MonitorDashboardPage() {
     grid: { left: 40, right: 16, top: 24, bottom: 72 },
     tooltip: { trigger: 'axis' },
     legend: { bottom: 0 },
-    xAxis: { type: 'category', data: engineData.map((d) => d.hour) },
+    xAxis: { type: 'category', data: engineData.map((d) => d.time), axisLabel: { formatter: timeAxisFormatter } },
     yAxis: { type: 'value' },
     series: (['antispam', 'antivirus', 'sandbox', 'rbl'] as const).map((k) => ({
       name: t(`engine.${k}`), type: 'line', areaStyle: {}, smooth: true,

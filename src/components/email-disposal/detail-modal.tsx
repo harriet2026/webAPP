@@ -30,9 +30,6 @@ interface DetailModalProps {
   // through to OverviewSection -- see that component's readOnly prop doc for
   // why it must not be re-derived here or lower (review finding).
   readOnly?: boolean;
-  // 安全分析属于 demo/产品形态切换器下的诊断界面。由服务端解析
-  // OSGATEWAY_PRODUCT_FORM_SWITCHER 后通过 ProductFormContext 传入，默认关闭。
-  showSecurityAnalysis?: boolean;
   // 原始日志内的节点/组件聚合进度面板仅对平台管理员可见。
   isTenantAdmin?: boolean;
 }
@@ -60,7 +57,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   });
 }
 
-export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEnabled = true, aiInterpretEnabled = true, readOnly = false, showSecurityAnalysis = false, isTenantAdmin = false }: DetailModalProps) {
+export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEnabled = true, aiInterpretEnabled = true, readOnly = false, isTenantAdmin = false }: DetailModalProps) {
   const t = useTranslations('emailDisposal.detail');
   const { apiRequest } = useApiRequest();
   const queryClient = useQueryClient();
@@ -124,7 +121,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   const analysisQ = useQuery({
     queryKey: ['mail-log-analysis', mailLogId, selectedAnalysisRecipient ?? 'all'],
     queryFn: () => withTimeout(getMailLogAnalysis(mailLogId!, selectedAnalysisRecipient, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
-    enabled: open && mailLogId != null && showSecurityAnalysis,
+    enabled: open && mailLogId != null,
   });
   const detail = detailQ.data ?? null;
   const analysisEvents = useMemo(() => {
@@ -162,7 +159,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   useEffect(() => {
     const container = contentRef.current;
     if (!container || !open || typeof IntersectionObserver === 'undefined') return;
-    const visibleSections: SectionKey[] = showSecurityAnalysis ? ['overview', 'analysis', 'rawlogs'] : ['overview', 'rawlogs'];
+    const visibleSections: SectionKey[] = ['overview', 'analysis', 'rawlogs'];
     const intersecting = new Set<SectionKey>();
     const observer = new IntersectionObserver(
       (entries) => {
@@ -194,7 +191,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     // `detail` is required because the content and section refs mount only
     // after the detail query resolves; the first open render still shows the
     // loading branch and has no elements to observe.
-  }, [open, detail, showSecurityAnalysis]);
+  }, [open, detail]);
 
   useEffect(() => {
     navButtonRefs.current[activeSection]?.scrollIntoView?.({
@@ -226,15 +223,15 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     dotTooltip?: string;
   }> = [
     { key: 'overview', label: t('overviewAndHandle'), icon: Inbox },
-    ...(showSecurityAnalysis ? [{
-      key: 'analysis' as const,
+    {
+      key: 'analysis',
       label: t('securityAnalysis'),
       icon: ShieldAlert,
       dotClassName: finalVerdictTypeConfig ? riskDotClass[finalVerdictTypeConfig.tone] : undefined,
       dotTooltip: finalVerdictTypeConfig
         ? `${t('nav.finalVerdict')}：${t(stripDetailPrefix(finalVerdictTypeConfig.labelKey))}`
         : undefined,
-    }] : []),
+    },
     { key: 'rawlogs', label: t('originalLog'), icon: ScrollText },
   ];
   const activeSectionLabel = navItems.find((item) => item.key === activeSection)?.label ?? '';
@@ -423,39 +420,37 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                     aiInterpretEnabled={aiInterpretEnabled}
                     events={eventsQ.data ?? []}
                     readOnly={readOnly}
-                    onViewBasis={showSecurityAnalysis ? () => scrollToSection('analysis') : undefined}
+                    onViewBasis={() => scrollToSection('analysis')}
                     onViewRawLogs={() => scrollToSection('rawlogs')}
                   />
                 </section>
-                {showSecurityAnalysis && (
-                  <section
-                    data-testid="disposal-detail-analysis"
-                    data-section-key="analysis"
-                    ref={(el) => {
-                      sectionRefs.current.analysis = el;
+                <section
+                  data-testid="disposal-detail-analysis"
+                  data-section-key="analysis"
+                  ref={(el) => {
+                    sectionRefs.current.analysis = el;
+                  }}
+                  className="scroll-mt-4"
+                >
+                  <h3 className="text-base font-semibold mb-2">{t('securityAnalysis')}</h3>
+                  <AnalysisSection
+                    detail={detail}
+                    analysis={analysisQ.data}
+                    analysisLoading={analysisQ.isLoading || analysisQ.isFetching}
+                    analysisError={analysisQ.isError}
+                    onRetryAnalysis={() => {
+                      void analysisQ.refetch();
                     }}
-                    className="scroll-mt-4"
-                  >
-                    <h3 className="text-base font-semibold mb-2">{t('securityAnalysis')}</h3>
-                    <AnalysisSection
-                      detail={detail}
-                      analysis={analysisQ.data}
-                      analysisLoading={analysisQ.isLoading || analysisQ.isFetching}
-                      analysisError={analysisQ.isError}
-                      onRetryAnalysis={() => {
-                        void analysisQ.refetch();
-                      }}
-                      aiEnabled={aiEnabled}
-                      events={analysisEvents}
-                      selectedRecipient={selectedAnalysisRecipient}
-                      onSelectedRecipientChange={setSelectedAnalysisRecipient}
-                      onViewRawLogs={() => {
-                        setRawLogsExpanded(true);
-                        scrollToSection('rawlogs');
-                      }}
-                    />
-                  </section>
-                )}
+                    aiEnabled={aiEnabled}
+                    events={analysisEvents}
+                    selectedRecipient={selectedAnalysisRecipient}
+                    onSelectedRecipientChange={setSelectedAnalysisRecipient}
+                    onViewRawLogs={() => {
+                      setRawLogsExpanded(true);
+                      scrollToSection('rawlogs');
+                    }}
+                  />
+                </section>
                 <section
                   data-testid="disposal-detail-rawlogs"
                   data-section-key="rawlogs"

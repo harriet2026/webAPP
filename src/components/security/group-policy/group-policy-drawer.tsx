@@ -271,7 +271,7 @@ export function GroupPolicyDrawer({
         onOpenChange(v);
       }}
     >
-      <SheetContent side="right" className="sm:max-w-none data-[side=right]:w-[80vw] flex flex-col p-0" data-testid="group-policy-drawer">
+      <SheetContent side="right" className="sm:max-w-none data-[side=right]:w-[80vw] flex flex-col p-0" data-testid="group-policy-drawer" showCloseButton={false}>
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle>{isEdit ? tGp('editPolicy') : tGp('newPolicy')}</SheetTitle>
           <p className="text-sm text-muted-foreground">{tGp('drawerSubtitle')}</p>
@@ -471,7 +471,6 @@ export function GroupPolicyDrawer({
               status={statusOf(selectedDef.key)}
               supportsCustom={supportsCustom}
               onChange={(next) => setPolicyStatus(selectedDef.key, next)}
-              onClose={() => { setPanelOpen(false); setSelectedPolicy(null); }}
             />
           )}
         </div>

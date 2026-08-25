@@ -1,6 +1,6 @@
 {
   "module": "sidebar-nav-version-footer",
-  "current_version": 49,
+  "current_version": 59,
   "history": [
     {
       "version": 1,
@@ -463,6 +463,96 @@
       "ticket": "GT-12938",
       "incremental": true,
       "summary": "合并 GT-12938 源分支在 9d960cba42936bfabcd48b7b7c31bf0df0edb442 之后的全部变更：策略流水线 Stage 3 内容规则调整为首个模块；附件安全反病毒、扫描超时、加密附件解密失败及图片检测动作按审核/进行下一步语义统一；意图引擎分类与阈值动作收敛为 proceed/quarantine/audit/discard，proceed 仅表示执行可选附加策略后继续匹配，不是白名单投递；同步清理旧动作标签与枚举值，并导入源分支最终版 GT-12938 HTML 规格及 11 张截图。"
+    },
+    {
+      "version": 50,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13017",
+      "incremental": true,
+      "summary": "新建 GT-13017【0818】处理问题总工单，新增 GT-12888 内容规则优先级展示需求文档与 HTML 导航入口；记录优先级列位于状态列之前、复用 contentRules.priority 国际化键，并归档用户提供的真实页面截图。"
+    },
+    {
+      "version": 51,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13027",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13027：内容规则保存/取消按钮从右上角移动到右下角，同时移除右上角关闭 X；保存与取消继续复用 common.save/common.cancel 国际化键，并归档用户提供的新建规则页面截图。"
+    },
+    {
+      "version": 52,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13033",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13033：IP频率限制保存/取消按钮移动至右下角，移除右上角关闭 X 与测试按钮；保存与取消继续复用 common.save/common.cancel 国际化键，并归档用户提供的新建规则页面截图。"
+    },
+    {
+      "version": 53,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13036",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13036：IP黑白名单保存/取消按钮移动至右下角，移除右上角关闭 X；保存与取消继续复用项目国际化键，并归档用户提供的新建规则页面截图。"
+    },
+    {
+      "version": 54,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13040",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13040：安全策略阶段1至阶段5主页面及页面内部二级弹窗统一移除右上角关闭 X，保留取消、保存、确认和既有业务关闭逻辑。"
+    },
+    {
+      "version": 55,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13059",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13059：IP黑白名单、发信行为管控和高级过滤规则三个模块的规则列表补充优先级字段，优先级位于状态字段之前，并使用项目国际化框架。"
+    },
+    {
+      "version": 56,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13061",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13061：海外邮件检查自定义 IP 定位库无数据状态移除重复的“立即创建”按钮，保留顶部新增规则和其他既有功能。"
+    },
+    {
+      "version": 57,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13065",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13065：发信行为管控无数据时移除重复的“立即创建”按钮，同时默认展示规则ID、规则名称、管控方向、管控对象、执行动作、优先级、状态、修改时间、操作九列表头。"
+    },
+    {
+      "version": 58,
+      "generated_at": "2026-08-18",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13031",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13031：邮件处置中心哈希加黑后补充内容规则管理入口，支持进入内容规则页面并定位已创建规则。"
+    },
+    {
+      "version": 59,
+      "generated_at": "2026-08-19",
+      "webapp_commit": "working-tree",
+      "comparison_spec_commit": "not-used",
+      "ticket": "GT-13070",
+      "incremental": true,
+      "summary": "在 GT-13017【0818】处理问题总工单中追加 GT-13070：统一 IP 频率限制、IP 黑白名单、发信人黑白名单、发信行为管控、内容规则、高级过滤规则、邮件标记与声明七个模块规则列表的状态字段 Switch 样式。"
     }
   ]
 }

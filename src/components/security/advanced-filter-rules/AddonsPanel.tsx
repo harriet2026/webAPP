@@ -580,7 +580,13 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
             value={tv(params, 'new_value', '')}
             onChange={(v) => onPatch({ new_value: v })}
           />
-          <p className="text-xs text-muted-foreground">{t('addons.modifyHeaderVariableHint')}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('addons.modifyHeaderVariableHint', {
+              sender: '{sender}',
+              recipient: '{recipient}',
+              subject: '{subject}',
+            })}
+          </p>
           <p className="text-xs text-amber-600">{t('addons.modifyHeaderDkimWarning')}</p>
         </div>
       );

@@ -6,8 +6,9 @@ import type { DisposalMailItem } from "@/types/email-disposal";
 import { formatDate } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const { relativeTimeMock } = vi.hoisted(() => ({
+const { relativeTimeMock, relativeTimeNow } = vi.hoisted(() => ({
   relativeTimeMock: vi.fn(),
+  relativeTimeNow: new Date("2026-07-15T10:05:00Z"),
 }));
 
 // Identity translator (keeps `namespace.key` / `namespace.key:{params}` visible)
@@ -26,6 +27,7 @@ vi.mock("next-intl", () => {
   return {
     useTranslations,
     useLocale: () => "zh",
+    useNow: () => relativeTimeNow,
     useFormatter: () => ({ relativeTime: relativeTimeMock }),
   };
 });
@@ -155,7 +157,7 @@ describe("MailListTable toolbar (GT-11580)", () => {
     const relativeText = `relative:${new Date(item.timestamp).toISOString()}`;
     const timeCell = screen.getByTestId("disposal-cell-1-time");
     await waitFor(() => expect(timeCell).toHaveTextContent(relativeText));
-    expect(relativeTimeMock).toHaveBeenCalledWith(new Date(item.timestamp));
+    expect(relativeTimeMock).toHaveBeenCalledWith(new Date(item.timestamp), relativeTimeNow);
 
     const timeTrigger = screen.getByText(relativeText);
     fireEvent.pointerEnter(timeTrigger, { pointerType: "mouse" });

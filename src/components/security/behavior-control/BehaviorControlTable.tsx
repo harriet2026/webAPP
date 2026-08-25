@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Globe, User, Server, Mail, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { BehaviorControlRuleView, BehaviorObjectType, BehaviorDirection, BehaviorProductAction } from '@/types/behavior-control';
 import { BACKEND_TO_PRODUCT } from '@/types/behavior-control';
@@ -14,6 +15,7 @@ interface Props {
   views: BehaviorControlRuleView[];
   onEdit: (view: BehaviorControlRuleView) => void;
   onDelete: (view: BehaviorControlRuleView) => void;
+  onToggle: (id: number, isActive: boolean) => void;
 }
 
 const DIR_BADGE: Record<BehaviorDirection, string> = {
@@ -53,17 +55,8 @@ function ObjectCell({ type, subType, value }: { type: BehaviorObjectType; subTyp
   );
 }
 
-export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
+export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Props) {
   const t = useTranslations();
-
-  if (views.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-muted-foreground mb-4">{t('behaviorControl.empty')}</div>
-        <p className="text-sm text-muted-foreground">{t('behaviorControl.emptyHint')}</p>
-      </div>
-    );
-  }
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -75,13 +68,21 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
             <TableHead className="w-[110px]">{t('behaviorControl.col.direction')}</TableHead>
             <TableHead className="min-w-[220px]">{t('behaviorControl.col.object')}</TableHead>
             <TableHead className="w-[90px]">{t('behaviorControl.col.action')}</TableHead>
+            <TableHead className="w-[80px]">{t('behaviorControl.col.priority')}</TableHead>
             <TableHead className="w-[80px]">{t('behaviorControl.col.status')}</TableHead>
             <TableHead className="w-[130px]">{t('behaviorControl.col.modified')}</TableHead>
             <TableHead className="w-[100px]">{t('behaviorControl.col.operations')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {views.map((v) => {
+          {views.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={9} className="h-32 text-center">
+                <div className="text-muted-foreground">{t('behaviorControl.empty')}</div>
+                <p className="text-sm text-muted-foreground">{t('behaviorControl.emptyHint')}</p>
+              </TableCell>
+            </TableRow>
+          ) : views.map((v) => {
             const productAction = BACKEND_TO_PRODUCT[v.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? v.rule.action;
             return (
               <TableRow key={v.rule.id}>
@@ -108,10 +109,13 @@ export function BehaviorControlTable({ views, onEdit, onDelete }: Props) {
                 <TableCell>
                   <Badge className={ACTION_BADGE[productAction as BehaviorProductAction]}>{t(`behaviorControl.action.${productAction}`)}</Badge>
                 </TableCell>
+                <TableCell className="font-mono text-xs">{v.rule.priority}</TableCell>
                 <TableCell>
-                  <Badge variant={v.rule.is_active ? 'default' : 'secondary'}>
-                    {t(v.rule.is_active ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
-                  </Badge>
+                  <Switch
+                    checked={v.rule.is_active}
+                    onCheckedChange={(isActive) => onToggle(v.rule.id, isActive)}
+                    aria-label={t(v.rule.is_active ? 'common.disabled' : 'common.enabled')}
+                  />
                 </TableCell>
                 {/* GT-12500：本地时区分钟精度，不再裸渲染 UTC ISO 串 */}
                 <TableCell className="text-sm text-muted-foreground">{formatTimestamp(v.rule.updated_at)}</TableCell>

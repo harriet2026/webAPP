@@ -324,6 +324,7 @@ export function AdvancedFilterRulesModule({
                 <TableHead className="min-w-[160px]">{t('name')}</TableHead>
                 <TableHead className="min-w-[180px]">{t('keywords')}</TableHead>
                 <TableHead className="w-[140px]">{t('scope')}</TableHead>
+                <TableHead className="w-[90px]">{t('priority')}</TableHead>
                 <TableHead className="w-[100px]">{t('status')}</TableHead>
                 <TableHead className="w-[110px]">{t('action')}</TableHead>
                 <TableHead className="w-[130px]">{t('expiresAt')}</TableHead>
@@ -333,13 +334,13 @@ export function AdvancedFilterRulesModule({
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                     {tc('loading')}
                   </TableCell>
                 </TableRow>
               ) : pagedRules.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                     {tc('noData')}
                   </TableCell>
                 </TableRow>
@@ -350,11 +351,9 @@ export function AdvancedFilterRulesModule({
                   const expiry = rule.valid_until ? dateFormatter.format(new Date(rule.valid_until)) : null;
 
                   return (
-                    <TableRow key={rule.id} data-testid={`rule-row-${rule.id}`}>
-                      <TableCell className="font-mono text-sm" data-testid={`rule-row-priority-${rule.id}`}>
-                        {rule.priority}
-                      </TableCell>
-                      <TableCell className="font-medium">{rule.name}</TableCell>
+                      <TableRow key={rule.id} data-testid={`rule-row-${rule.id}`}>
+                        <TableCell className="font-mono text-sm">{rule.id}</TableCell>
+                        <TableCell className="font-medium">{rule.name}</TableCell>
                       <TableCell>
                         {visible.length === 0 && more === 0 ? (
                           <span className="text-xs text-muted-foreground">-</span>
@@ -386,19 +385,16 @@ export function AdvancedFilterRulesModule({
                           </div>
                         )}
                       </TableCell>
+                      <TableCell className="font-mono text-sm" data-testid={`rule-row-priority-${rule.id}`}>
+                        {rule.priority}
+                      </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="outline"
+                        <Switch
+                          checked={rule.is_active}
+                          onCheckedChange={(isActive) => toggleMutation.mutate({ id: rule.id, isActive })}
                           data-testid={`rule-row-toggle-${rule.id}`}
-                          className={cn(
-                            'text-xs',
-                            rule.is_active
-                              ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                              : 'border-border bg-muted/40 text-muted-foreground',
-                          )}
-                        >
-                          {rule.is_active ? t('enabled') : t('disabled')}
-                        </Badge>
+                          aria-label={rule.is_active ? tc('disabled') : tc('enabled')}
+                        />
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn('text-xs', ACTION_BADGE_CLASS[action])}>
@@ -425,14 +421,6 @@ export function AdvancedFilterRulesModule({
                             data-testid={`rule-row-edit-${rule.id}`}
                           >
                             <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleMutation.mutate({ id: rule.id, isActive: !rule.is_active })}
-                            data-testid={`rule-row-toggle-btn-${rule.id}`}
-                          >
-                            {rule.is_active ? t('disabled') : t('enabled')}
                           </Button>
                           <Button
                             variant="ghost"

@@ -109,7 +109,7 @@ test.describe('Advanced Filter Rules — list & drawer host', () => {
     await expect(header.locator('[data-testid="module-enabled-switch"]')).toBeVisible();
   });
 
-  test('left nav lists the 3 stage-5 policies and collapses via the ChevronLeft toggle', async ({ authenticatedPage }) => {
+  test('left nav lists the 3 stage-5 policies without the removed collapse control', async ({ authenticatedPage }) => {
     await openAdvancedRulesDrawer(authenticatedPage);
     const drawer = authenticatedPage.locator('[data-testid="pipeline-config-drawer"]');
     const nav = drawer.locator('nav').first();
@@ -117,24 +117,15 @@ test.describe('Advanced Filter Rules — list & drawer host', () => {
     await expect(nav.locator('button')).toHaveCount(3);
     await expect(nav.getByText('高级过滤规则')).toBeVisible();
 
-    // The collapse toggle is the icon-only round button positioned between the
-    // nav column and the content pane (no testid — it's a Tooltip-wrapped
-    // icon button in PolicyPipelinePage.tsx).
+    // GT-13040 removes the drawer close/collapse affordance. The navigation
+    // remains expanded and keeps all three policy entries visible.
     const toggleBtn = drawer.locator('button.rounded-full.shadow-lg').first();
-    await expect(toggleBtn).toBeVisible({ timeout: 5000 });
-    await toggleBtn.click();
-    await authenticatedPage.waitForTimeout(400);
-
-    // Collapsed: item labels are hidden, only the status dot + icon remain.
-    await expect(nav.getByText('高级过滤规则')).toHaveCount(0);
+    await expect(toggleBtn).toHaveCount(0);
     await expect(nav.locator('button')).toHaveCount(3);
-
-    await toggleBtn.click();
-    await authenticatedPage.waitForTimeout(400);
     await expect(nav.getByText('高级过滤规则')).toBeVisible();
   });
 
-  test('list toolbar and 8-column table render', async ({ authenticatedPage }) => {
+  test('list toolbar and 9-column table render', async ({ authenticatedPage }) => {
     await openAdvancedRulesDrawer(authenticatedPage);
 
     await expect(authenticatedPage.locator('[data-testid="rules-search-input"]')).toBeVisible();
@@ -145,22 +136,23 @@ test.describe('Advanced Filter Rules — list & drawer host', () => {
     await expect(authenticatedPage.locator('[data-testid="rules-count"]')).toBeVisible();
 
     const headers = authenticatedPage.locator('table thead th');
-    await expect(headers).toHaveCount(8);
+    await expect(headers).toHaveCount(9);
     await expect(headers.nth(0)).toContainText('ID');
     await expect(headers.nth(1)).toContainText('规则名称');
     await expect(headers.nth(2)).toContainText('关键字');
     await expect(headers.nth(3)).toContainText('范围');
-    await expect(headers.nth(4)).toContainText('状态');
-    await expect(headers.nth(5)).toContainText('动作');
-    await expect(headers.nth(6)).toContainText('到期时间');
-    await expect(headers.nth(7)).toContainText('操作');
+    await expect(headers.nth(4)).toContainText('优先级');
+    await expect(headers.nth(5)).toContainText('状态');
+    await expect(headers.nth(6)).toContainText('动作');
+    await expect(headers.nth(7)).toContainText('到期时间');
+    await expect(headers.nth(8)).toContainText('操作');
   });
 
   test('static condition-catalogue info card renders below the table', async ({ authenticatedPage }) => {
     await openAdvancedRulesDrawer(authenticatedPage);
     const info = authenticatedPage.locator('[data-testid="rules-info-card"]');
     await expect(info).toBeVisible({ timeout: 5000 });
-    await expect(info).toContainText('54');
+    await expect(info).toContainText('49');
   });
 
   test('create rule via API is visible in the list', async ({ authenticatedPage, request }) => {

@@ -103,6 +103,7 @@ const scopeFields: Record<string, string> = {
   text_body: 'text_body',
   html_body: 'html_body',
   attachment_names: 'attachment_names',
+  attachment_hash: 'attachment_hash',
   attachment_types: 'attachment_types',
   urls: 'urls',
 };

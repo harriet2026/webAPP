@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useSyncExternalStore } from 'react';
-import { useTranslations, useLocale, useFormatter } from 'next-intl';
+import { useTranslations, useLocale, useFormatter, useNow } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -122,6 +122,7 @@ export function MailListTable({
   const t = useTranslations('emailDisposal');
   const rawLocale = useLocale();
   const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
   const mounted = useSyncExternalStore(
     subscribeToClientEnvironment,
     getClientSnapshot,
@@ -146,8 +147,8 @@ export function MailListTable({
     if (!timestamp) return formatDate(timestamp);
     const date = new Date(timestamp);
     if (Number.isNaN(date.getTime()) || !mounted) return formatDate(timestamp);
-    return format.relativeTime(date);
-  }, [format, mounted]);
+    return format.relativeTime(date, now);
+  }, [format, mounted, now]);
 
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
   const hasSelection = selectedIds.size > 0;

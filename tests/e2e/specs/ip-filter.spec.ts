@@ -195,10 +195,11 @@ test.describe('IP Filter Rules', () => {
     await blSheet.getByRole('combobox').filter({ hasText: /阻断|隔离|审核|丢弃/ }).first().click();
     await expect(page.getByRole('option', { name: '阻断' })).toBeVisible({ timeout: 5000 });
     await expect(page.getByRole('option', { name: '投递', exact: true })).toHaveCount(0);
-    // Tab 关闭下拉（不触发 sheet close），再显式关闭抽屉
+    // Tab 关闭下拉（不触发 sheet close），再通过底部取消按钮关闭抽屉。
+    // GT-13036 已移除右上角关闭按钮。
     await page.keyboard.press('Tab');
     await page.waitForTimeout(300);
-    await blSheet.locator('[data-slot="sheet-close"]').click();
+    await blSheet.getByRole('button', { name: '取消' }).click();
     await page.waitForTimeout(500);
     // 白名单 tab → 新增
     await page.getByRole('tab', { name: '白名单' }).click();
@@ -206,14 +207,14 @@ test.describe('IP Filter Rules', () => {
     const wlSheet = page.locator('[data-slot="sheet-content"]').last();
     await expect(wlSheet).toBeVisible({ timeout: 5000 });
     await expect(wlSheet.getByText('新建白名单规则')).toBeVisible({ timeout: 5000 });
-    // 打开动作下拉：白名单动作为 投递/标记投递（demo 词表），含"投递"，不含黑名单的"阻断"
-    await wlSheet.getByRole('combobox').filter({ hasText: /投递/ }).first().click();
-    await expect(page.getByRole('option', { name: '投递', exact: true })).toBeVisible({ timeout: 5000 });
+    // 白名单主动作显示为「放行」；「标记投递」是旁边的独立复选项。
+    await wlSheet.locator('[data-testid="ip-filter-action"]').click();
+    await expect(page.getByRole('option', { name: '放行', exact: true })).toBeVisible({ timeout: 5000 });
     await expect(page.getByRole('option', { name: '阻断' })).toHaveCount(0);
     // 清理：关闭下拉与抽屉，避免污染后续测试
     await page.keyboard.press('Tab');
     await page.waitForTimeout(300);
-    await wlSheet.locator('[data-slot="sheet-close"]').click();
+    await wlSheet.getByRole('button', { name: '取消' }).click();
     await page.waitForTimeout(500);
   });
 

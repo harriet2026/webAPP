@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Download, Info, Plus, RotateCcw, Search, Upload } from 'lucide-react';
@@ -19,6 +19,7 @@ import {
   deleteBehaviorControlRule,
   listBehaviorControlRules,
   resolveBehaviorControlRule,
+  toggleBehaviorControlRule,
 } from '@/lib/api/behavior-control';
 import type { BehaviorControlRuleView } from '@/types/behavior-control';
 import { useApiRequest } from '@/lib/api/client';
@@ -26,6 +27,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { RuleImportExportDialog } from '@/components/rules/RuleImportExportDialog';
 import { executeUnifiedRulesImport, exportUnifiedRules, previewUnifiedRulesImport } from '@/lib/api/unified-rules';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface Props {
   embedded?: boolean;
@@ -36,6 +38,7 @@ const PAGE_SIZES = [10, 20, 50, 100];
 export function BehaviorControlPage({ embedded = false }: Props) {
   const t = useTranslations();
   const qc = useQueryClient();
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
 
@@ -54,6 +57,18 @@ export function BehaviorControlPage({ embedded = false }: Props) {
   const { data, isLoading } = useQuery({
     queryKey: ['behavior-control-rules'],
     queryFn: () => listBehaviorControlRules(apiRequest),
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
+      toggleBehaviorControlRule(id, isActive, apiRequest),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['behavior-control-rules'] });
+      toast.success(t('common.updateSuccess'));
+    },
+    onError: (error: Error) => {
+      toast.error(apiErrorMessage(error));
+    },
   });
 
   const { data: tenantOptions = [] } = useQuery({
@@ -205,12 +220,8 @@ export function BehaviorControlPage({ embedded = false }: Props) {
             views={paged}
             onEdit={handleEdit}
             onDelete={(v) => setDeleteTarget(v)}
+            onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
           />
-          {filtered.length === 0 && (
-            <div className="flex justify-center pb-2">
-              <Button onClick={handleCreate}>{t('behaviorControl.createNow')}</Button>
-            </div>
-          )}
           {totalPages <= 1 ? (
             <div className="flex items-center justify-start px-4 py-3 border-t">
               <div className="text-sm text-muted-foreground">

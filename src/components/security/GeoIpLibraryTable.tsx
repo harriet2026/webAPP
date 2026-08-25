@@ -338,12 +338,6 @@ export function GeoIpLibraryTable() {
               </div>
             }
             title={t('geoipLibrary.emptyText')}
-            action={
-              <Button variant="outline" size="sm" onClick={openCreate}>
-                <Plus className="h-4 w-4 mr-1" />
-                {t('geoipLibrary.createNow')}
-              </Button>
-            }
           />
         </div>
       ) : (
@@ -370,7 +364,7 @@ export function GeoIpLibraryTable() {
 
       {/* 新增/编辑 Sheet —— 立即 CRUD（与 demo 的延迟保存有意不同，见 plan §1.1） */}
       <Sheet open={sheetOpen} onOpenChange={(open) => (open ? setSheetOpen(true) : closeSheet())}>
-        <SheetContent className="flex w-[560px] flex-col p-0 sm:max-w-[560px]">
+        <SheetContent className="flex w-[560px] flex-col p-0 sm:max-w-[560px]" showCloseButton={false}>
           <SheetHeader className="flex-shrink-0 border-b px-6 py-4">
             <div className="flex items-center justify-between">
               <div>

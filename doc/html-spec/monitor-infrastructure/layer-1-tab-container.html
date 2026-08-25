@@ -151,7 +151,8 @@
       <tr><td rowspan="3">Docker 状态卡（grid-cols-3）</td><td>运行中</td><td><b>8</b>（绿字，CheckCircle 图标）</td><td class="mono">monitor.container.running</td></tr>
       <tr><td>已停止</td><td><b>1</b>（灰字，XCircle 图标）</td><td class="mono">monitor.container.stopped</td></tr>
       <tr><td>重启中</td><td><b>2</b>（当前处于 restarting 状态的容器数；黄字，RefreshCw 图标）</td><td class="mono">monitor.container.restarts</td></tr>
-      <tr><td>Overlay2 空间使用率</td><td>SVG 环形图</td><td><b>72%</b>（绿色弧；&gt;85% 黄、&gt;95% 红）</td><td>strokeDasharray = 72×3.52 / 352；右侧文字说明阈值</td></tr>
+      <tr><td>容器明细抽屉</td><td>点击任一 Docker 状态卡</td><td>名称 · 完整镜像引用 · 本地化 Docker 状态</td><td>按卡片状态过滤；“已停止”包含 exited / created / dead，标题数量与明细行一致；加载失败显示降级提示，不伪装成无数据</td></tr>
+      <tr><td>Overlay2 空间使用率</td><td>SVG 环形图</td><td><b>72%</b>（绿色弧；&gt;85% 黄、&gt;95% 红）</td><td>DockerRootDir 所在宿主文件系统的 used / (used + available)；不得使用仅覆盖镜像层的 LayersSize。strokeDasharray = 72×3.52 / 352；右侧纵向三行依次为灰色说明“Docker存储驱动空间占用”、上间距 8px 的黄色“&gt;85% 告警”、红色“&gt;95% 严重”</td></tr>
       <tr><td rowspan="5">核心进程监控表</td><td>apiserver</td><td>运行中 · PID:1234 · 256M</td><td rowspan="5">进程清单来自当前节点实际采集配置（含 apiserver、antispam、authd、attachd、postfix、数据库进程、redis-server）；状态只表达进程是否存在：running=绿「运行中」、stopped=灰「已停止」；详情列单进程显示 PID，多进程显示进程数</td></tr>
       <tr><td>antispam</td><td>运行中 · PID:2345 · 128M</td></tr>
       <tr><td>postfix</td><td>运行中 · 进程数:12 · 64M</td></tr>

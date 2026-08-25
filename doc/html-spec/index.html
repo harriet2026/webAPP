@@ -99,6 +99,31 @@
     .l1-stats .done-count { color: oklch(0.45 0.12 150); font-weight: 600; }
     .l1-body { padding: 1.25rem; }
 
+    /* -- 全量目录 / 版本增量双栏 -- */
+    .spec-columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.85fr);
+      gap: 1.5rem;
+      align-items: start;
+    }
+    .spec-column { min-width: 0; }
+    .spec-column-title {
+      color: var(--primary);
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+      padding: 0 0.25rem;
+    }
+    .incremental-column {
+      position: sticky;
+      top: 1rem;
+    }
+    .incremental-column .l1-section { margin-bottom: 0; }
+    @media (max-width: 900px) {
+      .spec-columns { grid-template-columns: 1fr; }
+      .incremental-column { position: static; }
+    }
+
     /* -- 二级功能区 (可折叠) -- */
     details.l2-group {
       margin-bottom: 1rem;
@@ -186,6 +211,10 @@
     <div class="overview-item"><div class="num">7</div><div class="label">待生成</div></div>
     <div class="overview-item"><div class="num">85%</div><div class="label">完成率</div></div>
   </div>
+
+  <div class="spec-columns">
+    <section class="spec-column full-catalog" aria-labelledby="full-catalog-title">
+      <h2 id="full-catalog-title" class="spec-column-title">全量功能模块需求文档</h2>
 
   <!-- ==================== 一级：变更规格（增量 GT 索引） ==================== -->
   <details class="l1-section" open>
@@ -1606,6 +1635,167 @@
       </div>
     </div>
   </details>
+
+    </section>
+
+    <aside class="spec-column incremental-column" aria-labelledby="incremental-title">
+      <h2 id="incremental-title" class="spec-column-title">版本增量需求文档</h2>
+      <details class="l1-section" open>
+        <summary>
+          <div class="l1-header">
+            <span class="chevron"></span>
+            <span class="l1-icon">🧾</span>
+            <h2>GT-13017【0818】处理问题总工单</h2>
+            <span class="l1-stats"><span class="done-count">10</span> 个需求文档</span>
+          </div>
+        </summary>
+        <div class="l1-body">
+          <div class="grid">
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-12888" target="_blank" rel="noopener noreferrer">GT-12888 内容规则-列表未展示优先级且新建规则难以定位问题解决</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>内容规则列表新增优先级列，位置在状态列之前；列标题使用 contentRules.priority 国际化键。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13027" target="_blank" rel="noopener noreferrer">GT-13027 内容规则：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>内容规则新建/编辑抽屉的保存、取消按钮移至底部右侧，移除右上角关闭按钮；继续使用 common.save/common.cancel 国际化键。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13033" target="_blank" rel="noopener noreferrer">GT-13033 IP频率限制：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>IP频率限制新建/编辑抽屉的保存、取消按钮移至底部右侧，移除右上角关闭按钮与测试按钮；继续使用 common.save/common.cancel 国际化键。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13036" target="_blank" rel="noopener noreferrer">GT-13036 IP黑白名单：保存/取消按钮从右上角移动到右下角，同时去掉右上角的“关闭x”按钮</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>IP 黑白名单新建/编辑抽屉的保存、取消按钮移至底部右侧，移除右上角关闭按钮；继续使用项目国际化文案。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13040" target="_blank" rel="noopener noreferrer">GT-13040 安全策略模块：阶段1，阶段2，阶段3，阶段4，阶段5页面移除关闭X按钮</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>安全策略阶段1至阶段5主页面及页面内部二级弹窗统一移除右上角关闭 X，保留取消、保存、确认和既有业务关闭逻辑。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13059" target="_blank" rel="noopener noreferrer">GT-13059 IP黑白名单，发信行为管控，高级过滤规则三个模块的规则列表补充优先级字段</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>IP黑白名单、发信行为管控和高级过滤规则列表补充优先级字段，统一放在状态字段之前，并使用项目国际化框架。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13061" target="_blank" rel="noopener noreferrer">GT-13061 海外邮件检查：自定义IP定位库空状态移除“立即创建”按钮</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>移除自定义 IP 定位库无数据状态中的“立即创建”按钮，保留顶部新增规则和其他页面功能。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13065" target="_blank" rel="noopener noreferrer">GT-13065 发信行为管控：空数据状态移除“立即创建”按钮并默认展示表头字段</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>发信行为管控无数据时移除“立即创建”按钮，同时默认展示规则ID、规则名称、管控方向、管控对象、执行动作、优先级、状态、修改时间、操作九列表头。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13031" target="_blank" rel="noopener noreferrer">GT-13031 邮件处置中心：哈希加黑后补充内容规则管理入口，支持定位已创建规则</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-18</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>邮件处置中心哈希加黑后提供内容规则管理入口，支持进入内容规则页面并定位已创建规则。</p>
+              </div>
+            </details>
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13017.html#gt-13070" target="_blank" rel="noopener noreferrer">GT-13070 七个安全策略模块规则列表状态字段样式统一</a>
+                  <span class="badge badge-done">已完成</span>
+                  <span class="card-generated-at">2026-08-19</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13017【0818】处理问题总工单</p>
+                <p>统一 IP 频率限制、IP 黑白名单、发信人黑白名单、发信行为管控、内容规则、高级过滤规则、邮件标记与声明规则列表的状态字段 Switch 样式。</p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </details>
+    </aside>
+  </div>
 
 </body>
 </html>

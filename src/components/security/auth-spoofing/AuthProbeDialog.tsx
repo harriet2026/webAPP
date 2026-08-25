@@ -73,7 +73,7 @@ export function AuthProbeDialog({ open, onOpenChange }: AuthProbeDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px]" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{t('probe.title')}</DialogTitle>
           <DialogDescription>{t('probe.description')}</DialogDescription>

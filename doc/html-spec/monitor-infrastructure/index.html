@@ -389,9 +389,10 @@ graph LR
   <table class="spec-table">
     <thead><tr><th>规则</th><th>值（demo）</th></tr></thead>
     <tbody>
-      <tr><td>Overlay2 占用着色</td><td>&gt;85% 黄（警告）· &gt;95% 红（严重）；当前 72% 绿</td></tr>
+      <tr><td>Overlay2 占用着色</td><td>数值取 DockerRootDir 所在宿主文件系统的 used / (used + available)，不使用仅统计镜像层的 LayersSize；&gt;85% 黄（警告）· &gt;95% 红（严重）；当前 72% 绿</td></tr>
       <tr><td>分区状态着色</td><td>normal=绿 / warning=黄（78%、88% 两分区为 warning）</td></tr>
       <tr><td>进程状态徽标</td><td>running=绿「运行中」· stopped=灰「已停止」；资源异常由独立指标和告警中心负责，不混入进程存在性状态</td></tr>
+      <tr><td>Docker 状态卡抽屉</td><td>点击卡片后按状态展示完整容器清单；“已停止”归入 exited / created / dead，明细状态本地化，镜像引用不截断；明细接口失败显示降级提示</td></tr>
       <tr><td>慢查询行交互</td><td>【demo 现状】行 hover 高亮 + cursor-pointer，源码无点击处理。【目标行为·2026-07-22 用户决定】<b>hover 时以 Tooltip 显示该条 SQL 详情</b>（完整 SQL 语句 + 执行次数 + 平均耗时 + 最后执行时间；SQL 在表格单元格中 truncate 截断，Tooltip 展示全文），无需点击 —— 见差异 D-06</td></tr>
     </tbody>
   </table>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useState, useMemo, type KeyboardEvent } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +30,7 @@ import {
 import { EmptyState, DegradedBanner } from './StateBanners';
 import { useProcesses, useRuntime, useDockerContainers, useRuntimeTrend } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
+import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
 import type { TimeRange } from '@/types/monitoring';
 
 interface ProcessesTabProps {
@@ -38,6 +39,7 @@ interface ProcessesTabProps {
 }
 
 type DockerFilterState = 'running' | 'stopped' | 'restarting' | null;
+const STOPPED_CONTAINER_STATES = new Set(['exited', 'stopped', 'created', 'dead']);
 
 // Process status only expresses whether a monitored process exists. Resource
 // anomalies belong to their dedicated metrics and alerting rules, so this
@@ -58,6 +60,55 @@ function useProcStatusBadge() {
         return {
           className: 'border-transparent bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
           label: t('stopped'),
+        };
+    }
+  };
+}
+
+function useContainerStateBadge() {
+  const t = useTranslations('infrastructure.processes');
+  return (state: string): { className: string; label: string } => {
+    switch (state) {
+      case 'running':
+        return {
+          className: 'border-transparent bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+          label: t('containerStateRunning'),
+        };
+      case 'restarting':
+        return {
+          className: 'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+          label: t('containerStateRestarting'),
+        };
+      case 'paused':
+        return {
+          className: 'border-transparent bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+          label: t('containerStatePaused'),
+        };
+      case 'dead':
+        return {
+          className: 'border-transparent bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+          label: t('containerStateDead'),
+        };
+      case 'created':
+        return {
+          className: 'border-transparent bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
+          label: t('containerStateCreated'),
+        };
+      case 'exited':
+      case 'stopped':
+        return {
+          className: 'border-transparent bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
+          label: t('containerStateExited'),
+        };
+      case 'removing':
+        return {
+          className: 'border-transparent bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
+          label: t('containerStateRemoving'),
+        };
+      default:
+        return {
+          className: 'border-transparent bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
+          label: state,
         };
     }
   };
@@ -87,6 +138,8 @@ function buildChartOption(
   seriesMap: Record<string, { ts: string; value: number }[]>,
   selectedServices: string[],
   yLabel: string,
+  locale: string,
+  range: TimeRange,
 ) {
   const services = selectedServices.filter((s) => seriesMap[s]);
   if (services.length === 0) return null;
@@ -101,7 +154,14 @@ function buildChartOption(
     tooltip: { trigger: 'axis' as const },
     legend: { data: services, top: 0 },
     grid: { left: 56, right: 16, top: 36, bottom: 32 },
-    xAxis: { type: 'category' as const, data: tsArr, axisLabel: { showMaxLabel: true } },
+    xAxis: {
+      type: 'category' as const,
+      data: tsArr,
+      axisLabel: {
+        showMaxLabel: true,
+        formatter: createTimeAxisFormatter(locale, range === '7d'),
+      },
+    },
     yAxis: { type: 'value' as const, min: 0, axisLabel: { formatter: `{value} ${yLabel}` } },
     series: services.map((svc, i) => {
       const ptMap = new Map((seriesMap[svc] ?? []).map((p) => [p.ts, p.value]));
@@ -170,13 +230,19 @@ function ServiceMultiSelect({
 
 export function ProcessesTab({ node, range }: ProcessesTabProps) {
   const t = useTranslations('infrastructure');
+  const locale = useLocale();
   const procStatusBadge = useProcStatusBadge();
+  const containerStateBadge = useContainerStateBadge();
   const [dockerFilter, setDockerFilter] = useState<DockerFilterState>(null);
   const [selectedSvcs, setSelectedSvcs] = useState<string[] | null>(null); // null = all
 
   const { data: procData, isLoading: procLoading, isError: procError } = useProcesses(node);
   const { data: runtimeData, isLoading: rtLoading } = useRuntime(node, range);
-  const { data: containersData, isLoading: containersLoading } = useDockerContainers(node);
+  const {
+    data: containersData,
+    isLoading: containersLoading,
+    isError: containersError,
+  } = useDockerContainers(node);
   const { data: trendData, isLoading: trendLoading } = useRuntimeTrend(node, range);
 
   const allServices = useMemo(() => {
@@ -207,13 +273,13 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
   }, [trendData]);
 
   const gorOption = useMemo(
-    () => buildChartOption(goroutineMap, effectiveSelected, ''),
-    [goroutineMap, effectiveSelected],
+    () => buildChartOption(goroutineMap, effectiveSelected, '', locale, range),
+    [goroutineMap, effectiveSelected, locale, range],
   );
 
   const heapOption = useMemo(
-    () => buildChartOption(heapMap, effectiveSelected, 'MB'),
-    [heapMap, effectiveSelected],
+    () => buildChartOption(heapMap, effectiveSelected, 'MB', locale, range),
+    [heapMap, effectiveSelected, locale, range],
   );
 
   if (procLoading) {
@@ -242,7 +308,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
   const filteredContainers = dockerFilter
     ? allContainers.filter((c) => {
         if (dockerFilter === 'running') return c.state === 'running';
-        if (dockerFilter === 'stopped') return c.state === 'exited' || c.state === 'stopped';
+        if (dockerFilter === 'stopped') return STOPPED_CONTAINER_STATES.has(c.state);
         if (dockerFilter === 'restarting') return c.state === 'restarting';
         return false;
       })
@@ -253,7 +319,17 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
       ? t('processes.running')
       : dockerFilter === 'stopped'
         ? t('processes.stopped')
-        : t('processes.restarts');
+         : t('processes.restarts');
+
+  function handleDockerCardKeyDown(
+    event: KeyboardEvent<HTMLDivElement>,
+    filter: Exclude<DockerFilterState, null>,
+  ) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setDockerFilter(filter);
+    }
+  }
 
   return (
     <div className="space-y-4" data-testid="monitor-infrastructure-processes">
@@ -264,6 +340,12 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
         <Card
           className="cursor-pointer hover:bg-muted/50 transition-colors"
           onClick={() => setDockerFilter('running')}
+          onKeyDown={(event) => handleDockerCardKeyDown(event, 'running')}
+          role="button"
+          tabIndex={0}
+          aria-haspopup="dialog"
+          aria-expanded={dockerFilter === 'running'}
+          aria-controls="monitor-infrastructure-container-drawer"
           data-testid="monitor-infrastructure-container-running"
         >
           <CardContent className="p-4 flex items-center gap-4">
@@ -279,6 +361,12 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
         <Card
           className="cursor-pointer hover:bg-muted/50 transition-colors"
           onClick={() => setDockerFilter('stopped')}
+          onKeyDown={(event) => handleDockerCardKeyDown(event, 'stopped')}
+          role="button"
+          tabIndex={0}
+          aria-haspopup="dialog"
+          aria-expanded={dockerFilter === 'stopped'}
+          aria-controls="monitor-infrastructure-container-drawer"
           data-testid="monitor-infrastructure-container-stopped"
         >
           <CardContent className="p-4 flex items-center gap-4">
@@ -294,6 +382,12 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
         <Card
           className="cursor-pointer hover:bg-muted/50 transition-colors"
           onClick={() => setDockerFilter('restarting')}
+          onKeyDown={(event) => handleDockerCardKeyDown(event, 'restarting')}
+          role="button"
+          tabIndex={0}
+          aria-haspopup="dialog"
+          aria-expanded={dockerFilter === 'restarting'}
+          aria-controls="monitor-infrastructure-container-drawer"
           data-testid="monitor-infrastructure-container-restarting"
         >
           <CardContent className="p-4 flex items-center gap-4">
@@ -309,16 +403,30 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
       </div>
 
       <Sheet open={dockerFilter !== null} onOpenChange={(open) => !open && setDockerFilter(null)}>
-        <SheetContent data-testid="monitor-infrastructure-container-drawer">
+        <SheetContent
+          id="monitor-infrastructure-container-drawer"
+          className="w-full sm:w-3/4 lg:w-2/3"
+          data-testid="monitor-infrastructure-container-drawer"
+        >
           <SheetHeader>
             <SheetTitle>
-              {sheetTitle} ({filteredContainers.length})
+              {sheetTitle}
+              {!containersLoading && !containersError && ` (${filteredContainers.length})`}
             </SheetTitle>
           </SheetHeader>
+          {(containersError || containersData?.degraded) && (
+            <div className="px-4">
+              <DegradedBanner
+                message={containersError
+                  ? t('agentOffline')
+                  : degradeMessage(containersData?.degraded_code, t)}
+              />
+            </div>
+          )}
           <div className="mt-4 overflow-auto">
             {containersLoading ? (
               <Skeleton className="h-[200px] w-full rounded-lg" />
-            ) : filteredContainers.length === 0 ? (
+            ) : containersError ? null : filteredContainers.length === 0 ? (
               <EmptyState message={t('noData')} />
             ) : (
               <Table>
@@ -330,17 +438,18 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredContainers.map((c) => (
-                    <TableRow key={c.name} data-testid={`monitor-infrastructure-container-row-${c.name}`}>
-                      <TableCell className="font-mono text-xs">{c.name}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{c.image}</TableCell>
-                      <TableCell>
-                        <Badge variant={c.state === 'running' ? 'default' : 'secondary'}>
-                          {c.state}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filteredContainers.map((c) => {
+                    const stateBadge = containerStateBadge(c.state);
+                    return (
+                      <TableRow key={c.name} data-testid={`monitor-infrastructure-container-row-${c.name}`}>
+                        <TableCell className="font-mono text-xs">{c.name}</TableCell>
+                        <TableCell className="break-all font-mono text-xs text-muted-foreground">{c.image}</TableCell>
+                        <TableCell>
+                          <Badge className={stateBadge.className}>{stateBadge.label}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
@@ -380,7 +489,9 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
                   </div>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {t('processes.overlay2Thresholds')}
+                  <p>{t('processes.overlay2Description')}</p>
+                  <p className="mt-2 text-yellow-600">{t('processes.overlay2Warning')}</p>
+                  <p className="text-red-600">{t('processes.overlay2Critical')}</p>
                 </div>
               </div>
             );

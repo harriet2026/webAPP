@@ -482,7 +482,7 @@ export const mockTenants: TenantListResponse = {
       code: "TENANT_A",
       language: "zh",
       status: "active",
-      capability_flags: ["ai"],
+      capability_flags: ["phishing-detection", "spoofing-detection", "threat-retro"],
       routing_progress: {
         receiving: true,
         relay: true,

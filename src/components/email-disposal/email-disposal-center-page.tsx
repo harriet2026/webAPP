@@ -104,7 +104,7 @@ export function EmailDisposalCenterPage({
   const { merge } = useFilterMerger();
   const { templates, saveTemplate, deleteTemplate, renameTemplate } = useSearchTemplates();
   const queryClient = useQueryClient();
-  const { capabilities, viewer, switcherEnabled } = useProductForm();
+  const { capabilities, viewer } = useProductForm();
   const { features, isSystemAdmin, isTenantAdmin, user, demoAuthBypassEnabled } = useAuth();
   const { selectedTenantId } = useTenant();
   const { effectiveViewer } = resolveSecurityScope({
@@ -1107,7 +1107,6 @@ export function EmailDisposalCenterPage({
         aiEnabled={aiEnabled}
         aiInterpretEnabled={aiInterpretEnabled}
         readOnly={detailReadOnly}
-        showSecurityAnalysis={switcherEnabled}
         isTenantAdmin={isTenantAdmin}
         onFindSimilar={async (id) => {
           void runFindSimilar([id]);
