@@ -24,8 +24,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { SegmentedButton } from '@/components/ui/segmented-button';
-
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import {
   createSandboxRule,
@@ -264,23 +262,26 @@ export function SandboxRuleDrawer({
               className="inline-flex rounded-2xl border border-border/70 bg-muted/30 p-1 gap-1"
               data-testid="sandbox-direction-multiselect"
             >
-              {SANDBOX_DIRECTIONS.map((dir) => (
-                <SegmentedButton
-                  key={dir}
-                  selected={draft.direction.includes(dir)}
-                  aria-pressed={draft.direction.includes(dir)}
-                  data-testid={`sandbox-direction-${dir}`}
-                  className={cn(
-                    'rounded-xl px-4 py-1.5',
-                    draft.direction.includes(dir)
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'bg-background text-foreground hover:bg-muted/60',
-                  )}
-                  onClick={() => toggleDirection(dir)}
-                >
-                  {tdir(dir)}
-                </SegmentedButton>
-              ))}
+              {SANDBOX_DIRECTIONS.map((dir) => {
+                const selected = draft.direction.includes(dir);
+                return (
+                  <button
+                    key={dir}
+                    type="button"
+                    aria-pressed={selected}
+                    data-testid={`sandbox-direction-${dir}`}
+                    className={cn(
+                      'inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                      selected
+                        ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90'
+                        : 'border border-input bg-background text-foreground hover:bg-muted/60',
+                    )}
+                    onClick={() => toggleDirection(dir)}
+                  >
+                    {tdir(dir)}
+                  </button>
+                );
+              })}
             </div>
             {errors.direction && (
               <p className="text-xs text-destructive">{errors.direction}</p>
