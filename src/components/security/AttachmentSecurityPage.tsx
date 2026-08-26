@@ -70,9 +70,9 @@ import type {
 const TABS = [
   { key: 'basicLimit' },
   { key: 'antivirus' },
+  { key: 'sandboxRules' },
   { key: 'image' },
   { key: 'encrypted' },
-  { key: 'sandboxRules' },
 ] as const;
 
 type TabKey = (typeof TABS)[number]['key'];
