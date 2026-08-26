@@ -92,3 +92,17 @@ export interface ActiveContentConfig {
   lnk_to_url: boolean;
   tnef_unwrap: boolean;
 }
+
+/** 附件沙箱检测规则：按方向/后缀命中后送入沙箱动态执行，依结果或超时处置。 */
+export interface SandboxRule {
+  id?: number;
+  name: string;
+  enabled: boolean;
+  directions: Direction[];
+  /** 逗号分隔的送检后缀名列表，例如 .exe,.docm,.js。 */
+  ext_list: string;
+  /** 单个附件送检大小上限（MB），-1 表示不限制。 */
+  max_size_mb: number;
+  detect_action: Exclude<AttachmentAction, 'accept' | 'partial_skip'>;
+  timeout_action: Exclude<AttachmentAction, 'partial_skip'>;
+}

@@ -10,6 +10,7 @@ import type {
   ImageDetectConfig,
   PasswordBookEntry,
   QrDeepRoutesConfig,
+  SandboxRule,
 } from '@/types/attachment-security';
 import type { ApiRequestFn } from './client';
 import { apiRequest } from './client';
@@ -401,5 +402,60 @@ export async function saveTenantAttachmentSecuritySettings(
   return requestFn<TenantAttachmentSecuritySettings>('/attachment-security/settings', {
     method: 'PUT',
     body: settings,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// 附件沙箱检测规则：独立的规则列表 CRUD 端点，镜像 phishing-agent 的
+// admission-rules 写法（列表 + 增/改/启停/删），而非上面的单节配置读写。
+// ---------------------------------------------------------------------------
+
+export async function listSandboxRules(
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<SandboxRule[]> {
+  const resp = await requestFn<{ items: SandboxRule[] }>(
+    '/attachment-security/sandbox-rules',
+  );
+  return resp.items ?? [];
+}
+
+export async function createSandboxRule(
+  body: SandboxRule,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<SandboxRule> {
+  return requestFn<SandboxRule>('/attachment-security/sandbox-rules', {
+    method: 'POST',
+    body,
+  });
+}
+
+export async function updateSandboxRule(
+  id: number,
+  body: SandboxRule,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<void> {
+  await requestFn<void>(`/attachment-security/sandbox-rules/${id}`, {
+    method: 'PUT',
+    body,
+  });
+}
+
+export async function setSandboxRuleStatus(
+  id: number,
+  enabled: boolean,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<void> {
+  await requestFn<void>(`/attachment-security/sandbox-rules/${id}/status`, {
+    method: 'PUT',
+    body: { enabled },
+  });
+}
+
+export async function deleteSandboxRule(
+  id: number,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<void> {
+  await requestFn<void>(`/attachment-security/sandbox-rules/${id}`, {
+    method: 'DELETE',
   });
 }
