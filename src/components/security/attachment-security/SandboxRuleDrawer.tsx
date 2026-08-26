@@ -23,8 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { DirectionSwitcher } from './DirectionSwitcher';
+
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import {
   createSandboxRule,
@@ -70,6 +71,21 @@ function emptyDraft(): SandboxRule {
 function isValidationError(err: unknown): string | null {
   if (!(err instanceof ApiError) || err.status !== 400) return null;
   return err.message || null;
+}
+
+function SectionHeading({ index, label }: { index: number; label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={cn(
+          'flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary',
+        )}
+      >
+        {index}
+      </span>
+      <Label className="text-sm font-medium">{label}</Label>
+    </div>
+  );
 }
 
 interface SandboxRuleDrawerProps {
@@ -196,13 +212,13 @@ export function SandboxRuleDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
-        <SheetHeader>
+      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-[560px]">
+        <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>{rule ? t('editTitle') : t('createTitle')}</SheetTitle>
           <SheetDescription>{t('sheetDescription')}</SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 px-4 py-2">
+        <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
           <div className="space-y-1.5">
             <Label htmlFor="sandbox-rule-name">{t('colName')}</Label>
             <Input
@@ -215,15 +231,13 @@ export function SandboxRuleDrawer({
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
 
-          <Separator />
-
           <div className="space-y-3">
-            <Label className="text-sm font-medium">{t('sectionScope')}</Label>
+            <SectionHeading index={1} label={t('sectionScope')} />
             <DirectionSwitcher
               value={draft.direction}
               onChange={(direction) => setDraft((d) => ({ ...d, direction }))}
             />
-            <div className="flex items-center justify-between rounded-md border p-3">
+            <div className="flex items-center justify-between rounded-lg border p-4">
               <Label htmlFor="sandbox-recipient-filter" className="text-sm">
                 {t('recipientFilter')}
               </Label>
@@ -237,11 +251,9 @@ export function SandboxRuleDrawer({
             </div>
           </div>
 
-          <Separator />
-
           <div className="space-y-3">
-            <Label className="text-sm font-medium">{t('sectionFileType')}</Label>
-            <div className="space-y-2">
+            <SectionHeading index={2} label={t('sectionFileType')} />
+            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
               <p className="text-xs text-muted-foreground">{t('fileTypeCategoriesLabel')}</p>
               <div className="space-y-2">
                 {FILE_TYPE_CATEGORY_KEYS.map((key) => (
@@ -318,14 +330,15 @@ export function SandboxRuleDrawer({
             </div>
           </div>
 
-          <Separator />
-
           <div className="space-y-3">
-            <Label className="text-sm font-medium">{t('sectionRiskAction')}</Label>
+            <SectionHeading index={3} label={t('sectionRiskAction')} />
             <p className="text-xs text-muted-foreground">{t('riskActionHint')}</p>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {(['low', 'medium', 'high'] as const).map((level) => (
-                <div key={level} className="flex items-center justify-between gap-3">
+                <div
+                  key={level}
+                  className="flex items-center justify-between gap-3 rounded-lg border p-4"
+                >
                   <Label className="text-sm font-normal">{t(`riskLevel${level.charAt(0).toUpperCase()}${level.slice(1)}`)}</Label>
                   <Select
                     value={draft.risk_actions[level]}
@@ -347,10 +360,8 @@ export function SandboxRuleDrawer({
             </div>
           </div>
 
-          <Separator />
-
           <div className="space-y-3">
-            <Label className="text-sm font-medium">{t('sectionTimeout')}</Label>
+            <SectionHeading index={4} label={t('sectionTimeout')} />
             <div className="space-y-1.5">
               <Label htmlFor="sandbox-timeout-sec">{t('timeoutSecLabel')}</Label>
               <div className="flex items-center gap-2">
@@ -372,7 +383,7 @@ export function SandboxRuleDrawer({
                 </span>
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
               <Label className="text-sm">{t('timeoutActionLabel')}</Label>
               <p className="text-xs text-muted-foreground">{t('timeoutActionHint')}</p>
               <div className="space-y-2">
@@ -401,9 +412,7 @@ export function SandboxRuleDrawer({
             </div>
           </div>
 
-          <Separator />
-
-          <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="flex items-center justify-between">
             <Label htmlFor="sandbox-rule-enabled" className="text-sm">
               {t('enabledLabel')}
             </Label>
@@ -415,7 +424,7 @@ export function SandboxRuleDrawer({
           </div>
         </div>
 
-        <SheetFooter>
+        <SheetFooter className="flex-row justify-end gap-2 border-t px-6 py-3">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             {t('cancel')}
           </Button>
