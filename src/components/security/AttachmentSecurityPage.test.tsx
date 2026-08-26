@@ -83,6 +83,11 @@ vi.mock('./attachment-security/EncryptedAttachmentTab', () => ({
   DEFAULT_ENCRYPTED_ACTIONS: {},
   EncryptedAttachmentTab: () => <div />,
 }));
+vi.mock('./attachment-security/SandboxRulesTab', () => ({
+  SandboxRulesTab: ({ readOnly }: { readOnly?: boolean }) => (
+    <div data-testid="sandbox-rules-tab" data-read-only={String(!!readOnly)} />
+  ),
+}));
 
 vi.mock('./PipelinePanelHeader', () => ({
   PipelinePanelHeader: ({
@@ -139,5 +144,18 @@ describe('AttachmentSecurityPage tenant permissions', () => {
     await waitFor(() => {
       expect(mocks.setSecurityModuleEnabled).toHaveBeenCalledWith('attachment_security', false, mocks.apiRequest);
     });
+  });
+});
+
+describe('AttachmentSecurityPage sandbox rules tab', () => {
+  it('switches to the sandbox rules tab and passes through the edit permission', async () => {
+    render(<AttachmentSecurityPage embedded />);
+
+    await screen.findByTestId('attachment-security-content');
+
+    fireEvent.click(screen.getByTestId('tab-sandboxRules'));
+
+    const panel = await screen.findByTestId('sandbox-rules-tab');
+    expect(panel).toHaveAttribute('data-read-only', 'false');
   });
 });

@@ -55,7 +55,7 @@ function emptyDraft(): SandboxRule {
   return {
     name: '',
     enabled: true,
-    direction: 'both',
+    direction: 'receive',
     sender_recipient_filter_enabled: false,
     file_type_categories: [],
     custom_extensions: [],

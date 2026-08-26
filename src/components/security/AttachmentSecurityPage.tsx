@@ -22,6 +22,7 @@ import {
   DEFAULT_ENCRYPTED_CONFIG,
   EncryptedAttachmentTab,
 } from './attachment-security/EncryptedAttachmentTab';
+import { SandboxRulesTab } from './attachment-security/SandboxRulesTab';
 import { Button } from '@/components/ui/button';
 import { SegmentedButton } from '@/components/ui/segmented-button';
 import { useAuth } from '@/contexts/auth-context';
@@ -71,6 +72,7 @@ const TABS = [
   { key: 'antivirus' },
   { key: 'image' },
   { key: 'encrypted' },
+  { key: 'sandboxRules' },
 ] as const;
 
 type TabKey = (typeof TABS)[number]['key'];
@@ -349,6 +351,7 @@ export function AttachmentSecurityPage({
     antivirus: t('tabs.antivirus'),
     image: t('tabs.image'),
     encrypted: t('tabs.encrypted'),
+    sandboxRules: t('tabs.sandbox'),
   };
 
   if (loading) {
@@ -439,6 +442,8 @@ export function AttachmentSecurityPage({
                     onChange={(config) => updateDraft('encrypted', config)}
                     onActionsChange={(actions) => updateDraft('encryptedActions', actions)}
                   />
+                ) : activeTab === 'sandboxRules' ? (
+                  <SandboxRulesTab readOnly={!moduleEditable} />
                 ) : null}
               </div>
             </div>
