@@ -90,6 +90,22 @@ export async function listDkimKeys(
   return requestFn<DkimKeyListResponse>(`/dkim/keys${qs ? `?${qs}` : ''}`);
 }
 
+// Configuration selectors must not silently omit eligible keys when a tenant
+// has more than one API page. Keep pagination here so every consumer uses the
+// same termination rules.
+export async function listAllDkimKeys(
+  params: Omit<ListDkimKeysParams, 'page' | 'page_size'> = {},
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<DkimKey[]> {
+  const pageSize = 100;
+  const items: DkimKey[] = [];
+  for (let page = 1; ; page += 1) {
+    const result = await listDkimKeys({ ...params, page, page_size: pageSize }, requestFn);
+    items.push(...result.items);
+    if (result.items.length === 0 || items.length >= result.total) return items;
+  }
+}
+
 export async function getDkimKey(id: number, requestFn: ApiRequestFn = apiRequest): Promise<DkimKey> {
   return requestFn<DkimKey>(`/dkim/keys/${id}`);
 }

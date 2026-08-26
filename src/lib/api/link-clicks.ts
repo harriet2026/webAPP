@@ -3,6 +3,8 @@ import type { PaginatedResponse } from '@/types/api';
 
 export interface LinkClickLog {
   id: number;
+  /** Present on v2 rows; omitted on historical v1 rows. */
+  message_uuid?: string;
   message_id: string;
   occurred_at: string;
   clicker: string;
@@ -27,6 +29,8 @@ export interface LinkClickLog {
 export interface LinkClickParams {
   page?: number;
   page_size?: number;
+  message_uuid?: string;
+  /** Legacy v1 records only. New UI flows use message_uuid. */
   message_id?: string;
   clicker?: string;
   sender?: string;
@@ -38,6 +42,21 @@ export interface LinkClickParams {
   deep_inspect_state?: string;
   start?: string;
   end?: string;
+}
+
+const CANONICAL_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// The table's single identity column displays message_uuid for v2 rows and the
+// RFC Message-ID fallback for historical v1 rows. Route the copied value back
+// to the matching API parameter so a historical value is never parsed as UUID.
+export function linkClickMessageFilter(
+  rawIdentity: string,
+): Pick<LinkClickParams, 'message_uuid' | 'message_id'> {
+  const identity = rawIdentity.trim();
+  if (!identity) return {};
+  return CANONICAL_UUID.test(identity)
+    ? { message_uuid: identity }
+    : { message_id: identity };
 }
 
 export async function getLinkClicks(

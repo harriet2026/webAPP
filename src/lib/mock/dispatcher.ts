@@ -122,6 +122,8 @@ import {
   mockUserListRulesList,
   mockURLProtectionSettings,
   mockPutURLProtectionSettings,
+  mockARCSettings,
+  mockPutARCSettings,
   mockIntentEngineConfig,
   mockPutIntentEngineConfig,
   getSimilarDetectionMockState,
@@ -295,6 +297,12 @@ function pathname(path: string): string {
 function rawQuery(path: string): string {
   const idx = path.indexOf('?');
   return idx === -1 ? '' : path.slice(idx + 1);
+}
+
+function selectedTenantID(req: MockRequest): number {
+  const raw = req.headers?.['X-Tenant-ID'] ?? req.headers?.['x-tenant-id'];
+  const tenantID = Number(raw ?? 1);
+  return Number.isInteger(tenantID) && tenantID > 0 ? tenantID : 1;
 }
 
 // 从 start_date/end_date 推系统状态范围键（span 0→today, ≤6→7d, else 30d）。
@@ -2130,6 +2138,21 @@ const routes: Route[] = [
     handler: (req) => ({
       status: 200,
       data: mockPutURLProtectionSettings((req.body ?? {}) as Record<string, unknown>),
+    }),
+  },
+
+  // ─── 租户 ARC（独立于链接保护）──────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/arc/settings',
+    handler: (req) => ({ status: 200, data: mockARCSettings(selectedTenantID(req)) }),
+  },
+  {
+    method: 'PUT',
+    pattern: '/arc/settings',
+    handler: (req) => ({
+      status: 200,
+      data: mockPutARCSettings(selectedTenantID(req), (req.body ?? {}) as Record<string, unknown>),
     }),
   },
 

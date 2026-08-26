@@ -123,7 +123,7 @@ export function LinkDetailModal({ log, open, onOpenChange }: LinkDetailModalProp
           {/* Mail & click context */}
           <div data-testid="link-logs-detail-context" className="rounded-lg border border-border p-4">
             <h3 className="text-base font-semibold mb-3">{t('linkLogs.detail.context')}</h3>
-            <InfoRow label={t('linkLogs.columns.tid')} value={log.message_id} />
+            <InfoRow label={t('linkLogs.columns.tid')} value={log.message_uuid || log.message_id} />
             <InfoRow label={t('linkLogs.detail.subject')} value={log.subject || '-'} />
             <InfoRow label={t('linkLogs.columns.sender')} value={log.sender || '-'} />
             <InfoRow label={t('linkLogs.columns.clicker')} value={log.clicker} />

@@ -4571,6 +4571,21 @@
       "selectTenant": "请先在页面顶部选择一个租户，再管理其 DKIM 外发签名。",
       "noDomains": "该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。"
     },
+    "arcSealing": {
+      "title": "ARC 入站改写认证",
+      "description": "为所有入站邮件改写统一保留认证连续性，不隶属于链接保护或其他单一改写模块。",
+      "enabled": "生成 ARC",
+      "enabledDescription": "默认关闭。开启后，主题、信头、正文、附件或链接发生修改时，网关会在最终副本上生成 ARC。",
+      "signingDomain": "ARC 签名域",
+      "signingDomainDescription": "使用本租户已激活且 DNS 验证通过的 DKIM 密钥。关闭 ARC 不会阻止各模块修改邮件，但原 DKIM/ARC 可能在下游验签失败。",
+      "none": "不配置（不生成 ARC）",
+      "noKeys": "暂无可用 ARC 签名域。请先在上方 DKIM 外发签名配置中创建、验证并激活密钥。",
+      "unavailable": "{domain}（当前不可用，请重新选择）",
+      "loading": "加载中…",
+      "selectTenant": "请先在页面顶部选择一个租户，再配置其 ARC 策略。",
+      "saveSuccess": "ARC 配置已保存",
+      "saveFail": "ARC 配置保存失败"
+    },
     "flow": {
       "start": "策略流水线",
       "end": "下一模块"
@@ -11277,6 +11292,12 @@
       "tenant_id_required": "请指定租户",
       "tenant_id_invalid": "租户 ID 无效",
       "link_redirect_tls_not_configured": "链接跳转服务(8082)未配置 TLS 证书。请先在集群管理台「对外服务 TLS 证书」上传证书，或确认已由前置反代终结 TLS 后开启 link_protection/tls_terminated_by_proxy"
+    },
+    "arc": {
+      "signing_domain_required": "开启 ARC 前必须选择签名域",
+      "signing_domain_invalid": "ARC 签名域格式不正确",
+      "signing_key_unavailable": "ARC 签名域 {domain} 没有已激活且 DNS 验证通过的密钥",
+      "tenant_id_invalid": "租户 ID 无效"
     },
     "login_policy": {
       "two_factor_platform_admin_only": "二次认证强制策略仅平台管理员可设置",

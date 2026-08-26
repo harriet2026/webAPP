@@ -5069,6 +5069,24 @@ export function mockPutURLProtectionSettings(
   return { ...urlProtectionSettingsState };
 }
 
+// ─── 租户 ARC（与任何具体邮件改写模块解耦）────────────────────────────
+const arcSettingsByTenant = new Map<number, Record<string, unknown>>();
+
+export function mockARCSettings(tenantId: number): Record<string, unknown> {
+  const state = arcSettingsByTenant.get(tenantId) ?? {
+    tenant_id: tenantId,
+    enabled: false,
+    signing_domain: "",
+  };
+  return { ...state };
+}
+
+export function mockPutARCSettings(tenantId: number, patch: Record<string, unknown>): Record<string, unknown> {
+  const state = { ...mockARCSettings(tenantId), ...patch, tenant_id: tenantId };
+  arcSettingsByTenant.set(tenantId, state);
+  return { ...state };
+}
+
 // ─── 意图引擎（intent-engine，mock）────────────────────────────────
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
 // 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），

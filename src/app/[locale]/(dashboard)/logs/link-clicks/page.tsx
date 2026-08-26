@@ -11,7 +11,12 @@ import { ServerPagination } from '@/components/shared/server-pagination';
 import { useScopedApiRequest, ApiError } from '@/lib/api/client';
 import { useProductForm } from '@/contexts/product-form-context';
 import { listTenants } from '@/lib/api/tenants';
-import { getLinkClicks, downloadLinkClick, type LinkClickLog } from '@/lib/api/link-clicks';
+import {
+  getLinkClicks,
+  downloadLinkClick,
+  linkClickMessageFilter,
+  type LinkClickLog,
+} from '@/lib/api/link-clicks';
 import { LinkFilters, type LinkFilterValues } from '@/components/link-logs/link-filters';
 import { LinkTable } from '@/components/link-logs/link-table';
 import { LinkDetailModal } from '@/components/link-logs/link-detail-modal';
@@ -76,7 +81,7 @@ export default function LinkClicksPage() {
   const [selected, setSelected] = useState<LinkClickLog | null>(null);
 
   const params = useMemo(() => ({
-    message_id: appliedFilter.values.messageId || undefined,
+    ...linkClickMessageFilter(appliedFilter.values.messageId),
     clicker: appliedFilter.values.clicker || undefined,
     sender: appliedFilter.values.sender || undefined,
     src_url: appliedFilter.values.srcUrl || undefined,

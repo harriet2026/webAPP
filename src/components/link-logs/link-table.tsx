@@ -51,7 +51,7 @@ export function LinkTable({ logs, showTenant, onView, onDownload }: LinkTablePro
             return (
               <tr key={log.id} data-testid={`link-logs-row-${log.id}`} className={`border-b border-border hover:bg-muted/30 ${log.final_result === 'alerted' ? 'bg-rose-50 dark:bg-rose-950/20' : ''}`}>
                 <td className="px-4 py-3 text-xs whitespace-nowrap">{formatDate(log.occurred_at)}</td>
-                <td className="px-4 py-3 text-xs font-medium text-blue-600 whitespace-nowrap">{log.message_id}</td>
+                <td className="px-4 py-3 text-xs font-medium text-blue-600 whitespace-nowrap">{log.message_uuid || log.message_id}</td>
                 {showTenant && <td className="px-4 py-3 text-xs">{log.tenant_name || log.tenant_id || '-'}</td>}
                 <td className="px-4 py-3 text-xs truncate">{log.clicker}</td>
                 <td className="px-4 py-3 text-xs truncate">{log.sender || '-'}</td>

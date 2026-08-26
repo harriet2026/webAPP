@@ -19,6 +19,7 @@ import {
 import { AuthFlowDiagram } from './AuthFlowDiagram';
 import { ConfigHealthPanel } from './ConfigHealthPanel';
 import { DkimOutboundSigningSection } from './DkimOutboundSigningSection';
+import { ARCSealingSection } from './ARCSealingSection';
 import { AuthSpoofingTagPanel } from './AuthSpoofingTagPanel';
 import { applyTemplate } from '@/lib/auth-spoofing-templates';
 import { protocolActionShortKey, protocolActionDescKey, dominantAction } from '@/lib/auth-spoofing-labels';
@@ -254,6 +255,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                 租户外发邮件的 DKIM 签名密钥（生成/导入/发布 DNS/校验/激活）。自带
                 租户作用域与权限门控，不接入 AuthSpoofingConfig 的统一保存流。 */}
             <DkimOutboundSigningSection />
+            <ARCSealingSection />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

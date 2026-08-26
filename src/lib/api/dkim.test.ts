@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { generateDkimKey, listDkimSigningDomains } from './dkim';
+import { generateDkimKey, listAllDkimKeys, listDkimSigningDomains } from './dkim';
 
 describe('DKIM API contract', () => {
   it('reads the tenant-scoped minimal signing-domain projection', async () => {
@@ -43,5 +43,17 @@ describe('DKIM API contract', () => {
       body: request,
     });
     expect(response).not.toHaveProperty('private_key_pem');
+  });
+
+  it('loads every DKIM key page for configuration selectors', async () => {
+    const first = Array.from({ length: 100 }, (_, id) => ({ id })) as never[];
+    const last = [{ id: 101 }] as never[];
+    const requestFn = vi.fn()
+      .mockResolvedValueOnce({ items: first, total: 101, page: 1, page_size: 100 })
+      .mockResolvedValueOnce({ items: last, total: 101, page: 2, page_size: 100 });
+
+    await expect(listAllDkimKeys({ tenant_id: 7 }, requestFn as never)).resolves.toHaveLength(101);
+    expect(requestFn).toHaveBeenNthCalledWith(1, '/dkim/keys?tenant_id=7&page=1&page_size=100');
+    expect(requestFn).toHaveBeenNthCalledWith(2, '/dkim/keys?tenant_id=7&page=2&page_size=100');
   });
 });

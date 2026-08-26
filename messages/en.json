@@ -4566,6 +4566,21 @@
       "selectTenant": "Select a tenant at the top of the page before managing its DKIM outbound signing.",
       "noDomains": "This tenant has no sending domains yet. Add domains in Tenant Domain Management before configuring signing."
     },
+    "arcSealing": {
+      "title": "ARC for Inbound Mutations",
+      "description": "Preserves authentication continuity for every inbound mail mutation; it is not owned by Link Protection or any other single mutating feature.",
+      "enabled": "Generate ARC",
+      "enabledDescription": "Off by default. When enabled, the gateway generates ARC on the final copy after a subject, header, body, attachment, or link is changed.",
+      "signingDomain": "ARC Signing Domain",
+      "signingDomainDescription": "Uses this tenant's active, DNS-verified DKIM key. Disabling ARC does not stop message mutations, but the original DKIM or ARC may fail downstream validation.",
+      "none": "Not configured (do not generate ARC)",
+      "noKeys": "No eligible ARC signing domain is available. Create, verify, and activate a key under DKIM Outbound Signing above.",
+      "unavailable": "{domain} (currently unavailable; select again)",
+      "loading": "Loading…",
+      "selectTenant": "Select a tenant at the top of the page before configuring its ARC policy.",
+      "saveSuccess": "ARC settings saved",
+      "saveFail": "Failed to save ARC settings"
+    },
     "flow": {
       "start": "Pipeline",
       "end": "Next Module"
@@ -11222,6 +11237,12 @@
       "tenant_id_required": "A tenant must be specified",
       "tenant_id_invalid": "Invalid tenant ID",
       "link_redirect_tls_not_configured": "The link-redirect service (port 8082) has no TLS certificate configured. Upload one under \"External Service TLS Certificates\" in the cluster console, or confirm TLS is terminated by a front proxy and enable link_protection/tls_terminated_by_proxy."
+    },
+    "arc": {
+      "signing_domain_required": "Select a signing domain before enabling ARC",
+      "signing_domain_invalid": "The ARC signing domain is invalid",
+      "signing_key_unavailable": "ARC signing domain {domain} has no active, DNS-verified key",
+      "tenant_id_invalid": "The tenant ID is invalid"
     },
     "login_policy": {
       "two_factor_platform_admin_only": "Only platform admins may set the two-factor enforcement policy",
