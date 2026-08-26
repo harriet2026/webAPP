@@ -5247,6 +5247,9 @@
       "sectionTimeout": "Timeout Disposition",
       "recipientFilter": "Filter by sender/recipient",
       "fileTypeCategoriesLabel": "Preset File Type Categories",
+      "fileTypePickerDescription": "Configure the attachment types to submit to the sandbox",
+      "fileTypePickerPlaceholder": "Select attachment types",
+      "removeExtension": "Remove",
       "fileTypeCategories": {
         "executable": "Executables (.exe/.dll/.bat etc.)",
         "macro_doc": "Macro-enabled documents (.docm/.xlsm/.pptm etc.)",

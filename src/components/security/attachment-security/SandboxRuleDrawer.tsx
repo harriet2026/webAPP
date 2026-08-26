@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ChevronDown, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
@@ -16,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -43,6 +45,14 @@ const FILE_TYPE_CATEGORY_KEYS = [
   'archive',
   'pdf',
 ] as const;
+
+const FILE_TYPE_CHILDREN: Record<(typeof FILE_TYPE_CATEGORY_KEYS)[number], string[]> = {
+  executable: ['exe', 'dll', 'bat'],
+  macro_doc: ['docm', 'xlsm', 'pptm'],
+  script: ['js', 'vbs', 'ps1'],
+  archive: ['zip', 'rar', '7z'],
+  pdf: [],
+};
 
 /** 沙箱规则的检测范围方向支持多选（接收/外发/域内可任意组合），与其他
  * 沙箱检测子模块共用的单选 `DirectionSwitcher` 语义不同，故在本组件内单独
@@ -113,6 +123,7 @@ export function SandboxRuleDrawer({
   const [extInput, setExtInput] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [fileTypePickerOpen, setFileTypePickerOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -288,84 +299,113 @@ export function SandboxRuleDrawer({
             )}
           </div>
 
-          <div className="space-y-3">
-            <SectionHeading index={2} label={t('sectionFileType')} />
-            <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-              <p className="text-xs text-muted-foreground">{t('fileTypeCategoriesLabel')}</p>
-              <div className="space-y-2">
-                {FILE_TYPE_CATEGORY_KEYS.map((key) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`sandbox-filetype-${key}`}
-                      checked={draft.file_type_categories.includes(key)}
-                      onCheckedChange={() => toggleFileTypeCategory(key)}
-                    />
-                    <Label htmlFor={`sandbox-filetype-${key}`} className="text-sm font-normal">
-                      {t(`fileTypeCategories.${key}`)}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="sandbox-custom-ext">{t('customExtLabel')}</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="sandbox-custom-ext"
-                  value={extInput}
-                  onChange={(e) => setExtInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                      e.preventDefault();
-                      addCustomExtension();
-                    }
-                  }}
-                  placeholder={t('customExtPlaceholder')}
-                />
-                <Button type="button" variant="outline" onClick={addCustomExtension}>
-                  {t('customExtLabel')}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">{t('customExtHint')}</p>
-              {errors.customExt && (
-                <p className="text-xs text-destructive">{errors.customExt}</p>
-              )}
-              {draft.custom_extensions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {draft.custom_extensions.map((ext) => (
+            <div className="flex flex-col gap-3">
+              <SectionHeading index={2} label={t('sectionFileType')} />
+              <p className="text-xs text-muted-foreground">{t('fileTypePickerDescription')}</p>
+              <Popover open={fileTypePickerOpen} onOpenChange={setFileTypePickerOpen}>
+                <PopoverTrigger
+                  render={
                     <button
-                      key={ext}
                       type="button"
-                      onClick={() => removeCustomExtension(ext)}
-                      className="rounded-full border bg-muted px-2.5 py-0.5 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      {ext} ×
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            {errors.fileType && <p className="text-xs text-destructive">{errors.fileType}</p>}
-
-            <div className="space-y-1.5">
-              <Label htmlFor="sandbox-max-size">{t('maxFileSizeLabel')}</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="sandbox-max-size"
-                  type="number"
-                  min={1}
-                  value={draft.max_file_size_mb}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, max_file_size_mb: Number(e.target.value) || 0 }))
+                      className="flex min-h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-left shadow-xs outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-expanded={fileTypePickerOpen}
+                      data-testid="sandbox-filetype-picker"
+                    />
                   }
-                  className="w-28"
-                />
-                <span className="text-sm text-muted-foreground">MB</span>
+                >
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                    {[...draft.file_type_categories, ...draft.custom_extensions].map((value) => (
+                      <span
+                        key={value}
+                        className="inline-flex items-center gap-1 rounded-sm border bg-muted px-2 py-0.5 text-xs text-foreground"
+                      >
+                        {draft.file_type_categories.includes(value)
+                          ? t(`fileTypeCategories.${value}`)
+                          : value}
+                        <button
+                          type="button"
+                          aria-label={`${t('removeExtension')} ${value}`}
+                          className="rounded-sm text-muted-foreground hover:text-foreground"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (draft.file_type_categories.includes(value)) {
+                              toggleFileTypeCategory(value);
+                            } else {
+                              removeCustomExtension(value);
+                            }
+                          }}
+                        >
+                          <X className="size-3" aria-hidden="true" />
+                        </button>
+                      </span>
+                    ))}
+                    {draft.file_type_categories.length === 0 && draft.custom_extensions.length === 0 && (
+                      <span className="text-sm text-muted-foreground">{t('fileTypePickerPlaceholder')}</span>
+                    )}
+                  </div>
+                  <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-[min(500px,calc(100vw-3rem))] p-0">
+                  <div className="max-h-64 overflow-y-auto p-2">
+                    {FILE_TYPE_CATEGORY_KEYS.map((key) => {
+                      const checked = draft.file_type_categories.includes(key);
+                      return (
+                        <div key={key} className="rounded-sm">
+                          <label className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm hover:bg-muted">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={() => toggleFileTypeCategory(key)}
+                            />
+                            <span className="font-medium">{t(`fileTypeCategories.${key}`)}</span>
+                          </label>
+                          {checked && FILE_TYPE_CHILDREN[key].length > 0 && (
+                            <div className="ml-7 border-l pl-3">
+                              {FILE_TYPE_CHILDREN[key].map((extension) => (
+                                <div key={extension} className="flex items-center gap-2 px-2 py-1.5 text-sm">
+                                  <Checkbox checked readOnly aria-label={extension} />
+                                  <span>{extension}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="sandbox-custom-ext">{t('customExtLabel')}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="sandbox-custom-ext"
+                    value={extInput}
+                    onChange={(e) => setExtInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                        e.preventDefault();
+                        addCustomExtension();
+                      }
+                    }}
+                    placeholder={t('customExtPlaceholder')}
+                  />
+                  <Button type="button" variant="outline" onClick={addCustomExtension}>
+                    {t('customExtLabel')}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">{t('customExtHint')}</p>
+                {errors.customExt && <p className="text-xs text-destructive">{errors.customExt}</p>}
               </div>
-              <p className="text-xs text-muted-foreground">{t('maxFileSizeHint')}</p>
+              {errors.fileType && <p className="text-xs text-destructive">{errors.fileType}</p>}
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="sandbox-max-size">{t('maxFileSizeLabel')}</Label>
+                <div className="flex items-center gap-2">
+                  <Input id="sandbox-max-size" type="number" min={1} value={draft.max_file_size_mb} onChange={(e) => setDraft((d) => ({ ...d, max_file_size_mb: Number(e.target.value) || 0 }))} className="w-28" />
+                  <span className="text-sm text-muted-foreground">MB</span>
+                </div>
+                <p className="text-xs text-muted-foreground">{t('maxFileSizeHint')}</p>
+              </div>
             </div>
-          </div>
 
           <div className="space-y-3">
             <SectionHeading index={3} label={t('sectionRiskAction')} />
