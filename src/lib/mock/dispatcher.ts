@@ -76,6 +76,11 @@ import {
   mockPhishingBands,
   mockPutPhishingBands,
   mockPhishingConfigAudit,
+  mockSandboxRulesList,
+  mockCreateSandboxRule,
+  mockUpdateSandboxRule,
+  mockSetSandboxRuleStatus,
+  mockDeleteSandboxRule,
   mockSpoofingStats,
   mockThreatRetroStats,
   mockSystemHealthSummary,
@@ -272,7 +277,7 @@ function rangeFromDates(path: string): SystemStatusRangeKey {
   return spanToRange(span);
 }
 
-// 解析 /admin-audit(?/stats) 的 query 为 mockAdminAuditList/Stats 的入参。
+// 解��� /admin-audit(?/stats) 的 query 为 mockAdminAuditList/Stats 的入参。
 function parseAdminAuditQuery(path: string): {
   layer?: 'platform' | 'tenant';
   status?: 'success' | 'failed';
@@ -421,7 +426,7 @@ const mockAdvancedFieldDefs: Record<string, FieldDef> = Object.fromEntries(
   ]),
 );
 
-// ─── 角色（RBAC）mock 数据 ──────────────────────────────────────────────
+// ─── 角色（RBAC）mock 数据 ────���─────────────────────────────────────────
 // 平台/租户两套内置角色。`_level` 仅用于本地生成权限矩阵，不属于 Role ���上
 // 字段，列表响应里会被剥离。真实后端按 GetEffectiveTenantID 裁剪作用域，这里
 // 返回全集、由页面按视角（platform/tenant）过滤。
@@ -915,6 +920,47 @@ const routes: Route[] = [
     handler: (req) => {
       mockDeleteAttachmentPassword(Number(pathname(req.path).split('/')[3]));
       return { status: 204, data: {} };
+    },
+  },
+  // 附件沙箱检测规则：与 phishing-agent/admission-rules 同构的规则列表 CRUD。
+  {
+    method: 'GET',
+    pattern: '/attachment-security/sandbox-rules',
+    handler: () => ({ status: 200, data: mockSandboxRulesList() }),
+  },
+  {
+    method: 'POST',
+    pattern: '/attachment-security/sandbox-rules',
+    handler: (req) => ({ status: 201, data: mockCreateSandboxRule((req.body ?? {}) as Record<string, unknown>) }),
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/attachment-security\/sandbox-rules\/\d+\/status$/,
+    handler: (req) => {
+      const segments = pathname(req.path).split('/');
+      const id = Number(segments[segments.length - 2]);
+      const body = (req.body ?? {}) as { enabled?: boolean };
+      const rule = mockSetSandboxRuleStatus(id, Boolean(body.enabled));
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/attachment-security\/sandbox-rules\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/').pop());
+      const rule = mockUpdateSandboxRule(id, (req.body ?? {}) as Record<string, unknown>);
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/attachment-security\/sandbox-rules\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/').pop());
+      return mockDeleteSandboxRule(id)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
     },
   },
 
@@ -1740,7 +1786,7 @@ const routes: Route[] = [
   },
 
   // ─── 统一规则系统（sender_filter 页 + behavior_control 页 + 群组下拉）────
-  // `/unified-rules` 被多个模块共用（sender_filter 规则列表、群组下拉、
+  // `/unified-rules` 被多个��块共用（sender_filter 规则列表、群组下拉、
   // behavior_control、advanced_rules、user_list、mail_marking，以及
   // src/lib/api/unified-rules.ts 的通用 getUnifiedRules）。这里 mock 了这些
   // query 形态：sender_filter 列表页（`rule_page=sender_filter`）、
@@ -2053,7 +2099,7 @@ const routes: Route[] = [
     handler: () => ({ status: 200, data: mockAuthSpoofingProbe() }),
   },
 
-  // ─── URL检测与防护（url-protection，mock）──────────────────────────────
+  // ─── URL检测与防护（url-protection，mock）──────────────────────────��───
   {
     method: 'GET',
     pattern: '/url-protection/settings',

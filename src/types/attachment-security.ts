@@ -93,16 +93,47 @@ export interface ActiveContentConfig {
   tnef_unwrap: boolean;
 }
 
-/** 附件沙箱检测规则：按方向/后缀命中后送入沙箱动态执行，依结果或超时处置。 */
+/** 沙箱判定风险等级：低危 / 中危 / 高危三档，分别独立配置处置动作。 */
+export type SandboxRiskLevel = 'low' | 'medium' | 'high';
+
+/** 风险等级处置动作：不含 accept，风险判定结果不应默认放行。 */
+export type SandboxRiskAction = 'quarantine' | 'audit' | 'discard';
+
+/** 超时/引擎不可用后的处置动作，三者可任意组合勾选。 */
+export type SandboxTimeoutActionType = 'recall' | 'notify_admin' | 'notify_recipient';
+
+/** 三级风险各自独立的处置动作配置。 */
+export interface SandboxRiskActionConfig {
+  low: SandboxRiskAction;
+  medium: SandboxRiskAction;
+  high: SandboxRiskAction;
+}
+
+/** 超时处置配置：超时阈值 + 可组合的超时动作集合。通知收件人使用系统默认
+ * 通知模板，不在本模块内配置模板内容。 */
+export interface SandboxTimeoutConfig {
+  timeout_sec: number;
+  actions: SandboxTimeoutActionType[];
+}
+
+/** 附件沙箱检测规则：按方向/文件类型命中后送入沙箱动态执行，依风险等级或
+ * 超时结果分别处置。规则列表按 created_at 升序排列，即创建越早优先级越高，
+ * 一个附件命中的第一条已启用规则生效，不叠加匹配多条。 */
 export interface SandboxRule {
   id?: number;
   name: string;
   enabled: boolean;
-  directions: Direction[];
-  /** 逗号分隔的送检后缀名列表，例如 .exe,.docm,.js。 */
-  ext_list: string;
-  /** 单个附件送检大小上限（MB），-1 表示不限制。 */
-  max_size_mb: number;
-  detect_action: Exclude<AttachmentAction, 'accept' | 'partial_skip'>;
-  timeout_action: Exclude<AttachmentAction, 'partial_skip'>;
+  direction: Direction;
+  /** 特定收发信人筛选开关，关闭时该条件不参与匹配。 */
+  sender_recipient_filter_enabled: boolean;
+  /** 预置文件类型分类 key，如 ['executable','macro_doc']。 */
+  file_type_categories: string[];
+  /** 自定义扩展名，如 ['.iso']，需以 '.' 开头。 */
+  custom_extensions: string[];
+  /** 单文件送检大小上限（MB），超过则跳过送检，按基础限制的超限处置处理。 */
+  max_file_size_mb: number;
+  risk_actions: SandboxRiskActionConfig;
+  timeout: SandboxTimeoutConfig;
+  created_at: string;
+  updated_at: string;
 }

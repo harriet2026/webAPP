@@ -1243,7 +1243,7 @@ export function mockOpsTopCsv(response: OpsTopResponse): string {
 
 export function mockOpsTopAi(): { markdown: string } {
   return {
-    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- ���议优先复核失败率超过 50% 的连接来源及持续飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
+    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- ���议优先复核失败率超过 50% 的连接来源及持��飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
   };
 }
 
@@ -1993,6 +1993,78 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
   const before = phishingAdmissionRulesMockState.length;
   phishingAdmissionRulesMockState = phishingAdmissionRulesMockState.filter((rule) => rule.id !== id);
   return phishingAdmissionRulesMockState.length !== before;
+  }
+
+  // 附件沙箱检测规则：与准入规则同构的 CRUD mock，附带两条 demo 规则，展示
+  // 高风险文件类型（可执行/宏文档）与低风险容器格式（压缩包）的典型配置差异。
+  let sandboxRuleIdSeq = 3;
+  let sandboxRulesMockState: Array<Record<string, unknown>> = [
+    {
+      id: 1,
+      name: '可执行文件与宏文档送检',
+      enabled: true,
+      direction: 'receive',
+      sender_recipient_filter_enabled: false,
+      file_type_categories: ['executable', 'macro_doc'],
+      custom_extensions: [],
+      max_file_size_mb: 50,
+      risk_actions: { low: 'audit', medium: 'quarantine', high: 'discard' },
+      timeout: { timeout_sec: 60, actions: ['quarantine', 'notify_admin'] },
+      created_at: '2026-07-01T09:00:00.000Z',
+      updated_at: '2026-07-01T09:00:00.000Z',
+    },
+    {
+      id: 2,
+      name: '压缩包与脚本文件基础检测',
+      enabled: true,
+      direction: 'internal',
+      sender_recipient_filter_enabled: false,
+      file_type_categories: ['archive', 'script'],
+      custom_extensions: ['.iso'],
+      max_file_size_mb: 100,
+      risk_actions: { low: 'audit', medium: 'audit', high: 'quarantine' },
+      timeout: { timeout_sec: 90, actions: ['notify_admin'] },
+      created_at: '2026-07-05T14:30:00.000Z',
+      updated_at: '2026-07-05T14:30:00.000Z',
+    },
+  ];
+
+  export function mockSandboxRulesList() {
+    return { items: structuredClone(sandboxRulesMockState) };
+  }
+
+  export function mockCreateSandboxRule(body: Record<string, unknown>) {
+    const now = new Date().toISOString();
+    const rule: Record<string, unknown> = {
+      ...body,
+      id: sandboxRuleIdSeq++,
+      created_at: now,
+      updated_at: now,
+    };
+    sandboxRulesMockState = [...sandboxRulesMockState, rule];
+    return structuredClone(rule);
+  }
+
+  export function mockUpdateSandboxRule(id: number, body: Record<string, unknown>) {
+    const index = sandboxRulesMockState.findIndex((rule) => rule.id === id);
+    if (index === -1) return null;
+    const next = { ...sandboxRulesMockState[index], ...body, id, updated_at: new Date().toISOString() };
+    sandboxRulesMockState = sandboxRulesMockState.map((rule, i) => (i === index ? next : rule));
+    return structuredClone(next);
+  }
+
+  export function mockSetSandboxRuleStatus(id: number, enabled: boolean) {
+    const index = sandboxRulesMockState.findIndex((rule) => rule.id === id);
+    if (index === -1) return null;
+    const next = { ...sandboxRulesMockState[index], enabled, updated_at: new Date().toISOString() };
+    sandboxRulesMockState = sandboxRulesMockState.map((rule, i) => (i === index ? next : rule));
+    return structuredClone(next);
+  }
+
+  export function mockDeleteSandboxRule(id: number) {
+    const before = sandboxRulesMockState.length;
+    sandboxRulesMockState = sandboxRulesMockState.filter((rule) => rule.id !== id);
+    return sandboxRulesMockState.length !== before;
   }
 
   export function mockPhishingBands() {
@@ -6126,7 +6198,7 @@ interface MockDisposalSeed {
   basis?: [string, string, string];
   finalType?: string;
   correctionSource?: string;
-  // domainAgeDays -- 命中特征「域名年龄」badge 的 mock 值（新注册域名信号，
+  // domainAgeDays -- 命中特征「域名���龄」badge 的 mock 值（新注册域名信号，
   // deriveDomainAge() 只在存在且 <=7 天时渲染）。缺省 undefined����即真实后端
   // 现状（暂无 whois/RDAP 数据）的优雅降级。
   domainAgeDays?: number;
@@ -7112,7 +7184,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     mailType: "normal",
     deliveryStatus: "delivered",
     sourceIp: "10.0.1.20",
-    ipLocation: "内网",
+    ipLocation: "��网",
     cluster: "Node 2",
     attachmentCount: 1,
     hasQrCode: false,
