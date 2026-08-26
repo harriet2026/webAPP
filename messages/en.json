@@ -4972,7 +4972,8 @@
       "antivirus": "Antivirus Engine",
       "image": "Image Recognition",
       "encrypted": "Encrypted Attachments",
-      "activeContent": "Active Content Detection"
+      "activeContent": "Active Content Detection",
+      "sandbox": "Sandbox Detection"
     },
     "direction": {
       "receive": "Receive",
@@ -5220,6 +5221,83 @@
       "lnkToUrl": "Extract URLs from LNK for Evaluation",
       "lnkAction": "LNK Suspicious Action",
       "tnefUnwrap": "TNEF (winmail.dat) Auto-Unwrap"
+    },
+    "sandbox": {
+      "title": "Attachment Sandbox Detection Rules",
+      "description": "Attachments matching a direction/file-type condition are sent to the sandbox for dynamic execution and disposed of by risk level or timeout outcome. Rules are matched in ascending creation order; the first enabled matching rule applies and rules are not stacked.",
+      "createButton": "New Rule",
+      "searchPlaceholder": "Search rule name",
+      "emptyTitle": "No sandbox detection rules yet",
+      "emptyHint": "Once created, attachments matching the rule's conditions will be sent to the sandbox for dynamic analysis",
+      "noMatch": "No matching rules",
+      "colName": "Rule Name",
+      "colDirection": "Direction",
+      "colFileType": "File Type",
+      "colMaxSize": "Max Size to Scan",
+      "colStatus": "Status",
+      "colUpdatedAt": "Updated At",
+      "colActions": "Actions",
+      "createTitle": "New Sandbox Detection Rule",
+      "editTitle": "Edit Sandbox Detection Rule",
+      "sheetDescription": "Configure the matching conditions, the max file size to submit, and the disposal actions for each risk level and for timeouts.",
+      "namePlaceholder": "Enter rule name",
+      "sectionScope": "Detection Scope",
+      "sectionFileType": "File Type",
+      "sectionRiskAction": "Risk Disposition",
+      "sectionTimeout": "Timeout Disposition",
+      "recipientFilter": "Filter by sender/recipient",
+      "fileTypeCategoriesLabel": "Preset File Type Categories",
+      "fileTypeCategories": {
+        "executable": "Executables (.exe/.dll/.bat etc.)",
+        "macro_doc": "Macro-enabled documents (.docm/.xlsm/.pptm etc.)",
+        "script": "Scripts (.js/.vbs/.ps1 etc.)",
+        "archive": "Archives (.zip/.rar/.7z etc.)",
+        "pdf": "PDF documents"
+      },
+      "customExtLabel": "Custom Extensions",
+      "customExtPlaceholder": "e.g. .iso, press Enter to add",
+      "customExtHint": "Must start with a dot \".\"; you can add multiple",
+      "maxFileSizeLabel": "Max File Size to Scan",
+      "maxFileSizeHint": "Attachments larger than this size skip sandbox submission and are handled by the basic-limit exceed action instead",
+      "riskLevelLow": "Low",
+      "riskLevelMedium": "Medium",
+      "riskLevelHigh": "High",
+      "riskActionOptions": {
+        "quarantine": "Quarantine",
+        "audit": "Log for audit",
+        "discard": "Discard attachment"
+      },
+      "riskActionHint": "Each of the three risk levels has its own independent disposal action",
+      "timeoutSecLabel": "Sandbox Analysis Timeout",
+      "timeoutActionLabel": "Action on Timeout / Engine Unavailable",
+      "timeoutActionHint": "Select any combination; selected actions run in sequence",
+      "timeoutAction": {
+        "recall": "Recall message",
+        "notify_admin": "Notify administrator",
+        "notify_recipient": "Notify recipient"
+      },
+      "timeoutActionNotifyHint": "Notifying the recipient uses the system's default notification template",
+      "enabledLabel": "Enable this rule",
+      "errors": {
+        "needName": "Please enter a rule name",
+        "needFileTypeOrExt": "Select at least one preset file type category or enter one custom extension",
+        "needTimeoutAction": "Select at least one timeout disposal action",
+        "invalidExtFormat": "Custom extensions must start with \".\"",
+        "duplicateExt": "This extension has already been added"
+      },
+      "validationFailed": "Please fix the errors in the form",
+      "created": "Rule created",
+      "updated": "Rule updated",
+      "saveFailed": "Save failed",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "deleteConfirmTitle": "Delete this rule?",
+      "deleteConfirmDesc": "This cannot be undone. Attachments matching this rule's conditions will no longer be sent to the sandbox.",
+      "deleteSuccess": "Rule deleted",
+      "deleteFailed": "Delete failed",
+      "statusUpdateFailed": "Failed to update status",
+      "loadFailed": "Failed to load sandbox detection rules"
     }
   },
   "urlProtection": {
