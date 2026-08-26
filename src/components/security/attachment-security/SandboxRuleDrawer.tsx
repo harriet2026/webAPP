@@ -127,6 +127,7 @@ export function SandboxRuleDrawer({
   const toggleDirection = (dir: Direction) => {
     setDraft((d) => {
       const has = d.direction.includes(dir);
+      if (has && d.direction.length === 1) return d;
       return {
         ...d,
         direction: has ? d.direction.filter((v) => v !== dir) : [...d.direction, dir],
@@ -267,8 +268,14 @@ export function SandboxRuleDrawer({
                 <SegmentedButton
                   key={dir}
                   selected={draft.direction.includes(dir)}
+                  aria-pressed={draft.direction.includes(dir)}
                   data-testid={`sandbox-direction-${dir}`}
-                  className="px-4 py-1.5 rounded-xl"
+                  className={cn(
+                    'rounded-xl px-4 py-1.5',
+                    draft.direction.includes(dir)
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-background text-foreground hover:bg-muted/60',
+                  )}
                   onClick={() => toggleDirection(dir)}
                 >
                   {tdir(dir)}
