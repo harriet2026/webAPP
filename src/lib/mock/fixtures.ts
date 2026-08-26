@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index 平滑取值（无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index ��滑取值（无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -1758,7 +1758,7 @@ let alertRuleState: AlertRule[] = [
   { ...ruleDefaults, id: 102, name: "deferred 队列堆积", metric_key: "queue_deferred", module: "mailflow_queue", operator: "gt", threshold_warn: 50000, severity: "p0" },
   { ...ruleDefaults, id: 103, name: "Kingbase 主从延迟", metric_key: "kb_repl_delay", module: "database", operator: "gt", threshold_warn: 60, severity: "p1" },
   { ...ruleDefaults, id: 104, name: "RBL 响应超时", metric_key: "rbl_hits", module: "detection", operator: "gt", threshold_warn: 5, severity: "p3" },
-  { ...ruleDefaults, id: 105, name: "备份任务失败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
+  { ...ruleDefaults, id: 105, name: "备份任务��败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
 ];
 
 export function mockAlertRules(): { items: AlertRule[] } {
@@ -2008,7 +2008,11 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       file_type_categories: ['executable', 'macro_doc'],
       custom_extensions: [],
       max_file_size_mb: 50,
-      risk_actions: { low: 'audit', medium: 'quarantine', high: 'discard' },
+      risk_actions: {
+        low: { action: 'audit', attachment_policy: 'mark' },
+        medium: { action: 'quarantine', attachment_policy: 'mark' },
+        high: { action: 'discard', attachment_policy: 'discard' },
+      },
       timeout: { timeout_sec: 60, actions: ['quarantine', 'notify_admin'] },
       created_at: '2026-07-01T09:00:00.000Z',
       updated_at: '2026-07-01T09:00:00.000Z',
@@ -2022,7 +2026,11 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       file_type_categories: ['archive', 'script'],
       custom_extensions: ['.iso'],
       max_file_size_mb: 100,
-      risk_actions: { low: 'audit', medium: 'audit', high: 'quarantine' },
+      risk_actions: {
+        low: { action: 'audit', attachment_policy: 'mark' },
+        medium: { action: 'audit', attachment_policy: 'mark' },
+        high: { action: 'quarantine', attachment_policy: 'discard' },
+      },
       timeout: { timeout_sec: 90, actions: ['notify_admin'] },
       created_at: '2026-07-05T14:30:00.000Z',
       updated_at: '2026-07-05T14:30:00.000Z',
@@ -2154,7 +2162,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     detection_mode: 'realtime',
     // 邮件仍处于人工审核持有（hold/pending），recalls 为空、从未送达收件人，
     // 谈不上"召回"——recall_status 只对已送达过邮箱的邮件才有意义（对照
-    // ph-100002/ph-100004/ph-100006 的调查叙述均明确提到"隔离并召回"）。此
+    // ph-100002/ph-100004/ph-100006 的���查叙述均明确提到"隔离并召回"）。此
     // 记录的调查步骤仅"转人工审核"，不含任何召回动作，故应为 'none'，
     // 派生的邮件状态才会正确落在「待审核」而不是「召回中」。
     recall_status: 'none',
@@ -6174,7 +6182,7 @@ export function mockDeleteAttachmentPassword(id: number) {
 // ═══════════════��════════════════════════════════════════════════════════════════
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
-// 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
+// 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避���页面
 // 为 mock 引入第二套数据模型。
 // ════════════════════════════════════════════════════════════════════════════════
 
@@ -7503,7 +7511,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
             },
           ]
         : undefined,
-    // 域名年龄（命中特征「域名年龄」badge）：仅在 seed 显式提��时出现，其余行
+    // 域名年龄（命中特征「域名年龄」badge）：���在 seed 显式提��时出现，其余行
     // 保持缺省（deriveDomainAge() 优雅降级为不渲染）。
     domain_age_days: seed.domainAgeDays,
     cac_tid: seed.tid,

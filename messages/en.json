@@ -5263,12 +5263,18 @@
       "riskLevelLow": "Low",
       "riskLevelMedium": "Medium",
       "riskLevelHigh": "High",
+      "riskActionLabel": "Action",
       "riskActionOptions": {
         "quarantine": "Quarantine",
         "audit": "Log for audit",
         "discard": "Discard attachment"
       },
-      "riskActionHint": "Each of the three risk levels has its own independent disposal action",
+      "riskAttachmentPolicyLabel": "Attachment Policy",
+      "riskAttachmentPolicyOptions": {
+        "mark": "Mark",
+        "discard": "Discard attachment"
+      },
+      "riskActionHint": "Each of the three risk levels has its own independent action and attachment policy",
       "timeoutSecLabel": "Sandbox Analysis Timeout",
       "timeoutActionLabel": "Action on Timeout / Engine Unavailable",
       "timeoutActionHint": "Select any combination; selected actions run in sequence",

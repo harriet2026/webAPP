@@ -99,14 +99,26 @@ export type SandboxRiskLevel = 'low' | 'medium' | 'high';
 /** 风险等级处置动作：不含 accept，风险判定结果不应默认放行。 */
 export type SandboxRiskAction = 'quarantine' | 'audit' | 'discard';
 
+/** 附加策略：对命中风险的附件本身进行标记，或直接丢弃该附件。与执行动作
+ * （隔离/审核/丢弃整封邮件）互为独立维度，可同时生效。 */
+export type SandboxAttachmentPolicy = 'mark' | 'discard';
+
 /** 超时/引擎不可用后的处置动作，三者可任意组合勾选。 */
 export type SandboxTimeoutActionType = 'recall' | 'notify_admin' | 'notify_recipient';
 
+/** 单个风险等级的处置配置：执行动作 + 附加策略两个独立维度。 */
+export interface SandboxRiskLevelConfig {
+  /** 执行动作：隔离 / 审核 / 丢弃（作用于整封邮件的处置）。 */
+  action: SandboxRiskAction;
+  /** 附加策略：标记 / 丢弃附件（作用于命中风险的附件本身）。 */
+  attachment_policy: SandboxAttachmentPolicy;
+}
+
 /** 三级风险各自独立的处置动作配置。 */
 export interface SandboxRiskActionConfig {
-  low: SandboxRiskAction;
-  medium: SandboxRiskAction;
-  high: SandboxRiskAction;
+  low: SandboxRiskLevelConfig;
+  medium: SandboxRiskLevelConfig;
+  high: SandboxRiskLevelConfig;
 }
 
 /** 超时处置配置：超时阈值 + 可组合的超时动作集合。通知收件人使用系统默认

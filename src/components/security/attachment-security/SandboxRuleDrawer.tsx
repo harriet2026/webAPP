@@ -34,6 +34,7 @@ import {
 import type {
   SandboxRule,
   SandboxRiskAction,
+  SandboxAttachmentPolicy,
   SandboxTimeoutActionType,
   Direction,
 } from '@/types/attachment-security';
@@ -56,6 +57,7 @@ const FILE_TYPE_CHILDREN: Record<(typeof FILE_TYPE_CATEGORY_KEYS)[number], strin
 const SANDBOX_DIRECTIONS: Direction[] = ['receive', 'send', 'internal'];
 
 const RISK_ACTION_OPTIONS: SandboxRiskAction[] = ['quarantine', 'audit', 'discard'];
+const ATTACHMENT_POLICY_OPTIONS: SandboxAttachmentPolicy[] = ['mark', 'discard'];
 const TIMEOUT_ACTION_OPTIONS: SandboxTimeoutActionType[] = [
   'recall',
   'notify_admin',
@@ -71,7 +73,11 @@ function emptyDraft(): SandboxRule {
     file_type_categories: [],
     custom_extensions: [],
     max_file_size_mb: 20,
-    risk_actions: { low: 'audit', medium: 'quarantine', high: 'discard' },
+    risk_actions: {
+      low: { action: 'audit', attachment_policy: 'mark' },
+      medium: { action: 'quarantine', attachment_policy: 'mark' },
+      high: { action: 'discard', attachment_policy: 'discard' },
+    },
     timeout: { timeout_sec: 120, actions: ['notify_admin'] },
     created_at: '',
     updated_at: '',
@@ -178,7 +184,23 @@ export function SandboxRuleDrawer({
   const setRiskAction = (level: 'low' | 'medium' | 'high', action: SandboxRiskAction) => {
     setDraft((d) => ({
       ...d,
-      risk_actions: { ...d.risk_actions, [level]: action },
+      risk_actions: {
+        ...d.risk_actions,
+        [level]: { ...d.risk_actions[level], action },
+      },
+    }));
+  };
+
+  const setRiskAttachmentPolicy = (
+    level: 'low' | 'medium' | 'high',
+    policy: SandboxAttachmentPolicy,
+  ) => {
+    setDraft((d) => ({
+      ...d,
+      risk_actions: {
+        ...d.risk_actions,
+        [level]: { ...d.risk_actions[level], attachment_policy: policy },
+      },
     }));
   };
 
@@ -410,24 +432,56 @@ export function SandboxRuleDrawer({
               {(['low', 'medium', 'high'] as const).map((level) => (
                 <div
                   key={level}
-                  className="flex items-center justify-between gap-3 rounded-lg border p-4"
+                  className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <Label className="text-sm font-normal">{t(`riskLevel${level.charAt(0).toUpperCase()}${level.slice(1)}`)}</Label>
-                  <Select
-                    value={draft.risk_actions[level]}
-                    onValueChange={(v) => setRiskAction(level, v as SandboxRiskAction)}
-                  >
-                    <SelectTrigger className="w-40" data-testid={`sandbox-risk-action-${level}`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RISK_ACTION_OPTIONS.map((action) => (
-                        <SelectItem key={action} value={action}>
-                          {t(`riskActionOptions.${action}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs font-normal text-muted-foreground">
+                        {t('riskActionLabel')}
+                      </Label>
+                      <Select
+                        value={draft.risk_actions[level].action}
+                        onValueChange={(v) => setRiskAction(level, v as SandboxRiskAction)}
+                      >
+                        <SelectTrigger className="w-36" data-testid={`sandbox-risk-action-${level}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {RISK_ACTION_OPTIONS.map((action) => (
+                            <SelectItem key={action} value={action}>
+                              {t(`riskActionOptions.${action}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs font-normal text-muted-foreground">
+                        {t('riskAttachmentPolicyLabel')}
+                      </Label>
+                      <Select
+                        value={draft.risk_actions[level].attachment_policy}
+                        onValueChange={(v) =>
+                          setRiskAttachmentPolicy(level, v as SandboxAttachmentPolicy)
+                        }
+                      >
+                        <SelectTrigger
+                          className="w-36"
+                          data-testid={`sandbox-risk-attachment-policy-${level}`}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ATTACHMENT_POLICY_OPTIONS.map((policy) => (
+                            <SelectItem key={policy} value={policy}>
+                              {t(`riskAttachmentPolicyOptions.${policy}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
