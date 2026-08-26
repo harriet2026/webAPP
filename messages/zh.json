@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒���������件检测�������������������能�������������",
+    "spoofingDetection": "仿冒�����������件检测�������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -579,7 +579,7 @@
       "changeConn": "环比上周期连接数变化",
       "changeAuth": "环比上周期认证次数变化",
       "changeSend": "环比上周期发信数变化",
-      "changeSubject": "环比上周期出���次���变���",
+      "changeSubject": "环比���周期出���次���变���",
       "changeSender": "环比上周期发信数变化",
       "changeRecipient": "环比上周期��信数变化",
       "authAccount": "被认证的账号（用户名）",
@@ -705,7 +705,7 @@
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编��转发规��",
-      "drawerDescription": "在 SMTP 握手阶段决定连接的接��与过滤��略",
+      "drawerDescription": "在 SMTP 握手阶段决定连接��接��与过滤��略",
       "sectionBasic": "基础信���",
       "sectionMatch": "匹配��件",
       "sectionSimulator": "规���模拟器",
@@ -1184,7 +1184,7 @@
     "reject": "拒绝",
     "discard": "丢弃",
     "audit": "审核",
-    "timeoutMinutes": "超时(分钟)",
+    "timeoutMinutes": "超时(分��)",
     "globalRule": "全局规���",
     "systemRule": "系统规则",
     "systemRuleTooltip": "该规则由系统提供，无法删除��只有系统管理员可编辑部分字段",
@@ -1329,7 +1329,7 @@
     "selectedTargets": "已选对象:",
     "targetNone": "不限",
     "selectGroupPlaceholder": "选择组",
-    "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可填范围见新建/编辑抽屉���。",
+    "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可填范围见新建/编辑抽屉����。",
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
@@ -1457,7 +1457,7 @@
     "previewSelectPlaceholder": "选择群组",
     "previewMatchedCount": "命中 {count} 条已启用策略",
     "previewSimulationNote": "基于策略配置的模拟推演，实际处置以引擎判定为准。",
-    "previewEmpty": "该群组暂无������用的���中策略。",
+    "previewEmpty": "该群组暂���������用的���中策略。",
     "previewHitBadge": "优先��� {priority} · {name}",
     "previewIgnoredHigher": "注意：�����{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
     "previewNotExecuted": "未执行（前序已短路）",
@@ -1625,7 +1625,7 @@
     "recipients": "收件人",
     "reason": "原因",
     "quarantinedAt": "隔离时间",
-    "expiresAt": "过期时间",
+    "expiresAt": "过��时间",
     "released": "���释放",
     "releasedAt": "释放时间",
     "releasedBy": "释放���",
@@ -2062,7 +2062,7 @@
         "noNexthop": "暂���下一跳"
       },
       "relay": {
-        "description": "将已校验的发信域绑定��集群��口 IP",
+        "description": "将已校验的发信��绑定��集群��口 IP",
         "add": "添加绑定",
         "edit": "编辑绑定",
         "empty": "暂无出��绑定",
@@ -2088,7 +2088,7 @@
       "auth": {
         "dkimTitle": "DKIM 签名",
         "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS 校验",
-        "activeKeys": "已启用密钥 {count} 个",
+        "activeKeys": "已启用密钥 {count} ���",
         "smtpTitle": "SMTP 凭证",
         "smtpDescription": "管理发信认证账号、后端路由与锁定状态",
         "smtpLink": "前往 SMTP 凭证管理"
@@ -2620,7 +2620,7 @@
       "password": "密码修改",
       "twoFactor": "二次认证",
       "sessions": "登录会话",
-      "devices": "授信终端",
+      "devices": "授���终端",
       "trustedDevices": "授信终端",
       "history": "登录���史"
     },
@@ -3212,7 +3212,7 @@
     },
     "targetTypes": {
       "mail": "邮件",
-      "mail_batch": "��件批次",
+      "mail_batch": "���件批次",
       "account": "账��",
       "cluster": "簇"
     },
@@ -3359,7 +3359,7 @@
     "legendListType": "名单类型",
     "legendBlacklist": "黑名单",
     "legendWhitelist": "白名单",
-    "drawerIpFrequency": "IP频率限制配置",
+    "drawerIpFrequency": "IP频率��制配置",
     "drawerClose": "关闭",
     "ipFrequencyConfig": "IP频率限��配置",
     "ipFilterConfig": "IP黑白名单配置",
@@ -4114,7 +4114,7 @@
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
     "senderPlaceholder_domain": "如 example.com 或 evil.com",
     "noTenantDomains": "该租户暂无接收域名，请先在『接收域名』中配置",
-    "domainSuggestions": "本租户接收域���（快捷���择）",
+    "domainSuggestions": "���租户接收域���（快捷���择）",
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
     "currentEffect": "当前配置效果",
@@ -4347,7 +4347,7 @@
     "tipKeyword": "关键词用竖线分隔，支持多个关键词",
     "tipSimulator": "建议先使用模拟测试验证规则效果",
     "validUntilBeforeFrom": "失效时间不能早于生效时间",
-    "tagRequiredForAccept": "放行动作必须指定标签",
+    "tagRequiredForAccept": "放行���作必须指定标签",
     "formHasErrors": "请修正表单中标红的字段后再保存",
     "searchPlaceholder": "按规则 ID 或名称搜索",
     "resetFilters": "重置筛选",
@@ -5272,15 +5272,23 @@
       "riskActionLabel": "执行动作",
       "riskActionOptions": {
         "quarantine": "隔离",
-        "audit": "记录审计",
-        "discard": "丢弃附件"
+        "audit": "审核",
+        "discard": "丢弃",
+        "none": "不设置"
       },
       "riskAttachmentPolicyLabel": "附加策略",
       "riskAttachmentPolicyOptions": {
         "mark": "标记",
-        "discard": "丢弃附件"
+        "discard": "丢弃附件",
+        "none": "不设置"
       },
-      "riskActionHint": "三档风险等级分别独立配置执行动作与附加策略",
+      "markLocationLabel": "标记位置",
+      "markLocationOptions": {
+        "subject": "主题",
+        "header": "信头",
+        "body_start": "邮件正文开头"
+      },
+      "riskActionHint": "三档风险等级分别独立配置执行动作与附加策略，两者至少设置一项",
       "timeoutSecLabel": "沙箱分析超时时间",
       "timeoutActionLabel": "超时/引擎不可用后的处置",
       "timeoutActionHint": "可任意组合勾选，将依次执行",
@@ -5296,6 +5304,7 @@
         "needDirection": "请至少选择一个检测方向",
         "needFileTypeOrExt": "请至少选择一个预置文件类型分类或填写一个自定义扩展名",
         "needTimeoutAction": "请至少选择一项超时处置动作",
+        "needRiskAction": "执行动作和附加策略至少需要设置一项",
         "invalidExtFormat": "自定义扩展名需以 \".\" 开头",
         "duplicateExt": "该扩展名已添加"
       },
@@ -5443,7 +5452,7 @@
         "unit": "秒",
         "hint": "{engine}分析通常需 30-60 秒（有效范围：10-120 秒）"
       },
-      "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链接后需等待，请结合下方超时策略配置。",
+      "costBanner": "深度复检由【{engine}】��行，通常需 30-60 秒。用户点击链接后需等待，请结合下方超时策略配置。",
       "skip": {
         "title": "允许用户跳过深度检测",
         "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
@@ -6111,7 +6120,7 @@
       "confirmDelete": "确认丢弃选中邮件？丢弃后无法恢复。",
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
-      "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
+      "recallDescription": "尝试从收件人的邮���中移除选中邮件，并可同步改判邮件类型。",
       "recallAuditHint": "召回可能受目标邮件��统限制；操作结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
       "similarFound": "找�� {n} 封相似邮件",
@@ -6552,7 +6561,7 @@
         "loadingBadge": "加载中",
         "loadFailedBadge": "加载失败",
         "foundCount": "找到 {matched} / {total} 条记录",
-        "truncated": "已截断至 10,000 行",
+        "truncated": "已截断至 10,000 ���",
         "partial": "部分网关节点未能查询，当前生命周期日志不完整。失败节点：{nodes}",
         "searchPlaceholder": "搜索日志内容...",
         "copyAll": "复制全部",
@@ -7069,7 +7078,7 @@
       },
       "desc_keywordMatch": {
         "source": "内容规则模块-关键词库",
-        "usage": "从预定义关键词库匹配邮件内容",
+        "usage": "从预定义关��词库匹配邮件内容",
         "note": "关键词库支持分组管理"
       },
       "desc_sendTime": {
@@ -7163,7 +7172,7 @@
       "desc_rblResult": {
         "source": "RBL实时黑名单服务",
         "usage": "根据RBL查询结果过滤邮件",
-        "note": "支持多个RBL源联合查询"
+        "note": "���持多个RBL源联合查询"
       },
       "desc_urlDomain": {
         "source": "URL域名解析",
@@ -7387,7 +7396,7 @@
       "hitCount": "命中数 (7 天)",
       "lastHit": "最近命中",
       "lastHitNever": "从未",
-      "noHitStats": "保存规则后可查看命中统计。",
+      "noHitStats": "保存规则后可���看命中统计。",
       "fpRate": "误报率",
       "effectiveness": "有效性评分",
       "trendChart": "命中趋势",
@@ -8095,7 +8104,7 @@
       "latencyDistribution": "延迟区间分布",
       "receiveTrend": "接收流量趋势分析",
       "sendTrend": "外发流量趋势分析",
-      "internalTrend": "域内流量趋势分析",
+      "internalTrend": "域��流量趋势分析",
       "topBounceDomains": "目标域名退信率 TOP"
     },
     "bottomActions": {
@@ -8529,7 +8538,7 @@
     "tabs": {
       "overview": "检测总览",
       "config": "检测引擎配置",
-      "configPlaceholder": "检测引擎配置 — 配置模块上线后提供"
+      "configPlaceholder": "检测引擎配置 ��� 配置模块上线后提供"
     },
     "toggle": {
       "disableConfirmTitle": "确认关闭钓鱼邮件检测智能体？",
@@ -9044,7 +9053,7 @@
       "description": "将该仿冒判定标记为误报并放行",
       "reasonPlaceholder": "请输入放行原因",
       "reasonRequired": "请填写放行原因",
-      "submit": "确认放行",
+      "submit": "确认放��",
       "success": "已放行",
       "error": "放行失败"
     },
@@ -9323,7 +9332,7 @@
     "manualScan": {
       "entry": "紧急手动扫描",
       "title": "紧急手动扫描",
-      "description": "选择回溯策略与时间���围，立即对窗口内邮件复检。",
+      "description": "选择��溯策略与时间���围，立即对窗口内邮件复检。",
       "strategy": "回溯策略",
       "strategyPlaceholder": "请选择策略",
       "start": "开始时间",
@@ -9755,7 +9764,7 @@
     "batchConfirmDesc": "标记变更将实时推送至策略引擎并立即生效，无需重新同步。",
     "batchConfirmTag": "确定将选中的 {count} 条记录标记为{tag}吗？",
     "batchConfirmUntag": "取消选中的 {count} 条记录的标记？",
-    "batchExec": "批量标记为高管",
+    "batchExec": "批量标记��高管",
     "batchKey": "批量标记为关键岗位",
     "batchUntag": "取消标记",
     "bindDnPlaceholder": "如 cn=admin,dc=corp,dc=com",
@@ -9924,7 +9933,7 @@
     "tabContacts": "通讯录查询",
     "tabLogs": "同步日志",
     "tabSources": "数据源管理",
-    "tagExecutive": "高管",
+    "tagExecutive": "高���",
     "tagKeyPosition": "关键岗位",
     "tagNone": "无标记",
     "test": "测试连接",
@@ -10323,7 +10332,7 @@
       "ipFilterSummary": "黑名单: {blacklist} 条 / 白名单: {whitelist} 条",
       "rblSummary": "{servers} 个服务器 / 超时 {timeout}s",
       "overseasSummary": "{directions} 已启用",
-      "ipFrequencyHint": "限制单个 IP 的发信频率",
+      "ipFrequencyHint": "限制单个 IP 的���信频率",
       "ipFilterHint": "IP 黑名单与白名单规则",
       "rblHint": "拦截命中 RBL 服务的发件方",
       "overseasHint": "检测境外来源邮件"
@@ -10919,7 +10928,7 @@
       "id_invalid": "审核条目 ID 无效",
       "not_found": "审���条目不存在，可能已被处理",
       "not_pending": "该条目已不在待审核状态，��正在被其他人处理",
-      "operation_in_progress": "该邮件正有另一个处置操作在进行，请���后重试"
+      "operation_in_progress": "该邮件正有另一个���置操作在进行，请���后重试"
     },
     "proxysvr": {
       "cipher_profile_invalid": "加密��件档位无效，只能是：{allowed}",

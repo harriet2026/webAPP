@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index ��滑取值（无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index ���滑取值（无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -1758,7 +1758,7 @@ let alertRuleState: AlertRule[] = [
   { ...ruleDefaults, id: 102, name: "deferred 队列堆积", metric_key: "queue_deferred", module: "mailflow_queue", operator: "gt", threshold_warn: 50000, severity: "p0" },
   { ...ruleDefaults, id: 103, name: "Kingbase 主从延迟", metric_key: "kb_repl_delay", module: "database", operator: "gt", threshold_warn: 60, severity: "p1" },
   { ...ruleDefaults, id: 104, name: "RBL 响应超时", metric_key: "rbl_hits", module: "detection", operator: "gt", threshold_warn: 5, severity: "p3" },
-  { ...ruleDefaults, id: 105, name: "备份任务��败", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
+  { ...ruleDefaults, id: 105, name: "备份任务�����", metric_key: "data_dir_usage", module: "system", operator: "eq", threshold_warn: 0, severity: "p1" },
 ];
 
 export function mockAlertRules(): { items: AlertRule[] } {
@@ -2009,9 +2009,13 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       custom_extensions: [],
       max_file_size_mb: 50,
       risk_actions: {
-        low: { action: 'audit', attachment_policy: 'mark' },
-        medium: { action: 'quarantine', attachment_policy: 'mark' },
-        high: { action: 'discard', attachment_policy: 'discard' },
+        low: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
+        medium: {
+          action: 'quarantine',
+          attachment_policy: 'mark',
+          mark_locations: ['subject', 'header'],
+        },
+        high: { action: 'discard', attachment_policy: 'discard', mark_locations: [] },
       },
       timeout: { timeout_sec: 60, actions: ['quarantine', 'notify_admin'] },
       created_at: '2026-07-01T09:00:00.000Z',
@@ -2027,9 +2031,9 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       custom_extensions: ['.iso'],
       max_file_size_mb: 100,
       risk_actions: {
-        low: { action: 'audit', attachment_policy: 'mark' },
-        medium: { action: 'audit', attachment_policy: 'mark' },
-        high: { action: 'quarantine', attachment_policy: 'discard' },
+        low: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
+        medium: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
+        high: { action: 'quarantine', attachment_policy: 'discard', mark_locations: [] },
       },
       timeout: { timeout_sec: 90, actions: ['notify_admin'] },
       created_at: '2026-07-05T14:30:00.000Z',
@@ -2735,7 +2739,7 @@ const mockPhishingInvestigations: Record<string, InvestigationTask> = {
     id: 'inv-100011',
     summary: '',
     status: 'failed',
-    error_message: '附件解析超时（压缩包嵌套层数超限），研判任务失败，按默认策略放行并记录',
+    error_message: '附件解析超��（压缩包嵌套层数超限），研判任务失败，按默认策略放行并记录',
     steps: [
       { name: 'fetch_mail', status: 'completed' },
       { name: 'extract_attachments', status: 'failed', message: '解压嵌套压缩包超时' },
@@ -5885,7 +5889,7 @@ export function mockPutURLProtectionSettings(
 
 // ─── 意图引擎（intent-engine，mock）────────────────────────────────
 // 数据源：demo intent-engine-module.tsx createDefaultIntentEngineConfig()，
-// 动作映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
+// 动��映射后端枚举（mark_deliver→accept、review→audit、block→reject、drop→discard），
 // 非 receive 方向默认区间 accept→quarantine（D-06）。
 // 常量从 @/types/intent-engine 导入（INTENT_TYPES、RISK_LEVEL_OF���DEFAULT_MARK_TEXT、createDefaultMarkConfig）。
 

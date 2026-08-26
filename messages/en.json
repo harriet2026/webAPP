@@ -5264,17 +5264,25 @@
       "riskLevelMedium": "Medium",
       "riskLevelHigh": "High",
       "riskActionLabel": "Action",
-      "riskActionOptions": {
-        "quarantine": "Quarantine",
-        "audit": "Log for audit",
-        "discard": "Discard attachment"
-      },
+  "riskActionOptions": {
+  "quarantine": "Quarantine",
+  "audit": "Review",
+  "discard": "Discard",
+  "none": "None"
+  },
       "riskAttachmentPolicyLabel": "Attachment Policy",
-      "riskAttachmentPolicyOptions": {
-        "mark": "Mark",
-        "discard": "Discard attachment"
-      },
-      "riskActionHint": "Each of the three risk levels has its own independent action and attachment policy",
+  "riskAttachmentPolicyOptions": {
+  "mark": "Mark",
+  "discard": "Discard attachment",
+  "none": "None"
+  },
+  "markLocationLabel": "Mark locations",
+  "markLocationOptions": {
+  "subject": "Subject",
+  "header": "Header",
+  "body_start": "Start of body"
+  },
+      "riskActionHint": "Each of the three risk levels has its own independent action and attachment policy; at least one of the two must be set",
       "timeoutSecLabel": "Sandbox Analysis Timeout",
       "timeoutActionLabel": "Action on Timeout / Engine Unavailable",
       "timeoutActionHint": "Select any combination; selected actions run in sequence",
@@ -5290,6 +5298,7 @@
         "needDirection": "Select at least one detection direction",
         "needFileTypeOrExt": "Select at least one preset file type category or enter one custom extension",
         "needTimeoutAction": "Select at least one timeout disposal action",
+ "needRiskAction": "Set at least one of action or attachment policy",
         "invalidExtFormat": "Custom extensions must start with \".\"",
         "duplicateExt": "This extension has already been added"
       },

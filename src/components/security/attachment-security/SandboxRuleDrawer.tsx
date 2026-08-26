@@ -35,6 +35,7 @@ import type {
   SandboxRule,
   SandboxRiskAction,
   SandboxAttachmentPolicy,
+  SandboxMarkLocation,
   SandboxTimeoutActionType,
   Direction,
 } from '@/types/attachment-security';
@@ -56,8 +57,9 @@ const FILE_TYPE_CHILDREN: Record<(typeof FILE_TYPE_CATEGORY_KEYS)[number], strin
  * 实现一个多选分段控件，不改动共享的 `DirectionSwitcher`。 */
 const SANDBOX_DIRECTIONS: Direction[] = ['receive', 'send', 'internal'];
 
-const RISK_ACTION_OPTIONS: SandboxRiskAction[] = ['quarantine', 'audit', 'discard'];
-const ATTACHMENT_POLICY_OPTIONS: SandboxAttachmentPolicy[] = ['mark', 'discard'];
+const RISK_ACTION_OPTIONS: SandboxRiskAction[] = ['quarantine', 'audit', 'discard', 'none'];
+const ATTACHMENT_POLICY_OPTIONS: SandboxAttachmentPolicy[] = ['mark', 'discard', 'none'];
+const MARK_LOCATION_OPTIONS: SandboxMarkLocation[] = ['subject', 'header', 'body_start'];
 const TIMEOUT_ACTION_OPTIONS: SandboxTimeoutActionType[] = [
   'recall',
   'notify_admin',
@@ -74,9 +76,13 @@ function emptyDraft(): SandboxRule {
     custom_extensions: [],
     max_file_size_mb: 20,
     risk_actions: {
-      low: { action: 'audit', attachment_policy: 'mark' },
-      medium: { action: 'quarantine', attachment_policy: 'mark' },
-      high: { action: 'discard', attachment_policy: 'discard' },
+      low: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
+      medium: {
+        action: 'quarantine',
+        attachment_policy: 'mark',
+        mark_locations: ['subject', 'header'],
+      },
+      high: { action: 'discard', attachment_policy: 'discard', mark_locations: [] },
     },
     timeout: { timeout_sec: 120, actions: ['notify_admin'] },
     created_at: '',
@@ -199,9 +205,32 @@ export function SandboxRuleDrawer({
       ...d,
       risk_actions: {
         ...d.risk_actions,
-        [level]: { ...d.risk_actions[level], attachment_policy: policy },
+        [level]: {
+          ...d.risk_actions[level],
+          attachment_policy: policy,
+          // 切出“标记”时清空标记位置，避免残留无效数据；切入“标记”时若尚
+          // 无任何位置，不强制补默认值，允许为空（不要求至少保留一项）。
+          mark_locations: policy === 'mark' ? d.risk_actions[level].mark_locations : [],
+        },
       },
     }));
+  };
+
+  const toggleMarkLocation = (level: 'low' | 'medium' | 'high', loc: SandboxMarkLocation) => {
+    setDraft((d) => {
+      const current = d.risk_actions[level].mark_locations;
+      const has = current.includes(loc);
+      return {
+        ...d,
+        risk_actions: {
+          ...d.risk_actions,
+          [level]: {
+            ...d.risk_actions[level],
+            mark_locations: has ? current.filter((v) => v !== loc) : [...current, loc],
+          },
+        },
+      };
+    });
   };
 
   const toggleTimeoutAction = (action: SandboxTimeoutActionType) => {
@@ -231,6 +260,13 @@ export function SandboxRuleDrawer({
     if (draft.timeout.actions.length === 0) {
       next.timeoutAction = t('errors.needTimeoutAction');
     }
+    const riskActionInvalidLevel = (['low', 'medium', 'high'] as const).find((level) => {
+      const cfg = draft.risk_actions[level];
+      return cfg.action === 'none' && cfg.attachment_policy === 'none';
+    });
+    if (riskActionInvalidLevel) {
+      next.riskAction = t('errors.needRiskAction');
+    }
     setErrors((e) => ({
       ...e,
       ...next,
@@ -238,6 +274,7 @@ export function SandboxRuleDrawer({
       direction: next.direction ?? '',
       fileType: next.fileType ?? '',
       timeoutAction: next.timeoutAction ?? '',
+      riskAction: next.riskAction ?? '',
     }));
     return Object.keys(next).length === 0;
   };
@@ -429,62 +466,101 @@ export function SandboxRuleDrawer({
             <SectionHeading index={3} label={t('sectionRiskAction')} />
             <p className="text-xs text-muted-foreground">{t('riskActionHint')}</p>
             <div className="space-y-3">
-              {(['low', 'medium', 'high'] as const).map((level) => (
-                <div
-                  key={level}
-                  className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <Label className="text-sm font-normal">{t(`riskLevel${level.charAt(0).toUpperCase()}${level.slice(1)}`)}</Label>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <Label className="text-xs font-normal text-muted-foreground">
-                        {t('riskActionLabel')}
+              {(['low', 'medium', 'high'] as const).map((level) => {
+                const cfg = draft.risk_actions[level];
+                return (
+                  <div key={level} className="flex flex-col gap-3 rounded-lg border p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <Label className="text-sm font-normal">
+                        {t(`riskLevel${level.charAt(0).toUpperCase()}${level.slice(1)}`)}
                       </Label>
-                      <Select
-                        value={draft.risk_actions[level].action}
-                        onValueChange={(v) => setRiskAction(level, v as SandboxRiskAction)}
-                      >
-                        <SelectTrigger className="w-36" data-testid={`sandbox-risk-action-${level}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {RISK_ACTION_OPTIONS.map((action) => (
-                            <SelectItem key={action} value={action}>
-                              {t(`riskActionOptions.${action}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-xs font-normal text-muted-foreground">
+                            {t('riskActionLabel')}
+                          </Label>
+                          <Select
+                            value={cfg.action}
+                            onValueChange={(v) => setRiskAction(level, v as SandboxRiskAction)}
+                          >
+                            <SelectTrigger
+                              className="w-36"
+                              data-testid={`sandbox-risk-action-${level}`}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {RISK_ACTION_OPTIONS.map((action) => (
+                                <SelectItem key={action} value={action}>
+                                  {t(`riskActionOptions.${action}`)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Label className="text-xs font-normal text-muted-foreground">
+                            {t('riskAttachmentPolicyLabel')}
+                          </Label>
+                          <Select
+                            value={cfg.attachment_policy}
+                            onValueChange={(v) =>
+                              setRiskAttachmentPolicy(level, v as SandboxAttachmentPolicy)
+                            }
+                          >
+                            <SelectTrigger
+                              className="w-36"
+                              data-testid={`sandbox-risk-attachment-policy-${level}`}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ATTACHMENT_POLICY_OPTIONS.map((policy) => (
+                                <SelectItem key={policy} value={policy}>
+                                  {t(`riskAttachmentPolicyOptions.${policy}`)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Label className="text-xs font-normal text-muted-foreground">
-                        {t('riskAttachmentPolicyLabel')}
-                      </Label>
-                      <Select
-                        value={draft.risk_actions[level].attachment_policy}
-                        onValueChange={(v) =>
-                          setRiskAttachmentPolicy(level, v as SandboxAttachmentPolicy)
-                        }
-                      >
-                        <SelectTrigger
-                          className="w-36"
-                          data-testid={`sandbox-risk-attachment-policy-${level}`}
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ATTACHMENT_POLICY_OPTIONS.map((policy) => (
-                            <SelectItem key={policy} value={policy}>
-                              {t(`riskAttachmentPolicyOptions.${policy}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {cfg.attachment_policy === 'mark' && (
+                      <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+                        <Label className="text-xs font-normal text-muted-foreground">
+                          {t('markLocationLabel')}
+                        </Label>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {MARK_LOCATION_OPTIONS.map((loc) => {
+                            const selected = cfg.mark_locations.includes(loc);
+                            return (
+                              <button
+                                key={loc}
+                                type="button"
+                                aria-pressed={selected}
+                                data-testid={`sandbox-mark-location-${level}-${loc}`}
+                                className={cn(
+                                  'inline-flex h-8 items-center justify-center rounded-md px-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                                  selected
+                                    ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90'
+                                    : 'border border-input bg-background text-foreground hover:bg-muted/60',
+                                )}
+                                onClick={() => toggleMarkLocation(level, loc)}
+                              >
+                                {t(`markLocationOptions.${loc}`)}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+            {errors.riskAction && (
+              <p className="text-xs text-destructive">{errors.riskAction}</p>
+            )}
           </div>
 
           <div className="space-y-3">
