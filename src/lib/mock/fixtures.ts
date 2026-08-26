@@ -1243,7 +1243,7 @@ export function mockOpsTopCsv(response: OpsTopResponse): string {
 
 export function mockOpsTopAi(): { markdown: string } {
   return {
-    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中度较高。\n- ���议优先复核失败率超过 50% 的连接来源及持��飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
+    markdown: "## 运营趋势摘要\n\n- 连接与发信量整体稳定，TOP 来源集中���较高。\n- ���议优先复核失败率超过 50% 的连接来源及持��飙升对象。\n- 展开行可查看固��近 7 ���趋势与关联子维度。",
   };
 }
 
@@ -2003,7 +2003,7 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       id: 1,
       name: '可执行文件与宏文档送检',
       enabled: true,
-      direction: 'receive',
+      direction: ['receive'],
       sender_recipient_filter_enabled: false,
       file_type_categories: ['executable', 'macro_doc'],
       custom_extensions: [],
@@ -2017,7 +2017,7 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       id: 2,
       name: '压缩包与脚本文件基础检测',
       enabled: true,
-      direction: 'internal',
+      direction: ['internal'],
       sender_recipient_filter_enabled: false,
       file_type_categories: ['archive', 'script'],
       custom_extensions: ['.iso'],
@@ -2735,7 +2735,7 @@ const mockPhishingInvestigations: Record<string, InvestigationTask> = {
   },
   'ph-100012': {
     id: 'inv-100012',
-    summary: '快递到付通知，链接指向顺丰官方域名，无风险特征。',
+    summary: '快递���付通知，链接指向顺丰官方域名，无风险特征。',
     status: 'completed',
     risk_level: 'low',
     steps: [
@@ -4657,7 +4657,7 @@ export function mockDeleteGroupPolicyRule(id: number): boolean {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 内容规则（content_rules，mock）
-// 保留统一规则的真实存储形态：condition_tree / metadata 均为 JSON 字符串，
+// 保留统一规则的真实���储形态：condition_tree / metadata 均为 JSON 字符串，
 // CRUD、测试和导入导出共享同一份可变 fixture，便于浏览器完整走通规格交互。
 // ════════════════════════════════════════════════════════════════════════════════
 
@@ -7503,7 +7503,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
             },
           ]
         : undefined,
-    // 域名年龄（命中特征「域名年龄」badge）：仅在 seed 显式提供时出现，其余行
+    // 域名年龄（命中特征「域名年龄」badge）：仅在 seed 显式提��时出现，其余行
     // 保持缺省（deriveDomainAge() 优雅降级为不渲染）。
     domain_age_days: seed.domainAgeDays,
     cac_tid: seed.tid,

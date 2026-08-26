@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { DirectionSwitcher } from './DirectionSwitcher';
+import { SegmentedButton } from '@/components/ui/segmented-button';
 
 import { useApiRequest, ApiError } from '@/lib/api/client';
 import {
@@ -35,6 +35,7 @@ import type {
   SandboxRule,
   SandboxRiskAction,
   SandboxTimeoutActionType,
+  Direction,
 } from '@/types/attachment-security';
 
 const FILE_TYPE_CATEGORY_KEYS = [
@@ -44,6 +45,11 @@ const FILE_TYPE_CATEGORY_KEYS = [
   'archive',
   'pdf',
 ] as const;
+
+/** 沙箱规则的检测范围方向支持多选（接收/外发/域内可任意组合），与其他
+ * 沙箱检测子模块共用的单选 `DirectionSwitcher` 语义不同，故在本组件内单独
+ * 实现一个多选分段控件，不改动共享的 `DirectionSwitcher`。 */
+const SANDBOX_DIRECTIONS: Direction[] = ['receive', 'send', 'internal'];
 
 const RISK_ACTION_OPTIONS: SandboxRiskAction[] = ['quarantine', 'audit', 'discard'];
 const TIMEOUT_ACTION_OPTIONS: SandboxTimeoutActionType[] = [
@@ -56,7 +62,7 @@ function emptyDraft(): SandboxRule {
   return {
     name: '',
     enabled: true,
-    direction: 'receive',
+    direction: ['receive'],
     sender_recipient_filter_enabled: false,
     file_type_categories: [],
     custom_extensions: [],
@@ -118,6 +124,16 @@ export function SandboxRuleDrawer({
     }
   }, [open, rule]);
 
+  const toggleDirection = (dir: Direction) => {
+    setDraft((d) => {
+      const has = d.direction.includes(dir);
+      return {
+        ...d,
+        direction: has ? d.direction.filter((v) => v !== dir) : [...d.direction, dir],
+      };
+    });
+  };
+
   const toggleFileTypeCategory = (key: string) => {
     setDraft((d) => {
       const has = d.file_type_categories.includes(key);
@@ -178,13 +194,23 @@ export function SandboxRuleDrawer({
   const validate = (): boolean => {
     const next: Record<string, string> = {};
     if (!draft.name.trim()) next.name = t('errors.needName');
+    if (draft.direction.length === 0) {
+      next.direction = t('errors.needDirection');
+    }
     if (draft.file_type_categories.length === 0 && draft.custom_extensions.length === 0) {
       next.fileType = t('errors.needFileTypeOrExt');
     }
     if (draft.timeout.actions.length === 0) {
       next.timeoutAction = t('errors.needTimeoutAction');
     }
-    setErrors((e) => ({ ...e, ...next, name: next.name ?? '', fileType: next.fileType ?? '', timeoutAction: next.timeoutAction ?? '' }));
+    setErrors((e) => ({
+      ...e,
+      ...next,
+      name: next.name ?? '',
+      direction: next.direction ?? '',
+      fileType: next.fileType ?? '',
+      timeoutAction: next.timeoutAction ?? '',
+    }));
     return Object.keys(next).length === 0;
   };
 
@@ -233,10 +259,25 @@ export function SandboxRuleDrawer({
 
           <div className="space-y-3">
             <SectionHeading index={1} label={t('sectionScope')} />
-            <DirectionSwitcher
-              value={draft.direction}
-              onChange={(direction) => setDraft((d) => ({ ...d, direction }))}
-            />
+            <div
+              className="inline-flex rounded-2xl border border-border/70 bg-muted/30 p-1 gap-1"
+              data-testid="sandbox-direction-multiselect"
+            >
+              {SANDBOX_DIRECTIONS.map((dir) => (
+                <SegmentedButton
+                  key={dir}
+                  selected={draft.direction.includes(dir)}
+                  data-testid={`sandbox-direction-${dir}`}
+                  className="px-4 py-1.5 rounded-xl"
+                  onClick={() => toggleDirection(dir)}
+                >
+                  {tdir(dir)}
+                </SegmentedButton>
+              ))}
+            </div>
+            {errors.direction && (
+              <p className="text-xs text-destructive">{errors.direction}</p>
+            )}
             <div className="flex items-center justify-between rounded-lg border p-4">
               <Label htmlFor="sandbox-recipient-filter" className="text-sm">
                 {t('recipientFilter')}

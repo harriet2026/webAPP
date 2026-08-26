@@ -77,7 +77,10 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
     const keyword = search.trim().toLowerCase();
     if (!keyword) return rules;
     return rules.filter((rule) => {
-      const dirLabel = tdir(rule.direction).toLowerCase();
+      const dirLabel = rule.direction
+        .map((dir) => tdir(dir))
+        .join(' ')
+        .toLowerCase();
       const typeLabels = rule.file_type_categories
         .map((key) => t(`fileTypeCategories.${key}`))
         .join(' ')
@@ -215,7 +218,7 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
                   </div>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
-                  {tdir(rule.direction)}
+                  {rule.direction.map((dir) => tdir(dir)).join(' / ')}
                 </TableCell>
                 <TableCell
                   className="max-w-[220px] truncate text-xs text-muted-foreground"

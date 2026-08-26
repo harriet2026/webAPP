@@ -5280,6 +5280,7 @@
       "enabledLabel": "Enable this rule",
       "errors": {
         "needName": "Please enter a rule name",
+        "needDirection": "Select at least one detection direction",
         "needFileTypeOrExt": "Select at least one preset file type category or enter one custom extension",
         "needTimeoutAction": "Select at least one timeout disposal action",
         "invalidExtFormat": "Custom extensions must start with \".\"",

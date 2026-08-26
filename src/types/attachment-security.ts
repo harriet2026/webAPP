@@ -123,7 +123,8 @@ export interface SandboxRule {
   id?: number;
   name: string;
   enabled: boolean;
-  direction: Direction;
+  /** 检测范围方向，支持多选（接收/外发/域内可任意组合）。 */
+  direction: Direction[];
   /** 特定收发信人筛选开关，关闭时该条件不参与匹配。 */
   sender_recipient_filter_enabled: boolean;
   /** 预置文件类型分类 key，如 ['executable','macro_doc']。 */
