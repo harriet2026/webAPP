@@ -1329,7 +1329,7 @@
     "selectedTargets": "已选对象:",
     "targetNone": "不限",
     "selectGroupPlaceholder": "选择组",
-    "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可填范围见新建/编辑抽屉）。",
+    "executionOrderNote": "模块的执行顺序由阶段流水线（阶段1→阶段5）固定决定，与优先级无关；优先级仅在多条策略命中同一封邮件、且配置了同一模块时用于仲裁——数值越大越优先生效（可填范围见新建/编辑抽屉��。",
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
@@ -1457,7 +1457,7 @@
     "previewSelectPlaceholder": "选择群组",
     "previewMatchedCount": "命中 {count} 条已启用策略",
     "previewSimulationNote": "基于策略配置的模拟推演，实际处置以引擎判定为准。",
-    "previewEmpty": "该群组暂无已启用的���中策略。",
+    "previewEmpty": "该群组暂无已���用的���中策略。",
     "previewHitBadge": "优先��� {priority} · {name}",
     "previewIgnoredHigher": "注意：�����{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
     "previewNotExecuted": "未执行（前序已短路）",
@@ -2062,7 +2062,7 @@
         "noNexthop": "暂���下一跳"
       },
       "relay": {
-        "description": "将已校验的发信域绑定到集群出口 IP",
+        "description": "将已校验的发信域绑定到集群��口 IP",
         "add": "添加绑定",
         "edit": "编辑绑定",
         "empty": "暂无出��绑定",
@@ -4114,7 +4114,7 @@
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
     "senderPlaceholder_domain": "如 example.com 或 evil.com",
     "noTenantDomains": "该租户暂无接收域名，请先在『接收域名』中配置",
-    "domainSuggestions": "本租户接收域名（快捷选择）",
+    "domainSuggestions": "本租户接收域名（快捷���择）",
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
     "currentEffect": "当前配置效果",
@@ -4515,7 +4515,7 @@
       "dmarc_no_record": "DMARC无记录",
       "dmarc_no_recordDesc": "发信域未发布DMARC记录",
       "dmarc_query_fail": "DMARC查询失败",
-      "dmarc_query_failDesc": "DNS查询DMARC记录时发生错误（超时/SERVFAIL）",
+      "dmarc_query_failDesc": "DNS查询DMARC记录时发���错误（超时/SERVFAIL）",
       "ptr_noptr": "记录不存在",
       "ptr_noptrDesc": "发信IP无PTR反向解析记录",
       "ptr_nomatch": "与A记录不匹���",
@@ -4767,7 +4767,7 @@
       },
       "name": "规则名称",
       "priority": "优先级",
-      "priorityTooltip": "数值越大越优先，范围 {min}-{max}",
+      "priorityTooltip": "数值越大越优��，范围 {min}-{max}",
       "validFrom": "有效期开始",
       "validUntil": "有效期��束",
       "isActive": "启用",
@@ -5256,13 +5256,11 @@
       "fileTypePickerDescription": "配置需要进行沙箱检测的附件类型",
       "fileTypePickerPlaceholder": "请选择附件类型",
       "removeExtension": "删除",
-      "fileTypeCategories": {
-        "executable": "可执行文件（.exe/.dll/.bat 等）",
-        "macro_doc": "含宏文档（.docm/.xlsm/.pptm 等）",
-        "script": "脚本文件（.js/.vbs/.ps1 等）",
-        "archive": "压缩包（.zip/.rar/.7z 等）",
-        "pdf": "PDF 文档"
-      },
+  "fileTypeCategories": {
+  "office": "Office/WPS 文件",
+  "script": "脚本与字节码",
+  "exec": "可执行文件"
+  },
       "customExtLabel": "自定义扩展名",
       "customExtPlaceholder": "例如 .iso，回车添加",
       "customExtHint": "需以英文���点 \".\" 开头，可添加多个",
@@ -5423,7 +5421,7 @@
       "costHint": "复检耗时预期：回扫黑名单（即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
         "title": "回扫黑名单",
-        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命中即按其动作处置"
+        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命���即按其动作处置"
       },
       "m2": {
         "title": "查询情报",
@@ -6108,7 +6106,7 @@
       "releaseDescription": "将选中邮件恢复投递，并可同步改判邮件类型。",
       "releaseAuditHint": "放行与类型改判都会写入审计记录。",
       "recallDescription": "尝试从收件人的邮箱中移除选中邮件，并可同步改判邮件类型。",
-      "recallAuditHint": "召回可能受目标邮件系统限制；操作结果与类型改判会写入审计记录。",
+      "recallAuditHint": "召回可能受目标邮件��统限制；操作结果与类型改判会写入审计记录。",
       "similarLimit": "最多支持 10 封样本",
       "similarFound": "找到 {n} 封相似邮件",
       "exportNotImplemented": "导出功能即将推��",
@@ -6456,7 +6454,7 @@
         "tid": "TID",
         "emailId": "邮件 ID",
         "messageUuid": "邮件唯一ID",
-        "sessionId": "会话ID",
+        "sessionId": "会��ID",
         "queueId": "队列ID",
         "receiveTime": "接收时间",
         "direction": "收发类型",
@@ -9191,7 +9189,7 @@
       "importNoTag": "无标签",
       "importSelected": "已选 {n}/20 人",
       "importSelectedObjects": "已选保护对象",
-      "importSelectedEmpty": "暂未选择联系人",
+      "importSelectedEmpty": "暂未选择联���人",
       "importRemoveSelected": "移除该联系人",
       "importLimitHint": "单次最多选择 20 人。",
       "importEmpty": "暂无联系人",
@@ -9715,7 +9713,7 @@
       "statsRecalled": "累计��回",
       "nextRun": "下次执行",
       "confirmCloseTitle": "放弃未保存改动？",
-      "confirmCloseDescription": "当前抽屉有未保存的改动，确认放弃？",
+      "confirmCloseDescription": "当前抽��有未保存的改动，确认放弃？",
       "keepEditing": "继续编辑",
       "discard": "放弃"
     },
@@ -10816,7 +10814,7 @@
         "category_unknown": "无法识别的邮件分类「{value}」",
         "custom_weekday_out_of_range": "星期取值「{value}」超出范围，应在 {min}–{max} 之间",
         "custom_weekdays_empty": "自��义频率下至少要选择一天",
-        "notify_frequency_invalid": "通知频率取值无效，只能是：{allowed}",
+        "notify_frequency_invalid": "通知频率取值无���，只能是：{allowed}",
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
         "notify_times_empty": "通知频率不为「从不」时，至少要设置一个通知时间",
         "permission_unknown": "无法识别的权限项��{value}」",
@@ -11026,7 +11024,7 @@
     "threat_retro": {
       "run_not_found": "回溯运行记录不存在",
       "strategy_not_found": "处置策略不存在",
-      "strategy_id_required": "请选择处置策略",
+      "strategy_id_required": "请选择处置��略",
       "mail_log_id_required": "请选择邮件",
       "mail_log_ids_required": "请至少选择一封邮件",
       "leak_mail_not_in_run": "该邮件不属于本次回溯运行",
@@ -11177,7 +11175,7 @@
     "phishing_admission": {
       "profile_id_invalid_for_tenant": "所选检测档案不存在或不属于当前租户",
       "rule_not_found": "准入规则不存在",
-      "rule_name_exists": "准入规则名称已存在，请使用其他名称"
+      "rule_name_exists": "准入规则名称已存在��请使用其他名称"
     },
     "mail_auth_config": {
       "overlaps_existing_active": "与已启用的邮件认证配置在相同域范围和场景下重叠",
@@ -11319,7 +11317,7 @@
       "format_json_csv": "导出格式只能是 json 或 csv"
     },
     "group_management_access": {
-      "group_management_requires_tenant_administrator_a": "分组管理需要租户管理员权限",
+      "group_management_requires_tenant_administrator_a": "分���管理需要租户管理员权限",
       "group_management_accessed_within_tenant_context": "多租户模式下，分组管理需要先选择租户",
       "access_denied_group_management_rule": "无权访问该分组管理规则",
       "group_management_rules_imported_with_scope": "分组管理规则必须以 scope=groups 导入"

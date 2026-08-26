@@ -5250,13 +5250,11 @@
       "fileTypePickerDescription": "Configure the attachment types to submit to the sandbox",
       "fileTypePickerPlaceholder": "Select attachment types",
       "removeExtension": "Remove",
-      "fileTypeCategories": {
-        "executable": "Executables (.exe/.dll/.bat etc.)",
-        "macro_doc": "Macro-enabled documents (.docm/.xlsm/.pptm etc.)",
-        "script": "Scripts (.js/.vbs/.ps1 etc.)",
-        "archive": "Archives (.zip/.rar/.7z etc.)",
-        "pdf": "PDF documents"
-      },
+  "fileTypeCategories": {
+  "office": "Office/WPS files",
+  "script": "Scripts and bytecode",
+  "exec": "Executable files"
+  },
       "customExtLabel": "Custom Extensions",
       "customExtPlaceholder": "e.g. .iso, press Enter to add",
       "customExtHint": "Must start with a dot \".\"; you can add multiple",

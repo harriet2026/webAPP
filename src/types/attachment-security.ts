@@ -127,7 +127,7 @@ export interface SandboxRule {
   direction: Direction[];
   /** 特定收发信人筛选开关，关闭时该条件不参与匹配。 */
   sender_recipient_filter_enabled: boolean;
-  /** 预置文件类型分类 key，如 ['executable','macro_doc']。 */
+  /** 预置文件类型分类 key，如 ['office', 'script', 'exec']。 */
   file_type_categories: string[];
   /** 自定义扩展名，如 ['.iso']，需以 '.' 开头。 */
   custom_extensions: string[];

@@ -38,20 +38,16 @@ import type {
   Direction,
 } from '@/types/attachment-security';
 
-const FILE_TYPE_CATEGORY_KEYS = [
-  'executable',
-  'macro_doc',
-  'script',
-  'archive',
-  'pdf',
-] as const;
+const FILE_TYPE_CATEGORY_KEYS = ['office', 'script', 'exec'] as const;
 
 const FILE_TYPE_CHILDREN: Record<(typeof FILE_TYPE_CATEGORY_KEYS)[number], string[]> = {
-  executable: ['exe', 'dll', 'bat'],
-  macro_doc: ['docm', 'xlsm', 'pptm'],
-  script: ['js', 'vbs', 'ps1'],
-  archive: ['zip', 'rar', '7z'],
-  pdf: [],
+  office: [
+    'wps', 'wpt', 'doc', 'dot', 'docx', 'dotx', 'docm', 'dotm', 'pptx', 'pptm',
+    'potx', 'potm', 'ppsx', 'ppsm', 'et', 'ett', 'xls', 'xlsm', 'xltx', 'xltm',
+    'xlt', 'rtf',
+  ],
+  script: ['jar', 'js', 'pl', 'py', 'pyc'],
+  exec: ['exe', 'bin', 'cmd', 'com', 'bat'],
 };
 
 /** 沙箱规则的检测范围方向支持多选（接收/外发/域内可任意组合），与其他
