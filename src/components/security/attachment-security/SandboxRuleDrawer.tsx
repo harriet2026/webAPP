@@ -286,18 +286,6 @@ export function SandboxRuleDrawer({
             {errors.direction && (
               <p className="text-xs text-destructive">{errors.direction}</p>
             )}
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <Label htmlFor="sandbox-recipient-filter" className="text-sm">
-                {t('recipientFilter')}
-              </Label>
-              <Switch
-                id="sandbox-recipient-filter"
-                checked={draft.sender_recipient_filter_enabled}
-                onCheckedChange={(checked) =>
-                  setDraft((d) => ({ ...d, sender_recipient_filter_enabled: checked }))
-                }
-              />
-            </div>
           </div>
 
           <div className="space-y-3">
