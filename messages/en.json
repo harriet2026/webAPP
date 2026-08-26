@@ -5294,10 +5294,16 @@
       "cancel": "Cancel",
       "deleteConfirmTitle": "Delete this rule?",
       "deleteConfirmDesc": "This cannot be undone. Attachments matching this rule's conditions will no longer be sent to the sandbox.",
+      "deleteConfirmAction": "Delete",
       "deleteSuccess": "Rule deleted",
       "deleteFailed": "Delete failed",
       "statusUpdateFailed": "Failed to update status",
-      "loadFailed": "Failed to load sandbox detection rules"
+      "loadFailed": "Failed to load sandbox detection rules",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "edit": "Edit",
+      "delete": "Delete",
+      "footer": "{total} rule(s) total · {enabled} enabled"
     }
   },
   "urlProtection": {

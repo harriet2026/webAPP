@@ -3,15 +3,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Search, Plus, Pencil, Trash2, Info } from 'lucide-react';
+import { Search, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -130,36 +134,22 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
     }
   };
 
-  const summaryFor = (rule: SandboxRule): string => {
-    const dirLabel = tdir(rule.direction);
-    const typeLabels =
-      rule.file_type_categories.length > 0 || rule.custom_extensions.length > 0
-        ? [
-            ...rule.file_type_categories.map((key) => t(`fileTypeCategories.${key}`)),
-            ...rule.custom_extensions,
-          ].join('、')
-        : t('noFileTypeSelected');
-    const highActionLabel = t(`riskActionOptions.${rule.risk_actions.high}`);
-    return t('summaryLine', {
-      direction: dirLabel,
-      fileTypes: typeLabels,
-      highAction: highActionLabel,
-    });
+  // 文件类型列：预置分类 + 自定义扩展名合并展示，用 "、" 分隔；两者皆空时（理论上
+  // 不会发生，抽屉侧已强制校验至少选一项）回退为 "-"，与检测范围/送检大小上限列的
+  // 空值占位保持一致。
+  const fileTypeText = (rule: SandboxRule): string => {
+    const labels = [
+      ...rule.file_type_categories.map((key) => t(`fileTypeCategories.${key}`)),
+      ...rule.custom_extensions,
+    ];
+    return labels.length > 0 ? labels.join('、') : '-';
   };
 
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <h3 className="text-sm font-medium">{t('listTitle')}</h3>
-        <div className="flex items-start gap-1.5">
-          <p className="text-sm text-muted-foreground">{t('listDescription')}</p>
-          <Tooltip>
-            <TooltipTrigger
-              render={<Info className="mt-0.5 size-3.5 shrink-0 cursor-help text-muted-foreground" />}
-            />
-            <TooltipContent>{t('sortHint')}</TooltipContent>
-          </Tooltip>
-        </div>
+        <h3 className="text-sm font-medium">{t('title')}</h3>
+        <p className="text-sm text-muted-foreground">{t('description')}</p>
       </div>
 
       <div className="flex items-center justify-between gap-3">
@@ -174,8 +164,8 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
           />
         </div>
         {!readOnly && (
-          <Button onClick={handleCreate} data-testid="sandbox-rule-create-button">
-            <Plus className="size-4" />
+          <Button onClick={handleCreate} size="sm" data-testid="sandbox-rule-create-button">
+            <Plus className="mr-1.5 size-3.5" />
             {t('createButton')}
           </Button>
         )}
@@ -183,61 +173,97 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
 
       {loading ? (
         <div className="space-y-2">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
         </div>
+      ) : rules.length === 0 ? (
+        <p className="py-8 text-center text-sm text-muted-foreground">{t('emptyTitle')}</p>
       ) : filteredRules.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            {rules.length === 0 ? t('emptyState') : t('noSearchResult')}
-          </p>
-        </div>
+        <p className="py-8 text-center text-sm text-muted-foreground">{t('noMatch')}</p>
       ) : (
-        <div className="space-y-2">
-          {filteredRules.map((rule) => (
-            <div
-              key={rule.id}
-              className="rounded-lg border p-3"
-              data-testid={`sandbox-rule-card-${rule.id}`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`size-2 rounded-full ${rule.enabled ? 'bg-primary' : 'bg-muted-foreground/40'}`}
-                  />
-                  <span className="text-sm font-medium">{rule.name}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Switch
-                    checked={rule.enabled}
-                    onCheckedChange={() => handleToggleEnabled(rule)}
-                    disabled={readOnly}
-                    aria-label={t('enabledLabel')}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(rule)}
-                    disabled={readOnly}
-                    aria-label={t('editTitle')}
-                  >
-                    <Pencil className="size-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setDeletingRule(rule)}
-                    disabled={readOnly}
-                    aria-label={t('deleteConfirmTitle')}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              </div>
-              <p className="mt-1.5 text-xs text-muted-foreground">{summaryFor(rule)}</p>
-            </div>
-          ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('colName')}</TableHead>
+              <TableHead>{t('colStatus')}</TableHead>
+              <TableHead>{t('colDirection')}</TableHead>
+              <TableHead>{t('colFileType')}</TableHead>
+              <TableHead>{t('colMaxSize')}</TableHead>
+              <TableHead className="text-right">{t('colActions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredRules.map((rule) => (
+              <TableRow key={rule.id} data-testid={`sandbox-rule-row-${rule.id}`}>
+                <TableCell className="font-medium">{rule.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={rule.enabled}
+                      onCheckedChange={() => handleToggleEnabled(rule)}
+                      disabled={readOnly}
+                      aria-label={t('enabledLabel')}
+                      data-testid={`sandbox-rule-toggle-${rule.id}`}
+                    />
+                    <Badge
+                      variant={rule.enabled ? 'default' : 'secondary'}
+                      className="text-xs"
+                      data-testid={`sandbox-rule-status-badge-${rule.id}`}
+                    >
+                      {rule.enabled ? t('statusEnabled') : t('statusDisabled')}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {tdir(rule.direction)}
+                </TableCell>
+                <TableCell
+                  className="max-w-[220px] truncate text-xs text-muted-foreground"
+                  title={fileTypeText(rule)}
+                >
+                  {fileTypeText(rule)}
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {rule.max_file_size_mb} MB
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 text-xs"
+                      onClick={() => handleEdit(rule)}
+                      disabled={readOnly}
+                      aria-label={t('editTitle')}
+                      data-testid={`sandbox-rule-edit-${rule.id}`}
+                    >
+                      {t('edit')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setDeletingRule(rule)}
+                      disabled={readOnly}
+                      aria-label={t('deleteConfirmTitle')}
+                      data-testid={`sandbox-rule-delete-${rule.id}`}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      {rules.length > 0 && (
+        <p className="text-xs text-muted-foreground" data-testid="sandbox-rules-footer">
+          {t('footer', {
+            total: rules.length,
+            enabled: rules.filter((r) => r.enabled).length,
+          })}
+        </p>
       )}
 
       <SandboxRuleDrawer
@@ -254,7 +280,7 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('deleteConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('deleteConfirmDescription')}</AlertDialogDescription>
+            <AlertDialogDescription>{t('deleteConfirmDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
