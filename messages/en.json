@@ -5292,13 +5292,17 @@
         "notify_recipient": "Notify recipient"
       },
       "timeoutActionNotifyHint": "Notifying the recipient uses the system's default notification template",
+      "timeoutAdminEmailLabel": "Administrator email",
+      "timeoutAdminEmailPlaceholder": "Enter administrator email",
       "enabledLabel": "Enable this rule",
       "errors": {
         "needName": "Please enter a rule name",
         "needDirection": "Select at least one detection direction",
         "needFileTypeOrExt": "Select at least one preset file type category or enter one custom extension",
         "needTimeoutAction": "Select at least one timeout disposal action",
- "needRiskAction": "Set at least one of action or attachment policy",
+        "needAdminEmail": "Enter an administrator email",
+        "invalidAdminEmail": "Enter a valid administrator email",
+        "needRiskAction": "Set at least one of action or attachment policy",
         "invalidExtFormat": "Custom extensions must start with \".\"",
         "duplicateExt": "This extension has already been added"
       },

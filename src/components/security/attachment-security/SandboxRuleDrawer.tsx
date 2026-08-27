@@ -243,6 +243,7 @@ export function SandboxRuleDrawer({
           actions: has
             ? d.timeout.actions.filter((a) => a !== action)
             : [...d.timeout.actions, action],
+          ...(action === 'notify_admin' && has ? { admin_email: '' } : {}),
         },
       };
     });
@@ -260,6 +261,14 @@ export function SandboxRuleDrawer({
     if (draft.timeout.actions.length === 0) {
       next.timeoutAction = t('errors.needTimeoutAction');
     }
+    if (draft.timeout.actions.includes('notify_admin')) {
+      const adminEmail = draft.timeout.admin_email?.trim() ?? '';
+      if (!adminEmail) {
+        next.adminEmail = t('errors.needAdminEmail');
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail)) {
+        next.adminEmail = t('errors.invalidAdminEmail');
+      }
+    }
     const riskActionInvalidLevel = (['low', 'medium', 'high'] as const).find((level) => {
       const cfg = draft.risk_actions[level];
       return cfg.action === 'none' && cfg.attachment_policy === 'none';
@@ -274,6 +283,7 @@ export function SandboxRuleDrawer({
       direction: next.direction ?? '',
       fileType: next.fileType ?? '',
       timeoutAction: next.timeoutAction ?? '',
+      adminEmail: next.adminEmail ?? '',
       riskAction: next.riskAction ?? '',
     }));
     return Object.keys(next).length === 0;
@@ -603,6 +613,30 @@ export function SandboxRuleDrawer({
                     >
                       {t(`timeoutAction.${action}`)}
                     </Label>
+                    {action === 'notify_admin' && draft.timeout.actions.includes('notify_admin') && (
+                      <div className="ml-6 mt-2 flex flex-col gap-1.5">
+                        <Label htmlFor="sandbox-admin-email" className="text-xs font-normal text-muted-foreground">
+                          {t('timeoutAdminEmailLabel')}
+                        </Label>
+                        <Input
+                          id="sandbox-admin-email"
+                          type="email"
+                          value={draft.timeout.admin_email ?? ''}
+                          onChange={(e) =>
+                            setDraft((d) => ({
+                              ...d,
+                              timeout: { ...d.timeout, admin_email: e.target.value },
+                            }))
+                          }
+                          placeholder={t('timeoutAdminEmailPlaceholder')}
+                          aria-invalid={Boolean(errors.adminEmail)}
+                          data-testid="sandbox-admin-email-input"
+                        />
+                        {errors.adminEmail && (
+                          <p className="text-xs text-destructive">{errors.adminEmail}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

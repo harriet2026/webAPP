@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index ���滑取值（无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index ����滑取值（无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -2017,7 +2017,11 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
         },
         high: { action: 'discard', attachment_policy: 'discard', mark_locations: [] },
       },
-      timeout: { timeout_sec: 60, actions: ['quarantine', 'notify_admin'] },
+      timeout: {
+        timeout_sec: 60,
+        actions: ['quarantine', 'notify_admin'],
+        admin_email: 'sandbox-admin@example.com',
+      },
       created_at: '2026-07-01T09:00:00.000Z',
       updated_at: '2026-07-01T09:00:00.000Z',
     },
@@ -2035,7 +2039,11 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
         medium: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
         high: { action: 'quarantine', attachment_policy: 'discard', mark_locations: [] },
       },
-      timeout: { timeout_sec: 90, actions: ['notify_admin'] },
+      timeout: {
+        timeout_sec: 90,
+        actions: ['notify_admin'],
+        admin_email: 'sandbox-admin@example.com',
+      },
       created_at: '2026-07-05T14:30:00.000Z',
       updated_at: '2026-07-05T14:30:00.000Z',
     },
@@ -2230,7 +2238,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     disposition: 'review',
     detection_mode: 'realtime',
     // 同 ph-100001：调查叙述是"置信度 79%，转人工复核"，recalls 为空，从未
-    // 送达收件人，不存在召回动作，recall_status 应为 'none'，使派生的邮件
+    // 送达收件人，不存在召回动作，recall_status 应为 'none'，使��生的邮件
     // 状态落在「待审核」而不是与执行动作矛盾的「召回中」。
     recall_status: 'none',
     agent_rounds: 4,
@@ -2730,7 +2738,7 @@ const mockPhishingInvestigations: Record<string, InvestigationTask> = {
     status: 'running',
     steps: [
       { name: 'fetch_mail', status: 'completed' },
-      { name: 'sender_domain_check', status: 'completed', message: '新域名 new-vendor-portal.biz，30 天内首次通信' },
+      { name: 'sender_domain_check', status: 'completed', message: '新域名 new-vendor-portal.biz，30 天内首次��信' },
       { name: 'llm_verdict', status: 'running' },
     ],
     result: undefined,
@@ -4523,7 +4531,7 @@ export function mockGroupsMetaByType(type: GroupType): { items: IPGroupMeta[] } 
 // 该群组名刻意不在群组列表里，与 demo 一致）。metadata 遵循 GroupPolicyMetadata 契约
 // （feature/target_groups/stage_policies），stage_policies 附 summary 供表格徽标展示。
 // 可变 state：状态开关（PUT {is_active}）与删除在 mock 会话内生效。
-// ════════════════════════════════════════════════════════════════════════════════
+// ══���═════════════════════════════════════════════════════════════════════════════
 
 interface GpFixtureSpec {
   id: number;
@@ -5251,7 +5259,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
   };
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════���═══════════════════════════════════
 // 发信行为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
@@ -8428,7 +8436,7 @@ export function mockLinkClickLogsList(
   return { items: rows, total, page, page_size: pageSize };
 }
 
-// GET /link-click-logs/:id/download：单条留证导出（返回整行 JSON）。
+// GET /link-click-logs/:id/download：��条留证导出（返回整行 JSON）。
 export function mockLinkClickLogById(id: number): LinkClickLog | undefined {
   return mockLinkClickLogs.find((r) => r.id === id);
 }
@@ -9037,7 +9045,7 @@ export function mockDeliveryTrafficAi() {
 }
 
 // 链接与附件安全：严格复刻 demo 默认「全部租户 / 近7日」数据生成器。
-// 页面 mock 需要逐字段与 demo 一致，不能依赖 dispatcher 的空壳 fallback。
+// 页面 mock 需要逐字��与 demo 一致，不能依赖 dispatcher 的空壳 fallback。
 function makeLinkAttachmentRng(seed: number) {
   let value = seed >>> 0;
   return () => {

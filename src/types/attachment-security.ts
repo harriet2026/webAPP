@@ -134,6 +134,8 @@ export interface SandboxRiskActionConfig {
 export interface SandboxTimeoutConfig {
   timeout_sec: number;
   actions: SandboxTimeoutActionType[];
+  /** 启用通知管理员时使用的管理员邮箱地址。 */
+  admin_email?: string;
 }
 
 /** 附件沙箱检测规则：按方向/文件类型命中后送入沙箱动态执行，依风险等级或
