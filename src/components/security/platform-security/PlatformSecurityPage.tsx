@@ -1,6 +1,7 @@
 'use client';
 
-import { Info, ShieldCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Info, Loader2, Save, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -15,7 +16,16 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { BasicLimitTab } from '@/components/security/attachment-security/BasicLimitTab';
+import { BasicLimitTab, DEFAULT_BASIC_LIMIT_CONFIG } from '@/components/security/attachment-security/BasicLimitTab';
+import { Button } from '@/components/ui/button';
+import {
+  getBasicLimitConfig,
+  getPlatformSandboxPolicy,
+  saveBasicLimitConfig,
+  savePlatformSandboxPolicy,
+} from '@/lib/api/attachment-security';
+import { useApiRequest } from '@/lib/api/client';
+import type { BasicLimitConfig, PlatformSandboxPolicy } from '@/types/attachment-security';
 import { GroupManagementPage } from '@/components/security/groups/group-management-page';
 import { AntivirusEnginePanel } from './AntivirusEnginePanel';
 import { SandboxPlatformPanel } from './SandboxPlatformPanel';
@@ -37,6 +47,54 @@ import { usePermission } from '@/hooks/use-permission';
 export function PlatformSecurityPage() {
   const t = useTranslations('platformSecurity');
   const { canManageTenants } = usePermission();
+  const { apiRequest } = useApiRequest();
+  const [basicConfig, setBasicConfig] = useState<BasicLimitConfig>(DEFAULT_BASIC_LIMIT_CONFIG);
+  const [sandboxConfig, setSandboxConfig] = useState<PlatformSandboxPolicy>({
+    max_file_size_mb: 20,
+    analysis_timeout_seconds: 120,
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([getBasicLimitConfig('receive', apiRequest), getPlatformSandboxPolicy(apiRequest)])
+      .then(([basic, sandbox]) => {
+        if (!active) return;
+        if (basic) setBasicConfig({ ...DEFAULT_BASIC_LIMIT_CONFIG, ...basic });
+        if (sandbox) setSandboxConfig(sandbox);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [apiRequest]);
+
+  const updateBasicConfig = (next: BasicLimitConfig) => {
+    setBasicConfig(next);
+    setDirty(true);
+  };
+
+  const updateSandboxConfig = (next: PlatformSandboxPolicy) => {
+    setSandboxConfig(next);
+    setDirty(true);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await Promise.all([
+        saveBasicLimitConfig('receive', basicConfig, apiRequest),
+        savePlatformSandboxPolicy(sandboxConfig, apiRequest),
+      ]);
+      setDirty(false);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (!canManageTenants) {
     return (
@@ -90,8 +148,14 @@ export function PlatformSecurityPage() {
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
               <span className="text-pretty">{t('attachmentHint')}</span>
             </div>
-            <BasicLimitTab />
-            <SandboxPlatformPanel />
+            <BasicLimitTab config={basicConfig} onChange={updateBasicConfig} />
+            <SandboxPlatformPanel config={sandboxConfig} disabled={loading || saving} onChange={updateSandboxConfig} />
+            <div className="flex justify-end border-t pt-4">
+              <Button type="button" onClick={handleSave} disabled={loading || saving || !dirty}>
+                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {t('sandbox.save')}
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="antivirus" className="mt-0">
