@@ -686,7 +686,7 @@ const SECURITY_KPI = {
   blocked: 12_101,
 };
 
-// 确定性伪值：在 [base, base+width) 内按 index ����滑取值（无 Math.random，可复现）。
+// 确定性伪值：在 [base, base+width) 内按 index �����滑取值（无 Math.random，可复现）。
 function threatSeriesValue(
   i: number,
   base: number,
@@ -2007,7 +2007,6 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       sender_recipient_filter_enabled: false,
       file_type_categories: ['executable', 'macro_doc'],
       custom_extensions: [],
-      max_file_size_mb: 50,
       risk_actions: {
         low: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
         medium: {
@@ -2018,7 +2017,6 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
         high: { action: 'discard', attachment_policy: 'discard', mark_locations: [] },
       },
       timeout: {
-        timeout_sec: 60,
         actions: ['quarantine', 'notify_admin'],
         admin_email: 'sandbox-admin@example.com',
       },
@@ -2033,14 +2031,12 @@ export function mockPutPhishingEngineConfig(body: Record<string, unknown>) {
       sender_recipient_filter_enabled: false,
       file_type_categories: ['archive', 'script'],
       custom_extensions: ['.iso'],
-      max_file_size_mb: 100,
       risk_actions: {
         low: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
         medium: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
         high: { action: 'quarantine', attachment_policy: 'discard', mark_locations: [] },
       },
       timeout: {
-        timeout_sec: 90,
         actions: ['notify_admin'],
         admin_email: 'sandbox-admin@example.com',
       },
@@ -2237,7 +2233,7 @@ const mockPhishingDetectionLogsState: DetectionLogItem[] = [
     processed_at: phishingHoursAgo(2.9),
     disposition: 'review',
     detection_mode: 'realtime',
-    // 同 ph-100001：调查叙述是"置信度 79%，转人工复核"，recalls 为空，从未
+    // 同 ph-100001：调��叙述是"置信度 79%，转人工复核"，recalls 为空，从未
     // 送达收件人，不存在召回动作，recall_status 应为 'none'，使��生的邮件
     // 状态落在「待审核」而不是与执行动作矛盾的「召回中」。
     recall_status: 'none',
@@ -5597,7 +5593,7 @@ export function mockRecipientLimitConfig(): RecipientLimitConfig {
   };
 }
 
-// 收信人检测模块级 + 存在性验证配置（demo：模块开、存在性开、失败动作 阻断）。
+// 收信人检测模块级 + 存在���验证配置（demo：模块开、存在性开、失败动作 阻断）。
 export function mockRecipientCheckConfig(): RecipientCheckConfig {
   return {
     existence_enabled: true,
@@ -7333,7 +7329,7 @@ const OPERABLE_RECIPIENT_STATUSES = new Set([
 ]);
 
 // demo getContextData().generateRecipientStatus 的多投场景状态分布（同上文件
-// 207-210 行）：收件人数 > 1 时按下标对 5 态列表取模，逐一铺开
+// 207-210 行）：收件人数 > 1 时���下标对 5 态列表取模，逐一铺开
 // delivered/quarantined/pending_review/blocked/discarded。单投信仍沿用
 // recipientDisposalStatus（按整封邮件的 deliveryStatus 映射）。
 const MULTI_RECIPIENT_STATUS_DISTRIBUTION = [
@@ -8737,7 +8733,7 @@ export function mockContactSourceTest() {
   return { ok: false, info: '超时' };
 }
 
-// 行内同步状态机：1.5s 内为「同步中」，之后定态出结果 ——
+// 行内同步状态机���1.5s 内为「同步中」，之后定态出结果 ——
 // 「邮件系统」出 部分异常（2）（与规格截图一致），其余行出 正常。
 export function mockContactSourceSync(id: number) {
   const row = contactSources.find((s) => s.id === id);

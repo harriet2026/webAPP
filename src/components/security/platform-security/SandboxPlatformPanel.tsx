@@ -1,6 +1,6 @@
 'use client';
 
-import useSWR from 'swr';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,16 +8,18 @@ import { Label } from '@/components/ui/label';
 import { getPlatformSandboxPolicy, savePlatformSandboxPolicy } from '@/lib/api/attachment-security';
 import type { PlatformSandboxPolicy } from '@/types/attachment-security';
 
-const fetcher = () => getPlatformSandboxPolicy();
-
 export function SandboxPlatformPanel() {
   const t = useTranslations('platformSecurity');
-  const { data, mutate, isLoading } = useSWR('platform-sandbox-policy', fetcher);
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ['platform-sandbox-policy'],
+    queryFn: getPlatformSandboxPolicy,
+  });
   const config: PlatformSandboxPolicy = data ?? { max_file_size_mb: 20, analysis_timeout_seconds: 120 };
 
   async function save() {
     await savePlatformSandboxPolicy(config);
-    await mutate();
+    await queryClient.invalidateQueries({ queryKey: ['platform-sandbox-policy'] });
   }
 
   return (
