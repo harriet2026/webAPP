@@ -191,7 +191,6 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
               <TableHead>{t('colStatus')}</TableHead>
               <TableHead>{t('colDirection')}</TableHead>
               <TableHead>{t('colFileType')}</TableHead>
-              <TableHead>{t('colMaxSize')}</TableHead>
               <TableHead className="text-right">{t('colActions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -225,9 +224,6 @@ export function SandboxRulesTab({ readOnly = false }: SandboxRulesTabProps) {
                   title={fileTypeText(rule)}
                 >
                   {fileTypeText(rule)}
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">
-                  {rule.max_file_size_mb} MB
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">

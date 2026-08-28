@@ -18,6 +18,7 @@ import {
 import { BasicLimitTab } from '@/components/security/attachment-security/BasicLimitTab';
 import { GroupManagementPage } from '@/components/security/groups/group-management-page';
 import { AntivirusEnginePanel } from './AntivirusEnginePanel';
+import { SandboxPlatformPanel } from './SandboxPlatformPanel';
 import { ConnectionLayerPanel } from './ConnectionLayerPanel';
 import { usePermission } from '@/hooks/use-permission';
 
@@ -90,6 +91,7 @@ export function PlatformSecurityPage() {
               <span className="text-pretty">{t('attachmentHint')}</span>
             </div>
             <BasicLimitTab />
+            <SandboxPlatformPanel />
           </TabsContent>
 
           <TabsContent value="antivirus" className="mt-0">

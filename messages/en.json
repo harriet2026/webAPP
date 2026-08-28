@@ -10268,7 +10268,15 @@
       "groupPolicy": "Group Policy",
       "antivirusEngine": "Antivirus Engine"
     },
-    "attachmentHint": "Attachment size, count, and nesting-depth limits are platform-level resource constraints applied uniformly to all tenants. Tenant-side attachment security inspection does not include this item.",
+    "sandbox": {
+    "title": "Sandbox inspection settings",
+    "description": "Platform-level settings shared by Cloud Gateway, AI multi-tenant, and legacy multi-tenant products.",
+    "maxFileSize": "Maximum file size for inspection",
+    "timeout": "Sandbox analysis timeout",
+    "seconds": "seconds",
+    "save": "Save settings"
+  },
+  "attachmentHint": "Attachment size, count, and nesting-depth limits are platform-level resource constraints applied uniformly to all tenants. Tenant-side attachment security inspection does not include this item.",
     "antivirusHint": "The antivirus server host and virus database are platform-level configuration applied uniformly to all tenants; tenants can only set virus disposition actions.",
     "modules": {
       "ipFrequency": "IP Frequency Limit",

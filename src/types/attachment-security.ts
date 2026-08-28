@@ -107,6 +107,12 @@ export type SandboxAttachmentPolicy = 'mark' | 'discard' | 'none';
 /** 标记生效位置，仅在附加策略为“标记”时有效，可任意组合勾选（含 0 项）。 */
 export type SandboxMarkLocation = 'subject' | 'header' | 'body_start';
 
+/** 平台级沙箱检测配置，统一作用于云网关及多租户产品形态。 */
+export interface PlatformSandboxPolicy {
+  max_file_size_mb: number;
+  analysis_timeout_seconds: number;
+}
+
 /** 超时/引擎不可用后的处置动作，三者可任意组合勾选。 */
 export type SandboxTimeoutActionType = 'recall' | 'notify_admin' | 'notify_recipient';
 
@@ -132,7 +138,6 @@ export interface SandboxRiskActionConfig {
 /** 超时处置配置：超时阈值 + 可组合的超时动作集合。通知收件人使用系统默认
  * 通知模板，不在本模块内配置模板内容。 */
 export interface SandboxTimeoutConfig {
-  timeout_sec: number;
   actions: SandboxTimeoutActionType[];
   /** 启用通知管理员时使用的管理员邮箱地址。 */
   admin_email?: string;
@@ -153,8 +158,6 @@ export interface SandboxRule {
   file_type_categories: string[];
   /** 自定义扩展名，如 ['.iso']，需以 '.' 开头。 */
   custom_extensions: string[];
-  /** 单文件送检大小上限（MB），超过则跳过送检，按基础限制的超限处置处理。 */
-  max_file_size_mb: number;
   risk_actions: SandboxRiskActionConfig;
   timeout: SandboxTimeoutConfig;
   created_at: string;

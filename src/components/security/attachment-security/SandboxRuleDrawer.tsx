@@ -74,8 +74,7 @@ function emptyDraft(): SandboxRule {
     sender_recipient_filter_enabled: false,
     file_type_categories: [],
     custom_extensions: [],
-    max_file_size_mb: 20,
-    risk_actions: {
+      risk_actions: {
       low: { action: 'audit', attachment_policy: 'mark', mark_locations: ['subject'] },
       medium: {
         action: 'quarantine',
@@ -84,7 +83,7 @@ function emptyDraft(): SandboxRule {
       },
       high: { action: 'discard', attachment_policy: 'discard', mark_locations: [] },
     },
-    timeout: { timeout_sec: 120, actions: ['notify_admin'] },
+    timeout: { actions: ['notify_admin'] },
     created_at: '',
     updated_at: '',
   };
@@ -462,14 +461,7 @@ export function SandboxRuleDrawer({
                 {errors.customExt && <p className="text-xs text-destructive">{errors.customExt}</p>}
               </div>
               {errors.fileType && <p className="text-xs text-destructive">{errors.fileType}</p>}
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="sandbox-max-size">{t('maxFileSizeLabel')}</Label>
-                <div className="flex items-center gap-2">
-                  <Input id="sandbox-max-size" type="number" min={1} value={draft.max_file_size_mb} onChange={(e) => setDraft((d) => ({ ...d, max_file_size_mb: Number(e.target.value) || 0 }))} className="w-28" />
-                  <span className="text-sm text-muted-foreground">MB</span>
-                </div>
-                <p className="text-xs text-muted-foreground">{t('maxFileSizeHint')}</p>
-              </div>
+
             </div>
 
           <div className="space-y-3">
@@ -575,27 +567,6 @@ export function SandboxRuleDrawer({
 
           <div className="space-y-3">
             <SectionHeading index={4} label={t('sectionTimeout')} />
-            <div className="space-y-1.5">
-              <Label htmlFor="sandbox-timeout-sec">{t('timeoutSecLabel')}</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="sandbox-timeout-sec"
-                  type="number"
-                  min={1}
-                  value={draft.timeout.timeout_sec}
-                  onChange={(e) =>
-                    setDraft((d) => ({
-                      ...d,
-                      timeout: { ...d.timeout, timeout_sec: Number(e.target.value) || 0 },
-                    }))
-                  }
-                  className="w-28"
-                />
-                <span className="text-sm text-muted-foreground">
-                  {t('timeoutSecLabel').includes('秒') ? '' : 's'}
-                </span>
-              </div>
-            </div>
             <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
               <Label className="text-sm">{t('timeoutActionLabel')}</Label>
               <p className="text-xs text-muted-foreground">{t('timeoutActionHint')}</p>

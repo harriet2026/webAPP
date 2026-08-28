@@ -10,6 +10,7 @@ import type {
   ImageDetectConfig,
   PasswordBookEntry,
   QrDeepRoutesConfig,
+  PlatformSandboxPolicy,
   SandboxRule,
 } from '@/types/attachment-security';
 import type { ApiRequestFn } from './client';
@@ -322,6 +323,20 @@ export async function deletePasswordBookEntry(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<void> {
   await requestFn(`/attachment-security/password-book/${id}`, { method: 'DELETE' });
+}
+
+export async function getPlatformSandboxPolicy(
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<PlatformSandboxPolicy | null> {
+  const obj = await fetchConfigSection('sandbox_platform', requestFn);
+  return obj as PlatformSandboxPolicy | null;
+}
+
+export async function savePlatformSandboxPolicy(
+  config: PlatformSandboxPolicy,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<void> {
+  await saveConfigSection('sandbox_platform', config as unknown as Record<string, unknown>, requestFn);
 }
 
 export async function getActiveContentConfig(

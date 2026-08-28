@@ -1011,7 +1011,7 @@
           "targetHostHintRequired": "必填：作为直连投递目标（真实后端暂不支持留空按 MX 投递）"
         },
         "simulate": {
-          "header": "���中规则《{name}》",
+          "header": "�����中规则《{name}》",
           "channel": "投递通���：{channel}",
           "proxy": "代理 IP：{name}（出口：{egress}）",
           "helo": "HELO 声明：{helo}",
@@ -2442,7 +2442,7 @@
     "viewDetails": "查看",
     "location": "归属地",
     "stats": {
-      "total": "认证总次数",
+      "total": "认证总次���",
       "successRate": "认证成功率",
       "failed": "认证失败数"
     },
@@ -3543,7 +3543,7 @@
       "conditionDaily": "当日连接超过 {count} 次",
       "conditionConcurrent": "并发连接超过 {count} 个",
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
-      "conditionAuthFail": "每小时认证失败超过 {count} 次",
+      "conditionAuthFail": "每小时认证失败超过 {count} ��",
       "conditionCmdError": "��连接命令错误超过 {count} 次",
       "conditionConnAuthFail": "单连接认���失��超过 {count} 次",
       "suspend15minText": "15��钟",
@@ -4113,7 +4113,7 @@
     "drawerSubtitleWhitelist": "��置发信人白名单规则，信��的发信人直接放行",
     "senderPlaceholder_individual": "如: user@example.com 或 *@domain.com",
     "senderPlaceholder_domain": "如 example.com 或 evil.com",
-    "noTenantDomains": "该租户暂无接收域名，请先在『接收域名��中配置",
+    "noTenantDomains": "该��户暂无接收域名，请先在『接收域名��中配置",
     "domainSuggestions": "���租户接收域���（快捷���择）",
     "senderPlaceholder_group": "请选择发件人组",
     "validUntil": "生效结束",
@@ -5891,7 +5891,7 @@
       "quick": "快捷筛选",
       "clearAll": "清空",
       "advanced": "更多筛选条件",
-      "preciseFields": "27个精确字段",
+      "preciseFields": "27个���确字段",
       "tenantScope": "租户范围",
       "sendReceiveTime": "收发时间",
       "selectDate": "选择日期",
@@ -7154,7 +7154,7 @@
         "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
       },
       "desc_qrCodeCount": {
-        "source": "图片二维码识别引擎",
+        "source": "图片二维码识别引��",
         "usage": "限制邮件中二维码的数量",
         "note": "大量二维码可能为恶意邮件"
       },
@@ -9713,7 +9713,7 @@
       "highImmediate": "发现高危威胁时立即通知（置信度 ≥ 90%）",
       "mediumImmediate": "发现中危威胁且置信度��到阈值时立即通知",
       "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
-      "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇总。",
+      "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇���。",
       "lowDigest": "低危威胁每日汇总时间",
       "notifyVersionHint": "修改收件人或汇总时间只影响新任务；当天可能按不同配置版本分别汇总。",
       "previewImmediate": "高/中危即时通知",
@@ -10325,7 +10325,15 @@
       "groupPolicy": "群组策略",
       "antivirusEngine": "反病毒引擎"
     },
-    "attachmentHint": "附件大小、数量与嵌套层级等基础上限为平台级资源约束，统一作用于全部租户，租户侧的附件安全检测不含此项。",
+    "sandbox": {
+    "title": "沙箱检测配置",
+    "description": "平台级配置，统一应用于云网关、AI版多租户和传统版多租户。",
+    "maxFileSize": "单文件送检大小上限",
+    "timeout": "沙箱分析超时时间",
+    "seconds": "秒",
+    "save": "保存配置"
+  },
+  "attachmentHint": "附件大小、数量与嵌套层级等基础上限为平台级资源约束，统一作用于全部租户，租户侧的附件安全检测不含此项。",
     "antivirusHint": "反病毒服务器地址与病毒库为平台级配置，统一作用于全部租户；租户侧仅可设置病毒处置动作。",
     "modules": {
       "ipFrequency": "IP 频率限制",
@@ -10443,7 +10451,7 @@
     "neverExpires": "永不过期",
     "permanentLock": "永久锁定",
     "platformOnly": "由平台统一设置，租户不可修改",
-    "tenantBanner": "平��已下发登录���全基线。本租户只能在基线之上加严，不可低于基线；置灰选项即为低于基线、不可选择的取值。",
+    "tenantBanner": "平��已下发登录���全基线。本租户只能在基线之上加严，不可低于基线；置灰选项即为低于基线、不可选择��取值。",
     "belowBaseline": "低于平台基线，当前按基线生效",
     "noRules": "暂无 IP 规则",
     "addRule": "新增 IP",
@@ -10919,7 +10927,7 @@
       "connection_requires_platform": "连接维度只��平台视角下可用，请切换到平台视角",
       "dimension_invalid": "统计维度无效",
       "filter_enum_invalid": "筛选条件取值无效",
-      "key_required": "请指定要下钻的对象",
+      "key_required": "请指定要下钻的对���",
       "sort_invalid": "排序方式无效",
       "sub_dimension_invalid": "当前维度不支持该子维度",
       "tenant_id_invalid": "租户标识必须是正整数",
@@ -11175,7 +11183,7 @@
       "condition_tree_not_member_format": "该分组的条件不是可导入的成员列表格式"
     },
     "rule_test_eml": {
-      "file_missing": "请选择要上传的 EML 文件",
+      "file_missing": "请选择要上传的 EML ��件",
       "file_too_large": "文件过大，最�� {max_mb} MB",
       "file_unreadable": "文件无法读取",
       "condition_tree_invalid": "条件树 JSON 格式不正确",
