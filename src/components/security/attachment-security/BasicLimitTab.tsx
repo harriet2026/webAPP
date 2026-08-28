@@ -1,17 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, Info, Loader2, Save } from 'lucide-react';
+import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useApiRequest } from '@/lib/api/client';
-import { getBasicLimitConfig, saveBasicLimitConfig } from '@/lib/api/attachment-security';
+import { getBasicLimitConfig } from '@/lib/api/attachment-security';
 import { isValidLimitValue } from './limit-value';
 import { cn } from '@/lib/utils';
 import type { AttachmentAction, BasicLimitConfig, Direction } from '@/types/attachment-security';
@@ -54,7 +52,6 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
   const controlled = config !== undefined && onChange !== undefined;
   const [localConfig, setLocalConfig] = useState(DEFAULT_BASIC_LIMIT_CONFIG);
   const [loading, setLoading] = useState(!controlled);
-  const [saving, setSaving] = useState(false);
   const value = controlled ? config : localConfig;
 
   useEffect(() => {
@@ -102,19 +99,6 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
     const raw = Number(value[key]);
     const next = allowUnlimited && raw === -1 ? -1 : Math.max(1, Number.isFinite(raw) ? Math.trunc(raw) : 1);
     if (next !== raw) update({ [key]: next });
-  };
-
-  const handleStandaloneSave = async () => {
-    if (attachmentCountInvalid) return; // GT-12198: 非法值不提交
-    setSaving(true);
-    try {
-      await saveBasicLimitConfig(direction, value, apiRequest);
-      toast.success(t('toast.saveSuccess'));
-    } catch {
-      toast.error(t('toast.saveFailed'));
-    } finally {
-      setSaving(false);
-    }
   };
 
   const formatSize = (kb: number) => {
@@ -271,14 +255,6 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
         <p className="text-xs text-muted-foreground">{t('basicLimit.receiveDefault')}</p>
       </section>
 
-      {!controlled && (
-        <div className="flex justify-end border-t pt-4">
-          <Button onClick={handleStandaloneSave} disabled={saving || attachmentCountInvalid} data-testid="basic-limit-save">
-            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            {t('common.save')}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
