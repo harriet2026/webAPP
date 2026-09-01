@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Info, Loader2, Save, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 import {
   PageHeader,
@@ -91,6 +92,9 @@ export function PlatformSecurityPage() {
         savePlatformSandboxPolicy(sandboxConfig, apiRequest),
       ]);
       setDirty(false);
+      toast.success(t('toast.saveSuccess'));
+    } catch {
+      toast.error(t('toast.saveFailed'));
     } finally {
       setSaving(false);
     }
