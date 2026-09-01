@@ -126,7 +126,7 @@ export function AttachmentSecurityPage({
   const moduleT = useTranslations('securityModules');
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin, selectedTenantId, user } = useAuth();
-  const { capabilities, viewer } = useProductForm();
+  const { capabilities, viewer, grants } = useProductForm();
   const firstTab: TabKey = hideBasicLimit ? 'antivirus' : 'basicLimit';
   const [activeTab, setActiveTab] = useState<TabKey>(firstTab);
   const [draft, setDraft] = useState<AttachmentDraft>(defaultDraft);
@@ -156,15 +156,30 @@ export function AttachmentSecurityPage({
   // 两段并跳过其保存；单租户形态维持现状。
   const antivirusPlatformManaged = capabilities?.multiTenant ?? false;
 
+  // GT-12245 附件沙箱能力：平台管理员视角始终可见「沙箱检测」页签（用于配置
+  // 默认策略）；租户视角仅当该租户已开通 attachment-sandbox 能力时才可见。
+  const sandboxGranted = viewer !== 'tenant' || grants.includes('attachment-sandbox');
+
   const visibleTabs = useMemo(
-    () => TABS.filter((tab) => !hideBasicLimit || tab.key !== 'basicLimit'),
-    [hideBasicLimit],
+    () =>
+      TABS.filter(
+        (tab) =>
+          (!hideBasicLimit || tab.key !== 'basicLimit') &&
+          (tab.key !== 'sandboxRules' || sandboxGranted),
+      ),
+    [hideBasicLimit, sandboxGranted],
   );
   const dirty = !same(draft, baseline);
 
   useEffect(() => {
     if (hideBasicLimit && activeTab === 'basicLimit') setActiveTab('antivirus');
   }, [activeTab, hideBasicLimit]);
+
+  useEffect(() => {
+    if (!sandboxGranted && activeTab === 'sandboxRules') {
+      setActiveTab(hideBasicLimit ? 'antivirus' : 'basicLimit');
+    }
+  }, [activeTab, sandboxGranted, hideBasicLimit]);
 
   useEffect(() => {
     onDirtyChange?.(dirty);

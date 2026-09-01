@@ -9838,5 +9838,245 @@
       "canEdit": true,
       "readOnly": false
     }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": true,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "cloud",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-multi",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "ai-single",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-multi",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "platform",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": false,
+    "out": {
+      "visible": false,
+      "locked": false,
+      "canEdit": false,
+      "readOnly": false
+    }
+  },
+  {
+    "form": "legacy-single",
+    "viewer": "tenant",
+    "feature": "attachment-sandbox",
+    "granted": true,
+    "out": {
+      "visible": true,
+      "locked": false,
+      "canEdit": true,
+      "readOnly": false
+    }
   }
 ]

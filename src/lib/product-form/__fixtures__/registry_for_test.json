@@ -39,5 +39,6 @@
   { "id": "exec-impersonation", "visibility": "ALWAYS", "scope": "platform", "platformAccess": "edit", "tenantAccess": "readonly", "platformHidden": false, "grantable": false, "href": "/rules/exec-impersonation" },
   { "id": "domain-lookalike", "visibility": "ALWAYS", "scope": "platform", "platformAccess": "edit", "tenantAccess": "readonly", "platformHidden": false, "grantable": false, "href": "/rules/domain-lookalike" },
   { "id": "similar-detection", "visibility": "ALWAYS", "scope": "platform", "platformAccess": "edit", "tenantAccess": "readonly", "platformHidden": false, "grantable": false, "href": "/rules/similar-detection" },
-  { "id": "login-security", "visibility": "ALWAYS", "scope": "form-dependent", "platformAccess": "edit", "tenantAccess": "edit", "platformHidden": false, "grantable": false, "href": "" }
+  { "id": "login-security", "visibility": "ALWAYS", "scope": "form-dependent", "platformAccess": "edit", "tenantAccess": "edit", "platformHidden": false, "grantable": false, "href": "" },
+  { "id": "attachment-sandbox", "visibility": "ALWAYS", "scope": "tenant", "platformAccess": "edit", "tenantAccess": "edit", "platformHidden": false, "grantable": true, "href": "" }
 ]

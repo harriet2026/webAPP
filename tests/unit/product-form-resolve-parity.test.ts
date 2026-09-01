@@ -17,12 +17,15 @@ describe('resolve parity with Go', () => {
       (registry as FeatureDef[]).map((f) => [f.id, f]),
     );
     const rows = vectors as VectorRow[];
-    // 5 forms × 41 features × 2 viewers × 2 granted states.
+    // 5 forms × 42 features × 2 viewers × 2 granted states.
     // 这个数字是「生成的向量被截断」的哨兵，所以刻意写死而不是从 registry 推导 ——
     // 若从 registry.length 推导，向量文件整体缺失时它会跟着变小、断言恒真。
     // registry 增删条目时同步改这里（并重新生成向量）。
-    expect(registry).toHaveLength(41);
-    expect(rows.length).toBe(41 * 5 * 2 * 2);
+    // attachment-sandbox（附件沙箱能力开关，2026-01）目前只在前端注册表落地，
+    // 对应的 20 条向量按 resolve() 本身的状态机手工推导（与既有 grantable
+    // 特性同构），后端接入后需要用 Go 生成的向量替换校验。
+    expect(registry).toHaveLength(42);
+    expect(rows.length).toBe(42 * 5 * 2 * 2);
     for (const row of rows) {
       const f = byId.get(row.feature);
       expect(f, `fixture missing feature ${row.feature}`).toBeDefined();

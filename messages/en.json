@@ -2425,7 +2425,8 @@
     "capability": {
       "phishing-detection": "Phishing Detection Agent",
       "spoofing-detection": "Spoofing Detection Agent",
-      "threat-retro": "Threat Retro Agent"
+      "threat-retro": "Threat Retro Agent",
+      "attachment-sandbox": "Attachment Sandbox"
     },
     "actions": {
       "manage": "Manage",

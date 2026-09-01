@@ -697,7 +697,7 @@
         "fromDomainPlaceholder": "模糊匹配",
         "rcptDomainPlaceholder": "模糊匹配",
         "statusAll": "全部",
-        "statusEnabled": "��用",
+        "statusEnabled": "���用",
         "statusDisabled": "禁用"
       },
       "simulateButton": "模拟测试",
@@ -1333,7 +1333,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，灰色为「继承全局」，彩色��「另行配置」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，���色为「继承全局」，彩色��「另行配置」。",
     "priorityHintAria": "优�����级说明",
     "name": "名称",
     "targetGroups": "�����������",
@@ -1456,7 +1456,7 @@
     "previewSelectGroup": "目标群组",
     "previewSelectPlaceholder": "选择群组",
     "previewMatchedCount": "命中 {count} 条已启用策略",
-    "previewSimulationNote": "基于策略配置的模拟推演，实际处���以引擎判定为准。",
+    "previewSimulationNote": "基于策略配置的模拟推演，实���处���以引擎判定为准。",
     "previewEmpty": "该群组暂���������用的���中策略。",
     "previewHitBadge": "优先��� {priority} · {name}",
     "previewIgnoredHigher": "注意：�����{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
@@ -1647,7 +1647,7 @@
     "sender": "发件人",
     "status": "状态",
     "priority": "优先级",
-    "sidelinedAt": "���路时间",
+    "sidelinedAt": "���路时��",
     "reinject": "重新注入",
     "retryCount": "���试次数",
     "delete": "删除",
@@ -1825,7 +1825,7 @@
       "matched_route_rules": "命中的路由规则",
       "final_action_rule": "最终动作",
       "content": "正文",
-      "html_content": "HTML 正文",
+      "html_content": "HTML ��文",
       "attachments": "附件数",
       "urls": "URL ���",
       "action": "动作",
@@ -2004,7 +2004,8 @@
     "capability": {
       "phishing-detection": "钓鱼邮件检测智能体",
       "spoofing-detection": "仿冒邮件检测智能体",
-      "threat-retro": "威胁回溯智能体"
+      "threat-retro": "威胁回溯智能体",
+      "attachment-sandbox": "附件沙箱"
     },
     "actions": {
       "manage": "管理",
@@ -2087,7 +2088,7 @@
       },
       "auth": {
         "dkimTitle": "DKIM 签名",
-        "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS ��验",
+        "dkimDescription": "为��个发信域生成或导入 DKIM 密钥并完成 DNS ��验",
         "activeKeys": "已启用密钥 {count} ���",
         "smtpTitle": "SMTP 凭证",
         "smtpDescription": "管理发信认证账号、后端路由与锁定状态",
@@ -2412,7 +2413,7 @@
     },
     "downloadErrors": {
       "invalidId": "下载失败：记录标识无效",
-      "notFound": "下载失败：记录不存在或已被清理",
+      "notFound": "下载失败：记录不存在或��被清理",
       "generic": "下载失败：服务��读取失败，请稍后重试"
     }
   },
@@ -2720,7 +2721,7 @@
       "logoutCurrentConfirm": "下线当前设备将退出本会话，确定继续？",
       "logoutOthers": "下线���他所有设备",
       "logoutOthersTitle": "下线其他所有设备",
-      "logoutOthersConfirm": "确认下线除当前设备外的所有其他设备（共 {n} 台）？",
+      "logoutOthersConfirm": "确认��线除当前设备外的所有其他设备（共 {n} 台）？",
       "loggedOutDevice": "已下线设备 {name}",
       "loggedOutOthers": "已下线 {n} 台设备",
       "loggedOut": "已退出登录",
@@ -2804,7 +2805,7 @@
   },
   "proxysvr": {
     "title": "代理服务器管理",
-    "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分组」投递通道引用。",
+    "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分���」投递通道引用。",
     "endpointsTab": "代理服务���目录",
     "groupsTab": "代理���务器分组",
     "name": "名称",
@@ -3542,7 +3543,7 @@
       "permanent": "永久有效",
       "conditionDaily": "当日连接超过 {count} 次",
       "conditionConcurrent": "并发连接超过 {count} 个",
-      "conditionWindow": "每 {minutes} 分钟超过 {count} ��",
+      "conditionWindow": "每 {minutes} ��钟超过 {count} ��",
       "conditionAuthFail": "每小时认证失败超�� {count} ��",
       "conditionCmdError": "��连接命令错误超过 {count} 次",
       "conditionConnAuthFail": "单连接认���失��超过 {count} 次",
@@ -3941,7 +3942,7 @@
     "greylistMaxRequests": "最大请求数",
     "greylistWhitelistTTL": "白名单有效期",
     "greylistHours": "小时",
-    "greylistWhitelistTTLTip": "通过灰名单验证的发件人将被记住该时长，有效期内再次发信无需重新验证。",
+    "greylistWhitelistTTLTip": "通过灰名单验证的发件人将被记住该时长，有效期内再次发信无需重新验证���",
     "greylistExemptions": "豁免设置",
     "greylistExemptAuth": "已认证发件��（SPF/DKIM通过）自动豁免",
     "greylistExemptWhitelist": "白名单 IP / 域自动豁免",
@@ -4089,7 +4090,7 @@
     "action_reject": "拒收",
     "action_reject_desc": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
     "action_discard": "丢弃",
-    "action_discard_desc": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃",
+    "action_discard_desc": "静默丢弃邮件，发信方收到投��成功响应但邮件实际被丢弃",
     "action_quarantine": "隔离",
     "action_quarantine_desc": "邮件进入隔离区，管理员可审阅后决定是���放行",
     "action_audit": "审核",
@@ -4395,7 +4396,7 @@
     "headerRequired": "请同时填写邮件头名称和值",
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
-    "keywordPlaceholder": "例如：机密|绝密|内部��料",
+    "keywordPlaceholder": "��如：机密|绝密|内部��料",
     "keywordDividerHint": "多个关键词用��线 | 分隔",
     "regexPlaceholder": "输入兼容 Go 的正则表达式",
     "invalidRegex": "正则表达式无效",
@@ -5520,7 +5521,7 @@
     },
     "intentDesc": {
       "porn_gambling": "检测色情、赌博等违规内容邮件",
-      "political": "检测涉及政治敏感、反动内容的邮件",
+      "political": "检测涉及政治敏感、反��内容的邮件",
       "phishing": "检测伪装身份诱骗用户信息的钓鱼邮件",
       "spam": "检测垃圾邮件、骚扰邮件、广告邮件",
       "subscription": "检测新闻订阅、通知邮件、营销推送"
@@ -6105,7 +6106,7 @@
       "findSimilar": "找相似",
       "findSimilarTooltip": "以该邮件为样本，基于内容语义查找相似邮件",
       "download": "下载",
-      "loading": "加载中...",
+      "loading": "���载中...",
       "empty": "暂无数据",
       "selected": "已选 {n} 封",
       "disposalBasis": "处置依据",
@@ -6593,7 +6594,7 @@
   "advancedRulesFeature": {
     "title": "高级过滤规则",
     "description": "基于多条件组合的灵活过滤规则",
-    "moduleDescription": "多维度条件组合过滤，支持{count}种条件类型与AND/OR逻辑",
+    "moduleDescription": "多维度条件组��过滤，支持{count}种条件类型与AND/OR逻辑",
     "incompleteCondition": "[配置不完整]",
     "incompleteReasonMissingValue": "缺少��值：请填��该条件的匹配值",
     "incompleteReasonThreshold": "缺少阈值：请填写���值阈值",
@@ -6711,7 +6712,7 @@
       "deleteAttachmentScopeType": "指定类型",
       "deleteAttachmentScopeOverSize": "超过大小",
       "deleteAttachmentScopeEncrypted": "加密附件",
-      "deleteAttachmentScopeNestedZip": "嵌套压缩包",
+      "deleteAttachmentScopeNestedZip": "嵌套��缩包",
       "deleteAttachmentScopeQrCode": "含二维码",
       "deleteAttachmentReplacementText": "替换文本",
       "deleteAttachmentInsertNotice": "插���通知",
@@ -7519,7 +7520,7 @@
         "tagDeliver": {
           "source": "投递引擎",
           "usage": "投递并添加可疑标记",
-          "note": "标记位置为信头时样式不生效"
+          "note": "标记位置为信头时样��不生效"
         },
         "quarantine": {
           "source": "隔离区",
@@ -8653,7 +8654,7 @@
       "configPlaceholder": "配置模块上线后提供",
       "configSnapshotStaleNotice": "当前配置已变更，此为历史快照",
       "runLog": "运行日志",
-      "searchSteps": "搜索步骤...",
+      "searchSteps": "搜��步骤...",
       "exportJson": "导出 JSON",
       "noSteps": "暂无步骤记录",
       "noVerdictContent": "智能体已完成检测，详细研判内容暂未生成",
@@ -8712,7 +8713,7 @@
     },
     "navPhishingAgent": "钓鱼邮件检测智能体",
     "collapseMenu": "折叠菜单",
-    "expandMenu": "展开菜单"
+    "expandMenu": "展开菜��"
   },
   "phishingConfig": {
     "pageTitle": "检测引擎配置",
@@ -8846,7 +8847,7 @@
         "realtime": "按分级表执行处置（隔离/标记/放行）；若超时未出结论，将按下方「超时策略」临时处置。",
         "observe": "开启后，系统执行完整检测流程，但将实质性处置动作替换为下方预设的观察动作，仅用于策略调优与灰度观察。"
       },
-      "runModeCascadeHint": "优先实时检测，超时前完成即按「实时处置策略」执行；若超时且启用超时异步处理，则按「超时临时处置」放行，后台继续检测，完成后按「异步召回策略」执行召回或通知；若超时且禁用超时异步处理，则直接按「超时临时处置」执行，后台不再检测。",
+      "runModeCascadeHint": "优先实时检测，超时前完成即按「实时处置策略」执行；若超时且启用超时异步处理，则按「超时临时处置」放行，后台继续检测，完成后按「异步召回策略」执行召回或通知；若超时且禁用超时异步处理，则直接按��超时临时处置」执行，后台不再检测。",
       "timeoutSectionTitle": "超时时间线",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
@@ -8961,7 +8962,7 @@
       "rangeOver90": "时间范围不能超过 90 天",
       "range": {
         "today": "今日",
-        "7d": "近 7 天",
+        "7d": "��� 7 天",
         "30d": "近 30 天",
         "custom": "自定义"
       }
@@ -9188,7 +9189,7 @@
       "markPreview": "标记效果预览",
       "actionQuarantineDesc": "邮件移入隔离区，等待管理员审���处理",
       "actionRejectDesc": "直接拒绝邮件，退信给发件人",
-      "actionDiscardDesc": "静默丢弃，不通知发件人",
+      "actionDiscardDesc": "静默丢弃，不通知发件��",
       "actionRejectWarn": "严格模式会直接拒绝邮件，可��影响正常邮件投递，请谨慎使用",
       "previewNotify": "预览通知内容",
       "previewNotifyUnavailable": "模板预览暂不可用",
@@ -9354,7 +9355,7 @@
     "kpi": {
       "runningTasks": "进行中任务",
       "totalLeaks": "发现漏报",
-      "pendingRecall": "待确认漏报",
+      "pendingRecall": "待��认漏报",
       "todayRecalled": "召回成功",
       "recallSucceeded": "召回成功",
       "recallFailed": "召回失败",
@@ -11174,7 +11175,7 @@
       "rule_not_found": "规则不存在"
     },
     "group_members_io": {
-      "group_not_found": "分组不存在",
+      "group_not_found": "���组不存在",
       "access_denied": "无权访问该分组",
       "export_unsupported_for_feature_group": "功能分组不支持导出成员",
       "import_unsupported_for_feature_group": "功能分组不支持导入成员",
