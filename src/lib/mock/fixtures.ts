@@ -440,7 +440,25 @@ export function mockDeleteMailMarkingRule(id: number): boolean {
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 
-export function mockBootstrap(): Bootstrap {
+export function mockBootstrap(headers?: Record<string, string>): Bootstrap {
+  // 从 X-Tenant-ID 头部还原当前正在被切换/模拟的租户（对齐 fetchBootstrap()
+  // 的 selectedTenantHeader() 写法），从而按该租户自己的 capability_flags
+  // 派生 grants —— 否则「租户管理」里编辑保存的能力开通（如 attachment-sandbox）
+  // 永远不会反映到切换到该租户后看到的模块上。
+  const tenantIdHeader = headers?.['X-Tenant-ID'] ?? headers?.['x-tenant-id'];
+  const tenantId = tenantIdHeader ? Number(tenantIdHeader) : null;
+  const selectedTenant =
+    tenantId != null ? mockTenants.items.find((t) => t.id === tenantId) : undefined;
+  // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
+  // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
+  // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
+  // platformHidden:true，多租户平台视角恒隐藏，与 grants 无关）。
+  const demoAgentGrants = ['phishing-detection', 'spoofing-detection', 'threat-retro'];
+  // 与选中租户自身的 capability_flags（如「能力开通」里勾选的 attachment-sandbox）
+  // 取并集，既保留既有的智能体中心演示效果，又让租户管理页的编辑结果生效。
+  const grants = selectedTenant
+    ? Array.from(new Set([...demoAgentGrants, ...selectedTenant.capability_flags]))
+    : demoAgentGrants;
   return {
     form: "ai-multi",
     capabilities: { ai: true, multiTenant: true, saas: false },
@@ -461,15 +479,11 @@ export function mockBootstrap(): Bootstrap {
     // 用完整镜像后，Mock 与离线演示会话（createOfflineDemoBootstrap）、生产三者
     // 的菜单语义完全一致，且不会再因为「漏登记某个功能」而失败开放。
     featureRegistry: canonicalRegistry as FeatureDef[],
-    // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
-    // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
-    // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true，多租户平台视角恒隐藏，与 grants 无关）。
-    grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
+    grants,
   };
 }
 
-// ─── 租户 ─────────────────────������──────────────────────────���────────────────────
+// ─── 租户 ───────────────────────────────────────────────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -7500,7 +7514,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     sensitive_keyword_hit:
       seed.mailType === "phishing" || seed.mailType === "sensitive",
     // 内容实体链接 tab：照抄 demo mockEntities.links（同上文件 279-282 行），
-    // vt_score 照抄 demo html_spec §④「VirusTotal检测: 47/90」/「0/90」。
+    // vt_score 照抄 demo html_spec §④「VirusTotal��测: 47/90」/「0/90」。
     entity_urls:
       seed.mailType === "phishing"
         ? [

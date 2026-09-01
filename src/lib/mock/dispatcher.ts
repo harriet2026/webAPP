@@ -499,7 +499,7 @@ const routes: Route[] = [
   {
     method: 'GET',
     pattern: '/bootstrap',
-    handler: () => ({ status: 200, data: mockBootstrap() }),
+    handler: (req) => ({ status: 200, data: mockBootstrap(req.headers) }),
   },
   // 运行时版本（GT-11459）：侧栏 VersionFooter 在每个页面都会拉 /version。
   // mock 模式必须覆盖它，否则纯 mock 模式的 E2E（无 Playwright catch-all 路由）
@@ -1723,7 +1723,7 @@ const routes: Route[] = [
     handler: () => ({ status: 200, data: mockRBLDetectionProfiles }),
   },
 
-  // ─── 海外邮件检测（mock）──────────────────────────────────────────────────
+  // ─── 海外邮件检测（mock）─────────��────────────────────────────────────────
   {
     method: 'GET',
     pattern: '/overseas-mail/config',
