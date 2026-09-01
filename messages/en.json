@@ -10272,7 +10272,6 @@
     "attachmentSave": "Save settings",
     "sandbox": {
     "title": "Sandbox inspection settings",
-    "description": "Platform-level settings shared by Cloud Gateway, AI multi-tenant, and legacy multi-tenant products.",
     "maxFileSize": "Maximum file size for inspection",
     "timeout": "Sandbox analysis timeout",
     "seconds": "seconds",

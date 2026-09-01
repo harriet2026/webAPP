@@ -697,7 +697,7 @@
         "fromDomainPlaceholder": "模糊匹配",
         "rcptDomainPlaceholder": "模糊匹配",
         "statusAll": "全部",
-        "statusEnabled": "启用",
+        "statusEnabled": "��用",
         "statusDisabled": "禁用"
       },
       "simulateButton": "模拟测试",
@@ -1161,7 +1161,7 @@
       "updatedToast": "收信域已更新",
       "deletedToast": "收信域已删除",
       "deleteDialogTitle": "删除收信域「{domain}」？",
-      "deleteDialogDescription": "该域名可能正在被转发���置、发信认证引用，删除后相关规则的对应条件将失效。是否强制删除？",
+      "deleteDialogDescription": "该域名可能正在被转发���置、发信认证引用，删除后相关规则的对应条件将失效��是否强制删除？",
       "deleteConfirmButton": "强制删除",
       "probeButton": "探测",
       "probing": "探测中…",
@@ -1456,7 +1456,7 @@
     "previewSelectGroup": "目标群组",
     "previewSelectPlaceholder": "选择群组",
     "previewMatchedCount": "命中 {count} 条已启用策略",
-    "previewSimulationNote": "基于策略配置的模拟推演，实际处置以引擎判定为准。",
+    "previewSimulationNote": "基于策略配置的模拟推演，实际处���以引擎判定为准。",
     "previewEmpty": "该群组暂���������用的���中策略。",
     "previewHitBadge": "优先��� {priority} · {name}",
     "previewIgnoredHigher": "注意：�����{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
@@ -1757,7 +1757,7 @@
         "toolGeneric": "工具调用"
       },
       "eyebrow": "邮件日志",
-      "subtitle": "通过灵活的列选择和高级搜索，检查邮件元数据、认证结果、规则命中和邮件关联关系。"
+      "subtitle": "通过灵活的列选择和高级搜索，检查邮件元数据、认证���果、规则命中和邮件关联关系。"
     },
     "columnGroups": {
       "basic": "基本信息",
@@ -2826,7 +2826,7 @@
     "createEndpoint": "新建代理服务器",
     "editEndpoint": "编辑代理服务器",
     "deleteEndpoint": "删除代理服务器",
-    "createGroup": "新建分组",
+    "createGroup": "新建��组",
     "editGroup": "编辑分组",
     "deleteGroup": "删除分组",
     "endpointRequiredFields": "名称、主机、License ID 为必填",
@@ -3542,7 +3542,7 @@
       "permanent": "永久有效",
       "conditionDaily": "当日连接超过 {count} 次",
       "conditionConcurrent": "并发连接超过 {count} 个",
-      "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
+      "conditionWindow": "每 {minutes} 分钟超过 {count} ��",
       "conditionAuthFail": "每小时认证失败超�� {count} ��",
       "conditionCmdError": "��连接命令错误超过 {count} 次",
       "conditionConnAuthFail": "单连接认���失��超过 {count} 次",
@@ -4395,7 +4395,7 @@
     "headerRequired": "请同时填写邮件头名称和值",
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
-    "keywordPlaceholder": "例如：机密|绝密|内部资料",
+    "keywordPlaceholder": "例如：机密|绝密|内部��料",
     "keywordDividerHint": "多个关键词用��线 | 分隔",
     "regexPlaceholder": "输入兼容 Go 的正则表达式",
     "invalidRegex": "正则表达式无效",
@@ -4640,7 +4640,7 @@
     "templateDesc": {
       "loose": "仅拦截明确伪造，兼容老旧系统，丢弃动作使用极少",
       "standard": "平衡安全与业务，明确伪造使用阻断/丢弃，疑似伪造使用隔离",
-      "strict": "零信任策略，大量使用丢弃动作，适用于金融/政务等高安全场景",
+      "strict": "零信任策略，大量使用丢弃动作，适用于��融/政务等高安全场景",
       "custom": "完全手动控制，脱离模板保护，需自行评估风险"
     },
     "strictObserveNotice": "切换后将强制开启观察模式",
@@ -4760,7 +4760,7 @@
     "form": {
       "section": {
         "basic": "基础设置",
-        "direction": "管控方向",
+        "direction": "管控��向",
         "object": "管控对象",
         "detection": "��测条件",
         "action": "执行动作"
@@ -5124,7 +5124,7 @@
       "arbitration_highest_priority": "最高优先级",
       "arbitration_first_match": "首次匹配",
       "overflowAction": "溢出处理",
-      "qrOverflowAction": "二维码溢出处理动作",
+      "qrOverflowAction": "二维码溢���处理动作",
       "overflow_pass_alert": "放行+告警",
       "mode_none": "禁用",
       "mode_light": "轻度",
@@ -5424,7 +5424,7 @@
       },
       "errors": {
         "invalidUrl": "请输入合法的 https:// 主机名 (不要带 path)",
-        "invalidDomain": "域名格式不合法",
+        "invalidDomain": "域名格式不���法",
         "invalidCIDR": "CIDR 格式不合法"
       },
       "nonReceive": {
@@ -5742,7 +5742,7 @@
     "receiveEditorSubtitle": "配置外站邮件的适用对象、标记位置与显示样式",
     "sendEditorSubtitle": "配置外发邮件的适用对象、免责声明位置与格式",
     "configurationTips": "配置提示",
-    "receiveTip1": "高风险部门建议使用橙色警告样式",
+    "receiveTip1": "高风险部门建议使用橙色��告样式",
     "receiveTip2": "主题前缀会以纯文本形式写入邮件主题",
     "receiveTip3": "正文顶部适合展示醒目的外站来源提醒",
     "receiveTip4": "多个位置会同时添加主题前缀和正文顶部标记",
@@ -6331,7 +6331,7 @@
           "blacklistDialog": {
             "title": "确认将发信人 \"{sender}\" 加入黑���单？",
             "desc": "后续来自该发信人���邮件将被自动拦截。",
-            "scopeLabel": "生效范围",
+            "scopeLabel": "��效范围",
             "scopeTenant": "本租户",
             "scopeGlobal": "全系统",
             "includeSubdomains": "同时拦截该域名下所有地址",
@@ -6448,7 +6448,7 @@
         "viewRecallLog": "查看召回日志",
         "noEvents": "暂无事件",
         "aiVerdict": {
-          "title": "AI 智能研判",
+          "title": "AI ��能研判",
           "viewDetails": "查看详情",
           "hideDetails": "收起详情",
           "threat": {
@@ -6794,7 +6794,7 @@
     },
     "discard": {
       "paramsTitle": "丢弃参数",
-      "logEnabled": "记录详细日志（建议始终开启）",
+      "logEnabled": "记���详细日志（建议始终开启）",
       "silentDiscard": "静默丢弃（不发退信，避免��证邮箱存在）",
       "notifyAdmin": "通知管理员"
     },
@@ -7364,7 +7364,7 @@
         "time": "24 小时制时间区间，如 09:00 ~ 18:00。",
         "weekday": "勾选一个或多个星期几。",
         "select": "从下拉选择固定结果值（如 pass / fail），或输入单个值做等于 / 不等于匹配。",
-        "group": "从预置群组 / 档案���选择对象；* 表示任意对象。",
+        "group": "从预置群组 / 档案���选择���象；* 表示任意对象。",
         "featureGroup": "选择一个特征组进行匹配。",
         "orgDept": "从组织通讯录部门树中勾选一个或多个部门；勾选父部门会自动匹配其所有子部门的发信人。"
       }
@@ -8826,7 +8826,7 @@
       "description": "运行模式决定是否执行处置，防护等级与置信度分级决定处置方式；超时策略��所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
-      "disposalLoadFailed": "超时配置加载失败�����行模式仍按真实引擎配置展示。",
+      "disposalLoadFailed": "超时配置加载失败�����行模式仍按真实引擎配置���示。",
       "editUnavailable": "超时配置加载成功后才能编辑",
       "edit": "编辑",
       "save": "保存",
@@ -9189,7 +9189,7 @@
       "actionQuarantineDesc": "邮件移入隔离区，等待管理员审���处理",
       "actionRejectDesc": "直接拒绝邮件，退信给发件人",
       "actionDiscardDesc": "静默丢弃，不通知发件人",
-      "actionRejectWarn": "严格模式会直接拒绝邮件，可能影响正常邮件投递，请谨慎使用",
+      "actionRejectWarn": "严格模式会直接拒绝邮件，可��影响正常邮件投递，请谨慎使用",
       "previewNotify": "预览通知内容",
       "previewNotifyUnavailable": "模板预览暂不可用",
       "previewNotifyHint": "由后端正式模板渲染，仅预览，不发送邮件",
@@ -10329,7 +10329,6 @@
     "attachmentSave": "保存配置",
     "sandbox": {
     "title": "沙箱检测配置",
-    "description": "平台级配置，统一应用于云网关、AI版多租户和传统版多租户。",
     "maxFileSize": "单文件送检大小上限",
     "timeout": "沙箱分析超时时间",
     "seconds": "秒",
@@ -10822,7 +10821,7 @@
       "global_rbl_requires_system_admin": "管理全局 RBL 检测档案需要平台管理员权限",
       "id_invalid": "检测档案 ID 无效",
       "name_exists": "已存在同名的检测档案",
-      "not_found": "检测档案不存在，可能已被删除",
+      "not_found": "检测档案不存在，可能���被删除",
       "tenant_context_required": "��操作需要先选择租��",
       "test_supported_for_rbl_only": "仅 RBL 类型的检测档案支持测试"
     },

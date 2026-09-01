@@ -19,7 +19,6 @@ export function SandboxPlatformPanel({ config, disabled, onChange }: SandboxPlat
     <section className="space-y-4 rounded-lg border bg-card p-5" aria-labelledby="sandbox-platform-title">
       <div>
         <h2 id="sandbox-platform-title" className="text-base font-semibold">{t('sandbox.title')}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t('sandbox.description')}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
