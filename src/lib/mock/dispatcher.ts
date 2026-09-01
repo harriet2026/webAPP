@@ -342,7 +342,7 @@ const mockSecurityModules: Record<string, boolean> = {
 // 后端，此前该端点无 handler 而落到 fallback（返回 { items:[], total:0 }，无
 // fields 字段）→ 前端 fieldDefs 为空 → computeCatalogueItem 把所有 field 非
 // null 的条件判为 "即将上线"。这里按 catalogue 的 CONDITIONS 合成一份注册表，
-// 把每个条件用到的 field 都标为 supported，使 mock 下这些条件全部变为 "可用"。
+// 把每个条件用��的 field 都标为 supported，使 mock 下这些条件全部变为 "可用"。
 // 仅影响 mock 模式；真实模式仍请求后端，不受影响。field 为 null 的目录项
 //（如 senderOrganization "仅目录（无后端支持）"）不在此列，保持原状。
 //
@@ -848,6 +848,21 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/tenants',
     handler: () => ({ status: 200, data: mockTenants }),
+  },
+  // 编辑租户（如「能力开通」勾选项）。真实后端会校验 capability_flags 是否
+  // 已在 productform 注册表登记；mock 环境无需此校验，直接按 id 原地合并
+  // 更新字段并回写 updated_at，模拟成功持久化。
+  {
+    method: 'PUT',
+    pattern: /^\/tenants\/\d+$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const target = mockTenants.items.find((t) => t.id === id);
+      if (!target) return { status: 404, data: {} };
+      const body = (req.body ?? {}) as Partial<(typeof mockTenants.items)[number]>;
+      Object.assign(target, body, { updated_at: new Date().toISOString() });
+      return { status: 200, data: target };
+    },
   },
 
   // ─── 安全模块总开关 ──────────────────────────────────────────────────────
