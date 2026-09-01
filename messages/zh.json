@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒�����������件检测�������������������能�������������",
+    "spoofingDetection": "仿冒�������������件检测�������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -534,7 +534,7 @@
       "failReason": "失败原因",
       "bruteForce": "暴力破解",
       "firstAuth": "首次认证",
-      "sendCount": "发信量",
+      "sendCount": "发信���",
       "threatCount": "威胁��",
       "blockRate": "拦截率",
       "bounceCount": "���信量",
@@ -705,7 +705,7 @@
       "deleteButton": "删除",
       "drawerTitleNew": "新建转发规则",
       "drawerTitleEdit": "编��转发规��",
-      "drawerDescription": "在 SMTP 握手阶段决定连接��接��与过滤��略",
+      "drawerDescription": "在 SMTP 握手阶段决定连�����接��与过滤��略",
       "sectionBasic": "基础信���",
       "sectionMatch": "匹配��件",
       "sectionSimulator": "规���模拟器",
@@ -857,7 +857,7 @@
           "name": "通道名称",
           "status": "状态",
           "proxies": "关联代理 IP",
-          "actions": "操作"
+          "actions": "��作"
         },
         "editButton": "编辑",
         "deleteButton": "删除",
@@ -1011,7 +1011,7 @@
           "targetHostHintRequired": "必填：作为直连投递目标（真实后端暂不支持留空按 MX 投递）"
         },
         "simulate": {
-          "header": "�����中规则《{name}》",
+          "header": "�������中规则《{name}》",
           "channel": "投递通���：{channel}",
           "proxy": "代理 IP：{name}（出口：{egress}）",
           "helo": "HELO 声明：{helo}",
@@ -1624,7 +1624,7 @@
     "sender": "发件人",
     "recipients": "收件人",
     "reason": "原因",
-    "quarantinedAt": "隔离时间",
+    "quarantinedAt": "���离时间",
     "expiresAt": "过��时间",
     "released": "���释放",
     "releasedAt": "释放时间",
@@ -2087,7 +2087,7 @@
       },
       "auth": {
         "dkimTitle": "DKIM 签名",
-        "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS 校验",
+        "dkimDescription": "为每个发信域生成或导入 DKIM 密钥并完成 DNS ��验",
         "activeKeys": "已启用密钥 {count} ���",
         "smtpTitle": "SMTP 凭证",
         "smtpDescription": "管理发信认证账号、后端路由与锁定状态",
@@ -2413,7 +2413,7 @@
     "downloadErrors": {
       "invalidId": "下载失败：记录标识无效",
       "notFound": "下载失败：记录不存在或已被清理",
-      "generic": "下载失败：服务端读取失败，请稍后重试"
+      "generic": "下载失败：服务��读取失败，请稍后重试"
     }
   },
   "authAttempts": {
@@ -2442,7 +2442,7 @@
     "viewDetails": "查看",
     "location": "归属地",
     "stats": {
-      "total": "认证总次���",
+      "total": "认证���次���",
       "successRate": "认证成功率",
       "failed": "认证失败数"
     },
@@ -2805,7 +2805,7 @@
   "proxysvr": {
     "title": "代理服务器管理",
     "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分组」投递通道引用。",
-    "endpointsTab": "代理服务器目录",
+    "endpointsTab": "代理服务���目录",
     "groupsTab": "代理���务器分组",
     "name": "名称",
     "host": "主机",
@@ -2980,7 +2980,7 @@
       "overview": "概览",
       "steps": "步骤",
       "actions": "动作",
-      "raw": "原始数据"
+      "raw": "原���数据"
     },
     "sections": {
       "evidence": "证据",
@@ -3543,7 +3543,7 @@
       "conditionDaily": "当日连接超过 {count} 次",
       "conditionConcurrent": "并发连接超过 {count} 个",
       "conditionWindow": "每 {minutes} 分钟超过 {count} 次",
-      "conditionAuthFail": "每小时认证失败超过 {count} ��",
+      "conditionAuthFail": "每小时认证失败超�� {count} ��",
       "conditionCmdError": "��连接命令错误超过 {count} 次",
       "conditionConnAuthFail": "单连接认���失��超过 {count} 次",
       "suspend15minText": "15��钟",
@@ -3943,7 +3943,7 @@
     "greylistHours": "小时",
     "greylistWhitelistTTLTip": "通过灰名单验证的发件人将被记住该时长，有效期内再次发信无需重新验证。",
     "greylistExemptions": "豁免设置",
-    "greylistExemptAuth": "已认证发件人（SPF/DKIM通过）自动豁免",
+    "greylistExemptAuth": "已认证发件��（SPF/DKIM通过）自动豁免",
     "greylistExemptWhitelist": "白名单 IP / 域自动豁免",
     "greylistExemptInternal": "内部域名互发豁免",
     "greylistDelayInvalid": "延迟秒数必须不少于 10 秒",
@@ -4396,7 +4396,7 @@
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
     "keywordPlaceholder": "例如：机密|绝密|内部资料",
-    "keywordDividerHint": "多个关键词用竖线 | 分隔",
+    "keywordDividerHint": "多个关键词用��线 | 分隔",
     "regexPlaceholder": "输入兼容 Go 的正则表达式",
     "invalidRegex": "正则表达式无效",
     "runTest": "运行测试",
@@ -4669,7 +4669,7 @@
     "title": "发信行为管控",
     "infoTip": "检测并处置异常发信行为（僵尸网络、代理池、账号被盗、内部滥发等），各规则按优先级顺序匹配。",
     "addRule": "新建规则",
-    "searchPlaceholder": "搜索规则名称、管控对象...",
+    "searchPlaceholder": "搜索规则名称��管控对象...",
     "complexRule": "配置异常",
     "empty": "暂无���则",
     "emptyHint": "点击��方按钮创建第一条规则",
@@ -4762,7 +4762,7 @@
         "basic": "基础设置",
         "direction": "管控方向",
         "object": "管控对象",
-        "detection": "检测条件",
+        "detection": "��测条件",
         "action": "执行动作"
       },
       "name": "规则名称",
@@ -5065,7 +5065,7 @@
       "notConfigured": "未配置",
       "hostRequired": "请填写杀毒引擎服务器地址",
       "platformManagedHint": "反病毒服务器与病毒库由平台管理员在「平台安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
-      "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
+      "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引���状态",
       "updateSuccess": "病毒库更新请求已提交",
       "updateFailed": "病毒库更新失败",
       "receiveDefault": "收信方向默认：发现病毒后隔离；���描超时继续流水线"
@@ -5221,7 +5221,7 @@
       "vbaAction": "VBA 宏触发动作",
       "pdfJsSection": "PDF JavaScript 检测",
       "pdfJsEnabled": "启用 PDF JavaScript 检测",
-      "pdfJsAction": "PDF JavaScript 触发动作",
+      "pdfJsAction": "PDF JavaScript 触发���作",
       "lnkSection": "LNK 文件分析",
       "lnkEnabled": "启用 LNK ��件分析",
       "lnkToUrl": "从 LNK 中提取 URL 进行评估",
@@ -5280,7 +5280,7 @@
       "riskAttachmentPolicyOptions": {
         "mark": "标记",
         "discard": "丢弃附件",
-        "none": "不设置"
+        "none": "不设��"
       },
       "markLocationLabel": "标记位置",
       "markLocationOptions": {
@@ -5378,7 +5378,7 @@
       "timeoutContinueTip": "超时后放行邮件，依赖链接保护在用户点击时进行实时检测",
       "timeoutTreatMalicious": "按恶意处置（使用上述处置动作）",
       "timeoutTreatMaliciousTip": "超时后按照恶意URL的处置策略执行",
-      "timeoutPass": "放行（仅记录日志）",
+      "timeoutPass": "放��（仅记录日志）",
       "intelGroup": "情报库设置",
       "localIntel": "本地URL情报库",
       "localIntelDesc": "启用后，缓存URL沙箱检测结果，加速后续查询",
@@ -5687,7 +5687,7 @@
     "selectGroup": "选择群组...",
     "selectDepartment": "选择部门...",
     "departments": "适用部门",
-    "recipientGroups": "收件人群组",
+    "recipientGroups": "收��人群组",
     "senderGroups": "发件人群组",
     "applyToDirectionHint": "接收规则按收件人匹配，外发规则按发件人匹配；部门与群组之间为“或”关系。",
     "applyToReceiveHint": "收信人维度",
@@ -6185,7 +6185,7 @@
         "retry": "重试"
       },
       "overview": {
-        "threatLevel": "威胁等级",
+        "threatLevel": "��胁等级",
         "intentLabels": "意图标签",
         "threat": {
           "high": "高危",
@@ -6714,7 +6714,7 @@
       "deleteAttachmentScopeNestedZip": "嵌套压缩包",
       "deleteAttachmentScopeQrCode": "含二维码",
       "deleteAttachmentReplacementText": "替换文本",
-      "deleteAttachmentInsertNotice": "插入通知",
+      "deleteAttachmentInsertNotice": "插���通知",
       "deleteAttachmentNoticePositionTop": "正文顶部",
       "deleteAttachmentNoticePositionBottom": "正文底部",
       "disclaimerPositionHeader": "信头",
@@ -6795,7 +6795,7 @@
     "discard": {
       "paramsTitle": "丢弃参数",
       "logEnabled": "记录详细日志（建议始终开启）",
-      "silentDiscard": "静默丢弃（不发退信，避免验证邮箱存在）",
+      "silentDiscard": "静默丢弃（不发退信，避免��证邮箱存在）",
       "notifyAdmin": "通知管理员"
     },
     "primaryActionHint": {
@@ -7154,7 +7154,7 @@
         "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
       },
       "desc_qrCodeCount": {
-        "source": "图片二维码识别引��",
+        "source": "��片二维码识别引��",
         "usage": "限制邮件中二维码的数量",
         "note": "大量二维码可能为恶意邮件"
       },
@@ -7524,7 +7524,7 @@
         "quarantine": {
           "source": "隔离区",
           "usage": "移至隔离区待审",
-          "note": "被隔离邮件可在邮件隔离模块查看"
+          "note": "被隔离邮件可在邮件隔���模块查看"
         },
         "review": {
           "source": "���工审核队列",
@@ -8243,7 +8243,7 @@
       "clickOverviewMetrics": {
         "clickRate": "点击率",
         "threatClicks": "拦截点击",
-        "totalClicks": "总点击"
+        "totalClicks": "总点���"
       },
       "topMaliciousDomains": "TOP 恶意域名",
       "showAllDomains": "查看全部 20",
@@ -9568,7 +9568,7 @@
     },
     "cancelDialog": {
       "title": "取消回溯任务",
-      "body": "确认取消该回溯任务？将取消其下全部子任务，且不可恢复。",
+      "body": "确认取消该回溯任务？将取消其下���部子任务，且不可恢复。",
       "confirm": "确认取消",
       "cancel": "返回"
     }
@@ -9713,7 +9713,7 @@
       "highImmediate": "发现高危威胁时立即通知（置信度 ≥ 90%）",
       "mediumImmediate": "发现中危威胁且置信度��到阈值时立即通知",
       "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
-      "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇���。",
+      "mediumNoFallbackHint": "中危未达到该���值时不会回退到低危汇���。",
       "lowDigest": "低危威胁每日汇总时间",
       "notifyVersionHint": "修改收件人或汇总时间只影响新任务；当天可能按不同配置版本分别汇总。",
       "previewImmediate": "高/中危即时通知",
@@ -9918,7 +9918,7 @@
     "statDeleted": "删除",
     "statDuration": "耗时",
     "statFailed": "失败",
-    "statMode": "同步方式",
+    "statMode": "同步方��",
     "statUpdated": "更新",
     "stateInPool": "已纳入候选池",
     "stateKeyTarget": "重点对象",
@@ -10323,8 +10323,10 @@
       "ipStrategy": "IP 策略",
       "attachmentLimit": "附件基础限制",
       "groupPolicy": "群组策略",
-      "antivirusEngine": "反病毒引擎"
+      "antivirusEngine": "反病毒引擎",
+      "sandboxDetection": "沙箱检测配置"
     },
+    "attachmentSave": "保存配置",
     "sandbox": {
     "title": "沙箱检测配置",
     "description": "平台级配置，统一应用于云网关、AI版多租户和传统版多租户。",
@@ -10681,7 +10683,7 @@
       "rblSource": "RBL源",
       "averageResponseTime": "平均响应时间",
       "timeoutRate": "超时率",
-      "queryThroughput": "查询吞吐量"
+      "queryThroughput": "查询吞吐��"
     }
   },
   "monitorDashboard": {
@@ -10825,7 +10827,7 @@
       "test_supported_for_rbl_only": "仅 RBL 类型的检测档案支持测试"
     },
     "disposal": {
-      "access_denied": "没有权限执行该处置操作",
+      "access_denied": "没有���限执行该处置操作",
       "action_invalid": "处置动作无效，只能是：{allowed}",
       "description_required": "请填写说明",
       "eml_not_on_storage_node": "在存储节点上找不到原始邮件，可能已被清理",
@@ -10935,7 +10937,7 @@
       "tenant_not_found": "租户不存在，可能已被删除"
     },
     "outbound_audit": {
-      "access_denied": "没有权限访问该审核条目",
+      "access_denied": "没有权限访���该审核条目",
       "action_invalid": "审核动作无效，只能是：{allowed}",
       "id_invalid": "审核条目 ID 无效",
       "not_found": "审���条目不存在，可能已被处理",
@@ -11217,7 +11219,7 @@
     },
     "advanced_rules_config": {
       "review_timeout_action_accept_reject_keep": "审核超时处置只能是放行、拒绝或继续等待",
-      "forward_rate_limit_per_minute_non": "每分钟转发速率上限不能为负数",
+      "forward_rate_limit_per_minute_non": "每分钟转发速率上限不能���负数",
       "tarpit_max_concurrent_non_negative": "延时限流并发上限不能为负数",
       "admin_notify_max_recipients_non_negative": "管理员通知收件人上限不能为负数"
     },
@@ -11507,7 +11509,7 @@
       "user_list_rules_require_tenant_context": "用户名单规则需要先选择租户",
       "user_list_rules_created_managed_by": "用户名单规则由���户自行创建和管理，不通过通用管理接���",
       "access_denied_user_list_rule": "无权访问该用户名单规则",
-      "user_generated_user_list_rules_deleted": "此处只能删除用户自建的名单规则"
+      "user_generated_user_list_rules_deleted": "此处只能删除用户自建的名单规���"
     },
     "user_unlock": {
       "user_not_found": "用户不存在"

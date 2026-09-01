@@ -10266,8 +10266,10 @@
       "ipStrategy": "IP Strategy",
       "attachmentLimit": "Attachment Basic Limits",
       "groupPolicy": "Group Policy",
-      "antivirusEngine": "Antivirus Engine"
+      "antivirusEngine": "Antivirus Engine",
+      "sandboxDetection": "Sandbox Inspection Settings"
     },
+    "attachmentSave": "Save settings",
     "sandbox": {
     "title": "Sandbox inspection settings",
     "description": "Platform-level settings shared by Cloud Gateway, AI multi-tenant, and legacy multi-tenant products.",

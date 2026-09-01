@@ -55,8 +55,12 @@ export function PlatformSecurityPage() {
     analysis_timeout_seconds: 120,
   });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
+  // 附件基础限制、沙箱检测配置分属两个不同的策略模块（GT-12xxx），
+  // 各自独立保存、独立标脚本状态，互不阻塞。
+  const [basicSaving, setBasicSaving] = useState(false);
+  const [basicDirty, setBasicDirty] = useState(false);
+  const [sandboxSaving, setSandboxSaving] = useState(false);
+  const [sandboxDirty, setSandboxDirty] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -76,27 +80,37 @@ export function PlatformSecurityPage() {
 
   const updateBasicConfig = (next: BasicLimitConfig) => {
     setBasicConfig(next);
-    setDirty(true);
+    setBasicDirty(true);
   };
 
   const updateSandboxConfig = (next: PlatformSandboxPolicy) => {
     setSandboxConfig(next);
-    setDirty(true);
+    setSandboxDirty(true);
   };
 
-  const handleSave = async () => {
-    setSaving(true);
+  const handleSaveBasic = async () => {
+    setBasicSaving(true);
     try {
-      await Promise.all([
-        saveBasicLimitConfig('receive', basicConfig, apiRequest),
-        savePlatformSandboxPolicy(sandboxConfig, apiRequest),
-      ]);
-      setDirty(false);
+      await saveBasicLimitConfig('receive', basicConfig, apiRequest);
+      setBasicDirty(false);
       toast.success(t('toast.saveSuccess'));
     } catch {
       toast.error(t('toast.saveFailed'));
     } finally {
-      setSaving(false);
+      setBasicSaving(false);
+    }
+  };
+
+  const handleSaveSandbox = async () => {
+    setSandboxSaving(true);
+    try {
+      await savePlatformSandboxPolicy(sandboxConfig, apiRequest);
+      setSandboxDirty(false);
+      toast.success(t('toast.saveSuccess'));
+    } catch {
+      toast.error(t('toast.saveFailed'));
+    } finally {
+      setSandboxSaving(false);
     }
   };
 
@@ -137,6 +151,12 @@ export function PlatformSecurityPage() {
             <TabsTrigger value="antivirus" data-testid="platform-security-tab-antivirus">
               {t('tabs.antivirusEngine')}
             </TabsTrigger>
+            {/* 沙箱检测配置：与"附件基础限制"是两个不同的策略模块，前者约束沙箱引擎的
+                平台级参数（送检大小上限、分析超时），后者约束附件结构性上限；
+                各自独立保存，故拆分为独立 tab，紧跟"反病毒引擎"之后。 */}
+            <TabsTrigger value="sandbox" data-testid="platform-security-tab-sandbox">
+              {t('tabs.sandboxDetection')}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="ip" className="mt-0">
@@ -153,17 +173,26 @@ export function PlatformSecurityPage() {
               <span className="text-pretty">{t('attachmentHint')}</span>
             </div>
             <BasicLimitTab config={basicConfig} onChange={updateBasicConfig} />
-            <SandboxPlatformPanel config={sandboxConfig} disabled={loading || saving} onChange={updateSandboxConfig} />
             <div className="flex justify-end border-t pt-4">
-              <Button type="button" onClick={handleSave} disabled={loading || saving || !dirty}>
-                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                {t('sandbox.save')}
+              <Button type="button" onClick={handleSaveBasic} disabled={loading || basicSaving || !basicDirty}>
+                {basicSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {t('attachmentSave')}
               </Button>
             </div>
           </TabsContent>
 
           <TabsContent value="antivirus" className="mt-0">
             <AntivirusEnginePanel />
+          </TabsContent>
+
+          <TabsContent value="sandbox" className="mt-0 space-y-4">
+            <SandboxPlatformPanel config={sandboxConfig} disabled={loading || sandboxSaving} onChange={updateSandboxConfig} />
+            <div className="flex justify-end border-t pt-4">
+              <Button type="button" onClick={handleSaveSandbox} disabled={loading || sandboxSaving || !sandboxDirty}>
+                {sandboxSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {t('sandbox.save')}
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       </PageSurface>
