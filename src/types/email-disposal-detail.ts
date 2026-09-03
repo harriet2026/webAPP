@@ -191,6 +191,13 @@ export interface MailLogDetail {
   // 「通过」的第三种终态），驱动阶段3「附件安全检测」子分组内附件沙箱
   // 一项的 timeout 状态。缺省 undefined/false 即未超时（现状默认行为）。
   sandbox_timeout?: boolean;
+
+  // sandbox_recall_result -- 仅当 sandbox_timeout 为 true 且管理员在附件
+  // 沙箱规则的超时处置配置里勾选了「召回」动作时才存在，取值为本次召回
+  // 执行结果（'success'/'failed'）。驱动事后处置时间线追加一条
+  // event_source: 'workflow.sandbox_recall' 的记录。缺省 undefined 即未
+  // 配置召回动作，即使 sandbox_timeout 为 true 也不产生该时间线记录。
+  sandbox_recall_result?: 'success' | 'failed';
 }
 
 // PhishAgentCheck mirrors internal/models.PhishAgentCheckSummary — the
@@ -245,7 +252,7 @@ export interface DetectionCheckItem {
   ruleIds: number[];
   // children -- 仅"附件安全检测"这一项非空：拆分为基础限制/反病毒引擎/
   // 附件沙箱检测/图片识别/加密附件五个子引擎，父项状态由子项汇总而来
-  // （见 use-detection-stages.ts 的 aggregate()）。
+  // （见 use-detection-stages.ts 的 aggregate()���。
   children?: DetectionCheckItem[];
 }
 

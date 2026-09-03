@@ -674,7 +674,7 @@ export function mockDashboardSummaryFor(
   const { isCurrent, range } = noteDashboardWindow(startDate, endDate);
   const totals = DASH_TOTALS[range];
   const total = isCurrent ? totals.cur : totals.prev;
-  // 复用既有基础 metrics 形状（accepted_emails / by_email_type 等供其��页面读），
+  // 复用既有基础 metrics 形状（accepted_emails / by_email_type 等供其���页面读），
   // 只按范围替换 total_emails。基础对象缺少 spf/dkim/dmarc/by_action/by_day 字段，
   // 但这些字段本仪表盘不读，故这里断言为响应类型即可。
   return {
@@ -1940,7 +1940,7 @@ export function mockAgentCenterOverview(): AgentCenterOverview {
   // 首次进入时如实复现"未配置准入规则"场景，与总开关的拦截提示配套；
   // AdmissionRulesSection 本身此前在 mock 模式下无接口支撑（/phishing-agent/
   // admission-rules 未注册路由），这里一并补齐 CRUD，让该 tab 与总开关的
-  // "先配置再启用"闭环都可在 mock 模式下走������
+  // "先配置再启用"闭环都可在 mock 模式下走��������
   let phishingAdmissionRuleIdSeq = 1;
   let phishingAdmissionRulesMockState: Array<Record<string, unknown>> = [];
 let phishingBandsMockState = [
@@ -4361,7 +4361,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
 
 // 群组下拉/群组管理数据：�� `ruleToGroup`（src/lib/api/groups.ts）契约构造 —
 //   - 分组名取自 tags 里 `grp:<name>` 前缀（GROUP_TAG_PREFIX）���而非 `name` 字段；
-//   - 分组类型优先取 metadata.group_type，其次由 stage 反推（GROUP_TYPE_TO_STAGE 的反映射）；
+//   - 分组类型优先取 metadata.group_type，其次由 stage ���推（GROUP_TYPE_TO_STAGE 的反映射）；
 //   - 普通组 condition_tree 用 `serializeMembers` 生成（与 `parseMembers` 互为逆运算）；
 //     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形态）；
 //   - member_count / reference_count 显式下发（与真实后端 include=member_count,reference_count
@@ -4685,7 +4685,7 @@ export function mockDeleteGroupPolicyRule(id: number): boolean {
   return true;
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ═════════════���══════════════════════════════════════════════════════════════════
 // 内容规则（content_rules，mock）
 // 保留统一规则的真实���储形态：condition_tree / metadata 均为 JSON 字符串，
 // CRUD、测试和导入导出共享同一份可变 fixture，便于浏览器完整走通规格交互。
@@ -5135,7 +5135,7 @@ export function mockContentGroupsList(): { items: Rule[] } {
 // 身份认证与仿冒防护（auth-spoofing，mock）
 // 配置照抄 demo 默认值（src/components/security/AuthSpoofingPage.tsx 的
 // DEFAULT_CONFIG，已是映射到统一 action 的 demo 默认），保证 Mock 模式下页面
-// 展示的初始状��与 demo 完全对齐。
+// 展示的初��状��与 demo 完全对齐。
 // ════════════════════════════════════════════════════════════════════════════════
 
 function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
@@ -5283,7 +5283,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 // metadata���，id 由 'rule-N' 解���为数字 N。
 //
 // 注：demo 源数据里 rule-7（"双向合计发信限制"）的 `enabled` 字段是 `true`，但本模块
-// 的验收测试（behavior-control-mock.test.ts）要求它在 mock 里表现为禁用
+// 的验收测试��behavior-control-mock.test.ts）要求它在 mock 里表现为禁用
 // （`is_active` === false），用来在页面上演示"禁用规则"的展示态；这里对该一条记录的
 // `enabled` 做了有意的本地覆盖（改为 false）。
 // ════════════════════════════════════════════════════════════════════════════════
@@ -6251,6 +6251,12 @@ interface MockDisposalSeed {
   // 子分组内附件沙箱一项的第三种终态，独立于 threat/pass）。仅 MIC055 这类
   // 演示"沙箱超时"场景的种子需要设置；其余种子缺省 undefined 即未超时。
   sandboxTimeout?: boolean;
+  // sandboxRecallResult -- 仅当 sandboxTimeout 为 true 且该邮件命中的沙箱
+  // 规则超时处置配置勾选了"召回"动作时才设置；'success' 追加一条召回成功
+  // 的事后处置时间线事件，'failed' 追加召回失败的事件。缺省 undefined 即
+  // 该规则超时处置未配置召回动作，即使 sandboxTimeout 为 true 也不会在
+  // 事后处置时间线追加 workflow.sandbox_recall 记录。
+  sandboxRecallResult?: 'success' | 'failed';
 }
 
 const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
@@ -6494,6 +6500,48 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     hasQrCode: false,
     score: 60,
     basis: ["ATT-SANDBOX", "附件沙箱检测规则", "ATT-SANDBOX-02"],
+    sandboxTimeout: true,
+    sandboxRecallResult: "success",
+  },
+  {
+    tid: "MIC056",
+    time: "2026-05-29 11:20:00",
+    direction: "incoming",
+    sender: "notice@file-transfer-hub.com",
+    recipients: "ops@company.com",
+    subject: "供应商资质文件（单投信）",
+    action: "quarantine",
+    reason: "附件沙箱扫描超时",
+    mailType: "virus",
+    deliveryStatus: "quarantined",
+    sourceIp: "203.0.113.88",
+    ipLocation: "新加坡",
+    cluster: "Node 1",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 58,
+    basis: ["ATT-SANDBOX", "附件沙箱检测规则", "ATT-SANDBOX-02"],
+    sandboxTimeout: true,
+    sandboxRecallResult: "failed",
+  },
+  {
+    tid: "MIC057",
+    time: "2026-05-29 11:45:00",
+    direction: "incoming",
+    sender: "share@cloud-doc-notify.com",
+    recipients: "legal@company.com",
+    subject: "合规文件待签收（单投信）",
+    action: "quarantine",
+    reason: "附件沙箱扫描超时",
+    mailType: "virus",
+    deliveryStatus: "quarantined",
+    sourceIp: "203.0.113.91",
+    ipLocation: "新加坡",
+    cluster: "Node 2",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 55,
+    basis: ["ATT-SANDBOX", "附件沙箱检测规则", "ATT-SANDBOX-03"],
     sandboxTimeout: true,
   },
   {
@@ -7530,8 +7578,13 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     disposal_basis: disposalBasis(seed),
     disposal_policy_keys: seed.basis?.[0],
     // sandbox_timeout -- 阶段3「附件安全检测」子分组内附件沙箱一项的超时
-    // 终态；仅 MIC055 这类演示场景的种子设置 sandboxTimeout: true。
+    // 终端；仅 MIC055 这类演示场景的种子设置 sandboxTimeout: true。
     sandbox_timeout: Boolean(seed.sandboxTimeout),
+    // sandbox_recall_result -- 仅超时且该邮件命中的沙箱规则超时处置配置
+    // 勾选了"召回"动作的种子（MIC055/MIC056）才有值，驱动事后处置时间线
+    // 追加一条 workflow.sandbox_recall 事件；MIC057 缺省 undefined，演示
+    // "超时但未配置召回"的反例，不产出该事件。
+    sandbox_recall_result: seed.sandboxRecallResult,
     similarity_pct: Math.max(62, seed.score),
     geo_region: seed.ipLocation,
     geo_region_name: seed.ipLocation,
@@ -7983,6 +8036,37 @@ export function mockEmailDisposalEvents(id: number) {
     raw_line: `${item.received_at} ${item.queue_id} ${eventType} ${item.action}`,
     correlation_status: "matched",
   }));
+  // sandboxRecallEvent -- 沙箱超时召回的事后处置事件，仅当该邮件设置了
+  // sandbox_recall_result（即"沙箱超时"且"该邮件命中规则的超时处置配置
+  // 勾选了召回动作"两个条件同时满足）才生成；event_source 使用
+  // 'workflow.sandbox_recall'，与既有 'workflow.quarantine'/'sideline'/
+  // 'audit'/'bounce' 同一命名体系，落入 analysis-section.tsx 现有的
+  // "非 postfix 来源即归入处置动作时间线"黑名单过滤逻辑，不需要改动时间线
+  // 渲染代码。event_type 直接写中文文案（与现有事件的展示风格一致），不
+  // 接入 i18n 字典。
+  const sandboxRecallEvent = item.sandbox_recall_result
+    ? [
+        {
+          id: id * 100 + 20,
+          mail_log_id: id,
+          event_source: "workflow.sandbox_recall",
+          event_type: "附件沙箱超时召回",
+          event_result: item.sandbox_recall_result,
+          queue_id: item.queue_id,
+          message_id: item.message_id,
+          sender: item.sender,
+          recipients: item.recipients.join(", "),
+          event_time: item.received_at,
+          raw_payload: JSON.stringify({
+            event: "sandbox_recall",
+            tid: item.tid,
+            result: item.sandbox_recall_result,
+          }),
+          raw_line: `${item.received_at} ${item.queue_id} sandbox_recall ${item.sandbox_recall_result}`,
+          correlation_status: "matched",
+        },
+      ]
+    : [];
   // 每个收件人一条投递事件——补 `recipient`（单数）+ `dsn`，供 RecipientStatus
   // 的已投递分组按收件人匹配投递明细行（webapp/src/components/email-disposal/
   // components/recipient-status.tsx: events.find(e => e.recipient === d.recipient)）。
@@ -8013,7 +8097,7 @@ export function mockEmailDisposalEvents(id: number) {
       };
     },
   );
-  const events = [...genericEvents, ...perRecipientEvents];
+  const events = [...genericEvents, ...sandboxRecallEvent, ...perRecipientEvents];
   return { items: events, total: events.length, page: 1, page_size: 100 };
 }
 
