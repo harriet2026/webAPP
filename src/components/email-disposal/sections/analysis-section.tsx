@@ -134,9 +134,6 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   const t = useTranslations('emailDisposal.detail.analysis');
   const tFeatures = useTranslations('emailDisposal.detail.features');
   const { viewer, capabilities } = useProductForm();
-  // Reuses §9-A's existing "暂未实现" copy (send-receive-context-card.tsx)
-  // rather than adding a fourth duplicate translation of the same string.
-  const tSenderActions = useTranslations('emailDisposal.detail.overview.senderActions');
   const rawLocale = useLocale();
   const router = useRouter();
   // Same locale mapping pattern as mail-list-table.tsx; the disposal-basis
@@ -289,7 +286,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                         data-testid={`analysis-stage-${st.stage}-detail`}
                       >
                         {isPlatformPolicyContext && st.stage === 1 ? (
-                          /* 阶段1 + 多租户租户视角：命中策略明细替换为说明文字 */
+                          /* 阶段1 + 多租户租户��角：命中策略明细替换为说明文字 */
                           <p className="text-xs text-muted-foreground italic">
                             {t('platformStageHint')}
                           </p>
@@ -579,21 +576,6 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             <div className="flex items-start gap-2">
                               <span className="w-20 shrink-0 text-muted-foreground">{t('executionResult')}:</span>
                               <span>{ev.event_result || '—'}{ev.dsn ? `（${ev.dsn}）` : ''}</span>
-                            </div>
-                            <div className="pt-1">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="h-7 text-xs"
-                                data-testid={`analysis-timeline-event-${ev.id}-view-log`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toast.info(tSenderActions('notImplementedToast'));
-                                }}
-                              >
-                                {t('viewRecallLog')}
-                              </Button>
                             </div>
                           </div>
                         )}

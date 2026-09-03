@@ -6456,7 +6456,6 @@
         "recallScope": "Recall Scope",
         "recallAction": "Recall Action",
         "executionResult": "Execution Result",
-        "viewRecallLog": "View Recall Log",
         "noEvents": "No Events",
         "aiVerdict": {
           "title": "AI Verdict",
@@ -7840,7 +7839,7 @@
       "byThreat": "Threat breakdown",
       "blockRateLegend": "Bar color = block rate",
       "blockRateGood": "≥97%  Well protected",
-      "blockRateWarn": "95–97%  Monitor",
+      "blockRateWarn": "95���97%  Monitor",
       "blockRateBad": "<95%  High risk"
     },
     "time": {

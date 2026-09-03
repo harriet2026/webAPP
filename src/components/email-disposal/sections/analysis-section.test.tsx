@@ -135,7 +135,7 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(detail.textContent).toContain('召回范围');
     expect(detail.textContent).toContain('召回动作');
     expect(detail.textContent).toContain('执行结果');
-    expect(screen.getByTestId('analysis-timeline-event-501-view-log')).toHaveTextContent('查看召回日志');
+    expect(screen.queryByTestId('analysis-timeline-event-501-view-log')).not.toBeInTheDocument();
   });
 
   it('内容详情展开后展示可供后端日志检索的完整关联ID (GT-12651)', () => {

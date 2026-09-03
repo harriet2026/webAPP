@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒�����������������件检测�������������������能�������������",
+    "spoofingDetection": "仿冒�������������������件检测�������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -2057,7 +2057,7 @@
         "priorityHint": "数值越小越优先;同优先级将轮询",
         "hostRequired": "请输入主机或地址",
         "portInvalid": "端口需为 1-65535",
-        "add": "添加下一��",
+        "add": "��加下一��",
         "edit": "编辑下一���",
         "empty": "暂无收信域",
         "noNexthop": "暂���下一跳"
@@ -2207,7 +2207,7 @@
     "selectAll": "全选",
     "selectRow": "选择该行",
     "batchSelected": "已选 {count} 项",
-    "batchEnableTitle": "批量启用",
+    "batchEnableTitle": "批量启���",
     "batchEnableDescription": "确定批量启用选中的 {count} 个账号？",
     "batchDisableTitle": "批量停用",
     "batchDisableDescription": "确定批量停用选中的 {count} 个账号？停用��将立即终止其登录会话。",
@@ -3154,7 +3154,7 @@
       "recommended": "建议范围",
       "related_messages": "关联邮件",
       "tenant": "租户范围",
-      "single_message": "单封邮件",
+      "single_message": "��封邮件",
       "account": "账号范围"
     },
     "actionRecordTypes": {
@@ -3164,7 +3164,7 @@
       "export_report": "导出报告"
     },
     "actionRecordStatuses": {
-      "pending": "待处理",
+      "pending": "���处理",
       "running": "���行中",
       "completed": "已完成",
       "failed": "失败",
@@ -3542,7 +3542,7 @@
       "validityLabel": "有效期：",
       "permanent": "永久有效",
       "conditionDaily": "当日连接超过 {count} 次",
-      "conditionConcurrent": "并发连接超过 {count} 个",
+      "conditionConcurrent": "并发连接超过 {count} ��",
       "conditionWindow": "每 {minutes} ��钟超过 {count} ��",
       "conditionAuthFail": "每小时认证失败超�� {count} ��",
       "conditionCmdError": "��连接命令错误超过 {count} 次",
@@ -4392,7 +4392,7 @@
     "scopeDisplayUrls": "URL",
     "attachmentContentUnavailable": "附件内容匹配仅由旁路扫描器提供，当前编辑器暂不能配置。",
     "legacyScopesPreserved": "此规则保留了 {count} 个简化编辑器未展示的兼容作用域。",
-    "headerOnlyTagHint": "标记仅添加邮件头，不会修改邮件主题。",
+    "headerOnlyTagHint": "标记��添加邮件头，不会修改邮件主题。",
     "headerRequired": "请同时填写邮件头名称和值",
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
@@ -4663,7 +4663,7 @@
       "reject": "向发信方返回 SMTP 5xx 拒绝响应",
       "quarantine": "移入隔离区，等待管理员审阅",
       "audit": "添加标记头后正常投递",
-      "discard": "静默丢弃，发信方收到投递成功响应"
+      "discard": "静默丢弃，发信方收到投��成功响应"
     }
   },
   "behaviorControl": {
@@ -4867,7 +4867,7 @@
       "ipRequired": "请输入IP地址或IP段",
       "ipGroupRequired": "请选择IP群组",
       "domainRequired": "请输入域名",
-      "conditionsMin": "至少需要一条检测条件",
+      "conditionsMin": "至少需要一条检���条件",
       "conditionsMax": "最多允许 4 条检测条件"
     },
     "import": {
@@ -5681,7 +5681,7 @@
     "editReceiveRule": "编辑接收标记规则",
     "createSendRule": "新建外发声明规则",
     "editSendRule": "编辑外发声明规则",
-    "basicConfig": "基础配置",
+    "basicConfig": "基���配置",
     "ruleNamePlaceholder": "如：高管外站警示",
     "ruleNameTip": "用于识别规则，建议说明适用部门和用途",
     "priorityTip": "必须为正整数；数值越大，规则越优先执行",
@@ -5987,7 +5987,7 @@
       "groupRelation": "条件��关系",
       "conditionRelation": "组内条件关系",
       "groupLabel": "条件组 {n}",
-      "deleteGroup": "删除条件组 {n}",
+      "deleteGroup": "删���条件组 {n}",
       "groupLimit": "最多可添加 {n} 个���件组",
       "operator": "运算符",
       "operators": {
@@ -6100,7 +6100,7 @@
       "corrected": "已纠正",
       "correctedTooltip": "原判定：{original} → 纠正为：{current}（{source}）",
       "action": "执行动作",
-      "status": "邮件状态",
+      "status": "邮件状���",
       "operations": "操作",
       "view": "查看",
       "findSimilar": "找相似",
@@ -6452,7 +6452,6 @@
         "recallScope": "召回范围",
         "recallAction": "召回动作",
         "executionResult": "执行结果",
-        "viewRecallLog": "查看召回日志",
         "noEvents": "暂无事件",
         "aiVerdict": {
           "title": "AI ��能研判",
@@ -6707,7 +6706,7 @@
       "tagPositionPrefix": "主题前缀",
       "tagPositionHeader": "信头",
       "disclaimerContent": "免责声明内容",
-      "disclaimerPosition": "插入位置",
+      "disclaimerPosition": "插入��置",
       "headerName": "信头名称",
       "headerValue": "信头值",
       "mergeWindow": "合并窗口（分钟）",
@@ -7147,7 +7146,7 @@
       },
       "desc_nestedZipLevel": {
         "source": "压缩包解析引擎",
-        "usage": "检测压缩包嵌套层级",
+        "usage": "检测压缩包嵌��层级",
         "note": "用于检测压缩炸弹，建议阈值3-5层"
       },
       "desc_nestedFileCount": {
@@ -7217,7 +7216,7 @@
         "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命���高度相似域名；介于：命中差异落在指定区间的域名。",
         "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
         "recommended": "推荐使用「小于等于 2��，与内置相似域名规则一致，兼顾召回与误报。",
-        "note": "先选择受保护域��档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
+        "note": "先选择受保护域��档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越��似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检测模块",
@@ -9024,7 +9023,7 @@
       "empty": "暂无检测日志",
       "totalPrefix": "共 ",
       "totalSuffix": " 条",
-      "fallbackHint": "内联回退记录（已投递并标记），无可处置旁路件"
+      "fallbackHint": "内联回退记录（已投���并标记），无可处置旁路件"
     },
     "detail": {
       "title": "检测详情",
@@ -9344,7 +9343,7 @@
       "entry": "紧急手动扫描",
       "title": "紧急手动扫描",
       "description": "选择��溯策略与时间���围，立即对窗口内邮件复检。",
-      "strategy": "回溯策略",
+      "strategy": "回���策略",
       "strategyPlaceholder": "请选择策略",
       "start": "开始时间",
       "end": "结束时间",
@@ -9704,7 +9703,7 @@
       "circuitBreakerThreshold": "熔断阈值",
       "exclusions": "排除策略",
       "excludeTags": "排除收件人系统标签",
-      "excludeEmails": "排除邮件地址",
+      "excludeEmails": "��除邮件地址",
       "tagPlaceholder": "sys:标签名",
       "tagInvalid": "标签必须以 sys: 开头",
       "emailPlaceholder": "email 地址",
@@ -9737,7 +9736,7 @@
       "statsTriggers": "累计触发",
       "statsLeaks": "累计发现漏报",
       "statsRecalled": "累计��回",
-      "nextRun": "下次执行",
+      "nextRun": "下次执��",
       "confirmCloseTitle": "放弃未保存改动？",
       "confirmCloseDescription": "当前抽��有未保存的改动，确认放弃？",
       "keepEditing": "继续编辑",
@@ -10306,7 +10305,7 @@
       "enter": "系统状态",
       "licenseDays": "剩余 {n} 天",
       "ruleLatest": "最新",
-      "avExpire": "{vendor} / {date} 到期"
+      "avExpire": "{vendor} / {date} ���期"
     }
   },
   "emailType": {
@@ -10435,7 +10434,7 @@
       "passwordMaxAgeDays": "0 表示永不过期",
       "maxOnline": "0 表示不限制",
       "overflowPolicy": "「拒绝新登录」更严：合法会话在线时，攻击者的新登录会被直接拒绝",
-      "lockoutMinutes": "-1 = 永久锁定，只能由管理员在用户列表里手工解锁",
+      "lockoutMinutes": "-1 = 永久��定，只能由管理员在用户列表里手工解锁",
       "captchaAfterFailures": "连续失败达该次数后，后续登录需输入图形验证码",
       "twoFactorEnabled": "启用后，本租户全体成员登录需进行二次认证",
       "twoFactorLocked": "平台已强制启用二次认证，本租户无法关闭",
@@ -10806,7 +10805,7 @@
       "email_field_unmapped": "必填字段「邮箱」尚未映射，请���字段映射中指定它对应的列",
       "encryption_key_missing": "服务端未配置通讯录加密密钥（至少 32 字节），无法保存或测试含密码等敏感字段的配置，请联系管理员配置后重试",
       "file_store_uninitialized": "服务端未启用 CSV 文件存储，请联系管理员配置后重试",
-      "multipart_parse_failed": "上传表单解析失败，请重新提交",
+      "multipart_parse_failed": "上传��单解析失败，请重新提交",
       "no_running_sync": "当前没有正在运行的同步任务",
       "no_sync_log": "该数据源还没有同步记录",
       "not_found": "通讯录数据源不存在，可能已被删除",
@@ -10818,7 +10817,7 @@
       "updated_at_required": "缺少数据版本信息，请刷新页面后重试",
       "upload_token_empty": "请先上传 CSV 文件",
       "upload_token_invalid": "上传凭证无效或已过期，请重新上传 CSV 文件",
-      "user_file_empty": "上传的 CSV 文件为空",
+      "user_file_empty": "上传的 CSV ���件为空",
       "user_file_missing": "请选择要上传的用户通讯录 CSV ��件",
       "user_file_read_failed": "读取上传的 CSV 文件失败，请确认文件未损坏��重试",
       "user_file_ref_empty": "缺少已上传文件的引用，请重新上传"
@@ -11036,7 +11035,7 @@
       "type_unsupported": "不支持的调查类型",
       "target_type_unsupported": "不支持的调查对象类型",
       "traceback_created_elsewhere": "威胁回溯任务由威胁回溯扫描创建，不能从此处新建",
-      "traceback_cancelled_elsewhere": "威胁回溯任务请在威胁回溯运行记录中取消"
+      "traceback_cancelled_elsewhere": "威胁回溯任务请在威胁回溯运行记��中取消"
     },
     "profile": {
       "user_not_found": "用户���存在",
