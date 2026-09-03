@@ -3,7 +3,16 @@ import type {
   MailLogDetail, DetectionStage, DetectionCheckItem, CheckStatus, FinalVerdict,
 } from '@/types/email-disposal-detail';
 
-const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: string[] }[] }[] = [
+interface StageCheckDef {
+  key: string;
+  pages: string[];
+  // children -- 仅"附件安全检测"这一项非空，拆分为五个子引擎各自独立的
+  // page key（GT-«阶段3附件安全检测子分组»）；父项不再直接判定，而是由
+  // buildDetectionStages() 对 children 做 aggregate() 汇总。
+  children?: StageCheckDef[];
+}
+
+const STAGE_DEFS: { stage: number; key: string; checks: StageCheckDef[] }[] = [
   { stage: 1, key: 'connection', checks: [
     { key: 'ipRateLimit',       pages: ['ip_frequency'] },
     { key: 'ipFilter',          pages: ['ip_filter'] },
@@ -18,7 +27,13 @@ const STAGE_DEFS: { stage: number; key: string; checks: { key: string; pages: st
     { key: 'personalList',    pages: ['user_list'] },
   ]},
   { stage: 3, key: 'content', checks: [
-    { key: 'attachmentSecurity', pages: ['attachment_security'] },
+    { key: 'attachmentSecurity', pages: [], children: [
+      { key: 'attachmentBasicLimit',   pages: ['attachment_basic_limit'] },
+      { key: 'attachmentAntivirus',    pages: ['attachment_antivirus'] },
+      { key: 'attachmentSandbox',      pages: ['attachment_sandbox'] },
+      { key: 'attachmentImageDetect',  pages: ['attachment_image_detect'] },
+      { key: 'attachmentEncrypted',    pages: ['attachment_encrypted'] },
+    ]},
     { key: 'urlProtection',      pages: ['url_protection'] },
     { key: 'contentRules',       pages: ['content_rules'] },
   ]},
@@ -73,6 +88,14 @@ function checkStatus(ml: MailLogDetail, pages: string[]): { status: CheckStatus;
   return { status: 'pass', ruleIds: [] };
 }
 
+// attachmentSandboxStatus -- 附件沙箱检测专属判定：先看 sandbox_timeout
+// （扫描超时未拿到结论，独立于 threat/suspicious/pass 的第三种终态），
+// 其余情况沿用通用的 page 命中判定（checkStatus）。
+function attachmentSandboxStatus(ml: MailLogDetail, pages: string[]): { status: CheckStatus; ruleIds: number[] } {
+  if (ml.sandbox_timeout) return { status: 'timeout', ruleIds: [] };
+  return checkStatus(ml, pages);
+}
+
 function aiCheckStatus(ml: MailLogDetail, key: string): { status: CheckStatus; ruleIds: number[] } {
   const tag = (ml.cac_result?.tag ?? '').toLowerCase();
   const intTag = ml.cac_result?.int_tag ?? 0;
@@ -89,21 +112,38 @@ function aiCheckStatus(ml: MailLogDetail, key: string): { status: CheckStatus; r
   return { status: 'skipped', ruleIds: [] };
 }
 
+// aggregate -- threat > suspicious > timeout > pass > skipped。timeout（沙箱
+// 扫描超时未拿到结论）语义上比"通过"更需要关注，但尚未坐实威胁/可疑，故
+// 排在两者之间；用于父项"附件安全检测"汇总五个子引擎状态，以及既有的
+// 阶段整体状态汇总。
 function aggregate(checks: DetectionCheckItem[]): CheckStatus {
   if (checks.some((c) => c.status === 'threat')) return 'threat';
   if (checks.some((c) => c.status === 'suspicious')) return 'suspicious';
+  if (checks.some((c) => c.status === 'timeout')) return 'timeout';
   if (checks.some((c) => c.status === 'pass')) return 'pass';
   return 'skipped';
 }
 
+// buildCheckItem -- 单个检测项判定，若定义了 children（目前仅"附件安全
+// 检测"）则递归构建子项列表，父项状态由 aggregate(children) 得出而非
+// 独立判定；否则走原有的单项判定逻辑（AI 阶段走 aiCheckStatus，附件沙箱
+// 走 attachmentSandboxStatus，其余走通用 checkStatus）。
+function buildCheckItem(ml: MailLogDetail, stageKey: string, def: StageCheckDef): DetectionCheckItem {
+  if (def.children) {
+    const children = def.children.map((child) => buildCheckItem(ml, stageKey, child));
+    return { key: def.key, status: aggregate(children), ruleIds: [], children };
+  }
+  const { status, ruleIds } = stageKey === 'ai'
+    ? aiCheckStatus(ml, def.key)
+    : def.key === 'attachmentSandbox'
+      ? attachmentSandboxStatus(ml, def.pages)
+      : checkStatus(ml, def.pages);
+  return { key: def.key, status, ruleIds };
+}
+
 export function buildDetectionStages(ml: MailLogDetail): DetectionStage[] {
   return STAGE_DEFS.map((def) => {
-    const checks: DetectionCheckItem[] = def.checks.map((c) => {
-      const { status, ruleIds } = def.key === 'ai'
-        ? aiCheckStatus(ml, c.key)
-        : checkStatus(ml, c.pages);
-      return { key: c.key, status, ruleIds };
-    });
+    const checks: DetectionCheckItem[] = def.checks.map((c) => buildCheckItem(ml, def.key, c));
     if (def.key === 'identity') {
       const auth = checks.find((c) => c.key === 'authSpoofing');
       if (auth && auth.status === 'pass') {

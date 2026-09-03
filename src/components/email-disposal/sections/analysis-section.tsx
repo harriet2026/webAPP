@@ -46,6 +46,9 @@ const STATUS_ICON: Record<CheckStatus, React.ReactElement> = {
   threat:     <XCircle className="h-4 w-4 text-red-500" />,
   processing: <Clock className="h-4 w-4 text-blue-500 animate-pulse" />,
   skipped:    <MinusCircle className="h-4 w-4 text-gray-400" />,
+  // timeout -- 附件沙箱检测扫描超时未拿到结论，复用 Clock 图标但取中性
+  // slate 配色（不加 animate-pulse），与仍在进行中的 processing 区分开。
+  timeout:    <Clock className="h-4 w-4 text-slate-500" />,
 };
 
 // Larger variant for the stage-card centered icon (v2 spec: w-5 h-5).
@@ -55,6 +58,7 @@ const STATUS_ICON_LG: Record<CheckStatus, React.ReactElement> = {
   threat:     <XCircle className="h-5 w-5 text-red-500" />,
   processing: <Clock className="h-5 w-5 text-blue-500 animate-pulse" />,
   skipped:    <MinusCircle className="h-5 w-5 text-gray-400" />,
+  timeout:    <Clock className="h-5 w-5 text-slate-500" />,
 };
 
 const STAGE_CARD_STYLE: Record<CheckStatus, string> = {
@@ -63,6 +67,7 @@ const STAGE_CARD_STYLE: Record<CheckStatus, string> = {
   threat: 'border-red-300 bg-red-50 ring-1 ring-red-400 dark:border-red-800 dark:bg-red-950/20',
   processing: 'border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20',
   skipped: 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50',
+  timeout: 'border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/30',
 };
 
 // 状态徽标（通过/威胁/…）配色。
@@ -72,6 +77,7 @@ const STAGE_BADGE_STYLE: Record<CheckStatus, string> = {
   threat: 'text-red-600 border-red-300',
   processing: 'text-blue-600 border-blue-300',
   skipped: 'text-gray-500 border-gray-300',
+  timeout: 'text-slate-600 border-slate-300',
 };
 
 // 命中策略行 · 结果文案配色。
@@ -81,6 +87,7 @@ const CHECK_RESULT_COLOR: Record<CheckStatus, string> = {
   threat: 'text-red-600',
   processing: 'text-blue-600',
   skipped: 'text-muted-foreground',
+  timeout: 'text-slate-600',
 };
 
 const VERDICT_ICON: Record<FinalVerdict, React.ReactElement> = {
@@ -175,7 +182,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
   // 「事后处置时间线」是事后**处置动作**日志（召回/放行/丢弃等管理员操作），
   // 不是常规 SMTP 投递 DSN 事件流水 -- 后者（event_source === 'postfix'，见
   // internal/api/postfix_events.go）在这里展示会造成语义混淆（review finding）。
-  // 后端真实写入的 event_source 只有 5 个常量（internal/models/delivery_events.go）：
+  // 后端真实写���的 event_source 只有 5 个常量（internal/models/delivery_events.go）：
   // 'postfix'（Postfix 投递状态回传，routine）与 4 个 'workflow.*'（quarantine/
   // sideline/audit/bounce -- 均由 RecordWorkflowReinject 在管理员 release/approve
   // 时写入，即处置动作）。用黑名单排除 'postfix' 而非枚举白名单 'workflow.*'，
@@ -293,17 +300,41 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
                             </div>
                             <div className="space-y-1.5">
                               {st.checks.map((c) => (
-                                <div key={c.key} className="flex items-center justify-between gap-2 text-xs">
-                                  <div className="flex items-center gap-1 min-w-0">
-                                    {STATUS_ICON[c.status]}
-                                    <span className="truncate">{t(`check.${c.key}`)}</span>
+                                <div key={c.key}>
+                                  <div className="flex items-center justify-between gap-2 text-xs">
+                                    <div className="flex items-center gap-1 min-w-0">
+                                      {STATUS_ICON[c.status]}
+                                      <span className="truncate">{t(`check.${c.key}`)}</span>
+                                    </div>
+                                    <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
+                                      {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
+                                      {c.ruleIds.length > 0 && (
+                                        <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
+                                      )}
+                                    </span>
                                   </div>
-                                  <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[c.status])}>
-                                    {c.status === 'skipped' ? t('notIntegrated') : t(`status.${c.status}`)}
-                                    {c.ruleIds.length > 0 && (
-                                      <span className="ml-1 text-muted-foreground">#{c.ruleIds.join(', #')}</span>
-                                    )}
-                                  </span>
+                                  {/* 子分组容器：仅"附件安全检测"父项非空——五个子引擎
+                                      （基础限制/反病毒引擎/附件沙箱/图片识别/加密附件）
+                                      默认展开，沿用阶段卡"外层卡片=border、内层分隔=
+                                      border-t"由外而内逐层变浅的嵌套惯例（DESIGN.md）。 */}
+                                  {c.children && c.children.length > 0 && (
+                                    <div className="mt-1.5 ml-1 space-y-1.5 rounded-md border border-border/50 bg-muted/30 p-2">
+                                      {c.children.map((child) => (
+                                        <div key={child.key} className="flex items-center justify-between gap-2 text-xs">
+                                          <div className="flex items-center gap-1 min-w-0">
+                                            {STATUS_ICON[child.status]}
+                                            <span className="truncate">{t(`check.${child.key}`)}</span>
+                                          </div>
+                                          <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[child.status])}>
+                                            {child.status === 'skipped' ? t('notIntegrated') : t(`status.${child.status}`)}
+                                            {child.ruleIds.length > 0 && (
+                                              <span className="ml-1 text-muted-foreground">#{child.ruleIds.join(', #')}</span>
+                                            )}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -598,7 +629,7 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
               <KV label={tFeatures('tid')} value={tidOf(detail.message_uuid)} mono />
               <KV label={tFeatures('emailId')} value={detail.message_id || '—'} mono />
               {/* 完整关联键：用于在后端服务器日志中对应检索（GT-12651）。
-                  message_uuid 贯穿组件 JSONL，session_id 是 milter 运行日志的
+                  message_uuid 贯穿组件 JSONL，session_id 是 milter 运行日���的
                   sid，queue_id 对应 Postfix mail.log。 */}
               <KV label={tFeatures('messageUuid')} value={detail.message_uuid || '—'} mono />
               <KV label={tFeatures('sessionId')} value={detail.session_id || '—'} mono />

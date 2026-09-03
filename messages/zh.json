@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒���������������件检测�������������������能�������������",
+    "spoofingDetection": "仿冒�����������������件检测�������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1333,7 +1333,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则在每个模块的配置，���色为「继承全局」，彩色��「另行配置」。",
+    "configDetailHint": "按阶段流水线顺序展示该规则���每个模块的配置，���色为「继承全局」，彩色��「另行配置」。",
     "priorityHintAria": "优�����级说明",
     "name": "名称",
     "targetGroups": "�����������",
@@ -1456,7 +1456,7 @@
     "previewSelectGroup": "目标群组",
     "previewSelectPlaceholder": "选择群组",
     "previewMatchedCount": "命中 {count} 条已启用策略",
-    "previewSimulationNote": "基于策略配置的模拟推���，实���处���以引擎判定为准。",
+    "previewSimulationNote": "基于���略配置的模拟推���，实���处���以引擎判定为准。",
     "previewEmpty": "该群组暂���������用的���中策略。",
     "previewHitBadge": "优先��� {priority} · {name}",
     "previewIgnoredHigher": "注意：�����{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
@@ -2057,7 +2057,7 @@
         "priorityHint": "数值越小越优先;同优先级将轮询",
         "hostRequired": "请输入主机或地址",
         "portInvalid": "端口需为 1-65535",
-        "add": "添加下一跳",
+        "add": "添加下一��",
         "edit": "编辑下一���",
         "empty": "暂无收信域",
         "noNexthop": "暂���下一跳"
@@ -2084,7 +2084,7 @@
         "manageTitle": "管理出站策略",
         "manageDesc": "出站内容规则与审核队列在独立页面管理",
         "contentRulesLink": "前往内容规则",
-        "auditLink": "前往出站审核"
+        "auditLink": "前往出站���核"
       },
       "auth": {
         "dkimTitle": "DKIM 签名",
@@ -2824,7 +2824,7 @@
     "addMember": "添加成员代理服务器",
     "noMoreEndpoints": "没有更��可选代理���务器",
     "membersEmptyHint": "至少添加��个代理服务器；顺序即 failover 顺序（上者先）。",
-    "createEndpoint": "新建代理服务器",
+    "createEndpoint": "新��代理服务器",
     "editEndpoint": "编辑代理服务器",
     "deleteEndpoint": "删除代理服务器",
     "createGroup": "新建��组",
@@ -3165,7 +3165,7 @@
     },
     "actionRecordStatuses": {
       "pending": "待处理",
-      "running": "执行中",
+      "running": "���行中",
       "completed": "已完成",
       "failed": "失败",
       "cancelled": "已取消"
@@ -3813,7 +3813,7 @@
     "importJsonWrongScope": "不是 IP 黑白名单的导出文件",
     "importJsonEmpty": "导出文件中没有规则",
     "importJsonBadRule": "规��数据不完整或非 IP 规���",
-    "importListTypeMismatch": "名单类型与当前页不符",
+    "importListTypeMismatch": "名单类型与���前页不符",
     "importExpressionUnsupported": "表达��规则不支持批量导入，请手动创建"
   },
   "inboundAudit": {
@@ -4414,7 +4414,7 @@
     "actionSection": "执行动作",
     "actionTip": "选择规则命中后执行的处置动作",
     "actionHint": "���用于所有勾选的生效范围",
-    "remarkTitle": "备注说明",
+    "remarkTitle": "备��说明",
     "remarkPlaceholder": "添加规则说明，最多200字",
     "currentEffect": "当前配置效果",
     "editorSubtitle": "配置内容关键词/正则规���，识别并处置含敏感信息的邮件",
@@ -4720,7 +4720,7 @@
     "dim": {
       "mail_count": "���出邮件的总数上限",
       "ip_count": "使用发信IP个数上限",
-      "recipient_count": "收信人总人数上限",
+      "recipient_count": "���信人总人数上限",
       "attachment_size": "发出附件总大小上限(MB)"
     },
     "recipientLimit": {
@@ -5402,7 +5402,7 @@
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
       "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
-      "publicBaseUrlChangeConfirmBody": "此操作���让所有历史邮件中已重写的链接 (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
+      "publicBaseUrlChangeConfirmBody": "此操������让所有历史邮件中已重写的链接 (指向旧主机名) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
       "publicBaseUrlChangeConfirmCta": "我已了解风险并继续",
       "policy": {
         "title": "点击时安全策略（固定）",
@@ -5563,7 +5563,7 @@
       "presetStandard": "���准（推荐）",
       "presetLoose": "宽松"
     },
-    "applySameRisk": "应用同风险等级",
+    "applySameRisk": "应用��风险等级",
     "applySameRiskDone": "已应用到同风��等级的其他意图",
     "copyToDirections": "复制到其他方向",
     "reset": "重置为缺省值",
@@ -5740,7 +5740,7 @@
     "testMatchedRule": "匹配成功：{name}",
     "testNotMatched": "未匹配",
     "unnamedRule": "未命名规则",
-    "receiveEditorSubtitle": "配置外站邮件的适用对象、标记位置与显示样式",
+    "receiveEditorSubtitle": "配置外站邮件的适用对��、标记位置与显示样式",
     "sendEditorSubtitle": "配置外发邮件的适用对象、免责声明位置与格式",
     "configurationTips": "配置提示",
     "receiveTip1": "高风险部门建议使用橙色��告样式",
@@ -5988,7 +5988,7 @@
       "conditionRelation": "组内条件关系",
       "groupLabel": "条件组 {n}",
       "deleteGroup": "删除条件组 {n}",
-      "groupLimit": "最多可添加 {n} 个条件组",
+      "groupLimit": "最多可添加 {n} 个���件组",
       "operator": "运算符",
       "operators": {
         "eq": "等于",
@@ -6408,7 +6408,8 @@
           "suspicious": "可疑",
           "threat": "威胁",
           "processing": "处理中",
-          "skipped": "跳过"
+          "skipped": "跳过",
+          "timeout": "超时"
         },
         "check": {
           "ipRateLimit": "IP 频率限制",
@@ -6420,7 +6421,12 @@
           "behaviorControl": "发信行为管控",
           "recipientCheck": "收信人检测",
           "personalList": "个人黑白名单",
-          "attachmentSecurity": "附件安全",
+          "attachmentSecurity": "附件安全检测",
+          "attachmentBasicLimit": "基础限制",
+          "attachmentAntivirus": "反病毒引擎",
+          "attachmentSandbox": "附件沙箱",
+          "attachmentImageDetect": "图片识别",
+          "attachmentEncrypted": "加密附件",
           "urlProtection": "URL 防护",
           "contentRules": "内容规则",
           "intentEngine": "意图引擎",
@@ -7150,7 +7156,7 @@
         "note": "防止解压后文件数量过多"
       },
       "desc_imageQrCodeResult": {
-        "source": "附件图片识别引擎（OCR/二维码）",
+        "source": "附件图片识别引��（OCR/二维码）",
         "usage": "判断图片识别处理是否成功完成：成功=识别步���正常跑完（即使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
         "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
       },
@@ -8294,7 +8300,7 @@
       "safeLinkMail": "安全链接邮件",
       "maliciousLinkMail": "恶意链接邮件",
       "phishingLink": "钓鱼链接",
-      "malwareDownload": "恶意软件下载",
+      "malwareDownload": "恶���软件下载",
       "cAndCCommunication": "C&C通信",
       "spamPromotion": "垃圾推广",
       "totalAttachmentMail": "含附件邮件总量",
@@ -8847,7 +8853,7 @@
         "realtime": "按分级表执行处置（隔离/标记/放行）；若超时未出结论，将按下方「超时策略」临时处置。",
         "observe": "开启后，系统执行完整检测流程，但将实质性处置动作替换为下方预设的观察动作，仅用于策略调优与灰度观察。"
       },
-      "runModeCascadeHint": "优先实时检测，超时前完成即按「实时处置策略」执行；若超时且启用超时异步处理，则按「超时临时处置」放行，后台���续检测，完成后按「异步召回策略」执行召回或通知；若超时且禁用超时异步处理，则直接按��超时临时处置」执行，后台不再检测。",
+      "runModeCascadeHint": "优先实时检测，超时���完成即按「实时处置策略」执行；若超时且启用超时异步处理，则按「超时临时处置」放行，后台���续检测，完成后按「异步召回策略」执行召回或通知；若超时且禁用超时异步处理，则直接按��超时临时处置」执行，后台不再检测。",
       "timeoutSectionTitle": "超时时间线",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
@@ -9346,7 +9352,7 @@
       "defaultWindowHint": "缺省回溯 8 小时，上限 24 小时。",
       "windowTooLarge": "回溯窗超过 24 小时，请缩小时间范围。",
       "toastStarted": "扫描已启动",
-      "toastError": "启动扫描失败"
+      "toastError": "���动扫描失败"
     },
     "tabs": {
       "overview": "检测总览",
@@ -9557,7 +9563,7 @@
       "fpMarked": "已标记为误报",
       "cancelSuccess": "任务已取消",
       "cancelError": "取消任务失败",
-      "exportError": "导出报告失败",
+      "exportError": "���出报告失败",
       "bulkCancelResult": "请求 {requested} 个，已取消 {cancelled}，跳过 {skipped}，失败 {failed}"
     },
     "runStatus": {
@@ -9739,7 +9745,7 @@
     },
     "delete": {
       "title": "删除策略",
-      "description": "将删除策略「{name}」，此操作不可撤销。已有任务和已入队通知仍会按冻结配置继续执行。",
+      "description": "将删除策略「{name}」，此操作不可撤销。已有任务和已入队通知仍会按冻���配置继续执行。",
       "confirm": "删除",
       "cancel": "取消"
     },
@@ -11039,7 +11045,7 @@
       "name_required": "姓名不能为空",
       "password_incorrect": "密码错误",
       "verification_code_incorrect": "验证码错误",
-      "method_invalid": "无效的验证方式",
+      "method_invalid": "无��的验证方式",
       "purpose_invalid": "无效的验证用途",
       "type_invalid": "无效的类型",
       "method_purpose_mismatch": "验证方式与验证用途不匹配",

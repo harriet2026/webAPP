@@ -1940,7 +1940,7 @@ export function mockAgentCenterOverview(): AgentCenterOverview {
   // 首次进入时如实复现"未配置准入规则"场景，与总开关的拦截提示配套；
   // AdmissionRulesSection 本身此前在 mock 模式下无接口支撑（/phishing-agent/
   // admission-rules 未注册路由），这里一并补齐 CRUD，让该 tab 与总开关的
-  // "先配置再启用"闭环都可在 mock 模式下走通���
+  // "先配置再启用"闭环都可在 mock 模式下走������
   let phishingAdmissionRuleIdSeq = 1;
   let phishingAdmissionRulesMockState: Array<Record<string, unknown>> = [];
 let phishingBandsMockState = [
@@ -5135,7 +5135,7 @@ export function mockContentGroupsList(): { items: Rule[] } {
 // 身份认证与仿冒防护（auth-spoofing，mock）
 // 配置照抄 demo 默认值（src/components/security/AuthSpoofingPage.tsx 的
 // DEFAULT_CONFIG，已是映射到统一 action 的 demo 默认），保证 Mock 模式下页面
-// 展示的初始状态与 demo 完全对齐。
+// 展示的初始状��与 demo 完全对齐。
 // ════════════════════════════════════════════════════════════════════════════════
 
 function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
@@ -6247,6 +6247,10 @@ interface MockDisposalSeed {
   // isMixed -- 标记这封邮件是多收件人混合处置（action='mixed'），mockMailLog
   // 据此生成 disposition_actions + 逐收件人 final_action 各异的 dispositions。
   isMixed?: boolean;
+  // sandboxTimeout -- 附件沙箱检测扫描超时未拿到结论（阶段3「附件安全检测」
+  // 子分组内附件沙箱一项的第三种终态，独立于 threat/pass）。仅 MIC055 这类
+  // 演示"沙箱超时"场景的种子需要设置；其余种子缺省 undefined 即未超时。
+  sandboxTimeout?: boolean;
 }
 
 const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
@@ -6490,6 +6494,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     hasQrCode: false,
     score: 60,
     basis: ["ATT-SANDBOX", "附件沙箱检测规则", "ATT-SANDBOX-02"],
+    sandboxTimeout: true,
   },
   {
     tid: "MIC010",
@@ -7524,6 +7529,9 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
         : seed.correctionSource,
     disposal_basis: disposalBasis(seed),
     disposal_policy_keys: seed.basis?.[0],
+    // sandbox_timeout -- 阶段3「附件安全检测」子分组内附件沙箱一项的超时
+    // 终态；仅 MIC055 这类演示场景的种子设置 sandboxTimeout: true。
+    sandbox_timeout: Boolean(seed.sandboxTimeout),
     similarity_pct: Math.max(62, seed.score),
     geo_region: seed.ipLocation,
     geo_region_name: seed.ipLocation,

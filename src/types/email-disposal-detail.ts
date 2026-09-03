@@ -186,6 +186,11 @@ export interface MailLogDetail {
   // block. Absent for messages with no recorded basis (e.g. pure accept
   // with no rule hit).
   disposal_basis?: DisposalBasis;
+
+  // sandbox_timeout -- 附件沙箱检测扫描超时未拿到结论（区别于「威胁」/
+  // 「通过」的第三种终态），驱动阶段3「附件安全检测」子分组内附件沙箱
+  // 一项的 timeout 状态。缺省 undefined/false 即未超时（现状默认行为）。
+  sandbox_timeout?: boolean;
 }
 
 // PhishAgentCheck mirrors internal/models.PhishAgentCheckSummary — the
@@ -230,12 +235,18 @@ export interface PhishAgentRecommendedAction {
 export type { MailChildEvent };
 export type { MailLifecycleLog, MailLifecycleLogsResponse };
 
-export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped';
+// timeout -- 附件沙箱检测专用状态（扫描超时未拿到结论），与 threat/suspicious/
+// pass/skipped 并列参与阶段3汇总；仅 attachmentSandbox 子项会产出该状态。
+export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped' | 'timeout';
 
 export interface DetectionCheckItem {
   key: string;
   status: CheckStatus;
   ruleIds: number[];
+  // children -- 仅"附件安全检测"这一项非空：拆分为基础限制/反病毒引擎/
+  // 附件沙箱检测/图片识别/加密附件五个子引擎，父项状态由子项汇总而来
+  // （见 use-detection-stages.ts 的 aggregate()）。
+  children?: DetectionCheckItem[];
 }
 
 export interface DetectionStage {

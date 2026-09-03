@@ -6412,7 +6412,8 @@
           "suspicious": "Suspicious",
           "threat": "Threat",
           "processing": "Processing",
-          "skipped": "Skipped"
+          "skipped": "Skipped",
+          "timeout": "Timeout"
         },
         "check": {
           "ipRateLimit": "IP Rate Limit",
@@ -6424,7 +6425,12 @@
           "behaviorControl": "Sending Behavior Control",
           "recipientCheck": "Recipient Check",
           "personalList": "Personal List",
-          "attachmentSecurity": "Attachment Security",
+          "attachmentSecurity": "Attachment Security Detection",
+          "attachmentBasicLimit": "Basic Limits",
+          "attachmentAntivirus": "Antivirus Engine",
+          "attachmentSandbox": "Attachment Sandbox",
+          "attachmentImageDetect": "Image Detection",
+          "attachmentEncrypted": "Encrypted Attachments",
           "urlProtection": "URL Protection",
           "contentRules": "Content Rules",
           "intentEngine": "Intent Engine",
