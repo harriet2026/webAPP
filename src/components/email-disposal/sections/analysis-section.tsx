@@ -21,7 +21,7 @@ import {
   deriveThreatLevel, derivePhishAgentThreatLevel, THREAT_STYLES, formatBytes, tidOf, deriveDirection,
 } from '../lib/detail-helpers';
 import {
-  formatHitDetail, getModuleName, getActionLabel, getActionColor, getPolicyRoute, getPolicyMeta,
+  formatHitDetail, getModuleName, getModuleGroupName, getActionLabel, getActionColor, getPolicyRoute, getPolicyMeta,
   getStageColor, isStage1Policy, type DisposalLang,
 } from '../lib/disposal-basis-config';
 import { useProductForm } from '@/contexts/product-form-context';
@@ -398,7 +398,19 @@ export function AnalysisSection({ detail, aiEnabled = false, events = [] }: Anal
             ) : (
               <div className="flex items-center gap-2 min-w-0">
                 <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', getStageColor(policyMeta?.stage ?? 0))} />
-                <span className="font-medium">{getModuleName(basis.policy_key, disposalLang) || '—'}</span>
+                <span className="font-medium">
+                  {/* 附件安全检测的子引擎（基础限制/反病毒引擎/附件沙箱检测/
+                      图片识别/加密附件）补一层父级分组前缀，形成"附件安全
+                      检测 › 子引擎名"两级面包屑；仅当该 policy_key 填写了
+                      moduleGroup* 时出现，其余模块保持原有单层展示不变。 */}
+                  {getModuleGroupName(basis.policy_key, disposalLang) && (
+                    <span className="font-normal text-muted-foreground">
+                      {getModuleGroupName(basis.policy_key, disposalLang)}
+                      <span className="px-1">›</span>
+                    </span>
+                  )}
+                  {getModuleName(basis.policy_key, disposalLang) || '—'}
+                </span>
               </div>
             )}
             <span className="text-muted-foreground">{tFeatures('ruleName')}</span>

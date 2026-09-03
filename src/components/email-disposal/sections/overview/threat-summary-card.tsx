@@ -32,7 +32,7 @@ import {
   stripDetailPrefix, isNewSender, deriveConfidence, deriveHitSource, isSensitiveUrgent, deriveDomainAge,
 } from '../../lib/detail-helpers';
 import {
-  getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, formatHitDetail, isStage1Policy, type DisposalLang,
+  getModuleName, getModuleGroupName, getActionLabel, getActionColor, getPolicyMeta, getStageColor, formatHitDetail, isStage1Policy, type DisposalLang,
 } from '../../lib/disposal-basis-config';
 import { useProductForm } from '@/contexts/product-form-context';
 import { SenderActions } from './sender-actions';
@@ -387,6 +387,17 @@ export function ThreatSummaryCard({
             </span>
           ) : (
             <span className="font-medium text-foreground">
+              {/* 附件安全检测下的子引擎（基础限制/反病毒引擎/附件沙箱检测/图片
+                  识别/加密附件）补一层父级分组前缀，形成"附件安全检测 ›
+                  子引擎名"两级面包屑，避免子引擎名字裸露展示时看不出归属；
+                  仅当该 policy_key 填写了 moduleGroup* 时才出现，其余模块不
+                  受影响（getModuleGroupName 返回 undefined）。 */}
+              {getModuleGroupName(detail.disposal_basis.policy_key, disposalLang) && (
+                <span className="font-normal text-muted-foreground">
+                  {getModuleGroupName(detail.disposal_basis.policy_key, disposalLang)}
+                  <span className="px-1">›</span>
+                </span>
+              )}
               {getModuleName(detail.disposal_basis.policy_key, disposalLang) || detail.disposal_basis.policy_key}
               {detail.disposal_basis.rule_name && detail.disposal_basis.rule_name !== '—' && (
                 <span className="font-normal text-muted-foreground">「{detail.disposal_basis.rule_name}」</span>

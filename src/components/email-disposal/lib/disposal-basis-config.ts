@@ -71,6 +71,14 @@ interface PolicyMeta {
   moduleEn: string;
   moduleTh: string;
   moduleRu: string;
+  // 父级能力分组名（可选）。当子引擎（如"附件沙箱检测""反病毒引擎"）归属于同一
+  // 个更大的能力大类（如"附件安全检测"）时填写，用于在处置依据/检测流程等结果
+  // 展示场景里渲染"父级 › 子级"面包屑，避免子引擎名字裸露展示导致管理员看不出
+  // 归属关系。未填写时展示逻辑退回到只显示 moduleZh 本身（不受影响）。
+  moduleGroupZh?: string;
+  moduleGroupEn?: string;
+  moduleGroupTh?: string;
+  moduleGroupRu?: string;
   idPrefix: string;
   // 列表页命中简述（30-40 字内），返回「模块『规则名』· 简述」中的「简述」部分。
   // 注意：模板文案以中文为主语言（后端默认渲染语言也是中文），其他语言返回
@@ -404,10 +412,20 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
   // ===== 阶段三：内容层 =====
   'ATT-BASIC': {
     stage: 3,
-    moduleZh: '附件安全检测',
-    moduleEn: 'Attachment Security',
-    moduleTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
-    moduleRu: 'Безопасность вложений',
+    moduleZh: '基础限制',
+    moduleEn: 'Basic Limits',
+    moduleTh: 'ข้อจำกัดพื้นฐาน',
+    moduleRu: 'Базовые ограничения',
+    // 父级归属："基础限制"是"附件安全检测"大类下的一个子引擎（附件数量/大小/
+    // 嵌套层数限制），与反病毒/沙箱/图片识别/加密附件平级，因此补上父级分组名，
+    // 与其余四个子引擎在处置依据/检测流程展示上保持一致的层级语言。此前该
+    // policy_key 的 moduleZh 直接写成"附件安全检测"本身，会与父级大类同名，
+    // 导致面包屑退化成"附件安全检测 › 附件安全检测"；现拆开为子引擎自己的名字
+    // "基础限制" + 父级分组"附件安全检测"两层，语义更准确。
+    moduleGroupZh: '附件安全检测',
+    moduleGroupEn: 'Attachment Security',
+    moduleGroupTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
+    moduleGroupRu: 'Безопасность вложений',
     idPrefix: 'ATT-BASIC-',
     listSummary: (v, lang) => {
       if (v?.timeout) {
@@ -453,6 +471,12 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleEn: 'Anti-Virus Engine',
     moduleTh: 'เอนจินป้องกันไวรัส',
     moduleRu: 'Антивирусный движок',
+    // 父级归属："反病毒引擎"是"附件安全检测"大类下的子引擎，与基础限制/沙箱/
+    // 图片识别/加密附件平级，补上父级分组名用于面包屑展示。
+    moduleGroupZh: '附件安全检测',
+    moduleGroupEn: 'Attachment Security',
+    moduleGroupTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
+    moduleGroupRu: 'Безопасность вложений',
     idPrefix: 'ATT-AV-',
     listSummary: (v, lang) => {
       if (v?.timeout) {
@@ -499,6 +523,12 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleEn: 'Attachment Sandbox',
     moduleTh: 'แซนด์บ็อกซ์ไฟล์แนบ',
     moduleRu: 'Песочница для вложений',
+    // 父级归属：与其余四个子引擎共享同一个"附件安全检测"父级分组名，
+    // 用于面包屑展示；不影响筛选器仍按子引擎（moduleZh）独立分组。
+    moduleGroupZh: '附件安全检测',
+    moduleGroupEn: 'Attachment Security',
+    moduleGroupTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
+    moduleGroupRu: 'Безопасность вложений',
     idPrefix: 'ATT-SANDBOX-',
     listSummary: (v, lang) => {
       if (v?.timeout) {
@@ -539,10 +569,19 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
   },
   'ATT-QR': {
     stage: 3,
-    moduleZh: '附件安全检测',
-    moduleEn: 'Attachment Security',
-    moduleTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
-    moduleRu: 'Безопасность вложений',
+    // 细化命名：此前该 policy_key 的 moduleZh 直接写死为大类名"附件安全检测"，
+    // 与反病毒引擎/附件沙箱检测等子引擎裸露展示在同一层级里，管理员看不出
+    // 这是四个子引擎中的哪一个。现按其实际检测能力命名为"图片识别"（附件
+    // 图片中的二维码识别，钓鱼邮件典型载体），并通过 moduleGroupZh 挂回
+    // "附件安全检测"父级分组，形成"附件安全检测 › 图片识别"两层面包屑。
+    moduleZh: '图片识别',
+    moduleEn: 'Image Recognition',
+    moduleTh: 'การรู้จำภาพ',
+    moduleRu: 'Распознавание изображений',
+    moduleGroupZh: '附件安全检测',
+    moduleGroupEn: 'Attachment Security',
+    moduleGroupTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
+    moduleGroupRu: 'Безопасность вложений',
     idPrefix: 'ATT-QR-',
     listSummary: (_v, lang) => {
       switch (lang) {
@@ -563,10 +602,16 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
   },
   'ATT-ENC': {
     stage: 3,
-    moduleZh: '附件安全检测',
-    moduleEn: 'Attachment Security',
-    moduleTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
-    moduleRu: 'Безопасность вложений',
+    // 细化命名：同 ATT-QR，此前 moduleZh 直接写死为大类名，现按实际检测能力
+    // 命名为"加密附件"，并通过 moduleGroupZh 挂回"附件安全检测"父级分组。
+    moduleZh: '加密附件',
+    moduleEn: 'Encrypted Attachment',
+    moduleTh: 'ไฟล์แนบเข้ารหัส',
+    moduleRu: 'Зашифрованное вложение',
+    moduleGroupZh: '附件安全检测',
+    moduleGroupEn: 'Attachment Security',
+    moduleGroupTh: 'การตรวจสอบความปลอดภัยของไฟล์แนบ',
+    moduleGroupRu: 'Безопасность вложений',
     idPrefix: 'ATT-ENC-',
     listSummary: (_v, lang) => {
       switch (lang) {
@@ -668,7 +713,7 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       const tl = val(v, 'tag_label', lang === 'zh' ? '垃圾邮件' : 'spam');
       switch (lang) {
         case 'en': return `Classified as ${tl}`;
-        case 'th': return `จัดประ���ภทเป็น${tl}`;
+        case 'th': return `จัดประเภทเป็น${tl}`;
         case 'ru': return `Классифицировано как ${tl}`;
         default: return `判定为${tl}`;
       }
@@ -915,16 +960,23 @@ function toHitValues(v?: Record<string, string>): HitValues | undefined {
   return v as HitValues;
 }
 
-// 列表页文案：模块「规则名」· 命中简述
+// 列表页文案：父级分组 › 模块「规则名」· 命中简述
+// GT-附件安全分层：附件安全检测下的子引擎（基础限制/反病毒引擎/附件沙箱检测/
+// 图片识别/加密附件）此前在列表上直接展示子引擎名字，管理员看不出它们同属
+// "附件安全检测"大类。这里在模块名前补一层"父级 › "面包屑前缀（仅当该
+// policy_key 填写了 moduleGroup* 时才会出现，未填写的模块不受影响，展示
+// 逻辑保持原样）。
 export function formatListReason(basis: DisposalBasis, lang: DisposalLang = 'zh'): string {
   if (!basis?.policy_key) return '';
   const meta = DISPOSAL_POLICY_MAP[basis.policy_key];
   if (!meta) return '';
   const moduleName = moduleOf(meta, lang);
+  const groupName = getModuleGroupName(basis.policy_key, lang);
   const hv = toHitValues(basis.hit_values) ?? {};
   const summary = meta.listSummary(hv, lang);
   const ruleName = basis.rule_name ?? '';
-  return `${moduleName}「${ruleName}」· ${summary}`;
+  const groupPrefix = groupName ? `${groupName} › ` : '';
+  return `${groupPrefix}${moduleName}「${ruleName}」· ${summary}`;
 }
 
 // 详情页「命中」描述（变量已替换）。
@@ -941,6 +993,21 @@ export function getModuleName(policyKey: string, lang: DisposalLang = 'zh'): str
   const meta = DISPOSAL_POLICY_MAP[policyKey];
   if (!meta) return '';
   return moduleOf(meta, lang);
+}
+
+// 父级能力分组名（如"附件安全检测"）。仅在 PolicyMeta 填写了 moduleGroup* 时
+// 才有值；未填写（多数模块本身就是独立能力，没有更上层的分组）时返回
+// undefined，调用方据此判断是否渲染"父级 › 子级"面包屑，否则仍只展示
+// getModuleName 单层名字，行为不变。
+export function getModuleGroupName(policyKey: string, lang: DisposalLang = 'zh'): string | undefined {
+  const meta = DISPOSAL_POLICY_MAP[policyKey];
+  if (!meta) return undefined;
+  switch (lang) {
+    case 'en': return meta.moduleGroupEn;
+    case 'th': return meta.moduleGroupTh;
+    case 'ru': return meta.moduleGroupRu;
+    default: return meta.moduleGroupZh;
+  }
 }
 
 // GT-12236: 处置依据模块筛选按模块语义展示——原型要求附件安全检测作为单一
