@@ -484,6 +484,50 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       }
     },
   },
+  'ATT-SANDBOX': {
+    stage: 3,
+    moduleZh: '附件沙箱检测',
+    moduleEn: 'Attachment Sandbox',
+    moduleTh: 'แซนด์บ็อกซ์ไฟล์แนบ',
+    moduleRu: 'Песочница для вложений',
+    idPrefix: 'ATT-SANDBOX-',
+    listSummary: (v, lang) => {
+      if (v?.timeout) {
+        switch (lang) {
+          case 'en': return 'Scan timed out';
+          case 'th': return 'การสแกนหมดเวลา';
+          case 'ru': return 'Тайм-аут сканирования';
+          default: return '扫描超时';
+        }
+      }
+      const rl = val(v, 'risk_level', lang === 'zh' ? '高危' : 'high');
+      switch (lang) {
+        case 'en': return `High-risk behavior detected (${rl})`;
+        case 'th': return `ตรวจพบพฤติกรรมที่มีความเสี่ยงสูง (${rl})`;
+        case 'ru': return `Обнаружено высокорисковое поведение (${rl})`;
+        default: return `检出高危行为（${rl}）`;
+      }
+    },
+    hitDetail: (v, lang) => {
+      if (v?.timeout) {
+        switch (lang) {
+          case 'en': return 'Attachment sandbox scan timed out (configured to quarantine), safety unknown';
+          case 'th': return 'การสแกนแซนด์บ็อกซ์ไฟล์แนบหมดเวลา (กำหนดให้กักกัน) ความปลอดภัยไม่ทราบ';
+          case 'ru': return 'Тайм-аут сканирования в песочнице вложений (настроено на карантин), безопасность неизвестна';
+          default: return '附件沙箱扫描超时（配置为隔离），安全性未知';
+        }
+      }
+      const fn = val(v, 'filename');
+      const bh = val(v, 'behavior');
+      const rl = val(v, 'risk_level');
+      switch (lang) {
+        case 'en': return `Attachment ${fn} sandbox analysis detected high-risk behavior: ${bh} (risk level: ${rl})`;
+        case 'th': return `ไฟล์แนบ ${fn} วิเคราะห์ในแซนด์บ็อกซ์พบพฤติกรรมที่มีความเสี่ยงสูง: ${bh} (ระดับความเสี่ยง: ${rl})`;
+        case 'ru': return `Анализ вложения ${fn} в песочнице выявил высокорисковое поведение: ${bh} (уровень риска: ${rl})`;
+        default: return `附件 ${fn} 沙箱分析检出高危行为：${bh}（风险等级：${rl}）`;
+      }
+    },
+  },
   'ATT-QR': {
     stage: 3,
     moduleZh: '附件安全检测',

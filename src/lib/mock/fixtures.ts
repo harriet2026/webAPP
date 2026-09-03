@@ -674,7 +674,7 @@ export function mockDashboardSummaryFor(
   const { isCurrent, range } = noteDashboardWindow(startDate, endDate);
   const totals = DASH_TOTALS[range];
   const total = isCurrent ? totals.cur : totals.prev;
-  // 复用既有基础 metrics 形状（accepted_emails / by_email_type 等供其它页面读），
+  // 复用既有基础 metrics 形状（accepted_emails / by_email_type 等供其��页面读），
   // 只按范围替换 total_emails。基础对象缺少 spf/dkim/dmarc/by_action/by_day 字段，
   // 但这些字段本仪表盘不读，故这里断言为响应类型即可。
   return {
@@ -1940,7 +1940,7 @@ export function mockAgentCenterOverview(): AgentCenterOverview {
   // 首次进入时如实复现"未配置准入规则"场景，与总开关的拦截提示配套；
   // AdmissionRulesSection 本身此前在 mock 模式下无接口支撑（/phishing-agent/
   // admission-rules 未注册路由），这里一并补齐 CRUD，让该 tab 与总开关的
-  // "先配置再启用"闭环都可在 mock 模式下走通。
+  // "先配置再启用"闭环都可在 mock 模式下走通���
   let phishingAdmissionRuleIdSeq = 1;
   let phishingAdmissionRulesMockState: Array<Record<string, unknown>> = [];
 let phishingBandsMockState = [
@@ -6454,6 +6454,44 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     basis: ["ATT-AV", "勒索软件拦截", "ATT-AV-018"],
   },
   {
+    tid: "MIC054",
+    time: "2026-05-29 09:40:00",
+    direction: "incoming",
+    sender: "contract@vendor-notice.com",
+    recipients: "finance@company.com",
+    subject: "合同附件确认（单投信）",
+    action: "quarantine",
+    reason: "附件沙箱检出高危行为",
+    mailType: "virus",
+    deliveryStatus: "quarantined",
+    sourceIp: "198.51.100.77",
+    ipLocation: "荷兰",
+    cluster: "Node 2",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 96,
+    basis: ["ATT-SANDBOX", "附件沙箱检测规则", "ATT-SANDBOX-01"],
+  },
+  {
+    tid: "MIC055",
+    time: "2026-05-29 10:55:00",
+    direction: "incoming",
+    sender: "docs@shared-drive-service.com",
+    recipients: "hr@company.com",
+    subject: "员工手册更新（单投信）",
+    action: "quarantine",
+    reason: "附件沙箱扫描超时",
+    mailType: "virus",
+    deliveryStatus: "quarantined",
+    sourceIp: "203.0.113.64",
+    ipLocation: "新加坡",
+    cluster: "Node 1",
+    attachmentCount: 1,
+    hasQrCode: false,
+    score: 60,
+    basis: ["ATT-SANDBOX", "附件沙箱检测规则", "ATT-SANDBOX-02"],
+  },
+  {
     tid: "MIC010",
     time: "2026-05-29 12:00:00",
     direction: "incoming",
@@ -7494,7 +7532,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
     geo_asn: 12345 + index,
     // 钓鱼行照抄 demo getContextData() 的 auth 块（SPF✓ DKIM✗ DMARC⚠，design/
     // origin/demo/components/mail-investigation/overview-action-section.tsx
-    // 239 行）；其余行沿用既有按 score 的粗粒度映射。
+    // 239 行）；其��行沿用既有按 score 的粗粒度映射。
     spf_valid:
       seed.mailType === "phishing" ? "pass" : seed.score >= 80 ? "fail" : "pass",
     dkim_valid:
