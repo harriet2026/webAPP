@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,7 @@ import { AuthSpoofingPage } from '@/components/security/AuthSpoofingPage';
 import { BehaviorControlPage } from '@/components/security/BehaviorControlPage';
 import { RecipientCheckPage } from '@/components/security/RecipientCheckPage';
 import { ContentRulesPage } from '@/components/security/ContentRulesPage';
-import { AttachmentSecurityPage } from '@/components/security/AttachmentSecurityPage';
+import { AttachmentSecurityPage, type TabKey } from '@/components/security/AttachmentSecurityPage';
 import { UrlProtectionPage } from '@/components/security/UrlProtectionPage';
 import { IntentEnginePage } from '@/components/security/intent-engine/IntentEnginePage';
 import { SimilarDetectionPage } from '@/components/security/similar-detection/SimilarDetectionPage';
@@ -165,6 +166,7 @@ export function canAccessPolicyPipeline({
 export function PolicyPipelinePage() {
   const t = useTranslations();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isSystemAdmin, user } = useAuth();
   const isTenantAdmin = user?.role === 'tenant_admin';
   // switcherEnabled：高级过滤规则暂不对外露出，仅在产品形态切换器
@@ -196,6 +198,10 @@ export function PolicyPipelinePage() {
   const lockStage1 = caps.multiTenant && effectiveViewer === 'tenant';
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeDrawerPolicy, setActiveDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string }>({ stage: 1, key: 'ipFrequency' });
+  // 处置依据规则名深链跳转（GT-附件沙箱）：附件安全检测抽屉打开后，还需要在
+  // 「反病毒引擎/附件沙箱检测/图片识别/加密附件」等页签中定位到具体的一个，
+  // 例如从邮件处置详情页点击「附件沙箱检测」规则名跳转过来时应直接停在该页签。
+  const [attachmentInitialTab, setAttachmentInitialTab] = useState<string | undefined>(undefined);
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [intentDirty, setIntentDirty] = useState(false);
   // html_spec 宿主对齐（Task 10）：意图引擎左导航圆点/摘要跟随总开关启用态（同 url 模块模式）
@@ -213,6 +219,23 @@ export function PolicyPipelinePage() {
   const [pendingDrawerPolicy, setPendingDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string } | null>(null);
   // 抽屉导航折叠按钮的 pointer 驱动 hover（柔和交互反馈规格 §7.2，兼容 hover:none 设备）。
   const { pointerHoverProps: collapseHoverProps } = usePointerHover<HTMLButtonElement>();
+
+  // 处置依据规则名深链跳转：邮件处置详情页的「附件沙箱检测」规则名会带
+  // ?stage3=attachment&stage3Tab=sandboxRules 打开本页。落地时自动展开
+  // 阶段3「附件安全检测」抽屉，并把内部页签定位到「附件沙箱检测」。
+  // 仅在首次挂载时读取一次，避免用户手动切换抽屉/页签后被 query 参数覆盖。
+  useEffect(() => {
+    const stage3Key = searchParams.get('stage3');
+    const stage3Tab = searchParams.get('stage3Tab');
+    if (stage3Key) {
+      setActiveDrawerPolicy({ stage: 3, key: stage3Key });
+      setDrawerOpen(true);
+    }
+    if (stage3Tab) {
+      setAttachmentInitialTab(stage3Tab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { apiRequest } = useApiRequest();
 
@@ -261,7 +284,7 @@ export function PolicyPipelinePage() {
   // 取自当前生效方向组（mode==='separate' 取 similar_email.receive，'aggregate' 取 aggregate）。
   // 同 advancedRulesEnabledResp/securityModulesMap，仅在抽屉处于阶段5时取数。
   // 刷新按钮：让本页四类查询全部失效重取（原型只在 demo 里有 queryClient，
-  // 产品这边要显式取一个）。
+  // 产品这边���显式取一个）。
   const queryClient = useQueryClient();
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['agent-center-overview'] });
@@ -713,7 +736,7 @@ export function PolicyPipelinePage() {
     // 相似检测摘要 启用=「窗口{N}分钟 / 阈值{M}%」（Task 13），禁用=「已禁用」（复用 common.disabled，
     // demo D-8 未新造 key）；配置 query 未就绪前退回静态描述文案，避免摘要闪烁。
     // GT-12731：摘要的启用/未启用判断同样以「本地状态 ?? 父级兜底真值」为准，
-    // 使加载期首帧就显示正确的摘要（未启用模块直接显示「未启用」，不再先显示能力摘要再闪回）。
+    // 使加载期首帧就显示正确��摘要（未启用模块直接显示「未启用」，不再先显示能力摘要再闪回）。
     const urlEnabledForSummary = urlModuleEnabled ?? (item.key === 'url' ? stage3Fallback : undefined);
     const attachmentEnabledForSummary = attachmentEnabled ?? (item.key === 'attachment' ? stage3Fallback : undefined);
     const intentEnabledForSummary = intentEngineEnabled ?? (item.key === 'intentEngine' ? stage3Fallback : undefined);
@@ -843,6 +866,7 @@ export function PolicyPipelinePage() {
           hideBasicLimit={caps.multiTenant && effectiveViewer === 'tenant'}
           onDirtyChange={setAttachmentDirty}
           onEnabledChange={setAttachmentEnabled}
+          initialTab={attachmentInitialTab as TabKey | undefined}
         />
       );
     }

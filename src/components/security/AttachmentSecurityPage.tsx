@@ -75,7 +75,7 @@ const TABS = [
   { key: 'encrypted' },
 ] as const;
 
-type TabKey = (typeof TABS)[number]['key'];
+export type TabKey = (typeof TABS)[number]['key'];
 
 interface AttachmentDraft {
   enabled: boolean;
@@ -94,6 +94,10 @@ interface Props {
   hideBasicLimit?: boolean;
   onDirtyChange?: (dirty: boolean) => void;
   onEnabledChange?: (enabled: boolean) => void;
+  // 支持从外部（如处置依据规则名跳转）指定页面打开时默认停在哪个页签，
+  // 例如从邮件处置详情页点击「附件沙箱检测」规则名跳转过来时，应直接停在
+  // 「附件沙箱检测」页签，而不是总是回到第一个页签。未传入时维持原有默认行为。
+  initialTab?: TabKey;
 }
 
 const direction: Direction = 'receive';
@@ -121,6 +125,7 @@ export function AttachmentSecurityPage({
   hideBasicLimit = false,
   onDirtyChange,
   onEnabledChange,
+  initialTab,
 }: Props) {
   const t = useTranslations('attachmentSecurity');
   const moduleT = useTranslations('securityModules');
@@ -128,7 +133,7 @@ export function AttachmentSecurityPage({
   const { isSystemAdmin, selectedTenantId, user } = useAuth();
   const { capabilities, viewer, grants } = useProductForm();
   const firstTab: TabKey = hideBasicLimit ? 'antivirus' : 'basicLimit';
-  const [activeTab, setActiveTab] = useState<TabKey>(firstTab);
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab ?? firstTab);
   const [draft, setDraft] = useState<AttachmentDraft>(defaultDraft);
   const [baseline, setBaseline] = useState<AttachmentDraft>(defaultDraft);
   const [loading, setLoading] = useState(true);

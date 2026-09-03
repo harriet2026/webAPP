@@ -47,6 +47,15 @@ const STAGE_ROUTE: Record<number, string> = {
   5: '/security/pipeline',
 };
 
+// 阶段 3（内容层）下有多个检测引擎共用同一「策略流水线」路由，仅靠 STAGE_ROUTE
+// 无法定位到具体应打开哪个抽屉、抽屉内又应停在哪个页签。这里按 policy_key 追加
+// 更精确的查询参数：PolicyPipelinePage 读取 stage3/stage3Tab 后自动展开对应
+// 抽屉（如「附件安全检测」）并切到对应页签（如「附件沙箱检测」）。未覆盖的
+// policy_key 仍落回 STAGE_ROUTE 的通用路由，行为不变。
+const POLICY_ROUTE_OVERRIDE: Record<string, string> = {
+  'ATT-SANDBOX': '/security/pipeline?stage3=attachment&stage3Tab=sandboxRules',
+};
+
 // 阶段配色（列表页阶段色点 / 详情页强调）。
 const STAGE_COLOR: Record<number, string> = {
   1: 'bg-blue-500',
@@ -659,7 +668,7 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
       const tl = val(v, 'tag_label', lang === 'zh' ? '垃圾邮件' : 'spam');
       switch (lang) {
         case 'en': return `Classified as ${tl}`;
-        case 'th': return `จัดประเภทเป็น${tl}`;
+        case 'th': return `จัดประ���ภทเป็น${tl}`;
         case 'ru': return `Классифицировано как ${tl}`;
         default: return `判定为${tl}`;
       }
@@ -896,8 +905,9 @@ export function getStageColor(stage: number): string {
 
 export function getPolicyRoute(policyKey: string): string | undefined {
   const meta = DISPOSAL_POLICY_MAP[policyKey];
-  return meta ? STAGE_ROUTE[meta.stage] : undefined;
-}
+  if (!meta) return undefined;
+  return POLICY_ROUTE_OVERRIDE[policyKey] ?? STAGE_ROUTE[meta.stage];
+  }
 
 // 将后端返回的 hit_values (Record<string, string>) 转换为模板使用的 HitValues。
 function toHitValues(v?: Record<string, string>): HitValues | undefined {
