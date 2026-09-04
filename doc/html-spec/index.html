@@ -814,7 +814,7 @@
             <p>spec: 认证日志（含多租户）.md</p>
             <p>组件: auth-logs-page.tsx + stats-overview + search-filters + table + detail-modal + <b>brute-force-panel（未挂载）</b></p>
             <p>子文件: <a href="logs-auth-logs/layer-1-detail-drawer.html">详情抽屉</a></p>
-            <p>预览可交互 · 1 交互层级 · 9 项差异（重点：<b>暴力破解面板组件已写但页面未挂载</b>、租户视角未裁剪数据）/ 5 项需确认</p>
+            <p>预览可交互 · 1 交互层级 · 9 项差异（重点：<b>暴力破解面板组件已写但页面未挂载</b>、���户视角未裁剪数据）/ 5 项需确认</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1058,7 +1058,7 @@
           <div class="card-detail">
             <p>路由: /monitor/infrastructure · spec: 未提供 · 多租户租户视角导航隐藏（v2 用户决定：URL 直连也应 403/404 拦截）</p>
             <p>组件: monitor-infrastructure-page.tsx（4 Tab：硬件资源/服务进程/数据库与缓存/存储与备份；Kingbase/Redis × 指标切换）</p>
-            <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(双态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
+            <p>子文件: <a href="monitor-infrastructure/layer-1-tab-container.html">服务进程</a> / <a href="monitor-infrastructure/layer-2-tab-database.html">数据库与缓存(��态)</a> / <a href="monitor-infrastructure/layer-3-tab-storage.html">存储与备份</a></p>
             <p>预览可��互（Tab/库切换）· 形���×角色 5×2 矩阵实测 · v2：3 项用户决定落地（URL 拦截 / 硬件趋势图联动时间范围 / 慢查询行 hover Tooltip 显示 SQL 详情）· 7 项差异 + 3 项需���认均逐项标注复核状态</p>
           </div>
         </details>
@@ -1223,7 +1223,7 @@
             <p>组件: phishing-detection-agent-v1.tsx（两 Tab：检测总览/检测引擎配置）+ phishing-url-evidence-drawer.tsx + 外套启用开关与关闭二次确认</p>
             <p>子文件: <a href="component-phishing-detection-agent/layer-1-detail-drawer.html">检测详情抽屉(680px)</a> / <a href="component-phishing-detection-agent/layer-2-rule-drawer.html">准入规则抽屉+收件人树</a> / <a href="component-phishing-detection-agent/layer-3-mode-drawer.html">运行模式+分级策略表</a> / <a href="component-phishing-detection-agent/layer-4-band-edit.html">区间编辑弹窗(80vw)</a> / <a href="component-phishing-detection-agent/layer-5-url-evidence.html">URL透视证据(5Tab)</a> / <a href="component-phishing-detection-agent/layer-6-action-dialogs.html">处置确认对话框</a> / <a href="component-phishing-detection-agent/layer-7-disable-confirm.html">关闭确认</a></p>
             <p>预览可交互 · 7 交互层级子文件 · 6 项差异（主组件未国际化 · enabled 兼表仅审计只读 · traceback 无UI · 异步模式入口缺失 · mark 动作等）/ 7 项需确认（召回状态机 · 误报样本回流 · 准入规则映射统一规则系统 · 配置快照落库等）</p>
-            <p>增量需求文档：<a href="/html-spec/version/GT-12841.html" target="_blank" rel="noopener noreferrer">GT-12841 · GT-12859 检测配置模块前端优化</a>（运行模式说明、风���等级徽章、置信度数字显示、准入规则与截图参考）/ <a href="/html-spec/version/GT-12865.html" target="_blank" rel="noopener noreferrer">GT-12865 · GT-12514 缺少智能体总开关及关闭生命周期交互</a>（详情页顶部新增总开关、关闭二次确认+禁用横幅、重新开启前的准入规则门禁与「前往配置」���达���增���则���动���</p>
+            <p>增量需求文档：<a href="/html-spec/version/GT-12841.html" target="_blank" rel="noopener noreferrer">GT-12841 · GT-12859 检测配置模块前端优化</a>（运行模式说明、风���等级徽章、置信度数字显示、准入规则与截图参考）/ <a href="/html-spec/version/GT-12865.html" target="_blank" rel="noopener noreferrer">GT-12865 · GT-12514 缺少智能体总开关及关闭生命周期交互</a>（详情页顶��新增总开关、关闭二次确认+禁用横幅、重新开启前的准入规则门禁与「前往配置」���达���增���则���动���</p>
           </div>
         </details>
         <details class="spec-card status-done">
@@ -1584,6 +1584,36 @@
               <div class="card-detail">
                 <p>归属工单：GT-13017【0818】处理问题总工单</p>
                 <p>统一 IP 频率限制、IP 黑白名单、发信人黑白名单、发信行为管控、内容规则、高级过滤规则、邮件标记与声明规则列表的状态字段 Switch 样式。</p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </details>
+
+      <details class="l1-section" open>
+        <summary>
+          <div class="l1-header">
+            <span class="chevron"></span>
+            <span class="l1-icon">🧾</span>
+            <h2>GT-13137【0904】接入奇安信附件沙箱</h2>
+            <span class="l1-stats"><span class="done-count">1</span> 个需求文档</span>
+          </div>
+        </summary>
+        <div class="l1-body">
+          <div class="grid">
+            <details class="spec-card status-done">
+              <summary>
+                <div class="card-summary">
+                  <span class="chevron"></span>
+                  <a class="card-title" href="/html-spec/version/GT-13137.html#gt-13137" target="_blank" rel="noopener noreferrer">GT-13137 接入奇安信附件沙箱</a>
+                  <span class="badge badge-done">已完成（文字版）</span>
+                  <span class="card-generated-at">2026-09-04</span>
+                </div>
+              </summary>
+              <div class="card-detail">
+                <p>归属工单：GT-13137【0904】接入奇安信附件沙箱</p>
+                <p>附件安全检测新增“沙箱检测”页签与规则模型，平台安全策略新增沙箱平台配置，检测流程阶段3将附件安全检测拆分为五个独立子引擎并新增超时状态，处置依据补充“附件安全检测 › 子引擎名”归属标签，沙箱超时召回补充事后处置时间线记录。</p>
+                <p class="pending">当前为文字版需求文档，暂不含界面截图。</p>
               </div>
             </details>
           </div>

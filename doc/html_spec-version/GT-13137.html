@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GT-13137【0904】接入奇安信附件沙箱</title>
+  <style>
+    :root { --primary:#2563eb; --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#64748b; --border:#dbe1ea; --success:#16794a; --warn:#b45309; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:32px; background:var(--bg); color:var(--text); font:14px/1.65 "Geist", "Noto Sans SC", system-ui, sans-serif; }
+    main { max-width:1180px; margin:0 auto; }
+    header, nav, section { margin-bottom:24px; padding:24px; border:1px solid var(--border); border-radius:10px; background:var(--card); }
+    h1 { margin:0 0 8px; color:var(--primary); font-size:26px; }
+    h2 { margin:0 0 16px; padding-bottom:8px; border-bottom:2px solid var(--primary); font-size:20px; }
+    h3 { margin:20px 0 8px; font-size:17px; }
+    p { margin:8px 0; }
+    .meta { color:var(--muted); }
+    .toc ul { display:grid; gap:8px; margin:0; padding-left:20px; }
+    a { color:var(--primary); }
+    table { width:100%; border-collapse:collapse; margin:12px 0; }
+    th, td { padding:9px 10px; border:1px solid var(--border); text-align:left; vertical-align:top; }
+    th { background:#f1f3f7; white-space:nowrap; }
+    .preview { margin-top:16px; padding:16px; border:1px solid var(--border); border-left:4px solid var(--primary); border-radius:8px; }
+    .placeholder { color:var(--muted); font-style:italic; }
+    .done { color:var(--success); font-weight:650; }
+    .pending { color:var(--warn); font-weight:650; }
+    code { background:#f1f3f7; padding:1px 5px; border-radius:4px; font-size:13px; }
+    @media (max-width:760px) { body { padding:12px; } header, nav, section { padding:16px; } table { display:block; overflow-x:auto; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>GT-13137【0904】接入奇安信附件沙箱</h1>
+    <p class="meta">生成日期：2026-09-04　·　文档类型：功能增量需求文档　·　关联页面：附件安全检测（沙箱检测页签） / 平台安全策略（沙箱检测配置） / 邮件处置中心（检测流程阶段3、处置依据、事后处置时间线）</p>
+    <p class="meta pending">本版本为文字版需求文档，暂不含界面截图，待界面截图补充后升级为截图式交互预览。</p>
+  </header>
+
+  <nav class="toc" aria-label="GT-13137 目录">
+    <h2>目录</h2>
+    <ul>
+      <li><a href="#overview">A. 需求概览</a></li>
+      <li><a href="#background">1. 需求背景与目标</a></li>
+      <li><a href="#data-model">2. 数据模型</a></li>
+      <li><a href="#rule-config">3. 附件安全检测新增“沙箱检测”页签</a></li>
+      <li><a href="#platform-config">4. 平台安全策略新增沙箱平台配置</a></li>
+      <li><a href="#stage3">5. 检测流程阶段3子引擎拆分</a></li>
+      <li><a href="#disposal-basis">6. 处置依据“父级 › 子引擎”归属标签</a></li>
+      <li><a href="#timeline">7. 超时召回 → 事后处置时间线</a></li>
+      <li><a href="#i18n">8. 国际化文案范围</a></li>
+      <li><a href="#acceptance">9. 验收标准</a></li>
+      <li><a href="#verification">C. 验证与范围边界</a></li>
+    </ul>
+  </nav>
+
+  <section id="overview">
+    <h2>A. 需求概览</h2>
+    <table>
+      <tbody>
+        <tr><th>工单编号</th><td>GT-13137【0904】接入奇安信附件沙箱</td></tr>
+        <tr><th>处理状态</th><td class="done">前端已落地（Mock 数据验证），待后端联调</td></tr>
+        <tr><th>处理原则</th><td>仅新增附件沙箱检测能力及其在处置依据、检测流程、事后处置时间线的展示归属，不修改反病毒、图片识别、加密附件、基础限制四个既有子模块自身的判定与配置逻辑。</td></tr>
+        <tr><th>国际化要求</th><td>中文文案使用项目国际化框架（next-intl），覆盖中/英/泰/俄四语言，UTF-8 编码，禁止出现 replacement character（U+FFFD）。</td></tr>
+        <tr><th>关联文字版需求文档</th><td><code>doc/MD_spec-verson/feature/GT-13137-【0904】接入奇安信附件沙箱.md</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="background">
+    <h2>1. 需求背景与目标</h2>
+    <p>附件安全检测长期将反病毒引擎、图片识别、加密附件识别等子引擎与结构性限制（附件数量、大小、嵌套层数等）合并归入同一个“附件安全检测”模块进行判定与展示，管理员难以从处置依据、检测流程等结果页面上分辨命中的是附件安全检测下的哪一类具体策略。本需求在附件安全检测能力体系下，新增“附件沙箱检测”子引擎，对接奇安信附件沙箱，将可疑附件送入沙箱环境动态执行分析，按行为风险等级或分析超时结果分别给出处置动作，并让沙箱命中结果在处置依据、检测流程、事后处置时间线等结果展示场景中具备独立、可追溯的归属标签。</p>
+    <table>
+      <thead><tr><th>目标项</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>沙箱规则模块</td><td>新增“附件沙箱检测”规则模块，支持按方向、文件类型/自定义扩展名命中后送入沙箱动态分析。</td></tr>
+        <tr><td>风险处置</td><td>低/中/高三档风险等级分别配置执行动作（隔离/审核/丢弃/不设置）与附件附加策略（标记/丢弃附件/不设置），标记附加策略下可组合选择标记生效位置。</td></tr>
+        <tr><td>超时处置</td><td>支持沙箱分析超时或引擎不可用场景下的处置：召回、通知管理员、通知收件人，三者可任意组合勾选。</td></tr>
+        <tr><td>平台级配置</td><td>新增平台级沙箱检测配置：最大分析文件大小、分析超时阈值，统一作用于云网关及多租户产品形态。</td></tr>
+        <tr><td>检测流程拆分</td><td>阶段3的附件安全检测由单一合并判定拆分为“基础限制/反病毒引擎/附件沙箱/图片识别/加密附件”五个独立子项，父项状态由子项聚合，附件沙箱子项新增“超时”专属状态。</td></tr>
+        <tr><td>归属标签</td><td>处置依据卡片与详情页为附件安全检测的各子引擎（含附件沙箱）补充“附件安全检测 › 子引擎名”两级归属标签，不改变现有按子引擎独立筛选的能力。</td></tr>
+        <tr><td>召回时间线</td><td>沙箱超时且规则超时配置勾选“召回”时，在事后处置时间线中补充一条召回执行记录，区分成功与失败两种执行结果。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="data-model">
+    <h2>2. 数据模型</h2>
+    <h3>2.1 SandboxRule 规则模型</h3>
+    <table>
+      <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>direction</code></td><td><code>Direction[]</code></td><td>检测范围方向，支持接收 / 外发 / 域内任意组合多选。</td></tr>
+        <tr><td><code>sender_recipient_filter_enabled</code></td><td><code>boolean</code></td><td>特定收发信人筛选开关。</td></tr>
+        <tr><td><code>file_type_categories</code></td><td><code>string[]</code></td><td>预置文件类型分类（<code>office</code> / <code>script</code> / <code>exec</code>）。</td></tr>
+        <tr><td><code>custom_extensions</code></td><td><code>string[]</code></td><td>自定义扩展名，需以 <code>.</code> 开头。</td></tr>
+        <tr><td><code>risk_actions</code></td><td><code>SandboxRiskActionConfig</code></td><td>低 / 中 / 高三级风险各自独立的 <code>SandboxRiskLevelConfig</code>（执行动作 <code>action</code> + 附加策略 <code>attachment_policy</code> + 标记位置 <code>mark_locations</code>），执行动作与附加策略至少设置一项，不可同时为 <code>none</code>。</td></tr>
+        <tr><td><code>timeout</code></td><td><code>SandboxTimeoutConfig</code></td><td>超时处置动作集合 <code>actions</code>（<code>recall</code> / <code>notify_admin</code> / <code>notify_recipient</code> 可任意组合）及启用通知管理员时的 <code>admin_email</code>。</td></tr>
+      </tbody>
+    </table>
+    <p>规则列表按 <code>created_at</code> 升序排列，一个附件命中的第一条已启用规则生效，不叠加匹配多条。</p>
+
+    <h3>2.2 PlatformSandboxPolicy 平台级配置模型</h3>
+    <table>
+      <thead><tr><th>字段</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>max_file_size_mb</code></td><td>最大分析文件大小（MB），超出不送入沙箱分析。</td></tr>
+        <tr><td><code>analysis_timeout_seconds</code></td><td>分析超时阈值（秒），作用于云网关及多租户产品形态，不按租户单独配置。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>2.3 邮件详情关联字段</h3>
+    <table>
+      <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>sandbox_timeout</code></td><td><code>boolean（可选）</code></td><td>标记本次沙箱行为分析在时限内未产出结论，区别于“未命中规则”的通过态。</td></tr>
+        <tr><td><code>sandbox_recall_result</code></td><td><code>'success' | 'failed'（可选）</code></td><td>标记该邮件是否因沙箱超时触发召回及其执行结果。</td></tr>
+        <tr><td><code>CheckStatus</code> 新增枚举值</td><td><code>'timeout'</code></td><td>检测流程阶段3附件沙箱子项在超时场景下的独立状态值。</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="rule-config">
+    <h2>3. 附件安全检测新增“沙箱检测”页签</h2>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>页签入口</td><td>“附件安全检测”页面新增“沙箱检测”页签，支持 <code>?stage3=attachment&amp;stage3Tab=sandboxRules</code> 直达。</td><td><code>AttachmentSecurityPage.tsx</code></td></tr>
+        <tr><td>新建/编辑</td><td>抽屉分四个分区：检测范围（多选分段控件）、文件类型（分类勾选器 + 自定义扩展名输入）、风险等级处置（低/中/高三档独立配置执行动作与附加策略，附加策略为“标记”时展开标记位置勾选）、超时处置（动作组合勾选 + 管理员邮箱条件校验）。</td><td><code>SandboxRuleDrawer.tsx</code></td></tr>
+        <tr><td>列表操作</td><td>支持启停 Switch、编辑、删除、按名称搜索。</td><td><code>mockSandboxRulesList</code> / <code>mockCreateSandboxRule</code> / <code>mockUpdateSandboxRule</code> / <code>mockSetSandboxRuleStatus</code> / <code>mockDeleteSandboxRule</code></td></tr>
+        <tr><td>表单校验</td><td>规则名称必填；检测范围至少一项；文件类型分类与自定义扩展名至少一项；超时动作至少一项；启用通知管理员时邮箱必填且格式校验；任一风险等级的执行动作与附加策略不可同时为“不设置”。</td><td><code>SandboxRuleDrawer.tsx</code></td></tr>
+      </tbody>
+    </table>
+    <div class="preview">
+      <p><strong>状态：沙箱检测规则列表（文字版占位）</strong></p>
+      <p class="placeholder">本版本暂不提供界面截图。触发路径：进入“附件安全检测” → 选择“沙箱检测”页签 → 查看规则列表。验证重点：可新建/编辑/启停/删除/搜索规则，风险等级与超时处置分区展示正确。</p>
+    </div>
+  </section>
+
+  <section id="platform-config">
+    <h2>4. 平台安全策略新增沙箱平台配置</h2>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>配置区</td><td>平台安全策略页面新增“沙箱检测”配置区，提供最大分析文件大小（MB）、分析超时时长（秒）两项输入。</td><td><code>SandboxPlatformPanel.tsx</code></td></tr>
+        <tr><td>作用范围</td><td>统一作用于云网关及多租户产品形态，不按租户单独配置。</td><td>需求范围约束</td></tr>
+      </tbody>
+    </table>
+    <div class="preview">
+      <p><strong>状态：平台安全策略沙箱配置区（文字版占位）</strong></p>
+      <p class="placeholder">本版本暂不提供界面截图。触发路径：进入“平台安全策略” → 查看“沙箱检测”配置区。验证重点：最大分析文件大小与分析超时可正确保存。</p>
+    </div>
+  </section>
+
+  <section id="stage3">
+    <h2>5. 检测流程阶段3子引擎拆分</h2>
+    <p><code>use-detection-stages.ts</code> 将阶段3的“附件安全检测”由单一叶子判定项，改造为分组节点，下辖五个独立子项：</p>
+    <table>
+      <thead><tr><th>子引擎</th><th>page key</th></tr></thead>
+      <tbody>
+        <tr><td>基础限制</td><td><code>attachment_basic_limit</code></td></tr>
+        <tr><td>反病毒引擎</td><td><code>attachment_antivirus</code></td></tr>
+        <tr><td>附件沙箱检测</td><td><code>attachment_sandbox</code></td></tr>
+        <tr><td>图片识别</td><td><code>attachment_image_detect</code></td></tr>
+        <tr><td>加密附件</td><td><code>attachment_encrypted</code></td></tr>
+      </tbody>
+    </table>
+    <p>父项状态由五个子项按 <code>threat &gt; timeout &gt; suspicious &gt; pass &gt; skipped</code> 优先级聚合得出。附件沙箱子项新增专属判定函数，结合 <code>MailLogDetail.sandbox_timeout</code> 字段，在未命中高危行为规则但检测超时时返回独立的 <code>timeout</code> 状态，区别于笼统的“可疑”或“通过”。</p>
+    <p><code>analysis-section.tsx</code> 检测项渲染扩展为支持嵌套：父项默认展开，子项在父项下方以浅底浅边框的子分组容器呈现，沿用项目既有“卡片嵌套”视觉惯例，不引入新的颜色或阴影层级。</p>
+    <div class="preview">
+      <p><strong>状态：检测流程阶段3附件安全检测子分组（文字版占位）</strong></p>
+      <p class="placeholder">本版本暂不提供界面截图。触发路径：进入邮件处置中心邮件详情 → “检测流程” → 阶段3展开区域。验证重点：父项“附件安全检测”默认展开，下辖五个子项，附件沙箱子项在超时场景显示“超时”状态。</p>
+    </div>
+  </section>
+
+  <section id="disposal-basis">
+    <h2>6. 处置依据“父级 › 子引擎”归属标签</h2>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>归属字段</td><td>为附件安全检测各子引擎（反病毒、附件沙箱、图片识别、加密附件及基础限制）补充 <code>moduleGroupZh/En/Th/Ru</code> 父级分组字段，统一取值“附件安全检测”，与各自独立的 <code>moduleZh</code>（如“附件沙箱检测”）分离存储。</td><td><code>disposal-basis-config.ts</code></td></tr>
+        <tr><td>展示形式</td><td>处置依据卡片与详情页据此渲染“附件安全检测 › 附件沙箱检测”两级面包屑展示，按子引擎独立筛选的既有能力保持不变。</td><td><code>threat-summary-card.tsx</code> / <code>analysis-section.tsx</code></td></tr>
+        <tr><td>新增条目</td><td>新增 <code>ATT-SANDBOX</code> 处置依据条目，覆盖“沙箱分析超时（按规则配置隔离）”与“沙箱动态分析检出高危行为”两类命中场景的多语言文案。</td><td><code>disposal-basis-config.ts</code></td></tr>
+        <tr><td>规则入口跳转</td><td>新增 <code>POLICY_ROUTE_OVERRIDE</code> 映射，使 <code>ATT-SANDBOX</code> 处置依据的“查看规则”入口直达附件安全检测抽屉的“沙箱检测”页签。</td><td><code>disposal-basis-config.ts</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="timeline">
+    <h2>7. 超时召回 → 事后处置时间线</h2>
+    <table>
+      <thead><tr><th>项目</th><th>实现内容</th><th>事实源</th></tr></thead>
+      <tbody>
+        <tr><td>触发条件</td><td><code>sandbox_timeout === true</code> 且命中沙箱规则超时配置勾选了 <code>recall</code>。</td><td><code>SandboxTimeoutConfig.actions</code></td></tr>
+        <tr><td>事件来源</td><td><code>event_source: 'workflow.sandbox_recall'</code>，与现有 <code>workflow.quarantine</code> / <code>workflow.sideline</code> / <code>workflow.audit</code> / <code>workflow.bounce</code> 同一命名体系，天然落入现有“非 postfix 来源即归入处置动作时间线”的过滤与渲染逻辑，未改动时间线渲染代码。</td><td><code>fixtures.ts</code> / <code>analysis-section.tsx</code></td></tr>
+        <tr><td>事件文案</td><td><code>event_type</code> 直接写“附件沙箱超时召回”，不接入 i18n 翻译层，与现有时间线事件的展示风格一致。</td><td>既有事件展示惯例</td></tr>
+        <tr><td>执行结果覆盖</td><td>Mock 数据同时覆盖召回成功、召回失败、超时但未配置召回三类场景，验证触发条件的双重判断在数据层面自洽。</td><td><code>fixtures.ts</code></td></tr>
+      </tbody>
+    </table>
+    <div class="preview">
+      <p><strong>状态：事后处置时间线新增召回记录（文字版占位）</strong></p>
+      <p class="placeholder">本版本暂不提供界面截图。触发路径：进入满足触发条件的邮件详情 → “事后处置时间线”。验证重点：新事件按时间顺序正确插入序列，标题显示“workflow.sandbox_recall · 附件沙箱超时召回”，未配置召回的超时邮件不出现该记录。</p>
+    </div>
+  </section>
+
+  <section id="i18n">
+    <h2>8. 国际化文案范围</h2>
+    <p>全部新增文案复用项目现有国际化框架（next-intl），覆盖中/英/泰/俄四语言，涉及沙箱规则表单标签、平台配置项、阶段3五个子引擎名称、<code>timeout</code> 状态文案、处置依据 <code>ATT-SANDBOX</code> 条目文案。</p>
+    <table>
+      <thead><tr><th>文件</th><th>范围</th></tr></thead>
+      <tbody>
+        <tr><td><code>messages/zh.json</code></td><td>中文文案</td></tr>
+        <tr><td><code>messages/en.json</code></td><td>英文文案</td></tr>
+        <tr><td><code>messages/th.json</code></td><td>泰文文案</td></tr>
+        <tr><td><code>messages/ru.json</code></td><td>俄文文案</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="acceptance">
+    <h2>9. 验收标准</h2>
+    <table>
+      <thead><tr><th>编号</th><th>验收项</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>AC-13137-01</td><td>附件安全检测新增“沙箱检测”页签，支持规则新建、编辑、启停、删除、搜索。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-02</td><td>沙箱规则支持方向多选、文件类型分类与自定义扩展名任选其一。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-03</td><td>低/中/高三档风险等级分别独立配置执行动作与附加策略，附加策略为“标记”时可选标记位置。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-04</td><td>超时处置支持召回、通知管理员、通知收件人任意组合勾选，通知管理员时邮箱必填校验。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-05</td><td>平台安全策略新增沙箱最大分析文件大小与分析超时配置。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-06</td><td>检测流程阶段3的附件安全检测拆分为五个独立子项，父项状态由子项正确聚合。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-07</td><td>附件沙箱子项在检测超时且未命中高危行为规则时显示独立的“超时”状态。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-08</td><td>处置依据卡片与详情页展示“附件安全检测 › 附件沙箱检测”两级归属标签，按子引擎独立筛选能力不受影响。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-09</td><td>沙箱超时且规则配置召回时，事后处置时间线新增对应召回记录，成功/失败两种结果均可正确展示。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-10</td><td>沙箱超时但规则未配置召回时，事后处置时间线不出现召回记录。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-11</td><td>全部新增文案通过项目国际化框架实现，覆盖中/英/泰/俄四语言。</td><td class="done">通过</td></tr>
+        <tr><td>AC-13137-12</td><td>未修改附件安全检测既有的反病毒、图片识别、加密附件、基础限制子模块的判定与配置逻辑。</td><td class="done">通过</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="verification">
+    <h2>C. 验证与范围边界</h2>
+    <table>
+      <tbody>
+        <tr><th>类型检查</th><td>已完成涉及组件与类型定义的 TypeScript 类型检查，未发现本次修改模块的类型错误。</td></tr>
+        <tr><th>乱码自检</th><td>已对本需求涉及文件执行 Unicode replacement character（U+FFFD）搜索，未发现本次新增内容引入异常字符；历史遗留乱码分布在与本需求无关的既有模块，未做改动。</td></tr>
+        <tr><th>界面核验</th><td>已通过浏览器在附件安全检测“沙箱检测”页签、平台安全策略“沙箱检测”配置区完成界面核验；本版本文档暂未附界面截图。</td></tr>
+        <tr><th>待办事项</th><td class="pending">因本地沙箱环境无法连接真实后端 apiserver，沙箱规则的真实检测链路（奇安信沙箱引擎对接、milter 侧 <code>attachment_sandbox</code> 等 page key 标记）需由后端同步实现后进行端到端联调；本次前端实现基于 Mock 数据完成结构与交互验证。</td></tr>
+        <tr><th>范围边界</th><td>本需求覆盖附件沙箱检测规则模型、沙箱规则配置页面与抽屉、平台级沙箱配置、检测流程阶段3的附件安全检测子引擎拆分、处置依据归属标签、超时召回事后处置时间线记录，以及上述范围涉及的国际化文案。不改变反病毒引擎、图片识别、加密附件、基础限制四个既有子模块自身的判定与配置逻辑，不改变阶段1/2/4/5的既有结构，不改变事后处置时间线的渲染逻辑本身。</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>
