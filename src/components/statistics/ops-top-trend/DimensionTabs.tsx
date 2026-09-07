@@ -20,7 +20,7 @@ export function DimensionTabs({ dimension, onSelect, isPlatformScope }: Dimensio
     : ALL_DIMENSIONS.filter((d) => d !== 'connection');
 
   return (
-    <div className="flex gap-1 rounded-[10px] bg-card p-2 shadow-sm">
+    <div className="flex gap-1 rounded-[10px] bg-card p-2 shadow-sm" data-testid="ops-top-dim-tabs">
       {dimensions.map((dim) => {
         const cfg = DIMENSION_CONFIG[dim];
         const Icon = cfg.icon;

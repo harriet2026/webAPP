@@ -347,7 +347,7 @@ export function RouteRulesPage() {
             <Button variant="outline" onClick={() => setImportExportOpen(true)}>
               {t('ruleImportExport.trigger')}
             </Button>
-            <Button onClick={() => handleOpenDialog()}>
+            <Button onClick={() => handleOpenDialog()} data-testid="route-rule-create">
               <Plus className="h-4 w-4 mr-2" />
               {t('rules.createRule')}
             </Button>

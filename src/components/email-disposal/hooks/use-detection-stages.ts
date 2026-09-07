@@ -6,6 +6,7 @@ import {
   AGENT_PRESENTATIONS,
   AGENT_PRESENTATION_ORDER,
 } from '@/lib/agent-center/presentation';
+import { aggregateCheckStatus } from '../lib/check-status';
 
 const AI_AGENT_CHECKS = AGENT_PRESENTATION_ORDER.map((moduleKey) => ({
   key: AGENT_PRESENTATIONS[moduleKey].pipelineKey,
@@ -118,14 +119,6 @@ function mailMarkingStatus(ml: MailLogDetail, pages: string[]): { status: CheckS
   return { status: 'pass', ruleIds: [] };
 }
 
-function aggregate(checks: DetectionCheckItem[]): CheckStatus {
-  if (checks.some((c) => c.status === 'threat')) return 'threat';
-  if (checks.some((c) => c.status === 'suspicious')) return 'suspicious';
-  if (checks.some((c) => c.status === 'processing')) return 'processing';
-  if (checks.some((c) => c.status === 'pass')) return 'pass';
-  return 'skipped';
-}
-
 export function buildDetectionStages(ml: MailLogDetail): DetectionStage[] {
   return STAGE_DEFS.map((def) => {
     const checks: DetectionCheckItem[] = def.checks.map((c) => {
@@ -145,7 +138,7 @@ export function buildDetectionStages(ml: MailLogDetail): DetectionStage[] {
     return {
       stage: def.stage,
       key: def.key,
-      status: aggregate(checks),
+      status: aggregateCheckStatus(checks),
       durationMs: ml.stage_timings?.[def.key],
       checks,
     };

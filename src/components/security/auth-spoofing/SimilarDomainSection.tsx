@@ -39,7 +39,7 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
   };
 
   return (
-    <Card>
+    <Card data-testid="auth-spoofing-similar-domain-section">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader className="pb-3">
           <CollapsibleCardTrigger>
@@ -47,7 +47,7 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                 <CardTitle className="text-base font-semibold">{t('similarDomain.title')}</CardTitle>
                 {config.enabled && (
                   <Badge variant="secondary" className="text-[10px] ml-2">
-                    {t(`action.${toMessageKeySegment(config.action)}` as any)}
+                    {t(`action.${toMessageKeySegment(config.action)}` as Parameters<typeof t>[0])}
                   </Badge>
                 )}
               </CollapsibleCardTrigger>
@@ -68,12 +68,12 @@ export function SimilarDomainSection({ config, onChange, disabled }: SimilarDoma
                   disabled={disabled || !config.enabled}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue>{t(`action.${toMessageKeySegment(config.action)}` as any)}</SelectValue>
+                    <SelectValue>{t(`action.${toMessageKeySegment(config.action)}` as Parameters<typeof t>[0])}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {ACTIONS.map((a) => (
                       <SelectItem key={a} value={a}>
-                        {t(`action.${toMessageKeySegment(a)}` as any)}
+                        {t(`action.${toMessageKeySegment(a)}` as Parameters<typeof t>[0])}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -18,9 +18,10 @@ vi.mock('sonner', () => ({
 
 vi.mock('@/lib/api/user-list', async (orig) => {
   const actual = await orig<typeof import('@/lib/api/user-list')>();
-  return { ...actual, listUserListRules: vi.fn() };
+  return { ...actual, listUserListRules: vi.fn(), bulkDeleteUserListRules: vi.fn() };
 });
-import { listUserListRules } from '@/lib/api/user-list';
+import { toast } from 'sonner';
+import { bulkDeleteUserListRules, listUserListRules } from '@/lib/api/user-list';
 import type { UserListRulesParams, UserListRulesResult } from '@/lib/api/user-list';
 import { mockUserListRulesList } from '@/lib/mock/fixtures';
 import { UserListPage } from '../UserListPage';
@@ -32,6 +33,7 @@ const wrap = (retry: boolean | number = false) => render(
 );
 
 beforeEach(() => {
+  (bulkDeleteUserListRules as ReturnType<typeof vi.fn>).mockReset();
   (listUserListRules as ReturnType<typeof vi.fn>).mockImplementation((params: UserListRulesParams): Promise<UserListRulesResult> => {
     const page = params.page ?? 1;
     const pageSize = params.pageSize ?? 10;
@@ -118,6 +120,28 @@ describe('UserListPage', () => {
 
     fireEvent.click(screen.getByText('白名单规则'));
     await waitFor(() => expect(screen.queryByText(/删除选中/)).toBeNull());
+  });
+
+  it('bulk delete clears only IDs the server explicitly reports as deleted', async () => {
+    (bulkDeleteUserListRules as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      deleted: [1],
+      failed: [{ id: 2, code: 'user_list_access.access_denied_user_list_rule', reason: 'Access denied' }],
+    });
+    wrap();
+    await waitFor(() => screen.getByText('UB-20260320-001'));
+    const first = screen.getByRole('checkbox', { name: '选择 UB-20260320-001' });
+    const second = screen.getByRole('checkbox', { name: '选择 UB-20260319-002' });
+    fireEvent.click(first);
+    fireEvent.click(second);
+    fireEvent.click(screen.getByRole('button', { name: '删除选中(2)' }));
+    fireEvent.click(await screen.findByRole('button', { name: '确认' }));
+
+    await waitFor(() => expect(bulkDeleteUserListRules).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(first).not.toBeChecked();
+      expect(second).toBeChecked();
+    });
+    expect(toast.error).toHaveBeenCalledWith('2: 无权访问该用户名单规则');
   });
 
   it('首次加载失败立即显示错误，并允许手动重试（GT-12153）', async () => {

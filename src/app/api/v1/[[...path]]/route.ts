@@ -98,6 +98,22 @@ export async function PUT(request: NextRequest) {
   });
 }
 
+export async function PATCH(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const backendPath = pathname + search;
+  const target = new URL(backendPath, BACKEND_URL);
+
+  const headers = forwardHeaders(request);
+  const body = await request.arrayBuffer();
+
+  const backendResp = await fetch(target, { method: 'PATCH', headers, body, cache: 'no-store' as RequestCache });
+
+  return new Response(backendResp.body, {
+    status: backendResp.status,
+    headers: cleanResponseHeaders(backendResp),
+  });
+}
+
 export async function DELETE(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const backendPath = pathname + search;

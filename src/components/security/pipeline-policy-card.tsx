@@ -94,7 +94,7 @@ export function PipelinePolicyCard({ policy, barColor, onActivate }: PipelinePol
       <div className="flex-1 pl-2 min-w-0">
         <div className="text-sm font-medium truncate">{t(policy.nameKey)}</div>
         {isAI && (
-          <span className={cn(
+          <span data-testid={`pipeline-policy-type-${policy.key}`} className={cn(
             'text-[10px] px-1.5 py-0.5 rounded text-white',
             policy.type === 'ai-async' ? 'bg-warning' : 'bg-action-review',
           )}>
@@ -198,6 +198,7 @@ export function PipelineDrawerNavButton({
             )}
             onClick={onSelect}
             data-testid={testid}
+            aria-pressed={isActive}
             {...pointerHoverProps}
           />
         }

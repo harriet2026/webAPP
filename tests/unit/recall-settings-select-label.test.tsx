@@ -58,7 +58,12 @@ function Harness() {
       },
     } as unknown as DisposalSettings,
   });
-  return createElement(RecallSettingsTab, { control, watch, setValue });
+  return createElement(RecallSettingsTab, {
+    control,
+    watch,
+    setValue,
+    effectiveTenantId: null,
+  });
 }
 
 function renderTab() {

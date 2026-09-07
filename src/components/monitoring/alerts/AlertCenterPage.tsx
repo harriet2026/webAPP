@@ -57,7 +57,7 @@ export function AlertCenterPage() {
     <PageShell data-testid="alert-center-page">
       <div className="flex items-center justify-between">
         <PageHeader title={t('title')} />
-        <Button variant="outline" size="sm" onClick={handleRefresh} data-testid="alert-refresh">
+        <Button variant="outline" size="sm" onClick={handleRefresh} aria-busy={spinning} data-testid="alert-refresh">
           <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${spinning ? 'animate-spin' : ''}`} />
           {t('refresh')}
         </Button>

@@ -133,7 +133,7 @@ export function ReclassifyDialog({
             value={value}
             onValueChange={(v) => setValue(v ?? NO_RECLASSIFY)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" data-testid="disposal-reclassify-type">
               {/*
                 base-ui's <Select.Value> resolves its displayed label by
                 looking up the selected value against the currently-mounted
@@ -169,11 +169,11 @@ export function ReclassifyDialog({
             */}
             <SelectContent positionerClassName="isolate z-[200]" collisionPadding={8}>
               {EMAIL_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
+                <SelectItem key={type} value={type} data-testid={`disposal-reclassify-type-option-${type}`}>
                   {tDetail(stripDetailPrefix(mailTypeConfig[type].labelKey))}
                 </SelectItem>
               ))}
-              <SelectItem value={NO_RECLASSIFY}>
+              <SelectItem value={NO_RECLASSIFY} data-testid="disposal-reclassify-type-option-none">
                 {t("reclassify.noChange")}
               </SelectItem>
             </SelectContent>
@@ -182,6 +182,7 @@ export function ReclassifyDialog({
         {showWhitelistOption && (
           <label className="flex items-center gap-2 text-sm">
             <Checkbox
+              data-testid="disposal-reclassify-whitelist"
               checked={whitelist}
               onCheckedChange={(c) => setWhitelist(c === true)}
               aria-label={t("releaseWhitelist")}
@@ -190,7 +191,7 @@ export function ReclassifyDialog({
           </label>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy}>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogCancel data-testid="disposal-reclassify-cancel" disabled={busy}>{t("cancel")}</AlertDialogCancel>
           {/*
             html_spec layer-6/8: 确认按钮语义色, 放行 bg-green-500 hover 600 /
             召回 bg-orange-500 hover 600 白字。Button 的 hover 走
@@ -198,6 +199,7 @@ export function ReclassifyDialog({
             data-[hovered=true]:bg-primary/90。无 action 的纯改判弹窗保持默认。
           */}
           <AlertDialogAction
+            data-testid="disposal-reclassify-confirm"
             className={
               action === "release"
                 ? "border-green-500/20 bg-green-500 text-white data-[hovered=true]:bg-green-600 active:bg-green-600"

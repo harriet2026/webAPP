@@ -283,7 +283,7 @@ export function MonitorSecurityPage() {
         </CardHeader>
         <CardContent data-testid="monitor-security-trend-chart">
           {trend.length > 0
-            ? <ReactECharts option={trendOption} style={{ height: 340 }} notMerge />
+            ? <ReactECharts option={trendOption} style={{ height: 340 }} notMerge data-render-mode={trend.length === 1 ? 'single-bucket' : 'trend-area'} />
             : <div data-testid="monitor-security-trend-empty"><EmptyState message={t('noData')} /></div>}
         </CardContent>
       </Card>

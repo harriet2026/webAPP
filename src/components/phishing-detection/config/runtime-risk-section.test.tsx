@@ -36,12 +36,14 @@ const baseline: PhishAgentConfig = {
 function renderSection() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   render(<NextIntlClientProvider locale="zh" messages={zh as never}><QueryClientProvider client={client}><UnsavedGuardProvider><RuntimeRiskSection /></UnsavedGuardProvider></QueryClientProvider></NextIntlClientProvider>);
+  return client;
 }
 
 async function openEditor() {
-  renderSection();
+  const client = renderSection();
   fireEvent.click(await screen.findByRole('button', { name: '编辑' }));
-  return screen.findByTestId('runtime-risk-sheet');
+  await screen.findByTestId('runtime-risk-sheet');
+  return client;
 }
 
 describe('RuntimeRiskSection atomic draft', () => {
@@ -71,17 +73,37 @@ describe('RuntimeRiskSection atomic draft', () => {
     }), expect.any(Function));
   });
 
-  it('stores observe delivery as accept and marking as an independent flag', async () => {
+  it('keeps inferred next CAS versions when publication is pending and GET is still stale', async () => {
+    putConfig.mockResolvedValue({
+      committed: true,
+      published: false,
+      status: 'publication_pending',
+    });
+    // Initial load and the background post-save read both see the old snapshot.
+    getConfig.mockResolvedValue(structuredClone(baseline));
+    const client = await openEditor();
+    fireEvent.change(screen.getByTestId('cutoff-low'), { target: { value: '35' } });
+    fireEvent.click(screen.getByTestId('runtime-save'));
+
+    await waitFor(() => {
+      const cached = client.getQueryData<PhishAgentConfig>(['phish-config', 9]);
+      expect(cached?.risk_policy.cutoffs.low).toBe(35);
+      expect(cached?.risk_policy.version).toBe(4);
+      expect(cached?.runtime_policy.version).toBe(6);
+    });
+  });
+
+  it('stores native observe without any mark addon', async () => {
     const user = userEvent.setup();
     await openEditor();
     await user.click(screen.getByTestId('run-mode-observe'));
-    await user.click(screen.getByTestId('observe-mark-enabled'));
+    expect(screen.queryByTestId('observe-mark-enabled')).not.toBeInTheDocument();
     await user.click(screen.getByTestId('runtime-save'));
     await waitFor(() => expect(putConfig).toHaveBeenCalled());
     expect(putConfig.mock.calls[0]?.[0].runtime_policy).toEqual(expect.objectContaining({
       run_mode: 'observe',
       observe_action: 'accept',
-      observe_mark_enabled: true,
+      observe_mark_enabled: false,
     }));
   });
 

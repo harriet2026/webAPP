@@ -79,14 +79,14 @@ export function SenderFilterTable({
       accessorKey: 'list_id_display',
       header: t('senderFilter.ruleId'),
       cell: ({ row }) => (
-        <span className="font-mono text-xs">{row.original.list_id_display}</span>
+        <span data-testid="sender-filter-cell-ruleId" className="font-mono text-xs">{row.original.list_id_display}</span>
       ),
       size: 100,
     },
     {
       accessorKey: 'rule.name',
       header: t('senderFilter.ruleName'),
-      cell: ({ row }) => <span className="font-medium">{row.original.rule.name}</span>,
+      cell: ({ row }) => <span data-testid="sender-filter-cell-ruleName" className="font-medium">{row.original.rule.name}</span>,
     },
     {
       id: 'sender_config',
@@ -102,13 +102,13 @@ export function SenderFilterTable({
         // cell. Degrade to the same "complex condition" badge already used for a
         // rule the simple editor cannot represent.
         if (!resolved || !resolved.sender_config) {
-          return <Badge variant="secondary">{t('senderFilter.complexCondition')}</Badge>;
+          return <Badge data-testid="sender-filter-cell-complex" variant="secondary">{t('senderFilter.complexCondition')}</Badge>;
         }
         // An unrecognised type would likewise yield `undefined` here and crash on
         // render; fall back to the same badge rather than an undefined component.
         const Icon = senderIcon[resolved.sender_config.type];
         if (!Icon) {
-          return <Badge variant="secondary">{t('senderFilter.complexCondition')}</Badge>;
+          return <Badge data-testid="sender-filter-cell-complex" variant="secondary">{t('senderFilter.complexCondition')}</Badge>;
         }
         const typeLabel = t(`senderFilter.senderType_${resolved.sender_config.type}`);
         const groupDeleted = resolved.sender_config.type === 'group' && !senderGroupNames.has(resolved.sender_config.value);
@@ -121,9 +121,9 @@ export function SenderFilterTable({
                 <TooltipContent>{t('senderFilter.groupDeleted')}</TooltipContent>
               </Tooltip>
             ) : (
-              <span className="text-sm">{resolved.sender_config.value}</span>
+              <span data-testid="sender-filter-cell-senderValue" className="text-sm">{resolved.sender_config.value}</span>
             )}
-            <Badge variant="secondary" className="text-[10px]">{typeLabel}</Badge>
+            <Badge data-testid="sender-filter-cell-senderType" variant="secondary" className="text-[10px]">{typeLabel}</Badge>
           </div>
         );
       },
@@ -145,7 +145,7 @@ export function SenderFilterTable({
       accessorKey: 'rule.priority',
       header: t('senderFilter.priority'),
       cell: ({ row }) => (
-        <span className="text-sm tabular-nums">{row.original.rule.priority}</span>
+        <span data-testid="sender-filter-cell-priority" className="text-sm tabular-nums">{row.original.rule.priority}</span>
       ),
       size: 80,
     },
@@ -154,6 +154,7 @@ export function SenderFilterTable({
       header: t('senderFilter.status'),
       cell: ({ row }) => (
         <Switch
+          data-testid="sender-filter-row-status"
           checked={row.original.rule.is_active}
           onCheckedChange={(isActive) => onToggle(row.original.rule.id, isActive)}
           aria-label={row.original.rule.is_active ? t('common.disabled') : t('common.enabled')}
@@ -175,6 +176,7 @@ export function SenderFilterTable({
       cell: ({ row }) => (
         <div className="flex gap-1">
           <Button
+            data-testid="sender-filter-row-edit"
             variant="ghost"
             size="icon"
             aria-label={t('common.edit')}
@@ -192,6 +194,7 @@ export function SenderFilterTable({
             <Pencil className="h-4 w-4" />
           </Button>
           <Button
+            data-testid="sender-filter-row-delete"
             variant="ghost"
             size="icon"
             aria-label={t('common.delete')}
@@ -211,6 +214,9 @@ export function SenderFilterTable({
       <DataTable
         columns={columns}
         data={data}
+        rowTestId={(row) => `sender-filter-row-${row.rule.id}`}
+        columnTestId={(id) => `sender-filter-col-${id}`}
+        testId="sender-filter-table"
         pageCount={Math.max(1, pageCount)}
         pageIndex={pageIndex}
         onPageChange={onPageChange}

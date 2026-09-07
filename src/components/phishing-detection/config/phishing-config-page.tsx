@@ -18,8 +18,12 @@ export function PhishingConfigPage({ openCreateSignal }: { openCreateSignal?: nu
         <p className="text-sm text-muted-foreground">{t('pageDescription')}</p>
       </div>
       {status === 'ready' && readOnly ? <Alert role="status"><LockKeyhole className="size-4" /><AlertDescription>{t('readOnlyNotice')}</AlertDescription></Alert> : null}
-      <AdmissionRulesSection readOnly={controlsReadOnly} openCreateSignal={openCreateSignal} />
-      <RuntimeRiskSection readOnly={controlsReadOnly} />
+      <div data-testid="phishing-config-section-admission">
+        <AdmissionRulesSection readOnly={controlsReadOnly} openCreateSignal={openCreateSignal} />
+      </div>
+      <div data-testid="phishing-config-section-runtime-risk">
+        <RuntimeRiskSection readOnly={controlsReadOnly} />
+      </div>
     </div>
   );
 }

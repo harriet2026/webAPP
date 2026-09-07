@@ -6,11 +6,19 @@ import type {
   RBLFilterRuleView,
   RBLProbeResponse,
 } from '@/types/rbl-filter';
+import { fetchAllPages } from './pagination';
 
-export async function getRBLFilterRules(
-  params: { page?: number; page_size?: number; q?: string; match_mode?: string; product_action?: string; is_active?: boolean; sort?: string },
-  requestFn: ApiRequestFn = apiRequest,
-) {
+export interface RBLFilterRuleListParams {
+  page?: number;
+  page_size?: number;
+  q?: string;
+  match_mode?: string;
+  product_action?: string;
+  is_active?: boolean;
+  sort?: string;
+}
+
+function rblFilterRulesPath(params: RBLFilterRuleListParams): string {
   const qs = new URLSearchParams();
   if (params.page) qs.set('page', String(params.page));
   if (params.page_size) qs.set('page_size', String(params.page_size));
@@ -19,7 +27,23 @@ export async function getRBLFilterRules(
   if (params.product_action) qs.set('product_action', params.product_action);
   if (params.is_active !== undefined) qs.set('is_active', String(params.is_active));
   if (params.sort) qs.set('sort', params.sort);
-  return requestFn<{ items: RBLFilterRuleView[]; total: number }>(`/rbl-filter/rules?${qs}`);
+  const query = qs.toString();
+  return `/rbl-filter/rules${query ? `?${query}` : ''}`;
+}
+
+export async function getRBLFilterRules(
+  params: RBLFilterRuleListParams,
+  requestFn: ApiRequestFn = apiRequest,
+) {
+  return requestFn<{ items: RBLFilterRuleView[]; total: number }>(rblFilterRulesPath(params));
+}
+
+export async function listAllRBLFilterRules(
+  params: Omit<RBLFilterRuleListParams, 'page' | 'page_size'>,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<{ items: RBLFilterRuleView[] }> {
+  const items = await fetchAllPages<RBLFilterRuleView>(rblFilterRulesPath(params), requestFn);
+  return { items };
 }
 
 export async function createRBLFilterRule(data: RBLFilterRulePayload, requestFn: ApiRequestFn = apiRequest) {

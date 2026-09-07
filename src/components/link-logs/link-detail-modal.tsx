@@ -2,7 +2,15 @@
 
 import { useTranslations } from 'next-intl';
 import { ArrowRight, ShieldAlert, ShieldCheck, CheckCircle2, AlertTriangle, MinusCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { type LinkClickLog } from '@/lib/api/link-clicks';
 import { STAGE_ORDER, stageMeta, verdictMeta, resultMeta, actionMeta, deepInspectStateMeta, SOURCE_LABEL_KEY } from './meta';
@@ -42,15 +50,20 @@ export function LinkDetailModal({ log, open, onOpenChange }: LinkDetailModalProp
   const sm = stageMeta(log.trigger_stage);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent data-testid="link-logs-detail-modal" className="max-w-[1100px] w-[95vw] max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader className="p-6 border-b border-border">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        data-testid="link-logs-detail-modal"
+        className="data-[side=right]:w-full data-[side=right]:sm:max-w-2xl flex flex-col gap-0 p-0"
+        showCloseButton
+      >
+        <SheetHeader className="shrink-0 border-b border-border px-6 py-4">
           <div className="text-xs text-muted-foreground mb-1">{t('linkLogs.detail.breadcrumb')}</div>
-          <DialogTitle data-testid="link-logs-detail-title" className="text-lg font-semibold truncate">{log.original_url}</DialogTitle>
-          <DialogDescription className="sr-only">{t('linkLogs.detail.disposition')}</DialogDescription>
-        </DialogHeader>
+          <SheetTitle data-testid="link-logs-detail-title" className="text-lg font-semibold truncate">{log.original_url}</SheetTitle>
+          <SheetDescription className="sr-only">{t('linkLogs.detail.disposition')}</SheetDescription>
+        </SheetHeader>
 
-        <div className="p-6 space-y-6">
+        <div data-testid="link-logs-detail-body" className="min-h-0 flex-1 space-y-6 overflow-y-auto bg-muted/30 p-6">
           {/* Final disposition banner */}
           <div data-testid="link-logs-detail-banner" className={`rounded-lg p-4 border flex items-center gap-3 ${alerted ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
             {alerted ? <ShieldAlert className="h-6 w-6 text-red-600" /> : <ShieldCheck className="h-6 w-6 text-green-600" />}
@@ -131,7 +144,12 @@ export function LinkDetailModal({ log, open, onOpenChange }: LinkDetailModalProp
             <InfoRow label={t('linkLogs.detail.clientIp')} value={log.client_ip || '-'} />
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+        <SheetFooter className="shrink-0 flex-row justify-end border-t bg-muted/30 px-6 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)} data-testid="link-logs-detail-close">
+            {t('linkLogs.close')}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

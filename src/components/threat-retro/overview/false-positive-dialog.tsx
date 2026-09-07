@@ -53,7 +53,7 @@ export function FalsePositiveDialog({ open, onOpenChange, onSubmit, isLoading, a
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent data-testid="threat-retro-false-positive-dialog">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description')}</DialogDescription>
@@ -63,7 +63,7 @@ export function FalsePositiveDialog({ open, onOpenChange, onSubmit, isLoading, a
           <RadioGroup value={reason} onValueChange={(v) => setReason(v as Reason)} className="gap-2">
             {REASONS.map((r) => (
               <div key={r} className="flex items-center gap-2">
-                <RadioGroupItem value={r} id={`fp-${r}`} />
+                <RadioGroupItem value={r} id={`fp-${r}`} data-testid={`threat-retro-fp-reason-${r}`} />
                 <Label htmlFor={`fp-${r}`} className="cursor-pointer text-sm">
                   {reasonText(r)}
                 </Label>
@@ -72,6 +72,7 @@ export function FalsePositiveDialog({ open, onOpenChange, onSubmit, isLoading, a
           </RadioGroup>
 
           <Textarea
+            data-testid="threat-retro-fp-note"
             value={detail}
             onChange={(e) => setDetail(e.target.value)}
             placeholder={t('detailPlaceholder')}
@@ -80,17 +81,17 @@ export function FalsePositiveDialog({ open, onOpenChange, onSubmit, isLoading, a
 
           {allowWhitelist ? (
             <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <Checkbox checked={addWhitelist} onCheckedChange={(v) => setAddWhitelist(Boolean(v))} />
+              <Checkbox data-testid="threat-retro-fp-whitelist" checked={addWhitelist} onCheckedChange={(v) => setAddWhitelist(Boolean(v))} />
               <span>{t('addWhitelist')}</span>
             </label>
           ) : null}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+          <Button variant="outline" data-testid="threat-retro-fp-cancel" onClick={() => onOpenChange(false)} disabled={isLoading}>
             {t('cancel')}
           </Button>
-          <Button onClick={submit} disabled={isLoading}>
+          <Button data-testid="threat-retro-fp-submit" onClick={submit} disabled={isLoading}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {t('submit')}
           </Button>

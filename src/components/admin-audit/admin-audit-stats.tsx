@@ -14,24 +14,15 @@ export function AdminAuditStats({ stats }: AdminAuditStatsProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <StatCard
-        label={t('stats.total')}
-        value={total}
-        valueClass="text-gray-900"
-        testid="admin-audit-stat-total"
-      />
-      <StatCard
-        label={t('stats.success')}
-        value={success}
-        valueClass="text-emerald-700"
-        testid="admin-audit-stat-success"
-      />
-      <StatCard
-        label={t('stats.failed')}
-        value={failed}
-        valueClass="text-red-700"
-        testid="admin-audit-stat-failed"
-      />
+      <div data-testid="admin-audit-stat-total">
+        <StatCard label={t('stats.total')} value={total} valueClass="text-gray-900" />
+      </div>
+      <div data-testid="admin-audit-stat-success">
+        <StatCard label={t('stats.success')} value={success} valueClass="text-emerald-700" />
+      </div>
+      <div data-testid="admin-audit-stat-failed">
+        <StatCard label={t('stats.failed')} value={failed} valueClass="text-red-700" />
+      </div>
     </div>
   );
 }
@@ -40,12 +31,11 @@ interface StatCardProps {
   label: string;
   value: number;
   valueClass: string;
-  testid: string;
 }
 
-function StatCard({ label, value, valueClass, testid }: StatCardProps) {
+function StatCard({ label, value, valueClass }: StatCardProps) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm" data-testid={testid}>
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="text-sm text-body">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${valueClass}`}>{value}</div>
     </div>

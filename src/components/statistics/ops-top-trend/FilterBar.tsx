@@ -18,7 +18,12 @@ interface FilterBarProps {
   leftSlot?: ReactNode;
 }
 
-const DIRECTIONS: OpsDirection[] = ['all', 'receive', 'send', 'internal'];
+const DIRECTIONS: Array<{ value: OpsDirection; testid: string }> = [
+  { value: 'all', testid: 'ops-direction-all' },
+  { value: 'receive', testid: 'ops-direction-receive' },
+  { value: 'send', testid: 'ops-direction-send' },
+  { value: 'internal', testid: 'ops-direction-internal' },
+];
 const TIME_RANGES: OpsTimeRange[] = ['today', '7d', '30d', 'thisMonth', 'lastMonth'];
 const TOP_COUNTS: OpsTopCount[] = ['10', '50', '100'];
 
@@ -38,7 +43,7 @@ export function FilterBar({
   const effectiveDirection = dirDisabled ? (DIR_FIXED[dimension] ?? 'all') : direction;
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm" data-testid="ops-top-filter-bar">
       {leftSlot}
 
       <Tooltip>
@@ -53,7 +58,11 @@ export function FilterBar({
           <SegmentedControl
             value={effectiveDirection}
             onChange={(v) => !dirDisabled && onDirectionChange(v as OpsDirection)}
-            options={DIRECTIONS.map((d) => ({ value: d, label: t(`direction.${d}`) }))}
+            options={DIRECTIONS.map(({ value, testid }) => ({
+              value,
+              testid,
+              label: t(`direction.${value}`),
+            }))}
           />
         </TooltipTrigger>
         {dirDisabled && <TooltipContent>{t('dirFixedTip')}</TooltipContent>}
@@ -63,6 +72,7 @@ export function FilterBar({
         value={timeRange}
         onChange={(v) => onTimeRangeChange(v as OpsTimeRange)}
         size="sm"
+        testIdPrefix="ops-time-range"
         options={TIME_RANGES.map((r) => ({ value: r, label: t(`timeRange.${r}`) }))}
       />
 
@@ -70,6 +80,7 @@ export function FilterBar({
         value={topCount}
         onChange={(v) => onTopCountChange(v as OpsTopCount)}
         size="sm"
+        testIdPrefix="ops-top-count"
         options={TOP_COUNTS.map((c) => ({ value: c, label: `TOP ${c}` }))}
       />
     </div>

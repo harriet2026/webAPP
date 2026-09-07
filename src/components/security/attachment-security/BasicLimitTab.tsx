@@ -28,6 +28,7 @@ export const DEFAULT_BASIC_LIMIT_CONFIG: BasicLimitConfig = {
   danger_ext_enabled: true,
   danger_ext_list: '.exe,.scr,.com,.bat,.cmd,.pif,.vbs,.js,.jse,.ws,.wsh,.hta,.lnk,.iso,.img,.vhd,.ps1,.psm1,.msi',
   mime_mismatch_check: true,
+  mime_mismatch_action: 'quarantine',
 };
 
 const EXCEED_ACTIONS: AttachmentAction[] = [
@@ -54,6 +55,8 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
   const controlled = config !== undefined && onChange !== undefined;
   const [localConfig, setLocalConfig] = useState(DEFAULT_BASIC_LIMIT_CONFIG);
   const [loading, setLoading] = useState(!controlled);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadRevision, setLoadRevision] = useState(0);
   const [saving, setSaving] = useState(false);
   const value = controlled ? config : localConfig;
 
@@ -61,12 +64,16 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
     if (controlled) return;
     let active = true;
     setLoading(true);
+    setLoadFailed(false);
     getBasicLimitConfig(direction, apiRequest)
       .then((loaded) => {
+        if (!loaded) throw new Error('basic-limit configuration is missing');
         if (active) setLocalConfig(mergeConfig(loaded));
       })
       .catch(() => {
-        if (active) setLocalConfig(DEFAULT_BASIC_LIMIT_CONFIG);
+        if (!active) return;
+        setLoadFailed(true);
+        toast.error(t('toast.loadFailed'));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -74,7 +81,7 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
     return () => {
       active = false;
     };
-  }, [apiRequest, controlled, direction]);
+  }, [apiRequest, controlled, direction, loadRevision, t]);
 
   const update = useCallback((updates: Partial<BasicLimitConfig>) => {
     const next = { ...value, ...updates };
@@ -137,6 +144,26 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
 
   if (loading) {
     return <div className="flex justify-center py-12"><Loader2 className="h-7 w-7 animate-spin" /></div>;
+  }
+
+  if (!controlled && loadFailed) {
+    return (
+      <div
+        className="flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-center"
+        data-testid="basic-limit-load-error"
+      >
+        <AlertTriangle className="h-6 w-6 text-destructive" />
+        <p className="text-sm text-destructive">{t('toast.loadFailed')}</p>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setLoadRevision((current) => current + 1)}
+          data-testid="basic-limit-retry"
+        >
+          {t('common.retry')}
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -258,7 +285,18 @@ export function BasicLimitTab({ direction = 'receive', config, onChange }: Basic
 
       <section className="space-y-3">
         <Label>{fieldLabel(t('basicLimit.exceedAction'), t('tooltips.exceedAction'), 'basic-limit-exceed-action')}</Label>
-        <Select value={value.exceed_action} onValueChange={(action) => update({ exceed_action: action as AttachmentAction })}>
+        <Select
+          value={value.partial_skip ? 'partial_skip' : value.exceed_action}
+          onValueChange={(action) => {
+            const partialSkip = action === 'partial_skip';
+            update({
+              // partial_skip is a scanner sub-mode, not a persisted action.
+              // Preserve the last real disposition while that mode is active.
+              exceed_action: partialSkip ? value.exceed_action : action as AttachmentAction,
+              partial_skip: partialSkip,
+            });
+          }}
+        >
           <SelectTrigger className="w-[280px] max-w-full" data-testid="basic-limit-exceed-action">
             <SelectValue />
           </SelectTrigger>

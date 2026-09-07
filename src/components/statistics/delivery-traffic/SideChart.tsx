@@ -131,7 +131,7 @@ export function SideChart({ distribution, direction, isLoading }: SideChartProps
   } : undefined;
 
   return (
-    <Card className="h-full min-w-0 rounded-xl bg-card shadow-sm backdrop-blur-none">
+    <Card className="h-full min-w-0 rounded-xl bg-card shadow-sm backdrop-blur-none" data-testid="delivery-side-chart">
       <CardHeader>
         <CardTitle className="text-base">{t(titleKey)}</CardTitle>
       </CardHeader>
@@ -139,7 +139,7 @@ export function SideChart({ distribution, direction, isLoading }: SideChartProps
         {isLoading ? (
           <Skeleton className="h-64 w-full rounded-lg" />
         ) : !option ? (
-          <div className="flex h-64 items-center justify-center text-muted-foreground">
+          <div data-testid="delivery-side-chart-empty" className="flex h-64 items-center justify-center text-muted-foreground">
             {t('noData') as string}
           </div>
         ) : (

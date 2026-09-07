@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { ApiError } from './client';
 import { localizeApiError, apiErrorFieldPath } from './error-message';
 import zh from '@/../messages/zh.json';
@@ -41,6 +41,21 @@ describe('localizeApiError (GT-12606)', () => {
     expect(localizeApiError(e, t)).toBeNull();
     // 这一条是本机制的核心约束：上位规格禁止把后端英文当四语 UI。
     expect(localizeApiError(e, t)).not.toBe('english fallback');
+  });
+
+  it('查询未知错误码前先调用 has，避免 next-intl 记录 MISSING_MESSAGE', () => {
+    const translate = Object.assign(
+      vi.fn(() => { throw new Error('missing translation should not be rendered'); }),
+      { has: vi.fn(() => false) },
+    );
+    expect(localizeApiError(apiError('brand_new_error'), translate)).toBeNull();
+    expect(translate.has).toHaveBeenCalledWith('apiErrors.brand_new_error');
+    expect(translate).not.toHaveBeenCalled();
+  });
+
+  it('internal_error 返回通用本地化文案', () => {
+    expect(localizeApiError(apiError('internal_error', {}, 500), t))
+      .toBe('服务器内部错误，请稍后重试');
   });
 
   it('demo_unavailable 在所有钓鱼配置面板复用同一条本地化提示', () => {

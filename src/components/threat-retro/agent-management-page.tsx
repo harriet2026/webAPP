@@ -39,8 +39,8 @@ export function ThreatRetroAgentPage({
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-lg border border-border/70 bg-card p-6 shadow-sm">
           <TopBar />
           <Tabs key={activeTab} defaultValue={activeTab} className="flex flex-1 flex-col">
-            <TabsList className="shrink-0 self-start">
-              <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
+            <TabsList className="shrink-0 self-start" data-testid="threat-retro-tabs">
+              <TabsTrigger value="overview" data-testid="threat-retro-overview-tab">{t('tabs.overview')}</TabsTrigger>
               {configurationEnabled ? (
                 <TabsTrigger value="strategy" data-testid="threat-retro-strategy-tab">
                   {t('tabs.strategy')}

@@ -46,7 +46,7 @@ const SEMANTIC_BADGE_CLASS = 'h-[18px] max-w-full rounded-md px-1.5 py-0 text-[1
 
 type TranslationFn = ReturnType<typeof useTranslations>;
 
-function Sparkline({ data, color }: { data: number[]; color: string }) {
+function Sparkline({ data, color, testid }: { data: number[]; color: string; testid?: string }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
@@ -59,7 +59,7 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
     .join(' ');
 
   return (
-    <svg width="60" height="20" className="inline-block" aria-hidden="true">
+    <svg width="60" height="20" className="inline-block" aria-hidden="true" data-testid={testid}>
       <polyline
         points={points}
         fill="none"
@@ -139,13 +139,13 @@ function CellContent({
         col.key === 'authAccount';
       if (isIdentifierKey) {
         const textVal = String(value ?? '');
-        const isInternal = Boolean(row.metrics.isInternal);
         return (
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger
                 render={
                   <span
+                    data-testid={`ops-top-value-${row.rank}-${col.key}`}
                     className="max-w-[160px] cursor-help truncate font-mono text-foreground"
                     title={textVal}
                   />
@@ -164,14 +164,6 @@ function CellContent({
                 ) : null}
               </TooltipContent>
             </Tooltip>
-            {isInternal && col.key === 'sourceIp' ? (
-              <Badge
-                variant="outline"
-                className="border-blue-200 bg-blue-50 px-1 py-0 text-[10px] text-blue-600"
-              >
-                {t('internal')}
-              </Badge>
-            ) : null}
           </div>
         );
       }
@@ -182,6 +174,7 @@ function CellContent({
             <TooltipTrigger
               render={
                 <span
+                  data-testid={`ops-top-value-${row.rank}-${col.key}`}
                   className="block max-w-[196px] cursor-help truncate text-foreground"
                   title={textVal}
                 />
@@ -202,6 +195,7 @@ function CellContent({
             <TooltipTrigger
               render={
                 <span
+                  data-testid={`ops-top-value-${row.rank}-${col.key}`}
                   className="block max-w-[106px] cursor-help truncate font-mono text-xs text-muted-foreground"
                   title={ipsVal}
                 />
@@ -222,6 +216,7 @@ function CellContent({
             <TooltipTrigger
               render={
                 <span
+                  data-testid={`ops-top-value-${row.rank}-${col.key}`}
                   className="block max-w-[126px] cursor-help truncate text-xs text-muted-foreground"
                   title={domainVal}
                 />
@@ -242,19 +237,19 @@ function CellContent({
         col.key.includes('Last')
       ) {
         return (
-          <span className="text-xs text-muted-foreground">
+          <span data-testid={`ops-top-value-${row.rank}-${col.key}`} className="text-xs text-muted-foreground">
             {String(value ?? '-')}
           </span>
         );
       }
-      return <span className="text-foreground">{String(value ?? '-')}</span>;
+      return <span data-testid={`ops-top-value-${row.rank}-${col.key}`} className="text-foreground">{String(value ?? '-')}</span>;
     }
 
     case 'number': {
       const numVal = Number(value) || 0;
       if (col.key === 'successCount') {
         return (
-          <span className="font-medium text-green-600">
+          <span data-testid={`ops-top-value-${row.rank}-${col.key}`} className="font-medium text-green-600">
             {numVal.toLocaleString()}
           </span>
         );
@@ -266,6 +261,7 @@ function CellContent({
       ) {
         return (
           <span
+            data-testid={`ops-top-value-${row.rank}-${col.key}`}
             className={`font-medium ${numVal > 0 ? 'text-red-500' : 'text-muted-foreground'}`}
           >
             {numVal.toLocaleString()}
@@ -275,6 +271,7 @@ function CellContent({
       if (col.key === 'bounceCount') {
         return (
           <span
+            data-testid={`ops-top-value-${row.rank}-${col.key}`}
             className={`font-medium ${numVal > 0 ? 'text-yellow-600' : 'text-muted-foreground'}`}
           >
             {numVal.toLocaleString()}
@@ -282,7 +279,7 @@ function CellContent({
         );
       }
       return (
-        <span className="font-medium text-foreground">
+        <span data-testid={`ops-top-value-${row.rank}-${col.key}`} className="font-medium text-foreground">
           {numVal.toLocaleString()}
         </span>
       );
@@ -295,6 +292,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
+            data-testid={`ops-top-badge-${row.rank}-${col.key}`}
             className={`${SEMANTIC_BADGE_CLASS} ${isInternalGeo ? 'border-blue-200 bg-blue-50 text-blue-600' : 'border-border/70 bg-muted/40 text-muted-foreground'}`}
           >
             {isInternalGeo ? (t('internal') as string) : geo.split(' ')[0]}
@@ -308,6 +306,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
+            data-testid={`ops-top-badge-${row.rank}-${col.key}`}
             className={`${SEMANTIC_BADGE_CLASS} ${THREAT_TYPE_COLOR[threatType] ?? 'border-border/70 bg-muted/40 text-muted-foreground'}`}
           >
             {t(threatType as Parameters<typeof t>[0])}
@@ -320,6 +319,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
+            data-testid={`ops-top-badge-${row.rank}-${col.key}`}
             className={`${SEMANTIC_BADGE_CLASS} border-red-200 bg-red-50 text-red-600`}
           >
             {String(value)}
@@ -329,7 +329,7 @@ function CellContent({
       if (col.key === 'bruteForce') {
         if (!value) return <span className="text-muted-foreground">-</span>;
         return (
-          <Badge variant="destructive" className={SEMANTIC_BADGE_CLASS}>
+          <Badge variant="destructive" data-testid={`ops-top-badge-${row.rank}-${col.key}`} className={SEMANTIC_BADGE_CLASS}>
             {t('bruteForceTag')}
           </Badge>
         );
@@ -340,6 +340,7 @@ function CellContent({
         return (
           <Badge
             variant="outline"
+            data-testid={`ops-top-badge-${row.rank}-${col.key}`}
             className={`${SEMANTIC_BADGE_CLASS} ${isExternal ? 'border-border/70 bg-muted/40 text-muted-foreground' : 'border-green-200 bg-green-50 text-green-600'}`}
           >
             {isExternal ? (t('external') as string) : dept}
@@ -353,9 +354,10 @@ function CellContent({
       const percent = Number(value) || 0;
       const { bar, text } = progressColors(col.key, percent);
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" data-testid={`ops-top-progress-${row.rank}-${col.key}`}>
           <div className="h-1.5 w-12 overflow-hidden rounded-full bg-muted">
             <div
+              data-testid={`ops-top-progress-bar-${row.rank}-${col.key}`}
               className="h-full rounded-full transition-all"
               style={{
                 width: `${Math.min(percent, 100)}%`,
@@ -363,7 +365,7 @@ function CellContent({
               }}
             />
           </div>
-          <span className={`text-xs ${text}`}>{percent}%</span>
+          <span data-testid={`ops-top-progress-text-${row.rank}-${col.key}`} className={`text-xs ${text}`}>{percent}%</span>
         </div>
       );
     }
@@ -371,7 +373,7 @@ function CellContent({
     case 'change': {
       if (row.changePercent === null) {
         return (
-          <div className="flex justify-end">
+          <div className="flex justify-end" data-testid={`ops-top-change-${row.rank}`}>
             <Badge
               variant="outline"
               className="border-blue-200 bg-blue-50 px-1 py-0 text-[10px] text-blue-600"
@@ -384,6 +386,7 @@ function CellContent({
       const pct = row.changePercent;
       return (
         <div
+          data-testid={`ops-top-change-${row.rank}`}
           className={`flex items-center justify-end gap-1 ${pct > 0 ? 'text-red-500' : pct < 0 ? 'text-green-500' : 'text-muted-foreground'}`}
         >
           {pct > 0 ? (
@@ -402,7 +405,11 @@ function CellContent({
     case 'sparkline': {
       if (!row.trend || row.trend.length === 0) return null;
       return (
-        <Sparkline data={row.trend} color={DIMENSION_CONFIG[dimension].color} />
+        <Sparkline
+          data={row.trend}
+          color={DIMENSION_CONFIG[dimension].color}
+          testid={`ops-top-sparkline-${row.rank}`}
+        />
       );
     }
 
@@ -427,11 +434,11 @@ export function TopTable({
   const colCount = cols.length + 1;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" data-testid="ops-top-table">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border/60">
-            <th className="w-10 px-2 py-2 text-left font-medium text-muted-foreground">
+            <th className="w-10 px-2 py-2 text-left font-medium text-muted-foreground" data-testid="ops-top-col-rank">
               #
             </th>
             {cols.map((col) => (
@@ -439,6 +446,7 @@ export function TopTable({
                 <TooltipTrigger
                   render={
                     <th
+                      data-testid={`ops-top-col-${col.key}`}
                       className={`px-2 py-2 font-medium text-muted-foreground whitespace-nowrap cursor-help ${alignClass(col.align)}`}
                       style={{ width: col.width, minWidth: col.width }}
                     />
@@ -473,6 +481,7 @@ export function TopTable({
                 return (
                   <Fragment key={rowId}>
                     <tr
+                      data-testid={`ops-top-row-${row.rank}`}
                       onClick={(e) => {
                         const willExpand = !isExpanded;
                         onToggleRow(rowId);
@@ -493,19 +502,21 @@ export function TopTable({
                     >
                       <td className="px-2 py-[7.6px]">
                         <div className="flex items-center gap-1">
-                          {row.isSpike ? (
-                            <Flame className="h-3 w-3 text-orange-500" />
-                          ) : null}
                           <span
+                            data-testid={`ops-top-rank-${row.rank}`}
                             className={`inline-flex h-5 w-5 items-center justify-center rounded text-xs font-medium ${RANK_BADGE[row.rank] ?? 'bg-muted text-muted-foreground'}`}
                           >
                             {row.rank}
                           </span>
+                          {row.isSpike ? (
+                            <Flame data-testid={`ops-top-spike-${row.rank}`} className="h-3 w-3 text-orange-500" />
+                          ) : null}
                         </div>
                       </td>
                       {cols.map((col) => (
                         <td
                           key={col.key}
+                          data-testid={`ops-top-cell-${row.rank}-${col.key}`}
                           className={`px-2 py-[7.6px] ${alignClass(col.align)}`}
                         >
                           <CellContent
@@ -518,7 +529,7 @@ export function TopTable({
                       ))}
                     </tr>
                     {isExpanded && expandedContent ? (
-                      <tr>
+                      <tr data-testid={`ops-top-expanded-row-${row.rank}`}>
                         <td colSpan={colCount} className="p-0">
                           {expandedContent(row)}
                         </td>
@@ -530,7 +541,7 @@ export function TopTable({
         </tbody>
       </table>
       {showPartial ? (
-        <div className="mt-4 text-center text-sm text-muted-foreground">
+        <div className="mt-4 text-center text-sm text-muted-foreground" data-testid="ops-top-showing-partial">
           {t('showingPartial', { shown: visibleRows.length, total })}
         </div>
       ) : null}

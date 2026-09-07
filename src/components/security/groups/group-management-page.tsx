@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 import type { Rule } from '@/types/unified-rules';
 import type { Group, GroupType } from '@/types/groups';
 import { GROUPS_LIST_QUERY } from '@/lib/api/groups';
-import { ruleToGroup, buildRulePayload, importMembers, exportMembers } from '@/lib/api/groups';
+import { ruleToGroup, buildRulePayload, importMembers, exportMembers, importResultRows } from '@/lib/api/groups';
 import { GroupEditDialog } from './group-edit-dialog';
 import { FeatureGroupDrawer } from './feature-group-drawer';
 import { summarizeConditionTree, summarizeFeaturePreview } from './feature-group-preview';
@@ -156,11 +156,15 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
     onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });
 
-  // GT-12260：接口早就按行返回 {line, value, reason}，此前只取了 .length 塞进
-  // toast，逐行原因被整个丢弃 —— 管理员无法定位批量文件里到底哪几行有问题。
-  // 这里把明细留下来，用弹窗展示。
-  const [importFailures, setImportFailures] = useState<
-    { groupName: string; imported: number; failed: { line: number; value: string; reason: string }[] } | null
+  // GT-12260：失败行必须展示逐行原因；GT-13212：已存在成员也必须进入
+  // skipped 明细。弹窗统一保留两类行，确保文件中的非空数据可核对。
+  const [importResult, setImportResult] = useState<
+    {
+      groupName: string;
+      imported: number;
+      skipped: { line: number; value: string; reason: 'already_exists' }[];
+      failed: { line: number; value: string; reason: string }[];
+    } | null
   >(null);
 
   const handleImportFile = async (file: File) => {
@@ -169,9 +173,25 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
     setImportingRuleId(target.ruleId);
     try {
       const result = await importMembers(target.ruleId, file, { tenantId: effectiveTenantId });
-      if (result.failed.length > 0) {
-        toast.warning(t('importPartial', { imported: result.imported, failed: result.failed.length }));
-        setImportFailures({ groupName: target.name, imported: result.imported, failed: result.failed });
+      // 兼容滚动升级期间尚未返回 skipped 的旧 apiserver。
+      const skipped = result.skipped ?? [];
+      if (skipped.length > 0 || result.failed.length > 0) {
+        if (skipped.length > 0) {
+          toast.warning(t('importSummary', {
+            imported: result.imported,
+            skipped: skipped.length,
+            failed: result.failed.length,
+          }));
+        } else {
+          // 保留既有失败场景文案，维护用例和用户习惯不受影响。
+          toast.warning(t('importPartial', { imported: result.imported, failed: result.failed.length }));
+        }
+        setImportResult({
+          groupName: target.name,
+          imported: result.imported,
+          skipped,
+          failed: result.failed,
+        });
       } else {
         toast.success(t('importSuccess', { count: result.imported }));
       }
@@ -250,7 +270,12 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
   const renderFeatureTab = () => {
     const list = filtered.filter(g => g.type === 'feature');
     return (
-      <TabsContent key="feature" value="feature" className="space-y-4 mt-4">
+      <TabsContent
+        key="feature"
+        value="feature"
+        className="space-y-4 mt-4"
+        data-testid="groups-tabpanel-feature"
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="relative flex-1 max-w-md">
@@ -344,7 +369,12 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
     if (type === 'feature') return renderFeatureTab();
     const list = filtered.filter(g => g.type === type);
     return (
-      <TabsContent key={type} value={type} className="space-y-4 mt-4">
+      <TabsContent
+        key={type}
+        value={type}
+        className="space-y-4 mt-4"
+        data-testid={`groups-tabpanel-${type}`}
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 flex-1">
             <div className="relative flex-1 max-w-md">
@@ -536,6 +566,7 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
       <input
         type="file"
         accept=".txt,.csv,text/plain"
+        data-testid="groups-import-file-input"
         hidden
         ref={fileInputRef}
         onChange={e => {
@@ -572,15 +603,22 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
         variant="destructive"
       />
       {/* GT-12260：导入部分成功时逐行展示失败值、行号与原因 */}
-      <Dialog open={importFailures != null} onOpenChange={open => !open && setImportFailures(null)}>
+      <Dialog open={importResult != null} onOpenChange={open => !open && setImportResult(null)}>
         <DialogContent className="max-w-2xl" data-testid="import-failures-dialog" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>
-              {t('importFailuresTitle', {
-                name: importFailures?.groupName ?? '',
-                imported: importFailures?.imported ?? 0,
-                failed: importFailures?.failed.length ?? 0,
-              })}
+              {(importResult?.skipped.length ?? 0) > 0
+                ? t('importResultsTitle', {
+                    name: importResult?.groupName ?? '',
+                    imported: importResult?.imported ?? 0,
+                    skipped: importResult?.skipped.length ?? 0,
+                    failed: importResult?.failed.length ?? 0,
+                  })
+                : t('importFailuresTitle', {
+                    name: importResult?.groupName ?? '',
+                    imported: importResult?.imported ?? 0,
+                    failed: importResult?.failed.length ?? 0,
+                  })}
             </DialogTitle>
           </DialogHeader>
           <div className="max-h-[50vh] overflow-auto">
@@ -588,23 +626,44 @@ export function GroupManagementPage({ platformScope = false }: GroupManagementPa
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">{t('importFailureLine')}</TableHead>
+                  <TableHead className="w-[100px]">{t('importResultStatus')}</TableHead>
                   <TableHead>{t('importFailureValue')}</TableHead>
-                  <TableHead>{t('importFailureReason')}</TableHead>
+                  <TableHead>{(importResult?.skipped.length ?? 0) > 0
+                    ? t('importResultReason')
+                    : t('importFailureReason')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(importFailures?.failed ?? []).map((f, i) => (
-                  <TableRow key={`${f.line}-${i}`} data-testid={`import-failure-row-${f.line}`}>
-                    <TableCell className="tabular-nums">{f.line}</TableCell>
-                    <TableCell className="break-all font-mono text-xs">{f.value}</TableCell>
-                    <TableCell className="text-destructive text-xs">{f.reason}</TableCell>
+                {importResultRows({
+                  imported: importResult?.imported ?? 0,
+                  skipped: importResult?.skipped ?? [],
+                  failed: importResult?.failed ?? [],
+                }).map((row, i) => (
+                  <TableRow
+                    key={`${row.status}-${row.line}-${i}`}
+                    data-testid={row.status === 'failed'
+                      ? `import-failure-row-${row.line}`
+                      : `import-skipped-row-${row.line}`}
+                  >
+                    <TableCell className="tabular-nums">{row.line}</TableCell>
+                    <TableCell>
+                      <Badge variant={row.status === 'failed' ? 'destructive' : 'secondary'}>
+                        {t(row.status === 'failed' ? 'importResultFailed' : 'importResultSkipped')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="break-all font-mono text-xs">{row.value}</TableCell>
+                    <TableCell className={row.status === 'failed' ? 'text-destructive text-xs' : 'text-muted-foreground text-xs'}>
+                      {row.status === 'skipped' && row.reason === 'already_exists'
+                        ? t('importSkipAlreadyExists')
+                        : row.reason}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setImportFailures(null)}>{tCommon('close')}</Button>
+            <Button variant="outline" onClick={() => setImportResult(null)}>{tCommon('close')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

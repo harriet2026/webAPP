@@ -140,6 +140,7 @@ export function EmailHtmlView({ htmlBody }: EmailHtmlViewProps) {
         </div>
       )}
       <iframe
+        data-testid="email-html-frame"
         ref={iframeRef}
         // allow-scripts (for the trusted bridge only) but NOT allow-same-origin
         // and NOT allow-popups: the iframe cannot reach parent cookies/storage,

@@ -38,11 +38,15 @@ vi.mock('@/contexts/auth-context', () => ({
   useAuth: () => ({ isSystemAdmin: true, hasPermission: () => true, showAdvancedRules: false, user: { role: 'system_admin' } }),
 }));
 
-vi.mock('@/lib/api/client', () => ({
-  useApiRequest: () => ({ apiRequest: mockApiRequest }),
-  apiRequest: mockApiRequest,
-  ApiError: MockApiError,
-}));
+vi.mock('@/lib/api/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api/client')>();
+  return {
+    ...actual,
+    useApiRequest: () => ({ apiRequest: mockApiRequest }),
+    apiRequest: mockApiRequest,
+    ApiError: MockApiError,
+  };
+});
 
 import { SimilarDetectionPage } from '@/components/security/similar-detection/SimilarDetectionPage';
 

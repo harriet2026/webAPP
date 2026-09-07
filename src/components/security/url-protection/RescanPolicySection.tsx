@@ -49,13 +49,15 @@ export function RescanPolicySection({ settings, onChange }: Props) {
 
       <RescanRow
         icon={<ListChecks className="h-5 w-5 text-green-500 flex-shrink-0" />}
-        label={t('m1.title')} desc={t('m1.desc')} aria="rescan-blacklist" testId="rescan-blacklist"
+        label={t('m1.title')} desc={t('m1.desc')} aria="rescan-blacklist"
+        rowTestId="rescan-blacklist-row" toggleTestId="rescan-blacklist-toggle"
         checked={settings.rescan_blacklist}
         onCheckedChange={(v) => onChange({ rescan_blacklist: v })}
       />
       <RescanRow
         icon={<Search className="h-5 w-5 text-blue-500 flex-shrink-0" />}
-        label={t('m2.title')} desc={t('m2.desc')} aria="rescan-query-intel" testId="rescan-query-intel"
+        label={t('m2.title')} desc={t('m2.desc')} aria="rescan-query-intel"
+        rowTestId="rescan-query-intel-row" toggleTestId="rescan-query-intel-toggle"
         checked={settings.rescan_query_intel}
         onCheckedChange={(v) => onChange({ rescan_query_intel: v })}
       />
@@ -189,17 +191,22 @@ export function RescanPolicySection({ settings, onChange }: Props) {
   );
 }
 
-function RescanRow({ icon, label, desc, aria, testId, checked, onCheckedChange }: {
+// testid 由调用方传**完整字面量**（rowTestId / toggleTestId），不再在这里用
+// `${testId}-row` 拼：qc 的 testid 契约防线只认字面量与"有静态前缀的模板"，
+// `${testId}-toggle` 这种整段动态的写法在它眼里等于该 testid 不存在，
+// 引用它的 yml 用例会被判 testid.missing。渲染出来的属性值与此前逐字相同。
+function RescanRow({ icon, label, desc, aria, rowTestId, toggleTestId, checked, onCheckedChange }: {
   icon: React.ReactNode;
   label: string;
   desc: string;
   aria: string;
-  testId: string;
+  rowTestId: string;
+  toggleTestId: string;
   checked: boolean;
   onCheckedChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between p-4 bg-muted/40 rounded-lg border" data-testid={`${testId}-row`}>
+    <div className="flex items-center justify-between p-4 bg-muted/40 rounded-lg border" data-testid={rowTestId}>
       <div className="flex items-center gap-3">
         {icon}
         <div>
@@ -209,7 +216,7 @@ function RescanRow({ icon, label, desc, aria, testId, checked, onCheckedChange }
       </div>
       <Switch
         aria-label={aria}
-        data-testid={`${testId}-toggle`}
+        data-testid={toggleTestId}
         checked={checked}
         onCheckedChange={onCheckedChange}
       />

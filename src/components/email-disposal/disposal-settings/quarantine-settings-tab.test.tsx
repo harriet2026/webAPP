@@ -1,11 +1,12 @@
 import { forwardRef, useImperativeHandle } from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { useForm } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { zodResolver } from '@hookform/resolvers/zod';
 import type { DisposalSettings } from '@/types/disposal-settings';
-import { defaultDisposalSettings } from './schema';
+import { defaultDisposalSettings, disposalSettingsSchema } from './schema';
 import { QuarantineSettingsTab } from './quarantine-settings-tab';
 import { getBrowserTz } from '@/lib/timezone';
 
@@ -31,6 +32,7 @@ vi.mock('@/lib/api/client', () => ({
 export interface HarnessHandle {
   /** 模拟外部 form.reset(serverData)（例如页面加载时用服务器返回值覆盖表单）。 */
   resetSpamMinScore: (value: number) => void;
+  resetNotificationScope: (recipientGroupIds: number[], departmentPaths: string[]) => void;
 }
 
 const Harness = forwardRef<HarnessHandle, { serverTz: string; initialTz?: string }>(
@@ -54,6 +56,17 @@ const Harness = forwardRef<HarnessHandle, { serverTz: string; initialTz?: string
           },
         });
       },
+      resetNotificationScope: (recipientGroupIds: number[], departmentPaths: string[]) => {
+        const current = form.getValues();
+        form.reset({
+          ...current,
+          quarantine: {
+            ...current.quarantine,
+            recipient_group_ids: recipientGroupIds,
+            department_paths: departmentPaths,
+          },
+        });
+      },
     }));
 
     return (
@@ -69,6 +82,33 @@ const Harness = forwardRef<HarnessHandle, { serverTz: string; initialTz?: string
     );
   },
 );
+
+function QuarantineValidationHarness({
+  configure,
+}: {
+  configure?: (settings: DisposalSettings) => void;
+}) {
+  const initial = defaultDisposalSettings();
+  initial.quarantine.portal_base_url = 'https://mail.example.test';
+  configure?.(initial);
+  const form = useForm<DisposalSettings>({
+    resolver: zodResolver(disposalSettingsSchema),
+    defaultValues: initial,
+  });
+  return (
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <form noValidate onSubmit={form.handleSubmit(vi.fn())}>
+        <QuarantineSettingsTab
+          control={form.control}
+          watch={form.watch}
+          setValue={form.setValue}
+          serverTz="Asia/Shanghai"
+        />
+        <button type="submit" data-testid="validation-save">save</button>
+      </form>
+    </QueryClientProvider>
+  );
+}
 
 beforeEach(() => {
   (getBrowserTz as Mock).mockReturnValue('Asia/Shanghai');
@@ -168,6 +208,103 @@ describe('QuarantineSettingsTab category notification section (task-10)', () => 
     // Must restore to the post-reset server value (0.85), not the pre-reset
     // hardcoded default (0.7) nor any other stale cached value.
     expect(minInput).toHaveValue(0.85);
+  });
+
+  it('reconciles notification mode after an external form.reset', () => {
+    const ref = { current: null as HarnessHandle | null };
+    render(<Harness ref={ref} serverTz="Asia/Shanghai" />);
+    const allMode = screen.getByDisplayValue('all');
+    const specifiedMode = screen.getByDisplayValue('specified');
+
+    expect(allMode).toBeChecked();
+    expect(specifiedMode).not.toBeChecked();
+
+    act(() => {
+      ref.current!.resetNotificationScope([9101], []);
+    });
+    expect(specifiedMode).toBeChecked();
+    expect(allMode).not.toBeChecked();
+
+    act(() => {
+      ref.current!.resetNotificationScope([], []);
+    });
+    expect(allMode).toBeChecked();
+    expect(specifiedMode).not.toBeChecked();
+  });
+
+  it('keeps specified mode selected while the administrator is about to choose a scope', async () => {
+    render(<Harness serverTz="Asia/Shanghai" />);
+    const specifiedMode = screen.getByDisplayValue('specified');
+
+    await userEvent.click(specifiedMode);
+
+    expect(specifiedMode).toBeChecked();
+  });
+});
+
+describe('GT-13284 notification time validation guidance', () => {
+  it('explains that a selected hour/minute must be added before saving', () => {
+    render(<Harness serverTz="Asia/Shanghai" />);
+
+    expect(screen.getByTestId('disposal-settings-notify-time-add-hint')).toHaveTextContent(
+      'notifyTimeAddHint',
+    );
+  });
+
+  it('shows a field-level error when saving with no added notification time', async () => {
+    render(
+      <QuarantineValidationHarness
+        configure={(settings) => {
+          settings.quarantine.notify_times = [];
+        }}
+      />,
+    );
+
+    await userEvent.click(screen.getByTestId('validation-save'));
+
+    expect(await screen.findByTestId('disposal-settings-notify-times-error')).toHaveTextContent(
+      'notifyTimesRequired',
+    );
+
+    await userEvent.click(screen.getByTestId('disposal-settings-notify-time-add'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('disposal-settings-notify-times-error')).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('disposal-settings-notify-time-09:00')).toBeInTheDocument();
+  });
+
+  it('shows which weekday configuration is missing for a custom frequency', async () => {
+    render(
+      <QuarantineValidationHarness
+        configure={(settings) => {
+          settings.quarantine.notify_frequency = 'custom';
+          settings.quarantine.custom_weekdays = [];
+        }}
+      />,
+    );
+
+    await userEvent.click(screen.getByTestId('validation-save'));
+
+    expect(await screen.findByTestId('disposal-settings-custom-weekdays-error')).toHaveTextContent(
+      'customWeekdaysRequired',
+    );
+  });
+
+  it('shows the range error next to the offending permission validity input', async () => {
+    render(
+      <QuarantineValidationHarness
+        configure={(settings) => {
+          settings.quarantine.permissions.recall.valid_days = 0;
+        }}
+      />,
+    );
+
+    await userEvent.click(screen.getByTestId('validation-save'));
+
+    expect(
+      await screen.findByTestId('disposal-settings-valid-days-error-recall'),
+    ).toHaveTextContent('validDaysRange');
   });
 });
 

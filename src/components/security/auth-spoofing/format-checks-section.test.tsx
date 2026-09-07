@@ -6,7 +6,7 @@ import type { FormatChecksConfig, CheckItem } from '@/types/auth-spoofing';
 import zh from '@/../messages/zh.json';
 
 const wrap = (ui: React.ReactNode) => (
-  <NextIntlClientProvider locale="zh" messages={zh as any}>
+  <NextIntlClientProvider locale="zh" messages={zh as unknown as Record<string, unknown>}>
     {ui}
   </NextIntlClientProvider>
 );
@@ -44,6 +44,7 @@ describe('FormatChecksSection', () => {
     const { container } = render(wrap(<FormatChecksSection config={config} onChange={() => {}} />));
     expect(screen.getByText('允许（仅记录）')).toBeInTheDocument();
     expect(screen.getByText('观察中')).toBeInTheDocument();
+    expect(screen.getByTestId('auth-format-observing-mailfrom_invalid')).toHaveTextContent('观察中');
     expect(container.querySelector('.animate-pulse')).not.toBeNull();
     expect(screen.queryByText(/高风险动作/)).toBeNull();
   });

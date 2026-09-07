@@ -41,7 +41,7 @@ import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const advancedRuleSchema = z.object({
   name: z.string().min(1, 'nameRequired'),
-  action: z.enum(['accept', 'proceed', 'reject', 'quarantine', 'sideline', 'audit']),
+  action: z.enum(['accept', 'proceed', 'observe', 'reject', 'quarantine', 'sideline', 'audit']),
   priority: z.number().optional(),
   description: z.string().optional(),
   is_active: z.boolean().optional(),
@@ -525,7 +525,7 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         ) : (
-          <DataTable columns={makeColumns()} data={rules || []} />
+          <DataTable columns={makeColumns()} data={rules || []} rowTestId={(row) => `stage-rule-row-${row.id}`} />
         )}
       </PageSurface>
 
@@ -571,10 +571,11 @@ export function StageRulesPage({ stage }: StageRulesPageProps) {
               <div className="space-y-2">
                 <Label>{t('rules.action')} *</Label>
                 <Select value={form.watch('action')} onValueChange={(v) => form.setValue('action', v as AdvancedRuleForm['action'])}>
-                  <SelectTrigger data-testid={`stage-rule-action-${stage}`}><SelectValue>{{ accept: t('rules.accept'), proceed: t('rules.proceed'), reject: t('rules.reject'), quarantine: t('rules.quarantine'), sideline: t('rules.sideline'), audit: t('rules.audit') }[form.watch('action')]}</SelectValue></SelectTrigger>
+                  <SelectTrigger data-testid={`stage-rule-action-${stage}`}><SelectValue>{{ accept: t('rules.accept'), proceed: t('rules.proceed'), observe: t('rules.observe'), reject: t('rules.reject'), quarantine: t('rules.quarantine'), sideline: t('rules.sideline'), audit: t('rules.audit') }[form.watch('action')]}</SelectValue></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="accept" data-testid={`stage-rule-action-${stage}-option-accept`}>{t('rules.accept')}</SelectItem>
                     <SelectItem value="proceed" data-testid={`stage-rule-action-${stage}-option-proceed`}>{t('rules.proceed')}</SelectItem>
+                    <SelectItem value="observe" data-testid={`stage-rule-action-${stage}-option-observe`}>{t('rules.observe')}</SelectItem>
                     <SelectItem value="reject" data-testid={`stage-rule-action-${stage}-option-reject`}>{t('rules.reject')}</SelectItem>
                     <SelectItem value="quarantine" data-testid={`stage-rule-action-${stage}-option-quarantine`}>{t('rules.quarantine')}</SelectItem>
                     {stage !== 'sideline' && !editingRule?.is_system && (

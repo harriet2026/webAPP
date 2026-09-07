@@ -204,3 +204,48 @@ describe('ReviewSettingsTab custom duration range feedback (GT-12251)', () => {
     expect(screen.queryByTestId('disposal-settings-custom-minutes-error')).not.toBeInTheDocument();
   });
 });
+
+describe('ReviewSettingsTab complete field validation feedback (GT-13284)', () => {
+  function ValidatingHarness() {
+    const defaults = defaultDisposalSettings();
+    defaults.quarantine.portal_base_url = 'https://mail.example.test';
+    const form = useForm<DisposalSettings>({
+      defaultValues: defaults,
+      resolver: zodResolver(disposalSettingsSchema),
+    });
+    return (
+      <form noValidate onSubmit={form.handleSubmit(vi.fn())}>
+        <ReviewSettingsTab control={form.control} watch={form.watch} setValue={form.setValue} />
+        <button type="submit" data-testid="validation-save">save</button>
+      </form>
+    );
+  }
+
+  it.each([
+    ['disposal-settings-max-recheck-minutes', 'disposal-settings-max-recheck-minutes-error', 'maxRecheckMinutesRange'],
+    ['disposal-settings-notify-interval', 'disposal-settings-notify-interval-error', 'reviewerNotifyIntervalRange'],
+    ['disposal-settings-active-start', 'disposal-settings-active-start-error', 'reviewerActiveStartInvalid'],
+    ['disposal-settings-active-end', 'disposal-settings-active-end-error', 'reviewerActiveEndInvalid'],
+  ])('renders a specific error for %s', async (inputId, errorId, message) => {
+    render(<ValidatingHarness />);
+    await userEvent.clear(screen.getByTestId(inputId));
+
+    await userEvent.click(screen.getByTestId('validation-save'));
+
+    expect(await screen.findByTestId(errorId)).toHaveTextContent(message);
+  });
+
+  it('validates both required timeout mark inputs when marking is enabled', async () => {
+    render(<ValidatingHarness />);
+    await userEvent.click(screen.getByTestId('disposal-settings-timeout-mark-enabled'));
+
+    await userEvent.click(screen.getByTestId('validation-save'));
+
+    expect(
+      await screen.findByTestId('disposal-settings-timeout-mark-positions-error'),
+    ).toHaveTextContent('timeoutMarkPositionsRequired');
+    expect(await screen.findByTestId('disposal-settings-timeout-mark-text-error')).toHaveTextContent(
+      'timeoutMarkTextRequired',
+    );
+  });
+});

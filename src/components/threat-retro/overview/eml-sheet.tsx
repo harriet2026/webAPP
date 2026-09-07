@@ -62,7 +62,7 @@ export function EmlSheet({ open, onOpenChange, leak }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-[640px] flex flex-col gap-0 p-0">
+      <SheetContent side="right" data-testid="threat-retro-eml-sheet" className="sm:max-w-[640px] flex flex-col gap-0 p-0">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>{t('title')}</SheetTitle>
           <SheetDescription>{t('description')}</SheetDescription>
@@ -73,14 +73,14 @@ export function EmlSheet({ open, onOpenChange, leak }: Props) {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2 rounded-lg border bg-muted/30 p-4 text-sm">
-                <Row label={t('sender')} value={leak.sender} />
-                <Row label={t('subject')} value={leak.subject || '(—)'} />
-                <Row label={t('messageUuid')} value={leak.message_uuid} mono />
+                <Row label={t('sender')} value={leak.sender} testId="threat-retro-eml-sheet-sender" />
+                <Row label={t('subject')} value={leak.subject || '(—)'} testId="threat-retro-eml-sheet-subject" />
+                <Row label={t('messageUuid')} value={leak.message_uuid} mono testId="threat-retro-eml-sheet-message-uuid" />
                 <div className="flex flex-wrap gap-2 pt-1">
-                  <Badge className={threatTypeBadgeClass(leak.threat_type)}>
+                  <Badge data-testid="threat-retro-eml-sheet-threat-type" className={threatTypeBadgeClass(leak.threat_type)}>
                     {t(`threatType.${leak.threat_type}`)}
                   </Badge>
-                  <Badge className={dispositionBadgeClass(leak.disposition)}>
+                  <Badge data-testid="threat-retro-eml-sheet-disposition" className={dispositionBadgeClass(leak.disposition)}>
                     {t(`disposition.${leak.disposition}`)}
                   </Badge>
                 </div>
@@ -115,11 +115,11 @@ export function EmlSheet({ open, onOpenChange, leak }: Props) {
               <section className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold">{t('body')}</h4>
-                  <Button variant="outline" size="sm" className="gap-1.5" onClick={downloadEml}>
+                  <Button variant="outline" size="sm" data-testid="threat-retro-eml-sheet-download" className="gap-1.5" onClick={downloadEml}>
                     <Download className="h-3.5 w-3.5" /> {t('downloadEml')}
                   </Button>
                 </div>
-                <pre className="h-[420px] w-full overflow-auto rounded-lg border bg-white p-3 font-mono text-xs whitespace-pre-wrap">
+                <pre data-testid="threat-retro-eml-sheet-raw" className="h-[420px] w-full overflow-auto rounded-lg border bg-white p-3 font-mono text-xs whitespace-pre-wrap">
 				  {emlQuery.isLoading
 					? t('loading')
 					: emlQuery.isError
@@ -135,11 +135,11 @@ export function EmlSheet({ open, onOpenChange, leak }: Props) {
   );
 }
 
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function Row({ label, value, mono, testId }: { label: string; value: string; mono?: boolean; testId?: string }) {
   return (
     <div className="flex items-start gap-2">
       <span className="w-28 shrink-0 text-muted-foreground">{label}</span>
-      <span className={mono ? 'flex-1 break-all font-mono' : 'flex-1 break-all'}>{value || '—'}</span>
+      <span data-testid={testId} className={mono ? 'flex-1 break-all font-mono' : 'flex-1 break-all'}>{value || '—'}</span>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import type {
 import type { ApiRequestFn } from './client';
 import { apiRequest } from './client';
 import { GROUPS_LIST_QUERY, ruleToGroup } from './groups';
+import { fetchAllPages } from './pagination';
 
 export const SENDER_FILTER_PAGE = 'sender_filter';
 
@@ -42,14 +43,23 @@ function buildSenderChild(sc: SenderFilterSenderConfig): RuleNode {
   if (sc.type === 'domain') {
     return { type: 'condition', field: 'senderdomain', operator: 'eq', value: sc.value };
   }
-  return { type: 'condition', field: 'rcpttags', operator: 'hasTag', value: `grp:${sc.value}` };
+  // 入站邮件在 MAIL 阶段尚未由收件域解析出租户，租户级 sender group 的
+  // tag rule 会按隔离边界被跳过。直接使用 GroupLookup 注入的租户感知映射，
+  // 让规则在 RCPT 阶段稳定命中，同时不依赖跨阶段 grp: tag 传播。
+  return {
+    type: 'condition', field: 'sender_group', map_key: `grp:${sc.value}`,
+    operator: 'eq', value: 'true',
+  };
 }
 
 function buildIPChild(ip: SenderFilterIPRange): RuleNode | null {
   if (ip.type === 'all') return null;
   if (ip.type === 'single') return { type: 'condition', field: 'client_ip', operator: 'eq', value: ip.value! };
   if (ip.type === 'range') return { type: 'condition', field: 'client_ip', operator: 'cidr', value: ip.value! };
-  return { type: 'condition', field: 'rcpttags', operator: 'hasTag', value: `grp:${ip.value!}` };
+  return {
+    type: 'condition', field: 'sender_ip_group', map_key: `grp:${ip.value!}`,
+    operator: 'eq', value: 'true',
+  };
 }
 
 export function buildConditionTree(
@@ -72,6 +82,8 @@ function parseSenderChild(n: RuleNode): SenderFilterSenderConfig | null {
     return { type: 'domain', value: n.value! };
   if (n.field === 'rcpttags' && n.operator === 'hasTag' && n.value!.startsWith('grp:'))
     return { type: 'group', value: n.value!.slice(4) };
+  if (n.field === 'sender_group' && n.operator === 'eq' && n.value === 'true' && n.map_key?.startsWith('grp:'))
+    return { type: 'group', value: n.map_key.slice(4) };
   return null;
 }
 
@@ -83,6 +95,8 @@ function parseIPChild(n: RuleNode): SenderFilterIPRange | null {
     return { type: 'range', value: n.value };
   if (n.field === 'rcpttags' && n.operator === 'hasTag' && n.value!.startsWith('grp:'))
     return { type: 'ipGroup', value: n.value!.slice(4) };
+  if (n.field === 'sender_ip_group' && n.operator === 'eq' && n.value === 'true' && n.map_key?.startsWith('grp:'))
+    return { type: 'ipGroup', value: n.map_key.slice(4) };
   return null;
 }
 
@@ -189,7 +203,11 @@ export function normalizeDomain(input: string): string {
 export async function listSenderFilterRules(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<{ items: Rule[] }> {
-  return requestFn('/unified-rules?rule_page=sender_filter&rule_class=action&stage=rcpt&page_size=10000');
+  const items = await fetchAllPages<Rule>(
+    '/unified-rules?rule_page=sender_filter&rule_class=action&stage=rcpt',
+    requestFn,
+  );
+  return { items };
 }
 
 export async function listSenderFilterGroups(

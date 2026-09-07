@@ -137,33 +137,34 @@ function ExpandedRunDetail({
   };
 
   return (
-    <div className="bg-muted/20 px-4 py-3">
-      <h4 className="mb-2 text-xs font-semibold text-muted-foreground">{t('leakDetail.title')}</h4>
+    <div className="bg-muted/20 px-4 py-3" data-testid={`threat-retro-leak-detail-${runId}`}>
+      <h4 className="mb-2 text-xs font-semibold text-muted-foreground" data-testid={`threat-retro-leak-detail-title-${runId}`}>{t('leakDetail.title')}</h4>
       {isLoading ? (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3 w-3 animate-spin" /> {t('leakDetail.loading')}
         </div>
       ) : leaks.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{t('leakDetail.empty')}</p>
+        <p className="text-xs text-muted-foreground" data-testid={`threat-retro-leak-empty-${runId}`}>{t('leakDetail.empty')}</p>
       ) : (
         <div className="overflow-hidden rounded-md border border-border/60 bg-background">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-8">
+                <TableHead className="w-8" data-testid="threat-retro-leak-col-select">
                   <Checkbox
+                    data-testid={`threat-retro-leak-select-all-${runId}`}
                     checked={allChecked}
                     disabled={isTest}
                     onCheckedChange={(v) => toggleAll(Boolean(v))}
                   />
                 </TableHead>
-                <TableHead>{t('leakDetail.sender')}</TableHead>
-                <TableHead>{t('leakDetail.subject')}</TableHead>
-                <TableHead className="w-24">{t('leakDetail.threatType')}</TableHead>
-                <TableHead className="w-24">{t('leakDetail.disposition')}</TableHead>
-                <TableHead className="w-24">{t('leakDetail.recheckConfidence')}</TableHead>
-                <TableHead className="w-24">{t('leakDetail.recallStatus')}</TableHead>
-                <TableHead className="w-56 text-right">{t('leakDetail.actions')}</TableHead>
+                <TableHead data-testid="threat-retro-leak-col-sender">{t('leakDetail.sender')}</TableHead>
+                <TableHead data-testid="threat-retro-leak-col-subject">{t('leakDetail.subject')}</TableHead>
+                <TableHead className="w-24" data-testid="threat-retro-leak-col-threat-type">{t('leakDetail.threatType')}</TableHead>
+                <TableHead className="w-24" data-testid="threat-retro-leak-col-disposition">{t('leakDetail.disposition')}</TableHead>
+                <TableHead className="w-24" data-testid="threat-retro-leak-col-recheck-confidence">{t('leakDetail.recheckConfidence')}</TableHead>
+                <TableHead className="w-24" data-testid="threat-retro-leak-col-recall-status">{t('leakDetail.recallStatus')}</TableHead>
+                <TableHead className="w-56 text-right" data-testid="threat-retro-leak-col-actions">{t('leakDetail.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,48 +174,49 @@ function ExpandedRunDetail({
                 );
 				return (
 				  <Fragment key={`${runId}-${l.mail_log_id}`}>
-				  <TableRow>
+				  <TableRow data-testid={`threat-retro-leak-row-${runId}-${l.mail_log_id}`}>
                     <TableCell>
                       <Checkbox
+                        data-testid={`threat-retro-leak-select-${runId}-${l.mail_log_id}`}
                         checked={checked}
                         disabled={isTest}
                         onCheckedChange={(v) => toggleOne(l, Boolean(v))}
                       />
                     </TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="text-xs" data-testid={`threat-retro-leak-sender-${runId}-${l.mail_log_id}`}>
                       <OverflowCell text={l.sender} />
                     </TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="text-xs" data-testid={`threat-retro-leak-subject-${runId}-${l.mail_log_id}`}>
                       <OverflowCell text={l.subject} />
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs" data-testid={`threat-retro-leak-threat-type-${runId}-${l.mail_log_id}`}>
                         {['phishing', 'malware', 'impersonation', 'unknown'].includes(l.threat_type)
                           ? t(`eml.threatType.${l.threat_type}`)
                           : l.threat_type}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className={dispositionBadgeClass(l.disposition)}>
+                      <Badge className={dispositionBadgeClass(l.disposition)} data-testid={`threat-retro-leak-disposition-${runId}-${l.mail_log_id}`}>
                         {t(`leakDetail.dispositionValue.${l.disposition}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className={confidenceClass(Math.round((l.recheck_confidence ?? 0) * 100))}>
+                      <span data-testid={`threat-retro-leak-confidence-${runId}-${l.mail_log_id}`} className={confidenceClass(Math.round((l.recheck_confidence ?? 0) * 100))}>
                         {Math.round((l.recheck_confidence ?? 0) * 100)}%
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge className={recallBadgeClass(l.recall_status)}>
+                      <Badge className={recallBadgeClass(l.recall_status)} data-testid={`threat-retro-leak-recall-${runId}-${l.mail_log_id}`}>
                         {t(`recallStatus.${l.recall_status || 'no_need'}`)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <Button variant="ghost" size="sm" onClick={() => onShowAffected(l)}>
+                        <Button variant="ghost" size="sm" data-testid={`threat-retro-leak-affected-${runId}-${l.mail_log_id}`} onClick={() => onShowAffected(l)}>
                           {t('table.affectedUsers')}
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => onShowEml(l)}>
+                        <Button variant="ghost" size="sm" data-testid={`threat-retro-leak-eml-${runId}-${l.mail_log_id}`} onClick={() => onShowEml(l)}>
                           {t('table.viewEml')}
                         </Button>
                         {isAdmin ? (
@@ -224,7 +226,7 @@ function ExpandedRunDetail({
                                 {t('table.recall')}
                               </Button>
                             ) : null}
-                            <Button variant="ghost" size="sm" onClick={() => onMarkFp(l)}>
+                            <Button variant="ghost" size="sm" data-testid={`threat-retro-leak-false-positive-${runId}-${l.mail_log_id}`} onClick={() => onMarkFp(l)}>
                               {t('table.falsePositive')}
                             </Button>
                           </>
@@ -236,10 +238,10 @@ function ExpandedRunDetail({
 					<TableCell />
 					<TableCell colSpan={7} className="py-2">
 					  <dl className="grid gap-x-6 gap-y-1 text-xs text-muted-foreground md:grid-cols-2 xl:grid-cols-4">
-						<div><dt className="inline font-medium text-foreground">{t('leakDetail.mailId')}: </dt><dd className="inline font-mono">{l.mail_log_id}</dd></div>
-						<div><dt className="inline font-medium text-foreground">{t('leakDetail.originalDisposition')}: </dt><dd className="inline">{l.orig_disposition || '—'}</dd></div>
-						<div className="md:col-span-2"><dt className="inline font-medium text-foreground">{t('leakDetail.rationale')}: </dt><dd className="inline">{l.rationale || '—'}</dd></div>
-						<div className="md:col-span-2 xl:col-span-4"><dt className="inline font-medium text-foreground">{t('leakDetail.releasedRecipients')}: </dt><dd className="inline break-all">{l.released_recipients?.join(', ') || '—'}</dd></div>
+						<div><dt className="inline font-medium text-foreground">{t('leakDetail.mailId')}: </dt><dd className="inline font-mono" data-testid={`threat-retro-leak-mail-id-${runId}-${l.mail_log_id}`}>{l.mail_log_id}</dd></div>
+						<div><dt className="inline font-medium text-foreground">{t('leakDetail.originalDisposition')}: </dt><dd className="inline" data-testid={`threat-retro-leak-orig-disposition-${runId}-${l.mail_log_id}`}>{l.orig_disposition || '—'}</dd></div>
+						<div className="md:col-span-2"><dt className="inline font-medium text-foreground">{t('leakDetail.rationale')}: </dt><dd className="inline" data-testid={`threat-retro-leak-rationale-${runId}-${l.mail_log_id}`}>{l.rationale || '—'}</dd></div>
+						<div className="md:col-span-2 xl:col-span-4"><dt className="inline font-medium text-foreground">{t('leakDetail.releasedRecipients')}: </dt><dd className="inline break-all" data-testid={`threat-retro-leak-recipients-${runId}-${l.mail_log_id}`}>{l.released_recipients?.join(', ') || '—'}</dd></div>
 					  </dl>
 					</TableCell>
 				  </TableRow>
@@ -360,6 +362,7 @@ export function RunsTable({
         ),
         cell: ({ row }) => (
           <Checkbox
+            data-testid={`threat-retro-run-select-${row.original.run_id}`}
             checked={selectedRunIds.includes(row.original.run_id)}
             onCheckedChange={(checked) => setSelectedRunIds((current) => checked ? [...new Set([...current, row.original.run_id])] : current.filter((id) => id !== row.original.run_id))}
             aria-label={row.original.run_id}
@@ -374,6 +377,7 @@ export function RunsTable({
           return (
             <button
               type="button"
+              data-testid={`threat-retro-run-expand-${row.original.run_id}`}
               className="text-muted-foreground hover:text-foreground"
               onClick={() => setExpanded((prev) => ({ ...prev, [row.original.run_id]: !isOpen }))}
             >
@@ -390,6 +394,7 @@ export function RunsTable({
             <div className="whitespace-nowrap text-xs text-muted-foreground">{formatDate(row.original.created_at)}</div>
             <div className="flex min-w-0 items-center gap-1.5">
               <span
+                data-testid={`threat-retro-run-id-${row.original.run_id}`}
                 className="min-w-0 truncate font-mono text-xs"
                 title={row.original.run_id}
               >
@@ -406,7 +411,7 @@ export function RunsTable({
         cell: ({ row }) => (
           <div>
             <div className="max-w-40 truncate text-sm font-medium">{row.original.strategy_name || '—'}</div>
-            <Badge variant="outline">{t(`triggerType.${row.original.trigger_type}`)}</Badge>
+            <Badge variant="outline" data-testid={`threat-retro-run-trigger-${row.original.run_id}`}>{t(`triggerType.${row.original.trigger_type}`)}</Badge>
           </div>
         ),
       },
@@ -423,9 +428,10 @@ export function RunsTable({
       {
         id: 'mode',
         header: t('table.mode'),
-        cell: () => (
+        cell: ({ row }) => (
           <Badge
             variant="outline"
+            data-testid={`threat-retro-run-mode-${row.original.run_id}`}
             className="border-violet-200 bg-violet-50 text-violet-700 dark:bg-violet-950/40"
           >
             {t('modeBadge.async')}
@@ -436,14 +442,14 @@ export function RunsTable({
         accessorKey: 'agent_rounds',
         header: t('table.agentRounds'),
         cell: ({ row }) => (
-          <span className="tabular-nums text-sm">{row.original.agent_rounds ?? 0}</span>
+          <span className="tabular-nums text-sm" data-testid={`threat-retro-run-rounds-${row.original.run_id}`}>{row.original.agent_rounds ?? 0}</span>
         ),
       },
       {
         accessorKey: 'confidence',
         header: t('table.confidence'),
         cell: ({ row }) => (
-          <span className={row.original.confidence == null ? 'text-muted-foreground' : confidenceClass(Math.round(row.original.confidence * 100))}>
+          <span data-testid={`threat-retro-run-confidence-${row.original.run_id}`} className={row.original.confidence == null ? 'text-muted-foreground' : confidenceClass(Math.round(row.original.confidence * 100))}>
             {row.original.confidence == null ? '—' : `${Math.round(row.original.confidence * 100)}%`}
           </span>
         ),
@@ -456,14 +462,14 @@ export function RunsTable({
 		  const key = row.original.is_test && disposition !== 'no_need' && disposition !== 'false_positive'
 			? `proposed_${disposition}`
 			: disposition;
-		  return <Badge variant="outline">{t(`table.dispositionValue.${key}`)}</Badge>;
+		  return <Badge variant="outline" data-testid={`threat-retro-run-disposition-${row.original.run_id}`}>{t(`table.dispositionValue.${key}`)}</Badge>;
 		},
       },
       {
         accessorKey: 'recall_status',
         header: t('table.recallStatus'),
         cell: ({ row }) => (
-          <Badge className={recallBadgeClass(row.original.recall_status)}>
+          <Badge data-testid={`threat-retro-run-recall-${row.original.run_id}`} className={recallBadgeClass(row.original.recall_status)}>
             {t(`recallStatus.${row.original.recall_status || 'no_need'}`)}
           </Badge>
         ),
@@ -474,6 +480,7 @@ export function RunsTable({
         cell: ({ row }) => (
           <button
             type="button"
+            data-testid={`threat-retro-run-affected-${row.original.run_id}`}
             className="tabular-nums text-sm text-primary hover:underline"
 			onClick={() => setAffectedRunId(row.original.run_id)}
           >
@@ -511,6 +518,7 @@ export function RunsTable({
             <Button
               variant="ghost"
               size="sm"
+              data-testid={`threat-retro-run-view-leaks-${row.original.run_id}`}
               className="text-primary"
               onClick={() => setExpanded((p) => ({ ...p, [row.original.run_id]: true }))}
             >
@@ -548,10 +556,10 @@ export function RunsTable({
 	<div>
 	  <div className="flex items-center justify-end gap-2 border-b px-4 py-2">
         {selectedRunIds.length > 0 ? (
-          <div className="mr-auto flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm">
-            <strong>{t('table.selectedRuns', { count: selectedRunIds.length })}</strong>
-            <Button size="sm" variant="outline" onClick={() => exportMutation.mutate()} disabled={exportMutation.isPending}>{t('table.batchExport')}</Button>
-            <Button size="sm" variant="destructive" onClick={() => setBulkCancelOpen(true)}>{t('table.batchCancel')}</Button>
+          <div className="mr-auto flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm" data-testid="threat-retro-runs-batch-bar">
+            <strong data-testid="threat-retro-runs-selected-count">{t('table.selectedRuns', { count: selectedRunIds.length })}</strong>
+            <Button size="sm" variant="outline" data-testid="threat-retro-runs-export" onClick={() => exportMutation.mutate()} disabled={exportMutation.isPending}>{t('table.batchExport')}</Button>
+            <Button size="sm" variant="destructive" data-testid="threat-retro-runs-bulk-cancel" onClick={() => setBulkCancelOpen(true)}>{t('table.batchCancel')}</Button>
           </div>
         ) : null}
         {selected.length > 0 ? (
@@ -574,7 +582,7 @@ export function RunsTable({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className={`bg-muted/20 ${runColumnClass[header.column.id] ?? ''}`}>
+                  <TableHead key={header.id} data-testid={`threat-retro-run-col-${header.column.id}`} className={`bg-muted/20 ${runColumnClass[header.column.id] ?? ''}`}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -592,7 +600,7 @@ export function RunsTable({
               </TableRow>
             ) : table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24">
+                <TableCell colSpan={columns.length} className="h-24" data-testid="threat-retro-runs-empty">
                   <EmptyState title={t('table.empty')} />
                 </TableCell>
               </TableRow>
@@ -635,13 +643,13 @@ export function RunsTable({
 
       {totalPages > 1 ? (
         <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+          <Button variant="outline" size="sm" data-testid="threat-retro-runs-prev" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
             {t('table.prev')}
           </Button>
-          <span>
+          <span data-testid="threat-retro-runs-page-indicator">
             {page} / {totalPages}
           </span>
-          <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
+          <Button variant="outline" size="sm" data-testid="threat-retro-runs-next" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
             {t('table.next')}
           </Button>
         </div>
@@ -705,7 +713,7 @@ export function RunsTable({
       <AlertDialog open={bulkCancelOpen} onOpenChange={setBulkCancelOpen}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>{t('table.batchCancel')}</AlertDialogTitle><AlertDialogDescription>{t('table.bulkCancelDescription')}</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel>{t('cancelDialog.cancel')}</AlertDialogCancel><AlertDialogAction onClick={(event) => { event.preventDefault(); bulkCancelMutation.mutate(); }}>{t('table.batchCancel')}</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel data-testid="threat-retro-bulk-cancel-dismiss">{t('cancelDialog.cancel')}</AlertDialogCancel><AlertDialogAction data-testid="threat-retro-bulk-cancel-confirm" onClick={(event) => { event.preventDefault(); bulkCancelMutation.mutate(); }}>{t('table.batchCancel')}</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>

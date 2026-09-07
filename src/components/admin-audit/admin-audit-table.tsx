@@ -59,10 +59,10 @@ export function AdminAuditTable({
                   adminAudit.adminUser / resourceType（其值已同步改名，详情抽屉
                   同源字段随之一致）；结果列与筛选标签(操作结果)区分，用独立
                   resultColumn(结果)；操作列复用 common.actions(操作)。 */}
-              <TableHead className="bg-muted/20">{t('logs.timestamp')}</TableHead>
-              <TableHead className="bg-muted/20">{t('adminAudit.adminUser')}</TableHead>
+              <TableHead className="bg-muted/20" data-testid="admin-audit-header-timestamp">{t('logs.timestamp')}</TableHead>
+              <TableHead className="bg-muted/20" data-testid="admin-audit-header-admin-user">{t('adminAudit.adminUser')}</TableHead>
               {showTenant ? (
-                <TableHead className="bg-muted/20">{t('adminAudit.effectiveTenant')}</TableHead>
+                <TableHead className="bg-muted/20" data-testid="admin-audit-header-effective-tenant">{t('adminAudit.effectiveTenant')}</TableHead>
               ) : null}
               <TableHead className="bg-muted/20">{t('adminAudit.filter.module')}</TableHead>
               <TableHead className="bg-muted/20">{t('adminAudit.filter.opType')}</TableHead>
@@ -89,6 +89,7 @@ export function AdminAuditTable({
                   <TableRow
                     key={log.id}
                     data-testid={`admin-audit-row-${log.id}`}
+                    data-resource-id={log.resource_id ?? ''}
                     className={`cursor-pointer ${isFailed ? 'bg-red-50/40' : ''}`}
                     onClick={() => onRowClick(log)}
                   >
@@ -101,7 +102,7 @@ export function AdminAuditTable({
                         <span className="text-xs text-muted-foreground">{log.username || '-'}</span>
                       </div>
                     </TableCell>
-                    {showTenant ? <TableCell>{tenantLabel}</TableCell> : null}
+                    {showTenant ? <TableCell data-testid={`admin-audit-effective-tenant-${log.id}`}>{tenantLabel}</TableCell> : null}
                     <TableCell>
                       {/* Spec D1: hover shows the full 一级 / 二级 module path. */}
                       <div
@@ -167,12 +168,12 @@ export function AdminAuditTable({
       </div>
       <div className="flex items-center justify-between">
         <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
-          <SelectTrigger className="h-8 w-[110px]">
+          <SelectTrigger className="h-8 w-[110px]" data-testid="admin-audit-page-size">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {PAGE_SIZE_OPTIONS.map((size) => (
-              <SelectItem key={size} value={String(size)}>
+              <SelectItem key={size} value={String(size)} data-testid={`admin-audit-page-size-option-${size}`}>
                 {size}
               </SelectItem>
             ))}

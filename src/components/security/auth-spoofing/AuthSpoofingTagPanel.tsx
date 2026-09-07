@@ -44,6 +44,7 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Switch
+            data-testid="auth-spoofing-tag-subject-enabled"
             checked={!!value.tag_subject_enabled}
             disabled={disabled}
             onCheckedChange={(checked) => onChange({ tag_subject_enabled: checked })}
@@ -74,6 +75,7 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
             <Input
               value={value.tag_subject_content || ''}
               disabled={disabled}
+              data-testid="auth-spoofing-tag-subject-content"
               placeholder={t('subjectPlaceholder')}
               onChange={(e) => onChange({ tag_subject_content: e.target.value })}
               className="flex-1 min-w-[160px] h-8"
@@ -85,6 +87,7 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Switch
+            data-testid="auth-spoofing-tag-header-enabled"
             checked={!!value.tag_header_enabled}
             disabled={disabled}
             onCheckedChange={(checked) => onChange({ tag_header_enabled: checked })}
@@ -96,6 +99,7 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
             <Input
               value={value.tag_header_name || ''}
               disabled={disabled}
+              data-testid="auth-spoofing-tag-header-name"
               placeholder={t('headerNamePlaceholder')}
               onChange={(e) => onChange({ tag_header_name: e.target.value })}
               className="w-[220px] h-8"
@@ -103,6 +107,7 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
             <Input
               value={value.tag_header_value || ''}
               disabled={disabled}
+              data-testid="auth-spoofing-tag-header-value"
               placeholder={t('headerValuePlaceholder')}
               onChange={(e) => onChange({ tag_header_value: e.target.value })}
               className="flex-1 min-w-[140px] h-8"
@@ -114,6 +119,7 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Switch
+            data-testid="auth-spoofing-tag-body-enabled"
             checked={!!value.tag_body_enabled}
             disabled={disabled}
             onCheckedChange={(checked) => onChange({ tag_body_enabled: checked })}
@@ -125,6 +131,7 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
             <Input
               value={value.tag_body_content || ''}
               disabled={disabled}
+              data-testid="auth-spoofing-tag-body-content"
               placeholder={t('bodyPlaceholder')}
               onChange={(e) => onChange({ tag_body_content: e.target.value })}
               className="h-8 w-full"

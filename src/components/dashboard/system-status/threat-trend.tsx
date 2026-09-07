@@ -22,17 +22,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/i18n/navigation';
 import { ChevronRight } from 'lucide-react';
 import type { TrendSeriesPoint } from '@/lib/api/security-overview';
-import { buildThreatTrendOption, THREAT_TREND_SERIES } from './threat-trend-config';
+import type { SystemStatusRange } from './hooks';
+import {
+  buildEmptyThreatTrendBuckets,
+  buildThreatTrendOption,
+  THREAT_TREND_SERIES,
+} from './threat-trend-config';
 
 interface ThreatTrendProps {
   trend: TrendSeriesPoint[];
+  range: SystemStatusRange;
   isLoading: boolean;
   // GT-12397: 只有真实错误才显示占位（诚实报错）；成功但无数据时渲染空
   // 坐标系画布（见 buildThreatTrendOption 的空态分支）。
   isError?: boolean;
 }
 
-export function ThreatTrend({ trend, isLoading, isError = false }: ThreatTrendProps) {
+export function ThreatTrend({ trend, range, isLoading, isError = false }: ThreatTrendProps) {
   const t = useTranslations('systemStatus.trend');
   const tSeries = useTranslations('systemStatus.trend.series');
   // All five series shown by default (demo shows the full stack initially).
@@ -55,9 +61,10 @@ export function ThreatTrend({ trend, isLoading, isError = false }: ThreatTrendPr
       hidden,
       (key) => tSeries(key as Parameters<typeof tSeries>[0]),
       t('empty'),
+      buildEmptyThreatTrendBuckets(range),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [points, hidden]);
+  }, [points, hidden, range]);
 
   return (
     <Card

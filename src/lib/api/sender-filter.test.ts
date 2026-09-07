@@ -23,6 +23,26 @@ describe('condition_tree 不回归', () => {
     const t = buildConditionTree({ sender_config: { type: 'individual', value: 'x@y.com' }, ip_range: { type: 'all' } });
     expect(t).toEqual({ type: 'condition', field: 'sender', operator: 'eq', value: 'x@y.com' });
   });
+  it('sender group → tenant-aware sender_group map condition', () => {
+    const tree = buildConditionTree({ sender_config: { type: 'group', value: 'finance' }, ip_range: { type: 'all' } });
+    expect(tree).toEqual({
+      type: 'condition', field: 'sender_group', map_key: 'grp:finance', operator: 'eq', value: 'true',
+    });
+    const resolved = resolveSenderFilterRule(baseRule({ condition_tree: JSON.stringify(tree) }));
+    expect(resolved?.sender_config).toEqual({ type: 'group', value: 'finance' });
+  });
+  it('IP group → tenant-aware sender_ip_group map condition', () => {
+    const tree = buildConditionTree({ sender_config: { type: 'individual', value: 'x@y.com' }, ip_range: { type: 'ipGroup', value: 'trusted' } });
+    expect(tree).toEqual({
+      type: 'AND',
+      children: [
+        { type: 'condition', field: 'sender', operator: 'eq', value: 'x@y.com' },
+        { type: 'condition', field: 'sender_ip_group', map_key: 'grp:trusted', operator: 'eq', value: 'true' },
+      ],
+    });
+    const resolved = resolveSenderFilterRule(baseRule({ condition_tree: JSON.stringify(tree) }));
+    expect(resolved?.ip_range).toEqual({ type: 'ipGroup', value: 'trusted' });
+  });
   it('白名单规则可从 sys:nocontent 标签反解析 whitelist_mode', () => {
     const bypassMeta = resolveSenderFilterRule(baseRule({ action: 'accept', tags: ['sys:nocontent'] }));
     const directMeta = resolveSenderFilterRule(baseRule({ action: 'accept', tags: [] }));

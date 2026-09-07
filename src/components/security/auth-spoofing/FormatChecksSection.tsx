@@ -43,6 +43,7 @@ interface FormatChecksSectionProps {
 }
 
 interface FormatCheckCardProps {
+  checkKey: keyof FormatChecksConfig;
   labelKey: string;
   descKey: string;
   warningKey?: string;
@@ -51,7 +52,7 @@ interface FormatCheckCardProps {
   disabled?: boolean;
 }
 
-function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabled }: FormatCheckCardProps) {
+function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChange, disabled }: FormatCheckCardProps) {
   const t = useTranslations('authSpoofing');
   const tDesc = useTranslations('authSpoofing.formatActionDesc');
   const [pendingEnable, setPendingEnable] = useState(false);
@@ -78,8 +79,13 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
     >
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Switch checked={item.enabled} onCheckedChange={handleEnableChange} disabled={disabled} />
-          <span className="text-sm font-medium">{t(labelKey as any)}</span>
+          <Switch
+            data-testid={`auth-format-enabled-${checkKey}`}
+            checked={item.enabled}
+            onCheckedChange={handleEnableChange}
+            disabled={disabled}
+          />
+          <span className="text-sm font-medium">{t(labelKey as Parameters<typeof t>[0])}</span>
           {!item.enabled && (
             <span
               data-testid={`legacy-disabled-${labelKey}`}
@@ -89,7 +95,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
             </span>
           )}
           {item.observe_mode && item.enabled && (
-            <span className="flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+            <span data-testid={`auth-format-observing-${checkKey}`} className="flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
               {t('observing')}
             </span>
@@ -98,6 +104,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
 
         <div className="flex items-center gap-2">
           <Switch
+            data-testid={`auth-format-observe-${checkKey}`}
             size="sm"
             checked={item.observe_mode}
             onCheckedChange={(observe_mode) => onChange({ ...item, observe_mode })}
@@ -127,20 +134,22 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                 onValueChange={(v) => onChange({ ...item, action: v as AuthSpoofingAction })}
                 disabled={disabled || !item.enabled}
               >
-                <SelectTrigger className="w-[220px]">
+                <SelectTrigger className="w-[220px]" data-testid={`auth-format-action-${checkKey}`}>
                   <SelectValue>
                     {FORMAT_ACTIONS.includes(item.action as typeof FORMAT_ACTIONS[number])
-                      ? t(formatActionKey(item.action) as any)
+                      ? t(formatActionKey(item.action) as Parameters<typeof t>[0])
                       : item.action}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="w-72">
                   {FORMAT_ACTIONS.map((a) => (
-                    <SelectItem key={a} value={a}>
+                    // 纯测试定位用途：option 的无障碍名是 label + 描述两段拼接，
+                    // 而 QC 框架强制 exact 匹配（ui-locator.ts:44-45,84），按 name 定位恒不命中。
+                    <SelectItem key={a} value={a} data-testid={`auth-spoofing-format-action-${a}`}>
                       <div className="flex flex-col gap-0.5 py-0.5">
-                        <span>{t(formatActionKey(a) as any)}</span>
+                        <span>{t(formatActionKey(a) as Parameters<typeof t>[0])}</span>
                         <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                          {tDesc(toMessageKeySegment(a) as any)}
+                          {tDesc(toMessageKeySegment(a) as Parameters<typeof tDesc>[0])}
                         </span>
                       </div>
                     </SelectItem>
@@ -151,7 +160,10 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
           </div>
 
           {isHighRisk && (
-            <div className="ml-12 flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950/30">
+            <div
+              data-testid={`auth-format-highrisk-${checkKey}`}
+              className="ml-12 flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950/30"
+            >
               <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
               <p className="text-xs text-amber-700 dark:text-amber-300">{t('highRiskWarning')}</p>
             </div>
@@ -169,7 +181,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
 
           <div className="flex items-start gap-2 pl-12">
             <Info className="h-4 w-4 flex-shrink-0 text-blue-500 mt-0.5" />
-            <p className="text-xs text-muted-foreground">{t(descKey as any)}</p>
+            <p className="text-xs text-muted-foreground">{t(descKey as Parameters<typeof t>[0])}</p>
           </div>
         </>
       )}
@@ -185,14 +197,14 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 text-amber-500" />
-                {t(`${warningKey}.title` as any)}
+                {t(`${warningKey}.title` as Parameters<typeof t>[0])}
               </AlertDialogTitle>
               <AlertDialogDescription className="whitespace-pre-line">
-                {t(`${warningKey}.desc` as any)}
+                {t(`${warningKey}.desc` as Parameters<typeof t>[0])}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>{t(`${warningKey}.cancel` as any)}</AlertDialogCancel>
+              <AlertDialogCancel>{t(`${warningKey}.cancel` as Parameters<typeof t>[0])}</AlertDialogCancel>
               <AlertDialogAction
                 className="border-warning/80 bg-warning text-white data-[hovered=true]:bg-warning/90 active:bg-warning/85"
                 onClick={() => {
@@ -200,7 +212,7 @@ function FormatCheckCard({ labelKey, descKey, warningKey, item, onChange, disabl
                   setPendingEnable(false);
                 }}
               >
-                {t(`${warningKey}.confirm` as any)}
+                {t(`${warningKey}.confirm` as Parameters<typeof t>[0])}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -232,6 +244,7 @@ export function FormatChecksSection({ config, onChange, disabled }: FormatChecks
             {FORMAT_KEYS.map(({ key, labelKey, descKey, warningKey }) => (
               <FormatCheckCard
                 key={key}
+                checkKey={key}
                 labelKey={labelKey}
                 descKey={descKey}
                 warningKey={warningKey}

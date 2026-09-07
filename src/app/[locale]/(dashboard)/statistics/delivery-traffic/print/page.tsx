@@ -79,13 +79,13 @@ function PrintContent() {
         }
       `}</style>
 
-      <div className="print-root fixed inset-0 z-[9999] overflow-auto bg-white dark:bg-white text-black">
+      <div className="print-root fixed inset-0 z-[9999] overflow-auto bg-white dark:bg-white text-black" data-testid="delivery-print-page">
         <div className="mx-auto max-w-5xl px-8 py-10">
           <div className="mb-8 border-b border-gray-200 pb-6">
-            <h1 className="text-2xl font-bold text-gray-900">{tPrint('title')}</h1>
+            <h1 className="text-2xl font-bold text-gray-900" data-testid="delivery-print-title">{tPrint('title')}</h1>
             <div className="mt-2 flex flex-wrap gap-6 text-sm text-gray-600">
-              <span><span className="font-medium">{tPrint('dateRange')}：</span>{startDate} ~ {endDate}</span>
-              <span><span className="font-medium">{tPrint('direction')}：</span>{directionLabel}</span>
+              <span data-testid="delivery-print-date-range"><span className="font-medium">{tPrint('dateRange')}：</span>{startDate} ~ {endDate}</span>
+              <span data-testid="delivery-print-direction"><span className="font-medium">{tPrint('direction')}：</span>{directionLabel}</span>
               <span><span className="font-medium">{tPrint('generatedAt')}：</span>{new Date().toLocaleString()}</span>
             </div>
           </div>
@@ -100,7 +100,7 @@ function PrintContent() {
                   {Object.entries(data.kpi).map(([key, value]) => (
                     <div key={key} className="rounded-lg border border-gray-200 p-4">
                       <div className="text-xs font-medium text-gray-500">{key}</div>
-                      <div className="mt-1 text-2xl font-bold text-gray-900">
+                      <div className="mt-1 text-2xl font-bold text-gray-900" data-testid={`delivery-print-kpi-${key}`}>
                         {typeof value === 'number' ? (key.includes('rate') ? `${value.toFixed(1)}%` : value.toLocaleString()) : String(value ?? '—')}
                       </div>
                     </div>
@@ -110,11 +110,11 @@ function PrintContent() {
 
               <section className="mb-8">
                 <h2 className="mb-3 text-lg font-semibold text-gray-800">{tPrint('detailSection')}</h2>
-                <table className="w-full border-collapse text-sm">
+                <table className="w-full border-collapse text-sm" data-testid="delivery-print-detail-table">
                   <thead>
                     <tr className="bg-gray-50">
                       {columns.map((k) => (
-                        <th key={k} className={`border border-gray-200 px-3 py-2 font-medium text-gray-700 ${k !== 'date' ? 'text-right' : 'text-left'}`}>
+                        <th key={k} data-testid={`delivery-print-col-${k}`} className={`border border-gray-200 px-3 py-2 font-medium text-gray-700 ${k !== 'date' ? 'text-right' : 'text-left'}`}>
                           {t(`table.${TABLE_LABEL_KEYS[k] ?? k}`)}
                         </th>
                       ))}
@@ -122,7 +122,7 @@ function PrintContent() {
                   </thead>
                   <tbody>
                     {data.detail_table.map((row, i) => (
-                      <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <tr key={i} data-testid={`delivery-print-row-${i}`} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         {columns.map((k) => (
                           <td key={k} className={`border border-gray-200 px-3 py-2 tabular-nums text-gray-700 ${k !== 'date' ? 'text-right' : 'font-medium text-gray-800'}`}>
                             {formatVal(k, row[k])}

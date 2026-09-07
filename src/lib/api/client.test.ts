@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useScopedApiRequest } from './client';
+import {
+  apiRequest,
+  isPublicationPendingResponse,
+  useScopedApiRequest,
+  type ConfigMutationResult,
+} from './client';
 
 // Direct unit test for useScopedApiRequest's header-injection contract:
 //   tenantId !== null  → X-Tenant-ID: <tenantId>
@@ -73,5 +78,39 @@ describe('useScopedApiRequest', () => {
     const init = fetchMock.mock.calls[0][1] as RequestInit;
     expect(init.method).toBe('POST');
     expect(init.body).toBe(JSON.stringify({ x: 1 }));
+  });
+});
+
+describe('apiRequest committed configuration publication', () => {
+  const realFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+    vi.restoreAllMocks();
+  });
+
+  it('preserves the publication acknowledgement instead of forging a response from the request body', async () => {
+    const pending = {
+      committed: true as const,
+      published: false as const,
+      status: 'publication_pending' as const,
+    };
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(pending), {
+        status: 202,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ) as unknown as typeof fetch;
+    const submitted = { review: { reviewer_emails: [] } };
+
+    const result = await apiRequest<ConfigMutationResult<typeof submitted>>('/disposal-settings', {
+      method: 'PUT',
+      body: submitted,
+    });
+
+    expect(result).toEqual(pending);
+    expect(result).not.toEqual(submitted);
+    expect(isPublicationPendingResponse(result)).toBe(true);
+    expect(isPublicationPendingResponse({ ...pending, published: true })).toBe(false);
   });
 });

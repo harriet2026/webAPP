@@ -163,6 +163,7 @@ function TextField({
   onChange,
   autoFocus,
   placeholder,
+  testId,
 }: {
   label: string;
   required?: boolean;
@@ -170,6 +171,8 @@ function TextField({
   onChange: (v: string) => void;
   autoFocus?: boolean;
   placeholder?: string;
+  /** Optional stable data-testid forwarded to the input (QC/Playwright lookups only). */
+  testId?: string;
 }) {
   return (
     <Field label={label} required={required}>
@@ -177,6 +180,7 @@ function TextField({
         autoFocus={autoFocus}
         value={value}
         placeholder={placeholder}
+        data-testid={testId}
         onChange={(e) => onChange(e.target.value)}
       />
     </Field>
@@ -458,6 +462,7 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
           <TextField
             label={t('addons.tagContent')}
             required
+            testId="addon-emailTag-content"
             value={tv(params, 'tag_content', '')}
             onChange={(v) => onPatch({ tag_content: v })}
             autoFocus={autoFocus}
@@ -577,6 +582,7 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
           <TextField
             label={t('addons.modifyHeaderNewValue')}
             required
+            testId="addon-modifyHeader-new-value"
             value={tv(params, 'new_value', '')}
             onChange={(v) => onPatch({ new_value: v })}
           />
@@ -672,6 +678,7 @@ export function AddonsRowList({
             onSelect={() => onSelectKey?.(key)}
           >
             <Checkbox
+              data-testid={`addon-checkbox-${key}`}
               checked={checked}
               disabled={isDisabled}
               onCheckedChange={() => {
@@ -682,7 +689,7 @@ export function AddonsRowList({
             />
             <span className="flex-1">{t(`addons.${key}` as never)}</span>
             {notWired && (
-              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <span data-testid={`addon-upcoming-${key}`} className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 {t('addons.upcoming')}
               </span>
             )}

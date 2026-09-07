@@ -37,6 +37,7 @@ vi.mock("next-intl", () => ({
   useFormatter: () => ({
     relativeTime: (value: Date) => value.toISOString(),
   }),
+  useNow: () => new Date("2026-08-26T00:00:00.000Z"),
 }));
 
 vi.mock("next/navigation", () => ({

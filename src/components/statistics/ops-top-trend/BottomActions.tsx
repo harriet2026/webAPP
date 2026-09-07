@@ -40,8 +40,8 @@ export function BottomActions({ params }: BottomActionsProps) {
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-3 rounded-[10px] bg-card p-4 shadow-sm">
-      <Button variant="outline" className="rounded-lg border" onClick={handleExport} disabled={exporting}>
+    <div className="flex flex-wrap items-center justify-end gap-3 rounded-[10px] bg-card p-4 shadow-sm" data-testid="ops-top-bottom-actions">
+      <Button variant="outline" className="rounded-lg border" data-testid="ops-top-export-csv" onClick={handleExport} disabled={exporting}>
         {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
         {t('exportCsv')}
       </Button>

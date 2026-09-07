@@ -10,6 +10,7 @@ export interface BasicLimitConfig {
 	danger_ext_enabled: boolean;
 	danger_ext_list: string;
 	mime_mismatch_check: boolean;
+	mime_mismatch_action: Exclude<AttachmentAction, 'partial_skip'>;
 }
 
 export type Direction = 'receive' | 'send' | 'internal';

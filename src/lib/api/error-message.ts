@@ -1,8 +1,8 @@
 import { ApiError } from './client';
 
-// next-intl 的 t() 在 key 缺失时不抛异常、只返回 key 本身并打
-// MISSING_MESSAGE —— 所以这里必须自己判断"有没有命中"，否则用户会看到
-// `apiErrors.disposal.xxx` 这种字符串。
+// next-intl 的 t() 在 key 缺失时会先记录 MISSING_MESSAGE，再返回 key 本身。
+// 因此必须用 t.has() 预检，不能依赖调用后的字符串兜底，否则界面虽然能显示
+// 通用文案，浏览器控制台仍会持续报错。
 //
 // values 的类型必须与 next-intl 的 `TranslationValues`（Record<string,
 // string | number | Date>）**一致**：函数参数在 strictFunctionTypes 下是逆变的，
@@ -10,7 +10,9 @@ import { ApiError } from './client';
 // （tsc 报 "Type 'Record<string, unknown>' is not assignable to
 // 'Record<string, string | number | Date>'"），next build 直接失败。
 type TranslationValues = Record<string, string | number | Date>;
-type Translator = (key: string, values?: TranslationValues) => string;
+type Translator = ((key: string, values?: TranslationValues) => string) & {
+  has?: (key: string) => boolean;
+};
 
 const NAMESPACE = 'apiErrors';
 
@@ -49,6 +51,7 @@ export function localizeApiError(e: unknown, t: Translator): string | null {
   if (!code) return null;
 
   const key = `${NAMESPACE}.${code}`;
+  if (t.has && !t.has(key)) return null;
   const rendered = t(key, toTranslationValues(e.params));
   // 未命中时 next-intl 原样返回 key；这时视为"没有文案"，交给调用方兜底。
   if (rendered === key || rendered.startsWith(`${NAMESPACE}.`)) return null;

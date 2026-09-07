@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { createElement } from "react";
 
 // Regression coverage for the N-of-4 password gates (design §5.2). The old code
@@ -42,9 +42,10 @@ vi.mock("@/contexts/auth-context", () => ({
 
 // PasswordTab reads its policy + mutation from ./api; stub both.
 const useSecurityPolicyMock = vi.fn();
+const changePasswordMock = vi.fn();
 vi.mock("@/components/profile/api", () => ({
   useSecurityPolicy: () => useSecurityPolicyMock(),
-  useChangePassword: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useChangePassword: () => ({ mutateAsync: changePasswordMock, isPending: false }),
 }));
 
 import { ForcedChangeStep } from "@/components/login/forced-change-step";
@@ -186,5 +187,26 @@ describe("PasswordTab gate (rendered component)", () => {
     );
 
     expect(screen.getByTestId("profile-password-save")).toBeDisabled();
+  });
+
+  it("submits only once when save is clicked twice in the same event turn", () => {
+    useSecurityPolicyMock.mockReturnValue({
+      data: { minLength: 10, minCharClasses: 3, historyLimit: 3 },
+    });
+    changePasswordMock.mockReturnValue(new Promise(() => {}));
+    render(createElement(PasswordTab));
+
+    setInput(screen.getByTestId("profile-password-old-input"), "oldpassword1!");
+    setInput(screen.getByTestId("profile-password-new-input"), THREE_CLASS_NO_DIGIT);
+    setInput(screen.getByTestId("profile-password-confirm-input"), THREE_CLASS_NO_DIGIT);
+    const save = screen.getByTestId("profile-password-save") as HTMLButtonElement;
+
+    act(() => {
+      save.click();
+      save.click();
+    });
+
+    expect(changePasswordMock).toHaveBeenCalledTimes(1);
+    expect(save).toBeDisabled();
   });
 });

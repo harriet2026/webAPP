@@ -98,7 +98,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
         >
           {DECISION_MODES.map((m) => (
             <div key={m} className="flex items-center gap-2">
-              <RadioGroupItem value={m} id={`dm-${m}`} />
+              <RadioGroupItem value={m} id={`dm-${m}`} data-testid={`strategy-decision-mode-${m}`} />
               <Label htmlFor={`dm-${m}`} className="cursor-pointer">
                 {t(`decisionModeValue.${m}`)}
               </Label>
@@ -113,6 +113,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
           <Label htmlFor="auto-conf">{t('autoConfidenceThreshold')}</Label>
           <Input
             id="auto-conf"
+            data-testid="strategy-auto-confidence"
             type="number"
             min={1}
             max={100}
@@ -124,12 +125,13 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
             }
 			className={errors.autoConfidence ? 'border-destructive' : ''}
           />
-		  {errors.autoConfidence ? <p className="text-xs text-destructive">{t('numberInvalid')}</p> : null}
+		  {errors.autoConfidence ? <p className="text-xs text-destructive" data-testid="strategy-auto-confidence-error">{t('numberInvalid')}</p> : null}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="timeout">{t('decisionTimeoutHours')}</Label>
           <Input
             id="timeout"
+            data-testid="strategy-decision-timeout"
             type="number"
             min={1}
 			max={24}
@@ -141,7 +143,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
             }
 			className={errors.decisionTimeout ? 'border-destructive' : ''}
           />
-		  {errors.decisionTimeout ? <p className="text-xs text-destructive">{t('numberInvalid')}</p> : null}
+		  {errors.decisionTimeout ? <p className="text-xs text-destructive" data-testid="strategy-decision-timeout-error">{t('numberInvalid')}</p> : null}
         </div>
       </div>
 
@@ -154,7 +156,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
               value={draft.disposition.unread_policy}
               onValueChange={(v) => patch({ disposition: { ...draft.disposition, unread_policy: (v ?? 'recall') as RecallPolicy } })}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" data-testid="strategy-unread-policy">
                 <SelectValue>{t(`policy.${draft.disposition.unread_policy}`)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -169,7 +171,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
               value={draft.disposition.read_policy}
               onValueChange={(v) => patch({ disposition: { ...draft.disposition, read_policy: (v ?? 'notify') as RecallPolicy } })}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" data-testid="strategy-read-policy">
                 <SelectValue>{t(`policy.${draft.disposition.read_policy}`)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -184,6 +186,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
             <Label htmlFor="max-recall">{t('maxRecallPerRun')}</Label>
             <Input
               id="max-recall"
+              data-testid="strategy-max-recall"
               type="number"
               min={1}
 			  max={100000}
@@ -195,12 +198,13 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
               }
 			  className={errors.maxRecall ? 'border-destructive' : ''}
             />
-			{errors.maxRecall ? <p className="text-xs text-destructive">{t('numberInvalid')}</p> : null}
+			{errors.maxRecall ? <p className="text-xs text-destructive" data-testid="strategy-max-recall-error">{t('numberInvalid')}</p> : null}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="cb-threshold">{t('circuitBreakerThreshold')}</Label>
             <Input
               id="cb-threshold"
+              data-testid="strategy-circuit-breaker"
               type="number"
               min={1}
 			  max={100000}
@@ -212,7 +216,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
               }
 			  className={errors.circuitBreaker ? 'border-destructive' : ''}
             />
-			{errors.circuitBreaker ? <p className="text-xs text-destructive">{t('numberInvalid')}</p> : null}
+			{errors.circuitBreaker ? <p className="text-xs text-destructive" data-testid="strategy-circuit-breaker-error">{t('numberInvalid')}</p> : null}
           </div>
         </div>
       </div>
@@ -292,6 +296,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
         <div className="flex items-center justify-between gap-3">
           <h5 className="text-sm font-medium">{t('notify')}</h5>
           <Checkbox
+            data-testid="strategy-notify-enabled"
             checked={draft.notify.enabled}
             onCheckedChange={(checked) => patch({ notify: { ...draft.notify, enabled: Boolean(checked) } })}
             aria-label={t('notify')}
@@ -301,6 +306,7 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
           <Label>{t('notifyRecipients')}</Label>
           <div className="flex gap-2">
             <Input
+              data-testid="strategy-notify-recipients"
               value={recipientInput}
               onChange={(e) => setRecipientInput(e.target.value)}
               onKeyDown={(e) => {
@@ -333,11 +339,11 @@ export function DispositionBlock({ draft, patch, errors }: Props) {
           ) : null}
         </div>
         <div className="space-y-2 rounded-md bg-muted/30 p-3 text-sm">
-          <label className="flex items-center gap-2"><Checkbox checked={draft.notify.high.enabled} onCheckedChange={(v) => patch({ notify: { ...draft.notify, high: { enabled: Boolean(v) } } })} />{t('highImmediate')}</label>
-          <label className="flex flex-wrap items-center gap-2"><Checkbox checked={draft.notify.medium.enabled} onCheckedChange={(v) => patch({ notify: { ...draft.notify, medium: { ...draft.notify.medium, enabled: Boolean(v) } } })} />{t('mediumImmediate')}<Input type="number" min={70} max={89} className={`h-8 w-20 ${errors.confidence ? 'border-destructive' : ''}`} value={draft.notify.medium.min_confidence} onChange={(e) => patch({ notify: { ...draft.notify, medium: { ...draft.notify.medium, min_confidence: Number(e.target.value) } } })} />%</label>
+          <label className="flex items-center gap-2"><Checkbox data-testid="strategy-notify-high" checked={draft.notify.high.enabled} onCheckedChange={(v) => patch({ notify: { ...draft.notify, high: { enabled: Boolean(v) } } })} />{t('highImmediate')}</label>
+          <label className="flex flex-wrap items-center gap-2"><Checkbox data-testid="strategy-notify-medium" checked={draft.notify.medium.enabled} onCheckedChange={(v) => patch({ notify: { ...draft.notify, medium: { ...draft.notify.medium, enabled: Boolean(v) } } })} />{t('mediumImmediate')}<Input type="number" min={70} max={89} className={`h-8 w-20 ${errors.confidence ? 'border-destructive' : ''}`} value={draft.notify.medium.min_confidence} onChange={(e) => patch({ notify: { ...draft.notify, medium: { ...draft.notify.medium, min_confidence: Number(e.target.value) } } })} />%</label>
           {errors.confidence ? <p className="text-xs text-destructive">{t('mediumThresholdInvalid')}</p> : null}
           <p className="text-xs text-muted-foreground">{t('mediumNoFallbackHint')}</p>
-          <label className="flex flex-wrap items-center gap-2"><Checkbox checked={draft.notify.low.enabled} onCheckedChange={(v) => patch({ notify: { ...draft.notify, low: { ...draft.notify.low, enabled: Boolean(v) } } })} />{t('lowDigest')}<Input type="time" className="h-8 w-28" value={draft.notify.low.digest_time} onChange={(e) => patch({ notify: { ...draft.notify, low: { ...draft.notify.low, digest_time: e.target.value } } })} /></label>
+          <label className="flex flex-wrap items-center gap-2"><Checkbox data-testid="strategy-notify-low" checked={draft.notify.low.enabled} onCheckedChange={(v) => patch({ notify: { ...draft.notify, low: { ...draft.notify.low, enabled: Boolean(v) } } })} />{t('lowDigest')}<Input type="time" className="h-8 w-28" value={draft.notify.low.digest_time} onChange={(e) => patch({ notify: { ...draft.notify, low: { ...draft.notify.low, digest_time: e.target.value } } })} /></label>
         </div>
         <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">{t('notifyVersionHint')}</p>
         <Button data-testid="notification-preview-open" type="button" variant="outline" onClick={() => setPreviewOpen(true)}>{t('preview')}</Button>

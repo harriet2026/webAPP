@@ -1,6 +1,7 @@
 import type { AgentCenterCard, AgentCenterKey, AgentCenterPolicyPage } from '@/types/agent-center';
 
 export type AgentModuleKey = 'phishing_agent' | 'spoofing_agent' | 'threat_retro_agent';
+export type AgentPipelineKey = 'phishingAgent' | 'spoofingAgent' | 'threatRetroAgent';
 
 interface ExpectedPolicyPage {
   page: string;
@@ -11,7 +12,7 @@ interface ExpectedPolicyPage {
 export interface AgentPresentation {
   moduleKey: AgentModuleKey;
   agentKey: AgentCenterKey;
-  pipelineKey: 'phishingAgent' | 'spoofingAgent' | 'threatRetroAgent';
+  pipelineKey: AgentPipelineKey;
   pipelineNameKey: 'pipeline.phishingAgent' | 'pipeline.spoofingAgent' | 'pipeline.threatRetroAgent';
   pipelineDescKey: 'pipeline.phishingAgentDesc' | 'pipeline.spoofingAgentDesc' | 'pipeline.threatRetroAgentDesc';
   pipelineType: 'ai-sync' | 'ai-async';

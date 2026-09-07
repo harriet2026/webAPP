@@ -44,11 +44,11 @@ export function MailRoutingShell({ tenantId }: MailRoutingShellProps) {
   const highlightConfigId = parseConfigParam(searchParams);
   return (
     <Tabs defaultValue={initialTab} className="w-full" data-testid="mr-root">
-      <TabsList>
-        <TabsTrigger value="receiving">{t('tabs.receiving')}</TabsTrigger>
-        <TabsTrigger value="relay">{t('tabs.relay')}</TabsTrigger>
-        <TabsTrigger value="outbound">{t('tabs.outbound')}</TabsTrigger>
-        <TabsTrigger value="auth">{t('tabs.auth')}</TabsTrigger>
+      <TabsList data-testid="mr-tabs">
+        <TabsTrigger value="receiving" data-testid="mr-tab-receiving">{t('tabs.receiving')}</TabsTrigger>
+        <TabsTrigger value="relay" data-testid="mr-tab-relay">{t('tabs.relay')}</TabsTrigger>
+        <TabsTrigger value="outbound" data-testid="mr-tab-outbound">{t('tabs.outbound')}</TabsTrigger>
+        <TabsTrigger value="auth" data-testid="mr-tab-auth">{t('tabs.auth')}</TabsTrigger>
       </TabsList>
       <TabsContent value="receiving" className="mt-4">
         <ReceivingTab tenantId={tenantId} />

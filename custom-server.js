@@ -1,4 +1,5 @@
 'use strict'
+/* eslint-disable @typescript-eslint/no-require-imports -- Next.js standalone emits a CommonJS server entry point; this bootstrap must patch Node's http module before requiring it. */
 const https = require('https')
 const http = require('http')
 const fs = require('fs')

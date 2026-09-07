@@ -8,7 +8,7 @@ import { type LinkClickLog } from '@/lib/api/link-clicks';
 import { stageMeta, verdictMeta, resultMeta, actionMeta } from './meta';
 
 function Badge({ labelKey, color, t }: { labelKey: string; color: string; t: (k: string) => string }) {
-  return <span className={`px-2 py-1 rounded text-xs font-medium ${color}`}>{t(labelKey)}</span>;
+  return <span className={`inline-flex whitespace-nowrap px-2 py-1 rounded text-xs font-medium ${color}`}>{t(labelKey)}</span>;
 }
 
 interface LinkTableProps {
@@ -24,12 +24,12 @@ export function LinkTable({ logs, showTenant, onView, onDownload }: LinkTablePro
 
   return (
     <div data-testid="link-logs-table" className="overflow-x-auto border border-border rounded-lg">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[1280px] text-sm">
         <thead className="bg-muted/50 border-b border-border">
           <tr>
             <th className="px-4 py-3 text-left font-medium">{t('linkLogs.columns.clickTime')}</th>
             <th className="px-4 py-3 text-left font-medium">{t('linkLogs.columns.tid')}</th>
-            {showTenant && <th className="px-4 py-3 text-left font-medium">{t('common.tenant')}</th>}
+            {showTenant && <th className="px-4 py-3 text-left font-medium">{t('linkLogs.columns.tenant')}</th>}
             <th className="px-4 py-3 text-left font-medium">{t('linkLogs.columns.clicker')}</th>
             <th className="px-4 py-3 text-left font-medium">{t('linkLogs.columns.sender')}</th>
             <th className="px-4 py-3 text-left font-medium">{t('linkLogs.columns.originalUrl')}</th>

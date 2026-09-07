@@ -47,4 +47,13 @@ describe('SendReceiveContextCard delivery_failed (GT-12880)', () => {
     expect(screen.getByText(/该邮件已被阻断\/丢弃/)).toBeTruthy();
     expect(screen.queryByTestId('email-disposal-overview-context-delivery-failed')).toBeNull();
   });
+
+  it.each(['delivering', 'deferred'])(
+    'GT-13193: 投递族中间态 %s 不得误报已阻断/丢弃',
+    (status) => {
+      renderCard(status);
+      expect(screen.queryByTestId('email-disposal-overview-context-not-operable')).toBeNull();
+      expect(screen.queryByText(/该邮件已被阻断\/丢弃/)).toBeNull();
+    },
+  );
 });

@@ -14,6 +14,9 @@ interface ServerPaginationProps {
   // lets the user pick how many rows per page (GT-11585).
   onPageSizeChange?: (pageSize: number) => void;
   pageSizeOptions?: number[];
+  pageSizeTestId?: string;
+  testId?: string;
+  showTotal?: boolean;
 }
 
 export function ServerPagination({
@@ -23,6 +26,9 @@ export function ServerPagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [10, 20, 50, 100],
+  pageSizeTestId = 'pagination-page-size',
+  testId,
+  showTotal = true,
 }: ServerPaginationProps) {
   const t = useTranslations('common');
   const totalPages = Math.ceil(total / pageSize);
@@ -30,21 +36,29 @@ export function ServerPagination({
   if (totalPages <= 1 && !onPageSizeChange) return null;
 
   return (
-    <div className="flex items-center justify-between rounded-[20px] border border-border/70 bg-card/96 px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+    <div data-testid={testId} className="flex items-center justify-between rounded-[20px] border border-border/70 bg-card/96 px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
       <div className="flex items-center gap-4">
-        <div className="text-sm text-muted-foreground">
-          {t('total', { count: total })}
-        </div>
+        {showTotal && (
+          <div className="text-sm text-muted-foreground" data-testid="pagination-total">
+            {t('total', { count: total })}
+          </div>
+        )}
         {onPageSizeChange && (
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">{t('rowsPerPage')}</span>
             <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
-              <SelectTrigger className="h-8 w-[72px] text-xs">
+              <SelectTrigger data-testid={pageSizeTestId} className="h-8 w-[72px] text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {pageSizeOptions.map((opt) => (
-                  <SelectItem key={opt} value={String(opt)}>{opt}</SelectItem>
+                  <SelectItem
+                    key={opt}
+                    value={String(opt)}
+                    data-testid={`pagination-page-size-option-${opt}`}
+                  >
+                    {opt}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -55,6 +69,7 @@ export function ServerPagination({
         <Button
           variant="outline"
           size="icon"
+          data-testid="pagination-first"
           aria-label={t('page', { page: 1 })}
           title={t('page', { page: 1 })}
           onClick={() => onPageChange(1)}
@@ -65,6 +80,7 @@ export function ServerPagination({
         <Button
           variant="outline"
           size="icon"
+          data-testid="pagination-prev"
           aria-label={t('prev')}
           title={t('prev')}
           onClick={() => onPageChange(page - 1)}
@@ -72,12 +88,13 @@ export function ServerPagination({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="text-sm text-muted-foreground px-2">
+        <div className="text-sm text-muted-foreground px-2" data-testid="pagination-page-info">
           {t('pageOf', { current: page, total: Math.max(1, totalPages) })}
         </div>
         <Button
           variant="outline"
           size="icon"
+          data-testid="pagination-next"
           aria-label={t('next')}
           title={t('next')}
           onClick={() => onPageChange(page + 1)}
@@ -88,6 +105,7 @@ export function ServerPagination({
         <Button
           variant="outline"
           size="icon"
+          data-testid="pagination-last"
           aria-label={t('page', { page: Math.max(1, totalPages) })}
           title={t('page', { page: Math.max(1, totalPages) })}
           onClick={() => onPageChange(totalPages)}

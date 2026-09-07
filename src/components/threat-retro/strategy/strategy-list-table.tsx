@@ -87,13 +87,13 @@ export function StrategyListTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="bg-muted/20">{t('list.colName')}</TableHead>
-			  <TableHead className="bg-muted/20">{t('list.colMode')}</TableHead>
-              <TableHead className="bg-muted/20">{t('list.colTrigger')}</TableHead>
-              <TableHead className="bg-muted/20">{t('list.colStatus')}</TableHead>
-              <TableHead className="bg-muted/20">{t('list.colStats')}</TableHead>
-              <TableHead className="bg-muted/20">{t('list.colNextRun')}</TableHead>
-              <TableHead className="bg-muted/20 text-right">{t('list.colActions')}</TableHead>
+              <TableHead className="bg-muted/20" data-testid="threat-retro-strategy-col-name">{t('list.colName')}</TableHead>
+			  <TableHead className="bg-muted/20" data-testid="threat-retro-strategy-col-mode">{t('list.colMode')}</TableHead>
+              <TableHead className="bg-muted/20" data-testid="threat-retro-strategy-col-trigger">{t('list.colTrigger')}</TableHead>
+              <TableHead className="bg-muted/20" data-testid="threat-retro-strategy-col-status">{t('list.colStatus')}</TableHead>
+              <TableHead className="bg-muted/20" data-testid="threat-retro-strategy-col-stats">{t('list.colStats')}</TableHead>
+              <TableHead className="bg-muted/20" data-testid="threat-retro-strategy-col-next-run">{t('list.colNextRun')}</TableHead>
+              <TableHead className="bg-muted/20 text-right" data-testid="threat-retro-strategy-col-actions">{t('list.colActions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,13 +105,13 @@ export function StrategyListTable({
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-				<TableCell colSpan={7} className="h-24">
+				<TableCell colSpan={7} className="h-24" data-testid="threat-retro-strategy-empty">
                   <EmptyState title={t('list.empty')} />
                 </TableCell>
               </TableRow>
             ) : (
               filtered.map((s) => (
-                <TableRow key={s.id ?? s.name}>
+                <TableRow key={s.id ?? s.name} data-testid={`threat-retro-strategy-row-${s.id ?? s.name}`}>
                   <TableCell>
 					<div className="flex items-center gap-2">
                         <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: s.color_dot || '#1677FF' }} />
@@ -128,6 +128,7 @@ export function StrategyListTable({
                   </TableCell>
                   <TableCell>
                     <Switch
+                      data-testid={`threat-retro-strategy-toggle-${s.id ?? s.name}`}
                       checked={s.status === 'enabled'}
                       disabled={!isAdmin || s.mode === 'realtime'}
                       aria-label={t('list.colStatus')}
@@ -148,12 +149,13 @@ export function StrategyListTable({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <Button variant="ghost" size="icon" title={t('list.edit')} aria-label={t('list.edit')} disabled={!isAdmin || s.mode === 'realtime'} onClick={() => onEdit(s)}>
+                      <Button variant="ghost" size="icon" data-testid={`threat-retro-strategy-edit-${s.id ?? s.name}`} title={t('list.edit')} aria-label={t('list.edit')} disabled={!isAdmin || s.mode === 'realtime'} onClick={() => onEdit(s)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-testid={`threat-retro-strategy-clone-${s.id ?? s.name}`}
                         title={t('list.clone')}
                         aria-label={t('list.clone')}
                         disabled={!isAdmin || s.mode === 'realtime'}
@@ -164,6 +166,7 @@ export function StrategyListTable({
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-testid={`threat-retro-strategy-delete-${s.id ?? s.name}`}
                         title={t('list.delete')}
                         aria-label={t('list.delete')}
                         className="text-destructive"

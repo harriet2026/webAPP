@@ -70,5 +70,8 @@ export function isPhone(v: string): boolean {
 }
 
 export function isEmail(v: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  // Profile account data contains a masked display value such as
+  // "l***@example.com". It must never be reused as a verification-code target;
+  // require the user to enter a complete address before sending.
+  return !v.includes('*') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }

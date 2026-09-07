@@ -169,6 +169,7 @@ export function BehaviorControlPage({ embedded = false }: Props) {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              data-testid="behavior-control-search"
               placeholder={t('behaviorControl.searchPlaceholder')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -176,39 +177,39 @@ export function BehaviorControlPage({ embedded = false }: Props) {
             />
           </div>
           <Select value={dirFilter} onValueChange={(v) => { setDirFilter(v ?? 'all'); setPage(1); }}>
-            <SelectTrigger className="w-[120px]"><SelectValue placeholder={t('behaviorControl.filter.allDirections')} /></SelectTrigger>
+            <SelectTrigger data-testid="behavior-control-filter-direction" className="w-[120px]"><SelectValue placeholder={t('behaviorControl.filter.allDirections')} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('behaviorControl.filter.allDirections')}</SelectItem>
+              <SelectItem data-testid="behavior-control-filter-direction-all" value="all">{t('behaviorControl.filter.allDirections')}</SelectItem>
               {(['inbound', 'outbound', 'internal', 'bidirectional'] as const).map((d) => (
-                <SelectItem key={d} value={d}>{t(`behaviorControl.direction.${d}`)}</SelectItem>
+                <SelectItem data-testid={`behavior-control-filter-direction-${d}`} key={d} value={d}>{t(`behaviorControl.direction.${d}`)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={objFilter} onValueChange={(v) => { setObjFilter(v ?? 'all'); setPage(1); }}>
-            <SelectTrigger className="w-[120px]"><SelectValue placeholder={t('behaviorControl.filter.allTypes')} /></SelectTrigger>
+            <SelectTrigger data-testid="behavior-control-filter-object" className="w-[120px]"><SelectValue placeholder={t('behaviorControl.filter.allTypes')} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('behaviorControl.filter.allTypes')}</SelectItem>
+              <SelectItem data-testid="behavior-control-filter-object-all" value="all">{t('behaviorControl.filter.allTypes')}</SelectItem>
               {(['global', 'sender', 'senderIp', 'senderDomain'] as const).map((ot) => (
-                <SelectItem key={ot} value={ot}>{t(`behaviorControl.object.${ot}`)}</SelectItem>
+                <SelectItem data-testid={`behavior-control-filter-object-${ot}`} key={ot} value={ot}>{t(`behaviorControl.object.${ot}`)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v ?? 'all'); setPage(1); }}>
-            <SelectTrigger className="w-[120px]"><SelectValue placeholder={t('behaviorControl.filter.allStatus')} /></SelectTrigger>
+            <SelectTrigger data-testid="behavior-control-filter-status" className="w-[120px]"><SelectValue placeholder={t('behaviorControl.filter.allStatus')} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('behaviorControl.filter.allStatus')}</SelectItem>
-              <SelectItem value="enabled">{t('behaviorControl.filter.enabled')}</SelectItem>
-              <SelectItem value="disabled">{t('behaviorControl.filter.disabled')}</SelectItem>
+              <SelectItem data-testid="behavior-control-filter-status-all" value="all">{t('behaviorControl.filter.allStatus')}</SelectItem>
+              <SelectItem data-testid="behavior-control-filter-status-enabled" value="enabled">{t('behaviorControl.filter.enabled')}</SelectItem>
+              <SelectItem data-testid="behavior-control-filter-status-disabled" value="disabled">{t('behaviorControl.filter.disabled')}</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" onClick={handleResetFilters}>
+          <Button data-testid="behavior-control-filter-reset" variant="outline" size="sm" onClick={handleResetFilters}>
             <RotateCcw className="h-4 w-4 mr-1" />
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={handleCreate}><Plus className="mr-1 h-4 w-4" />{t('behaviorControl.addRule')}</Button>
-          <Button variant="outline" size="sm" onClick={() => setImportExportOpen(true)}><Upload className="h-4 w-4" /></Button>
-          <Button variant="outline" size="sm" onClick={() => setImportExportOpen(true)}><Download className="h-4 w-4" /></Button>
+          <Button data-testid="behavior-control-create" size="sm" onClick={handleCreate}><Plus className="mr-1 h-4 w-4" />{t('behaviorControl.addRule')}</Button>
+          <Button data-testid="behavior-control-import" variant="outline" size="sm" onClick={() => setImportExportOpen(true)}><Upload className="h-4 w-4" /></Button>
+          <Button data-testid="behavior-control-export" variant="outline" size="sm" onClick={() => setImportExportOpen(true)}><Download className="h-4 w-4" /></Button>
         </div>
       </div>
 
@@ -224,18 +225,19 @@ export function BehaviorControlPage({ embedded = false }: Props) {
           />
           {totalPages <= 1 ? (
             <div className="flex items-center justify-start px-4 py-3 border-t">
-              <div className="text-sm text-muted-foreground">
+              <div data-testid="behavior-control-total" className="text-sm text-muted-foreground">
                 {t('behaviorControl.pagination.total')} {filtered.length} {t('behaviorControl.pagination.rules')}
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-between px-4 py-3 border-t">
-              <div className="text-sm text-muted-foreground">
+              <div data-testid="behavior-control-total" className="text-sm text-muted-foreground">
                 {t('behaviorControl.pagination.total')} {filtered.length} {t('behaviorControl.pagination.rules')}
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
                   <Button
+                    data-testid="behavior-control-prev-page"
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 p-0"
@@ -265,6 +267,7 @@ export function BehaviorControlPage({ embedded = false }: Props) {
                     }
                     return (
                       <Button
+                        data-testid={`behavior-control-page-${pageNum}`}
                         key={i}
                         variant={page === pageNum ? 'default' : 'outline'}
                         size="sm"
@@ -276,6 +279,7 @@ export function BehaviorControlPage({ embedded = false }: Props) {
                     );
                   })}
                   <Button
+                    data-testid="behavior-control-next-page"
                     variant="outline"
                     size="sm"
                     className="h-8 w-8 p-0"
@@ -288,6 +292,7 @@ export function BehaviorControlPage({ embedded = false }: Props) {
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-muted-foreground">{t('behaviorControl.pagination.goToPage')}</span>
                   <input
+                    data-testid="behavior-control-jump-input"
                     type="number"
                     min={1}
                     max={totalPages}
@@ -304,10 +309,10 @@ export function BehaviorControlPage({ embedded = false }: Props) {
                   <span className="text-muted-foreground">{t('behaviorControl.pagination.page')}</span>
                 </div>
                 <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v ?? '20')); setPage(1); }}>
-                  <SelectTrigger className="w-[110px] h-8"><SelectValue /></SelectTrigger>
+                  <SelectTrigger data-testid="behavior-control-page-size" className="w-[110px] h-8"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {PAGE_SIZES.map((s) => (
-                      <SelectItem key={s} value={String(s)}>{t(`behaviorControl.pagination.perPage${s}`)}</SelectItem>
+                      <SelectItem data-testid={`behavior-control-page-size-${s}`} key={s} value={String(s)}>{t(`behaviorControl.pagination.perPage${s}`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -321,14 +326,14 @@ export function BehaviorControlPage({ embedded = false }: Props) {
 
       {deleteTarget && (
         <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-          <AlertDialogContent>
+          <AlertDialogContent data-testid="behavior-control-delete-dialog">
             <AlertDialogHeader>
               <AlertDialogTitle>{t('behaviorControl.delete.title')}</AlertDialogTitle>
               <AlertDialogDescription>{t('behaviorControl.delete.warning')}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('common.delete')}</AlertDialogAction>
+              <AlertDialogCancel data-testid="behavior-control-delete-cancel">{t('common.cancel')}</AlertDialogCancel>
+              <AlertDialogAction data-testid="behavior-control-delete-confirm" onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('common.delete')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

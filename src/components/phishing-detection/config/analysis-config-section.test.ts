@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { updateAnalysisConfig } from './analysis-config-section';
+import { committedAnalysisConfig, updateAnalysisConfig } from './analysis-config-section';
 import type { PhishAnalysisConfig } from '@/types/phishing-config';
 
 const config: PhishAnalysisConfig = {
@@ -23,5 +23,14 @@ describe('analysis config dependency', () => {
       ...config,
       netdisk_spoof: true,
     });
+  });
+
+  it('advances the local CAS version after a committed publication-pending response', () => {
+    expect(committedAnalysisConfig({ ...config, netdisk_spoof: true })).toEqual({
+      ...config,
+      netdisk_spoof: true,
+      version: 4,
+    });
+    expect(config.version).toBe(3);
   });
 });

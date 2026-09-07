@@ -35,7 +35,7 @@ import {
 import { CollapsibleSectionTrigger } from '@/components/ui/collapsible-section-trigger';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-  createBehaviorControlRule, updateBehaviorControlRule,
+  createBehaviorControlRule, listBehaviorControlGroups, updateBehaviorControlRule,
 } from '@/lib/api/behavior-control';
 import type {
   BehaviorControlFormData, BehaviorControlRuleView,
@@ -130,13 +130,8 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
   const groupsQuery = useQuery({
     queryKey: ['groups', 'behavior-control'],
-    queryFn: async () => {
-      // condition_tree 一并取回：群组成员预览要按它解析出真实成员名单。
-      const res = await apiRequest<{ items: { id: number; name: string; metadata: string; is_active: boolean; condition_tree?: string | RuleNode }[] }>(
-        '/unified-rules?rule_class=tag&page=groups&include=member_count&page_size=5000',
-      );
-      return res.items || [];
-    },
+    // condition_tree 一并取回：群组成员预览要按它解析出真实成员名单。
+    queryFn: () => listBehaviorControlGroups(apiRequest),
     staleTime: 30_000,
     enabled: open,
   });
@@ -312,14 +307,14 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   return (
     <>
       <Sheet open={open} onOpenChange={handleClose}>
-          <SheetContent
-            showCloseButton={false}
-
-          className="data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
+        <SheetContent
+          data-testid="behavior-control-rule-drawer"
+          showCloseButton={false}
+          className="data-[side=right]:w-[920px] data-[side=right]:max-w-full data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
           side="right"
         >
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit((v) => saveMutation.mutate(v as BehaviorControlFormData))} className="flex flex-col flex-1 overflow-hidden">
+            <form onSubmit={handleSubmit((v) => saveMutation.mutate(v as BehaviorControlFormData))} className="flex min-w-0 flex-1 flex-col overflow-hidden">
               <div className="px-6 py-4 border-b flex-shrink-0">
                 <SheetTitle className="text-[18px] font-semibold">
                   {editing ? t('behaviorControl.editTitle') : t('behaviorControl.createTitle')}
@@ -327,7 +322,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                 <p className="text-sm text-muted-foreground mt-1">{t('behaviorControl.drawerSubtitle')}</p>
               </div>
 
-              <div className="flex flex-1 overflow-hidden">
+              <div className="flex min-w-0 flex-1 overflow-hidden">
                 <TooltipProvider>
                   <div className="w-[560px] flex-shrink-0 overflow-y-auto p-6 border-r">
                     <div className="space-y-6">
@@ -346,6 +341,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             </Label>
                             <div className="flex-1">
                               <Input
+                                data-testid="behavior-control-rule-name"
                                 placeholder={t('behaviorControl.form.namePlaceholder')}
                                 {...register('name')}
                                 className={cn(formState.errors.name && 'border-red-500')}
@@ -367,10 +363,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               value={watchAll.direction}
                               onValueChange={(v) => setValue('direction', v as BehaviorDirection, { shouldDirty: true })}
                             >
-                              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                              <SelectTrigger data-testid="behavior-control-direction" className="w-48"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 {(['inbound', 'outbound', 'internal', 'bidirectional'] as BehaviorDirection[]).map((d) => (
-                                  <SelectItem key={d} value={d}>{t(`behaviorControl.direction.${d}`)}</SelectItem>
+                                  <SelectItem data-testid={`behavior-control-direction-${d}`} key={d} value={d}>{t(`behaviorControl.direction.${d}`)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -387,10 +383,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 setValue('object_config', OBJECT_TYPE_DEFAULTS[v as BehaviorObjectType], { shouldDirty: true });
                               }}
                             >
-                              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                              <SelectTrigger data-testid="behavior-control-object-type" className="w-48"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 {(['global', 'sender', 'senderIp', 'senderDomain'] as BehaviorObjectType[]).map((ot) => (
-                                  <SelectItem key={ot} value={ot}>{t(`behaviorControl.object.${ot}`)}</SelectItem>
+                                  <SelectItem data-testid={`behavior-control-object-type-${ot}`} key={ot} value={ot}>{t(`behaviorControl.object.${ot}`)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -409,10 +405,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     setValue('object_config', { type: 'sender', sub_type: v as 'individual' | 'group', value: '' }, { shouldDirty: true });
                                   }}
                                 >
-                                  <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                                  <SelectTrigger data-testid="behavior-control-sender-subtype" className="w-48"><SelectValue /></SelectTrigger>
                                   <SelectContent>
                                     {(['individual', 'group'] as const).map((st) => (
-                                      <SelectItem key={st} value={st}>{t(`behaviorControl.subType.${st}`)}</SelectItem>
+                                      <SelectItem data-testid={`behavior-control-sender-subtype-${st}`} key={st} value={st}>{t(`behaviorControl.subType.${st}`)}</SelectItem>
                                     ))}
                                   </SelectContent>
                                 </Select>
@@ -450,7 +446,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                       value={watchAll.object_config.type === 'sender' ? (watchAll.object_config.value ?? '') : ''}
                                       onValueChange={(v) => setValue('object_config', { type: 'sender', sub_type: 'group', value: v ?? '' }, { shouldDirty: true })}
                                     >
-                                      <SelectTrigger className={cn('w-full', objectConfigError && 'border-red-500')}>
+                                      <SelectTrigger data-testid="behavior-control-sender-group" className={cn('w-full', objectConfigError && 'border-red-500')}>
                                         <SelectValue placeholder={t('behaviorControl.form.groupPlaceholder')} />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -501,10 +497,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                     setValue('object_config', { type: 'senderIp', sub_type: v as 'single' | 'ipGroup', value: '' }, { shouldDirty: true });
                                   }}
                                 >
-                                  <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                                  <SelectTrigger data-testid="behavior-control-ip-subtype" className="w-48"><SelectValue /></SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="single">{t('behaviorControl.subType.single')}</SelectItem>
-                                    <SelectItem value="ipGroup">{t('behaviorControl.subType.ipGroup')}</SelectItem>
+                                    <SelectItem data-testid="behavior-control-ip-subtype-single" value="single">{t('behaviorControl.subType.single')}</SelectItem>
+                                    <SelectItem data-testid="behavior-control-ip-subtype-ipGroup" value="ipGroup">{t('behaviorControl.subType.ipGroup')}</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -516,6 +512,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                   </Label>
                                   <div className="flex-1">
                                     <Input
+                                      data-testid="behavior-control-ip-address"
                                       placeholder={t('behaviorControl.form.ipPlaceholder')}
                                       value={watchAll.object_config.type === 'senderIp' ? (watchAll.object_config.value ?? '') : ''}
                                       onChange={(e) => setValue('object_config', { type: 'senderIp', sub_type: 'single', value: e.target.value }, { shouldDirty: true })}
@@ -540,7 +537,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                       value={watchAll.object_config.type === 'senderIp' ? (watchAll.object_config.value ?? '') : ''}
                                       onValueChange={(v) => setValue('object_config', { type: 'senderIp', sub_type: 'ipGroup', value: v ?? '' }, { shouldDirty: true })}
                                     >
-                                      <SelectTrigger className={cn('w-full', objectConfigError && 'border-red-500')}>
+                                      <SelectTrigger data-testid="behavior-control-ip-group" className={cn('w-full', objectConfigError && 'border-red-500')}>
                                         <SelectValue placeholder={t('behaviorControl.form.ipGroupPlaceholder')} />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -668,10 +665,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               value={watchAll.time_window}
                               onValueChange={(v) => setValue('time_window', v as BehaviorTimeWindow, { shouldDirty: true })}
                             >
-                              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                              <SelectTrigger data-testid="behavior-control-time-window" className="w-48"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 {(['1min', '5min', '15min', '1hour', '6hour', '24hour', 'day'] as BehaviorTimeWindow[]).map((w) => (
-                                  <SelectItem key={w} value={w}>{t(`behaviorControl.window.${w}`)}</SelectItem>
+                                  <SelectItem data-testid={`behavior-control-time-window-${w}`} key={w} value={w}>{t(`behaviorControl.window.${w}`)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -716,7 +713,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                       setValue('conditions', next, { shouldDirty: true });
                                     }}
                                   >
-                                    <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                                    <SelectTrigger data-testid={`behavior-control-dimension-${idx}`} className="flex-1"><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                       {/* 其他条件已占用的维度置灰：后端要求条件维度互不重复
                                           （validateBehaviorControlConditions 的 duplicate dim 校验） */}
@@ -725,7 +722,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                           (c, i) => i !== idx && c.dim === d,
                                         );
                                         return (
-                                          <SelectItem key={d} value={d} disabled={usedElsewhere}>
+                                          <SelectItem data-testid={`behavior-control-dim-option-${d}`} key={d} value={d} disabled={usedElsewhere}>
                                             {t(`behaviorControl.dim.${d}`)}
                                           </SelectItem>
                                         );
@@ -741,6 +738,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                   </Label>
                                   <div className="flex items-center gap-2">
                                     <Input
+                                      data-testid={`behavior-control-threshold-${idx}`}
                                       type="number"
                                       min={1}
                                       placeholder={t('behaviorControl.form.thresholdPlaceholder')}
@@ -774,6 +772,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             <div className="min-w-[100px]" />
                             <div className="flex items-center gap-3">
                               <Button
+                                data-testid="behavior-control-add-condition"
                                 type="button"
                                 variant="outline"
                                 size="sm"
@@ -812,6 +811,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 ] as { value: boolean; label: string }[]).map(({ value, label }) => (
                                   <label key={String(value)} className="flex items-center gap-1.5 cursor-pointer text-sm">
                                     <input
+                                      data-testid={`behavior-control-relation-${value ? 'or' : 'and'}`}
                                       type="radio"
                                       name="or_enabled"
                                       checked={orEnabled === value}
@@ -843,10 +843,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               value={watchAll.action}
                               onValueChange={(v) => setValue('action', v as BehaviorProductAction, { shouldDirty: true })}
                             >
-                              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                              <SelectTrigger data-testid="behavior-control-action" className="w-48"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 {(['audit', 'quarantine', 'discard', 'reject'] as BehaviorProductAction[]).map((a) => (
-                                  <SelectItem key={a} value={a}>{t(`behaviorControl.action.${a}`)}</SelectItem>
+                                  <SelectItem data-testid={`behavior-control-action-${a}`} key={a} value={a}>{t(`behaviorControl.action.${a}`)}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -872,10 +872,13 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                   </div>
 
                   {/* 右栏：预览和帮助区 */}
-                  <div className="flex-1 overflow-y-auto bg-muted/40 p-6">
+                  <div
+                    data-testid="behavior-control-preview-pane"
+                    className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-muted/40 p-6"
+                  >
                     <div className="space-y-6">
                       {/* 规则效果预览 */}
-                      <div className="bg-background rounded-lg p-5 border">
+                      <div className="min-w-0 rounded-lg border bg-background p-5">
                         <div className="flex items-center gap-2 mb-4">
                           <Zap className="h-4 w-4 text-blue-500" />
                           <h3 className="font-medium">{t('behaviorControl.preview.title')}</h3>
@@ -890,17 +893,23 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                           </Alert>
                         ) : (
                           <div className="space-y-3 text-sm">
-                            <div className="flex items-start gap-2">
-                              <Users className="h-4 w-4 text-muted-foreground mt-0.5" />
-                              <div>
+                            <div className="flex min-w-0 items-start gap-2">
+                              <Users className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                              <div className="min-w-0 flex-1">
                                 <span className="text-muted-foreground">{t('behaviorControl.preview.objectPrefix')}</span>
-                                <Badge variant="secondary" className="mx-1.5">{describeObject(watchAll.object_config, t)}</Badge>
+                                <Badge
+                                  data-testid="behavior-control-preview-object-value"
+                                  variant="secondary"
+                                  className="mx-1.5 h-auto min-h-5 max-w-full whitespace-normal break-all text-left leading-relaxed"
+                                >
+                                  {describeObject(watchAll.object_config, t)}
+                                </Badge>
                               </div>
                             </div>
 
                             <div className="flex items-start gap-2">
                               <Globe className="h-4 w-4 text-muted-foreground mt-0.5" />
-                              <div>
+                              <div data-testid="behavior-control-preview-direction">
                                 <span className="text-muted-foreground">{t('behaviorControl.preview.directionPrefix')}</span>
                                 <Badge variant="secondary" className="mx-1.5">{t(`behaviorControl.direction.${watchAll.direction}`)}</Badge>
                               </div>
@@ -1038,7 +1047,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                       <Collapsible open={showSimulator} onOpenChange={setShowSimulator}>
                         <CollapsibleSectionTrigger>
                           <Play className="h-4 w-4" />
-                          <span>{t('behaviorControl.simulator.toggle')}</span>
+                          <span data-testid="behavior-control-simulator-toggle">{t('behaviorControl.simulator.toggle')}</span>
                         </CollapsibleSectionTrigger>
                         <CollapsibleContent className="mt-3">
                           <div className="bg-background rounded-lg p-4 border space-y-4">
@@ -1046,6 +1055,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               <div>
                                 <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.sender')}</Label>
                                 <Input
+                                  data-testid="behavior-control-sim-sender"
                                   value={simSender}
                                   onChange={(e) => setSimSender(e.target.value)}
                                   placeholder={t('behaviorControl.simulator.senderPlaceholder')}
@@ -1055,6 +1065,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               <div>
                                 <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.ip')}</Label>
                                 <Input
+                                  data-testid="behavior-control-sim-ip"
                                   value={simIp}
                                   onChange={(e) => setSimIp(e.target.value)}
                                   placeholder="192.168.1.1"
@@ -1065,6 +1076,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 <div>
                                   <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.ipCount')}</Label>
                                   <Input
+                                    data-testid="behavior-control-sim-ip-count"
                                     type="number"
                                     min={0}
                                     value={simUniqueSenderIPCount}
@@ -1076,6 +1088,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               <div>
                                 <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.mailCount')}</Label>
                                 <Input
+                                  data-testid="behavior-control-sim-mail-count"
                                   type="number"
                                   value={simMailCount}
                                   onChange={(e) => setSimMailCount(parseInt(e.target.value, 10) || 0)}
@@ -1085,6 +1098,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               <div>
                                 <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.recipientCount')}</Label>
                                 <Input
+                                  data-testid="behavior-control-sim-recipient-count"
                                   type="number"
                                   value={simRecipientCount}
                                   onChange={(e) => setSimRecipientCount(parseInt(e.target.value, 10) || 0)}
@@ -1092,7 +1106,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 />
                               </div>
                             </div>
-                            <Button type="button" size="sm" className="w-full" onClick={runSimulation}>
+                            <Button data-testid="behavior-control-sim-run" type="button" size="sm" className="w-full" onClick={runSimulation}>
                               {t('behaviorControl.simulator.run')}
                             </Button>
 
@@ -1108,12 +1122,12 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                   {simResult.hit ? (
                                     <>
                                       <X className="h-4 w-4 text-red-600" />
-                                      <span className="font-medium text-red-700 dark:text-red-400">{t('behaviorControl.simulator.hit')}</span>
+                                      <span data-testid="behavior-control-sim-hit" className="font-medium text-red-700 dark:text-red-400">{t('behaviorControl.simulator.hit')}</span>
                                     </>
                                   ) : (
                                     <>
                                       <Check className="h-4 w-4 text-green-600" />
-                                      <span className="font-medium text-green-700 dark:text-green-400">{t('behaviorControl.simulator.miss')}</span>
+                                      <span data-testid="behavior-control-sim-miss" className="font-medium text-green-700 dark:text-green-400">{t('behaviorControl.simulator.miss')}</span>
                                     </>
                                   )}
                                 </div>
@@ -1147,10 +1161,10 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                 </TooltipProvider>
               </div>
               <div className="flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0">
-                <Button type="button" variant="outline" size="sm" onClick={() => handleClose(false)}>
+                <Button data-testid="behavior-control-cancel" type="button" variant="outline" size="sm" onClick={() => handleClose(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button type="submit" size="sm" disabled={saveMutation.isPending}>
+                <Button data-testid="behavior-control-save" type="submit" size="sm" disabled={saveMutation.isPending}>
                   {t('common.save')}
                 </Button>
               </div>
@@ -1174,10 +1188,11 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
             <DialogDescription>{t('behaviorControl.closeConfirm.body')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setCloseConfirmOpen(false)}>
+            <Button data-testid="behavior-control-close-confirm-stay" type="button" variant="outline" onClick={() => setCloseConfirmOpen(false)}>
               {t('behaviorControl.closeConfirm.stay')}
             </Button>
             <Button
+              data-testid="behavior-control-close-confirm-discard"
               type="button"
               variant="destructive"
               onClick={() => { setCloseConfirmOpen(false); onOpenChange(false); }}

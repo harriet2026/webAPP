@@ -74,6 +74,12 @@ export interface RecipientDisposition {
   dsn_status?: string;
   object_kind?: string;
   object_id?: string;
+  /** Final decoded Subject of the RFC copy produced for this recipient. */
+  delivery_subject?: string;
+  /** Per-recipient recall projection; independent of the delivery status. */
+  recall_state?: 'handling' | 'success' | 'failed';
+  recall_at?: string;
+  recall_reason?: number;
 }
 
 export interface FinalActionRuleDetail {
@@ -82,16 +88,66 @@ export interface FinalActionRuleDetail {
   metadata?: string;
 }
 
-export interface SimilarDetectionLog {
-  matched: boolean;
-  skipped: boolean;
-  cluster_id?: string;
-  similarity_pct?: number;
-  action?: string;
-  skip_reason?: string;
+export type MatchedRulesByStage = Record<string, Record<string, number[]>>;
+
+export interface PostDetectionTimeline {
+  schema_version: 1;
+  events: PostDetectionTimelineEvent[];
 }
 
-export type MatchedRulesByStage = Record<string, Record<string, number[]>>;
+export interface PostDetectionTimelineEvent {
+  event_id: string;
+  event_type:
+    | 'phish_analysis_completed'
+    | 'phish_disposition_effective'
+    | 'phish_quarantine_succeeded'
+    | 'phish_review_state_changed'
+    | 'workflow_action'
+    | 'recall_requested'
+    | 'recall_state_changed';
+  occurred_at: string;
+  started_at?: string;
+  operation_id: string;
+  revision: number;
+  source?: string;
+  status: string;
+  display: boolean;
+  caused_by?: {
+    kind: 'phish_policy_decision';
+    decision_key: string;
+    task_id: string;
+    sideline_id: string;
+  };
+  data?: {
+    action?: string;
+    recipients?: string[];
+    recipient_count?: number;
+    requested_recipients?: number;
+    succeeded_recipients?: number;
+    failed_recipients?: number;
+    pending_recipients?: number;
+    expanded_recipients?: number;
+  };
+}
+
+/** One independently delivered release copy projected onto the original mail detail. */
+export interface MailLogReleaseRef {
+  mail_log_id: number;
+  message_uuid: string;
+  queue_id?: string;
+  /** Immutable intake/original subject. */
+  subject: string;
+  recipient_dispositions?: RecipientDisposition[];
+  released_at: string;
+  recipients?: string[];
+  released_for_recipients?: string[];
+  delivery_status_summary?: string;
+  delivery_attempts?: number;
+  last_delivery_event_at?: string;
+  delivery_error_summary?: string;
+  delivered_at?: string;
+  bounced_at?: string;
+}
 
 export interface MailLogDetail {
   id: number;
@@ -116,6 +172,7 @@ export interface MailLogDetail {
   cac_tid?: string;
   cac_result?: CACResult;
 
+  /** Immutable intake/original subject used for detection and forensics. */
   subject: string;
   content?: string;
   html_content?: string;
@@ -136,6 +193,8 @@ export interface MailLogDetail {
   storage_node?: string;
   storage_path?: string;
   storage_size?: number;
+  /** Detail-only EML retention signal; undefined means the server could not resolve it. */
+  eml_available?: boolean;
 
   received_at: string;
   processed_at?: string;
@@ -165,6 +224,8 @@ export interface MailLogDetail {
   /** Raw recall fold retained for detail/audit; visible badges use display_statuses. */
   recall_status_summary?: string;
   delivery_error_summary?: string;
+  /** Independently delivered copies created by releases of this original mail. */
+  release_mails?: MailLogReleaseRef[];
 
   matched_tag_rules?: MatchedRulesByStage;
   matched_action_rules?: MatchedRulesByStage;
@@ -175,7 +236,6 @@ export interface MailLogDetail {
   matched_action_rule_pages?: MatchedRulesByStage;
   matched_route_rules?: MatchedRulesByStage;
   final_action_rule?: Record<string, FinalActionRuleDetail>;
-  similar_detection?: SimilarDetectionLog;
   recipient_dispositions?: RecipientDisposition[];
 
   scan_results?: AttachmentScanResult[];
@@ -201,6 +261,8 @@ export interface MailLogDetail {
   // block. Absent for messages with no recorded basis (e.g. pure accept
   // with no rule hit).
   disposal_basis?: DisposalBasis;
+  /** Mail-level typed projection for the disposal-center post-detection view. */
+  post_detection_timeline?: PostDetectionTimeline | null;
 }
 
 // PhishAgentCheck mirrors internal/models.PhishAgentCheckSummary — the
@@ -254,6 +316,7 @@ export type {
 };
 
 export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped';
+export type CheckReason = 'module_disabled';
 
 export interface DetectionRecipientGroup {
   recipients: string[];
@@ -264,6 +327,7 @@ export interface DetectionRecipientGroup {
 export interface DetectionCheckItem {
   key: string;
   status: CheckStatus;
+  reason?: CheckReason;
   ruleIds: number[];
   recipientGroups?: DetectionRecipientGroup[];
 }

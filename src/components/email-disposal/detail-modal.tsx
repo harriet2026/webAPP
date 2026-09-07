@@ -9,12 +9,14 @@ import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Search, Loader2, AlertCircle, PanelLeftIcon, Inbox, ShieldAlert, ScrollText } from 'lucide-react';
 import { useApiRequest } from '@/lib/api/client';
+import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
+import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
 import { cn } from '@/lib/utils';
 import { getMailLogAnalysis, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
 import { mailTypeConfig, stripDetailPrefix } from './lib/detail-helpers';
 import { useLifecycleLogStream } from './hooks/use-lifecycle-log-stream';
 import { OverviewSection } from './sections/overview-section';
-import { AnalysisSection } from './sections/analysis-section';
+import { AnalysisSection, type VisibleAgentAccess } from './sections/analysis-section';
 import { RawLogsSection } from './sections/raw-logs-section';
 
 interface DetailModalProps {
@@ -123,6 +125,20 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     queryFn: () => withTimeout(getMailLogAnalysis(mailLogId!, selectedAnalysisRecipient, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
     enabled: open && mailLogId != null,
   });
+  const agentOverviewQ = useAgentCenterOverview({
+    includeStats: false,
+    enabled: open && mailLogId != null && aiEnabled,
+  });
+  const visibleAgentAccess = useMemo<VisibleAgentAccess | undefined>(() => {
+    if (!agentOverviewQ.data) return undefined;
+    const access: VisibleAgentAccess = {};
+    for (const card of agentOverviewQ.data.agents) {
+      if (card.access === 'hidden') continue;
+      const presentation = resolveAgentPresentation(card);
+      if (presentation) access[presentation.pipelineKey] = card.access;
+    }
+    return access;
+  }, [agentOverviewQ.data]);
   const detail = detailQ.data ?? null;
   const analysisEvents = useMemo(() => {
     const events = eventsQ.data ?? [];
@@ -274,6 +290,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
             <Tooltip>
               <TooltipTrigger render={<span className="shrink-0" />}>
                 <Button
+                  data-testid="disposal-detail-find-similar"
                   variant="outline"
                   size="sm"
                   disabled={!mailLogId}
@@ -437,10 +454,12 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                     detail={detail}
                     analysis={analysisQ.data}
                     analysisLoading={analysisQ.isLoading || analysisQ.isFetching}
-                    analysisError={analysisQ.isError}
+                    analysisError={analysisQ.isError || (aiEnabled && agentOverviewQ.isError)}
                     onRetryAnalysis={() => {
                       void analysisQ.refetch();
+                      if (aiEnabled) void agentOverviewQ.refetch();
                     }}
+                    visibleAgentAccess={visibleAgentAccess}
                     aiEnabled={aiEnabled}
                     events={analysisEvents}
                     selectedRecipient={selectedAnalysisRecipient}

@@ -1,4 +1,10 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import {
+  apiRequest,
+  isPublicationPendingResponse,
+  type ApiRequestFn,
+  type ConfigMutationResult,
+  type PublicationPendingResponse,
+} from './client';
 import type {
   Tenant,
   TenantDomain,
@@ -138,22 +144,50 @@ export function verifyDomainManual(tenantId: number, did: number): Promise<Domai
 
 export function getTenantLLMSetting(tenantId: number): Promise<TenantLLMSetting | null> {
   return apiRequest<TenantLLMSettingResponse>(`/tenants/${tenantId}/llm`).then(
-    (res) => res.setting
+    (res) => res.setting ? {
+      ...res.setting,
+      inherited: res.inherited === true,
+      has_explicit_api_key: res.has_explicit_api_key === true,
+    } : null,
   );
 }
 
 export function upsertTenantLLMSetting(
   tenantId: number,
-  data: UpsertTenantLLMRequest
-): Promise<TenantLLMSetting> {
-  return apiRequest<TenantLLMSettingResponse>(`/tenants/${tenantId}/llm`, {
+  data: UpsertTenantLLMRequest,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<ConfigMutationResult<TenantLLMSetting>> {
+  return requestFn<ConfigMutationResult<TenantLLMSettingResponse>>(`/tenants/${tenantId}/llm`, {
     method: 'PUT',
     body: data,
-  }).then((res) => res.setting!);
+  }).then((res) => isPublicationPendingResponse(res)
+    ? res
+    : {
+      ...res.setting!,
+      inherited: res.inherited === true,
+      has_explicit_api_key: res.has_explicit_api_key === true,
+    });
 }
 
-export function deleteTenantLLMSetting(tenantId: number): Promise<void> {
-  return apiRequest<void>(`/tenants/${tenantId}/llm`, {
+export interface TenantLLMDeletePendingResponse extends PublicationPendingResponse {
+  setting: TenantLLMSetting | null;
+  inherited: true;
+  has_explicit_api_key: false;
+}
+
+export function isTenantLLMDeletePendingResponse(
+  value: unknown,
+): value is TenantLLMDeletePendingResponse {
+  if (!isPublicationPendingResponse(value)) return false;
+  const candidate = value as Partial<TenantLLMDeletePendingResponse>;
+  return candidate.inherited === true && candidate.has_explicit_api_key === false && 'setting' in candidate;
+}
+
+export function deleteTenantLLMSetting(
+  tenantId: number,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<void | TenantLLMDeletePendingResponse> {
+  return requestFn<void | TenantLLMDeletePendingResponse>(`/tenants/${tenantId}/llm`, {
     method: 'DELETE',
   });
 }

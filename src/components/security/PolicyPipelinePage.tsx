@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,6 +43,7 @@ import { getSecurityModules, type SecurityModulePage } from '@/lib/api/security-
 import { getSimilarDetection } from '@/lib/api/similar-detection';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
+import { parsePipelineDeepLink } from '@/lib/policy-deep-link';
 
 // PipelinePolicy 类型随卡片组件收敛到 pipeline-policy-card.tsx（2026-07-25 柔和交互反馈规格整改）。
 
@@ -139,6 +141,18 @@ export const pipelineDrawerResponsiveClasses = {
   expandedNavLabel: 'hidden min-[1366px]:block',
 } as const;
 
+type PipelineDrawerPolicy = { stage: 1 | 2 | 3 | 5; key: string };
+
+/**
+ * Pages with a pinned action row need a bounded height from the workspace
+ * drawer and provide their own inner scroller. Other pages keep using the
+ * drawer content pane as their scrolling region.
+ */
+export function policyDrawerContentOwnsScrolling(policy: PipelineDrawerPolicy): boolean {
+  return (policy.stage === 2 && policy.key === 'authSpoofing')
+    || (policy.stage === 3 && policy.key === 'intentEngine');
+}
+
 /**
  * The colour key for the pipeline diagram. Every action the gateway can take on
  * a message appears here, ordered from the most permissive outcome to the least.
@@ -184,6 +198,8 @@ export function canAccessPolicyPipeline({
 export function PolicyPipelinePage() {
   const t = useTranslations();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const deepLink = parsePipelineDeepLink(searchParams);
   const { isSystemAdmin, user } = useAuth();
   const isTenantAdmin = user?.role === 'tenant_admin';
   // switcherEnabled：高级过滤规则暂不对外露出，仅在产品形态切换器
@@ -193,7 +209,7 @@ export function PolicyPipelinePage() {
   const { capabilities, switcherEnabled } = useProductForm();
   const { effectiveViewer } = useSecurityScope(null);
   const caps = capabilities ?? { ai: false, multiTenant: false, saas: false };
-  const overviewQuery = useAgentCenterOverview();
+  const overviewQuery = useAgentCenterOverview({ includeStats: false });
   const aiStagePolicies: PipelinePolicy[] = (overviewQuery.data?.agents ?? [])
     .filter((card) => card.access !== 'hidden')
     .map((card): PipelinePolicy | null => {
@@ -213,8 +229,11 @@ export function PolicyPipelinePage() {
   const showAIStage = aiStagePolicies.length > 0;
   // GT-11636: 多租户形态 + 租户视角下，阶段1 IP策略由平台统一管控
   const lockStage1 = caps.multiTenant && effectiveViewer === 'tenant';
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeDrawerPolicy, setActiveDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string }>({ stage: 1, key: 'ipFrequency' });
+  const deepLinkAllowed = !!deepLink && !(deepLink.stage === 1 && lockStage1);
+  const [drawerOpen, setDrawerOpen] = useState(deepLinkAllowed);
+  const [activeDrawerPolicy, setActiveDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string }>(
+    deepLinkAllowed ? deepLink : { stage: 1, key: 'ipFrequency' },
+  );
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [intentDirty, setIntentDirty] = useState(false);
   const [similarDirty, setSimilarDirty] = useState(false);
@@ -231,7 +250,7 @@ export function PolicyPipelinePage() {
     setStage3EnabledByNav((prev) => (prev[navKey] === enabled ? prev : { ...prev, [navKey]: enabled }));
   }, []);
   const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
-  const [pendingDrawerPolicy, setPendingDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string } | null>(null);
+  const [pendingDrawerPolicy, setPendingDrawerPolicy] = useState<PipelineDrawerPolicy | null>(null);
   // 抽屉导航折叠按钮的 pointer 驱动 hover（柔和交互反馈规格 §7.2，兼容 hover:none 设备）。
   const { pointerHoverProps: collapseHoverProps } = usePointerHover<HTMLButtonElement>();
 
@@ -838,7 +857,14 @@ export function PolicyPipelinePage() {
       return <UserListPage embedded />;
     }
     if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'content') {
-      return <ContentRulesPage embedded onEnabledChange={(v) => handleStage3EnabledChange('content', v)} />;
+      return (
+        <ContentRulesPage
+          embedded
+          onEnabledChange={(v) => handleStage3EnabledChange('content', v)}
+          deepLinkRuleID={deepLink?.key === 'content' ? deepLink.ruleDatabaseID : undefined}
+          deepLinkRuleRef={deepLink?.key === 'content' ? deepLink.ruleRef : undefined}
+        />
+      );
     }
     if (activeDrawerPolicy.stage === 3 && activeDrawerPolicy.key === 'attachment') {
       return (
@@ -879,11 +905,10 @@ export function PolicyPipelinePage() {
     return null;
   })();
 
-  const drawerContentOwnsScrolling =
-    activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'authSpoofing';
+  const drawerContentOwnsScrolling = policyDrawerContentOwnsScrolling(activeDrawerPolicy);
 
   return (
-    <PageShell>
+    <PageShell data-testid="policy-pipeline-page">
       <PageHeader
         title={t('pipeline.title')}
         actions={
@@ -1073,6 +1098,13 @@ export function PolicyPipelinePage() {
                     drawerContentOwnsScrolling && 'h-full min-h-0',
                     stage5Active && !comprehensiveStrategyEnabled && 'pointer-events-none opacity-50',
                   )}>
+                    {deepLink?.ruleRef && activeDrawerPolicy.stage === deepLink.stage && activeDrawerPolicy.key === deepLink.key && (
+                      <Alert className="mb-4" data-testid="pipeline-rule-deep-link-context">
+                        <AlertDescription>
+                          {t('pipeline.deepLinkRuleContext', { ruleId: deepLink.ruleRef })}
+                        </AlertDescription>
+                      </Alert>
+                    )}
                     {drawerContent}
                   </div>
                 </div>

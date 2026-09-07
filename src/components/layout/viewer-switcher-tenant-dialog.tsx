@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
+import { useOptionalUnsavedGuard } from '@/contexts/unsaved-guard-context';
 import { apiRequest } from '@/lib/api/client';
 
 interface TenantListItem {
@@ -64,6 +65,7 @@ export function ViewerSwitcherTenantDialog({
   const t = useTranslations('viewer');
   const { setSelectedTenant } = useAuth();
   const { setViewer } = useProductForm();
+  const unsavedGuard = useOptionalUnsavedGuard();
   const [picked, setPicked] = useState<number | null>(null);
 
   const { data: tenants, isLoading } = useQuery({
@@ -81,10 +83,18 @@ export function ViewerSwitcherTenantDialog({
 
   const handleConfirm = () => {
     if (picked == null) return;
-    setSelectedTenant(picked);
-    setViewer('tenant');
-    setPicked(null);
-    onOpenChange(false);
+    const tenantId = picked;
+    const transition = () => {
+      setSelectedTenant(tenantId);
+      setViewer('tenant');
+      setPicked(null);
+      onOpenChange(false);
+    };
+    if (unsavedGuard) {
+      unsavedGuard.requestTransition(transition);
+    } else {
+      transition();
+    }
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -97,7 +107,7 @@ export function ViewerSwitcherTenantDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md rounded-xl border-border shadow-2xl">
+      <DialogContent className="max-w-md rounded-xl border-border shadow-2xl" data-testid="viewer-tenant-dialog">
         <DialogHeader>
           <DialogTitle>{t('selectTenantTitle')}</DialogTitle>
         </DialogHeader>
@@ -113,7 +123,7 @@ export function ViewerSwitcherTenantDialog({
             if (!isNaN(n)) setPicked(n);
           }}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" data-testid="viewer-tenant-select">
             <SelectValue placeholder={t('selectTenantPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
@@ -123,7 +133,11 @@ export function ViewerSwitcherTenantDialog({
               </div>
             )}
             {tenants?.map((tenant) => (
-              <SelectItem key={tenant.id} value={tenant.id.toString()}>
+              <SelectItem
+                key={tenant.id}
+                value={tenant.id.toString()}
+                data-testid={`viewer-tenant-option-${tenant.id}`}
+              >
                 {tenant.name}
               </SelectItem>
             ))}
@@ -136,7 +150,7 @@ export function ViewerSwitcherTenantDialog({
           >
             {t('selectTenantCancel')}
           </Button>
-          <Button onClick={handleConfirm} disabled={picked == null}>
+          <Button onClick={handleConfirm} disabled={picked == null} data-testid="viewer-tenant-confirm">
             {t('selectTenantConfirm')}
           </Button>
         </DialogFooter>

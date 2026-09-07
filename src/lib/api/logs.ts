@@ -23,7 +23,7 @@ export async function getEmailLog(id: number, requestFn: ApiRequestFn = apiReque
 }
 
 export async function getEmailLogEvents(id: number, requestFn: ApiRequestFn = apiRequest): Promise<MailLogEventsResponse> {
-  return requestFn<MailLogEventsResponse>(`/mail-logs/${id}/events?page=1&page_size=100`);
+  return requestFn<MailLogEventsResponse>(`/mail-logs/${id}/events?page=1&page_size=100&include_releases=true`);
 }
 
 export interface SSEEvent {

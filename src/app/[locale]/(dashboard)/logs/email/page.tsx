@@ -206,6 +206,30 @@ function searchFormToParams(form: SearchForm & { advanced_filters?: string }): E
   };
 }
 
+function buildEmailLogDeepLinkState(searchParams: { get(name: string): string | null }) {
+  const attachmentMD5 = searchParams.get('attachment_md5');
+  const advancedFilter: AdvancedFilter | undefined = attachmentMD5
+    ? {
+        operator: 'AND',
+        groups: [{
+          operator: 'AND',
+          not: false,
+          conditions: [{ field: 'attachment_md5', op: 'eq', value: attachmentMD5 }],
+        }],
+      }
+    : undefined;
+  const recipientDomain = searchParams.get('recipient_domain') || undefined;
+
+  return {
+    advancedFilter,
+    searchForm: {
+      advanced_filters: advancedFilter ? JSON.stringify(advancedFilter) : undefined,
+      recipient_domain: recipientDomain,
+    } satisfies SearchForm & { advanced_filters?: string; recipient_domain?: string },
+    similarFilter: searchParams.get('similar') === 'matched' ? 'matched' : '',
+  };
+}
+
 export default function EmailLogsPage() {
   const t = useTranslations();
   const router = useRouter();
@@ -218,10 +242,13 @@ export default function EmailLogsPage() {
   const { apiRequest } = useApiRequest();
   const mailLogIdParam = searchParams.get('mail_log_id') || '';
   const querySelectedEmailId = Number.isInteger(Number(mailLogIdParam)) && Number(mailLogIdParam) > 0 ? Number(mailLogIdParam) : null;
-  const [searchForm, setSearchForm] = useState<SearchForm & { advanced_filters?: string; recipient_domain?: string }>({});
+  const [deepLinkInitialState] = useState(() => buildEmailLogDeepLinkState(searchParams));
+  const [searchForm, setSearchForm] = useState<SearchForm & { advanced_filters?: string; recipient_domain?: string }>(
+    deepLinkInitialState.searchForm,
+  );
   const [actionChip, setActionChip] = useState<string>('');
   const [dkimSignedFilter, setDkimSignedFilter] = useState<string>('');
-  const [similarFilter, setSimilarFilter] = useState<string>('');
+  const [similarFilter, setSimilarFilter] = useState<string>(deepLinkInitialState.similarFilter);
   // 邮件来源筛选：默认空 = 只看客户邮件（后端同一默认口径，自产信隐身）。
   const [originFilter, setOriginFilter] = useState<string>('');
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -229,7 +256,7 @@ export default function EmailLogsPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [aiInterpretEmailId, setAiInterpretEmailId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
-  const [initialAdvancedFilter, setInitialAdvancedFilter] = useState<AdvancedFilter | undefined>(undefined);
+  const initialAdvancedFilter = deepLinkInitialState.advancedFilter;
 
   const attachmentMd5Applied = useRef(false);
   useEffect(() => {
@@ -237,16 +264,6 @@ export default function EmailLogsPage() {
     const md5 = searchParams.get('attachment_md5');
     if (!md5) return;
     attachmentMd5Applied.current = true;
-    const af: AdvancedFilter = {
-      operator: 'AND',
-      groups: [{
-        operator: 'AND',
-        not: false,
-        conditions: [{ field: 'attachment_md5', op: 'eq', value: md5 }],
-      }],
-    };
-    setInitialAdvancedFilter(af);
-    setSearchForm((prev) => ({ ...prev, advanced_filters: JSON.stringify(af) }));
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.delete('attachment_md5');
     const nextQuery = nextParams.toString();
@@ -262,7 +279,6 @@ export default function EmailLogsPage() {
     const domain = searchParams.get('recipient_domain');
     if (!domain) return;
     recipientDomainApplied.current = true;
-    setSearchForm((prev) => ({ ...prev, recipient_domain: domain }));
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.delete('recipient_domain');
     const nextQuery = nextParams.toString();
@@ -278,7 +294,6 @@ export default function EmailLogsPage() {
     const similar = searchParams.get('similar');
     if (similar !== 'matched') return;
     similarApplied.current = true;
-    setSimilarFilter('matched');
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.delete('similar');
     nextParams.delete('direction');
@@ -420,7 +435,8 @@ export default function EmailLogsPage() {
           const senderText = sender.length > SENDER_TRUNCATE_LEN ? (
             <Tooltip>
               <TooltipTrigger render={
-                <span className="cursor-pointer hover:text-primary underline" onClick={handleClick} />
+                <span className="cursor-pointer hover:text-primary underline" onClick={handleClick}
+              data-testid={`email-log-open-detail-${row.original.id}`} />
               }>
                 {truncated}
               </TooltipTrigger>
@@ -429,7 +445,8 @@ export default function EmailLogsPage() {
               </TooltipContent>
             </Tooltip>
           ) : (
-            <span className="cursor-pointer hover:text-primary underline" onClick={handleClick}>
+            <span className="cursor-pointer hover:text-primary underline" onClick={handleClick}
+              data-testid={`email-log-open-detail-${row.original.id}`}>
               {sender}
             </span>
           );
@@ -950,7 +967,7 @@ export default function EmailLogsPage() {
       .filter((c) => visibleColumns.includes(c.key))
       .map((c) => allColumns[c.key])
       .filter(Boolean);
-  }, [router, t, visibleColumns]);
+  }, [aiOk, router, t, visibleColumns]);
 
   async function handleExport() {
     try {
@@ -1005,7 +1022,7 @@ export default function EmailLogsPage() {
               Timestamps: t('logs.columnGroups.timestamps'),
             }}
           />
-          <Button onClick={handleExport} variant="outline">
+          <Button onClick={handleExport} variant="outline" data-testid="email-logs-export">
             <Download className="h-4 w-4 mr-2" />
             {t('common.export')}
           </Button>
@@ -1079,7 +1096,12 @@ export default function EmailLogsPage() {
         </PageSurface>
       ) : (
         <PageSurface className="space-y-4">
-          <DataTable columns={columns} data={data?.items ?? []} hidePagination />
+          <DataTable
+            columns={columns}
+            data={data?.items ?? []}
+            hidePagination
+            rowTestId={(row) => `email-log-row-${row.id}`}
+          />
           <ServerPagination
             page={page}
             pageSize={20}

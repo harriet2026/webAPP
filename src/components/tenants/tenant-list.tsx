@@ -91,8 +91,8 @@ export function TenantList({ onEdit }: TenantListProps) {
       header: t('tenantName'),
       cell: ({ row }) => (
         <div className="min-w-0">
-          <div className="truncate font-medium text-foreground">{row.original.name}</div>
-          <div className="font-mono text-xs text-muted-foreground">{row.original.code}</div>
+          <div data-testid={`tenant-name-${row.original.id}`} className="truncate font-medium text-foreground">{row.original.name}</div>
+          <div data-testid={`tenant-code-${row.original.id}`} className="font-mono text-xs text-muted-foreground">{row.original.code}</div>
         </div>
       ),
     },
@@ -104,7 +104,7 @@ export function TenantList({ onEdit }: TenantListProps) {
           status: row.original.status,
           expired: row.original.expired,
         });
-        return <StatusBadge status={t(`status.${ds}` as const)} variant={STATUS_VARIANT[ds]} />;
+        return <span data-testid={`tenant-status-${row.original.id}`}><StatusBadge status={t(`status.${ds}` as const)} variant={STATUS_VARIANT[ds]} /></span>;
       },
     },
     {
@@ -147,10 +147,12 @@ export function TenantList({ onEdit }: TenantListProps) {
       cell: ({ row }) => {
         const a = row.original.access_status;
         return (
+          <span data-testid={`tenant-access-status-${row.original.id}`}>
           <StatusBadge
             status={t(`access.${a}` as const)}
             variant={a === 'configured' ? 'success' : 'warning'}
           />
+          </span>
         );
       },
     },
@@ -172,6 +174,7 @@ export function TenantList({ onEdit }: TenantListProps) {
         return (
           <div className="flex items-center justify-end gap-1">
             <Button
+              data-testid={`tenant-edit-${tenant.id}`}
               variant="ghost"
               size="sm"
               className="gap-1.5"
@@ -183,6 +186,7 @@ export function TenantList({ onEdit }: TenantListProps) {
               {t('actions.manage')}
             </Button>
             <Button
+              data-testid={`tenant-edit-details-${tenant.id}`}
               variant="ghost"
               size="icon"
               onClick={() => onEdit(tenant)}
@@ -192,6 +196,7 @@ export function TenantList({ onEdit }: TenantListProps) {
             </Button>
             {canActivate ? (
               <Button
+                data-testid={`tenant-activate-${tenant.id}`}
                 variant="ghost"
                 size="icon"
                 onClick={() => setConfirmStatus({ tenant, next: 'active' })}
@@ -202,6 +207,7 @@ export function TenantList({ onEdit }: TenantListProps) {
               </Button>
             ) : (
               <Button
+                data-testid={`tenant-suspend-${tenant.id}`}
                 variant="ghost"
                 size="icon"
                 onClick={() => setConfirmStatus({ tenant, next: 'suspended' })}
@@ -226,6 +232,7 @@ export function TenantList({ onEdit }: TenantListProps) {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={t('tenantName')}
+            data-testid="tenants-search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => {
@@ -278,14 +285,14 @@ export function TenantList({ onEdit }: TenantListProps) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-44">
+            <SelectTrigger className="w-44" data-testid="tenants-status-filter">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{tc('status')}</SelectItem>
-              <SelectItem value="pending">{t('status.pending')}</SelectItem>
-              <SelectItem value="active">{t('status.active')}</SelectItem>
-              <SelectItem value="suspended">{t('status.suspended')}</SelectItem>
+              <SelectItem data-testid="tenants-status-filter-option-all" value="all">{tc('status')}</SelectItem>
+              <SelectItem data-testid="tenants-status-filter-option-pending" value="pending">{t('status.pending')}</SelectItem>
+              <SelectItem data-testid="tenants-status-filter-option-active" value="active">{t('status.active')}</SelectItem>
+              <SelectItem data-testid="tenants-status-filter-option-suspended" value="suspended">{t('status.suspended')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -299,6 +306,7 @@ export function TenantList({ onEdit }: TenantListProps) {
         <DataTable
           columns={columns}
           data={data?.items ?? []}
+          rowTestId={(row) => `tenant-row-${row.id}`}
           pageCount={totalPages}
           pageIndex={page - 1}
           onPageChange={(i) => setPage(i + 1)}

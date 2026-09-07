@@ -96,6 +96,7 @@ export function FilterBar({
         <SegmentedControl
           value={direction}
           onChange={onDirectionChange}
+          testIdPrefix="link-attachment-direction"
           options={DIRECTIONS.map((d) => ({ value: d, label: t(`direction.${d}`) }))}
         />
       </div>
@@ -104,6 +105,7 @@ export function FilterBar({
         value={timeRange}
         onChange={handleTimeRangeChange}
         size="sm"
+        testIdPrefix="link-attachment-range"
         options={TIME_RANGES.map((r) => ({ value: r, label: t(`timeRange.${r}`) }))}
       />
 
@@ -114,6 +116,7 @@ export function FilterBar({
           </label>
           <input
             id={startId}
+            data-testid="link-attachment-custom-start"
             type="date"
             value={draft.start}
             onChange={(e) => editDraft({ start: e.target.value })}
@@ -125,13 +128,14 @@ export function FilterBar({
           </label>
           <input
             id={endId}
+            data-testid="link-attachment-custom-end"
             type="date"
             value={draft.end}
             onChange={(e) => editDraft({ end: e.target.value })}
             className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
           />
           {error && (
-            <span role="alert" className="text-sm text-danger">
+            <span role="alert" data-testid="link-attachment-range-error" className="text-sm text-danger">
               {t(`customRange.error.${error}`, { max: MAX_RANGE_DAYS })}
             </span>
           )}

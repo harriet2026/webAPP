@@ -51,10 +51,9 @@ describe('scene filter options', () => {
   });
 });
 
-// B1 regression: when the product-form switcher is enabled, the auth-logs
-// sidebar entry must remain reachable by a tenant_admin (spec §4.2). The logs
-// group now has an independent temporary switcher gate; this test keeps that
-// separate from the historical requiresAdvancedRules/permission contract.
+// B1 regression: auth/admin logs remain demo-only while link-protection logs
+// are available without the product-form switcher. Permission and product-form
+// gates remain independent from this temporary navigation exposure switch.
 describe('sidebar auth-logs visibility', () => {
   // Faithful copy of sidebar-nav.tsx isItemAllowed (form gating omitted: it is
   // additive / default-visible for items with no registry counterpart).
@@ -77,12 +76,15 @@ describe('sidebar auth-logs visibility', () => {
   // keeps tracking it.
   const adminAuditItem = logsGroup?.children?.find((c) => c.id === 'admin-audit-logs');
 
-  it('structure: logs group is not advanced-gated; auth-attempts is permission-gated', () => {
+  it('structure: only auth/admin log leaves retain the switcher gate', () => {
     expect(logsGroup).toBeDefined();
     expect(logsGroup!.requiresAdvancedRules).toBeFalsy();
-    expect(logsGroup!.requiresProductFormSwitcher).toBe(true);
+    expect(logsGroup!.requiresProductFormSwitcher).toBeFalsy();
     expect(authItem?.permission).toBe('view_auth_attempts');
+    expect(authItem?.requiresProductFormSwitcher).toBe(true);
     expect(linkClicksItem?.permission).toBe('view_link_logs');
+    expect(linkClicksItem?.requiresProductFormSwitcher).toBeFalsy();
+    expect(adminAuditItem?.requiresProductFormSwitcher).toBe(true);
   });
 
   it('admin-audit-logs is permission-gated, NOT advanced-rules-gated (review finding #3: tenant_admin must see it)', () => {
@@ -102,14 +104,17 @@ describe('sidebar auth-logs visibility', () => {
     expect(isItemAllowed(adminAuditItem!, tenantAdmin)).toBe(true);
   });
 
-  it('hides the whole logs group when the product-form switcher is disabled', () => {
+  it('keeps the logs group and link-protection logs visible when the switcher is disabled', () => {
     const tenantAdmin = {
-      perms: ['view_auth_attempts', 'view_admin_audit_logs'],
+      perms: ['view_auth_attempts', 'view_admin_audit_logs', 'view_link_logs'],
       isSystemAdmin: false,
       showAdvancedRules: false,
       switcherEnabled: false,
     };
-    expect(isItemAllowed(logsGroup!, tenantAdmin)).toBe(false);
+    expect(isItemAllowed(logsGroup!, tenantAdmin)).toBe(true);
+    expect(isItemAllowed(linkClicksItem!, tenantAdmin)).toBe(true);
+    expect(isItemAllowed(authItem!, tenantAdmin)).toBe(false);
+    expect(isItemAllowed(adminAuditItem!, tenantAdmin)).toBe(false);
   });
 
   it('a role without the permission still cannot see auth-attempts', () => {

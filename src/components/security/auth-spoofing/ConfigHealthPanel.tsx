@@ -39,20 +39,27 @@ export function ConfigHealthPanel({ config, onChange }: ConfigHealthPanelProps) 
   };
 
   return (
-    <div className="ml-6 space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+    <div
+      data-testid="auth-health-panel"
+      className="ml-6 space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30"
+    >
       <div className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
         <AlertTriangle className="h-4 w-4" />
         {t('health.title')}
       </div>
 
       {showSoftfailRow && (
-        <div className="flex items-start gap-2 rounded border border-amber-300 bg-white p-2 dark:border-amber-700 dark:bg-gray-900">
+        <div
+          data-testid="auth-health-softfail-risk"
+          className="flex items-start gap-2 rounded border border-amber-300 bg-white p-2 dark:border-amber-700 dark:bg-gray-900"
+        >
           <span className="text-amber-600 dark:text-amber-400">!</span>
           <p className="flex-1 text-xs text-amber-800 dark:text-amber-200">
             {t('health.softfailDropRisk')}
           </p>
           <div className="flex gap-1">
             <Button
+              data-testid="auth-health-change-quarantine"
               variant="outline"
               size="sm"
               className="h-6 text-xs"
@@ -61,6 +68,7 @@ export function ConfigHealthPanel({ config, onChange }: ConfigHealthPanelProps) 
               {t('health.changeToQuarantine')}
             </Button>
             <Button
+              data-testid="auth-health-change-tag"
               variant="outline"
               size="sm"
               className="h-6 text-xs"
@@ -73,9 +81,12 @@ export function ConfigHealthPanel({ config, onChange }: ConfigHealthPanelProps) 
       )}
 
       {showObserveRow && (
-        <div className="flex items-center gap-2 rounded border border-blue-300 bg-white p-2 dark:border-blue-700 dark:bg-gray-900">
+        <div
+          data-testid="auth-health-observe-suggest"
+          className="flex items-center gap-2 rounded border border-blue-300 bg-white p-2 dark:border-blue-700 dark:bg-gray-900"
+        >
           <p className="flex-1 text-xs text-muted-foreground">{t('health.dropSuggest')}</p>
-          <Button variant="outline" size="sm" className="h-6 text-xs" onClick={handleEnableObserve}>
+          <Button data-testid="auth-health-enable-observe" variant="outline" size="sm" className="h-6 text-xs" onClick={handleEnableObserve}>
             {t('health.enableObserve')}
           </Button>
         </div>

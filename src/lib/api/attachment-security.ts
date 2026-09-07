@@ -11,49 +11,129 @@ import type {
   PasswordBookEntry,
   QrDeepRoutesConfig,
 } from '@/types/attachment-security';
-import type { ApiRequestFn } from './client';
-import { apiRequest } from './client';
+import type { ApiRequestFn, ConfigMutationResult } from './client';
+import { apiRequest, isPublicationPendingResponse } from './client';
+import type { ConfigPatchOperation, ScopedConfigView } from './scoped-configs';
+import {
+  committedScopedConfigView,
+  getPlatformConfig,
+  getTenantConfig,
+  patchPlatformConfig,
+  patchTenantConfig,
+} from './scoped-configs';
 
-interface ConfigOverride {
-  id: number;
-  config_file: string;
-  section_name: string;
-  config_key: string;
-  config_value: string;
-  value_type: 'string' | 'int' | 'float' | 'bool';
-  is_active: boolean;
-  description: string;
+export type AttachmentSecurityConfigScope = 'platform' | 'tenant';
+
+/**
+ * AttachmentSecurityPage edits one attachd scoped document. Loading that one
+ * versioned view prevents the old per-section GETs from producing a draft
+ * assembled from different runtime snapshots.
+ */
+export function getAttachmentSecurityScopedConfig(
+  scope: AttachmentSecurityConfigScope,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<ScopedConfigView> {
+  return scope === 'tenant'
+    ? getTenantConfig('attachd', requestFn)
+    : getPlatformConfig('attachd', requestFn);
+}
+
+function withSyntheticTenantRow(view: ScopedConfigView): ScopedConfigView {
+  if (view.stored) return view;
+  return {
+    ...view,
+    stored: {
+      namespace: 'attachd',
+      scope_kind: 'tenant',
+      scope_id: view.effective.tenant_id,
+      schema_version: view.effective.schema_version,
+      version: 0,
+      document: {},
+      checksum: '',
+      updated_at: '',
+    },
+  };
+}
+
+/**
+ * Commit every field changed by the page in one scoped-config CAS. A tenant
+ * without an override legitimately starts at expected_version=0. When the DB
+ * commit succeeds but publication returns 202, retain the submitted document
+ * and inferred next version locally instead of immediately reading the still
+ * old runtime snapshot back over the editor.
+ */
+export async function patchAttachmentSecurityScopedConfig(
+  scope: AttachmentSecurityConfigScope,
+  current: ScopedConfigView,
+  operations: ConfigPatchOperation[],
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<ScopedConfigView> {
+  if (operations.length === 0) return current;
+  if (scope === 'platform' && !current.stored) {
+    throw new Error('attachd platform configuration is missing');
+  }
+  const currentWithRow = scope === 'tenant' ? withSyntheticTenantRow(current) : current;
+  const expectedVersion = currentWithRow.stored?.version ?? 0;
+  const result = scope === 'tenant'
+    ? await patchTenantConfig('attachd', expectedVersion, operations, requestFn)
+    : await patchPlatformConfig('attachd', expectedVersion, operations, requestFn);
+
+  if (isPublicationPendingResponse(result)) {
+    return committedScopedConfigView(currentWithRow, operations);
+  }
+  if (!result.published) {
+    const committed = committedScopedConfigView(currentWithRow, operations);
+    return { ...committed, stored: result.stored ?? committed.stored };
+  }
+  return result;
+}
+
+const sectionPaths: Record<string, string> = {
+  basic_limit_receive: 'basic_limit.receive',
+  basic_limit_send: 'basic_limit.send',
+  basic_limit_internal: 'basic_limit.internal',
+  antivirus: 'antivirus',
+  antivirus_actions_receive: 'antivirus',
+  antivirus_actions_send: 'antivirus',
+  antivirus_actions_internal: 'antivirus',
+  image_detect: 'image_detection',
+  image_detect_qr_deep_routes: 'image_detection.qr_deep_routes',
+  image_detect_actions_receive: 'image_detection',
+  image_detect_actions_send: 'image_detection',
+  image_detect_actions_internal: 'image_detection',
+  encrypted: 'encrypted',
+  encrypted_actions_receive: 'encrypted',
+  encrypted_actions_send: 'encrypted',
+  encrypted_actions_internal: 'encrypted',
+  active_content: 'active_content',
+};
+
+function valueAtPath(document: Record<string, unknown>, path: string): unknown {
+  let current: unknown = document;
+  for (const segment of path.split('.')) {
+    if (!current || typeof current !== 'object' || Array.isArray(current)) return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return current;
 }
 
 async function fetchConfigSection(
   section: string,
   requestFn: ApiRequestFn,
 ): Promise<Record<string, unknown> | null> {
-  try {
-    const resp = await requestFn<{ total: number; page: number; limit: number; items: ConfigOverride[] }>(
-      `/config-overrides?config_file=attachd.cf&section_name=${encodeURIComponent(section)}&page=1&limit=200`,
-    );
-    const obj: Record<string, unknown> = {};
-    for (const item of resp.items ?? []) {
-      if (!item.is_active) continue;
-      switch (item.value_type) {
-        case 'int':
-          obj[item.config_key] = parseInt(item.config_value, 10);
-          break;
-        case 'float':
-          obj[item.config_key] = parseFloat(item.config_value);
-          break;
-        case 'bool':
-          obj[item.config_key] = item.config_value === 'true';
-          break;
-        default:
-          obj[item.config_key] = item.config_value;
-      }
-    }
-    return obj;
-  } catch {
-    return null;
+  const path = sectionPaths[section];
+  if (!path) return null;
+  // A control-plane failure must reach the page's error state. Returning null
+  // here made a failed central read look like an empty/default form; a later
+  // Save could then overwrite the last good database document with defaults.
+  const response = await getPlatformConfig('attachd', requestFn);
+  const value = valueAtPath(response.effective.document, path);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const result = { ...(value as Record<string, unknown>) };
+  if (path.startsWith('basic_limit.') && Array.isArray(result.danger_ext_list)) {
+    result.danger_ext_list = result.danger_ext_list.join(',');
   }
+  return result;
 }
 
 async function saveConfigSection(
@@ -61,48 +141,22 @@ async function saveConfigSection(
   config: Record<string, unknown>,
   requestFn: ApiRequestFn,
 ): Promise<void> {
-  const resp = await requestFn<{ total: number; page: number; limit: number; items: ConfigOverride[] }>(
-    `/config-overrides?config_file=attachd.cf&section_name=${encodeURIComponent(section)}&page=1&limit=200`,
-  );
-  const existing = new Map<string, ConfigOverride>();
-  // GT-12197: 该节还没有任何配置行时后端可能返回 items: null（Go nil slice）。
-  // 读路径 fetchConfigSection 早有 `?? []` 兜底，这里漏了，导致保存在发出任何
-  // PUT/POST 之前就抛 TypeError —— 表现为「只有 GET、无写请求、保存失败」。
-  for (const item of resp.items ?? []) {
-    existing.set(item.config_key, item);
-  }
-  for (const [key, rawValue] of Object.entries(config)) {
-    let valueType: string;
-    let strValue: string;
-    if (typeof rawValue === 'boolean') {
-      valueType = 'bool';
-      strValue = String(rawValue);
-    } else if (typeof rawValue === 'number') {
-      valueType = Number.isInteger(rawValue) ? 'int' : 'float';
-      strValue = String(rawValue);
-    } else {
-      valueType = 'string';
-      strValue = rawValue == null ? '' : String(rawValue);
-    }
-    const prev = existing.get(key);
-    if (prev) {
-      await requestFn(`/config-overrides/${prev.id}`, {
-        method: 'PUT',
-        body: { config_value: strValue, value_type: valueType },
-      });
-    } else {
-      await requestFn('/config-overrides', {
-        method: 'POST',
-        body: {
-          config_file: 'attachd.cf',
-          section_name: section,
-          config_key: key,
-          config_value: strValue,
-          value_type: valueType,
-        },
-      });
-    }
-  }
+  const prefix = sectionPaths[section];
+  if (!prefix) throw new Error(`unknown attachd configuration section: ${section}`);
+  const response = await getPlatformConfig('attachd', requestFn);
+  if (!response.stored) throw new Error('attachd platform configuration is missing');
+  const operations = Object.entries(config)
+    .map(([key, rawValue]) => {
+      let value = rawValue;
+      if (key === 'danger_ext_list' && typeof rawValue === 'string') {
+        value = rawValue.split(',').map((item) => item.trim()).filter(Boolean);
+      }
+      if ((key === 'keyword_scope' || key === 'intent_categories') && typeof rawValue === 'string') {
+        value = rawValue.split(',').map((item) => item.trim()).filter(Boolean);
+      }
+      return { op: 'set' as const, path: `${prefix}.${key}`, value };
+    });
+  await patchPlatformConfig('attachd', response.stored.version, operations, requestFn);
 }
 
 export async function getBasicLimitConfig(
@@ -397,8 +451,8 @@ export async function getTenantAttachmentSecuritySettings(
 export async function saveTenantAttachmentSecuritySettings(
   settings: TenantAttachmentSecuritySettings,
   requestFn: ApiRequestFn = apiRequest,
-): Promise<TenantAttachmentSecuritySettings> {
-  return requestFn<TenantAttachmentSecuritySettings>('/attachment-security/settings', {
+): Promise<ConfigMutationResult<TenantAttachmentSecuritySettings>> {
+  return requestFn<ConfigMutationResult<TenantAttachmentSecuritySettings>>('/attachment-security/settings', {
     method: 'PUT',
     body: settings,
   });

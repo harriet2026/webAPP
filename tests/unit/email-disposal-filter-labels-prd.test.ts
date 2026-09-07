@@ -28,19 +28,20 @@ describe('GT-12237 emailDisposal.filters.statuses 对齐 V2 状态机字典', ()
   });
 });
 
-// GT-12238: 邮件类型筛选标签必须使用原型全称
+// GT-12238 / GT-13306: 邮件类型筛选标签必须使用原型全称
 // （webapp/doc/html-spec/email-handling-disposal-center/
 // layer-1-search-mailtype-popover.html），不能使用缩写。
-describe('GT-12238 emailDisposal.filters.mailTypes 使用原型全称', () => {
+describe('GT-12238 / GT-13306 emailDisposal.filters.mailTypes 使用原型全称', () => {
   const mailTypes = zh.emailDisposal.filters.mailTypes as Record<string, string>;
 
   const expected: Record<string, string> = {
-    subscription: '订阅资讯',
+    normal: '正常邮件',
+    subscription: '订阅邮件',
     advertising: '广告邮件',
     harmful: '有害内容邮件',
     suspicious: '可疑邮件',
     sensitive: '敏感内容邮件',
-    spoofing: '仿冒邮件',
+    spoofing: '身份仿冒邮件',
     phishing: '钓鱼邮件',
     virus: '病毒邮件',
   };
@@ -48,6 +49,24 @@ describe('GT-12238 emailDisposal.filters.mailTypes 使用原型全称', () => {
   for (const [key, label] of Object.entries(expected)) {
     it(`${key} 显示为「${label}」`, () => {
       expect(mailTypes[key]).toBe(label);
+    });
+  }
+});
+
+// GT-13306: 筛选、列表、详情和改判弹窗分别读取 filters.mailTypes 与
+// detail.mailType。两套命名空间必须展示同一组名称，避免同一枚举跨位置变名。
+describe('GT-13306 邮件处置中心邮件类型名称跨位置一致', () => {
+  const filterLabels = zh.emailDisposal.filters.mailTypes as Record<string, string>;
+  const detailLabels = zh.emailDisposal.detail.mailType as Record<string, string>;
+  const detailKeyByFilterKey: Record<string, string> = {
+    account_compromised: 'accountCompromised',
+  };
+
+  for (const [filterKey, filterLabel] of Object.entries(filterLabels)) {
+    const detailKey = detailKeyByFilterKey[filterKey] ?? filterKey;
+
+    it(`${filterKey} 在筛选与详情/改判位置使用同一名称`, () => {
+      expect(detailLabels[detailKey]).toBe(filterLabel);
     });
   }
 });

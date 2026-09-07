@@ -3,6 +3,9 @@
 // detail page describe the same posture. Multiple buckets render as stacked
 // areas; one bucket renders as a stacked bar.
 import type { TrendSeriesPoint } from '@/lib/api/security-overview';
+import { format, subDays, subHours } from 'date-fns';
+
+export type ThreatTrendRange = '24h' | 'today' | '7d' | '30d';
 
 /** i18n label key under `systemStatus.trend.series.*`. */
 export interface ThreatSeriesDef {
@@ -45,6 +48,25 @@ export function formatThreatTrendBucket(value: string): string {
 }
 
 /**
+ * Keep an honest time axis when a successful query returns no points. These
+ * labels describe the selected window only; the empty option still carries no
+ * series values and therefore does not fabricate threat counts.
+ */
+export function buildEmptyThreatTrendBuckets(
+  range: ThreatTrendRange,
+  now: Date = new Date(),
+): string[] {
+  if (range === 'today') return ['00:00', '06:00', '12:00', '18:00', '24:00'];
+  if (range === '24h') {
+    return [24, 20, 16, 12, 8, 4, 0].map((hours) => format(subHours(now, hours), 'HH:mm'));
+  }
+  if (range === '7d') {
+    return Array.from({ length: 7 }, (_, index) => format(subDays(now, 6 - index), 'yyyy-MM-dd'));
+  }
+  return [29, 24, 19, 14, 9, 4, 0].map((days) => format(subDays(now, days), 'yyyy-MM-dd'));
+}
+
+/**
  * Build the ECharts option for the dashboard threat trend.
  *
  * A line/area series needs at least two x-axis buckets to draw a segment.
@@ -58,19 +80,24 @@ export function buildThreatTrendOption(
   hidden: ReadonlySet<string>,
   seriesLabel: (key: string) => string,
   emptyText?: string,
+  emptyBuckets: string[] = [],
 ) {
   // GT-12397: 无数据时仍渲染完整坐标系画布（与原型一致、布局稳定），空态
   // 文案用 ECharts graphic 居中呈现，而不是整块换成占位 div。cast 到非空
   // 分支的返回类型，让消费方（组件与既有测试）的类型推断保持不变。
   if (points.length === 0) {
     const empty = {
-      grid: { left: 35, right: 26, top: 24, bottom: 0, containLabel: true },
+      grid: { left: 35, right: 26, top: 24, bottom: 8, containLabel: true },
       xAxis: {
         type: 'category',
-        boundaryGap: false,
-        data: [] as string[],
+        // Empty-window labels describe a range rather than data points. Put
+        // them inside equal-width cells so the first/last label cannot be
+        // clipped at the canvas edge.
+        boundaryGap: true,
+        data: emptyBuckets,
+        axisLabel: { interval: 0, fontSize: 12, color: '#666666' },
         axisLine: { show: true, lineStyle: { color: '#666666' } },
-        axisTick: { show: false },
+        axisTick: { show: true, lineStyle: { color: '#666666' } },
       },
       yAxis: {
         type: 'value',

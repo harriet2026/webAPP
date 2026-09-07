@@ -2,6 +2,7 @@ import { apiRequest, type ApiRequestFn } from './client'
 import type { MailMarkingDirection, MailMarkingMetadata, MailMarkingRule } from '@/components/security/mail-marking/types'
 import type { RuleNode } from '@/types/unified-rules'
 import { GROUP_TAG_PREFIX } from '@/types/groups'
+import { fetchAllPages } from './pagination'
 
 const PAGE = 'mail_marking'
 
@@ -150,10 +151,11 @@ export async function listMailMarkingRules(
   direction: MailMarkingDirection,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<MailMarkingRule[]> {
-  const data = await requestFn<{ items: RawMailMarkingRule[] }>(
-    `/unified-rules?rule_class=action&stage=data&rule_page=${PAGE}&page_size=500`,
+  const items = await fetchAllPages<RawMailMarkingRule>(
+    `/unified-rules?rule_class=action&stage=data&rule_page=${PAGE}`,
+    requestFn,
   )
-  return data.items
+  return items
     .map(parseRule)
     .filter((r): r is MailMarkingRule => !!r && r.direction === direction)
     .sort((a, b) => b.priority - a.priority || b.id - a.id)

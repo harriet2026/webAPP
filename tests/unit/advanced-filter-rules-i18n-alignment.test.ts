@@ -14,7 +14,7 @@ import ru from '../../messages/ru.json';
 //            referenced (pipeline node card, group-policy stage list), in every
 //            locale — the pipeline node and group-policy reference had abbreviated
 //            forms ("Advanced Rules" / 高级规则).
-const LOCALES = { zh, en, th, ru } as Record<string, any>;
+const LOCALES = { zh, en, th, ru };
 
 describe('advanced-filter-rules i18n alignment (GT-12076)', () => {
   it('zh 生效范围 uses the product-standard 接收/外发/域内 triplet', () => {

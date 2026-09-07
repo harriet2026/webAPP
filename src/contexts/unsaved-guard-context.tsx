@@ -34,6 +34,11 @@ interface UnsavedGuardContextValue {
    * 返回 true 表示可以导航，false 表示用户取消。
    */
   requestNavigate: (href: string, push: (href: string) => void) => void;
+  /**
+   * 租户、视角等会替换当前编辑上下文的状态切换也必须经过同一守卫。
+   * 若当前无未保存修改则立即执行；否则等待用户确认。
+   */
+  requestTransition: (transition: () => void) => void;
   /** 当前是否正在等待用户确认（用于渲染 AlertDialog） */
   pendingNav: PendingNavigation | null;
   /** 当前注册的 guard（用于 AlertDialog 读取 isDirty / onSave） */
@@ -55,8 +60,6 @@ export function UnsavedGuardProvider({ children }: { children: React.ReactNode }
   const [currentGuard, setCurrentGuard] = useState<UnsavedGuardRegistration | null>(null);
   const [pendingNav, setPendingNav] = useState<PendingNavigation | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  // 存储待执行的 push 函数，确认后调用
-  const pendingPushRef = useRef<((href: string) => void) | null>(null);
 
   const registerGuard = useCallback((reg: UnsavedGuardRegistration) => {
     guardRef.current = reg;
@@ -68,21 +71,28 @@ export function UnsavedGuardProvider({ children }: { children: React.ReactNode }
     setCurrentGuard(null);
   }, []);
 
-  const requestNavigate = useCallback((href: string, push: (href: string) => void) => {
+  const requestGuardedTransition = useCallback((href: string, transition: () => void) => {
     const guard = guardRef.current;
     if (!guard?.isDirty) {
-      push(href);
+      transition();
       return;
     }
-    pendingPushRef.current = push;
     setPendingNav({
       href,
       resolve: (proceed) => {
-        if (proceed) push(href);
+        if (proceed) transition();
         setPendingNav(null);
       },
     });
   }, []);
+
+  const requestNavigate = useCallback((href: string, push: (href: string) => void) => {
+    requestGuardedTransition(href, () => push(href));
+  }, [requestGuardedTransition]);
+
+  const requestTransition = useCallback((transition: () => void) => {
+    requestGuardedTransition('', transition);
+  }, [requestGuardedTransition]);
 
   const handleKeepEditing = useCallback(() => {
     pendingNav?.resolve(false);
@@ -97,11 +107,8 @@ export function UnsavedGuardProvider({ children }: { children: React.ReactNode }
     setIsSaving(true);
     try {
       await currentGuard.onSave();
-      // 保存成功后执行导航
-      if (pendingPushRef.current) {
-        pendingPushRef.current(pendingNav.href);
-      }
-      setPendingNav(null);
+      // 保存成功后执行导航或租户/视角等上下文切换。
+      pendingNav.resolve(true);
     } catch {
       // 保存失败：停留在页面，弹窗关闭（错误由 onSave 内部 toast 已提示）
       setPendingNav(null);
@@ -116,6 +123,7 @@ export function UnsavedGuardProvider({ children }: { children: React.ReactNode }
         registerGuard,
         unregisterGuard,
         requestNavigate,
+        requestTransition,
         pendingNav,
         currentGuard,
         handleKeepEditing,

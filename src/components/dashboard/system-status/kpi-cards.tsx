@@ -173,11 +173,16 @@ export function KpiCards({ data, showInfra }: KpiCardsProps) {
                     >
                       {card.badge ? (
                         <>
-                          <span className="text-3xl font-bold tracking-tight">{card.value}</span>
+                          <span
+                            className="text-3xl font-bold tracking-tight"
+                            data-testid={`system-status-kpi-value-${card.key}`}
+                          >
+                            {card.value}
+                          </span>
                           {card.badge}
                         </>
                       ) : (
-                        card.value
+                        <span data-testid={`system-status-kpi-value-${card.key}`}>{card.value}</span>
                       )}
                     </div>
                   )}

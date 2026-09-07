@@ -1,6 +1,29 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { ApiRequestFn } from './client';
-import { toggleBehaviorControlRule, buildConditionTreeFromForm } from './behavior-control';
+import { toggleBehaviorControlRule, buildConditionTreeFromForm, setRecipientPolicy } from './behavior-control';
+
+describe('setRecipientPolicy — scoped-config atomic save', () => {
+  it('sends quantity and existence policies in one request', async () => {
+    const fake = vi.fn(async () => ({ published: true }));
+    const limit = {
+      mode: 'detailed' as const,
+      is_active: true,
+      inbound_limit: { limit: 30, scope: 'local' as const, action: 'reject' as const },
+      outbound_limit: { limit: 50, action: 'audit' as const },
+      internal_limit: { limit: 20, action: 'quarantine' as const },
+      merged_limit: { limit: 50, action: 'audit' as const },
+    };
+    const check = { existence_enabled: true, existence_action: 'discard' as const };
+
+    await setRecipientPolicy(limit, check, fake as unknown as ApiRequestFn);
+
+    expect(fake).toHaveBeenCalledTimes(1);
+    expect(fake).toHaveBeenCalledWith('/behavior-control/recipient-policy', {
+      method: 'PUT',
+      body: { limit, check },
+    });
+  });
+});
 
 describe('toggleBehaviorControlRule (GT-11771 double-encode)', () => {
   it('PUTs is_active as object, not pre-stringified JSON string', async () => {

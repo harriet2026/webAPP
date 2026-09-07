@@ -76,6 +76,7 @@ export function TopMaliciousDomainsCard({ startDate, endDate, direction, tenantI
                       variant="ghost"
                       size="sm"
                       className="h-7 shrink-0 px-2 text-danger"
+                      data-testid={`top-malicious-domain-block-${d.domain}`}
                       onClick={() => setBlacklistDomain(d.domain)}
                     >
                       <ShieldBan className="h-3.5 w-3.5 text-rose-500" />

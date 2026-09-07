@@ -137,6 +137,11 @@ export interface DeliveryRecipientSummary {
 
 export interface MailChildEvent {
   id: number;
+  /** Stable identity/order carried by the post-detection projection. Generic
+   * delivery events leave these fields unset. */
+  projection_event_id?: string;
+  projection_revision?: number;
+  projection_order?: number;
   mail_log_id?: number;
   event_source: string;
   event_type: string;
@@ -230,7 +235,7 @@ export interface EmailLogSearchParams {
   action?: string;
   // 'true' = signed, 'false' = not signed, '' = all
   dkim_outbound_signed?: string;
-  // 'matched' = similar_detection/same_subject_detection 任一命中；其余值后端静默忽略。
+  // 'matched' = 统一处置依据中命中 SIM 模块；其余值后端静默忽略。
   similar?: string;
   // 邮件来源：不传/'' = 只看客户邮件（默认，自产信隐身）；'gateway' = 只看
   // 网关自产信（通知信/DSN/告警等）；'all' = 两者。

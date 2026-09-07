@@ -100,7 +100,7 @@ export function ImageDetectTab({
             <Label>{infoLabel(t('imageDetect.detectionMode'), t('tooltips.ocrMode'), 'ocr-detection-mode')}</Label>
             <Select value={config.ocr_mode} onValueChange={(mode) => onChange({ ...config, ocr_mode: mode as ImageDetectConfig['ocr_mode'] })}>
               <SelectTrigger className="w-full max-w-[400px]" data-testid="ocr-detection-mode"><SelectValue /></SelectTrigger>
-              <SelectContent className="min-w-[var(--radix-select-trigger-width)] w-max" data-testid="ocr-detection-mode-options">
+              <SelectContent align="start" data-testid="ocr-detection-mode-options">
                 <SelectItem value="none" data-testid="ocr-detection-mode-none">{t('imageDetect.ocrMode_none')}</SelectItem>
                 {/* GT-12xxx：OCR 仅单一 pytesseract 路径，无深浅之分，
                     原「深度检测（手写+印刷）」为从未实现的禁用占位，已移除；

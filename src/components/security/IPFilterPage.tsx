@@ -27,6 +27,7 @@ import { DataTable } from '@/components/shared/data-table';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import {
   getIPFilterRules,
+  listAllIPFilterRules,
   deleteIPFilterRule,
   setIPFilterRuleStatus,
   exportIPFilterRules,
@@ -385,8 +386,8 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
     queryKey: ['ip-filter-rules-all', listTypeTab],
     enabled: importOpen,
     queryFn: () =>
-      getIPFilterRules(
-        { list_type: listTypeTab, page: 1, page_size: 1000, sort: 'priority_desc' },
+      listAllIPFilterRules(
+        { list_type: listTypeTab, sort: 'priority_desc' },
         apiRequest,
       ),
   });
@@ -460,6 +461,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
             <Switch
               checked={row.original.is_active}
               onCheckedChange={(isActive) => toggleMutation.mutate({ id: row.original.id, isActive })}
+              data-testid={`ip-filter-toggle-${row.original.id}`}
               aria-label={row.original.is_active ? t('ipFrequency.deactivate') : t('ipFrequency.activate')}
             />
           </div>
@@ -482,13 +484,20 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
       header: t('common.actions'),
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenDialog(row.original)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            data-testid={`ip-filter-edit-${row.original.id}`}
+            onClick={() => handleOpenDialog(row.original)}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8"
+            data-testid={`ip-filter-delete-${row.original.id}`}
             onClick={() => setDeleteTarget({ id: row.original.id, name: row.original.name })}
           >
             <Trash2 className="h-4 w-4 text-destructive" />
@@ -581,8 +590,8 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
         >
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <TabsList>
-              <TabsTrigger value="blacklist">{t('ipFilter.blacklistRules')}</TabsTrigger>
-              <TabsTrigger value="whitelist">{t('ipFilter.whitelistRules')}</TabsTrigger>
+              <TabsTrigger value="blacklist" data-testid="ip-filter-tab-blacklist">{t('ipFilter.blacklistRules')}</TabsTrigger>
+              <TabsTrigger value="whitelist" data-testid="ip-filter-tab-whitelist">{t('ipFilter.whitelistRules')}</TabsTrigger>
             </TabsList>
             <div className="flex items-center gap-2 flex-wrap">
               <div className="relative">
@@ -594,6 +603,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     setSearch(e.target.value);
                     setPage(1);
                   }}
+                  data-testid="ip-filter-search"
                   className="pl-9 w-64"
                 />
               </div>
@@ -605,7 +615,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                 <Upload className="h-4 w-4 mr-1" />
                 {t('ipFilter.import')}
               </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
+              <Button variant="outline" size="sm" data-testid="ip-filter-export" onClick={handleExport}>
                 <Download className="h-4 w-4 mr-1" />
                 {t('ipFilter.export')}
               </Button>
@@ -621,6 +631,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           <DataTable
             columns={columns}
             data={rulesData?.items || []}
+            rowTestId={(row) => `ip-filter-row-${row.id}`}
             pageCount={Math.max(1, Math.ceil((rulesData?.total ?? 0) / pageSize))}
             pageIndex={page - 1}
             onPageChange={(newPage: number) => setPage(newPage + 1)}
@@ -648,6 +659,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
           side="right"
           className="data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
           showCloseButton={false}
+          data-testid="ip-filter-rule-drawer"
         >
           <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
             <div>
@@ -740,6 +752,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                               <Textarea
                                 placeholder={t('ipFilter.expressionPlaceholder')}
                                 {...form.register('ip_value')}
+                                data-testid="ip-filter-expression"
                                 className={cn(
                                   'flex-1 min-h-[72px] font-mono text-xs',
                                   form.formState.errors.ip_value && 'border-red-500',
@@ -789,6 +802,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                                       >
                                         <Checkbox
                                           checked={checked}
+                                          data-testid={`ip-filter-group-${group.rule_id}`}
                                           onCheckedChange={(next) => {
                                             const current = form.getValues('ip_groups') ?? [];
                                             form.setValue(
@@ -854,6 +868,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                           <Input
                             type="number"
                             {...form.register('priority', { valueAsNumber: true })}
+                            data-testid="ip-filter-priority"
                             className="w-24"
                             min={range.min}
                             max={range.max}
@@ -919,6 +934,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                           <Checkbox
                             checked={watchWhitelistTag}
                             onCheckedChange={(checked) => form.setValue('add_whitelist_tag', checked === true)}
+                            data-testid="ip-filter-whitelist-tag"
                           />
                           {t('ipFilter.actionTagDeliver')}
                         </label>
@@ -935,6 +951,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     <Textarea
                       placeholder={t('ipFilter.remarkPlaceholder')}
                       {...form.register('description')}
+                      data-testid="ip-filter-description"
                       className="min-h-[80px]"
                       maxLength={200}
                     />

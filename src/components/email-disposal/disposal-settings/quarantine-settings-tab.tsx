@@ -1,8 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from 'react-hook-form';
+import {
+  Controller,
+  useFormState,
+  type Control,
+  type UseFormWatch,
+  type UseFormSetValue,
+} from 'react-hook-form';
 import { AlertTriangle, Plus, Users, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -19,6 +25,7 @@ import {
 } from '@/types/disposal-settings';
 import { getBrowserTz } from '@/lib/timezone';
 import { NotificationScopeSelector } from './notification-scope-selector';
+import { firstValidationMessage } from './validation-error';
 
 // 恶意类=红、灰邮件类=灰橙（与 demo getMailTypeColor 语义一致，附暗色变体）。
 const categoryBadgeCls = (key: string) =>
@@ -46,10 +53,12 @@ function ScoreField({
   value,
   onCommit,
   testId,
+  invalid = false,
 }: {
   value: number;
   onCommit: (next: number) => void;
   testId: string;
+  invalid?: boolean;
 }) {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -62,6 +71,7 @@ function ScoreField({
       max={1}
       step={0.01}
       data-testid={testId}
+      aria-invalid={invalid ? true : undefined}
       value={display}
       onFocus={() => {
         setIsFocused(true);
@@ -103,20 +113,18 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
 
   const [tzAcked, setTzAcked] = useState(false);
 
-  // 通知模式：'all'=全员（默认），'specified'=指定范围
-  // 初始值派生自当前表单数据：若已有选中组/部门则默认为 specified，否则为 all。
-  // 使用 useMemo 仅在组件首次挂载时计算初始值，后续由用户交互控制。
-  const recipientGroupIdsInit = watch('quarantine.recipient_group_ids');
-  const departmentPathsInit = watch('quarantine.department_paths');
-  const initialMode = useMemo(
-    () =>
-      recipientGroupIdsInit.length > 0 || departmentPathsInit.length > 0
-        ? 'specified'
-        : 'all',
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-  const [notifyMode, setNotifyMode] = useState<'all' | 'specified'>(initialMode);
+  const recipientGroupIds = watch('quarantine.recipient_group_ids');
+  const departmentPaths = watch('quarantine.department_paths');
+  const scopeMode =
+    recipientGroupIds.length > 0 || departmentPaths.length > 0 ? 'specified' : 'all';
+
+  // 通知模式：'all'=全员（默认），'specified'=指定范围。
+  // 本地状态允许管理员先选“指定范围”再挑选对象；当 GET/保存响应通过
+  // form.reset 改写范围字段时，则以持久化数据重新校准，避免模式停留在挂载时快照。
+  const [notifyMode, setNotifyMode] = useState<'all' | 'specified'>(scopeMode);
+  useEffect(() => {
+    setNotifyMode(scopeMode);
+  }, [scopeMode]);
 
   const handleNotifyModeChange = (mode: 'all' | 'specified') => {
     setNotifyMode(mode);
@@ -139,16 +147,41 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
   const frequency = watch('quarantine.notify_frequency');
   const notifyTimes = watch('quarantine.notify_times');
   const customWeekdays = watch('quarantine.custom_weekdays');
-  const recipientGroupIds = watch('quarantine.recipient_group_ids');
-  const departmentPaths = watch('quarantine.department_paths');
-
+  const { errors } = useFormState({ control });
+  const customWeekdaysError = errors.quarantine?.custom_weekdays;
+  const validationText = (message: string | undefined, fallback: string) => {
+    switch (message ?? fallback) {
+      case 'customWeekdaysRequired':
+        return t('customWeekdaysRequired');
+      case 'customWeekdaysInvalid':
+        return t('customWeekdaysInvalid');
+      case 'notifyTimesRequired':
+        return t('notifyTimesRequired');
+      case 'notifyTimeFormatInvalid':
+        return t('notifyTimeFormatInvalid');
+      case 'scoreValueRange':
+        return t('scoreValueRange');
+      case 'scoreRangeError':
+        return t('scoreRangeError');
+      case 'validDaysRange':
+        return t('validDaysRange');
+      case 'portalBaseUrlRequired':
+        return t('portalBaseUrlRequired');
+      case 'portalBaseUrlInvalid':
+        return t('portalBaseUrlInvalid');
+      case 'portalBaseUrlNoPath':
+        return t('portalBaseUrlNoPath');
+      default:
+        return message ?? t('saveValidationFailed');
+    }
+  };
   const addTime = () => {
     const combined = `${newHour}:${newMinute}`;
     if (!notifyTimes.includes(combined)) {
       setValue(
         'quarantine.notify_times',
         [...notifyTimes, combined].sort(),
-        { shouldDirty: true },
+        { shouldDirty: true, shouldValidate: true },
       );
     }
   };
@@ -156,14 +189,14 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
     setValue(
       'quarantine.notify_times',
       notifyTimes.filter((x) => x !== t),
-      { shouldDirty: true },
+      { shouldDirty: true, shouldValidate: true },
     );
 
   const toggleWeekday = (d: number) => {
     const next = customWeekdays.includes(d)
       ? customWeekdays.filter((x) => x !== d)
       : [...customWeekdays, d].sort((a, b) => a - b);
-    setValue('quarantine.custom_weekdays', next, { shouldDirty: true });
+    setValue('quarantine.custom_weekdays', next, { shouldDirty: true, shouldValidate: true });
   };
 
   return (
@@ -237,6 +270,7 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                     name={`quarantine.category_notify.${key}` as const}
                     render={({ field, fieldState }) => {
                       const entry: CategoryNotifyEntry = field.value;
+                      const scoreErrorMessage = firstValidationMessage(fieldState.error);
                       return (
                         <tr
                           data-testid={`disposal-settings-category-row-${key}`}
@@ -261,10 +295,13 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                               <ScoreField
                                 testId={`disposal-settings-category-min-${key}`}
                                 value={entry.min_score}
+                                invalid={!!scoreErrorMessage}
                                 onCommit={(v) => field.onChange({ ...entry, min_score: v })}
                               />
-                              {fieldState.error && (
-                                <p className="text-xs text-destructive">{t('scoreRangeError')}</p>
+                              {scoreErrorMessage && (
+                                <p className="text-xs text-destructive" role="alert">
+                                  {validationText(scoreErrorMessage, 'scoreRangeError')}
+                                </p>
                               )}
                             </div>
                           </td>
@@ -272,6 +309,7 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                             <ScoreField
                               testId={`disposal-settings-category-max-${key}`}
                               value={entry.max_score}
+                              invalid={!!scoreErrorMessage}
                               onCommit={(v) => field.onChange({ ...entry, max_score: v })}
                             />
                           </td>
@@ -299,7 +337,7 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
               name="quarantine.notify_frequency"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-full" data-testid="disposal-settings-notify-frequency"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="daily">{t('freq_daily')}</SelectItem>
                     <SelectItem value="never">{t('freq_never')}</SelectItem>
@@ -311,12 +349,13 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
           </div>
 
           {frequency === 'custom' && (
-            <div className="space-y-2">
+            <div className="space-y-2" data-testid="disposal-settings-weekdays">
               <Label>{t('weekdays')}</Label>
               <div className="flex flex-wrap gap-3">
                 {[0, 1, 2, 3, 4, 5, 6].map((d) => (
                   <label key={d} className="flex items-center gap-2">
                     <Checkbox
+                      data-testid={`disposal-settings-weekday-${d}`}
                       checked={customWeekdays.includes(d)}
                       onCheckedChange={() => toggleWeekday(d)}
                     />
@@ -324,52 +363,83 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                   </label>
                 ))}
               </div>
+              {customWeekdaysError && (
+                <p
+                  className="text-sm text-destructive"
+                  role="alert"
+                  data-testid="disposal-settings-custom-weekdays-error"
+                >
+                  {validationText(firstValidationMessage(customWeekdaysError), 'customWeekdaysRequired')}
+                </p>
+              )}
             </div>
           )}
 
           {frequency !== 'never' && (
-            <div className="space-y-3">
-              <Label>{t('timePoints')}</Label>
-              <div className="flex gap-2">
-                <Select value={newHour} onValueChange={(v) => v != null && setNewHour(v)}>
-                  <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 24 }, (_, h) => (
-                      <SelectItem key={h} value={String(h).padStart(2, '0')}>
-                        {String(h).padStart(2, '0')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={newMinute} onValueChange={(v) => v != null && setNewMinute(v)}>
-                  <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 60 }, (_, m) => (
-                      <SelectItem key={m} value={String(m).padStart(2, '0')}>
-                        {String(m).padStart(2, '0')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button type="button" variant="outline" size="sm" onClick={addTime}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  {t('addTimePoint')}
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {notifyTimes.map((t) => (
-                  <span
-                    key={t}
-                    className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-1.5 text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+            <Controller
+              control={control}
+              name="quarantine.notify_times"
+              render={({ fieldState }) => (
+                <div className="space-y-3">
+                  <Label>{t('timePoints')}</Label>
+                  <div className="flex gap-2">
+                    <Select value={newHour} onValueChange={(v) => v != null && setNewHour(v)}>
+                      <SelectTrigger className="w-24" data-testid="disposal-settings-notify-hour"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, h) => (
+                          <SelectItem key={h} value={String(h).padStart(2, '0')} data-testid={`disposal-settings-notify-hour-option-${String(h).padStart(2, '0')}`}>
+                            {String(h).padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={newMinute} onValueChange={(v) => v != null && setNewMinute(v)}>
+                      <SelectTrigger className="w-24" data-testid="disposal-settings-notify-minute"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 60 }, (_, m) => (
+                          <SelectItem key={m} value={String(m).padStart(2, '0')} data-testid={`disposal-settings-notify-minute-option-${String(m).padStart(2, '0')}`}>
+                            {String(m).padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button type="button" variant="outline" size="sm" onClick={addTime} data-testid="disposal-settings-notify-time-add">
+                      <Plus className="h-4 w-4 mr-1" />
+                      {t('addTimePoint')}
+                    </Button>
+                  </div>
+                  <p
+                    className="text-sm text-muted-foreground"
+                    data-testid="disposal-settings-notify-time-add-hint"
                   >
-                    {t}
-                    <button type="button" onClick={() => removeTime(t)}>
-                      <X className="h-4 w-4" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
+                    {t('notifyTimeAddHint')}
+                  </p>
+                  {fieldState.error && (
+                    <p
+                      role="alert"
+                      className="text-sm text-destructive"
+                      data-testid="disposal-settings-notify-times-error"
+                    >
+                      {validationText(firstValidationMessage(fieldState.error), 'notifyTimesRequired')}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {notifyTimes.map((t) => (
+                      <span
+                        key={t}
+                        className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-1.5 text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                        data-testid={`disposal-settings-notify-time-${t}`}
+                      >
+                        {t}
+                        <button type="button" onClick={() => removeTime(t)} data-testid={`disposal-settings-notify-time-remove-${t}`}>
+                          <X className="h-4 w-4" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            />
           )}
 
           {/* 通知范围：方案C — 通知模式单选控制 */}
@@ -451,6 +521,7 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                 <Label htmlFor="portal-base-url">{t('portalBaseUrlLabel')}</Label>
                 <Input
                   id="portal-base-url"
+                  data-testid="disposal-settings-portal-base-url"
                   value={field.value ?? ''}
                   onChange={field.onChange}
                   placeholder={t('portalBaseUrlPlaceholder')}
@@ -458,7 +529,9 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                   className={fieldState.error ? 'border-destructive focus-visible:ring-destructive' : ''}
                 />
                 {fieldState.error ? (
-                  <p className="text-sm text-destructive">{t('portalBaseUrlRequired')}</p>
+                  <p className="text-sm text-destructive" role="alert">
+                    {validationText(firstValidationMessage(fieldState.error), 'portalBaseUrlRequired')}
+                  </p>
                 ) : portalUrl ? null : (
                   <p className="text-sm text-muted-foreground">{t('portalBaseUrlHelp')}</p>
                 )}
@@ -481,7 +554,10 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
           return (
             <>
               {portalMissing && (
-                <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                <div
+                  className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+                  data-testid="disposal-settings-portal-missing-hint"
+                >
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>{t('portalBaseUrlMissingHint')}</span>
                 </div>
@@ -516,6 +592,7 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                                 name={`quarantine.permissions.${key}.enabled` as const}
                                 render={({ field }) => (
                                   <Switch
+                                    data-testid={`disposal-settings-permission-toggle-${key}`}
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
                                     disabled={portalMissing}
@@ -528,16 +605,29 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                             <Controller
                               control={control}
                               name={`quarantine.permissions.${key}.valid_days` as const}
-                              render={({ field }) => (
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  max={30}
-                                  className="mx-auto w-24"
-                                  disabled={!enabled || portalMissing}
-                                  value={field.value}
-                                  onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-                                />
+                              render={({ field, fieldState }) => (
+                                <div className="space-y-1">
+                                  <Input
+                                    type="number"
+                                    min={1}
+                                    max={30}
+                                    className="mx-auto w-24"
+                                    disabled={!enabled || portalMissing}
+                                    value={field.value}
+                                    aria-invalid={fieldState.error ? true : undefined}
+                                    data-testid={`disposal-settings-valid-days-${key}`}
+                                    onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                                  />
+                                  {fieldState.error && (
+                                    <p
+                                      className="text-xs text-destructive"
+                                      role="alert"
+                                      data-testid={`disposal-settings-valid-days-error-${key}`}
+                                    >
+                                      {validationText(firstValidationMessage(fieldState.error), 'validDaysRange')}
+                                    </p>
+                                  )}
+                                </div>
                               )}
                             />
                           </td>

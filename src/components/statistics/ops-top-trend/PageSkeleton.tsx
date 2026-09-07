@@ -16,12 +16,12 @@ export function PageSkeleton({ isError, onRetry }: PageSkeletonProps) {
 
   if (isError) {
     return (
-      <Card>
+      <Card data-testid="ops-top-load-failed">
         <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
           <AlertCircle className="h-8 w-8 text-destructive" />
-          <p className="text-sm text-muted-foreground">{t('loadFailed')}</p>
+          <p className="text-sm text-muted-foreground" data-testid="ops-top-load-failed-text">{t('loadFailed')}</p>
           {onRetry && (
-            <Button variant="outline" size="sm" onClick={() => onRetry()}>
+            <Button variant="outline" size="sm" data-testid="ops-top-retry" onClick={() => onRetry()}>
               {t('retry')}
             </Button>
           )}
@@ -31,7 +31,7 @@ export function PageSkeleton({ isError, onRetry }: PageSkeletonProps) {
   }
 
   return (
-    <Card>
+    <Card data-testid="ops-top-skeleton">
       <CardHeader>
         <Skeleton className="h-6 w-40" />
       </CardHeader>

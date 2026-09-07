@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { isPublicationPendingResponse } from '@/lib/api/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -100,7 +101,7 @@ export function AdvancedFilterRulesModule({
   const tc = useTranslations('common');
   const locale = useLocale();
   const queryClient = useQueryClient();
-  const { apiRequest } = useApiRequest();
+  const { apiRequest, effectiveTenantId } = useApiRequest();
   const { user, selectedTenantId } = useAuth();
   const { capabilities, viewer } = useProductForm();
   const moduleEditable = canEditSecurityModule({
@@ -119,7 +120,8 @@ export function AdvancedFilterRulesModule({
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
 
-  const rulesQueryKey = ['advanced-rules', 'list'];
+  const rulesQueryKey = ['advanced-rules', 'list', effectiveTenantId] as const;
+  const enabledQueryKey = ['advanced-rules', 'enabled', effectiveTenantId] as const;
 
   const { data: rules, isLoading } = useQuery({
     queryKey: rulesQueryKey,
@@ -133,15 +135,19 @@ export function AdvancedFilterRulesModule({
   const fieldDefs = fieldDefsResp?.fields ?? {};
 
   const { data: moduleEnabledResp } = useQuery({
-    queryKey: ['advanced-rules', 'enabled'],
+    queryKey: enabledQueryKey,
     queryFn: () => getModuleEnabled(apiRequest),
   });
   const moduleEnabled = moduleEnabledResp?.enabled ?? true;
 
   const setEnabledMutation = useMutation({
     mutationFn: (enabled: boolean) => setModuleEnabled(enabled, apiRequest),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['advanced-rules', 'enabled'] });
+    onSuccess: (result, enabled) => {
+      if (isPublicationPendingResponse(result)) {
+        queryClient.setQueryData(enabledQueryKey, { enabled });
+      } else {
+        void queryClient.invalidateQueries({ queryKey: enabledQueryKey });
+      }
       toast.success(tc('updateSuccess'));
     },
     onError: () => toast.error(tc('error')),

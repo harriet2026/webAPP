@@ -224,6 +224,15 @@ describe('GeoDistributionCard ECharts world map', () => {
     expect(ranking).not.toHaveTextContent('NaN');
   });
 
+  it('keeps country names readable at common desktop widths (GT-12550)', () => {
+    render(<GeoDistributionCard {...props} />);
+
+    const geoGrid = screen.getByTestId('geo-world-map').parentElement;
+    expect(geoGrid).toHaveClass('2xl:grid-cols-2');
+    expect(geoGrid).not.toHaveClass('xl:grid-cols-2');
+    expect(screen.getByRole('button', { name: '1. 美国' })).toHaveAttribute('title', '美国');
+  });
+
   it('shows an explicit empty state without a map or visual scale', () => {
     countries = [];
     render(<GeoDistributionCard {...props} />);

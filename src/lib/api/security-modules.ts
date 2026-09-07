@@ -1,4 +1,4 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import { apiRequest, type ApiRequestFn, type PublicationPendingResponse } from './client';
 import type { Viewer } from '@/lib/product-form/resolve';
 
 // 安全模块总开关的 page 标识。所有 page 都可以通过 GET /security/modules 一次
@@ -91,7 +91,7 @@ export async function setSecurityModuleEnabled(
   enabled: boolean,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<void> {
-  await requestFn(`/security/modules/${page}`, { method: 'PUT', body: { enabled } });
+  await requestFn<void | PublicationPendingResponse>(`/security/modules/${page}`, { method: 'PUT', body: { enabled } });
 }
 
 // 关闭这三个模块会连带停用它们的白名单 / accept 规则，

@@ -1,4 +1,4 @@
-import type { ApiRequestFn } from './client';
+import type { ApiRequestFn, ConfigMutationResult } from './client';
 import { apiRequest } from './client';
 import type { DisposalSettings } from '@/types/disposal-settings';
 
@@ -11,6 +11,6 @@ export async function getDisposalSettings(
 export async function putDisposalSettings(
   settings: DisposalSettings,
   requestFn: ApiRequestFn = apiRequest,
-): Promise<DisposalSettings> {
-  return requestFn<DisposalSettings>('/disposal-settings', { method: 'PUT', body: settings });
+): Promise<ConfigMutationResult<DisposalSettings>> {
+  return requestFn<ConfigMutationResult<DisposalSettings>>('/disposal-settings', { method: 'PUT', body: settings });
 }

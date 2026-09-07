@@ -81,11 +81,11 @@ export function SpoofingLogTable({ data, isLoading, canEdit, onOpenDetail, onBlo
         const noAct = !item.actionable;
         return (
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" onClick={() => onOpenDetail(item.id)}>{tsd('table.detail')}</Button>
+            <Button variant="ghost" size="sm" data-testid="spoof-log-row-detail" onClick={() => onOpenDetail(item.id)}>{tsd('table.detail')}</Button>
             {canEdit ? (
               <>
-                <Button variant="outline" size="sm" disabled={noAct} onClick={() => onBlock(item)}>{tsd('table.block')}</Button>
-                <Button variant="ghost" size="sm" disabled={noAct} onClick={() => onExempt(item)}>{tsd('table.exempt')}</Button>
+                <Button variant="outline" size="sm" data-testid="spoof-log-row-block" disabled={noAct} onClick={() => onBlock(item)}>{tsd('table.block')}</Button>
+                <Button variant="ghost" size="sm" data-testid="spoof-log-row-exempt" disabled={noAct} onClick={() => onExempt(item)}>{tsd('table.exempt')}</Button>
                 {noAct ? <span className="text-xs text-muted-foreground">{tsd('table.fallbackHint')}</span> : null}
               </>
             ) : null}
@@ -98,13 +98,14 @@ export function SpoofingLogTable({ data, isLoading, canEdit, onOpenDetail, onBlo
   const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card">
+    <div className="overflow-x-auto rounded-lg border border-border bg-card" data-testid="spoof-log-table">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id}>
               {hg.headers.map((h, idx) => (
                 <TableHead key={h.id}
+                  data-testid={`spoof-log-col-${h.column.id}`}
                   className={cn('bg-muted/40 text-foreground', idx === hg.headers.length - 1 && 'sticky right-0 bg-muted/40 text-right')}>
                   {h.isPlaceholder ? null : flexRender(h.column.columnDef.header, h.getContext())}
                 </TableHead>
@@ -114,15 +115,16 @@ export function SpoofingLogTable({ data, isLoading, canEdit, onOpenDetail, onBlo
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            <TableRow><TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+            <TableRow><TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground" data-testid="spoof-log-loading">
               <Loader2 className="mx-auto h-5 w-5 animate-spin" /></TableCell></TableRow>
           ) : table.getRowModel().rows.length === 0 ? (
-            <TableRow><TableCell colSpan={columns.length} className="h-36 text-center text-muted-foreground">{tsd('table.empty')}</TableCell></TableRow>
+            <TableRow><TableCell colSpan={columns.length} className="h-36 text-center text-muted-foreground" data-testid="spoof-log-empty">{tsd('table.empty')}</TableCell></TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} data-testid="spoof-log-row">
                 {row.getVisibleCells().map((cell, idx) => (
                   <TableCell key={cell.id}
+                    data-testid={`spoof-log-cell-${cell.column.id}`}
                     className={cn(idx === row.getVisibleCells().length - 1 && 'sticky right-0 bg-card')}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

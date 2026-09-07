@@ -52,7 +52,12 @@ export function ThreatTop5({ top5, isLoading, range }: ThreatTop5Props) {
             <Skeleton className="h-8 w-full" />
           </div>
         ) : top5.length === 0 ? (
-          <div className="flex h-24 items-center justify-center text-muted-foreground">{tEmpty('empty')}</div>
+          <div
+            className="flex h-24 items-center justify-center text-muted-foreground"
+            data-testid="system-status-top5-empty"
+          >
+            {tEmpty('empty')}
+          </div>
         ) : (
           <ul className="space-y-2.5" data-testid="system-status-top5-list">
             {top5.map((row, i) => {

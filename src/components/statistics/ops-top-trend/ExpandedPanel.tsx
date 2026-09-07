@@ -171,6 +171,7 @@ export function ExpandedPanel({
 
   return (
     <div
+      data-testid="ops-top-expanded-panel"
       className="w-full overflow-hidden"
       style={{
         backgroundColor: '#F8FAFC',
@@ -181,6 +182,7 @@ export function ExpandedPanel({
       <div className="flex justify-end px-4 pt-2">
         <button
           type="button"
+          data-testid="ops-top-collapse"
           onClick={onCollapse}
           className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary"
         >
@@ -189,8 +191,8 @@ export function ExpandedPanel({
         </button>
       </div>
       <div className="flex h-[380px] flex-col gap-4 px-4 pb-4 xl:flex-row">
-        <div className="flex h-full min-h-0 w-full flex-col xl:w-[60%]">
-          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+        <div className="flex h-full min-h-0 w-full flex-col xl:w-[60%]" data-testid="ops-top-trend-pane">
+          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground" data-testid="ops-top-trend-title">
             <TrendingUp className="h-4 w-4 shrink-0" style={{ color }} />
             <span
               className="truncate"
@@ -199,11 +201,11 @@ export function ExpandedPanel({
               {t('trendAnalysisTitle', { item: displayName })}
             </span>
           </h3>
-          <div className="min-h-0 flex-1 rounded-lg bg-background p-3 shadow-sm">
+          <div className="min-h-0 flex-1 rounded-lg bg-background p-3 shadow-sm" data-testid="ops-top-trend-chart">
             {trendOption ? (
               <ReactECharts notMerge option={trendOption} style={{ height: 280 }} />
             ) : (
-              <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+              <div className="flex h-full flex-col items-center justify-center text-muted-foreground" data-testid="ops-top-trend-empty">
                 <Search className="mb-2 h-10 w-10 opacity-30" />
                 <p className="text-sm">{t('noTrendData')}</p>
               </div>
@@ -211,8 +213,8 @@ export function ExpandedPanel({
           </div>
         </div>
 
-        <div className="flex h-full min-h-0 w-full flex-col xl:w-[40%]">
-          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+        <div className="flex h-full min-h-0 w-full flex-col xl:w-[40%]" data-testid="ops-top-drill-pane">
+          <h3 className="mb-2 flex min-w-0 items-center gap-2 text-sm font-medium text-foreground" data-testid="ops-top-drill-title">
             <FileText className="h-4 w-4 shrink-0 text-purple-600" />
             <span
               className="truncate"
@@ -238,11 +240,12 @@ export function ExpandedPanel({
               </span>
             ) : null}
           </h3>
-          <div className="mb-2 flex flex-wrap gap-1">
+          <div className="mb-2 flex flex-wrap gap-1" data-testid="ops-top-subdim-tabs">
             {drillConfig.subDims.map((sd) => (
               <button
                 key={sd}
                 type="button"
+                data-testid={`ops-subdim-${sd}`}
                 onClick={() => onSubDimChange(sd)}
                 className={`rounded px-2 py-1 text-xs transition-colors ${
                   subDim === sd
@@ -254,15 +257,16 @@ export function ExpandedPanel({
               </button>
             ))}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto rounded-lg bg-background p-3 shadow-sm">
+          <div className="min-h-0 flex-1 overflow-y-auto rounded-lg bg-background p-3 shadow-sm" data-testid="ops-top-drill-chart">
             {drilldown.isLoading ? (
               <Skeleton className="h-[260px] w-full rounded-lg" />
             ) : drilldown.isError ? (
-              <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
+              <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground" data-testid="ops-top-drill-error">
                 <AlertCircle className="h-8 w-8 opacity-40 text-destructive" />
                 <p className="text-sm">{t('drilldownError')}</p>
                 <button
                   type="button"
+                  data-testid="ops-top-drill-retry"
                   onClick={() => drilldown.refetch()}
                   className="flex items-center gap-1 rounded px-2 py-1 text-xs border border-border/70 hover:bg-muted transition-colors"
                 >
@@ -277,7 +281,7 @@ export function ExpandedPanel({
                 style={{ height: Math.max(drillItems.length * 32, 160) }}
               />
             ) : (
-              <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
+              <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground" data-testid="ops-top-drill-empty">
                 <Search className="mb-2 h-10 w-10 opacity-30" />
                 <p className="text-sm">{t(drillConfig.emptyKey as Parameters<typeof t>[0])}</p>
               </div>

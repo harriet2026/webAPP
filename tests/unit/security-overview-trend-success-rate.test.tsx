@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { createElement } from 'react';
 import type { TrendData } from '@/lib/api/security-overview';
-import { NON_SERIES_KEYS } from '@/lib/api/security-overview';
+import { DELIVERY_RESULT_KEYS, NON_SERIES_KEYS } from '@/lib/api/security-overview';
 
 // Review Bug-2 regression: the delivery_result trend rows carry a `success_rate`
 // percentage that is NOT a stackable count and is NOT a valid drill-down series
@@ -31,12 +31,11 @@ vi.mock('@/components/shared/smart-summary-badge', () => ({
 
 import { TrendChartCard } from '@/components/statistics/security-overview/TrendChartCard';
 
-const DELIVERY_KEYS = ['delivered', 'failed', 'cancelled', 'in_delivery', 'partial_delivered', 'unknown'];
+const DELIVERY_KEYS: string[] = [...DELIVERY_RESULT_KEYS];
+const RETIRED_DELIVERY_KEYS = ['in_delivery', 'partial_delivered', 'unknown'];
 
-// Mirrors the real backend delivery_result trend row shape (storage
-// computeTrendAndDetail): date + the 6 result counts + the synthetic
-// success_rate percentage. total/block_rate/change live in the detail rows, not
-// the trend rows, so they are intentionally absent here.
+// Deliberately mirrors an older backend response. The current client must only
+// expose the three public terminal result series during a rolling upgrade.
 function row(date: string) {
   return {
     date,
@@ -72,11 +71,12 @@ describe('TrendChartCard success_rate exclusion (Bug-2)', () => {
     const { container } = renderChart();
     const texts = legendLabels(container);
     expect(texts).not.toContain('success_rate');
-    // the 6 real delivery-result series remain
+    // the 3 public delivery-result series remain; internal lifecycle states do not
     for (const k of DELIVERY_KEYS) expect(texts).toContain(k);
+    for (const k of RETIRED_DELIVERY_KEYS) expect(texts).not.toContain(k);
   });
 
-  it('renders exactly one legend button per real series (6 delivery-result series)', () => {
+  it('renders exactly one legend button per public delivery-result series', () => {
     // ECharts draws on a canvas/SVG and does not emit real <circle> elements in
     // jsdom (the chart was ported from recharts to echarts-for-react with
     // symbol:'none'), so the old "12 circles" assertion no longer applies. The
@@ -97,7 +97,9 @@ describe('TrendChartCard success_rate exclusion (Bug-2)', () => {
     // drivable from jsdom (canvas/SVG + internal event wiring).
     expect(NON_SERIES_KEYS.has('success_rate')).toBe(true);
     const dataKeys = Object.keys(trend.delivery_result[0]);
-    const seriesKeys = dataKeys.filter((k) => k !== 'date' && !NON_SERIES_KEYS.has(k));
+    const seriesKeys = dataKeys.filter((k) => (
+      k !== 'date' && !NON_SERIES_KEYS.has(k) && DELIVERY_KEYS.includes(k)
+    ));
     expect(seriesKeys).toEqual(DELIVERY_KEYS);
     expect(seriesKeys).not.toContain('success_rate');
   });

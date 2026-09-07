@@ -39,13 +39,17 @@ export function ColumnSelector({ storageKey, columns, onColumnsChange, buttonLab
     initialized.current = true;
     const stored = localStorage.getItem(storageKey);
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is an external client-only source; hydrate it after mount to avoid an SSR mismatch.
       setVisibleKeys(JSON.parse(stored));
     } else {
       setVisibleKeys(columns.filter((c) => c.defaultVisible).map((c) => c.key));
     }
   }, [storageKey, columns]);
 
-  const handleColumnsChange = useCallback(onColumnsChange, [onColumnsChange]);
+  const handleColumnsChange = useCallback(
+    (keys: string[]) => onColumnsChange(keys),
+    [onColumnsChange],
+  );
 
   useEffect(() => {
     handleColumnsChange(visibleKeys);
@@ -96,12 +100,12 @@ export function ColumnSelector({ storageKey, columns, onColumnsChange, buttonLab
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="outline" size="sm" className="w-full">
+        <Button data-testid="column-selector-trigger" variant="outline" size="sm" className="w-full">
           <Columns3 className="h-4 w-4 mr-2" />
           {buttonLabel || t('selectColumns')}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72 p-0 overflow-hidden">
+      <PopoverContent data-testid="column-selector-menu" align="end" className="w-72 p-0 overflow-hidden">
         <div className="flex items-center border-b px-3 py-2 shrink-0">
           <Search className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
           <Input
@@ -124,6 +128,7 @@ export function ColumnSelector({ storageKey, columns, onColumnsChange, buttonLab
                   return (
                     <label
                       key={column.key}
+                      data-testid={`column-selector-option-${column.key}`}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-sm hover:bg-accent cursor-pointer text-sm"
                     >
                       <Checkbox

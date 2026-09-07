@@ -8,7 +8,7 @@ describe('phishing demo boundary', () => {
     { method: 'GET', path: '/phishing-agent/control', expected: 200 },
     { method: 'PUT', path: '/phishing-agent/control', body: { enabled: true, expected_revision: 1 }, expected: 200 },
     { method: 'GET', path: '/phishing-agent/config', expected: 200 },
-    { method: 'PUT', path: '/phishing-agent/config', body: { risk_policy: { expected_version: 1, cutoffs: { low: 40, medium: 70, high: 90 }, policies: { suspicious: { base_disposition: 'proceed' }, low: { base_disposition: 'proceed' }, medium: { base_disposition: 'audit' }, high: { base_disposition: 'quarantine' } } }, runtime_policy: { expected_version: 1, run_mode: 'realtime', observe_action: 'accept', observe_mark_enabled: true, timeout_minutes: 5, max_recheck_minutes: 30, timeout_async_enabled: true } }, expected: 200 },
+    { method: 'PUT', path: '/phishing-agent/config', body: { risk_policy: { expected_version: 1, cutoffs: { low: 40, medium: 70, high: 90 }, policies: { suspicious: { base_disposition: 'proceed' }, low: { base_disposition: 'proceed' }, medium: { base_disposition: 'audit' }, high: { base_disposition: 'quarantine' } } }, runtime_policy: { expected_version: 1, run_mode: 'realtime', observe_action: 'accept', observe_mark_enabled: false, timeout_minutes: 5, max_recheck_minutes: 30, timeout_async_enabled: true } }, expected: 200 },
     { method: 'GET', path: '/phishing-agent/analysis-config', expected: 200 },
     { method: 'PUT', path: '/phishing-agent/analysis-config', body: { expected_version: 1, netdisk_domain: false, netdisk_extract: false, netdisk_spoof: false }, expected: 200 },
     { method: 'GET', path: '/phishing-agent/admission-rules', expected: 200 },

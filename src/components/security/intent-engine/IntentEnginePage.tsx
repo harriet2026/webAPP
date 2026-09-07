@@ -41,6 +41,7 @@ import {
   NO_DIRTY,
   type DirtyDirections,
 } from './copy-dirty';
+import { intentEngineEmbeddedLayoutClasses } from './layout';
 
 const DIRECTION_KEY_MAP: Record<IntentDirection, string> = {
   receive: 'tabReceive',
@@ -246,6 +247,8 @@ export function IntentEnginePage({
     setExpandedIntent(null);
   }, []);
 
+  const usesEmbeddedLayout = embedded === true;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -267,8 +270,12 @@ export function IntentEnginePage({
   }
 
   const content = (
-    <div data-testid="intent-engine-page">
+    <div
+      className={cn(usesEmbeddedLayout && intentEngineEmbeddedLayoutClasses.root)}
+      data-testid="intent-engine-page"
+    >
       <PipelinePanelHeader
+        className={cn(usesEmbeddedLayout && intentEngineEmbeddedLayoutClasses.card)}
         title={t('title')}
         enabled={moduleEnabled}
         onToggle={toggleModule}
@@ -277,11 +284,20 @@ export function IntentEnginePage({
         disabledLabel={t('statusDisabled')}
         switchTestId="intent-engine-master-switch"
         titleTestId="intent-engine"
+        contentClassName={usesEmbeddedLayout ? intentEngineEmbeddedLayoutClasses.content : undefined}
       >
-        <div className="space-y-4">
+        <div
+          className={cn(
+            usesEmbeddedLayout ? intentEngineEmbeddedLayoutClasses.stack : 'space-y-4',
+          )}
+        >
           {/* 总开关关闭 → 整体半透明禁点（保存栏在容器外，html_spec L4-6） */}
           <div
-            className={cn('flex-1 space-y-4', !moduleEnabled && 'opacity-50 pointer-events-none')}
+            className={cn(
+              'space-y-4',
+              usesEmbeddedLayout ? intentEngineEmbeddedLayoutClasses.body : 'flex-1',
+              !moduleEnabled && 'opacity-50 pointer-events-none',
+            )}
             data-testid="intent-engine-body"
           >
             <Tabs value={direction} onValueChange={handleDirectionChange}>
@@ -305,6 +321,7 @@ export function IntentEnginePage({
             {/* 全局操作栏（html_spec §2.2-5..8：图标 + 重置红字 + 右侧 dirty ⚠） */}
             <div className="flex items-center gap-2 flex-wrap p-3 bg-muted/50 rounded-lg" data-testid="ie-ops-bar">
               <Button
+                data-testid="ie-apply-same-risk"
                 variant="outline"
                 size="sm"
                 className="h-8 text-xs"
@@ -314,11 +331,12 @@ export function IntentEnginePage({
                 <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                 {t('applySameRisk')}
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setShowCopy(true)}>
+              <Button data-testid="ie-copy-directions" variant="outline" size="sm" className="h-8 text-xs" onClick={() => setShowCopy(true)}>
                 <Copy className="h-3.5 w-3.5 mr-1" />
                 {t('copyToDirections')}
               </Button>
               <Button
+                data-testid="ie-reset-directions"
                 variant="outline"
                 size="sm"
                 className="h-8 text-xs text-destructive hover:text-destructive"
@@ -388,9 +406,14 @@ export function IntentEnginePage({
             )}
           </div>
 
-          {/* sticky 保存栏（html_spec §2.2-11；dim 容器外，总开关关闭时仍可点） */}
+          {/* 保存栏与滚动正文是 flex 同级区域；dim 容器外，总开关关闭时仍可点。 */}
           <div
-            className="sticky bottom-0 -mx-6 -mb-6 px-6 py-3 border-t bg-background/95 backdrop-blur-sm flex items-center justify-between z-10"
+            className={cn(
+              'border-t bg-background/95 px-6 py-3 backdrop-blur-sm flex items-center justify-between z-10',
+              usesEmbeddedLayout
+                ? intentEngineEmbeddedLayoutClasses.footer
+                : 'sticky bottom-0 -mx-6 -mb-6',
+            )}
             data-testid="intent-engine-save-bar"
           >
             <span

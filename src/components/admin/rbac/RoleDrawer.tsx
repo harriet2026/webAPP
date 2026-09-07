@@ -49,12 +49,47 @@ const ACTION_FIELD: Record<PermAction, keyof RolePermission> = {
   delete: 'canDelete',
 };
 
+type BuiltInDisplayLevel = 'admin' | 'operator' | 'viewer';
+
+/**
+ * The database currently seeds immutable built-in roles without seeding their
+ * full role_permissions matrices. Project their established default policy in
+ * this read-only drawer so an empty API matrix is not rendered as deny-all.
+ *
+ * This is display-only: authorization continues to be decided by the backend
+ * and the existing access helpers. Any persisted permission row makes the API
+ * matrix authoritative and disables this fallback.
+ */
+function builtInDisplayLevel(role: Role | null): BuiltInDisplayLevel | null {
+  if (!role?.isSystemDefault || (role.permissions?.length ?? 0) > 0) return null;
+  if (role.isSuperAdmin || role.code === 'super_admin') return 'admin';
+  if (role.code === 'tenant_ops') return 'operator';
+  if (role.code === 'tenant_auditor' || role.code === 'platform_auditor') return 'viewer';
+  return null;
+}
+
+function builtInDisplayRow(meta: SubModuleMeta, level: BuiltInDisplayLevel): RolePermission {
+  const admin = level === 'admin';
+  const editable = admin || level === 'operator';
+  return {
+    submoduleId: meta.id,
+    visible: true,
+    canView: true,
+    canEdit: editable,
+    canApprove: meta.supportApprove ? admin : null,
+    canDelete: meta.supportDelete ? admin : null,
+  };
+}
+
 /** Every submodule the drawer's scope covers, one row per id, filling in any
  * id absent from the role's saved matrix (module tree grown since the role
  * was last saved) with an empty/unset row. */
-function mergePermissions(scope: RbacScope, existing: RolePermission[] | undefined): RolePermission[] {
-  const byId = new Map((existing ?? []).map((p) => [p.submoduleId, p]));
-  return rbacSubmodulesForScope(scope).map((meta) => byId.get(meta.id) ?? emptyPermissionRow(meta));
+function mergePermissions(scope: RbacScope, role: Role | null): RolePermission[] {
+  const byId = new Map((role?.permissions ?? []).map((p) => [p.submoduleId, p]));
+  const displayLevel = builtInDisplayLevel(role);
+  return rbacSubmodulesForScope(scope).map(
+    (meta) => byId.get(meta.id) ?? (displayLevel ? builtInDisplayRow(meta, displayLevel) : emptyPermissionRow(meta)),
+  );
 }
 
 export interface RoleDrawerProps {
@@ -127,9 +162,10 @@ export function RoleDrawer({ open, onOpenChange, scope, role, existingNames, onS
   // different role) — matches the demo's openNew/openEdit deep-copy reset.
   useEffect(() => {
     if (!open) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- opening or retargeting the controlled drawer intentionally resets its editable draft.
     setName(role?.name ?? '');
     setRemark(role?.remark ?? '');
-    setPermissions(mergePermissions(scope, role?.permissions));
+    setPermissions(mergePermissions(scope, role));
   }, [open, role, scope]);
 
   const permBySubId = useMemo(() => new Map(permissions.map((p) => [p.submoduleId, p])), [permissions]);

@@ -24,8 +24,12 @@ import {
   MIN_COUNT_MIN,
   MIN_COUNT_MAX,
 } from './defaults';
-import { getSimilarDetection, putSimilarDetection } from '@/lib/api/similar-detection';
-import { useApiRequest, ApiError } from '@/lib/api/client';
+import {
+  committedSimilarDetection,
+  getSimilarDetection,
+  putSimilarDetection,
+} from '@/lib/api/similar-detection';
+import { useApiRequest, ApiError, isPublicationPendingResponse } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -197,7 +201,23 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
         expected_version: config.version,
       };
       const updated = await putSimilarDetection(req, apiRequest);
-      setConfig(updated);
+      if (isPublicationPendingResponse(updated)) {
+        // This endpoint is one scoped-document CAS, so a committed write advances
+        // exactly from expected_version to expected_version+1. Build the local
+        // state explicitly from the submitted business fields; do not cast the
+        // request DTO (expected_version is not a response version). This keeps
+        // the next save's CAS safe even if the immediate GET still sees the old
+        // immutable snapshot.
+        const committed = committedSimilarDetection(req);
+        setConfig(committed);
+        // Adopt server-owned metadata only when publication has caught up. An
+        // old GET must never roll the inferred committed version backwards.
+        void getSimilarDetection(apiRequest).then((refreshed) => {
+          if (refreshed.version >= committed.version) setConfig(refreshed);
+        }).catch(() => undefined);
+      } else {
+        setConfig(updated);
+      }
       setDirty(false);
       toast.success(t('title') + ' ✓');
     } catch (e: unknown) {

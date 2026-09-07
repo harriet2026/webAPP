@@ -44,10 +44,10 @@ export function SpoofingWhitelistPanel({ auditOnly = false }: { auditOnly?: bool
   const items = listQuery.data?.items ?? [];
 
   return (
-    <div className="flex max-h-[60vh] flex-col">
+    <div className="flex max-h-[60vh] flex-col" data-testid="spoof-whitelist-panel">
       <div className="border-b px-4 py-3">
         <h4 className="text-sm font-semibold">{tsd('whitelist.title')}</h4>
-        <p className="mt-0.5 text-xs text-muted-foreground">{tsd('whitelist.subtitle')}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground" data-testid="spoof-whitelist-semantics">{tsd('whitelist.subtitle')}</p>
       </div>
       <div className="flex-1 overflow-y-auto p-2">
         {listQuery.isLoading ? (

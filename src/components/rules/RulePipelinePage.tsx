@@ -255,6 +255,7 @@ function TagRuleRow({ rule, onSelect }: { rule: Rule; onSelect: (r: Rule) => voi
   return (
     <button
       onClick={() => onSelect(rule)}
+      data-testid={`pipeline-tag-rule-${rule.id}`}
       className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left hover:bg-muted/50 transition-colors border-l-2 border-blue-300 dark:border-blue-700"
     >
       <span className="text-xs font-mono text-muted-foreground w-10 shrink-0 text-right">{rule.priority}</span>
@@ -287,6 +288,7 @@ function ActionRuleRow({ rule, onSelect }: { rule: Rule; onSelect: (r: Rule) => 
   return (
     <button
       onClick={() => onSelect(rule)}
+      data-testid={`pipeline-action-rule-${rule.id}`}
       className={cn('w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-left hover:bg-muted/50 transition-colors border-l-2', borderCls)}
     >
       <span className="text-xs font-mono text-muted-foreground w-10 shrink-0 text-right">{rule.priority}</span>
@@ -605,7 +607,7 @@ function StageSheet({
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto">
-          <div className="border-b border-border/30">
+          <div className="border-b border-border/30" data-testid="stage-sheet-tag-section">
             <div className="px-4 py-1.5 flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
               <Tag className="h-3.5 w-3.5" />
               <span className="text-xs font-semibold uppercase tracking-wide">标签规则</span>
@@ -621,7 +623,7 @@ function StageSheet({
             </div>
           </div>
 
-          <div>
+          <div data-testid="stage-sheet-action-section">
             <div className="px-4 py-1.5 flex items-center gap-1.5 text-foreground">
               <Zap className="h-3.5 w-3.5" />
               <span className="text-xs font-semibold uppercase tracking-wide">动作规则</span>
@@ -743,14 +745,14 @@ function RuleDetailSheet({ rule, onClose, onToggle }: {
 
   return (
     <Sheet open={!!rule} onOpenChange={open => !open && onClose()}>
-      <SheetContent side="right" className="w-[480px] sm:w-[520px] p-0 flex flex-col">
+      <SheetContent side="right" className="w-[480px] sm:w-[520px] p-0 flex flex-col" data-testid="rule-detail-sheet">
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border/60 shrink-0">
           <SheetTitle className="text-base font-semibold">{rule?.name || ''}</SheetTitle>
           {rule && (
             <div className="flex flex-wrap items-center gap-1.5 mt-1">
-              <Badge variant="outline" className="text-xs">ID: {rule.id}</Badge>
-              <Badge variant="outline" className="text-xs">{t(stageKey)}</Badge>
-              <Badge variant="outline" className="text-xs">优先级 {rule.priority}</Badge>
+              <Badge variant="outline" className="text-xs" data-testid="rule-detail-id">ID: {rule.id}</Badge>
+              <Badge variant="outline" className="text-xs" data-testid="rule-detail-stage">{t(stageKey)}</Badge>
+              <Badge variant="outline" className="text-xs" data-testid="rule-detail-priority">优先级 {rule.priority}</Badge>
               <StatusBadge
                 status={rule.is_active ? t('common.enabled') : t('common.disabled')}
                 variant={rule.is_active ? 'success' : 'default'}
@@ -842,6 +844,7 @@ function RuleDetailSheet({ rule, onClose, onToggle }: {
                 variant="outline"
                 size="sm"
                 onClick={() => onToggle(rule)}
+                data-testid="rule-detail-toggle"
                 className="flex items-center gap-1.5"
               >
                 {rule.is_active
@@ -849,7 +852,7 @@ function RuleDetailSheet({ rule, onClose, onToggle }: {
                   : <><Power className="h-3.5 w-3.5" />启用</>}
               </Button>
               <div className="flex-1" />
-              <Link href={editHref as Parameters<typeof Link>[0]['href']}>
+              <Link href={editHref as Parameters<typeof Link>[0]['href']} data-testid="rule-detail-edit-link">
                 <Button size="sm" className="flex items-center gap-1.5">
                   <ExternalLink className="h-3.5 w-3.5" />
                   在原页面编辑

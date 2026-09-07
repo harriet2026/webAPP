@@ -68,7 +68,7 @@ export function DisplayNameSpoofSection({ config, onChange, disabled }: DisplayN
               <TabsList>
                 {DIRECTION_KEYS.map((d) => (
                   <TabsTrigger key={d.key} value={d.key}>
-                    {t(d.labelKey as any)}
+                    {t(d.labelKey as Parameters<typeof t>[0])}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -77,7 +77,7 @@ export function DisplayNameSpoofSection({ config, onChange, disabled }: DisplayN
                 <TabsContent key={d.key} value={d.key}>
                   <div className="pt-2">
                     <CheckItemRow
-                      label={t(d.labelKey as any)}
+                      label={t(d.labelKey as Parameters<typeof t>[0])}
                       item={config[d.key]}
                       onChange={(item) => handleDirectionChange(d.key, item)}
                       disabled={disabled}
@@ -103,7 +103,7 @@ export function DisplayNameSpoofSection({ config, onChange, disabled }: DisplayN
                 <div key={i} className="flex items-center gap-2 rounded-lg border p-2">
                   <span className="text-sm flex-1 font-mono">{user.name}</span>
                   <Badge variant="outline" className="text-[10px]">
-                    {t(`displayNameSpoof.${user.match_mode}` as any)}
+                    {t(`displayNameSpoof.${user.match_mode}` as Parameters<typeof t>[0])}
                   </Badge>
                   <Button variant="ghost" size="icon-sm" onClick={() => handleRemoveUser(i)} disabled={disabled}>
                     <X className="h-3 w-3" />
@@ -141,5 +141,4 @@ export function DisplayNameSpoofSection({ config, onChange, disabled }: DisplayN
     </Card>
   );
 }
-
 

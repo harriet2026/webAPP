@@ -2,14 +2,24 @@
 
 import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getAgentCenterOverview } from '@/lib/api/agent-center';
+import {
+  getAgentCenterOverview,
+  type AgentCenterOverviewOptions,
+} from '@/lib/api/agent-center';
 import { useApiRequest } from '@/lib/api/client';
 import { useProductForm } from '@/contexts/product-form-context';
 import type { AgentCenterOverview } from '@/types/agent-center';
 
-export const agentCenterOverviewQueryKey = (tenantId: number | null | undefined) => (
-  ['agent-center-overview', tenantId ?? null] as const
+export const agentCenterOverviewQueryKey = (
+  tenantId: number | null | undefined,
+  includeStats = true,
+) => (
+  ['agent-center-overview', tenantId ?? null, includeStats] as const
 );
+
+export interface UseAgentCenterOverviewOptions extends AgentCenterOverviewOptions {
+  enabled?: boolean;
+}
 
 // 仿冒邮件/威胁回溯智能体暂不对外露出：仅当产品形态切换器
 // （OSGATEWAY_PRODUCT_FORM_SWITCHER=true，演示/开发环境）开启时展示，
@@ -17,9 +27,10 @@ export const agentCenterOverviewQueryKey = (tenantId: number | null | undefined)
 // 两个消费方都经由本 hook 取数，在此统一过滤即可同时覆盖。
 const SWITCHER_ONLY_AGENTS = new Set<string>(['spoofing', 'threat-retro']);
 
-export function useAgentCenterOverview() {
+export function useAgentCenterOverview(options: UseAgentCenterOverviewOptions = {}) {
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const { switcherEnabled } = useProductForm();
+  const includeStats = options.includeStats ?? true;
   const select = useCallback(
     (data: AgentCenterOverview): AgentCenterOverview => (
       switcherEnabled
@@ -29,8 +40,9 @@ export function useAgentCenterOverview() {
     [switcherEnabled],
   );
   return useQuery({
-    queryKey: agentCenterOverviewQueryKey(effectiveTenantId),
-    queryFn: () => getAgentCenterOverview(apiRequest),
+    queryKey: agentCenterOverviewQueryKey(effectiveTenantId, includeStats),
+    queryFn: () => getAgentCenterOverview(apiRequest, { includeStats }),
+    enabled: options.enabled,
     staleTime: 30_000,
     select,
   });

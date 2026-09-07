@@ -144,12 +144,14 @@ export default function AuditQueuePage() {
       id: 'select',
       header: () => (
         <Checkbox
+          data-testid="audit-queue-select-all"
           checked={selectedIds.length === items.length && items.length > 0}
           onCheckedChange={handleSelectAll}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
+          data-testid={`audit-queue-select-${row.original.id}`}
           checked={selectedIds.includes(row.original.id)}
           onCheckedChange={(checked) => handleSelect(row.original.id, !!checked)}
         />
@@ -191,10 +193,12 @@ export default function AuditQueuePage() {
       accessorKey: 'status',
       header: t('common.status'),
       cell: ({ row }) => (
-        <StatusBadge
-          status={row.original.status}
-          variant={row.original.status === 'approved' ? 'success' : row.original.status === 'rejected' ? 'error' : 'warning'}
-        />
+        <span data-testid={`audit-queue-status-${row.original.id}`}>
+          <StatusBadge
+            status={row.original.status}
+            variant={row.original.status === 'approved' ? 'success' : row.original.status === 'rejected' ? 'error' : 'warning'}
+          />
+        </span>
       ),
     },
     {
@@ -208,6 +212,7 @@ export default function AuditQueuePage() {
       cell: ({ row }) => (
         <div className="flex gap-1">
           <Button
+            data-testid={`audit-queue-preview-${row.original.id}`}
             variant="ghost"
             size="icon"
             onClick={() => handlePreview(row.original)}
@@ -216,6 +221,7 @@ export default function AuditQueuePage() {
             <Eye className="h-4 w-4" />
           </Button>
           <Button
+            data-testid={`audit-queue-approve-${row.original.id}`}
             variant="ghost"
             size="icon"
             onClick={() => setNotesDialog({ type: 'approve', ids: [row.original.id] })}
@@ -224,6 +230,7 @@ export default function AuditQueuePage() {
             <Check className="h-4 w-4 text-green-500" />
           </Button>
           <Button
+            data-testid={`audit-queue-reject-${row.original.id}`}
             variant="ghost"
             size="icon"
             onClick={() => setNotesDialog({ type: 'reject', ids: [row.original.id] })}
@@ -244,11 +251,11 @@ export default function AuditQueuePage() {
         description={t('auditQueue.subtitle')}
         actions={activeTab === 'pending' && selectedIds.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            <Button variant="default" onClick={() => handleBatchAction('approve')}>
+            <Button data-testid="audit-queue-batch-approve" variant="default" onClick={() => handleBatchAction('approve')}>
               <Check className="h-4 w-4 mr-2" />
               {t('auditQueue.batchApprove')} ({selectedIds.length})
             </Button>
-            <Button variant="destructive" onClick={() => handleBatchAction('reject')}>
+            <Button data-testid="audit-queue-batch-reject" variant="destructive" onClick={() => handleBatchAction('reject')}>
               <X className="h-4 w-4 mr-2" />
               {t('auditQueue.batchReject')} ({selectedIds.length})
             </Button>
@@ -259,9 +266,9 @@ export default function AuditQueuePage() {
       <PageSurface>
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab((v ?? 'pending') as 'pending' | 'approved' | 'rejected'); setSelectedIds([]); }}>
         <TabsList className="rounded-2xl border border-border/70 bg-muted/30 p-1">
-          <TabsTrigger value="pending">{t('auditQueue.pending')}</TabsTrigger>
-          <TabsTrigger value="approved">{t('auditQueue.approved')}</TabsTrigger>
-          <TabsTrigger value="rejected">{t('auditQueue.rejected')}</TabsTrigger>
+          <TabsTrigger data-testid="audit-queue-tab-pending" value="pending">{t('auditQueue.pending')}</TabsTrigger>
+          <TabsTrigger data-testid="audit-queue-tab-approved" value="approved">{t('auditQueue.approved')}</TabsTrigger>
+          <TabsTrigger data-testid="audit-queue-tab-rejected" value="rejected">{t('auditQueue.rejected')}</TabsTrigger>
         </TabsList>
         <TabsContent value={activeTab} className="mt-4">
           {isLoading ? (
@@ -269,14 +276,14 @@ export default function AuditQueuePage() {
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <DataTable columns={columns} data={items} />
+            <DataTable columns={columns} data={items} rowTestId={(row) => `audit-queue-row-${row.id}`} />
           )}
         </TabsContent>
       </Tabs>
       </PageSurface>
 
       <Dialog open={!!notesDialog} onOpenChange={(open) => !open && setNotesDialog(null)}>
-        <DialogContent className="max-w-md rounded-[28px] border-border/70 shadow-2xl">
+        <DialogContent data-testid="audit-queue-review-dialog" className="max-w-md rounded-[28px] border-border/70 shadow-2xl">
           <DialogHeader>
             <DialogTitle>
               {notesDialog?.type === 'approve' ? t('auditQueue.approveTitle') : t('auditQueue.rejectTitle')}
@@ -286,6 +293,7 @@ export default function AuditQueuePage() {
             <div className="space-y-2">
               <Label>{t('auditQueue.notes')}</Label>
               <textarea
+                data-testid="audit-queue-review-notes"
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -293,8 +301,8 @@ export default function AuditQueuePage() {
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setNotesDialog(null)}>{t('common.cancel')}</Button>
-              <Button onClick={handleSubmitNotes} disabled={isSubmitting}>
+              <Button data-testid="audit-queue-review-cancel" variant="outline" onClick={() => setNotesDialog(null)}>{t('common.cancel')}</Button>
+              <Button data-testid="audit-queue-review-confirm" onClick={handleSubmitNotes} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {t('common.confirm')}
               </Button>

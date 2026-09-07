@@ -39,15 +39,17 @@ export function PlatformSecurityPage() {
 
   if (!canManageTenants) {
     return (
-      <PageShell>
+      <PageShell data-testid="platform-security-page">
         <PageHeader title={t('title')} />
-        <AccessDeniedPanel description={t('accessDenied')} />
+        <div data-testid="platform-security-access-denied">
+          <AccessDeniedPanel description={t('accessDenied')} />
+        </div>
       </PageShell>
     );
   }
 
   return (
-    <PageShell>
+    <PageShell data-testid="platform-security-page">
       <PageHeader
         title={
           <span className="flex items-center gap-2">

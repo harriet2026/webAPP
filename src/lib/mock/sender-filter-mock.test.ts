@@ -5,7 +5,7 @@ import { GROUPS_LIST_QUERY } from '@/lib/api/groups';
 import type { ApiRequestFn } from '@/lib/api/client';
 
 describe('sender_filter mock', () => {
-  const path = '/unified-rules?rule_page=sender_filter&rule_class=action&stage=rcpt&page_size=10000';
+  const path = '/unified-rules?rule_page=sender_filter&rule_class=action&stage=rcpt&page=1&page_size=100';
   it('被 mock 覆盖', () => {
     expect(isMockable('GET', path)).toBe(true);
   });
@@ -41,7 +41,7 @@ describe('sender_filter mock', () => {
 describe('/unified-rules mock 只覆盖 sender_filter 与群组两种 query（回归：其余模块必须放行到真实后端）', () => {
   it('sender_filter 列表页 query 被 mock 覆盖', () => {
     expect(
-      isMockable('GET', '/unified-rules?rule_page=sender_filter&rule_class=action&stage=rcpt&page_size=10000'),
+      isMockable('GET', '/unified-rules?rule_page=sender_filter&rule_class=action&stage=rcpt&page=1&page_size=100'),
     ).toBe(true);
   });
 

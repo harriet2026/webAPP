@@ -6,6 +6,7 @@ import { Plus, Download, Upload, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -34,6 +35,7 @@ import type {
 } from "@/types/content-rules";
 import type {
   CreateRuleRequest,
+  Rule,
   UpdateRuleRequest,
 } from "@/types/unified-rules";
 import type { Group } from "@/types/groups";
@@ -51,6 +53,7 @@ import {
 } from "@/lib/api/unified-rules";
 import { ModuleMasterSwitch } from "@/components/security/ModuleMasterSwitch";
 import { useApiErrorMessage } from "@/lib/api/use-api-error-message";
+import { buildContentRuleImportTemplate } from "@/lib/content-rule-import-template";
 
 function toRFC3339(value?: string): string | null {
   if (!value) return null;
@@ -59,10 +62,14 @@ function toRFC3339(value?: string): string | null {
   return d.toISOString();
 }
 
-export function ContentRulesPage({ embedded, onEnabledChange }: {
+export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, deepLinkRuleRef }: {
   embedded?: boolean;
   /** 向父级（策略流水线左导航）回传模块总开关启用态，用于圆点/摘要联动。 */
   onEnabledChange?: (enabled: boolean) => void;
+  /** 处置依据深链接解析出的 unified_rules 数字主键。 */
+  deepLinkRuleID?: number;
+  /** 原始公开规则标识（例如 CR-26694），用于明确的定位/失败提示。 */
+  deepLinkRuleRef?: string;
 } = {}) {
   const t = useTranslations();
   const apiErrorMessage = useApiErrorMessage();
@@ -102,6 +109,11 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
   const [importExportTab, setImportExportTab] = useState<"export" | "import">("export");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [handledDeepLinkRuleID, setHandledDeepLinkRuleID] = useState<number | undefined>(undefined);
+  const importTemplate = useMemo(
+    () => buildContentRuleImportTemplate(selectedTenantId ?? user?.tenant_id),
+    [selectedTenantId, user?.tenant_id],
+  );
 
   const queryKey = useMemo(() => [
     "content-rules-rules",
@@ -124,6 +136,17 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
         apiRequest,
       ),
     enabled: embedded || isSystemAdmin || user?.role === "tenant_admin",
+  });
+
+  const {
+    data: deepLinkedRule,
+    isFetching: isDeepLinkRuleLoading,
+    isError: isDeepLinkRuleError,
+  } = useQuery<Rule>({
+    queryKey: ["content-rule-deep-link", deepLinkRuleID],
+    queryFn: () => apiRequest<Rule>(`/unified-rules/${deepLinkRuleID}`),
+    enabled: !!deepLinkRuleID && (embedded || isSystemAdmin || user?.role === "tenant_admin"),
+    retry: false,
   });
 
   const { data: groupsData } = useQuery<{ items: unknown[] }>({
@@ -167,6 +190,19 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
       };
     });
   }, [rulesData]);
+
+  // A deep link may target a rule outside the current page/filter, so load it
+  // directly by its stable database ID and open the same edit drawer used by
+  // the table. This guarded render-time state adjustment is the React pattern
+  // for deriving local selection from newly-arrived query data without a
+  // cascading synchronization effect.
+  const deepLinkWrongPage = !!deepLinkedRule && deepLinkedRule.page !== "content_rules";
+  if (deepLinkRuleID && deepLinkedRule && !deepLinkWrongPage && handledDeepLinkRuleID !== deepLinkRuleID) {
+    setHandledDeepLinkRuleID(deepLinkRuleID);
+    const resolved = resolveContentRulesRule(deepLinkedRule);
+    setEditingRule({ rule: deepLinkedRule, resolved, is_complex: resolved === null });
+    setDrawerOpen(true);
+  }
 
   const totalFiltered = rulesData?.total ?? 0;
   const totalPages = Math.max(
@@ -234,7 +270,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
   const handleOpenDrawer = useCallback((rule?: ContentRuleRuleView) => {
     setEditingRule(rule || null);
     setDrawerOpen(true);
-  }, []);
+  }, [setDrawerOpen, setEditingRule]);
 
   const handleSubmit = useCallback(
     async (data: ContentRuleFormData) => {
@@ -331,7 +367,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
       .catch((error: Error) => {
         toast.error(apiErrorMessage(error));
       });
-  }, [selectedIds, apiRequest, queryClient, queryKey, t, apiErrorMessage]);
+  }, [selectedIds, apiRequest, queryClient, queryKey, t, apiErrorMessage, setSelectedIds]);
 
   if (!embedded && !isSystemAdmin && user?.role !== "tenant_admin") {
     return (
@@ -347,7 +383,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
   const actionButtons = (
     <div className="flex gap-2">
       {isContentRulesAdmin && (
-        <Button variant="outline" onClick={() => {
+        <Button variant="outline" data-testid="content-rules-import" onClick={() => {
           setImportExportTab("import");
           setImportExportOpen(true);
         }}>
@@ -356,7 +392,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
         </Button>
       )}
       {isContentRulesAdmin && (
-        <Button variant="outline" onClick={() => {
+        <Button variant="outline" data-testid="content-rules-export" onClick={() => {
           setImportExportTab("export");
           setImportExportOpen(true);
         }}>
@@ -376,6 +412,20 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
   const content = (
     <>
       <div className="space-y-4">
+        {deepLinkRuleID && isDeepLinkRuleLoading && (
+          <Alert data-testid="content-rule-deep-link-loading">
+            <AlertDescription>
+              {t("contentRules.deepLinkLoading", { ruleId: deepLinkRuleRef ?? deepLinkRuleID })}
+            </AlertDescription>
+          </Alert>
+        )}
+        {deepLinkRuleID && (isDeepLinkRuleError || deepLinkWrongPage) && (
+          <Alert variant="destructive" data-testid="content-rule-deep-link-unavailable">
+            <AlertDescription>
+              {t("contentRules.deepLinkUnavailable", { ruleId: deepLinkRuleRef ?? deepLinkRuleID })}
+            </AlertDescription>
+          </Alert>
+        )}
         <div className="flex flex-wrap gap-3 items-center">
           <Input
             data-testid="content-rules-search"
@@ -396,7 +446,10 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
               setSelectedIds([]);
             }}
           >
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger
+              className="w-[120px]"
+              data-testid="content-rules-status-filter"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -436,6 +489,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
               <Button
                 variant="outline"
                 size="sm"
+                data-testid="content-rules-bulk-enable"
                 onClick={() =>
                   bulkMutation.mutate({ ids: selectedIds, active: true })
                 }
@@ -445,6 +499,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
               <Button
                 variant="outline"
                 size="sm"
+                data-testid="content-rules-bulk-disable"
                 onClick={() =>
                   bulkMutation.mutate({ ids: selectedIds, active: false })
                 }
@@ -454,6 +509,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
               <Button
                 variant="destructive"
                 size="sm"
+                data-testid="content-rules-bulk-delete"
                 onClick={() => setBulkDeleteOpen(true)}
               >
                 {t("common.delete")}
@@ -545,6 +601,7 @@ export function ContentRulesPage({ embedded, onEnabledChange }: {
         variant="unified-rules"
         adminContext={isSystemAdmin ? "system-admin" : "tenant-admin"}
         tenantOptions={tenantOptions}
+        importTemplate={importTemplate}
         onExport={(selection) =>
           exportUnifiedRules(selection, apiRequest, "content_rules")
         }

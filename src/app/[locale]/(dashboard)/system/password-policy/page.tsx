@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Save, Loader2 } from 'lucide-react';
@@ -18,15 +18,10 @@ export default function PasswordPolicyPage() {
   const { isSystemAdmin } = usePermission();
   const { data, isLoading } = usePasswordPolicySettings();
   const update = useUpdatePasswordPolicySettings();
-  const [minLength, setMinLength] = useState<number | null>(null);
-  const [minCharClasses, setMinCharClasses] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (data) {
-      setMinLength(data.minLength);
-      setMinCharClasses(data.minCharClasses);
-    }
-  }, [data]);
+  const [minLengthOverride, setMinLengthOverride] = useState<number | null>(null);
+  const [minCharClassesOverride, setMinCharClassesOverride] = useState<number | null>(null);
+  const minLength = minLengthOverride ?? data?.minLength ?? null;
+  const minCharClasses = minCharClassesOverride ?? data?.minCharClasses ?? null;
 
   if (!isSystemAdmin) {
     return <AccessDeniedPanel description={t('common.accessDenied')} />;
@@ -50,6 +45,7 @@ export default function PasswordPolicyPage() {
         actions={
           <Button
             type="button"
+            data-testid="password-policy-save"
             onClick={onSave}
             disabled={update.isPending || isLoading || minLength === null || minCharClasses === null}
           >
@@ -70,13 +66,13 @@ export default function PasswordPolicyPage() {
           <div className="max-w-md space-y-4">
             <label className="block space-y-1">
               <span className="text-sm font-medium">{t('passwordPolicy.minLength')}</span>
-              <Select value={String(minLength)} onValueChange={(v) => setMinLength(Number(v))}>
-                <SelectTrigger>
+              <Select value={String(minLength)} onValueChange={(v) => setMinLengthOverride(Number(v))}>
+                <SelectTrigger data-testid="password-policy-min-length">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {data.lengthTiers.map((n) => (
-                    <SelectItem key={n} value={String(n)}>
+                    <SelectItem key={n} value={String(n)} data-testid={`password-policy-min-length-option-${n}`}>
                       {n}
                     </SelectItem>
                   ))}
@@ -85,13 +81,13 @@ export default function PasswordPolicyPage() {
             </label>
             <label className="block space-y-1">
               <span className="text-sm font-medium">{t('passwordPolicy.minCharClasses')}</span>
-              <Select value={String(minCharClasses)} onValueChange={(v) => setMinCharClasses(Number(v))}>
-                <SelectTrigger>
+              <Select value={String(minCharClasses)} onValueChange={(v) => setMinCharClassesOverride(Number(v))}>
+                <SelectTrigger data-testid="password-policy-min-char-classes">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {data.classTiers.map((n) => (
-                    <SelectItem key={n} value={String(n)}>
+                    <SelectItem key={n} value={String(n)} data-testid={`password-policy-min-char-classes-option-${n}`}>
                       {n}
                     </SelectItem>
                   ))}

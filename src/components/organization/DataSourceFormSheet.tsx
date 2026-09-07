@@ -363,7 +363,7 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
 
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
           <SectionCard title={t('sectionBasic')}>
-            <Field label={t('fieldName')} required error={nameErr} data-testid="contacts-source-form-name">
+            <Field label={t('fieldName')} required error={nameErr} data-testid="contacts-source-form-name" errorTestId="contacts-source-form-name-error">
               <Input
                 value={draft.name}
                 onChange={(e) => patch({ name: e.target.value })}
@@ -414,7 +414,7 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
                       data-testid="contacts-source-form-server"
                     />
                   </Field>
-                  <Field label={t('fieldPort')} required error={portErr} data-testid="contacts-source-form-port">
+                  <Field label={t('fieldPort')} required error={portErr} data-testid="contacts-source-form-port" errorTestId="contacts-source-form-port-error">
                     <Input
                       type="number"
                       value={draft.port}

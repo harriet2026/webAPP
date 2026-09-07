@@ -29,6 +29,14 @@ const MAX_BRAND_LEN = 30;
 
 function clamp(n: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, n)); }
 
+function effectiveMode(e: SpoofBrandDTO | null): SpoofDispositionMode {
+  if (e?.observe_mode) return 'observe';
+  if (e?.disposition?.mode && e.disposition.mode !== 'observe') return e.disposition.mode;
+  if (e?.disposition?.action === 'quarantine') return 'standard';
+  if (e?.disposition?.action === 'reject' || e?.disposition?.action === 'discard') return 'strict';
+  return e ? 'custom' : 'standard';
+}
+
 function initFromEditing(e: SpoofBrandDTO | null) {
   return {
     brandName: e?.brand_name ?? '',
@@ -36,7 +44,7 @@ function initFromEditing(e: SpoofBrandDTO | null) {
     protectedDomains: e?.protected_domains?.length
       ? e.protected_domains.map((d) => ({ ...d }))
       : ([{ domain: '', edit_distance_threshold: 3 }] as SpoofProtectedDomain[]),
-    mode: (e?.disposition?.mode ?? 'standard') as SpoofDispositionMode,
+    mode: effectiveMode(e),
     action: (e?.disposition?.action ?? 'quarantine') as SpoofDispositionAction,
     markStyle: (e?.disposition?.mark_style ?? (['subject'] as SpoofMarkPosition[])),
     markText: e?.disposition?.mark_text ?? '',
@@ -46,22 +54,24 @@ function initFromEditing(e: SpoofBrandDTO | null) {
   };
 }
 
-function BrandFormSection({ icon: Icon, title, description, children, muted = false }: {
+function BrandFormSection({ icon: Icon, title, description, children, muted = false, testId, titleTestId }: {
   icon: LucideIcon;
   title: string;
   description: string;
   children: React.ReactNode;
   muted?: boolean;
+  testId?: string;
+  titleTestId?: string;
 }) {
   return (
-    <section className={muted ? 'bg-muted/30 px-6 py-6' : 'bg-background px-6 py-6'}>
+    <section className={muted ? 'bg-muted/30 px-6 py-6' : 'bg-background px-6 py-6'} data-testid={testId}>
       <div className="space-y-4">
         <div className="flex items-center gap-3 border-b border-border pb-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
             <Icon className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+            <h3 className="text-sm font-semibold text-foreground" data-testid={titleTestId}>{title}</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
           </div>
         </div>
@@ -159,7 +169,7 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
         notify, admin_emails: adminList.length ? adminList : undefined,
       },
       enabled: editing?.enabled ?? true,
-      observe_mode: editing?.observe_mode ?? false,
+      observe_mode: mode === 'observe',
     };
   }
 
@@ -186,17 +196,17 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
   return (
     <>
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex max-w-[80vw] flex-col gap-0 p-0 data-[side=right]:w-[80vw]">
+      <SheetContent side="right" className="flex max-w-[80vw] flex-col gap-0 p-0 data-[side=right]:w-[80vw]" data-testid="spoof-brand-form">
         <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle>{isEdit ? tsd('brandForm.editTitle') : tsd('brandForm.addTitle')}</SheetTitle>
+          <SheetTitle data-testid="spoof-brand-form-sheet-title">{isEdit ? tsd('brandForm.editTitle') : tsd('brandForm.addTitle')}</SheetTitle>
           <SheetDescription>{isEdit ? tsd('brand.subtitle') : tsd('brandForm.addDescription')}</SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto">
-          <BrandFormSection icon={Shield} title={tsd('brandForm.sectionIdentity')} description={tsd('brandForm.sectionIdentityDescription')}>
+          <BrandFormSection testId="spoof-brand-form-section-identity" titleTestId="spoof-brand-form-heading-identity" icon={Shield} title={tsd('brandForm.sectionIdentity')} description={tsd('brandForm.sectionIdentityDescription')}>
             <div className="space-y-1.5">
               <Label>{tsd('brandForm.brandName')}</Label>
-              <Input value={brandName} maxLength={MAX_BRAND_LEN}
+              <Input value={brandName} maxLength={MAX_BRAND_LEN} data-testid="spoof-brand-form-name"
                 onChange={(e) => setBrandName(e.target.value)} placeholder={tsd('brandForm.brandNamePlaceholder')} />
               <p className="text-xs text-muted-foreground">{brandName.trim().length}/{MAX_BRAND_LEN} · {tsd('brandForm.brandNameHint')}</p>
               {brandName.trim().length > MAX_BRAND_LEN ? <p className="text-xs text-destructive">{tsd('brandForm.errBrandName')}</p> : null}
@@ -205,13 +215,13 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
               <Label>{tsd('brandForm.keywords')}</Label>
               <p className="text-xs text-muted-foreground">{tsd('brandForm.keywordsHint')}</p>
               <div className="flex items-center gap-2">
-                <Input value={keywordInput}
+                <Input value={keywordInput} data-testid="spoof-brand-form-keyword-input"
                   onChange={(e) => setKeywordInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addKeyword(); } }}
                   maxLength={MAX_KEYWORD_LEN}
                   disabled={keywords.length >= MAX_KEYWORDS}
                   placeholder={keywords.length >= MAX_KEYWORDS ? tsd('brandForm.errKeywords') : ''} />
-                <Button variant="outline" size="sm" onClick={addKeyword} disabled={keywords.length >= MAX_KEYWORDS}>
+                <Button variant="outline" size="sm" data-testid="spoof-brand-form-add-keyword" onClick={addKeyword} disabled={keywords.length >= MAX_KEYWORDS}>
                   <Plus className="mr-1 h-3.5 w-3.5" />{tsd('brandForm.addKeyword')}
                 </Button>
               </div>
@@ -235,54 +245,54 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
                 <span />
               </div>
               {protectedDomains.map((d, idx) => (
-                <div key={idx} className="grid grid-cols-[minmax(0,1fr)_7rem_2rem] items-center gap-2">
-                  <Input value={d.domain} placeholder={idx === 0 ? 'cacter.com' : 'example.com'}
+                <div key={idx} className="grid grid-cols-[minmax(0,1fr)_7rem_2rem] items-center gap-2" data-testid={`spoof-brand-form-domain-row-${idx}`}>
+                  <Input value={d.domain} data-testid={`spoof-brand-form-domain-${idx}`} placeholder={idx === 0 ? 'cacter.com' : 'example.com'}
                     onChange={(e) => setProtectedDomains((prev) => prev.map((x, i) => i === idx ? { ...x, domain: e.target.value } : x))}
                     className="min-w-0" />
-                  <Input type="number" min={1} value={d.edit_distance_threshold}
+                  <Input type="number" min={1} value={d.edit_distance_threshold} data-testid={`spoof-brand-form-distance-${idx}`}
                     onChange={(e) => setProtectedDomains((prev) => prev.map((x, i) => i === idx ? { ...x, edit_distance_threshold: Number(e.target.value) } : x))}
                     className="w-full" />
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500"
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500" data-testid={`spoof-brand-form-domain-remove-${idx}`}
                     onClick={() => setProtectedDomains((prev) => prev.filter((_, i) => i !== idx))}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               ))}
-              <Button variant="outline" size="sm"
+              <Button variant="outline" size="sm" data-testid="spoof-brand-form-add-domain"
                 onClick={() => setProtectedDomains((prev) => [...prev, { domain: '', edit_distance_threshold: 3 }])}>
                 <Plus className="mr-1 h-3.5 w-3.5" />{tsd('brandForm.addDomain')}
               </Button>
-              {noDomain ? <p className="text-xs text-destructive">{tsd('brandForm.errNoDomain')}</p> : null}
-              {emptyDomainInvalid ? <p className="text-xs text-destructive">{tsd('brandForm.errEmptyDomain')}</p> : null}
-              {populatedDomainInvalid ? <p className="text-xs text-destructive">{tsd('brandForm.errDomainThreshold')}</p> : null}
+              {noDomain ? <p className="text-xs text-destructive" data-testid="spoof-brand-form-err-no-domain">{tsd('brandForm.errNoDomain')}</p> : null}
+              {emptyDomainInvalid ? <p className="text-xs text-destructive" data-testid="spoof-brand-form-err-empty-domain">{tsd('brandForm.errEmptyDomain')}</p> : null}
+              {populatedDomainInvalid ? <p className="text-xs text-destructive" data-testid="spoof-brand-form-err-domain-threshold">{tsd('brandForm.errDomainThreshold')}</p> : null}
             </div>
           </BrandFormSection>
 
-          <BrandFormSection icon={Search} title={tsd('brandForm.sectionDetection')} description={tsd('brandForm.sectionDetectionDescription')} muted>
+          <BrandFormSection testId="spoof-brand-form-section-detection" titleTestId="spoof-brand-form-heading-detection" icon={Search} title={tsd('brandForm.sectionDetection')} description={tsd('brandForm.sectionDetectionDescription')} muted>
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-3">
               <Label className="min-w-32">{tsd('brandForm.confidenceThreshold')}</Label>
-              <Input type="number" min={0} max={100} value={confidenceThreshold}
+              <Input type="number" min={0} max={100} value={confidenceThreshold} data-testid="spoof-brand-form-confidence"
                 onChange={(e) => setConfidenceThreshold(clamp(Number(e.target.value), 0, 100))} className="h-8 w-28" />
               <span className="text-xs text-muted-foreground">{tsd('brandForm.confidenceThresholdHint')}</span>
               </div>
             </div>
           </BrandFormSection>
 
-          <BrandFormSection icon={Shield} title={tsd('brandForm.sectionDisposition')} description={tsd('brandForm.sectionDispositionDescription')}>
+          <BrandFormSection testId="spoof-brand-form-section-disposition" titleTestId="spoof-brand-form-heading-disposition" icon={Shield} title={tsd('brandForm.sectionDisposition')} description={tsd('brandForm.sectionDispositionDescription')}>
             {discardNeedsAlert ? (
-              <div className="flex items-start gap-2 rounded-md border border-rose-300/60 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+              <div className="flex items-start gap-2 rounded-md border border-rose-300/60 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300" data-testid="spoof-brand-form-discard-alert">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{tsd('personForm.errDiscardNeedsAlert')}</span>
               </div>
             ) : null}
             <div className="space-y-2">
               <Label>{tsd('personForm.disposition')}</Label>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3" data-testid="spoof-brand-form-modes">
                 {modeCards.map((card) => {
                   const active = mode === card.key;
                   return (
-                    <button key={card.key} type="button" onClick={() => onModeChange(card.key)}
+                    <button key={card.key} type="button" data-testid={`spoof-brand-form-mode-${card.key}`} onClick={() => onModeChange(card.key)}
                       className={active
                         ? 'relative overflow-hidden rounded-lg border border-blue-500 bg-blue-50 py-3 pl-4 pr-3 text-left dark:bg-blue-950/30'
                         : 'relative overflow-hidden rounded-lg border border-border py-3 pl-4 pr-3 text-left hover:bg-accent'}>
@@ -293,21 +303,24 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
                   );
                 })}
               </div>
-              {mode === 'custom' ? <p className="text-xs text-muted-foreground">{tsd('brandForm.modeCustomHint')}</p> : null}
+              {mode === 'custom' ? <p className="text-xs text-muted-foreground" data-testid="spoof-brand-form-mode-custom-hint">{tsd('brandForm.modeCustomHint')}</p> : null}
             </div>
-            <div className="space-y-2">
-              <Label>{tsd('personForm.action')}</Label>
-              <div className="inline-flex max-w-full flex-wrap rounded-lg border border-border bg-muted/30 p-1">
-                {availableActions.map((candidate) => (
-                  <Button key={candidate} type="button" size="sm"
-                    variant={action === candidate ? 'default' : 'ghost'}
-                    onClick={() => onActionChange(candidate)}>
-                    {tsd(`disposition.${candidate}`)}
-                  </Button>
-                ))}
+            {mode !== 'observe' ? (
+              <div className="space-y-2">
+                <Label>{tsd('personForm.action')}</Label>
+                <div className="inline-flex max-w-full flex-wrap rounded-lg border border-border bg-muted/30 p-1" data-testid="spoof-brand-form-actions">
+                  {availableActions.map((candidate) => (
+                    <Button key={candidate} type="button" size="sm"
+                      data-testid={`spoof-brand-form-action-${candidate}`}
+                      variant={action === candidate ? 'default' : 'ghost'}
+                      onClick={() => onActionChange(candidate)}>
+                      {tsd(`disposition.${candidate}`)}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </div>
-            {(mode === 'observe' || action === 'accept') ? (
+            ) : null}
+            {mode !== 'observe' && action === 'accept' ? (
               <div className="space-y-2">
                 <Label>{tsd('personForm.markStyle')}</Label>
                 <div className="flex flex-wrap gap-3">
@@ -331,12 +344,12 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
                   <Label className="font-normal">{tsd('personForm.notify')}</Label>
                   <p className="mt-1 text-xs text-muted-foreground">{tsd('personForm.adminEmailsHint')}</p>
                 </div>
-                <Switch checked={notify} onCheckedChange={setNotify} />
+                <Switch data-testid="spoof-brand-form-notify" checked={notify} onCheckedChange={setNotify} />
               </div>
               {notify ? (
                 <div className="space-y-2">
                   <Label>{tsd('personForm.adminEmails')}</Label>
-                  <Input value={adminEmails} onChange={(e) => setAdminEmails(e.target.value)}
+                  <Input value={adminEmails} data-testid="spoof-brand-form-admin-emails" onChange={(e) => setAdminEmails(e.target.value)}
                     placeholder={tsd('personForm.adminEmailsPlaceholder')} />
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-xs text-muted-foreground">{tsd('personForm.previewNotifyHint')}</p>
@@ -365,8 +378,8 @@ export function SpoofingBrandForm({ open, onOpenChange, editing, onSaved }: {
 
         <SheetFooter className="border-t px-6 py-3">
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>{tsd('brandForm.cancel')}</Button>
-            <Button disabled={saveDisabled || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
+            <Button variant="outline" data-testid="spoof-brand-form-cancel" onClick={() => onOpenChange(false)}>{tsd('brandForm.cancel')}</Button>
+            <Button data-testid="spoof-brand-form-save" disabled={saveDisabled || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
               {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {tsd('brandForm.save')}
             </Button>

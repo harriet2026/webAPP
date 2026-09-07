@@ -147,11 +147,11 @@ export function SearchFilters({ onSearch, onReset, defaultValues, initialAdvance
         <Select value={action || ''} onValueChange={(value) => form.setValue('action', value || '')}>
           <SelectTrigger data-testid="email-logs-filter-action"><SelectValue placeholder={t('logs.action')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">{t('common.all')}</SelectItem>
-            <SelectItem value="accept">{t('rules.accept')}</SelectItem>
-            <SelectItem value="reject">{t('rules.reject')}</SelectItem>
-            <SelectItem value="quarantine">{t('rules.quarantine')}</SelectItem>
-            <SelectItem value="sideline">{t('rules.sideline')}</SelectItem>
+            <SelectItem value="" data-testid="email-logs-filter-action-option-all">{t('common.all')}</SelectItem>
+            <SelectItem value="accept" data-testid="email-logs-filter-action-option-accept">{t('rules.accept')}</SelectItem>
+            <SelectItem value="reject" data-testid="email-logs-filter-action-option-reject">{t('rules.reject')}</SelectItem>
+            <SelectItem value="quarantine" data-testid="email-logs-filter-action-option-quarantine">{t('rules.quarantine')}</SelectItem>
+            <SelectItem value="sideline" data-testid="email-logs-filter-action-option-sideline">{t('rules.sideline')}</SelectItem>
           </SelectContent>
         </Select>
       ),
@@ -175,7 +175,7 @@ export function SearchFilters({ onSearch, onReset, defaultValues, initialAdvance
           {advancedOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           {t('advancedFilter.title')}
           {advancedFilter.groups.some((g) => g.conditions.length > 0) && (
-            <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+            <span data-testid="email-logs-advanced-count" className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
               {advancedFilter.groups.reduce((sum, g) => sum + g.conditions.length, 0)}
             </span>
           )}

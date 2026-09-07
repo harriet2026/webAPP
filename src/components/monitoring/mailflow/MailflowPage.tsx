@@ -36,7 +36,7 @@ export function MailflowPage() {
   }, [node, nodes]);
 
   if (!isSystemAdmin) {
-    return <AccessDenied />;
+    return <div data-testid="monitor-mailflow-access-denied"><AccessDenied /></div>;
   }
 
   return (

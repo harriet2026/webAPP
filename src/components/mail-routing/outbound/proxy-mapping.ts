@@ -1,5 +1,5 @@
 // 出站路由步骤一：代理 IP（Task 13 接通真实后端）—— ProxysvrEndpoint ⇄ OutboundProxyRow 映射。
-// 对齐 doc/mail-routing.md §4、internal/models/proxysvr.go、internal/api/proxysvr.go。
+// 对齐 docs/features/mail-routing.md §4、internal/models/proxysvr.go、internal/api/proxysvr.go。
 
 import type { ProxysvrEndpoint, ProxysvrEndpointRequest } from '@/types/proxysvr';
 import { normalizeProbeStatus } from '../mr-types';

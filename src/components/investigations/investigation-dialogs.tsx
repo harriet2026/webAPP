@@ -679,7 +679,7 @@ export function InvestigationCreateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent data-testid="investigation-create-dialog">
         <DialogHeader>
           <DialogTitle>{t('investigations.createTitle')}</DialogTitle>
           <DialogDescription>{t('investigations.createDescription')}</DialogDescription>
@@ -689,12 +689,12 @@ export function InvestigationCreateDialog({
           <div className="space-y-2">
             <Label>{t('investigations.fields.agentType')}</Label>
             <Select value={type} onValueChange={(value) => setType(value as InvestigationType)}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" data-testid="investigation-type-select">
                 <SelectValue>{t(genericAgentTypes.find(i => i.value === type)?.labelKey ?? 'investigations.types.phish_analysis')}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {genericAgentTypes.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
+                  <SelectItem key={item.value} value={item.value} data-testid={`investigation-type-option-${item.value}`}>
                     {t(item.labelKey)}
                   </SelectItem>
                 ))}

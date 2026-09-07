@@ -28,6 +28,7 @@ export function AuthStatsCards() {
     {
       key: 'total',
       testId: 'auth-stats-total',
+      level: 'info',
       label: t('authAttempts.stats.total'),
       value: total,
       Icon: ListChecks,
@@ -36,6 +37,7 @@ export function AuthStatsCards() {
     {
       key: 'successRate',
       testId: 'auth-stats-success-rate',
+      level: 'success',
       label: t('authAttempts.stats.successRate'),
       value: successRate,
       Icon: ShieldCheck,
@@ -44,6 +46,7 @@ export function AuthStatsCards() {
     {
       key: 'failed',
       testId: 'auth-stats-failed',
+      level: 'danger',
       label: t('authAttempts.stats.failed'),
       value: failed,
       Icon: ShieldAlert,
@@ -56,7 +59,11 @@ export function AuthStatsCards() {
       {stats.map((s) => (
         <Card key={s.key} size="sm" data-testid={s.testId}>
           <CardContent className="flex items-center gap-4">
-            <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg', s.tone)}>
+            <div
+              data-testid={`auth-stats-icon-${s.key}`}
+              data-level={s.level}
+              className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg', s.tone)}
+            >
               <s.Icon className="h-5 w-5" />
             </div>
             <div className="min-w-0 space-y-1">

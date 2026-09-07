@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { TrendSeriesPoint } from '@/lib/api/security-overview';
-import { buildThreatTrendOption, formatThreatTrendBucket } from '../threat-trend-config';
+import {
+  buildEmptyThreatTrendBuckets,
+  buildThreatTrendOption,
+  formatThreatTrendBucket,
+} from '../threat-trend-config';
 
 const label = (key: string) => key;
 
@@ -135,12 +139,38 @@ describe('buildThreatTrendOption', () => {
 // 占位 div。
 describe('empty-data canvas option (GT-12397)', () => {
   it('returns a full axes option with centered empty-text graphic for zero points', () => {
-    const option = buildThreatTrendOption([], new Set(), (k) => k, '暂无数据');
+    const buckets = ['00:00', '06:00', '12:00', '18:00', '24:00'];
+    const option = buildThreatTrendOption([], new Set(), (k) => k, '暂无数据', buckets);
     expect(option).not.toBeNull();
-    expect(option?.xAxis).toMatchObject({ type: 'category', data: [] });
+    expect(option?.xAxis).toMatchObject({
+      type: 'category',
+      data: buckets,
+      axisLabel: { interval: 0, fontSize: 12, color: '#666666' },
+      axisTick: { show: true },
+    });
     expect(option?.yAxis).toMatchObject({ type: 'value', splitNumber: 4 });
+    expect(option?.grid).toMatchObject({ bottom: 8, containLabel: true });
     expect(option?.series).toEqual([]);
     const graphics = (option as { graphic?: Array<{ style?: { text?: string } }> }).graphic ?? [];
     expect(graphics.some((g) => g.style?.text === '暂无数据')).toBe(true);
+  });
+
+  it('builds time labels for each selected empty range without inventing series values', () => {
+    const now = new Date('2026-08-31T10:00:00+08:00');
+
+    expect(buildEmptyThreatTrendBuckets('24h', now)).toEqual([
+      '10:00', '14:00', '18:00', '22:00', '02:00', '06:00', '10:00',
+    ]);
+    expect(buildEmptyThreatTrendBuckets('today', now)).toEqual([
+      '00:00', '06:00', '12:00', '18:00', '24:00',
+    ]);
+    expect(buildEmptyThreatTrendBuckets('7d', now)).toEqual([
+      '2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28',
+      '2026-08-29', '2026-08-30', '2026-08-31',
+    ]);
+    expect(buildEmptyThreatTrendBuckets('30d', now)).toEqual([
+      '2026-08-02', '2026-08-07', '2026-08-12', '2026-08-17',
+      '2026-08-22', '2026-08-27', '2026-08-31',
+    ]);
   });
 });

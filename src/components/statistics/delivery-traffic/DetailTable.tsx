@@ -92,7 +92,7 @@ export function DetailTable({ data, direction, isLoading }: DetailTableProps) {
   const columns = COLUMNS_BY_DIRECTION[direction] ?? COLUMNS_BY_DIRECTION.all;
 
   return (
-    <Card className="rounded-xl bg-card shadow-sm backdrop-blur-none">
+    <Card className="rounded-xl bg-card shadow-sm backdrop-blur-none" data-testid="delivery-detail-table">
       <CardHeader className="grid-rows-[auto_auto]">
         <CardTitle className="leading-6">{t('title')}</CardTitle>
       </CardHeader>

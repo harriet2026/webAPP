@@ -26,7 +26,7 @@ describe('unifiedToRow', () => {
     expect(unifiedToRow(rule).tlsLevel).toBe('forceVerify');
   });
 
-  it('metadata.tls_level 缺失/空 → 兜底 prefer（doc/mail-routing.md §3.4）', () => {
+  it('metadata.tls_level 缺失/空 → 兜底 prefer（docs/features/mail-routing.md §3.4）', () => {
     expect(unifiedToRow(baseRule({ metadata: JSON.stringify({ channel: 'smtp' }) })).tlsLevel).toBe('prefer');
     expect(unifiedToRow(baseRule({ metadata: undefined })).tlsLevel).toBe('prefer');
   });

@@ -56,6 +56,19 @@ const fieldDefinitions: FieldDefinitionsResponse = {
         { value: 'delivery_failure_dsn', label: '投递失败退信' },
       ],
     },
+    mx_region: {
+      label: 'Recipient MX Region',
+      type: 'string',
+      min_stage: 'data',
+      operators: ['eq', 'ne', 'within'],
+      category: 'mail_basic',
+      supported: true,
+      enum_values: [
+        { value: 'CN', label: '中国 (CN)' },
+        { value: 'SG', label: '新加坡 (SG)' },
+        { value: 'US', label: '美国 (US)' },
+      ],
+    },
     rcpt_count: {
       label: 'Recipient Count',
       type: 'number',
@@ -109,6 +122,7 @@ describe('CompactConditionEditor 枚举值输入（GT-12914）', () => {
       'isOutbound',
       'oneRecipient',
       'originKind',
+      'mxRegion',
       'recipient',
       'recipientCount',
       'recipientDomain',
@@ -124,6 +138,20 @@ describe('CompactConditionEditor 枚举值输入（GT-12914）', () => {
     expect(en.advancedRules.fields.originKind).toBe('Mail Origin Kind');
     expect(ru.advancedRules.fields.originKind).toBe('Тип происхождения письма');
     expect(th.advancedRules.fields.originKind).toBe('ประเภทที่มาของอีเมล');
+    expect(zh.advancedRules.fields.mxRegion).toBe('收件域 MX 地域');
+  });
+
+  it('mx_region 支持单选、多选和取反算子', async () => {
+    renderEditor([{ type: 'condition', field: 'mx_region', operator: 'within', value: 'CN\nSG' }]);
+    const field = screen.getByTestId('mr-ob-rule-more-condition-field-0');
+    await waitFor(() => expect(field).toHaveTextContent('收件域 MX 地域'));
+    const value = screen.getByTestId('mr-ob-rule-more-condition-value-0');
+    expect(value.tagName).toBe('BUTTON');
+    expect(value).toHaveTextContent('2');
+
+    const user = userEvent.setup();
+    await user.click(screen.getByTestId('mr-ob-rule-more-condition-operator-0'));
+    expect(await screen.findByText('不等于')).toBeVisible();
   });
 
   it('origin_kind 字段名使用当前语言文案而不是后端英文标签', async () => {

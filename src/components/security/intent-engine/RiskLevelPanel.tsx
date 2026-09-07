@@ -70,7 +70,11 @@ export function RiskLevelPanel({
         </span>
         <span className="text-xs text-muted-foreground">{t(`${level}Desc` as 'highDesc', { n: intents.length })}</span>
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-3 pt-3">
+      {/* ie-panel-{level} 挂在 CollapsibleTrigger（面板头按钮）上，卡片在这个兄弟
+          节点里，因此没有任何 testid 能圈定"某一档风险面板内的卡片"。断言
+          「高危档必须且仅含钓鱼/涉政/涉黄赌」只能退化成按 ie-card-{direction}-
+          前缀全局取，会连中中/低危档的卡片。补这个容器 testid 供测试限定范围。 */}
+      <CollapsibleContent className="space-y-3 pt-3" data-testid={`ie-panel-content-${level}`}>
         {intents.map((intent) => (
           <IntentCard
             key={intent}

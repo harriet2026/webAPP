@@ -83,13 +83,17 @@ export function FilterBar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div
+      className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm"
+      data-testid="security-overview-filter-bar"
+    >
       {leftSlot}
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground whitespace-nowrap">{t('direction.label')}</span>
         <SegmentedControl
           value={direction}
           onChange={onDirectionChange}
+          testIdPrefix="security-overview-direction"
           options={DIRECTIONS.map((d) => ({ value: d, label: t(`direction.${d}`) }))}
         />
       </div>
@@ -98,6 +102,7 @@ export function FilterBar({
         value={timeRange}
         onChange={onTimeRangeChange}
         size="sm"
+        testIdPrefix="security-overview-timerange"
         options={TIME_RANGES.map((r) => ({ value: r, label: t(`timeRange.${r}`) }))}
       />
 
@@ -108,6 +113,7 @@ export function FilterBar({
           </label>
           <input
             id={startId}
+            data-testid="security-overview-custom-start"
             type="date"
             value={draft.start}
             onChange={(e) => editDraft({ start: e.target.value })}
@@ -119,6 +125,7 @@ export function FilterBar({
           </label>
           <input
             id={endId}
+            data-testid="security-overview-custom-end"
             type="date"
             value={draft.end}
             onChange={(e) => editDraft({ end: e.target.value })}

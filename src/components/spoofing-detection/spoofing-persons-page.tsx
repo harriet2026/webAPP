@@ -107,23 +107,23 @@ export function SpoofingPersonsPage({ auditOnly }: { auditOnly?: boolean }) {
             <div className="relative min-w-60 flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={keyword} onChange={(e) => { setKeyword(e.target.value); setPage(1); }}
-                placeholder={tsd('person.searchPlaceholder')} className="h-9 pl-9" />
+                placeholder={tsd('person.searchPlaceholder')} className="h-9 pl-9" data-testid="spoof-person-search" />
             </div>
             <Select value={levelFilter} onValueChange={(v) => { setLevelFilter(v ?? 'all'); setPage(1); }}>
-              <SelectTrigger className="h-9 w-full sm:w-36"><SelectValue>{levelFilterLabel}</SelectValue></SelectTrigger>
+              <SelectTrigger className="h-9 w-full sm:w-36" data-testid="spoof-person-level-filter"><SelectValue>{levelFilterLabel}</SelectValue></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{tsd('person.allLevels')}</SelectItem>
-                <SelectItem value="high">{tsd('person.level.high')}</SelectItem>
-                <SelectItem value="medium">{tsd('person.level.medium')}</SelectItem>
-                <SelectItem value="low">{tsd('person.level.low')}</SelectItem>
+                <SelectItem value="all" data-testid="spoof-person-level-option-all">{tsd('person.allLevels')}</SelectItem>
+                <SelectItem value="high" data-testid="spoof-person-level-option-high">{tsd('person.level.high')}</SelectItem>
+                <SelectItem value="medium" data-testid="spoof-person-level-option-medium">{tsd('person.level.medium')}</SelectItem>
+                <SelectItem value="low" data-testid="spoof-person-level-option-low">{tsd('person.level.low')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={observeFilter} onValueChange={(v) => { setObserveFilter(v ?? 'all'); setPage(1); }}>
-              <SelectTrigger className="h-9 w-full sm:w-36"><SelectValue>{observeFilterLabel}</SelectValue></SelectTrigger>
+              <SelectTrigger className="h-9 w-full sm:w-36" data-testid="spoof-person-observe-filter"><SelectValue>{observeFilterLabel}</SelectValue></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{tsd('person.allObserve')}</SelectItem>
-                <SelectItem value="on">{tsd('person.observeOn')}</SelectItem>
-                <SelectItem value="off">{tsd('person.observeOff')}</SelectItem>
+                <SelectItem value="all" data-testid="spoof-person-observe-option-all">{tsd('person.allObserve')}</SelectItem>
+                <SelectItem value="on" data-testid="spoof-person-observe-option-on">{tsd('person.observeOn')}</SelectItem>
+                <SelectItem value="off" data-testid="spoof-person-observe-option-off">{tsd('person.observeOff')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -135,7 +135,7 @@ export function SpoofingPersonsPage({ auditOnly }: { auditOnly?: boolean }) {
             </label>
           ) : null}
         </CardHeader>
-        <CardContent className="space-y-2 px-6 pb-6">
+        <CardContent className="space-y-2 px-6 pb-6" data-testid="spoof-person-list">
           {filtered.map((p) => (
             <SpoofingPersonCard key={p.id} person={p} disabled={readonly || p.read_only}
               selected={!p.read_only && selectedIds.includes(p.id)}
@@ -145,19 +145,19 @@ export function SpoofingPersonsPage({ auditOnly }: { auditOnly?: boolean }) {
               onDelete={() => setDeleting(p)} />
           ))}
           {filtered.length === 0 && items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex flex-col items-center justify-center py-16 text-center" data-testid="spoof-person-empty">
               <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
                 <Users className="h-7 w-7 text-muted-foreground" />
               </div>
-              <p className="text-sm font-medium text-foreground">{tsd('person.emptyTitle')}</p>
-              <p className="mt-1 mb-4 text-xs text-muted-foreground">{tsd('person.emptyDescription')}</p>
-              <Button disabled={readonly} onClick={() => { setEditing(null); setFormOpen(true); }}>
+              <p className="text-sm font-medium text-foreground" data-testid="spoof-person-empty-title">{tsd('person.emptyTitle')}</p>
+              <p className="mt-1 mb-4 text-xs text-muted-foreground" data-testid="spoof-person-empty-desc">{tsd('person.emptyDescription')}</p>
+              <Button data-testid="spoof-person-empty-add" disabled={readonly} onClick={() => { setEditing(null); setFormOpen(true); }}>
                 <Plus className="mr-2 h-4 w-4" />{tsd('person.add')}
               </Button>
             </div>
           ) : null}
           {filtered.length === 0 && items.length > 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">{tsd('person.emptyFiltered')}</p>
+            <p className="py-10 text-center text-sm text-muted-foreground" data-testid="spoof-person-empty-filtered">{tsd('person.emptyFiltered')}</p>
           ) : null}
           <div data-testid="spoof-person-pagination">
             <ServerPagination
@@ -171,14 +171,14 @@ export function SpoofingPersonsPage({ auditOnly }: { auditOnly?: boolean }) {
       </Card>
 
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="spoof-person-delete-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>{tsd('person.deleteConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{tsd('person.deleteConfirmDesc')}</AlertDialogDescription>
+            <AlertDialogTitle data-testid="spoof-person-delete-title">{tsd('person.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription data-testid="spoof-person-delete-desc">{tsd('person.deleteConfirmDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tsd('personForm.cancel')}</AlertDialogCancel>
-            <AlertDialogAction className="bg-rose-600 hover:bg-rose-700"
+          <AlertDialogFooter data-testid="spoof-person-delete-footer">
+            <AlertDialogCancel data-testid="spoof-person-delete-cancel">{tsd('personForm.cancel')}</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-600 hover:bg-rose-700" data-testid="spoof-person-delete-confirm"
               onClick={() => { if (deleting) deleteMutation.mutate(deleting.id); setDeleting(null); }}>
               {tsd('person.delete')}
             </AlertDialogAction>

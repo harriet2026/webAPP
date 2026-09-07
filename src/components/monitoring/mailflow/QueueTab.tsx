@@ -138,7 +138,7 @@ export function QueueTab({ node, range, direction }: QueueTabProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4" data-testid="monitor-mailflow-queue-skeleton">
         <Skeleton className="h-[120px] w-full rounded-lg" />
         <Skeleton className="h-[300px] w-full rounded-lg" />
         <Skeleton className="h-[200px] w-full rounded-lg" />

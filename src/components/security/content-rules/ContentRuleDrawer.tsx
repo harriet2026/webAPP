@@ -566,7 +566,7 @@ export function ContentRuleDrawer({
                         <SelectTrigger data-testid="content-rule-content-group"><SelectValue placeholder={t('contentRules.selectContentGroup')} /></SelectTrigger>
                         <SelectContent className="z-[80]" data-content-rule-layer="editor">
                           {contentGroups.map((group) => (
-                            <SelectItem key={`${group.name}-${group.ruleId}`} value={group.name}>
+                            <SelectItem key={`${group.name}-${group.ruleId}`} value={group.name} data-testid={`content-rule-content-group-option-${group.name}`}>
                               {group.name}{group.memberCount != null ? ` (${group.memberCount})` : ''}
                             </SelectItem>
                           ))}
@@ -690,24 +690,27 @@ export function ContentRuleDrawer({
                 </div>
 
                 <Collapsible open={examplesOpen} onOpenChange={setExamplesOpen}>
-                  <CollapsibleSectionTrigger className="h-9">
+                  <CollapsibleSectionTrigger data-testid="content-rule-examples-trigger" className="h-9">
                     <Lightbulb className="h-4 w-4" />{t('contentRules.viewExamples')}
                   </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-3 space-y-2">
-                    <ExampleButton title={t('contentRules.exampleKeywordReject')} description={t('contentRules.exampleKeywordRejectDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{17}[\\dXx]', ['text_body', 'html_body'], 'reject')} />
-                    <ExampleButton title={t('contentRules.exampleRegexQuarantine')} description={t('contentRules.exampleRegexQuarantineDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{16,19}', ['text_body', 'html_body'], 'audit')} />
-                    <ExampleButton title={t('contentRules.exampleContentGroupAudit')} description={t('contentRules.exampleContentGroupAuditDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('keyword', '敏感词1|敏感词2', ['subject', 'text_body', 'html_body'], 'reject')} />
+                    <div data-testid="content-rule-example-id-card">
+                      <ExampleButton testId="content-rule-example-id-card-content" title={t('contentRules.exampleKeywordReject')} description={t('contentRules.exampleKeywordRejectDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{17}[\\dXx]', ['text_body', 'html_body'], 'reject')} />
+                    </div>
+                    <ExampleButton testId="content-rule-example-bank-card" title={t('contentRules.exampleRegexQuarantine')} description={t('contentRules.exampleRegexQuarantineDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('regex', '\\d{16,19}', ['text_body', 'html_body'], 'audit')} />
+                    <ExampleButton testId="content-rule-example-sensitive" title={t('contentRules.exampleContentGroupAudit')} description={t('contentRules.exampleContentGroupAuditDesc')} applyLabel={t('contentRules.applyExample')} onClick={() => applyExample('keyword', '敏感词1|敏感词2', ['subject', 'text_body', 'html_body'], 'reject')} />
                   </CollapsibleContent>
                 </Collapsible>
 
                 <Collapsible open={testOpen} onOpenChange={setTestOpen}>
                   {/* 柔和交互反馈规格 §2.3：语义绿不作装饰用途，模拟测试触发器与其余折叠区
                       统一走共享触发器的 primary 文字 + muted 表面。 */}
-                  <CollapsibleSectionTrigger className="h-9">
+                  <CollapsibleSectionTrigger data-testid="content-rule-test-trigger" className="h-9">
                     <Play className="h-4 w-4" />{t('contentRules.simulateTest')}
                   </CollapsibleSectionTrigger>
                   <CollapsibleContent className="mt-3 rounded-lg border bg-card p-4">
                     <Textarea
+                      data-testid="content-rule-test-content"
                       value={testContent}
                       onChange={(event) => {
                         setTestContent(event.target.value);
@@ -718,8 +721,8 @@ export function ContentRuleDrawer({
                       placeholder={t('contentRules.testContent')}
                       className="min-h-24"
                     />
-                    {testError && <p className="mt-1 text-xs text-destructive">{testError}</p>}
-                    <Button className="mt-3 w-full" variant="outline" onClick={runTest} disabled={isTesting}>
+                    {testError && <p data-testid="content-rule-test-content-error" className="mt-1 text-xs text-destructive">{testError}</p>}
+                    <Button data-testid="content-rule-run-test" className="mt-3 w-full" variant="outline" onClick={runTest} disabled={isTesting}>
                       {isTesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {t('contentRules.runTest')}
                     </Button>
@@ -728,12 +731,12 @@ export function ContentRuleDrawer({
                         信息色 + 靶心图标，未命中用 muted 中性灰。destructive 红色只保留给下方
                         真正的执行错误（接口失败 / 正则解析异常等）。 */}
                     {testRunError ? (
-                      <div className="mt-3 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                      <div data-testid="content-rule-test-run-error" className="mt-3 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
                         <AlertTriangle className="h-4 w-4" />
                         {testRunError}
                       </div>
                     ) : testMatch !== null && (
-                      <div className={cn(
+                      <div data-testid="content-rule-test-result" className={cn(
                         'mt-3 flex items-center gap-2 rounded-lg border p-3 text-sm',
                         testMatch
                           ? 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300'
@@ -759,7 +762,7 @@ export function ContentRuleDrawer({
           </div>
 
           <div className="flex flex-shrink-0 justify-end gap-2 border-t px-6 py-4 max-sm:px-4">
-            <Button type="button" variant="outline" onClick={requestClose}>
+            <Button type="button" variant="outline" onClick={requestClose} data-testid="content-rule-cancel">
               {t('common.cancel')}
             </Button>
             <Button type="button" onClick={handleSubmit} disabled={isSubmitting} data-testid="content-rule-save">
@@ -886,14 +889,14 @@ function PreviewRow({ icon, label, value }: { icon: React.ReactNode; label: stri
   );
 }
 
-function ExampleButton({ title, description, applyLabel, onClick }: { title: string; description: string; applyLabel: string; onClick: () => void }) {
+function ExampleButton({ testId, title, description, applyLabel, onClick }: { testId: string; title: string; description: string; applyLabel: string; onClick: () => void }) {
   return (
-    <div className="flex w-full items-start gap-2 rounded-lg border bg-card p-3 text-left">
+    <div data-testid={testId} className="flex w-full items-start gap-2 rounded-lg border bg-card p-3 text-left">
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{title}</span>
         <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>
       </span>
-      <Button type="button" variant="ghost" size="sm" onClick={onClick}>{applyLabel}</Button>
+      <Button type="button" variant="ghost" size="sm" onClick={onClick} data-testid={`${testId}-apply`}>{applyLabel}</Button>
     </div>
   );
 }

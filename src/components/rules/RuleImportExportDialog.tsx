@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Download, FileUp, Loader2, Upload } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Download, FileJson, Loader2, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
@@ -72,6 +72,7 @@ export interface RuleImportExportDialogProps {
   adminContext: 'system-admin' | 'tenant-admin';
   tenantOptions?: TenantOption[];
   initialTab?: 'export' | 'import';
+  importTemplate?: RuleExportEnvelope;
   onExport?: (selection: RuleExportSelection) => Promise<RuleExportEnvelope>;
   onPreviewImport?: (payload: RuleImportPreviewRequest) => Promise<RuleImportPreviewResponse>;
   onExecuteImport?: (payload: RuleImportExecuteRequest) => Promise<RuleImportExecuteResponse>;
@@ -82,13 +83,12 @@ const EMPTY_SELECTION: ImportSelectionState = {
   detection_profiles: false,
 };
 
-function downloadEnvelope(file: RuleExportEnvelope, scopeLabel: string) {
+function downloadJSON(file: RuleExportEnvelope, fileName: string) {
   const blob = new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  const safeScope = scopeLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   link.href = url;
-  link.download = `${safeScope || 'rule-settings'}-export.json`;
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -103,6 +103,7 @@ export function RuleImportExportDialog({
   adminContext,
   tenantOptions = [],
   initialTab = 'export',
+  importTemplate,
   onExport,
   onPreviewImport,
   onExecuteImport,
@@ -125,8 +126,7 @@ export function RuleImportExportDialog({
     targetTenantId: null,
   });
   const [preview, setPreview] = useState<RuleImportPreviewResponse | null>(null);
-  const [skippedDuplicateIds, setSkippedDuplicateIds] = useState<string[]>([]);
-  const [skipAllRemainingDuplicates, setSkipAllRemainingDuplicates] = useState(false);
+  const previewRequestId = useRef(0);
 
   const availableGroups = useMemo(
     () => (importFile ? getAvailableImportGroups(importFile) : EMPTY_SELECTION),
@@ -138,11 +138,59 @@ export function RuleImportExportDialog({
     detection_profiles: t('ruleImportExport.dialog.group.detectionProfiles'),
   };
 
-  function clearPreviewState() {
+  const clearPreviewState = useCallback(() => {
+    previewRequestId.current += 1;
     setPreview(null);
-    setSkippedDuplicateIds([]);
-    setSkipAllRemainingDuplicates(false);
-  }
+    setIsPreviewing(false);
+  }, []);
+
+  const requestPreview = useCallback(async (
+    file: RuleExportEnvelope,
+    nextSelection: ImportSelectionState,
+    nextImportMode: DialogImportModeState,
+  ) => {
+    const requestId = ++previewRequestId.current;
+    setPreview(null);
+
+    if (!Object.values(nextSelection).some(Boolean)) {
+      setIsPreviewing(false);
+      return;
+    }
+    if (
+      adminContext === 'system-admin'
+      && nextImportMode.mode === 'import_to_selected_tenant'
+      && nextImportMode.targetTenantId === null
+    ) {
+      setIsPreviewing(false);
+      toast.error(t('ruleImportExport.dialog.toast.chooseTargetTenant'));
+      return;
+    }
+    if (!onPreviewImport) {
+      setIsPreviewing(false);
+      toast.error(t('ruleImportExport.dialog.toast.previewNotWired', { variant }));
+      return;
+    }
+
+    setIsPreviewing(true);
+    try {
+      const nextPreview = await onPreviewImport(buildPreviewPayload({
+        file,
+        selection: nextSelection,
+        importMode: nextImportMode,
+      }));
+      if (previewRequestId.current === requestId) {
+        setPreview(nextPreview);
+      }
+    } catch (error) {
+      if (previewRequestId.current === requestId) {
+        toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.previewFailed')));
+      }
+    } finally {
+      if (previewRequestId.current === requestId) {
+        setIsPreviewing(false);
+      }
+    }
+  }, [adminContext, apiErrorMessage, onPreviewImport, t, variant]);
 
   useEffect(() => {
     if (open) {
@@ -164,27 +212,30 @@ export function RuleImportExportDialog({
       setImportMode({ mode: 'restore_original_tenants', targetTenantId: null });
       clearPreviewState();
     }
-  }, [initialTab, open]);
-
-  useEffect(() => {
-    if (!importFile) {
-      return;
-    }
-
-    const nextAvailable = getAvailableImportGroups(importFile);
-    setSelection(nextAvailable);
-    clearPreviewState();
-  }, [importFile]);
+  }, [clearPreviewState, initialTab, open]);
 
   useEffect(() => {
     if (adminContext === 'tenant-admin') {
-      setImportMode({ mode: 'restore_original_tenants', targetTenantId: null });
+      if (importMode.mode !== 'restore_original_tenants' || importMode.targetTenantId !== null) {
+        const nextMode: DialogImportModeState = {
+          mode: 'restore_original_tenants',
+          targetTenantId: null,
+        };
+        setImportMode(nextMode);
+        if (importFile) {
+          void requestPreview(importFile, selection, nextMode);
+        }
+      }
       return;
     }
     if (importMode.mode === 'import_to_selected_tenant' && importMode.targetTenantId === null && tenantOptions.length > 0) {
-      setImportMode((current) => ({ ...current, targetTenantId: tenantOptions[0].id }));
+      const nextMode = { ...importMode, targetTenantId: tenantOptions[0].id };
+      setImportMode(nextMode);
+      if (importFile) {
+        void requestPreview(importFile, selection, nextMode);
+      }
     }
-  }, [adminContext, importMode.mode, importMode.targetTenantId, tenantOptions]);
+  }, [adminContext, importFile, importMode, requestPreview, selection, tenantOptions]);
 
   // Base UI's <Select.Value> shows the raw value unless the Root gets `items`,
   // which rendered the tenant id instead of its name (GT-12021).
@@ -193,17 +244,19 @@ export function RuleImportExportDialog({
     [tenantOptions],
   );
 
-  useEffect(() => {
-    clearPreviewState();
-  }, [importMode.mode, importMode.targetTenantId]);
-
   const duplicateEntries = useMemo(
-    () => Object.entries(preview?.duplicates ?? {}) as Array<[string, NonNullable<RuleImportPreviewResponse['duplicates'][string]>]>,
+    () => (Object.entries(preview?.duplicates ?? {}) as Array<[
+      string,
+      NonNullable<RuleImportPreviewResponse['duplicates'][string]>,
+    ]>).filter(([, items]) => items.length > 0),
     [preview],
   );
 
   const invalidEntries = useMemo(
-    () => Object.entries(preview?.invalid_items ?? {}) as Array<[string, NonNullable<RuleImportPreviewResponse['invalid_items'][string]>]>,
+    () => (Object.entries(preview?.invalid_items ?? {}) as Array<[
+      string,
+      NonNullable<RuleImportPreviewResponse['invalid_items'][string]>,
+    ]>).filter(([, items]) => items.length > 0),
     [preview],
   );
 
@@ -225,7 +278,8 @@ export function RuleImportExportDialog({
 				include_rules: exportSelection.rules,
 				include_detection_profiles: exportSelection.detection_profiles,
 			});
-			downloadEnvelope(file, scopeLabel);
+			const safeScope = scopeLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+			downloadJSON(file, `${safeScope || 'rule-settings'}-export.json`);
       toast.success(t('ruleImportExport.dialog.toast.exportDownloaded'));
     } catch (error) {
       toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.exportFailed')));
@@ -234,54 +288,44 @@ export function RuleImportExportDialog({
     }
   }
 
+  function handleDownloadImportTemplate() {
+    if (!importTemplate) return;
+    const safeScope = scopeLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    downloadJSON(importTemplate, `${safeScope || 'rule-settings'}-import-template.json`);
+  }
+
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
+    const input = event.currentTarget;
 
     try {
+      const parsedFile = await parseImportFile(file);
+      const nextSelection = getAvailableImportGroups(parsedFile);
+      const nextImportMode =
+        adminContext === 'system-admin'
+        && importMode.mode === 'import_to_selected_tenant'
+        && importMode.targetTenantId === null
+        && tenantOptions.length > 0
+          ? { ...importMode, targetTenantId: tenantOptions[0].id }
+          : importMode;
+
       setFileName(file.name);
-      setImportFile(await parseImportFile(file));
+      setImportFile(parsedFile);
+      setSelection(nextSelection);
+      setImportMode(nextImportMode);
       setActiveTab('import');
+      await requestPreview(parsedFile, nextSelection, nextImportMode);
     } catch (error) {
       setFileName('');
       setImportFile(null);
       setSelection(EMPTY_SELECTION);
       clearPreviewState();
       toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.parseFailed')));
-    }
-  }
-
-  async function handlePreview() {
-    if (!importFile) {
-      toast.error(t('ruleImportExport.dialog.toast.chooseFileFirst'));
-      return;
-    }
-    if (!hasSelection) {
-      toast.error(t('ruleImportExport.dialog.toast.selectAtLeastOneType'));
-      return;
-    }
-    if (adminContext === 'system-admin' && importMode.mode === 'import_to_selected_tenant' && importMode.targetTenantId === null) {
-      toast.error(t('ruleImportExport.dialog.toast.chooseTargetTenant'));
-      return;
-    }
-    if (!onPreviewImport) {
-      toast.error(t('ruleImportExport.dialog.toast.previewNotWired', { variant }));
-      return;
-    }
-
-    setIsPreviewing(true);
-    try {
-      const nextPreview = await onPreviewImport(buildPreviewPayload({ file: importFile, selection, importMode }));
-      setPreview(nextPreview);
-      setSkippedDuplicateIds([]);
-      setSkipAllRemainingDuplicates(false);
-      toast.success(t('ruleImportExport.dialog.toast.previewLoaded'));
-    } catch (error) {
-      toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.previewFailed')));
     } finally {
-      setIsPreviewing(false);
+      input.value = '';
     }
   }
 
@@ -301,8 +345,6 @@ export function RuleImportExportDialog({
         file: importFile,
         selection,
         importMode,
-        skippedDuplicateIds,
-        skipAllRemainingDuplicates,
       }));
 
       toast.success(t('ruleImportExport.dialog.toast.importFinished'));
@@ -315,26 +357,47 @@ export function RuleImportExportDialog({
   }
 
 	function toggleSelection(group: ImportGroupKey, checked: boolean) {
-		setSelection((current) => ({ ...current, [group]: checked }));
-		clearPreviewState();
+		const nextSelection = { ...selection, [group]: checked };
+		setSelection(nextSelection);
+		if (importFile) {
+			void requestPreview(importFile, nextSelection, importMode);
+		}
 	}
+
+  function handleImportModeChange(value: DialogImportModeState['mode']) {
+    const nextMode: DialogImportModeState = {
+      mode: value,
+      targetTenantId:
+        value === 'import_to_selected_tenant'
+          ? importMode.targetTenantId ?? tenantOptions[0]?.id ?? null
+          : null,
+    };
+    setImportMode(nextMode);
+    if (importFile) {
+      void requestPreview(importFile, selection, nextMode);
+    }
+  }
+
+  function handleTargetTenantChange(value: string | null) {
+    const nextMode = {
+      ...importMode,
+      targetTenantId: value ? Number(value) : null,
+    };
+    setImportMode(nextMode);
+    if (importFile) {
+      void requestPreview(importFile, selection, nextMode);
+    }
+  }
 
 	function toggleExportSelection(group: ImportGroupKey, checked: boolean) {
 		setExportSelection((current) => ({ ...current, [group]: checked }));
 	}
-
-  function toggleDuplicateSkip(previewItemId: string, checked: boolean) {
-    setSkippedDuplicateIds((current) => {
-      if (checked) {
-        return current.includes(previewItemId) ? current : [...current, previewItemId];
-      }
-      return current.filter((item) => item !== previewItemId);
-    });
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent
+        className="max-h-[calc(100dvh-2rem)] max-w-3xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
+        data-testid="rule-import-export-dialog"
+      >
         <DialogHeader>
           <DialogTitle>{t('ruleImportExport.dialog.title', { scopeLabel })}</DialogTitle>
           <DialogDescription>
@@ -342,10 +405,15 @@ export function RuleImportExportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'export' | 'import')}>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as 'export' | 'import')}
+          className="min-h-0 overflow-y-auto overscroll-contain pr-1"
+          data-testid="rule-import-export-scroll"
+        >
           <TabsList>
-            <TabsTrigger value="export">{t('ruleImportExport.dialog.tabs.export')}</TabsTrigger>
-            <TabsTrigger value="import">{t('ruleImportExport.dialog.tabs.import')}</TabsTrigger>
+            <TabsTrigger data-testid="rule-import-export-tab-export" value="export">{t('ruleImportExport.dialog.tabs.export')}</TabsTrigger>
+            <TabsTrigger data-testid="rule-import-export-tab-import" value="import">{t('ruleImportExport.dialog.tabs.import')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="export" className="space-y-4">
@@ -374,7 +442,7 @@ export function RuleImportExportDialog({
 			  </div>
 			</div>
 
-            <Button onClick={handleExport} disabled={isExporting}>
+            <Button data-testid="rule-export-execute" onClick={handleExport} disabled={isExporting}>
               {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               {t('ruleImportExport.dialog.exportButton')}
             </Button>
@@ -383,7 +451,7 @@ export function RuleImportExportDialog({
           <TabsContent value="import" className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="rule-import-file">{t('ruleImportExport.dialog.importFileLabel')}</Label>
-              <Input id="rule-import-file" type="file" accept="application/json" onChange={handleFileChange} />
+              <Input id="rule-import-file" data-testid="rule-import-file" type="file" accept="application/json" onChange={handleFileChange} />
               {fileName ? <p className="text-sm text-muted-foreground">{t('ruleImportExport.dialog.loadedFile', { fileName })}</p> : null}
             </div>
 
@@ -398,26 +466,20 @@ export function RuleImportExportDialog({
                     <Label>{t('ruleImportExport.dialog.importModeLabel')}</Label>
                     <Select
                       value={importMode.mode}
-                      onValueChange={(value) =>
-                        setImportMode((current) => ({
-                          mode: value as DialogImportModeState['mode'],
-                          targetTenantId:
-                            value === 'import_to_selected_tenant'
-                              ? current.targetTenantId ?? tenantOptions[0]?.id ?? null
-                              : null,
-                        }))
-                      }
+                      onValueChange={(value) => handleImportModeChange(
+                        value as DialogImportModeState['mode'],
+                      )}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full" data-testid="rule-import-mode">
                         <SelectValue>
                           {importMode.mode === 'restore_original_tenants'
                             ? t('ruleImportExport.dialog.restoreOriginalTenants')
                             : t('ruleImportExport.dialog.importToSelectedTenant')}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="restore_original_tenants">{t('ruleImportExport.dialog.restoreOriginalTenants')}</SelectItem>
-                        <SelectItem value="import_to_selected_tenant">{t('ruleImportExport.dialog.importToSelectedTenant')}</SelectItem>
+                      <SelectContent data-testid="rule-import-mode-options">
+                        <SelectItem value="restore_original_tenants" data-testid="rule-import-mode-restore_original_tenants">{t('ruleImportExport.dialog.restoreOriginalTenants')}</SelectItem>
+                        <SelectItem value="import_to_selected_tenant" data-testid="rule-import-mode-import_to_selected_tenant">{t('ruleImportExport.dialog.importToSelectedTenant')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -428,16 +490,14 @@ export function RuleImportExportDialog({
                       <Select
                         items={targetTenantItems}
                         value={importMode.targetTenantId?.toString() ?? ''}
-                        onValueChange={(value) =>
-                          setImportMode((current) => ({ ...current, targetTenantId: Number(value) }))
-                        }
+                        onValueChange={handleTargetTenantChange}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full" data-testid="rule-import-target-tenant">
                           <SelectValue placeholder={t('ruleImportExport.dialog.targetTenantPlaceholder')} />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent data-testid="rule-import-target-tenant-options">
                           {tenantOptions.map((tenant) => (
-                            <SelectItem key={tenant.id} value={tenant.id.toString()}>
+                            <SelectItem key={tenant.id} value={tenant.id.toString()} data-testid={`rule-import-target-tenant-${tenant.id}`}>
                               {tenant.name}
                             </SelectItem>
                           ))}
@@ -470,12 +530,15 @@ export function RuleImportExportDialog({
                   </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button onClick={handlePreview} disabled={isPreviewing || !hasSelection}>
-                    {isPreviewing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileUp className="mr-2 h-4 w-4" />}
-                    {t('ruleImportExport.dialog.previewButton')}
-                  </Button>
-                </div>
+                {isPreviewing ? (
+                  <div
+                    className="flex items-center gap-2 text-sm text-muted-foreground"
+                    data-testid="rule-import-preview-loading"
+                  >
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>{t('ruleImportExport.dialog.previewLoading')}</span>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
@@ -502,36 +565,25 @@ export function RuleImportExportDialog({
 
                 {duplicateEntries.length > 0 ? (
                   <div className="space-y-3">
-                    <h3 className="font-medium">{t('ruleImportExport.dialog.duplicateHandlingTitle')}</h3>
-                    <label className="flex items-center gap-3 rounded-md border p-3 text-sm">
-                      <Checkbox
-                        checked={skipAllRemainingDuplicates}
-                        onCheckedChange={(checked) => {
-                          const enabled = checked === true;
-                          setSkipAllRemainingDuplicates(enabled);
-                          if (enabled) {
-                            setSkippedDuplicateIds([]);
-                          }
-                        }}
-                      />
-                      <span>{t('ruleImportExport.dialog.skipAllRemainingDuplicates')}</span>
-                    </label>
+                    <Alert data-testid="rule-import-duplicate-policy">
+                      <AlertTitle>{t('ruleImportExport.dialog.duplicateHandlingTitle')}</AlertTitle>
+                      <AlertDescription>
+                        {t('ruleImportExport.dialog.duplicatesWillBeSkipped')}
+                      </AlertDescription>
+                    </Alert>
                     {duplicateEntries.map(([group, items]) => (
                       <div key={group} className="space-y-2 rounded-md border p-3">
                         <div className="text-sm font-medium">{groupLabels[group as ImportGroupKey]}</div>
                         {items.map((item) => (
                           <div key={item.preview_item_id} className="space-y-2 rounded-md border p-3">
-                            <label className="flex items-start gap-3 text-sm">
-                              <Checkbox
-                                checked={skipAllRemainingDuplicates || skippedDuplicateIds.includes(item.preview_item_id)}
-                                disabled={skipAllRemainingDuplicates}
-                                onCheckedChange={(checked) => toggleDuplicateSkip(item.preview_item_id, checked === true)}
-                              />
-                              <span>
-                                {t('ruleImportExport.dialog.skipDuplicate', { previewItemId: item.preview_item_id })}
-                                {item.reason ? <span className="block text-muted-foreground">{item.reason}</span> : null}
+                            <div className="text-sm">
+                              <span className="font-medium">
+                                {t('ruleImportExport.dialog.duplicateWillBeSkipped', {
+                                  previewItemId: item.preview_item_id,
+                                })}
                               </span>
-                            </label>
+                              {item.reason ? <span className="block text-muted-foreground">{item.reason}</span> : null}
+                            </div>
                             <details className="rounded-md border bg-muted/30 p-3 text-xs">
                               <summary className="cursor-pointer font-medium">{t('ruleImportExport.dialog.showDetails')}</summary>
                               <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -574,14 +626,30 @@ export function RuleImportExportDialog({
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="shrink-0" data-testid="rule-import-export-actions">
+          <Button data-testid="rule-import-export-close" variant="outline" onClick={() => onOpenChange(false)}>
             {t('ruleImportExport.dialog.closeButton')}
           </Button>
-          <Button onClick={handleImport} disabled={!preview || isImporting}>
-            {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-            {t('ruleImportExport.dialog.importButton')}
-          </Button>
+          {activeTab === 'import' && importTemplate ? (
+            <Button
+              variant="outline"
+              onClick={handleDownloadImportTemplate}
+              data-testid="rule-import-template-download"
+            >
+              <FileJson className="mr-2 h-4 w-4" />
+              {t('ruleImportExport.dialog.importTemplateButton')}
+            </Button>
+          ) : null}
+          {activeTab === 'import' ? (
+            <Button
+              onClick={handleImport}
+              disabled={!preview || isPreviewing || isImporting || !hasSelection}
+              data-testid="rule-import-execute"
+            >
+              {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              {t('ruleImportExport.dialog.importButton')}
+            </Button>
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

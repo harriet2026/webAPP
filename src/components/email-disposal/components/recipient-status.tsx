@@ -53,6 +53,12 @@ const STATUS_STYLES: Record<string, string> = {
 };
 const DEFAULT_STATUS_STYLE = 'bg-gray-50 text-gray-700 border-gray-200';
 
+const RECALL_STYLES: Record<string, string> = {
+  handling: 'bg-amber-50 text-amber-700 border-amber-200',
+  success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  failed: 'bg-red-50 text-red-700 border-red-200',
+};
+
 const ACTION_ICONS: Record<ActionKey, typeof Send> = {
   deliver: Send,
   discard: Trash2,
@@ -187,7 +193,7 @@ export function RecipientStatus({
         <div className="flex flex-wrap gap-2" data-testid="email-disposal-recipient-header-actions">
           {headerActions.map((action) => {
             const Icon = ACTION_ICONS[action];
-            return <Button key={action} size="sm" variant={action === 'discard' ? 'destructive' : 'outline'} disabled={readOnly} onClick={() => openAction(action, operableGroups.map((group) => group.key))} className={cn(action === 'deliver' && 'border-transparent bg-emerald-600 text-white data-[hovered=true]:bg-emerald-700')}><Icon className="mr-1.5 size-3.5" />{t(`recipientStatus.action.${action}`)}</Button>;
+            return <Button key={action} data-testid={`email-disposal-recipient-header-action-${action}`} size="sm" variant={action === 'discard' ? 'destructive' : 'outline'} disabled={readOnly} onClick={() => openAction(action, operableGroups.map((group) => group.key))} className={cn(action === 'deliver' && 'border-transparent bg-emerald-600 text-white data-[hovered=true]:bg-emerald-700')}><Icon className="mr-1.5 size-3.5" />{t(`recipientStatus.action.${action}`)}</Button>;
           })}
         </div>
       ) : null}
@@ -212,6 +218,7 @@ export function RecipientStatus({
             {multiGroup && (
               <TableHead className="w-10">
                 <Checkbox
+                  data-testid="email-disposal-recipient-select-all"
                   checked={operableGroups.length > 0 && selectedCount === operableGroups.length}
                   onCheckedChange={toggleAllGroups}
                   aria-label="Select all groups"
@@ -220,6 +227,7 @@ export function RecipientStatus({
             )}
             <TableHead className="text-xs">{t('recipientStatus.colRecipients')}</TableHead>
             <TableHead className="text-xs">{t('recipientStatus.colStatus')}</TableHead>
+            <TableHead className="text-xs">{t('recipientStatus.colRecall')}</TableHead>
             <TableHead className="text-xs">{t('recipientStatus.colActions')}</TableHead>
           </TableRow>
         </TableHeader>
@@ -257,6 +265,7 @@ export function RecipientStatus({
                       <span className="block size-4" aria-hidden="true" />
                     ) : (
                       <Checkbox
+                        data-testid={`email-disposal-recipient-checkbox-${g.dispositions[0]?.recipient}`}
                         checked={selected.has(g.key)}
                         onCheckedChange={() => toggleGroup(g.key)}
                         aria-label={`Select group ${g.key}`}
@@ -293,6 +302,36 @@ export function RecipientStatus({
                   </Badge>
                 </TableCell>
                 <TableCell className="text-xs">
+                  {g.dispositions.some((d) => d.recall_state) ? (
+                    <div className="space-y-1">
+                      {g.dispositions.map((d) => (
+                        <div
+                          key={d.recipient}
+                          className="flex items-center gap-1.5"
+                          data-testid={`email-disposal-recipient-recall-${d.recipient}`}
+                          data-recall-at={d.recall_at}
+                        >
+                          {g.dispositions.length > 1 ? (
+                            <span className="max-w-32 truncate text-muted-foreground">{d.recipient}</span>
+                          ) : null}
+                          {d.recall_state ? (
+                            <Badge
+                              variant="outline"
+                              className={RECALL_STYLES[d.recall_state] || DEFAULT_STATUS_STYLE}
+                            >
+                              {t(`recipientStatus.recall.${d.recall_state}`, { default: d.recall_state })}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-xs">
                   {notOperable ? (
                     missingObjectId ? (
                       <Tooltip>
@@ -315,6 +354,7 @@ export function RecipientStatus({
                         const btn = (
                           <Button
                             key={action}
+                            data-testid={`email-disposal-recipient-action-${g.dispositions[0]?.recipient}-${action}`}
                             size="sm"
                             variant="ghost"
                             className={cn('h-7 text-xs', ACTION_ROW_CLASS[action])}
@@ -328,7 +368,7 @@ export function RecipientStatus({
                         return readOnly ? (
                           <Tooltip key={action}>
                             <TooltipTrigger render={<span />}>{btn}</TooltipTrigger>
-                            <TooltipContent>{t('recipientStatus.readOnlyTooltip')}</TooltipContent>
+                            <TooltipContent data-testid="email-disposal-recipient-readonly-tooltip">{t('recipientStatus.readOnlyTooltip')}</TooltipContent>
                           </Tooltip>
                         ) : btn;
                       })}

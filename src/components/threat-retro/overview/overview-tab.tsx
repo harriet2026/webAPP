@@ -169,9 +169,9 @@ export function OverviewTab({ manualScanOpen, onManualScanOpenChange }: Overview
         activeKpi={activeKpi}
         onToggle={toggleKpi}
       />
-	  <section className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm">
+	  <section className="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm" data-testid="threat-retro-runs-section">
 		<div className="flex items-center justify-between border-b px-4 py-3">
-		  <h3 className="font-medium">{t('table.title')}</h3>
+		  <h3 className="font-medium" data-testid="threat-retro-runs-title">{t('table.title')}</h3>
 		  <Button size="sm" className="gap-1.5" data-testid="manual-scan-entry" disabled={!canEdit || !stateQuery.data?.enabled} onClick={() => onManualScanOpenChange(true)}><Zap className="h-3.5 w-3.5" />{t('manualScan.entry')}</Button>
 		</div>
 		<div className="border-b px-4 py-3">

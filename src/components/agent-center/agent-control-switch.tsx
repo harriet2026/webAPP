@@ -32,6 +32,7 @@ export function AgentControlSwitch({
         {checked ? enabledLabel : disabledLabel}
       </span>
       <Switch
+        data-testid="agent-control-switch"
         aria-label={ariaLabel}
         checked={checked}
         disabled={disabled || pending}

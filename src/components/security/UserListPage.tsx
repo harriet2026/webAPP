@@ -151,10 +151,26 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
   const batchDeleteMutation = useMutation({
     mutationFn: () => bulkDeleteUserListRules(Array.from(selectedIds), apiRequest),
     onSuccess: (res) => {
-      res.failed.forEach((f) => toast.error(`${f.id}: ${f.reason}`));
-      if (res.failed.length === 0) toast.success(t('deleteSuccess'));
-      queryClient.invalidateQueries({ queryKey });
-      setSelectedIds(new Set());
+      const failureMessage = (code: string) => {
+        if (code === 'unified_rule.not_found') return t('failureNotFound');
+        if (code === 'user_list_access.access_denied_user_list_rule') return t('failureAccessDenied');
+        if (code === 'missing_result') return t('failureMissingResult');
+        if (
+          code === 'user_list_access.user_generated_user_list_rules_deleted' ||
+          code === 'unified_rule.tenant_config_managed' ||
+          code === 'sysrule_confirmation_required'
+        ) return t('failureProtected');
+        return t('deleteFailed');
+      };
+      res.failed.forEach((f) => toast.error(`${f.id}: ${failureMessage(f.code)}`));
+      if (res.failed.length === 0) {
+        toast.success(t('deleteSuccess'));
+      } else {
+        toast.warning(t('deletePartial', { deleted: res.deleted.length, failed: res.failed.length }));
+      }
+      if (res.deleted.length > 0) queryClient.invalidateQueries({ queryKey });
+      const deleted = new Set(res.deleted);
+      setSelectedIds((current) => new Set(Array.from(current).filter((id) => !deleted.has(id))));
       setShowBatch(false);
     },
     onError: (error: Error) => {
@@ -192,14 +208,15 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
           }}
         >
           <TabsList className="rounded-2xl border border-border/70 bg-muted/30 p-1">
-            <TabsTrigger value="blacklist">{t('blacklistRules')}</TabsTrigger>
-            <TabsTrigger value="whitelist">{t('whitelistRules')}</TabsTrigger>
+            <TabsTrigger data-testid="user-list-tab-blacklist" value="blacklist">{t('blacklistRules')}</TabsTrigger>
+            <TabsTrigger data-testid="user-list-tab-whitelist" value="whitelist">{t('whitelistRules')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <div className="flex flex-wrap gap-3 items-center justify-between">
+        <div className="flex flex-wrap gap-3 items-center justify-between" data-testid="user-list-toolbar">
           <div className="flex flex-1 flex-wrap gap-3 items-center">
             <Input
+              data-testid="user-list-search"
               type="search"
               placeholder={t('searchPlaceholder')}
               value={search}
@@ -214,6 +231,7 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
                 <TooltipTrigger
                   render={
                     <Button
+                      data-testid="user-list-reset"
                       variant="ghost"
                       size="icon"
                       aria-label={t('reset')}
@@ -231,23 +249,23 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
             </TooltipProvider>
           </div>
           {selectedIds.size > 0 && (
-            <Button variant="destructive" onClick={() => setShowBatch(true)}>
+            <Button data-testid="user-list-batch-delete" variant="destructive" onClick={() => setShowBatch(true)}>
               {t('deleteSelected')}({selectedIds.size})
             </Button>
           )}
         </div>
 
         {isLoading ? (
-          <div className="space-y-2 py-4">
+          <div className="space-y-2 py-4" data-testid="user-list-skeleton">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
+              <Skeleton key={i} data-testid="user-list-skeleton-row" className="h-10 w-full" />
             ))}
           </div>
         ) : isError ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-12">
+          <div className="flex flex-col items-center justify-center gap-3 py-12" data-testid="user-list-error">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <p className="text-sm text-muted-foreground">{t('loadFailed')}</p>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <Button data-testid="user-list-retry" variant="outline" size="sm" onClick={() => refetch()}>
               {t('retry')}
             </Button>
           </div>
@@ -262,13 +280,14 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
             />
 
             {total > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1 py-3">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1 py-3" data-testid="user-list-pagination">
+                <div className="text-sm text-muted-foreground" data-testid="user-list-total">
                   {t('total')} {total} {t('items')}
                 </div>
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-1">
                     <Button
+                      data-testid="user-list-prev-page"
                       variant="outline"
                       size="sm"
                       className="h-8 w-8 p-0"
@@ -279,12 +298,13 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
                     </Button>
                     {pageWindow.map((p, i) =>
                       p === 'ellipsis' ? (
-                        <span key={`ellipsis-${i}`} className="px-1 text-muted-foreground">
+                        <span key={`ellipsis-${i}`} data-testid="user-list-page-ellipsis" className="px-1 text-muted-foreground">
                           …
                         </span>
                       ) : (
                         <Button
                           key={p}
+                          data-testid={`user-list-pagebtn-${p}`}
                           variant={p === safePage ? 'default' : 'outline'}
                           size="sm"
                           className={cn('h-8 w-8 p-0', p === safePage && 'bg-primary text-primary-foreground')}
@@ -295,6 +315,7 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
                       ),
                     )}
                     <Button
+                      data-testid="user-list-next-page"
                       variant="outline"
                       size="sm"
                       className="h-8 w-8 p-0"
@@ -307,6 +328,7 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">{t('goToPage')}</span>
                     <input
+                      data-testid="user-list-jump-input"
                       type="number"
                       min={1}
                       max={maxPage}
@@ -326,12 +348,12 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
                       setPage(1);
                     }}
                   >
-                    <SelectTrigger className="h-8 w-[110px]">
+                    <SelectTrigger data-testid="user-list-page-size" className="h-8 w-[110px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {PAGE_SIZES.map((s) => (
-                        <SelectItem key={s} value={String(s)}>
+                        <SelectItem key={s} data-testid={`user-list-pagesize-option-${s}`} value={String(s)}>
                           {s} {t('itemsPerPage')}
                         </SelectItem>
                       ))}
@@ -351,18 +373,18 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
       {body}
 
       <AlertDialog open={showBatch} onOpenChange={setShowBatch}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="user-list-batch-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('confirmDeleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription data-testid="user-list-batch-dialog-text">
               {t('confirmDeleteBatch')}
               {selectedIds.size}
               {t('rulesText')} ? {t('cannotUndo')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={() => batchDeleteMutation.mutate()}>
+            <AlertDialogCancel data-testid="user-list-batch-dialog-cancel">{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction data-testid="user-list-batch-dialog-confirm" variant="destructive" onClick={() => batchDeleteMutation.mutate()}>
               {t('confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -370,16 +392,17 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
       </AlertDialog>
 
       <AlertDialog open={!!deleting} onOpenChange={(open) => { if (!open) setDeleting(null); }}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="user-list-delete-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('confirmDeleteTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription data-testid="user-list-delete-dialog-text">
               {t('confirmDeleteSingle')} {deleting?.ruleId} ? {t('cannotUndo')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogCancel data-testid="user-list-delete-dialog-cancel">{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
+              data-testid="user-list-delete-dialog-confirm"
               variant="destructive"
               onClick={() => deleting && deleteMutation.mutate(deleting.id)}
             >
@@ -389,7 +412,7 @@ export function UserListPage({ embedded }: { embedded?: boolean } = {}) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+      <div className="rounded-lg border bg-muted/30 px-4 py-3 text-sm text-muted-foreground" data-testid="user-list-tip">
         {tp('userListTip')}
       </div>
     </>

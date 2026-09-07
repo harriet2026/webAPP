@@ -116,6 +116,19 @@ export function useAgentFeatureAccess(): AgentFeatureAccess {
 }
 
 /**
+ * System status describes running, tenant-enabled agents. Registry
+ * visibility also includes locked SaaS upsell entries, which belong in
+ * navigation but must not be rendered as an unavailable/abnormal service.
+ */
+export function deriveAgentRowVisibility(
+  access: AgentFeatureAccess,
+): Record<AgentRowKey, boolean> {
+  return Object.fromEntries(
+    (Object.keys(AGENT_FEATURE_IDS) as AgentRowKey[]).map((key) => [key, access[key].canRequest]),
+  ) as Record<AgentRowKey, boolean>;
+}
+
+/**
  * Real-hook wrapper, same inputs as `useSystemStatusVisibility` (`registry`
  * + `grants` from `useProductForm()`, `effectiveViewer` from the shared
  * `useSecurityScope(null)`) — does not recompute or duplicate scope
@@ -124,10 +137,7 @@ export function useAgentFeatureAccess(): AgentFeatureAccess {
  */
 export function useAgentRowVisibility(): Record<AgentRowKey, boolean> {
   const access = useAgentFeatureAccess();
-
-  return Object.fromEntries(
-    (Object.keys(AGENT_FEATURE_IDS) as AgentRowKey[]).map((key) => [key, access[key].visible]),
-  ) as Record<AgentRowKey, boolean>;
+  return deriveAgentRowVisibility(access);
 }
 
 export interface SystemStatusVisibility {
@@ -229,7 +239,7 @@ export function useSystemStatusVisibility(): SystemStatusVisibility {
   // the page level, but agent-overview.tsx returns null when every per-agent
   // resolve() is hidden — mirror that here so overviewCols doesn't leave a
   // dangling column for an AI form whose agent rows all resolved hidden.
-  const anyAgentVisible = Object.values(agentAccess).some((access) => access.visible);
+  const anyAgentVisible = Object.values(deriveAgentRowVisibility(agentAccess)).some(Boolean);
 
   return deriveVisibility({ ai: caps.ai === true }, infraVisible, anyAgentVisible);
 }

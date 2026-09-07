@@ -85,6 +85,8 @@ export function ProductFormProvider({
   // context is sent as X-Tenant-ID and the API correctly rejects the write.
   // Keep this reconciliation here as well as in the switcher so a refresh or
   // an older browser session repairs itself without another viewer switch.
+  // This is initialization/state repair rather than a user action. User-driven
+  // viewer changes are guarded at their UI entry points before either value changes.
   useEffect(() => {
     if (user?.role === 'system_admin' && viewer === 'platform' && selectedTenantId !== null) {
       setSelectedTenant(null);

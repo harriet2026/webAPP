@@ -160,12 +160,12 @@ function Body({ log, tenantNameOf, t, onClose }: BodyProps) {
             <div className="flex items-center gap-3 py-3">
               <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3">
                 <div className="mb-1 text-xs text-muted-foreground">{t('adminAudit.before')}</div>
-                <div className="whitespace-pre-line text-sm text-foreground/80">{diffText(log.before_value)}</div>
+                <div className="whitespace-pre-line text-sm text-foreground/80" data-testid="admin-audit-detail-diff-before">{diffText(log.before_value)}</div>
               </div>
               <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
               <div className="flex-1 rounded-lg border border-blue-200 bg-blue-50 p-3">
                 <div className="mb-1 text-xs text-blue-600">{t('adminAudit.after')}</div>
-                <div className="whitespace-pre-line text-sm text-foreground">{diffText(log.after_value)}</div>
+                <div className="whitespace-pre-line text-sm text-foreground" data-testid="admin-audit-detail-diff-after">{diffText(log.after_value)}</div>
               </div>
             </div>
           </Section>

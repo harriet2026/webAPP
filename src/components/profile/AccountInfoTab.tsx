@@ -110,7 +110,8 @@ function AccountForm({
   };
 
   const sendEmailCode = async () => {
-    if (!isEmail(email)) {
+    const isCurrentMaskedEmail = email.includes('*') && email === account.email;
+    if (!isCurrentMaskedEmail && !isEmail(email)) {
       setEmailErr(t('account.emailInvalid'));
       return;
     }
@@ -176,7 +177,7 @@ function AccountForm({
 
       <div className="max-w-2xl space-y-5">
         <div className="space-y-3">
-          <ReadonlyRow label={t('account.username')} value={account.username} />
+          <ReadonlyRow label={t('account.username')} value={account.username} testId="profile-account-username" />
           <ReadonlyRow label={t('account.role')} value={roleDisplay} testId="profile-account-role" />
         </div>
 
@@ -224,7 +225,7 @@ function AccountForm({
                 {t('account.bind')}
               </Button>
             </div>
-            {phoneErr ? <p className="text-xs text-destructive">{phoneErr}</p> : null}
+            {phoneErr ? <p className="text-xs text-destructive" data-testid="profile-account-phone-error">{phoneErr}</p> : null}
           </div>
         </div>
 
@@ -237,29 +238,44 @@ function AccountForm({
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-48 ${emailErr ? 'border-destructive' : ''}`}
                 placeholder={t('account.emailPlaceholder')}
+                data-testid="profile-account-email-input"
               />
               <Input
                 value={emailCode}
                 onChange={(e) => setEmailCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                 className="w-32"
                 placeholder={t('account.codePlaceholder')}
+                data-testid="profile-account-email-code-input"
               />
-              <Button variant="outline" disabled={emailCd > 0 || sendCode.isPending} onClick={sendEmailCode}>
+              <Button
+                variant="outline"
+                disabled={emailCd > 0 || sendCode.isPending}
+                onClick={sendEmailCode}
+                data-testid="profile-account-email-send-code"
+              >
                 {emailCd > 0 ? t('account.resendIn', { n: emailCd }) : t('account.getCode')}
               </Button>
-              <Button disabled={emailCode.length !== 6 || bindContact.isPending} onClick={bindEmail}>
+              <Button
+                disabled={emailCode.length !== 6 || bindContact.isPending}
+                onClick={bindEmail}
+                data-testid="profile-account-email-bind"
+              >
                 {t('account.bind')}
               </Button>
             </div>
-            {emailErr ? <p className="text-xs text-destructive">{emailErr}</p> : null}
+            {emailErr ? (
+              <p className="text-xs text-destructive" data-testid="profile-account-email-error">
+                {emailErr}
+              </p>
+            ) : null}
           </div>
         </div>
 
         <div className="border-t border-border" />
 
         <div className="space-y-3">
-          <ReadonlyRow label={t('account.lastLoginTime')} value={formatTimestamp(account.lastLoginTime) || '—'} />
-          <ReadonlyRow label={t('account.lastLoginIp')} value={account.lastLoginIp || '—'} />
+          <ReadonlyRow label={t('account.lastLoginTime')} value={formatTimestamp(account.lastLoginTime) || '—'} testId="profile-account-last-login-time" />
+          <ReadonlyRow label={t('account.lastLoginIp')} value={account.lastLoginIp || '—'} testId="profile-account-last-login-ip" />
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-2">

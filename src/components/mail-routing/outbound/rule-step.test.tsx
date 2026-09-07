@@ -266,6 +266,32 @@ describe('RuleStep drawer', () => {
     });
   });
 
+  it('GT-12856：无 CAC 结果可选择「未检测 (0)」并保存 → condition_tree 写入 cac_int_tag within 0', { timeout: 30_000 }, async () => {
+    const user = userEvent.setup();
+    render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));
+    await screen.findByTestId('mr-ob-rule-empty');
+    await user.click(screen.getByTestId('mr-ob-rule-create'));
+    await screen.findByTestId('mr-ob-rule-drawer');
+
+    await user.type(screen.getByTestId('mr-ob-rule-name-input'), '未检测邮件走 proxysvr');
+    await user.type(screen.getByTestId('mr-ob-rule-target-host-input'), 'proxy-relay.example.net');
+    await user.click(screen.getByTestId('mr-ob-rule-intent-tag-select'));
+    await user.click(await screen.findByText('未检测 (0)'));
+    await user.keyboard('{Escape}');
+    expect(screen.queryByTestId('mr-ob-rule-no-condition-warning')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('mr-ob-rule-save'));
+    await waitFor(() => expect(mockApiRequest).toHaveBeenCalled());
+    const [, opts] = mockApiRequest.mock.calls[0];
+    const submitted = (opts as { body: { condition_tree: RuleNode } }).body.condition_tree;
+    expect((submitted.children ?? []).find((node) => node.field === 'cac_int_tag')).toEqual({
+      type: 'condition',
+      field: 'cac_int_tag',
+      operator: 'within',
+      value: '0',
+    });
+  });
+
   it('GT-12854：意图引擎标签支持多选（勾选垃圾邮件 3 + 广告 4）→ within 3/4', { timeout: 30_000 }, async () => {
     const user = userEvent.setup();
     render(wrap(<RuleStep tenantId={1} channels={channels} proxies={proxies} />));

@@ -30,7 +30,7 @@ export function BasicInfoBlock({ draft, patch, errors }: Props) {
           placeholder={t('namePlaceholder')}
         />
         {errors.name ? (
-          <p className="text-xs text-destructive">{t('nameRequired')}</p>
+          <p className="text-xs text-destructive" data-testid="strategy-name-error">{t('nameRequired')}</p>
         ) : (
           <p className="text-xs text-muted-foreground">{t('nameHint')}</p>
         )}

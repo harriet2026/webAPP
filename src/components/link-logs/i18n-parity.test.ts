@@ -21,7 +21,7 @@ const STRING_PATHS: string[][] = [
   ['linkLogs', 'filters', 'emailPlaceholder'], ['linkLogs', 'filters', 'urlPlaceholder'],
   ['linkLogs', 'filters', 'selectDate'],
   ['common', 'tenant'], ['common', 'all'],
-  ['linkLogs', 'columns', 'clickTime'], ['linkLogs', 'columns', 'tid'], ['linkLogs', 'columns', 'clicker'],
+  ['linkLogs', 'columns', 'clickTime'], ['linkLogs', 'columns', 'tid'], ['linkLogs', 'columns', 'tenant'], ['linkLogs', 'columns', 'clicker'],
   ['linkLogs', 'columns', 'sender'], ['linkLogs', 'columns', 'originalUrl'], ['linkLogs', 'columns', 'triggerStage'],
   ['linkLogs', 'columns', 'verdict'], ['linkLogs', 'columns', 'finalResult'], ['linkLogs', 'columns', 'userAction'], ['linkLogs', 'columns', 'action'],
   ['linkLogs', 'stages', 'cloud_intel'], ['linkLogs', 'stages', 'local_blacklist'], ['linkLogs', 'stages', 'phishing_agent'], ['linkLogs', 'stages', 'none'],

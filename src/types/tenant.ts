@@ -152,6 +152,10 @@ export interface TenantLLMSetting {
   model: string;
   enabled: boolean;
   insecure_skip_verify: boolean;
+  /** true means the tenant has no explicit override and is using Platform. */
+  inherited?: boolean;
+  /** true only when this tenant owns a persisted API key. */
+  has_explicit_api_key?: boolean;
 }
 
 export interface UpsertTenantLLMRequest {
@@ -166,6 +170,8 @@ export interface UpsertTenantLLMRequest {
 
 export interface TenantLLMSettingResponse {
   setting: TenantLLMSetting | null;
+  inherited?: boolean;
+  has_explicit_api_key?: boolean;
 }
 
 export interface TenantListResponse {

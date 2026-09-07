@@ -2,7 +2,7 @@
 
 // 出站路由步骤一：代理 IP 列表（Task 13 接通真实后端 —— proxysvr-endpoints，取代 mock-only 虚拟
 // endpoint）。对齐 doc/html-spec/admin-forwarding/index.html §2.5 c-5「交互层级 0」+
-// layer-5-outbound-proxy-drawer.html（抽屉 5a + 删除确认 5b）、doc/mail-routing.md §4。
+// layer-5-outbound-proxy-drawer.html（抽屉 5a + 删除确认 5b）、docs/features/mail-routing.md §4。
 //
 // 真实后端字段比 demo 多三个（lid/presend_code/license，私有协议交换点账户信息）：lid 必填，
 // presend_code 默认 347，license 明文写入/密文存储，update 留空=保持原值不变（proxysvr.go 注释）。

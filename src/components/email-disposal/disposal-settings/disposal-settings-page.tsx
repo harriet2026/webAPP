@@ -1,23 +1,24 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useCallback, useState } from 'react';
+import { useForm, type SubmitErrorHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Save, RotateCcw, Loader2, Shield, AlertTriangle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FramedPage } from '@/components/shared/page-shell';
-import { useApiRequest } from '@/lib/api/client';
+import { isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import { localizeApiError, apiErrorFieldPath } from '@/lib/api/error-message';
 import { getDisposalSettings, putDisposalSettings } from '@/lib/api/disposal-settings';
-import { DISPOSAL_CATEGORY_KEYS, type DisposalSettings } from '@/types/disposal-settings';
+import type { DisposalSettings } from '@/types/disposal-settings';
 import { disposalSettingsSchema, defaultDisposalSettings } from './schema';
 import { QuarantineSettingsTab } from './quarantine-settings-tab';
 import { ReviewSettingsTab } from './review-settings-tab';
 import { RecallSettingsTab } from './recall-settings-tab';
+import { firstValidationMessage } from './validation-error';
 import { getBrowserTz } from '@/lib/timezone';
 import { useTenant } from '@/hooks/use-tenant';
 import { useProductForm } from '@/contexts/product-form-context';
@@ -29,16 +30,20 @@ function normalizeTime(v: string): string {
   return v;
 }
 
+type DisposalSettingsTab = 'quarantine' | 'review' | 'recall';
+
 export function DisposalSettingsPage() {
   const t = useTranslations('disposalSettings');
   // 根命名空间实例：localizeApiError 需要用完整 key（apiErrors.<code>）查文案。
   const tRoot = useTranslations();
   const tCommon = useTranslations('common');
   const { apiRequest } = useApiRequest();
+  const queryClient = useQueryClient();
   const { effectiveTenantId } = useTenant();
   const { capabilities } = useProductForm();
   const { isSystemAdmin, demoAuthBypassEnabled } = useAuth();
   const { registerGuard, unregisterGuard } = useUnsavedGuard();
+  const [activeTab, setActiveTab] = useState<DisposalSettingsTab>('quarantine');
   // GT-12427: 多租户下「处置设置」是租户自有配置(registry platformHidden=true 已隐藏平台
   // 视角侧栏入口)。平台管理员未下钻到具体租户(effectiveTenantId===null)时,即便手贴 URL
   // 也拒绝渲染/取数,与同区兄弟模块 group-policy 一致;下钻进入某租户后按该租户身份正常配置。
@@ -66,7 +71,7 @@ export function DisposalSettingsPage() {
     if (data) form.reset(data);
   }, [data, form]);
 
-  const onSubmit = async (values: DisposalSettings) => {
+  const onSubmit = useCallback(async (values: DisposalSettings): Promise<boolean> => {
     const browserTz = getBrowserTz();
     const pinnedTz =
       values.tz && values.tz.trim() !== '' ? values.tz : data?.server_tz || browserTz;
@@ -82,8 +87,25 @@ export function DisposalSettingsPage() {
     };
     try {
       const saved = await putDisposalSettings(payload, apiRequest);
-      form.reset(saved);
+      let persistedSettings: DisposalSettings;
+      if (isPublicationPendingResponse(saved)) {
+        // Preserve the response-only timezone already loaded by GET while
+        // marking the explicit submitted form values clean. The acknowledgement
+        // itself is not a DisposalSettings DTO.
+        persistedSettings = { ...payload, server_tz: data?.server_tz };
+      } else {
+        persistedSettings = saved;
+      }
+      // The global query staleTime is 60 seconds. Keep the cache and the form
+      // on the same saved DTO so leaving and immediately returning cannot
+      // rehydrate the page with the pre-save settings (GT-12948).
+      queryClient.setQueryData(
+        ['disposal-settings', effectiveTenantId],
+        persistedSettings,
+      );
+      form.reset(persistedSettings);
       toast.success(t('saveSuccess'));
+      return true;
     } catch (e) {
       // GT-12606：后端现在返回**稳定错误码 + 结构化参数**，前端按 locale 渲染。
       // 此前这里是按英文 message 做子串匹配（portal_base_url / 分类键名两条），
@@ -97,6 +119,10 @@ export function DisposalSettingsPage() {
       const localized = localizeApiError(e, tRoot);
       const fieldPath = apiErrorFieldPath(e);
       if (fieldPath) {
+        const tab = fieldPath.split('.')[0];
+        if (tab === 'quarantine' || tab === 'review' || tab === 'recall') {
+          setActiveTab(tab);
+        }
         // 把错误标注到具体输入框旁。message 存本地化后的文案，字段渲染层直接用。
         form.setError(fieldPath as Parameters<typeof form.setError>[0], {
           type: 'server',
@@ -104,12 +130,75 @@ export function DisposalSettingsPage() {
         });
       }
       toast.error(localized ?? t('saveFailed'));
+      return false;
     }
-  };
+  }, [apiRequest, data, effectiveTenantId, form, queryClient, t, tRoot]);
 
-  // GT-12251：校验失败时 handleSubmit 默认什么都不做，保存按钮看上去"没反应"。
-  // 至少给一个明确的失败提示，具体字段错误由各 tab 就地渲染。
-  const onInvalid = () => toast.error(t('saveValidationFailed'));
+  const validationText = useCallback(
+    (message: string | undefined) => {
+      switch (message) {
+        case 'customWeekdaysRequired':
+          return t('customWeekdaysRequired');
+        case 'customWeekdaysInvalid':
+          return t('customWeekdaysInvalid');
+        case 'notifyTimesRequired':
+          return t('notifyTimesRequired');
+        case 'notifyTimeFormatInvalid':
+          return t('notifyTimeFormatInvalid');
+        case 'scoreValueRange':
+          return t('scoreValueRange');
+        case 'scoreRangeError':
+          return t('scoreRangeError');
+        case 'validDaysRange':
+          return t('validDaysRange');
+        case 'portalBaseUrlRequired':
+          return t('portalBaseUrlRequired');
+        case 'portalBaseUrlInvalid':
+          return t('portalBaseUrlInvalid');
+        case 'portalBaseUrlNoPath':
+          return t('portalBaseUrlNoPath');
+        case 'customMinutesRange':
+          return t('customMinutesRange');
+        case 'maxRecheckMinutesRange':
+          return t('maxRecheckMinutesRange');
+        case 'reviewerNotifyIntervalRange':
+          return t('reviewerNotifyIntervalRange');
+        case 'reviewerActiveStartInvalid':
+          return t('reviewerActiveStartInvalid');
+        case 'reviewerActiveEndInvalid':
+          return t('reviewerActiveEndInvalid');
+        case 'emailInvalid':
+          return t('emailInvalid');
+        case 'timeoutMarkPositionsRequired':
+          return t('timeoutMarkPositionsRequired');
+        case 'timeoutMarkPositionsInvalid':
+          return t('timeoutMarkPositionsInvalid');
+        case 'timeoutMarkTextRequired':
+          return t('timeoutMarkTextRequired');
+        case 'timeoutMarkTextTooLong':
+          return t('timeoutMarkTextTooLong');
+        case 'recallTaskTimeoutRange':
+          return t('recallTaskTimeoutRange');
+        default:
+          return message ?? t('saveValidationFailed');
+      }
+    },
+    [t],
+  );
+
+  // GT-12251 / GT-13284：校验失败时切到首个错误所在页签，同时给出具体原因。
+  const onInvalid = useCallback<SubmitErrorHandler<DisposalSettings>>(
+    (errors) => {
+      const tab: DisposalSettingsTab = errors.quarantine
+        ? 'quarantine'
+        : errors.review
+          ? 'review'
+          : 'recall';
+      setActiveTab(tab);
+      toast.error(validationText(firstValidationMessage(errors[tab])));
+    },
+    [validationText],
+  );
 
   // 供 UnsavedGuardDialog「保存后离开」选项调用：触发完整的 RHF 校验+提交流程。
   const saveForGuard = useCallback(
@@ -117,18 +206,21 @@ export function DisposalSettingsPage() {
       new Promise<void>((resolve, reject) => {
         form.handleSubmit(
           async (values) => {
-            await onSubmit(values);
+            const saved = await onSubmit(values);
+            if (!saved) {
+              reject(new Error('save failed'));
+              return;
+            }
             resolve();
           },
-          () => {
+          (errors) => {
             // 校验失败：让 Promise reject，保持弹窗关闭但停留在页面
-            toast.error(t('saveValidationFailed'));
+            onInvalid(errors);
             reject(new Error('validation'));
           },
         )();
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form],
+    [form, onInvalid, onSubmit],
   );
 
   // 注册 / 更新 guard（随 isDirty 变化实时同步）
@@ -138,9 +230,7 @@ export function DisposalSettingsPage() {
     return () => {
       unregisterGuard();
     };
-    // saveForGuard 依赖 form（稳定引用），isDirty 是基础类型，不会引起无限循环。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDirty, saveForGuard]);
+  }, [isDirty, registerGuard, saveForGuard, unregisterGuard]);
 
   // 浏览器关闭/刷新时的原生拦截
   useEffect(() => {
@@ -196,8 +286,12 @@ export function DisposalSettingsPage() {
       description={t('pageDescription')}
       data-testid="disposal-settings-page"
     >
-      <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
-        <Tabs defaultValue="quarantine" data-testid="disposal-settings-tabs">
+      <form noValidate onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as DisposalSettingsTab)}
+          data-testid="disposal-settings-tabs"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="quarantine" data-testid="disposal-settings-tab-quarantine" className="data-active:!bg-white data-active:!text-gray-900">
               <Shield className="mr-2 h-4 w-4" />
@@ -225,7 +319,12 @@ export function DisposalSettingsPage() {
             <ReviewSettingsTab control={control} watch={watch} setValue={setValue} />
           </TabsContent>
           <TabsContent value="recall" className="mt-6">
-            <RecallSettingsTab control={control} watch={watch} setValue={setValue} />
+            <RecallSettingsTab
+              control={control}
+              watch={watch}
+              setValue={setValue}
+              effectiveTenantId={effectiveTenantId ?? null}
+            />
           </TabsContent>
         </Tabs>
         <div className="sticky bottom-0 z-10 mt-6 flex justify-end gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur-sm">

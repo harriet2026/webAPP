@@ -31,6 +31,7 @@ export function PhishingOverviewPage({ hitRate }: { hitRate?: number | null }) {
   const tp = useTranslations('phishingDetection');
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [filterResetVersion, setFilterResetVersion] = useState(0);
   const [page, setPage] = useState(1);
   const [detailId, setDetailId] = useState<string | null>(null);
   const range = useMemo(() => computeRange(filters.rangeKey, filters.start, filters.end), [filters.end, filters.rangeKey, filters.start]);
@@ -43,15 +44,19 @@ export function PhishingOverviewPage({ hitRate }: { hitRate?: number | null }) {
     mail_status: filters.mail_status.length ? filters.mail_status : undefined,
     ...range,
   }), [filters, page, range]);
-  const statsQuery = useQuery({ queryKey: phishingQueryKeys.stats(effectiveTenantId, range), queryFn: () => getDetectionStats(range, apiRequest) });
+  const statsQuery = useQuery({ queryKey: phishingQueryKeys.stats(effectiveTenantId), queryFn: () => getDetectionStats({}, apiRequest) });
   const logsQuery = useQuery({ queryKey: phishingQueryKeys.logs(effectiveTenantId, apiFilters), queryFn: () => getDetectionLogs(apiFilters, apiRequest) });
   const changeFilters = useCallback((next: DetectionFilterState) => { setFilters(next); setPage(1); }, []);
-  const applyFilterPatch = useCallback((patch: Partial<DetectionFilterState>) => { setFilters((current) => ({ ...current, ...patch })); setPage(1); }, []);
+  const resetFilters = useCallback(() => { setFilters(DEFAULT_FILTERS); setFilterResetVersion((current) => current + 1); setPage(1); }, []);
+  const applyKpiFilter = useCallback((patch: Partial<Pick<DetectionFilterState, 'disposition' | 'recall_status'>>) => {
+    setFilters((current) => ({ ...current, disposition: [], recall_status: [], ...patch }));
+    setPage(1);
+  }, []);
   return <PageShell className="space-y-6">
-    <KpiCards stats={statsQuery.data} hitRate={hitRate} isLoading={statsQuery.isLoading} onQuarantinedClick={() => applyFilterPatch({ disposition: ['quarantine'] })} onPendingReviewClick={() => applyFilterPatch({ disposition: ['audit'] })} onRecalledClick={() => applyFilterPatch({ recall_status: ['recalled'] })} onRecallSuccessClick={() => applyFilterPatch({ recall_status: ['recalled'] })} />
+    <KpiCards stats={statsQuery.data} hitRate={hitRate} isLoading={statsQuery.isLoading} onDetectedClick={resetFilters} onQuarantinedClick={() => applyKpiFilter({ disposition: ['quarantine'] })} onPendingReviewClick={() => applyKpiFilter({ disposition: ['audit'] })} onRecalledClick={() => applyKpiFilter({ recall_status: ['recalled'] })} onRecallSuccessClick={() => applyKpiFilter({ recall_status: ['recalled'] })} />
     <PageSurface className="rounded-xl border-border p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-3"><h3 className="text-base font-semibold">{tp('table.logTitle')}</h3><Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={() => { statsQuery.refetch(); logsQuery.refetch(); }} disabled={statsQuery.isFetching || logsQuery.isFetching}><RefreshCw className={statsQuery.isFetching || logsQuery.isFetching ? 'size-4 animate-spin' : 'size-4'} />{t('common.refresh')}</Button></div>
-      <PageFilters className="mb-4 rounded-xl border-border p-4 shadow-none"><DetectionLogFilters value={filters} onChange={changeFilters} onReset={() => changeFilters(DEFAULT_FILTERS)} /></PageFilters>
+      <PageFilters className="mb-4 rounded-xl border-border p-4 shadow-none"><DetectionLogFilters key={filterResetVersion} value={filters} onChange={changeFilters} onReset={resetFilters} /></PageFilters>
       <DetectionLogTable data={logsQuery.data?.items ?? []} isLoading={logsQuery.isLoading} truncated={logsQuery.data?.items.some((item) => item.result_truncated)} onOpenDetail={setDetailId} />
       <div className="mt-4"><ServerPagination page={page} pageSize={PAGE_SIZE} total={logsQuery.data?.total ?? 0} onPageChange={setPage} /></div>
     </PageSurface>

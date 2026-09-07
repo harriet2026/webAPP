@@ -115,12 +115,13 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                     {TEMPLATE_NAMES.map((name) => (
                       <Button
                         key={name}
+                        data-testid={`protocol-template-${name}`}
                         variant={config.template === name ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => handleTemplateSelect(name)}
                         disabled={disabled}
                       >
-                        {t(`protocolChecks.template.${name}` as any)}
+                        {t(`protocolChecks.template.${name}` as Parameters<typeof t>[0])}
                       </Button>
                     ))}
                   </div>
@@ -151,7 +152,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
               <TabsList>
                 {PROTOCOL_GROUPS.map((g) => (
                   <TabsTrigger key={g.key} value={g.key}>
-                    {t(g.labelKey as any)}
+                    {t(g.labelKey as Parameters<typeof t>[0])}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -175,14 +176,15 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                       // omits it (e.g. an older backend payload), fall back to a default
                       // item so the demo's full row set still shows and Save writes it back.
                       const item: CheckItem = config[g.key]?.[subkey] ?? { enabled: true, action: 'proceed', observe_mode: false };
-                      const label = t(`protocolChecks.${g.key}_${subkey}` as any);
-                      const desc = t(`protocolChecks.${g.key}_${subkey}Desc` as any);
+                      const label = t(`protocolChecks.${g.key}_${subkey}` as Parameters<typeof t>[0]);
+                      const desc = t(`protocolChecks.${g.key}_${subkey}Desc` as Parameters<typeof t>[0]);
                       const isDisabled = lockNonCustom || (g.key === 'ptr' && ptrReadonly);
                       const actions = g.key === 'dmarc' ? DMARC_ACTIONS : PROTOCOL_ACTIONS;
                       const showTagPanel = item.enabled && item.action === 'proceed';
                       return (
                         <div
                           key={subkey}
+                          data-testid={`protocol-check-${g.key}-${subkey}`}
                           className="space-y-2 rounded-lg border bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900"
                         >
                           <div className="flex items-center justify-between gap-3">
@@ -211,16 +213,23 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                               }
                               disabled={isDisabled}
                             >
-                              <SelectTrigger className="w-[140px]">
-                                <SelectValue>{t(protocolActionShortKey(item.action) as any)}</SelectValue>
+                              <SelectTrigger
+                                className="w-[140px]"
+                                data-testid={`protocol-check-action-${g.key}-${subkey}`}
+                              >
+                                <SelectValue>{t(protocolActionShortKey(item.action) as Parameters<typeof t>[0])}</SelectValue>
                               </SelectTrigger>
                               <SelectContent alignItemWithTrigger={false} className="w-72">
                                 {actions.map((a) => (
-                                  <SelectItem key={a} value={a}>
+                                  // 选项的可及名字是「标题 + 描述」两行拼接，而 QC 的定位器
+                                  // 门禁强制 exact 匹配，按 name 恒 0 命中。给每个选项一个
+                                  // 稳定 testid（与 FormatChecksSection 的
+                                  // auth-spoofing-format-action-<action> 同族命名）。
+                                  <SelectItem key={a} value={a} data-testid={`auth-spoofing-protocol-action-${a}`}>
                                     <div className="flex flex-col gap-0.5 py-0.5">
-                                      <span>{t(protocolActionShortKey(a) as any)}</span>
+                                      <span>{t(protocolActionShortKey(a) as Parameters<typeof t>[0])}</span>
                                       <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                                        {t(protocolActionDescKey(a) as any)}
+                                        {t(protocolActionDescKey(a) as Parameters<typeof t>[0])}
                                       </span>
                                     </div>
                                   </SelectItem>
@@ -261,11 +270,11 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
       </Collapsible>
 
       <AlertDialog open={pendingTemplate !== null} onOpenChange={(open) => { if (!open) setPendingTemplate(null); }}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="protocol-template-confirm">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('protocolChecks.templateConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('protocolChecks.templateConfirmDesc', { template: pendingTemplate ? t(`protocolChecks.template.${pendingTemplate}` as any) : '' })}
+              {t('protocolChecks.templateConfirmDesc', { template: pendingTemplate ? t(`protocolChecks.template.${pendingTemplate}` as Parameters<typeof t>[0]) : '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           {pendingTemplate && (
@@ -282,7 +291,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
           )}
           <AlertDialogFooter>
             <AlertDialogCancel>{t('protocolChecks.templateCancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmTemplate}>{t('protocolChecks.templateApply')}</AlertDialogAction>
+            <AlertDialogAction data-testid="protocol-template-apply" onClick={confirmTemplate}>{t('protocolChecks.templateApply')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

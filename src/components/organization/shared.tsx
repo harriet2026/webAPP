@@ -202,6 +202,17 @@ export function ListToolbar({
   filterContent,
   actions,
   testIdPrefix,
+  // testIdPrefix 拼出来的 `${testIdPrefix}-search` 这类模板，前缀在开头，
+  // qc 的 testid 契约扫描器（scripts/playwright/lib/yml/testid-contract.mjs）
+  // 认不出来 —— 它只认字面量和"有静态前缀"的模板，于是这些真实渲染的 testid
+  // 被判为不存在。所以每个派生 id 额外开一个可选的完整字面量 prop 供调用方直接
+  // 传（与 RescanPolicySection / PipelinePanelHeader 的处理一致），不传时仍
+  // 退回原表达式，渲染结果逐字不变。
+  searchTestId,
+  resetTestId,
+  refreshTestId,
+  filterTestId,
+  filterPopoverTestId,
 }: {
   search: string;
   onSearchChange: (v: string) => void;
@@ -212,6 +223,11 @@ export function ListToolbar({
   filterContent?: ReactNode;
   actions?: ReactNode;
   testIdPrefix: string;
+  searchTestId?: string;
+  resetTestId?: string;
+  refreshTestId?: string;
+  filterTestId?: string;
+  filterPopoverTestId?: string;
 }) {
   const t = useTranslations('organizationContacts');
   return (
@@ -223,13 +239,13 @@ export function ListToolbar({
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
           className="h-9 w-64 pl-8"
-          data-testid={`${testIdPrefix}-search`}
+          data-testid={searchTestId ?? `${testIdPrefix}-search`}
         />
       </div>
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={onReset} aria-label={t('resetFilters')} data-testid={`${testIdPrefix}-reset`}>
+            <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={onReset} aria-label={t('resetFilters')} data-testid={resetTestId ?? `${testIdPrefix}-reset`}>
               <RotateCcw className="h-4 w-4" />
             </Button>
           }
@@ -240,7 +256,7 @@ export function ListToolbar({
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={onRefresh} aria-label={t('refresh')} data-testid={`${testIdPrefix}-refresh`}>
+              <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={onRefresh} aria-label={t('refresh')} data-testid={refreshTestId ?? `${testIdPrefix}-refresh`}>
                 <RefreshCw className="h-4 w-4" />
               </Button>
             }
@@ -253,7 +269,7 @@ export function ListToolbar({
           <Popover>
             <PopoverTrigger
               render={
-                <Button variant="outline" className="h-9 gap-1.5" data-testid={`${testIdPrefix}-filter`}>
+                <Button variant="outline" className="h-9 gap-1.5" data-testid={filterTestId ?? `${testIdPrefix}-filter`}>
                   <SlidersHorizontal className="h-4 w-4" />
                   {t('filter')}
                   {!!filterCount && filterCount > 0 && (
@@ -264,7 +280,7 @@ export function ListToolbar({
                 </Button>
               }
             />
-            <PopoverContent align="end" className="w-80 space-y-3" data-testid={`${testIdPrefix}-filter-popover`}>
+            <PopoverContent align="end" className="w-80 space-y-3" data-testid={filterPopoverTestId ?? `${testIdPrefix}-filter-popover`}>
               {filterContent}
             </PopoverContent>
           </Popover>
@@ -325,6 +341,9 @@ export function Field({
   hint,
   children,
   'data-testid': testId,
+  // 行内错误的 `${testId}-error` 同样是"前缀在开头"的模板，qc 契约扫描器看不见；
+  // 调用方可直接传完整字面量，不传时退回原表达式，渲染结果逐字不变。
+  errorTestId,
 }: {
   label: string;
   required?: boolean;
@@ -332,6 +351,7 @@ export function Field({
   hint?: string;
   children: ReactNode;
   'data-testid'?: string;
+  errorTestId?: string;
 }) {
   return (
     <div className="space-y-1.5">
@@ -340,7 +360,7 @@ export function Field({
       </Label>
       {children}
       {hint && !error && <p className="text-xs text-gray-400">{hint}</p>}
-      {error && <p className="text-xs text-red-500" data-testid={testId ? `${testId}-error` : undefined}>{error}</p>}
+      {error && <p className="text-xs text-red-500" data-testid={errorTestId ?? (testId ? `${testId}-error` : undefined)}>{error}</p>}
     </div>
   );
 }

@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   getObserveStats: vi.fn(),
   putConfig: vi.fn(),
   toastError: vi.fn(),
+  apiRequest: vi.fn(),
+  effectiveTenantId: 101 as number | null,
 }));
 
 vi.mock('@/lib/api/auth-spoofing', () => ({
@@ -20,7 +22,10 @@ vi.mock('@/lib/api/auth-spoofing', () => ({
 }));
 
 vi.mock('@/lib/api/client', () => ({
-  useApiRequest: () => ({ apiRequest: vi.fn() }),
+  useApiRequest: () => ({
+    apiRequest: mocks.apiRequest,
+    effectiveTenantId: mocks.effectiveTenantId,
+  }),
 }));
 
 vi.mock('@/contexts/auth-context', () => ({
@@ -51,23 +56,38 @@ vi.mock('./auth-spoofing/FormatChecksSection', () => ({
     config: FormatChecksConfig;
     onChange: (config: FormatChecksConfig) => void;
   }) => (
-    <button
-      type="button"
-      data-testid="make-subject-tag-empty"
-      onClick={() =>
-        onChange({
-          ...config,
-          mailfrom_empty: {
-            ...config.mailfrom_empty,
-            action: 'proceed',
-            tag_subject_enabled: true,
-            tag_subject_content: '',
-          },
-        })
-      }
-    >
-      make invalid
-    </button>
+    <div>
+      <span data-testid="server-mailfrom-invalid-action">{config.mailfrom_invalid.action}</span>
+      <button
+        type="button"
+        data-testid="make-subject-tag-empty"
+        onClick={() =>
+          onChange({
+            ...config,
+            mailfrom_empty: {
+              ...config.mailfrom_empty,
+              action: 'proceed',
+              tag_subject_enabled: true,
+              tag_subject_content: '',
+            },
+          })
+        }
+      >
+        make invalid
+      </button>
+      <button
+        type="button"
+        data-testid="make-valid-change"
+        onClick={() =>
+          onChange({
+            ...config,
+            mailfrom_empty: { ...config.mailfrom_empty, action: 'audit' },
+          })
+        }
+      >
+        make valid change
+      </button>
+    </div>
   ),
 }));
 
@@ -119,6 +139,7 @@ function initialConfig(): AuthSpoofingConfig {
 describe('AuthSpoofingPage save validation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.effectiveTenantId = 101;
     mocks.getConfig.mockResolvedValue(initialConfig());
     mocks.getObserveStats.mockResolvedValue({ days: 7, points: [] });
     mocks.putConfig.mockResolvedValue({ ok: true });
@@ -143,5 +164,114 @@ describe('AuthSpoofingPage save validation', () => {
 
     expect(mocks.toastError).toHaveBeenCalledWith('已启用的标记方式内容不能为空');
     expect(mocks.putConfig).not.toHaveBeenCalled();
+  });
+
+  it('hides fallback defaults and disables writes until a failed config load is retried successfully', async () => {
+    const serverConfig = initialConfig();
+    serverConfig.format_checks.mailfrom_invalid.action = 'discard';
+    serverConfig.similar_domain.threshold = 17;
+    mocks.getConfig
+      .mockRejectedValueOnce(new Error('server unavailable'))
+      .mockResolvedValueOnce(serverConfig);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh}>
+          <AuthSpoofingPage embedded />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByTestId('auth-spoofing-load-error')).toBeInTheDocument();
+    expect(screen.queryByTestId('auth-spoofing-config-content')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('make-subject-tag-empty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('auth-spoofing-save')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('auth-spoofing-save'));
+    expect(mocks.putConfig).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('auth-spoofing-load-retry'));
+
+    expect(await screen.findByTestId('auth-spoofing-config-content')).toBeInTheDocument();
+    expect(screen.queryByTestId('auth-spoofing-load-error')).not.toBeInTheDocument();
+    expect(screen.getByTestId('server-mailfrom-invalid-action')).toHaveTextContent('discard');
+    fireEvent.click(screen.getByTestId('make-valid-change'));
+    await waitFor(() => expect(screen.getByTestId('auth-spoofing-save')).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId('auth-spoofing-save'));
+    await waitFor(() => expect(mocks.putConfig).toHaveBeenCalledTimes(1));
+    expect(mocks.putConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        format_checks: expect.objectContaining({
+          mailfrom_empty: expect.objectContaining({ action: 'audit' }),
+          mailfrom_invalid: expect.objectContaining({ action: 'discard' }),
+        }),
+        similar_domain: expect.objectContaining({ threshold: 17 }),
+      }),
+      mocks.apiRequest,
+      expect.any(AbortSignal),
+    );
+    expect(mocks.getConfig).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads and hydrates the current tenant before allowing a cross-tenant save', async () => {
+    const tenantOne = initialConfig();
+    tenantOne.format_checks.mailfrom_invalid.action = 'reject';
+    const tenantTwo = initialConfig();
+    tenantTwo.format_checks.mailfrom_invalid.action = 'discard';
+    tenantTwo.similar_domain.threshold = 23;
+
+    let resolveTenantTwo!: (config: AuthSpoofingConfig) => void;
+    const tenantTwoResponse = new Promise<AuthSpoofingConfig>((resolve) => {
+      resolveTenantTwo = resolve;
+    });
+    mocks.getConfig
+      .mockResolvedValueOnce(tenantOne)
+      .mockImplementationOnce(() => tenantTwoResponse);
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    const view = render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh}>
+          <AuthSpoofingPage embedded />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByTestId('server-mailfrom-invalid-action')).toHaveTextContent('reject');
+
+    mocks.effectiveTenantId = 202;
+    view.rerender(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh}>
+          <AuthSpoofingPage embedded />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(mocks.getConfig).toHaveBeenCalledTimes(2));
+    expect(screen.queryByTestId('auth-spoofing-config-content')).not.toBeInTheDocument();
+    expect(screen.getByTestId('auth-spoofing-loading')).toBeInTheDocument();
+    expect(screen.getByTestId('auth-spoofing-save')).toBeDisabled();
+
+    resolveTenantTwo(tenantTwo);
+    expect(await screen.findByTestId('server-mailfrom-invalid-action')).toHaveTextContent('discard');
+    fireEvent.click(screen.getByTestId('make-valid-change'));
+    await waitFor(() => expect(screen.getByTestId('auth-spoofing-save')).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId('auth-spoofing-save'));
+
+    await waitFor(() => expect(mocks.putConfig).toHaveBeenCalledTimes(1));
+    expect(mocks.putConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        format_checks: expect.objectContaining({
+          mailfrom_invalid: expect.objectContaining({ action: 'discard' }),
+        }),
+        similar_domain: expect.objectContaining({ threshold: 23 }),
+      }),
+      mocks.apiRequest,
+      expect.any(AbortSignal),
+    );
   });
 });

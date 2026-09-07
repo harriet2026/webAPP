@@ -50,6 +50,17 @@
 </tbody>
 </table></div>
   <p><strong>三语文案：</strong>「观察中 / Observing / กำลังสังเกต」；只读动作「允许（仅记录） / Allow (log only) / อนุญาต (บันทึกเท่านั้น)」——demo 用内联 <code>language ===</code> 判断而非 i18n key，详见主文件 §7。</p>
+</section>
+<section>
+  <h2>后端映射与邮件事实</h2>
+  <table class="spec-table">
+    <thead><tr><th>层次</th><th>字段</th><th>约束</th></tr></thead>
+    <tbody>
+      <tr><td>页面配置 API</td><td><code>action=&lt;原动作&gt;</code> + <code>observe_mode=true</code></td><td>编辑模型保留管理员选择的原动作，关闭观察模式时恢复该动作。</td></tr>
+      <tr><td>统一规则</td><td><code>rules.action=observe</code> + <code>metadata.configured_action=&lt;原动作&gt;</code></td><td><code>action</code> 是唯一运行时执行事实；<code>rules.observe_mode</code> 仅为滚动升级兼容镜像，不得作为新代码的判断依据。</td></tr>
+      <tr><td>邮件处置事实</td><td><code>disposal_basis.modules[].action=observe</code>、<code>effective_for=[]</code></td><td>必须记录实际命中的规则和收件人，但不进入最终处置候选、不阻断邮件，也不借用 <code>proceed</code> 表示观察。</td></tr>
+    </tbody>
+  </table>
 </section><script src="../assets/spec-preview.js"></script>
 </body>
 </html>

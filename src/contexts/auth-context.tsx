@@ -48,8 +48,8 @@ export type Permission =
   | 'view_admin_audit_logs'
   | 'view_link_logs'
   | 'manage_ip_frequency'
-  // GT-11959: login-security policy. Held by BOTH roles — the platform sets a
-  // baseline, a tenant admin tightens it for their own tenant. Without this a
+  // GT-13320: login-security policy. Held by BOTH roles — Platform and Tenant
+  // each configure their own independent scope. Without this a
   // tenant admin cannot reach the tab at all (they hold neither manage_tenants nor
   // manage_users), and the whole per-tenant layer would be backend-only.
   | 'manage_login_security'

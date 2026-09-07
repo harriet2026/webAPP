@@ -64,6 +64,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
       <button
         onClick={handleClick}
         {...pointerHoverProps}
+        data-testid={`sidebar-nav-${item.id}`}
         data-active={isSelected ? 'true' : undefined}
         aria-expanded={hasChildren ? isExpanded : undefined}
         className={cn(
@@ -105,7 +106,7 @@ function SidebarNavItem({ item, level = 0, expandedItems, toggleExpand, isItemAl
       </button>
 
       {hasChildren && isExpanded && (
-        <div className="ml-5 mt-1 space-y-1 border-l border-white/8 pl-3">
+        <div className="ml-5 mt-1 space-y-1 border-l border-white/8 pl-3" data-testid={`sidebar-nav-children-${item.id}`}>
           {filteredChildren?.map((child) => (
             <SidebarNavItem
               key={child.id}
@@ -223,7 +224,13 @@ export function SidebarNav() {
             className="h-10 w-10 shrink-0 object-contain"
           />
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold tracking-wide text-white" suppressHydrationWarning>{brandName}</div>
+            <div
+              className="truncate text-sm font-semibold tracking-wide text-white"
+              data-testid="sidebar-brand-name"
+              suppressHydrationWarning
+            >
+              {brandName}
+            </div>
             <div className="truncate text-xs text-sidebar-foreground/55">
               {activeTitleKey ? t(activeTitleKey) : t('sidebar.dashboard')}
             </div>

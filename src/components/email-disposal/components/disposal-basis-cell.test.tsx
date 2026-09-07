@@ -80,6 +80,27 @@ function renderCell(requestFn: ApiRequestFn) {
 }
 
 describe('DisposalBasisCell (GT-12935)', () => {
+  it('renders the no-rules-matched backend reason as a plain dash', () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { container } = render(
+      <QueryClientProvider client={client}>
+        <TooltipProvider>
+          <DisposalBasisCell
+            mailLogId={98}
+            basis={undefined}
+            groups={undefined}
+            reason=" No Rules Matched "
+            lang="zh"
+            requestFn={vi.fn() as unknown as ApiRequestFn}
+          />
+        </TooltipProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(container.textContent).toBe('-');
+    expect(container).not.toHaveTextContent(/no rules matched/i);
+  });
+
   it('does not resurrect reason text when structured facts contain only proceed hits', () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(

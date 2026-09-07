@@ -168,6 +168,7 @@ export default function QuarantinePage() {
       ),
       cell: ({ row }) => (
         <Checkbox
+          data-testid={`quarantine-select-${row.original.id}`}
           checked={selectedIds.includes(row.original.quarantine_id)}
           onCheckedChange={(checked) => handleSelect(row.original.quarantine_id, !!checked)}
         />
@@ -222,7 +223,10 @@ export default function QuarantinePage() {
       accessorKey: 'released_at',
       header: t('quarantine.released'),
       cell: ({ row }) => (
-        <Badge variant={row.original.released_at ? 'default' : 'secondary'}>
+        <Badge
+          variant={row.original.released_at ? 'default' : 'secondary'}
+          data-testid={`quarantine-released-${row.original.id}`}
+        >
           {row.original.released_at ? t('common.yes') : t('common.no')}
         </Badge>
       ),
@@ -234,6 +238,7 @@ export default function QuarantinePage() {
         <Button
           variant="ghost"
           size="icon"
+          data-testid={`quarantine-preview-${row.original.id}`}
           onClick={() => handlePreview(row.original)}
           title={t('emailPreview.title')}
         >
@@ -245,13 +250,14 @@ export default function QuarantinePage() {
   ];
 
   return (
-    <PageShell>
+    // data-testid 为纯属性新增（QC 稳定定位点），不改变渲染结构。
+    <PageShell data-testid="quarantine-page">
       <PageHeader
         eyebrow={t('quarantine.eyebrow')}
         title={t('quarantine.title')}
         description={t('quarantine.subtitle')}
         actions={selectedIds.length > 0 ? (
-          <Button onClick={() => setReleaseDialog(true)}>
+          <Button data-testid="quarantine-batch-release" onClick={() => setReleaseDialog(true)}>
             <SendHorizonal className="h-4 w-4 mr-2" />
             {t('quarantine.batchRelease')} ({selectedIds.length})
           </Button>
@@ -267,6 +273,7 @@ export default function QuarantinePage() {
           className="w-48"
         />
         <Input
+          data-testid="quarantine-filter-subject"
           placeholder={t('quarantine.subject')}
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
@@ -279,16 +286,16 @@ export default function QuarantinePage() {
           className="w-48"
         />
         <Select value={releasedFilter} onValueChange={(v) => setReleasedFilter(v === 'all' ? '' : v ?? '')}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40" data-testid="quarantine-filter-released">
             <SelectValue placeholder={t('quarantine.released')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t('common.all')}</SelectItem>
-            <SelectItem value="yes">{t('common.yes')}</SelectItem>
-            <SelectItem value="no">{t('common.no')}</SelectItem>
+            <SelectItem value="all" data-testid="quarantine-filter-released-option-all">{t('common.all')}</SelectItem>
+            <SelectItem value="yes" data-testid="quarantine-filter-released-option-yes">{t('common.yes')}</SelectItem>
+            <SelectItem value="no" data-testid="quarantine-filter-released-option-no">{t('common.no')}</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={handleSearch}>{t('common.search')}</Button>
+        <Button data-testid="quarantine-search" onClick={handleSearch}>{t('common.search')}</Button>
         <Button variant="outline" onClick={handleReset}>{t('common.reset')}</Button>
       </div>
       </PageFilters>
@@ -301,7 +308,18 @@ export default function QuarantinePage() {
         </PageSurface>
       ) : (
         <PageSurface className="space-y-4">
-          <DataTable columns={columns} data={items} pageSize={pageSize} hidePagination />
+          {/* columnTestId / rowTestId 是 DataTable 既有的透传 prop（见
+              components/shared/data-table.tsx），只往既有 <th>/<tr> 上加属性，
+              不包新节点、不改结构。 */}
+          <DataTable
+            columns={columns}
+            data={items}
+            pageSize={pageSize}
+            hidePagination
+            testId="quarantine-table"
+            columnTestId={(id) => `quarantine-col-${id}`}
+            rowTestId={(row) => `quarantine-row-${row.id}`}
+          />
           <ServerPagination
             page={page}
             pageSize={pageSize}
@@ -312,7 +330,7 @@ export default function QuarantinePage() {
       )}
 
       <Dialog open={releaseDialog} onOpenChange={(open) => !open && setReleaseDialog(false)}>
-        <DialogContent className="max-w-md rounded-[28px] border-border/70 shadow-2xl">
+        <DialogContent className="max-w-md rounded-[28px] border-border/70 shadow-2xl" data-testid="quarantine-release-dialog">
           <DialogHeader>
             <DialogTitle>{t('quarantine.batchRelease')}</DialogTitle>
           </DialogHeader>
@@ -336,7 +354,7 @@ export default function QuarantinePage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReleaseDialog(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleBatchRelease} disabled={isSubmitting}>
+            <Button data-testid="quarantine-release-confirm" onClick={handleBatchRelease} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {t('quarantine.release')}
             </Button>

@@ -111,6 +111,7 @@ export function Header() {
                 <DropdownMenuItem
                   onClick={() => setTimeout(() => router.push(`/${locale}/profile`), 0)}
                   className="gap-2 px-2 py-1.5"
+                  data-testid="user-menu-profile"
                 >
                   <User className="mr-2 size-4" />
                   {t('profile.title')}

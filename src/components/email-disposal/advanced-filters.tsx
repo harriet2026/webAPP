@@ -658,6 +658,7 @@ export function AdvancedFilters({ value, onChange }: AdvancedFiltersProps) {
                     onValueChange={(v) => handleFieldChange(gi, ci, v ?? "")}
                   >
                     <SelectTrigger
+                      data-testid={`disposal-advanced-field-${gi}-${ci}`}
                       className="h-8 min-w-[12rem] shrink-0 text-xs"
                       aria-label={t("placeholder.field")}
                     >
@@ -671,7 +672,11 @@ export function AdvancedFilters({ value, onChange }: AdvancedFiltersProps) {
                               {t(`advancedGroups.${groupKey}`)}
                             </div>
                             {fields.map((f) => (
-                              <SelectItem key={f.key} value={f.key}>
+                              <SelectItem
+                                key={f.key}
+                                value={f.key}
+                                data-testid={`disposal-advanced-field-option-${f.key}`}
+                              >
                                 {t(f.i18nKey)}
                               </SelectItem>
                             ))}
@@ -691,6 +696,7 @@ export function AdvancedFilters({ value, onChange }: AdvancedFiltersProps) {
                     disabled={!fieldDef}
                   >
                     <SelectTrigger
+                      data-testid={`disposal-advanced-operator-${gi}-${ci}`}
                       className="h-8 min-w-[9rem] shrink-0 text-xs"
                       aria-label={t("operator")}
                     >
@@ -698,7 +704,11 @@ export function AdvancedFilters({ value, onChange }: AdvancedFiltersProps) {
                     </SelectTrigger>
                     <SelectContent>
                       {allowedOps.map((op) => (
-                        <SelectItem key={op} value={op}>
+                        <SelectItem
+                          key={op}
+                          value={op}
+                          data-testid={`disposal-advanced-operator-option-${op}`}
+                        >
                           {t(`operators.${op}`)}
                         </SelectItem>
                       ))}

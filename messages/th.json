@@ -179,17 +179,18 @@
       "targetTenantPlaceholder": "เลือกผู้เช่า",
       "importTypesTitle": "ประเภทการนำเข้า",
       "importTypesDescription": "เลือกได้เฉพาะประเภทที่มีอยู่ในไฟล์เท่านั้น",
-      "previewButton": "ดูตัวอย่างการนำเข้า",
+      "previewLoading": "กำลังตรวจสอบเนื้อหาที่นำเข้าโดยอัตโนมัติ…",
       "previewSummaryTitle": "สรุปตัวอย่าง",
       "summaryLine": "แยกได้ {parsed}, นำเข้าได้ {importable}, ซ้ำ {duplicates}, ไม่ถูกต้อง {invalid}",
       "duplicateHandlingTitle": "การจัดการรายการซ้ำ",
-      "skipAllRemainingDuplicates": "ข้ามรายการซ้ำที่เหลือทั้งหมด",
-      "skipDuplicate": "ข้ามรายการซ้ำ {previewItemId}",
+      "duplicatesWillBeSkipped": "รายการซ้ำจะไม่เขียนทับข้อมูลที่มีอยู่และจะถูกข้ามโดยอัตโนมัติระหว่างการนำเข้า",
+      "duplicateWillBeSkipped": "จะข้ามรายการซ้ำ {previewItemId}",
       "showDetails": "แสดงรายละเอียด",
       "sourcePayload": "ข้อมูลต้นทาง",
       "existingItem": "รายการที่มีอยู่",
       "invalidItemsTitle": "รายการไม่ถูกต้อง",
       "closeButton": "ปิด",
+      "importTemplateButton": "เทมเพลตนำเข้า",
       "importButton": "นำเข้า",
       "group": {
         "rules": "กฎ",
@@ -203,7 +204,6 @@
         "selectAtLeastOneType": "กรุณาเลือกประเภทการนำเข้าอย่างน้อยหนึ่งประเภท",
         "chooseTargetTenant": "กรุณาเลือกผู้เช่าปลายทาง",
         "previewNotWired": "ยังไม่ได้เชื่อมต่อพรีวิว {variant}",
-        "previewLoaded": "โหลดตัวอย่างแล้ว",
         "previewFailed": "พรีวิวไม่สำเร็จ",
         "runPreviewFirst": "กรุณาดูตัวอย่างก่อนนำเข้า",
         "importNotWired": "ยังไม่ได้เชื่อมต่อการนำเข้า {variant}",
@@ -514,7 +514,7 @@
     },
     "collaboration": {
       "title": "ภาพรวมการทำงานร่วมกัน",
-      "description": "ทั้งสาม Agent ใช้ชั้นวิเคราะห์อัจฉริยะร่วมกันใน policy pipeline แต่แยกการตั้งค่า บันทึก และขอบเขตสิทธิ์",
+      "description": "Agent ที่เปิดใช้งานและแสดงอยู่ใช้ชั้นวิเคราะห์อัจฉริยะของ policy pipeline โดยยังคงแยกการตั้งค่า บันทึก และขอบเขตสิทธิ์",
       "phishing": {
         "title": "ตรวจจับฟิชชิง",
         "body": "ให้ผลตัดสินหลัง sideline session แบบเรียลไทม์ และขับเคลื่อนการกักกัน ทำเครื่องหมาย ตรวจทาน หรือปล่อยผ่าน"
@@ -1064,7 +1064,19 @@
           "rcptKindBcc": "สำเนาลับถึง",
           "intentTag": "แท็กเอนจินเจตนา",
           "intentTagAny": "ไม่จำกัด",
-          "intentTagHint": "จับคู่ผลการจำแนกจากเอนจินเจตนา หากไม่เลือกจะไม่จำกัดเงื่อนไขนี้",
+          "intentTagHint": "จับคู่ผลการจำแนกจากเอนจินเจตนา สำหรับอีเมลที่ปล่อยโดยยังไม่ได้ตรวจ CAC ให้เลือก ยังไม่ได้ตรวจสอบ (0)",
+          "intentTagSelected": "เลือกแล้ว {count} รายการ",
+          "intentTagClear": "ล้าง",
+          "intentTagValue0": "ยังไม่ได้ตรวจสอบ (0)",
+          "intentTagValue1": "ปกติ (1)",
+          "intentTagValue2": "สมัครสมาชิก (2)",
+          "intentTagValue3": "สแปม (3)",
+          "intentTagValue4": "โฆษณา (4)",
+          "intentTagValue5": "ลามก/การพนัน (5)",
+          "intentTagValue6": "การเมือง (6)",
+          "intentTagValue7": "ฟิชชิง (7)",
+          "intentTagValue8": "บัญชีถูกบุกรุก (8)",
+          "intentTagValue9": "ไวรัส (9)",
           "targetHost": "ที่อยู่ปลายทาง",
           "targetHostHint": "ไม่บังคับ เว้นว่างเพื่อนำส่งตาม MX ของโดเมนผู้รับ",
           "targetHostLoopback": "ที่อยู่ปลายทางต้องไม่ซ้ำกับที่อยู่ภายในของเกตเวย์",
@@ -1395,6 +1407,7 @@
       "query": "ค้นหา",
       "startDate": "วันที่เริ่มต้น",
       "endDate": "วันที่สิ้นสุด",
+      "invalidRange": "วันที่สิ้นสุดต้องไม่เร็วกว่าวันที่เริ่มต้น",
       "empty": "ไม่มีบันทึก"
     },
     "username": "ชื่อผู้ใช้",
@@ -1739,14 +1752,21 @@
     "exportMembersFor": "ส่งออก: {name}",
     "importSuccess": "นำเข้าสมาชิกแล้ว {count} รายการ",
     "importPartial": "นำเข้าแล้ว {imported} รายการ; ล้มเหลว {failed} บรรทัด",
+    "importSummary": "ผลการนำเข้า: เพิ่ม {imported} ข้าม {skipped} ล้มเหลว {failed}",
     "importFileHint": "เลือกไฟล์ .txt หรือ .csv บรรทัดละหนึ่งสมาชิก",
     "noGroupSelected": "กรุณาเลือกกลุ่มก่อน",
     "eyebrow": "การจัดการกลุ่ม",
     "columnType": "ประเภท",
     "importFailuresTitle": "ผลการนำเข้า \"{name}\": สำเร็จ {imported} ล้มเหลว {failed}",
+    "importResultsTitle": "ผลการนำเข้า \"{name}\": เพิ่ม {imported} ข้าม {skipped} ล้มเหลว {failed}",
     "importFailureLine": "บรรทัด",
+    "importResultStatus": "ผลลัพธ์",
+    "importResultSkipped": "ข้าม",
+    "importResultFailed": "ล้มเหลว",
+    "importResultReason": "สาเหตุ",
     "importFailureValue": "ค่า",
     "importFailureReason": "สาเหตุ",
+    "importSkipAlreadyExists": "มีสมาชิกนี้อยู่แล้ว",
     "platformIpGroupTitle": "กลุ่ม IP ระดับแพลตฟอร์ม",
     "platformScopeHint": "กลุ่ม IP ระดับแพลตฟอร์มมีผลกับผู้เช่าทั้งหมด และใช้อ้างอิงในนโยบาย IP (นิพจน์บัญชีดำ/ขาว IP)",
     "contentMemberListPerLine": "หนึ่งคำสำคัญต่อหนึ่งบรรทัด",
@@ -2002,6 +2022,7 @@
       "isOutbound": "ขาออก",
       "oneRecipient": "ผู้รับหนึ่งราย",
       "originKind": "ประเภทที่มาของอีเมล",
+      "mxRegion": "ภูมิภาค MX ของโดเมนผู้รับ",
       "recipient": "ผู้รับ",
       "recipientCount": "จำนวนผู้รับ",
       "recipientDomain": "โดเมนผู้รับ",
@@ -2064,6 +2085,7 @@
     "sideline": "ระงับ",
     "accept": "รับ",
     "proceed": "ดำเนินการต่อ",
+    "observe": "สังเกต",
     "reject": "ปฏิเสธ",
     "discard": "ทิ้ง",
     "audit": "ตรวจสอบ",
@@ -2595,6 +2617,7 @@
     "columns": {
       "clickTime": "เวลาคลิก",
       "tid": "TID อีเมล",
+      "tenant": "ผู้เช่าที่เป็นเจ้าของ",
       "clicker": "ผู้คลิก",
       "sender": "ผู้ส่ง",
       "originalUrl": "URL เดิม",
@@ -3327,6 +3350,7 @@
   },
   "pipeline": {
     "title": "ไปป์ไลน์นโยบาย",
+    "deepLinkRuleContext": "ระบุตำแหน่งจากหลักฐานการจัดการอีเมล: กฎที่ตรงกัน {ruleId}",
     "executionPipeline": "กระบวนการดำเนินนโยบาย",
     "phase1IP": "นโยบาย IP",
     "phase2Sender": "นโยบายผู้ส่ง/ผู้รับ",
@@ -4290,6 +4314,8 @@
   },
   "contentRules": {
     "title": "กฎเนื้อหา",
+    "deepLinkLoading": "กำลังค้นหากฎที่ตรงกัน {ruleId}…",
+    "deepLinkUnavailable": "ไม่สามารถเปิดกฎ {ruleId} ได้: กฎถูกลบ ไม่ใช่กฎเนื้อหา หรือบัญชีนี้ไม่มีสิทธิ์เข้าถึง",
     "description": "จับคู่เนื้อหาอีเมลด้วยคำสำคัญ รูปแบบ หรือกลุ่มเนื้อหา",
     "basicSettings": "การตั้งค่าพื้นฐาน",
     "ruleDescription": "คำอธิบาย",
@@ -4480,6 +4506,7 @@
     "save": "บันทึก",
     "saveSuccess": "บันทึกสำเร็จ",
     "saveFailed": "บันทึกล้มเหลว",
+    "loadFailed": "โหลดการกำหนดค่าการตรวจสอบสิทธิ์และการปลอมแปลงไม่สำเร็จ โปรดลองอีกครั้ง",
     "warning": "คำเตือน",
     "viewObserveStats": "ดูสถิติการสังเกต",
     "restoreDefault": "คืนค่าเริ่มต้น",
@@ -5121,12 +5148,13 @@
     },
     "common": {
       "save": "บันทึก",
-      "cancel": "ยกเลิก"
+      "cancel": "ยกเลิก",
+      "retry": "ลองอีกครั้ง"
     },
     "toast": {
       "saveSuccess": "บันทึกการตั้งค่าแล้ว",
       "saveFailed": "บันทึกล้มเหลว",
-      "loadFailed": "โหลดการตั้งค่าล้มเหลว กำลังแสดงค่าเริ่มต้น",
+      "loadFailed": "โหลดการตั้งค่าล้มเหลว โปรดลองอีกครั้ง",
       "deleteSuccess": "ลบกฎแล้ว"
     },
     "antivirus": {
@@ -6065,7 +6093,6 @@
       "direction": "ทิศทาง",
       "senderIp": "IP ผู้ส่ง",
       "sender": "ผู้ส่ง",
-      "senderRecipient": "ผู้ส่ง → ผู้รับ",
       "recipient": "ผู้รับ",
       "subject": "หัวข้อ",
       "mailType": "ประเภทอีเมล",
@@ -6229,6 +6256,8 @@
         "recipient": "ผู้รับ",
         "context": {
           "title": "บริบทการส่ง/รับ",
+          "originalSubject": "หัวเรื่องต้นฉบับ",
+          "deliverySubject": "หัวเรื่องที่ส่ง",
           "recipientsCount": "ผู้รับ {n} ราย",
           "notOperableWarning": "อีเมลนี้ถูกบล็อก/ทิ้งแล้ว ระบบไม่ได้เก็บเนื้อหาต้นฉบับ ไม่สามารถดำเนินการต่อได้",
           "deliveryFailedWarning": "อีเมลนี้ถูกปล่อยและจัดส่งโดยเกตเวย์แล้ว แต่ระบบเมลปลายทางรับไม่สำเร็จ (ดูสถานะผู้รับและรายละเอียดการจัดส่ง) ใช้การดำเนินการ “ส่งซ้ำ” เพื่อกู้คืนการจัดส่ง",
@@ -6275,7 +6304,13 @@
           "expandAll": "แสดงทั้งหมด {n} ผู้รับ",
           "colRecipients": "ผู้รับ",
           "colStatus": "สถานะ",
+          "colRecall": "สถานะการเรียกคืน",
           "colActions": "การดำเนินการ",
+          "recall": {
+            "handling": "กำลังเรียกคืน",
+            "success": "เรียกคืนแล้ว",
+            "failed": "เรียกคืนล้มเหลว"
+          },
           "status": {
             "delivered": "นำส่งแล้ว",
             "marked_delivered": "ทำเครื่องหมายว่านำส่งแล้ว",
@@ -6312,9 +6347,19 @@
           "readOnlyTooltip": "มุมมองเจาะลึกนี้ดูได้อย่างเดียว",
           "selected": "เลือกแล้ว {n} ผู้รับ",
           "empty": "ยังไม่มีประวัติการจัดการผู้รับ",
-          "actionSuccess": "ดำเนินการสำเร็จ",
-          "actionFailed": "ดำเนินการล้มเหลว",
-          "redeliverSuccess": "ส่งคำขอส่งซ้ำแล้ว ผลการจัดส่งจะอัปเดตในสถานะเร็ว ๆ นี้",
+      "actionSuccess": "ดำเนินการสำเร็จ",
+      "actionFailed": "ดำเนินการล้มเหลว",
+      "recallUnsupportedBackend": "ระบบอีเมลของผู้รับรายนี้ไม่รองรับการเรียกคืน",
+      "recallTrackingIdMissing": "ไม่มีรหัสติดตามจากระบบอีเมล จึงไม่สามารถเริ่มการเรียกคืนได้",
+      "recallNotDelivered": "ยังไม่มีการยืนยันว่าอีเมลถูกนำส่งให้ผู้รับรายนี้แล้ว",
+      "recallDeliveryStatusUnknown": "ไม่ทราบสถานะการนำส่งของผู้รับรายนี้ จึงไม่สามารถเรียกคืนได้อย่างปลอดภัย",
+      "recallNoDeliveredRecipients": "ไม่มีผู้รับที่นำส่งแล้วและสามารถเรียกคืนได้",
+      "recallBackendResolutionFailed": "ไม่สามารถระบุระบบอีเมลของผู้รับได้ กรุณาลองใหม่ภายหลัง",
+      "recallRequestCreateFailed": "สร้างคำขอเรียกคืนไม่สำเร็จ กรุณาลองใหม่ภายหลัง",
+      "recallNoRecallableRecipients": "ขณะนี้ไม่มีผู้รับที่ตรงตามเงื่อนไขการเรียกคืน",
+      "recallMailNotFound": "ไม่มีระเบียนอีเมลนี้หรือถูกลบแล้ว",
+      "recallForbidden": "คุณไม่มีสิทธิ์เรียกคืนอีเมลนี้",
+      "redeliverSuccess": "ส่งคำขอส่งซ้ำแล้ว ผลการจัดส่งจะอัปเดตในสถานะเร็ว ๆ นี้",
           "deferredRetrying": "การจัดส่งถูกเลื่อน ระบบกำลังลองใหม่อัตโนมัติ",
           "redeliverDialog": {
             "title": "ส่งซ้ำ",
@@ -6391,6 +6436,7 @@
           "confirm": "เพิ่มในบัญชีดำ",
           "confirming": "กำลังสร้าง…",
           "vtScore": "ตรวจสอบ VirusTotal: {score}",
+          "qrDetected": "คิวอาร์โค้ด: ใช่ ({count})",
           "title": "การตรวจจับและจัดการเอนทิตีเนื้อหา"
         },
         "reclassify": {
@@ -6404,6 +6450,7 @@
           "viewHtml": "HTML",
           "viewRaw": "ซอร์สโค้ด",
           "downloadEml": "ดาวน์โหลด EML",
+          "emlUnavailable": "ไม่ได้เก็บอีเมลต้นฉบับไว้ จึงไม่สามารถดาวน์โหลด EML หรือไฟล์แนบได้",
           "rawLoading": "กำลังโหลด…",
           "rawUnavailable": "ไม่มีซอร์สโค้ด",
           "blockedBanner": "ผู้รับบางราย ({names}) ถูกบล็อก/ทิ้งอีเมล ไม่สามารถดูต้นฉบับได้",
@@ -6418,6 +6465,7 @@
         "items": "รายการ",
         "finalVerdict": "ผลตัดสินสุดท้าย",
         "notIntegrated": "ยังไม่รวมระบบ",
+        "moduleDisabled": "ปิดใช้งานแล้ว",
         "stageName": {
           "connection": "การเชื่อมต่อ",
           "connectionPlatform": "ควบคุมโดยแพลตฟอร์ม",
@@ -6518,6 +6566,7 @@
           "delivered": "สำเร็จ",
           "failed": "ล้มเหลว",
           "success": "สำเร็จ",
+          "partialSuccess": "สำเร็จบางส่วน",
           "handling": "กำลังดำเนินการ",
           "expanded": "แยกเป็นคำขอย่อย",
           "timeoutReleased": "ปล่อยอัตโนมัติเมื่อหมดเวลา",
@@ -6532,7 +6581,8 @@
           "forwardDelivery": "การส่งต่อ",
           "adminRecall": "ผู้ดูแลระบบเรียกคืน",
           "agentRecall": "เอเจนต์เรียกคืน",
-          "sidelineAgentRecall": "เอเจนต์ช่องทางแยกเรียกคืน"
+          "sidelineAgentRecall": "เอเจนต์ช่องทางแยกเรียกคืน",
+          "phishAgentRecall": "เอเจนต์ตรวจจับฟิชชิงเรียกคืน"
         }
       },
       "features": {
@@ -6593,7 +6643,7 @@
         "platformPolicyListReason": "ถูกสกัดกั้นโดยนโยบายที่แพลตฟอร์มควบคุม",
         "basisScope": "ขอบเขตที่ใช้",
         "hitModules": "โมดูลที่ตรงกัน",
-        "hitModulesHint": "โมดูลที่อีเมลฉบับนี้ตรงกัน กฎที่ยังไม่ถูกประเมิน (เพราะโมดูลก่อนหน้าตัดสินไปแล้ว) จะไม่แสดงที่นี่",
+        "hitModulesHint": "โมดูลที่การกระทำมีผลกับผู้รับอย่างน้อยหนึ่งราย กฎสิ้นสุดที่ตรงตามเงื่อนไขแต่ไม่ส่งผลต่อผู้รับจะไม่ถูกนับว่าเป็นการตรวจพบ",
         "effectiveFor": "มีผลกับ: {list}",
         "matchedOnlyFor": "ตรงกันเท่านั้น: {list}"
       },
@@ -7371,7 +7421,8 @@
       "orgDeptNoMatch": "ไม่พบแผนกที่ตรงกัน",
       "orgDeptClearAll": "ล้างทั้งหมด",
       "qrResultValues": {
-        "success": "สำเร็จ",
+          "success": "สำเร็จ",
+          "partialSuccess": "สำเร็จบางส่วน",
         "fail": "ล้มเหลว"
       },
       "envelopeHeaderConsistencyValues": {
@@ -7646,6 +7697,8 @@
     "weekday_6": "ส.",
     "timePoints": "เวลาแจ้งเตือน",
     "addTimePoint": "เพิ่มเวลา",
+    "notifyTimeAddHint": "หลังจากเลือกเวลาแล้ว ให้คลิก “เพิ่มเวลา” เพื่อเพิ่มลงในรายการด้านล่างก่อนบันทึก",
+    "notifyTimesRequired": "ยังไม่ได้เพิ่มเวลาแจ้งเตือน โปรดเลือกเวลาและคลิก “เพิ่มเวลา” ก่อนบันทึก",
     "tzComputedIn": "Notification times are computed in {tz}",
     "tzMismatchHint": "Your browser time zone ({browserTz}) differs from the current notification time zone ({effectiveTz}). Choose which time zone the notification times should be interpreted in:",
     "tzUseBrowser": "Use browser time zone ({tz})",
@@ -7758,6 +7811,22 @@
     "emailInvalid": "รูปแบบอีเมลไม่ถูกต้อง ใช้ที่อยู่เช่น user@example.com",
     "emailDuplicate": "อีเมลนี้อยู่ในรายการแล้ว",
     "customMinutesRange": "ระยะเวลาตรวจสอบต้องอยู่ระหว่าง 1 ถึง 300 นาที",
+    "scoreValueRange": "เกณฑ์ความเชื่อมั่นต้องอยู่ระหว่าง 0 ถึง 1",
+    "customWeekdaysRequired": "กำหนดการแจ้งเตือนแบบกำหนดเองต้องเลือกอย่างน้อยหนึ่งวัน",
+    "customWeekdaysInvalid": "การตั้งค่าวันแจ้งเตือนไม่ถูกต้อง",
+    "notifyTimeFormatInvalid": "รูปแบบเวลาแจ้งเตือนไม่ถูกต้อง โปรดเพิ่มใหม่",
+    "validDaysRange": "จำนวนวันที่มีผลต้องอยู่ระหว่าง 1 ถึง 30 วัน",
+    "portalBaseUrlInvalid": "URL การเข้าถึงภายนอกต้องเป็น HTTPS และมีชื่อโฮสต์",
+    "portalBaseUrlNoPath": "URL การเข้าถึงภายนอกต้องไม่มีพาธ พารามิเตอร์การค้นหา หรือส่วนย่อย",
+    "maxRecheckMinutesRange": "ช่วงเวลาตรวจซ้ำต้องอยู่ระหว่าง 1 ถึง 60 นาที",
+    "reviewerNotifyIntervalRange": "ช่วงเวลาแจ้งผู้ตรวจสอบต้องอยู่ระหว่าง 1 ถึง 1440 นาที",
+    "reviewerActiveStartInvalid": "โปรดเลือกเวลาเริ่มแจ้งผู้ตรวจสอบที่ถูกต้อง",
+    "reviewerActiveEndInvalid": "โปรดเลือกเวลาสิ้นสุดแจ้งผู้ตรวจสอบที่ถูกต้อง",
+    "timeoutMarkPositionsRequired": "เมื่อเปิดใช้เครื่องหมายการส่ง ต้องเลือกตำแหน่งอย่างน้อยหนึ่งตำแหน่ง",
+    "timeoutMarkPositionsInvalid": "ตำแหน่งเครื่องหมายการส่งไม่ถูกต้อง",
+    "timeoutMarkTextRequired": "เมื่อเปิดใช้เครื่องหมายการส่ง ต้องระบุข้อความเครื่องหมาย",
+    "timeoutMarkTextTooLong": "ข้อความเครื่องหมายต้องไม่เกิน 20 อักขระ",
+    "recallTaskTimeoutRange": "เวลาหมดเวลาของงานเรียกคืนต้องอยู่ระหว่าง 1 ถึง 300 วินาที",
     "saveValidationFailed": "การตั้งค่าบางอย่างไม่ถูกต้อง กรุณาแก้ไขแล้วบันทึกใหม่",
     "notifyMode": "โหมดการแจ้งเตือน",
     "notifyModeAll": "ผู้ใช้ทั้งหมด (ค่าเริ่มต้น)",
@@ -7971,10 +8040,7 @@
       "delivered": "นำส่งแล้ว",
       "success_rate": "อัตราการนำส่งสำเร็จ",
       "failed": "ล้มเหลว",
-      "cancelled": "ยกเลิกแล้ว",
-      "in_delivery": "กำลังนำส่ง",
-      "partial_delivered": "นำส่งบางส่วน",
-      "unknown": "ไม่ทราบ"
+      "cancelled": "ยกเลิกแล้ว"
     },
     "threatLevels": {
       "normal": "ปกติ",
@@ -8847,12 +8913,7 @@
         "realtime": "ใช้การจัดการตามแถบ (กักกัน/ทำเครื่องหมาย/ยอมรับ)",
         "observe": "ข้ามการจัดการแถบ; บันทึกเฉพาะผลการสังเกต"
       },
-      "observeModeBanner": "โหมดสังเกตจะไม่ใช้การจัดการความเสี่ยง และคงค่าที่ซ่อนไว้", "timeoutPolicy": "ไทม์ไลน์การหมดเวลา", "timeoutMinutes": "รอแบบเรียลไทม์ (นาที)", "maxRecheckMinutes": "ตรวจต่อเบื้องหลัง (นาที)", "timeoutAsync": "ทำต่อหลังหมดเวลา", "timeoutAsyncHint": "ส่งอีเมลก่อนแล้ววิเคราะห์ต่อและเรียกคืนเมื่อจำเป็น", "observeMark": "เพิ่มเครื่องหมายผลสังเกต", "observeMarkHint": "เมื่อปิดจะส่งตามปกติโดยไม่เพิ่มเครื่องหมาย", "confidencePolicy": "นโยบายการจัดการตามความมั่นใจ", "confidenceHint": "4 ระดับครอบคลุม 0–100 ต่อเนื่อง โดยแก้ไขจุดแบ่งร่วม 3 จุด", "cutoff": { "low": "เริ่มต่ำ", "medium": "เริ่มกลาง", "high": "เริ่มสูง" }, "invalidCutoffs": "จุดแบ่งต้องเพิ่มขึ้นและอยู่ระหว่าง 0 ถึง 100", "invalidTimeoutWindow": "เวลารอแบบเรียลไทม์ต้องอยู่ที่ 1–300 นาที และการตรวจต่อเบื้องหลังต้องอยู่ที่ 1–60 นาที", "range": "ช่วงความมั่นใจ", "risk": "ระดับความเสี่ยง", "dispositionLabel": "การจัดการ", "markSetting": "เครื่องหมายเพิ่มเติม", "riskLevel": { "suspicious": "น่าสงสัย", "low": "ต่ำ", "medium": "กลาง", "high": "สูง" }, "disposition": { "proceed": "ดำเนินการต่อ", "audit": "ตรวจสอบ", "quarantine": "กักกัน", "discard": "ทิ้ง" }, "markText": "ข้อความเครื่องหมาย", "markTextRequired": "ต้องระบุข้อความเมื่อเปิดใช้เครื่องหมายเพิ่มเติม", "markTextTooLong": "ข้อความเครื่องหมายต้องไม่เกิน 20 ตัวอักษร", "markTextLimit": "ไม่เกิน 20 ตัวอักษร",
-      "observeAction": "การกระทำการสังเกต",
-      "observeActionValue": {
-        "accept": "ส่งมอบ (รายการที่อนุญาต)"
-      },
-      "observeMarkEnabled": "เพิ่มเครื่องหมายความเสี่ยงเมื่อส่ง",
+      "observeModeBanner": "โหมดสังเกตจะไม่ใช้การจัดการความเสี่ยง และคงค่าที่ซ่อนไว้", "timeoutPolicy": "ไทม์ไลน์การหมดเวลา", "timeoutMinutes": "รอแบบเรียลไทม์ (นาที)", "maxRecheckMinutes": "ตรวจต่อเบื้องหลัง (นาที)", "timeoutAsync": "ทำต่อหลังหมดเวลา", "timeoutAsyncHint": "ส่งอีเมลก่อนแล้ววิเคราะห์ต่อและเรียกคืนเมื่อจำเป็น", "confidencePolicy": "นโยบายการจัดการตามความมั่นใจ", "confidenceHint": "4 ระดับครอบคลุม 0–100 ต่อเนื่อง โดยแก้ไขจุดแบ่งร่วม 3 จุด", "cutoff": { "low": "เริ่มต่ำ", "medium": "เริ่มกลาง", "high": "เริ่มสูง" }, "invalidCutoffs": "จุดแบ่งต้องเพิ่มขึ้นและอยู่ระหว่าง 0 ถึง 100", "invalidTimeoutWindow": "เวลารอแบบเรียลไทม์ต้องอยู่ที่ 1–300 นาที และการตรวจต่อเบื้องหลังต้องอยู่ที่ 1–60 นาที", "range": "ช่วงความมั่นใจ", "risk": "ระดับความเสี่ยง", "dispositionLabel": "การจัดการ", "markSetting": "เครื่องหมายเพิ่มเติม", "riskLevel": { "suspicious": "น่าสงสัย", "low": "ต่ำ", "medium": "กลาง", "high": "สูง" }, "disposition": { "proceed": "ดำเนินการต่อ", "audit": "ตรวจสอบ", "quarantine": "กักกัน", "discard": "ทิ้ง" }, "markText": "ข้อความเครื่องหมาย", "markTextRequired": "ต้องระบุข้อความเมื่อเปิดใช้เครื่องหมายเพิ่มเติม", "markTextTooLong": "ข้อความเครื่องหมายต้องไม่เกิน 20 ตัวอักษร", "markTextLimit": "ไม่เกิน 20 ตัวอักษร",
       "timeoutSectionTitle": "ไทม์ไลน์การหมดเวลา",
       "timeoutScopeNote": "การหมดเวลารวม/อะซิงค์มีผลต่อการตรวจสอบ sideline ทั้งหมด",
       "soon": "เร็ว ๆ นี้",
@@ -9186,7 +9247,7 @@
       "sectionBatch": "ข้อมูลกลุ่ม",
       "sectionContacts": "นำเข้าจากองค์กร",
       "sectionNotify": "การแจ้งเตือน",
-      "modeObserveDesc": "แค่ทำเครื่องหมาย ไม่บล็อก",
+      "modeObserveDesc": "สังเกตเท่านั้น ไม่บล็อกหรือทำเครื่องหมาย",
       "modeStandardDesc": "กักกันรอการตรวจสอบ",
       "modeStrictDesc": "ปิดกั้นหรือทิ้ง ปฏิเสธการรับ",
       "markPreview": "ตัวอย่างการทำเครื่องหมาย",
@@ -9282,7 +9343,7 @@
       "editDistance": "ค่าเกณฑ์ระยะแก้ไข",
       "confidenceThreshold": "ค่าเกณฑ์ความมั่นใจ",
       "confidenceThresholdHint": "เรียกใช้การจัดการเมื่อความมั่นใจถึงค่านี้",
-      "modeObserveDesc": "ทำเครื่องหมายและส่งต่อโดยไม่บล็อก",
+      "modeObserveDesc": "สังเกตเท่านั้น ไม่บล็อกหรือทำเครื่องหมาย",
       "modeStandardDesc": "กักกันเมลที่ตรงเงื่อนไข",
       "modeStrictDesc": "ปฏิเสธหรือทิ้งเมลที่ตรงเงื่อนไข",
       "modeCustomHint": "กำหนดเอง: ปรับการจัดการด้วยตนเองแล้ว",
@@ -10454,8 +10515,7 @@
   "loginSecurity": {
     "unsavedChanges": "มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
     "cancel": "ยกเลิก",
-    "resetToDefault": "รีเซ็ตเป็นค่าเริ่มต้น",
-    "resetToBaseline": "รีเซ็ตเป็นค่าพื้นฐานของแพลตฟอร์ม",
+    "resetToDefault": "รีเซ็ตเป็นค่าเริ่มต้นของระบบ",
     "resetConfirmDescription": "ค่าในแบบฟอร์มจะถูกรีเซ็ต ต้องกด \"บันทึก\" จึงจะมีผล ดำเนินการต่อหรือไม่?",
     "resetApplied": "รีเซ็ตแล้ว บันทึกเพื่อให้มีผล",
     "sections": {
@@ -10479,8 +10539,7 @@
       "cidr": "ที่อยู่/ช่วง IP",
       "remark": "หมายเหตุ",
       "captchaAfterFailures": "จำนวนครั้งที่ล้มเหลวก่อนต้องใช้รหัสยืนยัน",
-      "twoFactorEnabled": "เปิดใช้การยืนยันตัวตนสองชั้นสำหรับผู้เช่านี้",
-      "forceTwoFactor": "บังคับเปิดใช้การยืนยันตัวตนสองชั้นทั่วทั้งระบบ"
+      "forceTwoFactor": "บังคับใช้การยืนยันตัวตนสองชั้น"
     },
     "hints": {
       "minCharClasses": "ต้องมีอย่างน้อย N ประเภทจากอักขระ 4 ประเภท (ตัวพิมพ์ใหญ่/ตัวพิมพ์เล็ก/ตัวเลข/อักขระพิเศษ)",
@@ -10490,9 +10549,7 @@
       "overflowPolicy": "«ปฏิเสธการเข้าสู่ระบบใหม่» เข้มงวดกว่า: เมื่อเซสชันที่ถูกต้องออนไลน์อยู่ การเข้าสู่ระบบใหม่ของผู้โจมตีจะถูกปฏิเสธทันที",
       "lockoutMinutes": "-1 = ล็อกถาวร ปลดล็อกได้เฉพาะโดยผู้ดูแลระบบในรายการผู้ใช้เท่านั้น",
       "captchaAfterFailures": "หลังจากล้มเหลวติดต่อกันถึงจำนวนนี้ การเข้าสู่ระบบครั้งถัดไปต้องกรอกรหัสยืนยันภาพ",
-      "twoFactorEnabled": "เมื่อเปิดใช้งาน สมาชิกทั้งหมดของผู้เช่านี้ต้องยืนยันตัวตนสองชั้นเมื่อเข้าสู่ระบบ",
-      "twoFactorLocked": "แพลตฟอร์มได้บังคับเปิดใช้การยืนยันตัวตนสองชั้นแล้ว ผู้เช่านี้ไม่สามารถปิดได้",
-      "forceTwoFactor": "เมื่อเปิดใช้งาน สมาชิกของผู้เช่าทุกรายในแพลตฟอร์มต้องยืนยันตัวตนสองชั้นเมื่อเข้าสู่ระบบ"
+      "forceTwoFactor": "มีผลเฉพาะกับบัญชีในขอบเขตปัจจุบัน"
     },
     "ipModes": {
       "none": "ไม่จำกัด",
@@ -10511,9 +10568,6 @@
     "unlimited": "ไม่จำกัด",
     "neverExpires": "ไม่มีวันหมดอายุ",
     "permanentLock": "ล็อกถาวร",
-    "platformOnly": "กำหนดโดยแพลตฟอร์มแบบรวมศูนย์ ผู้เช่าไม่สามารถแก้ไขได้",
-    "tenantBanner": "แพลตฟอร์มได้กำหนดเกณฑ์พื้นฐานความปลอดภัยในการเข้าสู่ระบบแล้ว ผู้เช่านี้ทำได้เพียงเข้มงวดกว่าเกณฑ์พื้นฐาน ไม่สามารถต่ำกว่าได้; ตัวเลือกที่เป็นสีเทาคือค่าที่ต่ำกว่าเกณฑ์พื้นฐานและไม่สามารถเลือกได้",
-    "belowBaseline": "ต่ำกว่าเกณฑ์พื้นฐานของแพลตฟอร์ม ปัจจุบันมีผลตามเกณฑ์พื้นฐาน",
     "noRules": "ยังไม่มีกฎ IP",
     "addRule": "เพิ่ม IP",
     "delete": "ลบ",
@@ -10523,6 +10577,7 @@
   },
   "recipientCheck": {
     "banner": "ตรวจสอบที่อยู่ผู้รับในขั้นตอน RCPT TO เพื่อป้องกันการโจมตีแบบเก็บเกี่ยวไดเรกทอรี (DHA) การถล่มอีเมล และฟิชชิงด้านข้างภายในโดเมน",
+    "loadFailed": "โหลดการกำหนดค่าไม่สำเร็จ ระบบจึงปิดการแก้ไขและบันทึกเพื่อป้องกันการเขียนทับค่าที่มีอยู่ โปรดลองอีกครั้ง",
     "module": {
       "enabled": "เปิดใช้งาน",
       "disabled": "ปิดใช้งาน",
@@ -10631,7 +10686,12 @@
     "loadFailed": "โหลดไม่สำเร็จ",
     "retry": "ลองอีกครั้ง",
     "deleteSuccess": "ลบเรียบร้อยแล้ว",
-    "deleteFailed": "การลบล้มเหลว"
+    "deleteFailed": "การลบล้มเหลว",
+    "deletePartial": "ลบสำเร็จ {deleted} รายการ และลบไม่สำเร็จ {failed} รายการ",
+    "failureNotFound": "ไม่พบกฎหรือกฎถูกลบไปแล้ว",
+    "failureAccessDenied": "คุณไม่มีสิทธิ์เข้าถึงกฎรายการผู้ใช้นี้",
+    "failureProtected": "ไม่สามารถลบกฎที่ได้รับการป้องกันนี้ได้ที่นี่",
+    "failureMissingResult": "เซิร์ฟเวอร์ไม่ส่งผลการลบของกฎนี้ โปรดลองอีกครั้ง"
   },
   "portalWhitelist": {
     "loading": "กำลังโหลด...",
@@ -10892,6 +10952,7 @@
   },
   "apiErrors": {
     "demo_unavailable": "โหมดสาธิตไม่รองรับการกำหนดค่าและการควบคุมเอเจนต์ตรวจจับฟิชชิง",
+    "internal_error": "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ โปรดลองอีกครั้งในภายหลัง",
     "redeliver": {
       "in_progress": "มีคำขอส่งซ้ำสำหรับอีเมลนี้กำลังดำเนินการอยู่ โปรดลองใหม่ภายหลัง",
       "original_expired": "ไม่ได้เก็บต้นฉบับไว้ (หรือหมดอายุแล้ว) ไม่สามารถส่งซ้ำได้",
@@ -10902,7 +10963,9 @@
       "last_super_admin": "ไม่สามารถปิดใช้งานผู้ดูแลระบบสูงสุดที่เปิดใช้งานคนสุดท้ายได้ มิฉะนั้นจะไม่มีใครจัดการระบบ",
       "last_system_admin": "ไม่สามารถลบหรือลดสิทธิ์ผู้ดูแลระบบคนสุดท้ายได้ มิฉะนั้นจะไม่มีใครจัดการระบบ",
       "not_found": "ไม่พบบัญชี อาจถูกลบไปแล้ว",
+      "password_complexity_insufficient": "รหัสผ่านต้องประกอบด้วยอักขระอย่างน้อย {min_classes} ประเภทจาก: ตัวพิมพ์ใหญ่ ตัวพิมพ์เล็ก ตัวเลข และอักขระพิเศษ",
       "password_recently_used": "รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านที่ใช้ล่าสุด",
+      "password_too_short": "รหัสผ่านต้องมีอย่างน้อย {min} อักขระ",
       "role_id_required": "กรุณาเลือกบทบาท",
       "tenant_id_required": "ต้องระบุผู้เช่าเมื่อเลือกบทบาท “{role}”",
       "tenant_scope_required": "กรุณาเลือกผู้เช่าก่อนดำเนินการนี้",
@@ -11213,6 +11276,7 @@
       "domain_delete_gated": "ต้องปิดใช้งานโดเมนรับอีเมลต่อเนื่องจนครบช่วงระบายคิว (ค่าเริ่มต้น 7 วัน เพื่อให้อีเมลที่ค้างอยู่ส่งเสร็จ) ก่อนจึงจะลบได้",
       "admin_account_password_pair_required": "ต้องระบุบัญชีผู้ดูแลและรหัสผ่านพร้อมกัน",
       "admin_account_too_long": "บัญชีผู้ดูแลต้องยาวไม่เกิน {max} อักขระ",
+      "code_too_long": "รหัสผู้เช่าต้องยาวไม่เกิน {max} อักขระ",
       "code_immutable": "รหัสผู้เช่าแก้ไขไม่ได้หลังสร้างแล้ว",
       "has_withheld_mail": "ผู้เช่านี้ยังมีอีเมลที่ถูกกักไว้ (กักกัน / ทางข้าง / ตรวจสอบขาออก) กรุณาปล่อยหรือล้างก่อนลบผู้เช่า",
       "next_hop_pair_required": "ต้องระบุโฮสต์และพอร์ตของฮอปถัดไปพร้อมกัน",
@@ -11287,6 +11351,7 @@
     "attachment_security": {
       "password_blank": "รหัสผ่านต้องไม่ว่าง",
       "password_too_long": "รหัสผ่านต้องยาวไม่เกิน {max} อักขระ",
+      "password_already_exists": "รหัสผ่านนี้มีอยู่แล้ว",
       "id_invalid": "รหัสไม่ถูกต้อง",
       "id_required": "กรุณาระบุรหัส",
       "sideline_item_not_found": "ไม่พบรายการทางข้าง",
@@ -11319,7 +11384,7 @@
       "two_factor_platform_admin_only": "เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่ตั้งนโยบายบังคับยืนยันสองขั้นตอนได้",
       "two_factor_locked_by_platform": "แพลตฟอร์มบังคับเปิดการยืนยันสองขั้นตอน ผู้เช่าปิดไม่ได้",
       "two_factor_self_service_tenant_only": "สวิตช์ยืนยันสองขั้นตอนแบบบริการตนเองเป็นระดับผู้เช่า ไม่รองรับในค่าพื้นฐานรวม",
-      "baseline_platform_admin_only": "เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่แก้ค่าพื้นฐานของแพลตฟอร์มได้",
+      "baseline_platform_admin_only": "เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่แก้การตั้งค่าความปลอดภัยการเข้าสู่ระบบของแพลตฟอร์มได้",
       "rule_platform_admin_only": "เฉพาะผู้ดูแลแพลตฟอร์มเท่านั้นที่แก้กฎของแพลตฟอร์มได้",
       "ip_or_cidr_format_invalid": "กรุณากรอก IP หรือ CIDR ที่ถูกต้อง (เช่น 192.168.1.0/24)",
       "rule_already_exists": "กฎ IP/CIDR นี้มีอยู่แล้ว",
@@ -11575,7 +11640,8 @@
     },
     "portal_quarantine_listadd": {
       "quarantine_item_has_no_tenant_cannot": "รายการกักกันนี้ไม่มีผู้เช่า จึงเพิ่มเข้ารายชื่อผู้ใช้ไม่ได้",
-      "quarantined_mail_has_no_usable_sender": "อีเมลที่กักกันนี้ไม่มีผู้ส่งที่ใช้เพิ่มได้"
+      "quarantined_mail_has_no_usable_sender": "อีเมลที่กักกันนี้ไม่มีผู้ส่งที่ใช้เพิ่มได้",
+      "rule_already_exists": "มีกฎรายชื่อผู้ใช้สำหรับผู้รับและผู้ส่งนี้อยู่แล้ว"
     },
     "portal_quarantine_release": {
       "quarantine_item_not_found": "ไม่พบรายการกักกัน",
@@ -11586,6 +11652,7 @@
     },
     "recall_admin": {
       "backend_coremail_exchange": "แบ็กเอนด์ต้องเป็น coremail หรือ exchange",
+      "key_id_exists": "รหัสคีย์นี้มีอยู่แล้ว โปรดใช้รหัสอื่นแล้วลองอีกครั้ง",
       "mail_log_does_not_belong_your": "บันทึกอีเมลนี้ไม่ได้เป็นของผู้เช่าของคุณ",
       "recall_request_not_found": "ไม่พบคำขอเรียกคืน",
       "recall_request_does_not_belong_your": "คำขอเรียกคืนนี้ไม่ได้เป็นของผู้เช่าของคุณ"

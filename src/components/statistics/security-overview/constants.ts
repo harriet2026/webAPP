@@ -41,9 +41,6 @@ export const SERIES_COLORS: Record<string, string> = {
   delivered: '#10B981',
   failed: '#EF4444',
   cancelled: '#9CA3AF',
-  in_delivery: '#3B82F6',
-  partial_delivered: '#F59E0B',
-  unknown: '#6B7280',
 };
 
 // Only these two perspectives are user-facing. `threat_type`,

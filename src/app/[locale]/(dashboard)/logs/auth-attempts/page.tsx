@@ -206,11 +206,21 @@ export default function AuthAttemptsPage() {
       // 列表的成功/失败徽标(emerald/red 设计 token)保持一致。
       cell: ({ row }) =>
         row.original.success ? (
-          <Badge variant="outline" className="rounded bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+          <Badge
+            variant="outline"
+            data-testid="auth-attempt-result-badge"
+            data-state="success"
+            className="rounded bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+          >
             {t('authAttempts.success')}
           </Badge>
         ) : (
-          <Badge variant="outline" className="rounded bg-red-50 text-red-700 ring-1 ring-red-200">
+          <Badge
+            variant="outline"
+            data-testid="auth-attempt-result-badge"
+            data-state="failed"
+            className="rounded bg-red-50 text-red-700 ring-1 ring-red-200"
+          >
             {t('authAttempts.failed')}
           </Badge>
         ),
@@ -219,10 +229,17 @@ export default function AuthAttemptsPage() {
       id: 'fail_reason',
       header: t('authAttempts.failureReason'),
       cell: ({ row }) => {
-        if (row.original.success) return <span className="text-muted-foreground">—</span>;
+        // 纯属性新增（QC 稳定定位点）：三个分支渲染的都是同一列的取值节点，
+        // 挂同一个 testid 才能让「成功行必须是占位符、失败行必须是具体原因」
+        // 这条判据用一次集合断言表达出来（WP-ALOG-006）。不包新的 <span>：
+        // 那会改变组件结构。
+        const failReasonTestId = `auth-attempt-fail-reason-${row.original.id}`;
+        if (row.original.success) {
+          return <span className="text-muted-foreground" data-testid={failReasonTestId}>—</span>;
+        }
         const key = failReasonLabelKey(row.original.fail_reason_code);
-        if (key) return <span>{t(key)}</span>;
-        return <span>{row.original.failure_reason || '—'}</span>;
+        if (key) return <span data-testid={failReasonTestId}>{t(key)}</span>;
+        return <span data-testid={failReasonTestId}>{row.original.failure_reason || '—'}</span>;
       },
     },
     {
@@ -286,6 +303,7 @@ export default function AuthAttemptsPage() {
               noDataText={t('authAttempts.empty')}
               rowClassName={(row) => (row.success ? '' : 'bg-rose-50 dark:bg-rose-950/20')}
               rowTestId={(row) => `auth-attempt-row-${row.id}`}
+              rowDataLevel={(row) => (row.success ? 'success' : 'failed')}
             />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">

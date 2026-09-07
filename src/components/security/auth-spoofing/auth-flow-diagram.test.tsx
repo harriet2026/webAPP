@@ -5,7 +5,7 @@ import { AuthFlowDiagram } from './AuthFlowDiagram';
 import zh from '@/../messages/zh.json';
 
 const wrap = (ui: React.ReactNode) =>
-  <NextIntlClientProvider locale="zh" messages={zh as any}>{ui}</NextIntlClientProvider>;
+  <NextIntlClientProvider locale="zh" messages={zh as unknown as Record<string, unknown>}>{ui}</NextIntlClientProvider>;
 
 describe('AuthFlowDiagram', () => {
   const base = { spf:'reject', dkim:'quarantine', dmarc:'reject', ptr:'quarantine' } as const;

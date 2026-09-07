@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { pipelineDrawerResponsiveClasses } from '@/components/security/PolicyPipelinePage';
+import {
+  pipelineDrawerResponsiveClasses,
+  policyDrawerContentOwnsScrolling,
+} from '@/components/security/PolicyPipelinePage';
 
 vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -16,5 +19,10 @@ describe('PolicyPipelinePage 配置抽屉响应式布局（GT-12160）', () => {
     expect(pipelineDrawerResponsiveClasses.expandedNav).toContain('w-14');
     expect(pipelineDrawerResponsiveClasses.expandedNav).toContain('min-[1366px]:w-[200px]');
     expect(pipelineDrawerResponsiveClasses.expandedNavLabel).toContain('min-[1366px]:block');
+  });
+
+  it('意图引擎使用抽屉内的独立滚动正文，保存栏不覆盖末尾配置', () => {
+    expect(policyDrawerContentOwnsScrolling({ stage: 3, key: 'intentEngine' })).toBe(true);
+    expect(policyDrawerContentOwnsScrolling({ stage: 3, key: 'content' })).toBe(false);
   });
 });

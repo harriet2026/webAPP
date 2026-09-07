@@ -1,4 +1,4 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import { apiRequest, type ApiRequestFn, type PublicationPendingResponse } from './client';
 import type {
   IntentDirection,
   IntentEngineConfig,
@@ -38,5 +38,5 @@ export async function putIntentEngineConfig(
   cfg: IntentEngineConfig,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<void> {
-  await requestFn<void>('/security/intent-engine', { method: 'PUT', body: cfg });
+  await requestFn<void | PublicationPendingResponse>('/security/intent-engine', { method: 'PUT', body: cfg });
 }

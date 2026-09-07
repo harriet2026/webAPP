@@ -9,7 +9,13 @@ interface MapKeyItem {
   id?: number | string
   name?: string
   label?: string
-  [key: string]: any
+  [key: string]: unknown
+}
+
+type MapKeyResponse = MapKeyItem[] | {
+  items?: MapKeyItem[]
+  rules?: MapKeyItem[]
+  profiles?: MapKeyItem[]
 }
 
 interface Props {
@@ -22,16 +28,25 @@ interface Props {
 
 export function MapKeySelect({ mapSource, value, onChange, placeholder = 'Select...', className }: Props) {
   const { apiRequest } = useApiRequest()
-  const [items, setItems] = useState<MapKeyItem[]>([])
-  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{
+    source: string
+    items: MapKeyItem[]
+    status: 'loaded' | 'failed'
+  } | null>(null)
+
+  const dynamicSource = !mapSource || mapSource === 'dynamic'
+  const currentResult = result?.source === mapSource ? result : null
+  const items = currentResult?.items ?? []
+  const loading = !dynamicSource && currentResult === null
 
   useEffect(() => {
     if (!mapSource || mapSource === 'dynamic') return
-    setLoading(true)
+    let cancelled = false
     // Strip /api/v1 prefix since apiRequest prepends it
     const path = mapSource.replace(/^\/api\/v1/, '')
-    apiRequest<any>(path)
+    apiRequest<MapKeyResponse>(path)
       .then((resp) => {
+        if (cancelled) return
         // Handle various response shapes: array, {items}, {rules}, {profiles}
         let list: MapKeyItem[] = []
         if (Array.isArray(resp)) {
@@ -43,10 +58,14 @@ export function MapKeySelect({ mapSource, value, onChange, placeholder = 'Select
         } else if (Array.isArray(resp?.profiles)) {
           list = resp.profiles
         }
-        setItems(list)
+        setResult({ source: mapSource, items: list, status: 'loaded' })
       })
-      .catch(() => setItems([]))
-      .finally(() => setLoading(false))
+      .catch(() => {
+        if (!cancelled) setResult({ source: mapSource, items: [], status: 'failed' })
+      })
+    return () => {
+      cancelled = true
+    }
   }, [mapSource, apiRequest])
 
   if (!mapSource || mapSource === 'dynamic' || (!loading && items.length === 0)) {
@@ -62,7 +81,7 @@ export function MapKeySelect({ mapSource, value, onChange, placeholder = 'Select
 
   return (
     <Select value={value} onValueChange={(v) => { if (v != null) onChange(v); }} disabled={loading}>
-      <SelectTrigger className={className ?? 'h-7 text-xs'}>
+      <SelectTrigger data-testid="map-key-select" className={className ?? 'h-7 text-xs'}>
         <SelectValue placeholder={loading ? 'Loading...' : placeholder} />
       </SelectTrigger>
       <SelectContent>
@@ -70,7 +89,7 @@ export function MapKeySelect({ mapSource, value, onChange, placeholder = 'Select
           const key = mapKeyForItem(mapSource, item)
           const label = item.name ?? item.label ?? key
           return (
-            <SelectItem key={key} value={key}>
+            <SelectItem key={key} value={key} data-testid={`map-key-option-${key}`}>
               {label}
             </SelectItem>
           )

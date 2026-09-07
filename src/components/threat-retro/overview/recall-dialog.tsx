@@ -32,7 +32,7 @@ export function RecallDialog({ open, onOpenChange, leaks, policies, onConfirm, i
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent data-testid="threat-retro-recall-dialog">
         <AlertDialogHeader>
           <AlertDialogTitle>{t('title')}</AlertDialogTitle>
           <AlertDialogDescription>
@@ -41,7 +41,7 @@ export function RecallDialog({ open, onOpenChange, leaks, policies, onConfirm, i
         </AlertDialogHeader>
         <div className="grid grid-cols-2 gap-3 rounded-md bg-muted/40 p-3 text-sm"><div><p className="text-muted-foreground">{t('unreadPolicy')}</p><strong>{t(`policy.${policies.unread_policy}`)}</strong></div><div><p className="text-muted-foreground">{t('readPolicy')}</p><strong>{t(`policy.${policies.read_policy}`)}</strong></div></div>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogCancel data-testid="threat-retro-recall-cancel">{t('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             data-testid="threat-retro-recall-confirm"
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Pencil, ShieldAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ApiError, useApiRequest } from '@/lib/api/client';
+import { ApiError, isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { getPhishingConfig, putPhishingConfig } from '@/lib/api/phishing-config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -114,8 +114,37 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
 
   const saveMutation = useMutation({
     mutationFn: (value: PhishAgentConfig) => putPhishingConfig(requestFromDraft(value), apiRequest),
-    onSuccess: (value) => {
-      queryClient.setQueryData(phishingQueryKeys.config(effectiveTenantId), value);
+    onSuccess: (value, submitted) => {
+      if (isPublicationPendingResponse(value)) {
+        // Both domains are changed by one scoped-document CAS. A committed
+        // acknowledgement therefore advances both versions exactly once. Keep
+        // the submitted business fields and advance the versions explicitly so
+        // reopening the editor cannot send stale expected_version values.
+        const committed: PhishAgentConfig = {
+          risk_policy: {
+            ...submitted.risk_policy,
+            version: submitted.risk_policy.version + 1,
+          },
+          runtime_policy: {
+            ...submitted.runtime_policy,
+            version: submitted.runtime_policy.version + 1,
+          },
+        };
+        queryClient.setQueryData(phishingQueryKeys.config(effectiveTenantId), committed);
+        // A direct background read may still observe the pre-publication
+        // snapshot. Only replace the inferred committed state once both server
+        // versions have caught up; never roll the cache backwards.
+        void getPhishingConfig(apiRequest).then((refreshed) => {
+          if (
+            refreshed.risk_policy.version >= committed.risk_policy.version
+            && refreshed.runtime_policy.version >= committed.runtime_policy.version
+          ) {
+            queryClient.setQueryData(phishingQueryKeys.config(effectiveTenantId), refreshed);
+          }
+        }).catch(() => undefined);
+      } else {
+        queryClient.setQueryData(phishingQueryKeys.config(effectiveTenantId), value);
+      }
       setConflict(null);
       setOpen(false);
       toast.success(t('saved'));
@@ -200,7 +229,7 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
               <div className="flex items-center gap-2 text-sm"><span className="text-muted-foreground">{t('runMode')}</span><span className="text-xs text-muted-foreground">{t('runModeFootnote')}</span></div>
               <div className="flex flex-wrap items-center gap-2"><Badge className={configQuery.data.runtime_policy.run_mode === 'observe' ? 'border-transparent bg-warning/15 text-warning-foreground dark:text-warning' : 'border-transparent bg-destructive/15 text-destructive'}>{t(`runModeValue.${configQuery.data.runtime_policy.run_mode}`)}</Badge><p className="text-sm text-muted-foreground">{t('summary', { count: RISKS.length, autoDeliver: configQuery.data.runtime_policy.timeout_async_enabled ? t('autoDeliverOn') : t('autoDeliverOff') })}</p></div>
             </div>
-            <Button variant="outline" size="sm" onClick={openEditor} disabled={readOnly}><Pencil className="size-3.5" />{t('edit')}</Button>
+            <Button variant="outline" size="sm" onClick={openEditor} disabled={readOnly} data-testid="runtime-risk-edit"><Pencil className="size-3.5" />{t('edit')}</Button>
           </div>
         ) : null}
       </CardContent>
@@ -214,7 +243,7 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
             ) : null}
             <section className="space-y-3">
               <Label>{t('runMode')}</Label>
-              <div className="flex gap-2">{(['realtime', 'observe'] as PhishRunMode[]).map((mode) => <OptionCard key={mode} selected={draft.runtime_policy.run_mode === mode} title={t(`runModeValue.${mode}`)} description={t(`runModeHint.${mode}`)} onClick={() => patchRuntime({ run_mode: mode })} testId={`run-mode-${mode}`} />)}</div>
+              <div className="flex gap-2">{(['realtime', 'observe'] as PhishRunMode[]).map((mode) => <OptionCard key={mode} selected={draft.runtime_policy.run_mode === mode} title={t(`runModeValue.${mode}`)} description={t(`runModeHint.${mode}`)} onClick={() => patchRuntime(mode === 'observe' ? { run_mode: mode, observe_action: 'accept', observe_mark_enabled: false } : { run_mode: mode })} testId={`run-mode-${mode}`} />)}</div>
               {draft.runtime_policy.run_mode === 'observe' ? (
                 <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning-foreground dark:text-warning">{t('observeModeBanner')}</div>
               ) : null}
@@ -227,14 +256,13 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
               </div>
               {!validRuntimeDeadlines ? <p className="text-sm text-destructive">{t('invalidTimeoutWindow')}</p> : null}
               {draft.runtime_policy.run_mode === 'realtime' ? <div className="flex items-center justify-between rounded-lg border border-border p-3"><div><Label>{t('timeoutAsync')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('timeoutAsyncHint')}</p></div><Switch checked={draft.runtime_policy.timeout_async_enabled} onCheckedChange={(timeout_async_enabled) => patchRuntime({ timeout_async_enabled })} data-testid="timeout-async-enabled" /></div> : null}
-              {draft.runtime_policy.run_mode === 'observe' ? <div className="flex items-center justify-between rounded-lg border border-border p-3"><div><Label>{t('observeMark')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('observeMarkHint')}</p></div><Switch checked={draft.runtime_policy.observe_mark_enabled} onCheckedChange={(observe_mark_enabled) => patchRuntime({ observe_action: 'accept', observe_mark_enabled })} data-testid="observe-mark-enabled" /></div> : null}
             </section>
             <section className="space-y-3">
               <div><Label>{t('confidencePolicy')}</Label><p className="mt-1 text-sm text-muted-foreground">{t('confidenceHint')}</p></div>
               <div className="grid grid-cols-3 gap-2 rounded-lg border border-border bg-muted/30 p-3">
                 {(['low', 'medium', 'high'] as const).map((cutoff) => <div key={cutoff} className="min-w-0 space-y-2"><Label htmlFor={`cutoff-${cutoff}`} className="text-sm">{t(`cutoff.${cutoff}`)}</Label><Input id={`cutoff-${cutoff}`} data-testid={`cutoff-${cutoff}`} type="number" min={1} max={99} value={draft.risk_policy.cutoffs[cutoff]} onChange={(event) => patchCutoff(cutoff, Number(event.target.value))} /></div>)}
               </div>
-              {!validCutoffs ? <p className="text-sm text-destructive">{t('invalidCutoffs')}</p> : null}
+              {!validCutoffs ? <p className="text-sm text-destructive" data-testid="runtime-cutoff-error">{t('invalidCutoffs')}</p> : null}
               <div className="overflow-x-auto rounded-lg border border-border">
                 <div className="grid min-w-[570px] grid-cols-[126px_112px_170px_1fr] border-b border-border bg-muted/40 px-3 py-2 text-sm font-medium text-muted-foreground"><span>{t('range')}</span><span>{t('risk')}</span><span>{t('dispositionLabel')}</span><span>{t('markSetting')}</span></div>
                 {RISKS.map((risk, index) => {
@@ -244,17 +272,17 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
                   return <div key={risk} className="grid min-w-[570px] grid-cols-[126px_112px_170px_1fr] items-start gap-2 border-b border-border px-3 py-3 last:border-b-0" data-testid={`risk-row-${risk}`}>
                     <span className="font-mono text-xs text-muted-foreground">{ranges[index]?.[0]}–{ranges[index]?.[1]}</span>
                     <Badge variant={risk === 'high' ? 'destructive' : 'secondary'} className="w-fit">{t(`riskLevel.${risk}`)}</Badge>
-                    <Select value={policy.base_disposition} onValueChange={(value) => patchPolicy(risk, { base_disposition: value as PhishPolicyDisposition })}><SelectTrigger className="w-full" data-testid={`disposition-${risk}`}><SelectValue /></SelectTrigger><SelectContent>{DISPOSITIONS.map((value) => <SelectItem key={value} value={value}>{t(`disposition.${value}`)}</SelectItem>)}</SelectContent></Select>
+                    <Select value={policy.base_disposition} onValueChange={(value) => patchPolicy(risk, { base_disposition: value as PhishPolicyDisposition })}><SelectTrigger className="w-full" data-testid={`disposition-${risk}`}><SelectValue /></SelectTrigger><SelectContent>{DISPOSITIONS.map((value) => <SelectItem key={value} value={value} data-testid={`disposition-option-${risk}-${value}`}>{t(`disposition.${value}`)}</SelectItem>)}</SelectContent></Select>
                     {policy.base_disposition === 'proceed' ? <div className="space-y-2" data-testid={`mark-addon-${risk}`}>
-                      <div className="flex flex-wrap gap-2">{MARK_POSITIONS.map((position) => <Button key={position} type="button" size="sm" variant={positions.includes(position) ? 'default' : 'outline'} onClick={() => patchPolicy(risk, { mark_positions: positions.includes(position) ? positions.filter((item) => item !== position) : [...positions, position] })}>{t(`markPosition.${position}`)}</Button>)}</div>
-                      {positions.length > 0 ? <div className="space-y-1"><Input value={policy.mark_text ?? ''} placeholder={t('markText')} aria-invalid={markLength === 0 || markLength > 20} onChange={(event) => patchPolicy(risk, { mark_text: event.target.value })} />{markLength === 0 ? <p className="text-sm text-destructive">{t('markTextRequired')}</p> : markLength > 20 ? <p className="text-sm text-destructive">{t('markTextTooLong')}</p> : <p className="text-xs text-muted-foreground">{t('markTextLimit')}</p>}</div> : null}
+                      <div className="flex flex-wrap gap-2">{MARK_POSITIONS.map((position) => <Button key={position} type="button" size="sm" variant={positions.includes(position) ? 'default' : 'outline'} onClick={() => patchPolicy(risk, { mark_positions: positions.includes(position) ? positions.filter((item) => item !== position) : [...positions, position] })} data-testid={`mark-position-${risk}-${position}`}>{t(`markPosition.${position}`)}</Button>)}</div>
+                      {positions.length > 0 ? <div className="space-y-1"><Input value={policy.mark_text ?? ''} placeholder={t('markText')} aria-invalid={markLength === 0 || markLength > 20} onChange={(event) => patchPolicy(risk, { mark_text: event.target.value })} data-testid={`mark-text-${risk}`} />{markLength === 0 ? <p className="text-sm text-destructive" data-testid={`mark-text-hint-${risk}`}>{t('markTextRequired')}</p> : markLength > 20 ? <p className="text-sm text-destructive" data-testid={`mark-text-hint-${risk}`}>{t('markTextTooLong')}</p> : <p className="text-xs text-muted-foreground" data-testid={`mark-text-hint-${risk}`}>{t('markTextLimit')}</p>}</div> : null}
                     </div> : <span className="text-sm text-muted-foreground">—</span>}
                   </div>;
                 })}
               </div>
             </section>
           </div> : null}
-          <SheetFooter className="shrink-0 flex-row justify-end gap-2 border-t border-border px-5 py-3"><Button variant="outline" onClick={() => setOpen(false)} disabled={saveMutation.isPending}>{t('cancel')}</Button><Button onClick={() => draft && saveMutation.mutate(draft)} disabled={!draft || !validCutoffs || !validRuntimeDeadlines || invalidMarkText || saveMutation.isPending || readOnly} data-testid="runtime-save">{saveMutation.isPending ? t('saving') : t('save')}</Button></SheetFooter>
+          <SheetFooter className="shrink-0 flex-row justify-end gap-2 border-t border-border px-5 py-3"><Button variant="outline" onClick={() => setOpen(false)} disabled={saveMutation.isPending} data-testid="runtime-cancel">{t('cancel')}</Button><Button onClick={() => draft && saveMutation.mutate(draft)} disabled={!draft || !validCutoffs || !validRuntimeDeadlines || invalidMarkText || saveMutation.isPending || readOnly} data-testid="runtime-save">{saveMutation.isPending ? t('saving') : t('save')}</Button></SheetFooter>
         </SheetContent>
       </Sheet>
     </Card>

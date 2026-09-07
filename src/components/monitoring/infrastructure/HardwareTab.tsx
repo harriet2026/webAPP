@@ -86,13 +86,18 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
   }
 
   const netTop5 = data?.network_top5 ?? [];
+  const cpuLatest = data?.cpu_mem?.points.at(-1)?.value ?? '';
+  const memLatest = data?.mem_trend?.points.at(-1)?.value ?? '';
 
   return (
     <div className="space-y-4" data-testid="monitor-infrastructure-hardware">
       {data?.degraded && (
         <DegradedBanner message={degradeMessage(data.degraded_code, t)} />
       )}
-      <Card data-testid="monitor-infrastructure-cpu-memory-card">
+      <Card
+        data-testid="monitor-infrastructure-cpu-memory-card"
+        aria-label={`CPU latest ${cpuLatest}; memory latest ${memLatest}`}
+      >
         <CardHeader>
           <CardTitle>{t('hardware.cpuMem')}</CardTitle>
         </CardHeader>

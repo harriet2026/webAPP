@@ -43,24 +43,24 @@ export function SpoofingPersonCard({ person, selected, disabled, onSelect, onObs
   const categoryLabel = tryT(tsd, `person.category.${person.category}`, tsd('person.categoryUnknown'));
   const primaryEmail = person.legit_emails?.[0]?.email ?? '-';
   return (
-    <div className={cn('flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 transition-colors hover:bg-accent/40',
+    <div data-testid="spoof-person-card" className={cn('flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 transition-colors hover:bg-accent/40',
       person.observe_mode ? 'border-dashed border-amber-300' : 'border-border/70')}>
-      <Checkbox checked={selected} disabled={disabled} onCheckedChange={(c) => onSelect(!!c)} />
+      <Checkbox data-testid="spoof-person-card-select" checked={selected} disabled={disabled} onCheckedChange={(c) => onSelect(!!c)} />
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-sm font-medium text-blue-700 dark:text-blue-300">
         {(person.display_name || '?').slice(0, 1)}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-medium">{person.display_name}</span>
-          <Badge variant="outline" className={cn('shrink-0 px-1.5 py-0 text-[10px]', LEVEL_CLS[person.protection_level])}>
+          <span className="truncate text-sm font-medium" data-testid="spoof-person-card-name">{person.display_name}</span>
+          <Badge variant="outline" className={cn('shrink-0 px-1.5 py-0 text-[10px]', LEVEL_CLS[person.protection_level])} data-testid="spoof-person-card-level">
             {levelLabel}
           </Badge>
-          <Badge variant="outline" className="shrink-0 px-1.5 py-0 text-[10px]">
+          <Badge variant="outline" className="shrink-0 px-1.5 py-0 text-[10px]" data-testid="spoof-person-card-category">
             {categoryLabel}
           </Badge>
           {person.read_only ? <Badge variant="secondary" className="shrink-0 px-1.5 py-0 text-[10px]">{tsd('inheritedReadOnly')}</Badge> : null}
         </div>
-        <p className="truncate text-xs text-muted-foreground">
+        <p className="truncate text-xs text-muted-foreground" data-testid="spoof-person-card-email">
           {primaryEmail}
         </p>
       </div>
@@ -70,20 +70,20 @@ export function SpoofingPersonCard({ person, selected, disabled, onSelect, onObs
       </div>
       <div className="hidden w-32 shrink-0 flex-col xl:flex">
         <span className="text-[11px] text-muted-foreground">{tsd('person.detectionConfig')}</span>
-        <span className="text-xs">
+        <span className="text-xs" data-testid="spoof-person-card-baseline">
           {tsd('person.sensitivityShort')} {person.sensitivity} · {tsd('person.thresholdShort')} {person.confidence_threshold}
         </span>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
-        <span className={cn('hidden text-xs sm:inline', person.observe_mode ? 'text-amber-600' : 'text-muted-foreground')}>
+        <span data-testid="spoof-person-card-observe-label" className={cn('hidden text-xs sm:inline', person.observe_mode ? 'text-amber-600' : 'text-muted-foreground')}>
           {person.observe_mode ? tsd('person.observe') : tsd('person.detect')}
         </span>
-        <Switch aria-label={person.observe_mode ? tsd('person.observe') : tsd('person.detect')}
+        <Switch data-testid="spoof-person-card-observe" aria-label={person.observe_mode ? tsd('person.observe') : tsd('person.detect')}
           checked={person.observe_mode} disabled={disabled} onCheckedChange={onObserve} />
       </div>
       <div className="flex shrink-0 items-center">
-        <Button aria-label={tsd('person.edit')} title={tsd('person.edit')} variant="ghost" size="icon" className="h-8 w-8" disabled={disabled} onClick={onEdit}><Edit className="h-3.5 w-3.5" /></Button>
-        <Button aria-label={tsd('person.delete')} title={tsd('person.delete')} variant="ghost" size="icon" className="h-8 w-8 text-rose-500" disabled={disabled} onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
+        <Button data-testid="spoof-person-card-edit" aria-label={tsd('person.edit')} title={tsd('person.edit')} variant="ghost" size="icon" className="h-8 w-8" disabled={disabled} onClick={onEdit}><Edit className="h-3.5 w-3.5" /></Button>
+        <Button data-testid="spoof-person-card-delete" aria-label={tsd('person.delete')} title={tsd('person.delete')} variant="ghost" size="icon" className="h-8 w-8 text-rose-500" disabled={disabled} onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
       </div>
     </div>
   );

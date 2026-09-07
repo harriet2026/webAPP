@@ -146,7 +146,7 @@ export function QuickFilters({
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="disposal-quick-filters">
           {mounted && tenantSelector ? (
-            <div className="order-1 space-y-1">
+            <div className="order-1 space-y-1" data-testid="disposal-tenant-scope-filter">
               <label className="text-xs text-muted-foreground">
                 {t("tenantScope")}
               </label>
@@ -298,6 +298,7 @@ export function QuickFilters({
               {t("executionAction")}
             </label>
             <MultiSelectFilter
+              triggerTestId="disposal-action-filter-trigger"
               options={actions.map((action) => ({
                 value: action,
                 label: t(`actions.${action}`),
@@ -328,6 +329,7 @@ export function QuickFilters({
               {t("emailStatus")}
             </label>
             <MultiSelectFilter
+              triggerTestId="disposal-status-filter-trigger"
               options={statuses.map((status) => ({
                 value: status,
                 label: t(`statuses.${status}`),
@@ -350,6 +352,7 @@ export function QuickFilters({
               {t("mailType")}
             </label>
             <MultiSelectFilter
+              triggerTestId="disposal-mail-type-filter-trigger"
               options={mailTypes.map((mt) => ({
                 value: mt,
                 label: t(`mailTypes.${mt}`),

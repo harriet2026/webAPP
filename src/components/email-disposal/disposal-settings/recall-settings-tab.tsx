@@ -3,7 +3,13 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Controller, type Control, type UseFormWatch, type UseFormSetValue } from 'react-hook-form';
+import {
+  Controller,
+  useFormState,
+  type Control,
+  type UseFormWatch,
+  type UseFormSetValue,
+} from 'react-hook-form';
 import { Plus, X, Trash2, Loader2, Key, Settings, Mail, Bell } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -28,13 +34,16 @@ import {
 } from '@/components/ui/table';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useApiRequest } from '@/lib/api/client';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { toast } from 'sonner';
 import type { DisposalSettings } from '@/types/disposal-settings';
+import { firstValidationMessage } from './validation-error';
 
 interface Props {
   control: Control<DisposalSettings>;
   watch: UseFormWatch<DisposalSettings>;
   setValue: UseFormSetValue<DisposalSettings>;
+  effectiveTenantId: number | null;
 }
 
 const POLICY_OPTIONS = ['recall', 'notify', 'wait'] as const;
@@ -80,8 +89,9 @@ async function deleteRecallKey(
   });
 }
 
-export function RecallSettingsTab({ control, watch, setValue }: Props) {
+export function RecallSettingsTab({ control, watch, setValue, effectiveTenantId }: Props) {
   const t = useTranslations('disposalSettings');
+  const apiErrorMessage = useApiErrorMessage();
   const { apiRequest } = useApiRequest();
   const queryClient = useQueryClient();
   const [newEmail, setNewEmail] = useState('');
@@ -92,16 +102,29 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
   const [newKeySubmitting, setNewKeySubmitting] = useState(false);
 
   const notifyEmails = watch('recall.notify_emails');
+  const recallKeysQueryKey = ['recall-keys', effectiveTenantId] as const;
+  const { errors } = useFormState({ control });
+  const notifyEmailsError = errors.recall?.notify_emails;
+  const validationText = (message: string | undefined, fallback: string) => {
+    switch (message ?? fallback) {
+      case 'recallTaskTimeoutRange':
+        return t('recallTaskTimeoutRange');
+      case 'emailInvalid':
+        return t('emailInvalid');
+      default:
+        return message ?? t('saveValidationFailed');
+    }
+  };
 
   const { data: recallKeys = [], isLoading: keysLoading } = useQuery({
-    queryKey: ['recall-keys'],
+    queryKey: recallKeysQueryKey,
     queryFn: () => fetchRecallKeys(apiRequest),
   });
 
   const deleteKeyMutation = useMutation({
     mutationFn: (id: number) => deleteRecallKey(id, apiRequest),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recall-keys'] });
+      queryClient.invalidateQueries({ queryKey: recallKeysQueryKey });
       toast.success(t('keyDeleted'));
     },
     onError: () => {
@@ -125,13 +148,17 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
       return;
     }
     setEmailError('');
-    setValue('recall.notify_emails', [...notifyEmails, trimmed], { shouldDirty: true });
+    setValue('recall.notify_emails', [...notifyEmails, trimmed], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
     setNewEmail('');
   };
 
   const removeEmail = (email: string) =>
     setValue('recall.notify_emails', notifyEmails.filter((e) => e !== email), {
       shouldDirty: true,
+      shouldValidate: true,
     });
 
   const handleCreateKey = async () => {
@@ -142,14 +169,14 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
         { key_id: newKeyID.trim(), key_secret: newKeySecret.trim(), backend: newKeyBackend },
         apiRequest,
       );
-      queryClient.invalidateQueries({ queryKey: ['recall-keys'] });
+      queryClient.invalidateQueries({ queryKey: recallKeysQueryKey });
       toast.success(t('keyCreated'));
       setNewKeyOpen(false);
       setNewKeyID('');
       setNewKeySecret('');
       setNewKeyBackend('coremail');
-    } catch {
-      toast.error(t('keyCreateFailed'));
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t('keyCreateFailed')));
     } finally {
       setNewKeySubmitting(false);
     }
@@ -169,16 +196,36 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
             <Controller
               control={control}
               name="recall.task_timeout_seconds"
-              render={({ field }) => (
-                <Input
-                  type="number"
-                  min={1}
-                  max={300}
-                  className="w-32"
-                  data-testid="disposal-settings-recall-timeout"
-                  value={field.value}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-                />
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Input
+                    type="number"
+                    min={1}
+                    max={300}
+                    className="w-32"
+                    data-testid="disposal-settings-recall-timeout"
+                    value={field.value}
+                    aria-invalid={fieldState.error ? true : undefined}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10) || 0;
+                      // number input can keep the lexical value (for example
+                      // "031") even after RHF stores the parsed number 31.
+                      // Normalize the DOM value in the same event so the user
+                      // never sees a stale leading zero.
+                      e.currentTarget.value = String(value);
+                      field.onChange(value);
+                    }}
+                  />
+                  {fieldState.error && (
+                    <p
+                      className="text-sm text-destructive"
+                      role="alert"
+                      data-testid="disposal-settings-recall-timeout-error"
+                    >
+                      {validationText(firstValidationMessage(fieldState.error), 'recallTaskTimeoutRange')}
+                    </p>
+                  )}
+                </div>
               )}
             />
             <span className="text-sm text-muted-foreground">{t('seconds')}</span>
@@ -348,6 +395,15 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
                 {emailError}
               </p>
             )}
+            {!emailError && notifyEmailsError && (
+              <p
+                className="mt-1 text-sm text-destructive"
+                role="alert"
+                data-testid="disposal-settings-recall-emails-error"
+              >
+                {validationText(firstValidationMessage(notifyEmailsError), 'emailInvalid')}
+              </p>
+            )}
           </div>
 
           {notifyEmails.length > 0 && (
@@ -401,6 +457,7 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
             <div className="space-y-2">
               <Label>{t('keyId')}</Label>
               <Input
+                data-testid="disposal-settings-recall-key-id-input"
                 value={newKeyID}
                 onChange={(e) => setNewKeyID(e.target.value)}
                 placeholder={t('keyIdPlaceholder')}
@@ -410,6 +467,7 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
               <Label>{t('keySecret')}</Label>
               <Input
                 type="password"
+                data-testid="disposal-settings-recall-key-secret-input"
                 value={newKeySecret}
                 onChange={(e) => setNewKeySecret(e.target.value)}
                 placeholder={t('keySecretPlaceholder')}
@@ -423,13 +481,13 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
                 className="flex gap-4"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="coremail" />
+                  <RadioGroupItem value="coremail" data-testid="disposal-settings-recall-key-backend-coremail" />
                   <Label className="cursor-pointer" onClick={() => setNewKeyBackend('coremail')}>
                     {t('coremailAgent')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="exchange" />
+                  <RadioGroupItem value="exchange" data-testid="disposal-settings-recall-key-backend-exchange" />
                   <Label className="cursor-pointer" onClick={() => setNewKeyBackend('exchange')}>
                     {t('exchangeAgent')}
                   </Label>
@@ -438,10 +496,15 @@ export function RecallSettingsTab({ control, watch, setValue }: Props) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNewKeyOpen(false)}>
+            <Button
+              variant="outline"
+              data-testid="disposal-settings-recall-key-cancel"
+              onClick={() => setNewKeyOpen(false)}
+            >
               {t('cancel')}
             </Button>
             <Button
+              data-testid="disposal-settings-recall-key-create"
               onClick={handleCreateKey}
               disabled={!newKeyID.trim() || !newKeySecret.trim() || newKeySubmitting}
             >

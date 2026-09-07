@@ -8,10 +8,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug",
-    "test:e2e:codegen": "playwright codegen http://localhost:3000",
     "test": "vitest run",
     "test:watch": "vitest",
     "dev:zhlmai": "WEBAPP_DEV_ORIGINS=192.168.3.3,localhost,192.168.28.147,127.0.0.1 API_BACKEND_URL=http://127.0.0.1:18080 next dev"
@@ -49,7 +45,6 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

@@ -36,7 +36,11 @@ describe("QuickFilters grid layout", () => {
         value={{}}
         onChange={vi.fn()}
         tenantSelector={
-          <button type="button" data-testid="tenant-selector">
+          // 刻意**不**复用生产的 `tenant-selector` testid：QuickFilters 只关心
+          // 传进来的节点被放在第一格，与它具体是谁无关。冒用生产 testid 会让
+          // qc 的 testid 契约检查（scripts/playwright/lib/yml/testid-contract.mjs）
+          // 认为该 testid 在全仓有两处定义，对每一条引用它的用例都报 ambiguous。
+          <button type="button" data-testid="quick-filters-tenant-slot-stub">
             tenant
           </button>
         }
@@ -44,7 +48,7 @@ describe("QuickFilters grid layout", () => {
     );
 
     const grid = screen.getByTestId("disposal-quick-filters");
-    const tenantSelector = screen.getByTestId("tenant-selector");
+    const tenantSelector = screen.getByTestId("quick-filters-tenant-slot-stub");
 
     expect(grid.firstElementChild).toContainElement(tenantSelector);
     expect(grid.firstElementChild).toHaveTextContent(

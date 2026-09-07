@@ -145,8 +145,8 @@
     <table class="spec-table">
       <thead><tr><th>列类型</th><th>渲染</th><th>语义</th></tr></thead>
       <tbody>
-        <tr><td>排名徽标</td><td>第1 金 / 第2 银 / 第3 铜 / 其余灰</td><td>—</td></tr>
-        <tr><td>徽标列（badge）</td><td>地理位置 / 失败原因 / 暴力破解 / 关联威胁类型 / 主要威胁类型 / 所属部门</td><td>内网 IP 显示「内网」标签</td></tr>
+        <tr><td>排名徽标</td><td>第1 金 / 第2 银 / 第3 铜 / 其余灰</td><td>徽标固定在排名列首位；飙升火焰置于徽标右侧，不得改变序号水平位置</td></tr>
+        <tr><td>徽标列（badge）</td><td>地理位置 / 失败原因 / 暴力破解 / 关联威胁类型 / 主要威胁类型 / 所属部门</td><td>内网 IP 仅在「地理位置」列显示一次「内网」标签，来源 IP 列不重复展示</td></tr>
         <tr><td>进度条列</td><td>失败占比 / 拦截率 / 误投递率 / 退信率</td><td><strong>失败率/退信率越高越红；拦截率越高越绿</strong>。连接失败率 <strong>&gt;50% 标红</strong></td></tr>
         <tr><td>环比列</td><td>百分比 + 箭头</td><td><strong>上升红、下降绿</strong></td></tr>
         <tr><td>迷你趋势（sparkline）</td><td>行内微型折线</td><td>—</td></tr>
@@ -325,6 +325,7 @@
       <tr><td class="bad">D8</td><td class="bad">React key 警告</td><td>—</td><td class="bad">控制台持续报 <code>Each child in a list should have a unique "key" prop</code>（<code>OpsTopTrendPage</code>）</td><td class="bad">demo 缺陷，落地时避免照抄该渲染逻辑</td></tr>
       <tr><td>D9</td><td>权限/形态/403/租户停用回退</td><td>§0 / §8</td><td class="bad">demo 无实现（纯前端 mock）</td><td>后端行为，落地按 PRD</td></tr>
       <tr><td>D10</td><td>AI 分析的形态策略</td><td class="bad">PRD 自相矛盾（F区标注「传统形态按策略处理」vs §0.2「全形态可见」）</td><td>demo 恒可见</td><td class="bad">→ §10 Q3</td></tr>
+      <tr><td>D11</td><td>排名与内网标签纠偏（GT-12778）</td><td>排名徽标纵向对齐；内网属性只展示一次</td><td class="bad">火焰插在徽标前导致序号错位，来源 IP 与地理位置各显示一次「内网」</td><td class="pass">落地时将火焰置于徽标后，并仅在地理位置列保留「内网」</td></tr>
     </tbody>
   </table>
 </section>

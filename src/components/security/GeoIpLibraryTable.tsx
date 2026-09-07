@@ -256,10 +256,22 @@ export function GeoIpLibraryTable() {
       header: t('common.actions'),
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(row.original)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            data-testid={`geoip-rule-edit-${row.original.id}`}
+            onClick={() => openEdit(row.original)}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteTarget(row.original)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            data-testid={`geoip-rule-delete-${row.original.id}`}
+            onClick={() => setDeleteTarget(row.original)}
+          >
             <Trash2 className="h-4 w-4 text-destructive" />
           </Button>
         </div>
@@ -269,11 +281,11 @@ export function GeoIpLibraryTable() {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="geoip-library">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium">{t('geoipLibrary.title')}</h4>
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={openCreate}>
+          <Button size="sm" data-testid="geoip-create-rule" onClick={openCreate}>
             <Plus className="h-4 w-4 mr-1" />
             {t('geoipLibrary.createRule')}
           </Button>
@@ -303,6 +315,7 @@ export function GeoIpLibraryTable() {
         <div className="relative max-w-xs flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            data-testid="geoip-search"
             placeholder={t('geoipLibrary.searchPlaceholder')}
             value={search}
             onChange={(e) => {
@@ -315,6 +328,7 @@ export function GeoIpLibraryTable() {
         <Button
           variant="outline"
           size="sm"
+          data-testid="geoip-reset"
           onClick={() => {
             setSearch('');
             setPage(1);
@@ -330,7 +344,7 @@ export function GeoIpLibraryTable() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border" data-testid="geoip-empty">
           <EmptyState
             icon={
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
@@ -344,6 +358,7 @@ export function GeoIpLibraryTable() {
         <DataTable
           columns={columns}
           data={items}
+          rowTestId={(rule) => `geoip-rule-row-${rule.id}`}
           pageSize={PAGE_SIZE}
           pageCount={Math.max(1, Math.ceil(total / PAGE_SIZE))}
           pageIndex={page - 1}
@@ -364,7 +379,7 @@ export function GeoIpLibraryTable() {
 
       {/* 新增/编辑 Sheet —— 立即 CRUD（与 demo 的延迟保存有意不同，见 plan §1.1） */}
       <Sheet open={sheetOpen} onOpenChange={(open) => (open ? setSheetOpen(true) : closeSheet())}>
-        <SheetContent className="flex w-[560px] flex-col p-0 sm:max-w-[560px]" showCloseButton={false}>
+        <SheetContent className="flex w-[560px] flex-col p-0 sm:max-w-[560px]" showCloseButton={false} data-testid="geoip-rule-sheet">
           <SheetHeader className="flex-shrink-0 border-b px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -374,10 +389,10 @@ export function GeoIpLibraryTable() {
                 <p className="mt-1 text-sm text-muted-foreground">{t('geoipLibrary.sheetDesc')}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={closeSheet}>
+                <Button variant="outline" size="sm" data-testid="geoip-rule-cancel" onClick={closeSheet}>
                   {t('common.cancel')}
                 </Button>
-                <Button size="sm" disabled={isSaving || !canSave} onClick={handleSave}>
+                <Button size="sm" data-testid="geoip-rule-save" disabled={isSaving || !canSave} onClick={handleSave}>
                   {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {t('common.save')}
                 </Button>
@@ -400,6 +415,7 @@ export function GeoIpLibraryTable() {
                     </Label>
                     <div className="flex-1">
                       <Input
+                        data-testid="geoip-rule-ip"
                         placeholder={t('geoipLibrary.ipRangePlaceholder')}
                         value={form.ipRange}
                         onChange={(e) => {
@@ -432,6 +448,7 @@ export function GeoIpLibraryTable() {
                             <Button
                               variant="outline"
                               role="combobox"
+                              data-testid="geoip-rule-region"
                               aria-expanded={regionOpen}
                               className={cn('w-full justify-between font-normal', errors.regionCode && 'border-red-500')}
                             />
@@ -483,6 +500,7 @@ export function GeoIpLibraryTable() {
                     </Label>
                     <div className="flex-1">
                       <Input
+                        data-testid="geoip-rule-region-name"
                         placeholder={t('geoipLibrary.regionNamePlaceholder')}
                         value={form.regionName}
                         onChange={(e) =>

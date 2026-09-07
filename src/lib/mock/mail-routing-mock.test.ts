@@ -78,7 +78,7 @@ describe('mail-routing mock 路由覆盖（isMockable 全表）', () => {
     expect(isMockable('POST', '/unified-rules')).toBe(false);
   });
 
-  it('/relay-grants 系已随后端一并退役，不再被 mock（doc/mail-routing.md「已移除：/relay-grants*」）', () => {
+  it('/relay-grants 系已随后端一并退役，不再被 mock（docs/features/mail-routing.md「已移除：/relay-grants*」）', () => {
     expect(isMockable('GET', '/relay-grants')).toBe(false);
     expect(isMockable('POST', '/relay-grants')).toBe(false);
   });

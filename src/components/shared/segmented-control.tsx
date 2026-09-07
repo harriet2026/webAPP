@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 interface SegmentedOption<T extends string> {
   value: T;
   label: React.ReactNode;
+  testid?: string;
 }
 
 interface SegmentedControlProps<T extends string> {
@@ -37,7 +38,7 @@ export function SegmentedControl<T extends string>({
           key={opt.value}
           selected={value === opt.value}
           pad={pad}
-          testid={testIdPrefix ? `${testIdPrefix}-${opt.value}` : undefined}
+          testid={opt.testid ?? (testIdPrefix ? `${testIdPrefix}-${opt.value}` : undefined)}
           onSelect={() => onChange(opt.value)}
         >
           {opt.label}

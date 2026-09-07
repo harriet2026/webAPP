@@ -113,10 +113,12 @@ const CLIENT_IP_OPERATORS = ['eq', 'ne', 'cidr', 'match'];
 const SCALAR_TEXT_OPERATORS = ['eq', 'ne', 'contain', 'not_contain', 'match', 'suffix', 'prefix'];
 
 // GT-12854：意图引擎标签逐值列出（不再按五类分组合并 3/4、7/9），支持多选，
-// 补上此前缺失的「正常(1)」。取值语义与 internal/models/email_type.go::
-// EmailTypeFromCacIntTag 对齐：1=正常、2=订阅、3=垃圾、4=广告、5=色情赌博、
-// 6=涉政、7=钓鱼、8=账号失陷、9=病毒。条件树仍写引擎实际消费的 cac_int_tag。
-const INTENT_TAG_ALL_VALUES = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+// 补上此前缺失的「正常(1)」。GT-12856 再补「未检测(0)」：隔离/审核在 CAC
+// 运行前放行时，投递上下文按 0 求值，管理员必须能显式配置这条路由。取值语义
+// 与 internal/models/email_type.go / routeeval 对齐：0=未检测、1=正常、2=订阅、
+// 3=垃圾、4=广告、5=色情赌博、6=涉政、7=钓鱼、8=账号失陷、9=病毒。
+// 条件树仍写引擎实际消费的 cac_int_tag。
+const INTENT_TAG_ALL_VALUES = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 function normalizedIntentTagValues(raw: string): string {
   const values = raw
@@ -129,7 +131,7 @@ function normalizedIntentTagValues(raw: string): string {
 }
 
 /** 把 cac_int_tag 条件节点解析成勾选值集合。eq 只接受单值；within 接受
- * 已知标签值（1~9）的任意子集。含未知值（如 0 或 12）的节点无法由勾选列表
+ * 已知标签值（0~9）的任意子集。含未知值（如 12）的节点无法由勾选列表
  * 准确表达，返回 undefined 留在 otherConditions 原样透传，不能在一次普通
  * 编辑保存后被悄悄改写。 */
 function intentTagsFromCondition(node: RuleNode): string[] | undefined {

@@ -361,6 +361,7 @@ export function SelectedConditions({
 
   return (
     <div
+      data-testid="disposal-selected-conditions"
       className={
         compact
           ? "mt-3 border-t pt-3"
@@ -379,6 +380,7 @@ export function SelectedConditions({
           type="button"
           variant="link"
           size="sm"
+          data-testid="disposal-conditions-clear"
           onClick={onClearAll}
           className="h-auto p-0 text-sm text-danger data-[hovered=true]:text-danger/80"
         >
@@ -390,6 +392,7 @@ export function SelectedConditions({
         {chips.map((chip) => (
           <span
             key={chip.key}
+            data-testid={`disposal-condition-chip-${chip.key}`}
             className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm transition-[background-color] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
               chip.isAi
                 ? "bg-primary/10 text-primary has-[[data-hovered=true]]:bg-primary/15"
@@ -405,6 +408,7 @@ export function SelectedConditions({
                 size="icon-xs"
                 className="-mr-2 size-5 rounded-full text-current"
                 onClick={() => onRemoveChip(chip.key)}
+                data-testid={`disposal-condition-chip-remove-${chip.key}`}
                 aria-label={`${t("clearAll")}: ${chip.label}`}
               >
                 <X className="h-3 w-3" />

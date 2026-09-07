@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -33,16 +33,13 @@ export function TwoFactorTab() {
   const disable2FA = useDisable2FA();
   const sendCode = useSendCode();
 
-  const [method, setMethod] = useState<TwoFactorMethod>('sms');
+  const [requestedMethod, setRequestedMethod] = useState<TwoFactorMethod>('sms');
   // SMS is only offered when the deployment has an SMS channel configured.
   // Default to true until the config loads so we don't flicker the option off.
   const smsAvailable = config?.smsChannelAvailable !== false;
-  // If the server has no SMS channel, never leave the picker on 'sms'.
-  useEffect(() => {
-    if (!smsAvailable && method === 'sms') {
-      setMethod('email');
-    }
-  }, [smsAvailable, method]);
+  // Derive the effective method instead of synchronously correcting state in
+  // an effect when the deployment reports that SMS is unavailable.
+  const method: TwoFactorMethod = !smsAvailable && requestedMethod === 'sms' ? 'email' : requestedMethod;
   const [target, setTarget] = useState('');
   const [code, setCode] = useState('');
   const [cd, setCd] = useState(0);
@@ -175,7 +172,7 @@ export function TwoFactorTab() {
             <p className="text-sm font-medium">{t('twoFactor.methodLabel')}</p>
             <RadioGroup
               value={method}
-              onValueChange={(v) => setMethod(v as TwoFactorMethod)}
+              onValueChange={(v) => setRequestedMethod(v as TwoFactorMethod)}
               className="space-y-3"
             >
               {(['sms', 'email'] as TwoFactorMethod[]).map((m) => {

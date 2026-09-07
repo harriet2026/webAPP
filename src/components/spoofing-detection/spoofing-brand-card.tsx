@@ -36,7 +36,7 @@ export function SpoofingBrandCard({ brand, disabled, onObserve, onEdit, onDelete
   const modeLabel = tryT(tsd, `brand.mode.${brand.disposition.mode}`, tsd('brand.modeUnknown'));
   const domains = brand.protected_domains?.map((domain) => `${domain.domain} ≤${domain.edit_distance_threshold}`).join(', ') || '—';
   return (
-    <div className={cn(
+    <div data-testid="spoof-brand-card" className={cn(
       'group flex items-start gap-4 rounded-lg border bg-card p-4 transition-all hover:border-primary/30 hover:shadow-md',
       brand.observe_mode ? 'border-dashed border-amber-300' : 'border-border/70',
     )}>
@@ -45,17 +45,17 @@ export function SpoofingBrandCard({ brand, disabled, onObserve, onEdit, onDelete
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate text-sm font-semibold">{brand.brand_name}</span>
-          <Badge variant="outline" className={cn('text-[10px]', MODE_CLS[brand.disposition.mode])}>{modeLabel}</Badge>
+          <span className="truncate text-sm font-semibold" data-testid="spoof-brand-card-name">{brand.brand_name}</span>
+          <Badge variant="outline" className={cn('text-[10px]', MODE_CLS[brand.disposition.mode])} data-testid="spoof-brand-card-mode">{modeLabel}</Badge>
           {brand.read_only ? <Badge variant="secondary" className="text-[10px]">{tsd('inheritedReadOnly')}</Badge> : null}
         </div>
-        <p className="mt-1 truncate text-sm text-muted-foreground">
+        <p className="mt-1 truncate text-sm text-muted-foreground" data-testid="spoof-brand-card-domains">
           {tsd('brand.protectedDomains')}: {domains}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          <span>{tsd('brand.confidenceThreshold')}: {brand.confidence_threshold}%</span>
+          <span data-testid="spoof-brand-card-threshold">{tsd('brand.confidenceThreshold')}: {brand.confidence_threshold}%</span>
             <Tooltip>
-              <TooltipTrigger render={<span className="inline-flex cursor-help items-center gap-0.5" />}>
+              <TooltipTrigger render={<span className="inline-flex cursor-help items-center gap-0.5" data-testid="spoof-brand-card-keywords" />}>
               {tsd('brand.keywordsCount', { count: brand.keywords?.length ?? 0 })}
               <Info className="h-3 w-3" />
             </TooltipTrigger>
@@ -64,13 +64,13 @@ export function SpoofingBrandCard({ brand, disabled, onObserve, onEdit, onDelete
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5 self-center">
-        <span className={cn('hidden text-xs sm:inline', brand.observe_mode ? 'text-amber-600' : 'text-muted-foreground')}>
+        <span data-testid="spoof-brand-card-observe-label" className={cn('hidden text-xs sm:inline', brand.observe_mode ? 'text-amber-600' : 'text-muted-foreground')}>
           {brand.observe_mode ? tsd('person.observe') : tsd('person.detect')}
         </span>
-        <Switch aria-label={brand.observe_mode ? tsd('person.observe') : tsd('person.detect')}
+        <Switch data-testid="spoof-brand-card-observe" aria-label={brand.observe_mode ? tsd('person.observe') : tsd('person.detect')}
           checked={brand.observe_mode} disabled={disabled} onCheckedChange={onObserve} />
-        <Button aria-label={tsd('brand.edit')} title={tsd('brand.edit')} variant="ghost" size="icon" className="h-8 w-8" disabled={disabled} onClick={onEdit}><Edit className="h-3.5 w-3.5" /></Button>
-        <Button aria-label={tsd('brand.delete')} title={tsd('brand.delete')} variant="ghost" size="icon" className="h-8 w-8 text-rose-500" disabled={disabled} onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
+        <Button data-testid="spoof-brand-card-edit" aria-label={tsd('brand.edit')} title={tsd('brand.edit')} variant="ghost" size="icon" className="h-8 w-8" disabled={disabled} onClick={onEdit}><Edit className="h-3.5 w-3.5" /></Button>
+        <Button data-testid="spoof-brand-card-delete" aria-label={tsd('brand.delete')} title={tsd('brand.delete')} variant="ghost" size="icon" className="h-8 w-8 text-rose-500" disabled={disabled} onClick={onDelete}><Trash2 className="h-3.5 w-3.5" /></Button>
       </div>
     </div>
   );

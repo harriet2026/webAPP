@@ -248,7 +248,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
         </div>
         <div className="flex items-center gap-2">
           <Select value={threatFilter} onValueChange={(value) => setThreatFilter(value ?? 'all')}>
-            <SelectTrigger size="sm" className="w-28" aria-label={tRoot('geo.threatFilter')}>
+            <SelectTrigger size="sm" className="w-28" data-testid="sov-time-threat-filter" aria-label={tRoot('geo.threatFilter')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -264,6 +264,7 @@ export function TimeDistributionCard({ startDate, endDate, direction, scopeTenan
             onChange={setMode}
             size="sm"
             className="shrink-0"
+            testIdPrefix="sov-time-mode"
             options={[
               { value: 'daily', label: t('daily') },
               { value: 'weekly', label: t('weekly') },

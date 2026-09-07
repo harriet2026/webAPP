@@ -11,6 +11,7 @@ interface KpiCardsProps {
   stats?: PhishingStats;
   hitRate?: number | null;
   isLoading?: boolean;
+  onDetectedClick?: () => void;
   onQuarantinedClick?: () => void;
   onPendingReviewClick?: () => void;
   onRecalledClick?: () => void;
@@ -26,7 +27,8 @@ interface KpiCardData {
   onClick?: () => void;
 }
 
-function KpiCard({ label, value, hint, tone, onClick, isLoading }: {
+function KpiCard({ cardKey, label, value, hint, tone, onClick, isLoading }: {
+  cardKey: string;
   label: string;
   value: number | string | null;
   hint?: string;
@@ -52,6 +54,7 @@ function KpiCard({ label, value, hint, tone, onClick, isLoading }: {
   if (onClick) {
     return (
       <Button
+        data-testid={`phishing-kpi-${cardKey}`}
         variant="outline"
         onClick={onClick}
         className="h-auto w-full cursor-pointer flex-col items-stretch whitespace-normal rounded-xl border-border bg-card p-4 text-left shadow-sm data-[hovered=true]:bg-muted/35"
@@ -61,13 +64,13 @@ function KpiCard({ label, value, hint, tone, onClick, isLoading }: {
     );
   }
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div data-testid={`phishing-kpi-${cardKey}`} className="rounded-xl border border-border bg-card p-4 shadow-sm">
       {content}
     </div>
   );
 }
 
-export function KpiCards({ stats, hitRate, isLoading, onQuarantinedClick, onPendingReviewClick, onRecalledClick, onRecallSuccessClick }: KpiCardsProps) {
+export function KpiCards({ stats, hitRate, isLoading, onDetectedClick, onQuarantinedClick, onPendingReviewClick, onRecalledClick, onRecallSuccessClick }: KpiCardsProps) {
   const t = useTranslations('phishingDetection');
   const ta = useTranslations('agentCenterOverview.metrics');
   const format = useFormatter();
@@ -77,6 +80,7 @@ export function KpiCards({ stats, hitRate, isLoading, onQuarantinedClick, onPend
       key: 'today_detected',
       label: t('kpi.todayDetected'),
       value: stats?.today_detected ?? null,
+      onClick: onDetectedClick,
     },
     {
       key: 'today_quarantined',
@@ -119,6 +123,7 @@ export function KpiCards({ stats, hitRate, isLoading, onQuarantinedClick, onPend
       {cards.map((card) => (
         <KpiCard
           key={card.key}
+          cardKey={card.key}
           label={card.label}
           value={card.value}
           hint={card.hint}

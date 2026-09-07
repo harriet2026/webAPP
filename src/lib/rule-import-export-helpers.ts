@@ -100,17 +100,11 @@ export function buildExecutePayload(args: {
   file: RuleExportEnvelope;
   selection: ImportSelectionState;
   importMode: DialogImportModeState;
-  skippedDuplicateIds: string[];
-  skipAllRemainingDuplicates?: boolean;
 }): RuleImportExecuteRequest {
   return {
     ...buildPreviewPayload(args),
     duplicate_resolutions: {
-      ...(args.skipAllRemainingDuplicates ? { apply_to_remaining: 'skip' as const } : {}),
-      items: args.skippedDuplicateIds.map((previewItemID) => ({
-        preview_item_id: previewItemID,
-        action: 'skip' as const,
-      })),
+      apply_to_remaining: 'skip',
     },
   };
 }

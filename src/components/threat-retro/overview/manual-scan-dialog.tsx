@@ -127,7 +127,7 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
           <div className="space-y-1.5">
             <Label>{t('strategy')}</Label>
             <Select value={strategyId} onValueChange={(v) => setStrategyId(v ?? '')}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" data-testid="manual-scan-strategy">
                 <SelectValue placeholder={t('strategyPlaceholder')}>
                   {(() => {
                     const selected = strategies.find((s) => String(s.id) === strategyId);
@@ -152,6 +152,7 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
               <Label htmlFor="scan-start">{t('start')}</Label>
               <Input
                 id="scan-start"
+                data-testid="manual-scan-start"
                 type="datetime-local"
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
@@ -162,6 +163,7 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
               <Label htmlFor="scan-end">{t('end')}</Label>
               <Input
                 id="scan-end"
+                data-testid="manual-scan-end"
                 type="datetime-local"
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
@@ -170,12 +172,12 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
             </div>
           </div>
           {tooLarge ? (
-            <p className="text-xs text-destructive">{t('windowTooLarge')}</p>
+            <p className="text-xs text-destructive" data-testid="manual-scan-window-error">{t('windowTooLarge')}</p>
           ) : null}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={scan.isPending}>
+          <Button variant="outline" data-testid="manual-scan-cancel" onClick={() => onOpenChange(false)} disabled={scan.isPending}>
             {tc('cancel')}
           </Button>
           <Button

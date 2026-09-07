@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { deriveVisibility, resolveAgentFeatureAccess } from '../visibility';
+import {
+  deriveAgentRowVisibility,
+  deriveVisibility,
+  resolveAgentFeatureAccess,
+} from '../visibility';
 
 const AGENT_FEATURES = [
   { id: 'phishing-detection', visibility: 'AI_ELSE_LOCK', scope: 'mixed', platformAccess: 'edit', tenantAccess: 'edit', platformHidden: true, grantable: true },
@@ -113,5 +117,21 @@ describe('resolveAgentFeatureAccess', () => {
       true,
     );
     expect(access.spoofing).toEqual({ visible: true, canRequest: false });
+  });
+
+  it('shows status rows only for tenant-enabled agents, not visible upsell entries', () => {
+    const access = resolveAgentFeatureAccess(
+      AGENT_FEATURES,
+      { ai: true, multiTenant: true, saas: true },
+      'tenant',
+      ['phishing-detection'],
+      true,
+    );
+
+    expect(deriveAgentRowVisibility(access)).toEqual({
+      phishing: true,
+      spoofing: false,
+      'threat-retro': false,
+    });
   });
 });

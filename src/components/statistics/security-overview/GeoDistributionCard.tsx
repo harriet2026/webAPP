@@ -393,7 +393,7 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
             {selectedName && (
               <>
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="truncate">{selectedName}</span>
+                <span className="truncate" data-testid="geo-selected-country">{selectedName}</span>
               </>
             )}
           </CardTitle>
@@ -429,7 +429,7 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="grid gap-4 xl:grid-cols-2">
+          <div className="grid gap-4 2xl:grid-cols-2">
             <Skeleton className="h-[260px] rounded-xl" />
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, index) => (
@@ -444,7 +444,7 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid gap-4 2xl:grid-cols-2">
               <WorldThreatMap
                 countries={mapCountries}
                 selectedCountry={activeCountry ? mapCountryCode(activeCountry) : null}
@@ -465,8 +465,10 @@ export function GeoDistributionCard({ startDate, endDate, direction, scopeTenant
                             'flex w-full items-center gap-1.5 rounded-lg px-1.5 py-2 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                           )}
                           data-country-code={country.country}
+                          data-testid={`geo-ranking-row-${country.country}`}
                           aria-label={`${index + 1}. ${countryName(country.country)}`}
                           aria-pressed={isSelected}
+                          title={countryName(country.country)}
                           onClick={() => setSelectedCountry(country.country)}
                         >
                           <span className="w-4 shrink-0 text-right text-xs text-muted-foreground">{index + 1}</span>

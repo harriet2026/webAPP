@@ -95,7 +95,7 @@ function ConditionRow({
   return (
     <div className="flex items-center gap-2">
       <Select value={condition.field} onValueChange={handleFieldChange}>
-        <SelectTrigger className="w-[160px]">
+        <SelectTrigger data-testid="advanced-filter-field" className="w-[160px]">
           <SelectValue placeholder={t("advancedFilter.selectField")} />
         </SelectTrigger>
         <SelectContent>
@@ -108,7 +108,7 @@ function ConditionRow({
       </Select>
 
       <Select value={condition.op} onValueChange={handleOpChange}>
-        <SelectTrigger className="w-[130px]">
+        <SelectTrigger data-testid="advanced-filter-operator" className="w-[130px]">
           <SelectValue>
             {t(operatorLabelKeys[condition.op as SearchOperator] as never)}
           </SelectValue>
@@ -129,7 +129,7 @@ function ConditionRow({
               value={String(condition.value ?? "true")}
               onValueChange={handleValueChange}
             >
-              <SelectTrigger className="w-[100px]">
+              <SelectTrigger data-testid="advanced-filter-value" className="w-[100px]">
                 <SelectValue>
                   {String(condition.value ?? "true") === "true"
                     ? t("common.yes")
@@ -146,7 +146,7 @@ function ConditionRow({
               value={String(condition.value ?? "")}
               onValueChange={handleValueChange}
             >
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger data-testid="advanced-filter-value" className="w-[140px]">
                 <SelectValue placeholder={t("advancedFilter.selectValue")} />
               </SelectTrigger>
               <SelectContent>
@@ -159,6 +159,7 @@ function ConditionRow({
             </Select>
           ) : (
             <Input
+              data-testid="advanced-filter-value"
               className="w-[180px]"
               value={String(condition.value ?? "")}
               onChange={(e) => handleValueChange(e.target.value)}
@@ -230,7 +231,7 @@ function ConditionGroup({
   };
 
   return (
-    <div className="border rounded-md p-3 space-y-2">
+    <div data-testid={`advanced-filter-group-${index}`} className="border rounded-md p-3 space-y-2">
       <div className="flex items-center gap-2">
         <Button
           variant="ghost"
@@ -386,11 +387,11 @@ export function AdvancedFilterBuilder({
         />
       ))}
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={addGroup}>
+        <Button data-testid="advanced-filter-add-group" variant="outline" size="sm" onClick={addGroup}>
           <Plus className="h-3 w-3 mr-1" /> {t("advancedFilter.addGroup")}
         </Button>
         {value.groups.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={clearAll}>
+          <Button data-testid="advanced-filter-clear-all" variant="ghost" size="sm" onClick={clearAll}>
             {t("advancedFilter.clearAll")}
           </Button>
         )}

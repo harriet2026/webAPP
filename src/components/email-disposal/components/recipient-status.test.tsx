@@ -87,6 +87,27 @@ describe('RecipientStatus dispatch flow', () => {
     (toast.warning as ReturnType<typeof vi.fn>).mockReset();
   });
 
+  it('GT-13038: renders handling, success, and failed recall states per recipient', () => {
+    const dispositions: RecipientDisposition[] = [
+      { recipient: 'pending@test.local', final_action: 'accept', status: 'delivered', recall_state: 'handling', recall_at: '2026-08-31T01:00:00Z' },
+      { recipient: 'ok@test.local', final_action: 'accept', status: 'delivered', recall_state: 'success', recall_at: '2026-08-31T01:01:00Z' },
+      { recipient: 'bad@test.local', final_action: 'accept', status: 'delivered', recall_state: 'failed', recall_at: '2026-08-31T01:02:00Z' },
+    ];
+
+    render(<RecipientStatus {...baseProps(dispositions)} />);
+
+    expect(screen.getByText('emailDisposal.detail.overview.recipientStatus.colRecall')).toBeInTheDocument();
+    for (const [recipient, state, at] of [
+      ['pending@test.local', 'handling', '2026-08-31T01:00:00Z'],
+      ['ok@test.local', 'success', '2026-08-31T01:01:00Z'],
+      ['bad@test.local', 'failed', '2026-08-31T01:02:00Z'],
+    ]) {
+      const cell = screen.getByTestId(`email-disposal-recipient-recall-${recipient}`);
+      expect(cell).toHaveTextContent(`emailDisposal.detail.overview.recipientStatus.recall.${state}`);
+      expect(cell).toHaveAttribute('data-recall-at', at);
+    }
+  });
+
   it('multi-object batch deliver: partial failure aggregates into "N succeeded / M failed" and lists the failed recipient', async () => {
     const user = userEvent.setup();
     const dispositions: RecipientDisposition[] = [
@@ -154,6 +175,75 @@ describe('RecipientStatus dispatch flow', () => {
     const modal = await screen.findByTestId('email-disposal-recipient-batch-result');
     expect(within(modal).getByText('quarantined@test.local')).toBeInTheDocument();
     expect(modal.textContent).toContain('recipientStatus.notApplicable');
+  });
+
+  it('GT-13390: recall renders the recipient-specific localized failure instead of the raw whole-message code', async () => {
+    const user = userEvent.setup();
+    const dispositions: RecipientDisposition[] = [
+      { recipient: 'unsupported@test.local', final_action: 'deliver', status: 'delivered' },
+    ];
+    mockRecallMails.mockResolvedValue({
+      succeeded: [],
+      failed: [{ id: 42, reason: 'no_recallable_recipients' }],
+      recipient_results: [{
+        mail_log_id: 42,
+        recipients: ['unsupported@test.local'],
+        status: 'skipped',
+        reason: 'unsupported_backend',
+      }],
+    });
+
+    render(<RecipientStatus {...baseProps(dispositions)} />);
+
+    await user.click(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.recall'));
+    await user.click(await screen.findByText('mock-reclassify-confirm'));
+
+    await waitFor(() => expect(mockRecallMails).toHaveBeenCalledTimes(1));
+    const localizedReason = 'emailDisposal.detail.overview.recipientStatus.recallUnsupportedBackend';
+    const modal = await screen.findByTestId('email-disposal-recipient-batch-result');
+    expect(modal).toHaveTextContent(localizedReason);
+    expect(modal).not.toHaveTextContent('no_recallable_recipients');
+    expect(modal).not.toHaveTextContent('unsupported_backend');
+    expect(toast.error).toHaveBeenCalledWith(localizedReason);
+  });
+
+  it('GT-13390: mixed recall results keep each recipient outcome distinct', async () => {
+    const user = userEvent.setup();
+    const dispositions: RecipientDisposition[] = [
+      { recipient: 'recalled@test.local', final_action: 'deliver', status: 'delivered' },
+      { recipient: 'pending-id@test.local', final_action: 'deliver', status: 'delivered' },
+    ];
+    mockRecallMails.mockResolvedValue({
+      succeeded: [],
+      failed: [],
+      partial: [42],
+      recipient_results: [
+        { mail_log_id: 42, recipients: ['recalled@test.local'], status: 'succeeded' },
+        {
+          mail_log_id: 42,
+          recipients: ['pending-id@test.local'],
+          status: 'failed',
+          reason: 'tracking_id_missing',
+        },
+      ],
+    });
+
+    render(<RecipientStatus {...baseProps(dispositions)} />);
+
+    for (const checkbox of screen.getAllByRole('checkbox', { name: /Select group __no_object/ })) {
+      await user.click(checkbox);
+    }
+    const recallButtons = screen.getAllByText('emailDisposal.detail.overview.recipientStatus.action.recall');
+    await user.click(recallButtons[recallButtons.length - 1]);
+    await user.click(await screen.findByText('mock-reclassify-confirm'));
+
+    await waitFor(() => expect(mockRecallMails).toHaveBeenCalledTimes(1));
+    const modal = await screen.findByTestId('email-disposal-recipient-batch-result');
+    expect(within(modal).getByText('recalled@test.local')).toBeInTheDocument();
+    expect(within(modal).getByText('pending-id@test.local')).toBeInTheDocument();
+    expect(modal).toHaveTextContent('emailDisposal.detail.overview.recipientStatus.actionSuccess');
+    expect(modal).toHaveTextContent('emailDisposal.detail.overview.recipientStatus.recallTrackingIdMissing');
+    expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('recipientStatus.bulkResult'));
   });
 
   it('surfaces reclassify_failed as a distinct warning toast without turning a successful dispose into a failure', async () => {
@@ -276,11 +366,12 @@ describe('RecipientStatus dispatch flow', () => {
     ));
   });
 
-  // G6: a batch action that partially succeeds must open the "操作完成"
-  // modal with one row per affected recipient -- success rows show
-  // {prevStatus} → {newStatus} on a green background, failure rows show
-  // {prevStatus} → {reason} on a red background.
-  it('G6: batch-result modal renders per-recipient before→after rows (success green, failure red)', async () => {
+  // G6 / GT-13273: a batch action that partially succeeds must open the
+  // "操作完成" modal with one row per affected recipient. A successful
+  // release request is only the start of asynchronous delivery, so the
+  // result row stays at delivering until delivery facts confirm a terminal
+  // delivered state.
+  it('GT-13273: batch deliver result reports delivering until a delivery fact confirms success', async () => {
     const user = userEvent.setup();
     const dispositions: RecipientDisposition[] = [
       { recipient: 'ok@test.local', final_action: 'sideline', status: 'quarantined', object_kind: 'quarantine', object_id: 'obj-ok' },
@@ -310,7 +401,8 @@ describe('RecipientStatus dispatch flow', () => {
     const okRow = within(modal).getByText('ok@test.local').closest('div');
     expect(okRow?.className).toContain('bg-emerald-50');
     expect(okRow?.textContent).toContain('status.quarantined');
-    expect(okRow?.textContent).toContain('status.delivered');
+    expect(okRow?.textContent).toContain('status.delivering');
+    expect(okRow?.textContent).not.toContain('status.delivered');
 
     const failRow = within(modal).getByText('fail@test.local').closest('div');
     expect(failRow?.className).toContain('bg-red-50');

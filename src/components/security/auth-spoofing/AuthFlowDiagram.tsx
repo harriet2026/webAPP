@@ -54,7 +54,7 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
       return {
         id: key,
         label: key.toUpperCase(),
-        sub: t(flowSubKey(action, isPtr) as any),
+        sub: t(flowSubKey(action, isPtr) as Parameters<typeof t>[0]),
         color: action === 'discard' ? DISCARD_COLOR : PROTOCOL_BASE_COLOR[key],
         clickable: true,
       } satisfies Node;
@@ -74,13 +74,18 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
         {nodes.map((node, idx) => (
           <div key={node.id} className="flex items-center gap-2">
             <FlowNodeButton
+              testid={`auth-flow-node-${node.id}`}
               active={node.clickable && activeTab === node.id}
               clickable={node.clickable}
               colorClass={node.color}
               onClick={node.clickable ? () => onNodeClick(node.id as ProtocolTab) : undefined}
             >
               <div className="text-xs font-medium">{node.label}</div>
-              {node.sub && <div className="mt-0.5 text-[10px] opacity-70">{node.sub}</div>}
+              {node.sub && (
+                <div data-testid={`auth-flow-node-sub-${node.id}`} className="mt-0.5 text-[10px] opacity-70">
+                  {node.sub}
+                </div>
+              )}
             </FlowNodeButton>
             {idx < nodes.length - 1 && (
               <ChevronRight className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
@@ -95,12 +100,14 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
 // 流程节点按钮：可点节点的 hover 为 pointer 驱动的内嵌 hairline（柔和交互反馈规格 §7.2），
 // 不做位移/缩放；selected(ring-primary) 与 hover 分层，focus-visible 独立 ring。
 function FlowNodeButton({
+  testid,
   active,
   clickable,
   colorClass,
   onClick,
   children,
 }: {
+  testid: string;
   active: boolean;
   clickable: boolean;
   colorClass: string;
@@ -112,6 +119,7 @@ function FlowNodeButton({
   return (
     <button
       type="button"
+      data-testid={testid}
       onClick={onClick}
       disabled={!clickable}
       className={cn(

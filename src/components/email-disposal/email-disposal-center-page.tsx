@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Search, X, Inbox as InboxIcon, Info } from "lucide-react";
 import { useScopedApiRequest } from "@/lib/api/client";
 import { useTenant } from "@/hooks/use-tenant";
@@ -40,7 +40,12 @@ import {
   resolvePositiveEnumFilterValues,
 } from "./lib/filter-state";
 import { resolveDisplayStatusHighlightKeys } from "@/lib/display-status";
-import { formatRecipientDetail } from "./lib/csv-export";
+import {
+  buildDisposalCsv,
+  DISPOSAL_TABLE_COLUMNS,
+  type DisposalTableColumn,
+} from "./lib/csv-export";
+import type { DisposalLang } from "./lib/disposal-basis-config";
 import { SearchBar } from "./search-bar";
 import { SaveTemplateDialog } from "./save-template-dialog";
 import { QuickFilters } from "./quick-filters";
@@ -77,9 +82,7 @@ import type {
   DisposalMailItem,
 } from "@/types/email-disposal";
 import type { AdvancedFilter } from "@/types/log";
-import { pendingViewFilter } from "./lib/pending-filter";
-import { mailTypeLabelKey } from "./lib/detail-helpers";
-import { deliveryStatusLabel } from "@/components/logs/status-labels";
+import { pendingViewQuickFilter } from "./lib/pending-filter";
 import { toast } from "sonner";
 
 function getDefaultQuickFilter(): DisposalQuickFilter {
@@ -97,9 +100,10 @@ export function EmailDisposalCenterPage({
   mode = "disposal",
 }: { mode?: "disposal" | "investigation" } = {}) {
   const t = useTranslations("emailDisposal");
-  // GT-12763：导出 CSV 时状态翻译需要 logs 命名空间的 key，
-  // emailDisposal 命名空间下没有 deliveryStatusValue.*。
-  const tLogs = useTranslations("logs");
+  const rawLocale = useLocale();
+  const disposalLang: DisposalLang = (["zh", "en", "th", "ru"] as const).includes(
+    rawLocale as DisposalLang,
+  ) ? (rawLocale as DisposalLang) : "zh";
   const { effectiveTenantId } = useTenant();
   const { merge } = useFilterMerger();
   const { templates, saveTemplate, deleteTemplate, renameTemplate } = useSearchTemplates();
@@ -155,30 +159,28 @@ export function EmailDisposalCenterPage({
   const aiEnabled = capabilities?.ai ?? false;
   const aiInterpretEnabled = aiEnabled && features.aiInterpret;
 
+  const initialView = useSearchParams().get("view");
   const [quickFilter, setQuickFilter] = useState<DisposalQuickFilter>(
-    getDefaultQuickFilter,
+    () => pendingViewQuickFilter(initialView) ?? getDefaultQuickFilter(),
   );
   // GT-12423: html_spec（index「按 demo（默认展开）落地」）要求高级筛选默认
   // 展开；「更多筛选条件」(AdvancedFilters) 仍默认折叠（PRD 口径）。
   const [quickFilterCollapsed, setQuickFilterCollapsed] = useState(false);
-  // GT-12608/GT-12818：系统状态「待处置邮件 → 去处置」深链。?view=pending 时首载
-  // 即应用与 KPI 卡同一口径的待处置筛选（display_status ∈ 隔离中 quarantine_pending
-  // | 待审核 audit_pending），落地列表与卡片数字一致；无参数时维持 V2 默认全部邮件。
-  const initialView = useSearchParams().get('view');
   const [advancedFilter, setAdvancedFilter] = useState<AdvancedFilter>(
-    () => pendingViewFilter(initialView) ?? DEFAULT_ADVANCED,
+    DEFAULT_ADVANCED,
   );
   const [aiConditions, setAiConditions] = useState<AICondition[]>([]);
   // Structured controls edit a local draft. Only an explicit Search action
   // copies that draft into these applied states and changes the list query.
+  // GT-12608/GT-12818/GT-13248：?view=pending 的 draft/applied 状态都从
+  // 邮件状态 quick-filter 初始化。列表首载保持「隔离中 + 待审核」口径，同时
+  // 标签与用户手动多选状态走完全相同的逐项展示模型。
   const [appliedQuickFilter, setAppliedQuickFilter] =
-    useState<DisposalQuickFilter>(getDefaultQuickFilter);
-  // GT-12608/GT-12818：applied 状态也须从 ?view=pending 深链初始化，否则列表查询
-  // 仍用空的 DEFAULT_ADVANCED（= 全部邮件），只有 draft 筛选 UI 被填充、列表却没
-  // 真正过滤，导致「默认展示待审核+隔离中」失效。其他入口 pendingViewFilter 返回
-  // null，回落 DEFAULT_ADVANCED，行为不变。
+    useState<DisposalQuickFilter>(
+      () => pendingViewQuickFilter(initialView) ?? getDefaultQuickFilter(),
+    );
   const [appliedAdvancedFilter, setAppliedAdvancedFilter] =
-    useState<AdvancedFilter>(() => pendingViewFilter(initialView) ?? DEFAULT_ADVANCED);
+    useState<AdvancedFilter>(DEFAULT_ADVANCED);
   const [appliedAiConditions, setAppliedAiConditions] = useState<AICondition[]>(
     [],
   );
@@ -636,47 +638,15 @@ export function EmailDisposalCenterPage({
   }, []);
 
   // 将 DisposalMailItem 列表转 CSV Blob 并触发下载
-  const exportToCsv = useCallback((items: DisposalMailItem[]) => {
-    const escapeCsv = (value: unknown) =>
-      `"${String(value ?? "").replaceAll('"', '""')}"`;
-    const rows = [
-      [
-        "ID",
-        t("table.time"),
-        t("table.direction"),
-        t("table.sender"),
-        t("table.recipient"),
-        t("table.subject"),
-        t("table.senderIp"),
-        t("table.disposalBasis"),
-        t("table.mailType"),
-        t("table.action"),
-        t("table.status"),
-        t("batch.csvRecipientDetail"),
-      ],
-      ...items.map((item) => [
-        item.id,
-        item.timestamp,
-        item.direction ?? "",
-        item.sender,
-        item.recipientList?.join("; ") ?? item.recipient,
-        item.subject,
-        item.clientIp ?? "",
-        item.disposalBasis?.policy_key ?? item.disposalBasis?.action ?? "",
-        // GT-12763：邮件类型翻译为当前语言
-        item.emailType ? t(mailTypeLabelKey(item.emailType)) : "",
-        item.action ?? "",
-        // GT-12763：状态翻译为当前语言
-        (item.displayStatuses ?? []).length === 1
-          ? deliveryStatusLabel(item.displayStatuses[0].status, (k: string) => tLogs(k))
-          : (item.displayStatuses ?? [])
-              .map((entry) => `${deliveryStatusLabel(entry.status, (k: string) => tLogs(k))}×${entry.count}`)
-              .join("; "),
-        formatRecipientDetail(item, (key) => t(key as never)),
-      ]),
-    ];
+  const exportToCsv = useCallback((
+    items: DisposalMailItem[],
+    columns: readonly DisposalTableColumn[],
+  ) => {
     const blob = new Blob(
-      [`\uFEFF${rows.map((row) => row.map(escapeCsv).join(",")).join("\n")}`],
+      [buildDisposalCsv(items, columns, {
+        t: (key) => t(key as never),
+        lang: disposalLang,
+      })],
       { type: "text/csv;charset=utf-8" },
     );
     const url = URL.createObjectURL(blob);
@@ -685,11 +655,13 @@ export function EmailDisposalCenterPage({
     anchor.download = `email-disposal-${new Date().toISOString().slice(0, 10)}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
-  }, [t, tLogs]);
+  }, [t, disposalLang]);
 
   // 导出全量筛选结果（无选中时）
   const EXPORT_MAX = 5000;
-  const exportAllFiltered = useCallback(async () => {
+  const exportAllFiltered = useCallback(async (
+    columns: readonly DisposalTableColumn[],
+  ) => {
     const total = similarMode ? similarTotal : (data?.total ?? 0);
     if (total === 0) return;
     if (total > EXPORT_MAX) {
@@ -700,7 +672,7 @@ export function EmailDisposalCenterPage({
     setExportLoading(true);
     try {
       if (similarMode) {
-        exportToCsv(similarItems);
+        exportToCsv(similarItems, columns);
       } else {
         // 后端 QueryMailLogs 把 page_size 硬顶在 200（QueryMailLogs 内部 clamp，
         // 见 internal/api/mail_logs.go）；以 200/页分页拉取到 EXPORT_MAX 或服务端
@@ -721,7 +693,7 @@ export function EmailDisposalCenterPage({
           // 空页：后端已无更多数据
           if (result.items.length === 0) break;
         }
-        exportToCsv(items.slice(0, target));
+        exportToCsv(items.slice(0, target), columns);
       }
     } catch {
       toast.error(t("batch.failed"));
@@ -733,15 +705,19 @@ export function EmailDisposalCenterPage({
   const handleBatchAction = useCallback(
     async (
       action: "find_similar" | "release" | "delete" | "export" | "recall",
+      visibleColumns?: readonly DisposalTableColumn[],
     ) => {
       if (action === "export") {
+        const columns = visibleColumns ?? DISPOSAL_TABLE_COLUMNS.filter(
+          (column) => column !== "similarity" || similarMode,
+        );
         if (selectedIds.size === 0) {
           // 未选中 → 导出当前筛选全部
-          void exportAllFiltered();
+          void exportAllFiltered(columns);
           return;
         }
         // 有选中 → 从跨页缓存 Map 直接读取，不依赖当前页数据
-        exportToCsv(Array.from(selectedItemMap.values()));
+        exportToCsv(Array.from(selectedItemMap.values()), columns);
         return;
       }
 
@@ -772,7 +748,7 @@ export function EmailDisposalCenterPage({
 
       setDeleteConfirmOpen(true);
     },
-    [selectedIds, selectedItemMap, t, runFindSimilar, exportToCsv, exportAllFiltered],
+    [selectedIds, selectedItemMap, t, runFindSimilar, exportToCsv, exportAllFiltered, similarMode],
   );
 
   const executeDelete = useCallback(async () => {
@@ -1090,7 +1066,7 @@ export function EmailDisposalCenterPage({
             page={page}
             pageSize={pageSize}
             total={data?.total ?? 0}
-            pageSizeOptions={[50, 100, 200]}
+            pageSizeOptions={[20, 50, 100, 200]}
             onPageChange={setPage}
             onPageSizeChange={(size) => {
               setPageSize(size);
@@ -1189,7 +1165,7 @@ export function EmailDisposalCenterPage({
         open={pendingTemplateId !== null}
         onOpenChange={(open) => { if (!open) setPendingTemplateId(null); }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="disposal-template-apply-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t("search.templateApplyConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -1199,10 +1175,11 @@ export function EmailDisposalCenterPage({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingTemplateId(null)}>
+            <AlertDialogCancel data-testid="disposal-template-apply-cancel" onClick={() => setPendingTemplateId(null)}>
               {t("detail.overview.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
+              data-testid="disposal-template-apply-confirm"
               onClick={() => {
                 if (pendingTemplateId) applyTemplate(pendingTemplateId);
                 setPendingTemplateId(null);

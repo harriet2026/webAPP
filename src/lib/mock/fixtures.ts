@@ -765,19 +765,19 @@ const EMAIL_TYPE_KEYS = [
   "normal", "subscription", "advertising", "spam", "harmful", "suspicious",
   "sensitive", "spoofing", "phishing", "virus", "account_compromised",
 ];
-// 与后端 internal/models/security_overview.go 的 AllActions 一致（第 3 项是
-// advanced_review，不是 greylist——展示文案仍是"灰名单"，见 messages）。
-const ACTION_KEYS = ["deliver", "mark_deliver", "advanced_review", "quarantine", "review", "block", "drop", "recall"];
+// 与后端 internal/models/security_overview.go 的 AllActions 一致。
+// mark_deliver 已并入 deliver，advanced_review 是处理中间态，不属于最终执行动作。
+const ACTION_KEYS = ["deliver", "quarantine", "review", "block", "drop", "recall"];
 const LEVEL_KEYS = ["normal", "low", "medium", "high", "critical"];
-const DELIVERY_KEYS = ["delivered", "failed", "cancelled", "in_delivery", "partial_delivered", "unknown"];
+const DELIVERY_KEYS = ["delivered", "failed", "cancelled"];
 
 function buildOverviewTrend(scale = 1, dates: string[] = SECURITY_DATES) {
   return {
     threat_type: buildThreatOverviewRows(dates, scale),
     email_type: buildOverviewRows(EMAIL_TYPE_KEYS, [820, 110, 96, 210, 34, 72, 18, 28, 64, 18, 12], scale, dates),
-    action: buildOverviewRows(ACTION_KEYS, [860, 180, 90, 120, 76, 280, 48, 22], scale, dates),
+    action: buildOverviewRows(ACTION_KEYS, [860, 120, 76, 280, 48, 22], scale, dates),
     threat_level: buildOverviewRows(LEVEL_KEYS, [820, 310, 180, 96, 38], scale, dates),
-    delivery_result: buildOverviewRows(DELIVERY_KEYS, [1320, 76, 18, 54, 33, 12], scale, dates),
+    delivery_result: buildOverviewRows(DELIVERY_KEYS, [1320, 76, 18], scale, dates),
   };
 }
 
@@ -1996,7 +1996,7 @@ function initialPhishingConfig(): PhishAgentConfig {
     risk_policy: { version: 1, updated_at: DEMO_PHISHING_TIME, cutoffs: { low: 40, medium: 70, high: 90 }, policies: {
       suspicious: { base_disposition: 'proceed' }, low: { base_disposition: 'proceed' }, medium: { base_disposition: 'audit' }, high: { base_disposition: 'quarantine' },
     } },
-    runtime_policy: { version: 1, updated_at: DEMO_PHISHING_TIME, run_mode: 'realtime', observe_action: 'accept', observe_mark_enabled: true, timeout_minutes: 5, max_recheck_minutes: 30, timeout_async_enabled: true },
+    runtime_policy: { version: 1, updated_at: DEMO_PHISHING_TIME, run_mode: 'realtime', observe_action: 'accept', observe_mark_enabled: false, timeout_minutes: 5, max_recheck_minutes: 30, timeout_async_enabled: true },
   };
 }
 function initialPhishingAnalysisConfig(): PhishAnalysisConfig {
@@ -2490,7 +2490,7 @@ export function mockIPFrequencyRulesList(query: {
   const total = items.length;
   const page = query.page || 1;
   const pageSize = query.page_size || 20;
-  // IPFrequencyPage 用 page_size=10000 一次拉全，所以不切分；如果要切：
+  // 与真实接口一样按 page/page_size 切分；页面会按 100 条逐页拉全。
   const start = (page - 1) * pageSize;
   const end = start + pageSize;
   return {
@@ -5253,6 +5253,7 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     danger_ext_list:
       ".exe,.scr,.com,.bat,.cmd,.pif,.vbs,.js,.jse,.ws,.wsh,.hta,.lnk,.iso,.img,.vhd,.ps1,.psm1,.msi",
     mime_mismatch_check: true,
+    mime_mismatch_action: "quarantine",
   }),
   ...attachmentConfigSeed("antivirus", { host: "av-server", port: "6600" }),
   ...attachmentConfigSeed("antivirus_actions_receive", {
@@ -5482,7 +5483,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
       { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
-      { policyKey: "SIM", ruleName: "相似邮件批量检测", ruleId: "SIM-077", hitValues: { similar_type: "营销", dimension: "正文", similarity: "91" } },
+      { policyKey: "SIM", ruleName: "相似邮件批量检测", ruleId: "SIM-077", hitValues: { detection_type: "similar_email", direction: "receive", cluster_id: "marketing-cluster", counter: "12", similarity_pct: "91" } },
       { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
       { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
@@ -6675,6 +6676,16 @@ function disposalBasis(seed: MockDisposalSeed): DisposalBasis | undefined {
     hit_values: { reason: seed.reason, score: String(seed.score), confidence: String(seed.score) },
     detection_tags: [`source:${seed.basis[0].toLowerCase()}`],
   };
+	if (seed.basis[0] === "SIM") {
+		base.hit_values = {
+			detection_type: "similar_email",
+			direction: seed.direction === "outgoing" ? "send" : "receive",
+			namespace: `mock_${seed.cluster}`,
+			cluster_id: seed.cluster,
+			counter: String(Math.max(1, Math.round(seed.score / 5))),
+			similarity_pct: String(Math.max(62, seed.score)),
+		};
+	}
   if (!seed.isMixed || !seed.mixedBasis?.length) return base;
 
   const recipients = seed.recipients.split(",").map((item) => item.trim());
@@ -6849,14 +6860,6 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
           },
         }
       : {},
-    similar_detection: {
-      matched: seed.score >= 60,
-      skipped: seed.score < 60,
-      cluster_id: seed.cluster,
-      similarity_pct: Math.max(62, seed.score),
-      action: disposalAction(seed),
-      skip_reason: seed.score < 60 ? "低于相似度阈值" : undefined,
-    },
     recipient_dispositions: recipients.map((recipient, i) => {
       const status = recipientStatusFor(seed, recipients.length, i);
       // mixed seed: 前半投递、后半隔离/旁路，模拟真实 mixed 场景
@@ -7201,7 +7204,8 @@ function mockAdvancedValue(
       (recipient) => recipient.split("@")[1] ?? "",
     ),
     tid: item.tid,
-    similar_cluster: item.similar_detection?.cluster_id,
+		similar_cluster: [item.disposal_basis, ...(item.disposal_basis?.modules ?? [])]
+			.find((basis) => basis?.policy_key === "SIM")?.hit_values?.cluster_id,
     attachment_count: attachments.length,
     attachment_total_size: attachments.reduce(
       (sum, attachment) => sum + attachment.size,

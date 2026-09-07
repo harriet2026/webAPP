@@ -1,4 +1,4 @@
-import { apiRequest, ApiError, API_BASE, type ApiRequestFn } from './client';
+import { apiRequest, ApiError, API_BASE, type ApiRequestFn, type PublicationPendingResponse } from './client';
 import type {
   Rule,
   CreateRuleRequest,
@@ -113,11 +113,11 @@ export async function getModuleEnabled(
   return requestFn<{ enabled: boolean }>(`/security/advanced-rules/enabled`);
 }
 
-export async function setModuleEnabled(
+export function setModuleEnabled(
   enabled: boolean,
   requestFn: ApiRequestFn = apiRequest,
-): Promise<void> {
-  return requestFn<void>(`/security/advanced-rules/enabled`, {
+): Promise<void | PublicationPendingResponse> {
+  return requestFn<void | PublicationPendingResponse>(`/security/advanced-rules/enabled`, {
     method: 'PUT',
     body: { enabled },
   });

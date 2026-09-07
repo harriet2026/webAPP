@@ -128,22 +128,23 @@ export default function OpsTopTrendPage() {
   ) : undefined;
 
   return (
-    <PageShell>
+    <PageShell data-testid="ops-top-trend-page">
       <PageHeader
         icon={TrendingUp}
         title={t('title')}
         description={t('subtitle')}
+        data-testid="ops-top-trend-header"
       />
 
-      <div className="block md:hidden">
+      <div className="block md:hidden" data-testid="ops-top-narrow-notice">
         <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-6 text-center dark:border-yellow-900 dark:bg-yellow-900/20">
-          <p className="text-sm text-yellow-700 dark:text-yellow-300">
+          <p className="text-sm text-yellow-700 dark:text-yellow-300" data-testid="ops-top-narrow-notice-text">
             {t('useWideScreen')}
           </p>
         </div>
       </div>
 
-      <div className="hidden space-y-6 md:block">
+      <div className="hidden space-y-6 md:block" data-testid="ops-top-board">
         <FilterBar
           dimension={dimension}
           direction={direction}
@@ -166,11 +167,11 @@ export default function OpsTopTrendPage() {
         ) : isError ? (
           <PageSkeleton isError onRetry={() => refetch()} />
         ) : (
-          <div className="flex flex-col gap-4 rounded-[14px] border border-border bg-card py-6 shadow-sm">
+          <div className="flex flex-col gap-4 rounded-[14px] border border-border bg-card py-6 shadow-sm" data-testid="ops-top-list-card">
             <div className="px-6 pb-2">
               <div className="flex items-center gap-2 text-base font-semibold leading-none">
                 <DimensionIcon className="h-4 w-4" />
-                <span>{t(DIMENSION_CONFIG[dimension].labelKey)} TOP {topCount}</span>
+                <span data-testid="ops-top-list-title">{t(DIMENSION_CONFIG[dimension].labelKey)} TOP {topCount}</span>
                 <span className="ml-2 text-xs font-normal text-muted-foreground">
                   {t('clickRowToExpand')}
                 </span>

@@ -28,4 +28,25 @@ describe('ServerPagination interaction semantics', () => {
     fireEvent.click(screen.getByRole('button', { name: 'next' }));
     expect(onPageChange).toHaveBeenCalledWith(3);
   });
+
+  it('keeps page-size and disabled navigation controls visible for an empty result', () => {
+    render(
+      <ServerPagination
+        page={1}
+        pageSize={100}
+        total={0}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+        pageSizeOptions={[50, 100, 200]}
+        pageSizeTestId="link-logs-page-size"
+        testId="link-logs-pagination"
+      />,
+    );
+
+    expect(screen.getByTestId('link-logs-pagination')).toBeVisible();
+    expect(screen.getByTestId('link-logs-page-size')).toHaveTextContent('100');
+    expect(screen.getByRole('button', { name: 'prev' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'next' })).toBeDisabled();
+    expect(screen.getByText('pageOf:{"current":1,"total":1}')).toBeVisible();
+  });
 });

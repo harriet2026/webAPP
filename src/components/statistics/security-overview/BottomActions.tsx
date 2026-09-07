@@ -25,7 +25,7 @@ export function BottomActions({ startDate, endDate, direction, scopeTenantId }: 
     : getExportCsvUrl({ startDate, endDate, direction, tenantId: resolvedScopeTenant });
 
   return (
-    <div className="flex items-center justify-between flex-wrap gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div data-testid="security-overview-bottom-actions" className="flex items-center justify-between flex-wrap gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center gap-3">
         <a href={csvUrl} download>
           <Button variant="outline" size="sm">

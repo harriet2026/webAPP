@@ -97,6 +97,7 @@ export function ConnectionLayerPanel() {
             <button
               key={policy.key}
               type="button"
+              data-testid={`platform-security-policy-${policy.key}`}
               onClick={() => requestSelect(policy.key)}
               aria-pressed={isSelected}
               className={cn(
@@ -130,7 +131,7 @@ export function ConnectionLayerPanel() {
       </nav>
 
       {/* 右侧模块配置 */}
-      <div className="overflow-y-auto p-4">
+      <div className="overflow-y-auto p-4" data-testid="platform-security-policy-panel">
         {selected === 'ipFrequency' && <IPFrequencyPage embedded showPlatformScopeBadge />}
         {selected === 'ipFilter' && <IPFilterPage embedded />}
         {selected === 'rbl' && <RBLFilterPage embedded />}

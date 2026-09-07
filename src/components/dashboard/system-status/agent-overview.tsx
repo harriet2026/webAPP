@@ -10,9 +10,9 @@
 // platform viewer in a multi-tenant AI form (or a SaaS tenant not granted a
 // given feature) can resolve very differently per row even though
 // `capabilities.ai` is true for the whole page. Each row is independently
-// re-checked here via `useAgentRowVisibility()` (visibility.ts), the same
-// `resolve()` mechanism `sidebar-visibility.ts` uses per nav item — this
-// component does not otherwise re-derive product-form capability itself.
+// re-checked here via `useAgentRowVisibility()` (visibility.ts). Unlike the
+// sidebar, system status only shows enabled/requestable agents: a visible
+// locked upsell entry is not a running agent and must not appear abnormal.
 //
 // hooks.ts consumes the same per-feature resolution and requests only rows
 // whose capability is enabled. Results are independently nullable so a grant

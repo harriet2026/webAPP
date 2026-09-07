@@ -113,6 +113,36 @@ describe('RoleDrawer (Plan C Task 7)', () => {
     expect(screen.queryByTestId('role-save')).toBeNull();
   });
 
+  it('shows the empty tenant_ops built-in role as visible + view/edit in the read-only matrix', () => {
+    const tenantOps: Role = {
+      ...templateRole,
+      code: 'tenant_ops',
+      name: '安全运营',
+      permissions: [],
+    };
+    wrap(<RoleDrawer open onOpenChange={() => {}} scope="tenant" role={tenantOps} existingNames={[]} />);
+
+    const visibleCheckboxes = screen.getAllByTestId(/^role-perm-42-.*-visible$/);
+    expect(visibleCheckboxes.length).toBeGreaterThan(0);
+    for (const checkbox of visibleCheckboxes) expect(checkbox).toBeChecked();
+    expect(screen.getByTestId('role-perm-42-login-security-view')).toBeChecked();
+    expect(screen.getByTestId('role-perm-42-login-security-edit')).toBeChecked();
+  });
+
+  it('shows the empty tenant_auditor built-in role as visible + view-only', () => {
+    const tenantAuditor: Role = {
+      ...templateRole,
+      code: 'tenant_auditor',
+      name: '审计员',
+      permissions: [],
+    };
+    wrap(<RoleDrawer open onOpenChange={() => {}} scope="tenant" role={tenantAuditor} existingNames={[]} />);
+
+    expect(screen.getByTestId('role-perm-42-login-security-visible')).toBeChecked();
+    expect(screen.getByTestId('role-perm-42-login-security-view')).toBeChecked();
+    expect(screen.getByTestId('role-perm-42-login-security-edit')).not.toBeChecked();
+  });
+
   it('saving a new role calls createRole with the scope + name + matrix', async () => {
     wrap(<RoleDrawer open onOpenChange={() => {}} scope="tenant" role={null} existingNames={[]} />);
 

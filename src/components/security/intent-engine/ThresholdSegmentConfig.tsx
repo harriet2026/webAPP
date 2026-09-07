@@ -141,6 +141,7 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
               max={1}
               step={0.01}
               disabled={disabled}
+              data-testid={`ie-segment-${i}-min`}
             />
             <span className="text-muted-foreground">-</span>
             <Input
@@ -152,18 +153,19 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
               max={1}
               step={0.01}
               disabled={disabled}
+              data-testid={`ie-segment-${i}-max`}
             />
             <Select
               value={segment.action}
               onValueChange={(v) => handleSegmentChange(i, { action: v as IntentAction })}
               disabled={disabled}
             >
-              <SelectTrigger className="w-28 h-8 text-sm">
+              <SelectTrigger className="w-28 h-8 text-sm" data-testid={`ie-segment-${i}-action`}>
                 <SelectValue>{actionLabel(segment.action)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {actions.map((a) => (
-                  <SelectItem key={a} value={a}>
+                  <SelectItem key={a} value={a} data-testid={`ie-segment-${i}-action-option-${a}`}>
                     {actionLabel(a)}
                   </SelectItem>
                 ))}
@@ -176,6 +178,7 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
                 className="h-8 px-2 text-destructive hover:text-destructive"
                 onClick={() => handleRemoveSegment(i)}
                 disabled={disabled}
+                data-testid={`ie-segment-${i}-remove`}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -197,12 +200,12 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
 
       {/* 操作按钮 */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Button variant="outline" size="sm" onClick={handleAddSegment} className="h-8 text-xs" disabled={disabled}>
+        <Button variant="outline" size="sm" onClick={handleAddSegment} className="h-8 text-xs" disabled={disabled} data-testid="ie-add-segment">
           <Plus className="h-3.5 w-3.5 mr-1" />
           {t('addSegment')}
         </Button>
         {coverageIssue && (
-          <Button variant="outline" size="sm" onClick={handleFillGaps} className="h-8 text-xs" disabled={disabled}>
+          <Button variant="outline" size="sm" onClick={handleFillGaps} className="h-8 text-xs" disabled={disabled} data-testid="ie-fill-gaps">
             <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
             {t('fillGaps')}
           </Button>
@@ -213,9 +216,9 @@ export function ThresholdSegmentConfig({ segments, onChange, direction, disabled
             <SelectValue placeholder={t('applyPreset')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="strict">{t('presetStrict')}</SelectItem>
-            <SelectItem value="standard">{t('presetStandard')}</SelectItem>
-            <SelectItem value="loose">{t('presetLoose')}</SelectItem>
+            <SelectItem value="strict" data-testid="ie-preset-option-strict">{t('presetStrict')}</SelectItem>
+            <SelectItem value="standard" data-testid="ie-preset-option-standard">{t('presetStandard')}</SelectItem>
+            <SelectItem value="loose" data-testid="ie-preset-option-loose">{t('presetLoose')}</SelectItem>
           </SelectContent>
         </Select>
       </div>

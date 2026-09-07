@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { LinkProtectionTab } from './url-protection/LinkProtectionTab';
 import { SandboxTab } from './url-protection/SandboxTab';
 import { getURLProtectionSettings, putURLProtectionSettings } from '@/lib/api/url-protection';
-import { useApiRequest } from '@/lib/api/client';
+import { isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import { useProductForm } from '@/contexts/product-form-context';
 import { cn } from '@/lib/utils';
 import type { Direction, URLProtectionSettings } from '@/types/url-protection';
@@ -71,8 +71,16 @@ export function UrlProtectionPage({ direction = 'receive', embedded, onDirtyChan
     setSaving(true);
     try {
       const updated = await putURLProtectionSettings(draft, apiRequest);
-      setSaved(updated);
-      setDraft(updated);
+      if (isPublicationPendingResponse(updated)) {
+        // This page submits its complete editable DTO. It is safe to mark that
+        // explicit draft as saved, but not to pretend the acknowledgement is a
+        // URLProtectionSettings response.
+        setSaved(draft);
+        setDraft(draft);
+      } else {
+        setSaved(updated);
+        setDraft(updated);
+      }
       toast.success(t('saveSuccess'));
     } catch (e) {
       toast.error(t('saveFail', { error: e instanceof Error ? e.message : String(e) }));
@@ -93,6 +101,7 @@ export function UrlProtectionPage({ direction = 'receive', embedded, onDirtyChan
         disabledLabel={t('statusDisabled')}
         switchTestId="url-protection-master-switch"
         titleTestId="url-protection"
+        statusTestId="url-protection-status"
       >
         <div className="space-y-4">
           <div className={cn('flex-1', !moduleEnabled && 'opacity-50 pointer-events-none')}>

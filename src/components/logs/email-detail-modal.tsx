@@ -114,8 +114,8 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                 <TabsTrigger value="rules" data-testid="email-log-detail-tab-rules">{t('logs.ruleMatches')}</TabsTrigger>
                 <TabsTrigger value="content">{t('logs.content')}</TabsTrigger>
                 <TabsTrigger value="attachments">{t('logs.attachments')}</TabsTrigger>
-                <TabsTrigger value="delivery">{t('logs.delivery')}</TabsTrigger>
-                <TabsTrigger value="raw">{t('logs.rawLog')}</TabsTrigger>
+                <TabsTrigger value="delivery" data-testid="email-log-detail-tab-delivery">{t('logs.delivery')}</TabsTrigger>
+                <TabsTrigger value="raw" data-testid="email-log-detail-tab-raw">{t('logs.rawLog')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="info" className="min-h-0">
@@ -440,7 +440,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="delivery">
+              <TabsContent value="delivery" data-testid="email-log-detail-delivery">
                 <ScrollArea className="h-[calc(92vh-13rem)] pr-2">
                   <div className="space-y-4 pb-1">
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -448,7 +448,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                         <label className="text-sm text-muted-foreground">Queue ID</label>
                         <p className="mt-1 overflow-hidden font-mono text-sm break-all">{email.queue_id || '-'}</p>
                       </div>
-                      <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+                      <div className="rounded-2xl border border-border/60 bg-muted/20 p-4" data-testid="email-log-detail-delivery-status">
                         <label className="text-sm text-muted-foreground">{t('logs.deliveryStatusSummary')}</label>
                         <div className="mt-2">
                           <DeliveryStatusBadge status={email.delivery_status_summary} action={email.action} t={t} />
@@ -460,7 +460,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                           <WorkflowOutcomeBadge outcome={email.workflow_outcome_summary} t={t} />
                         </div>
                       </div>
-                      <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+                      <div className="rounded-2xl border border-border/60 bg-muted/20 p-4" data-testid="email-log-detail-delivery-attempts">
                         <label className="text-sm text-muted-foreground">{t('logs.deliveryAttempts')}</label>
                         <p className="mt-1 text-sm">{email.delivery_attempts ?? 0}</p>
                       </div>
@@ -532,12 +532,12 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-muted-foreground">{t('logs.noDeliveryEvents')}</p>
+                        <p className="text-sm text-muted-foreground" data-testid="email-log-detail-delivery-events-empty">{t('logs.noDeliveryEvents')}</p>
                       )}
                     </div>
 
                     {!email.queue_id && !email.delivery_status_summary && (
-                      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground" data-testid="email-log-detail-delivery-empty">
                         <Truck className="h-8 w-8 mb-2 opacity-40" />
                         <p className="text-sm">{t('logs.noDeliveryInfo')}</p>
                       </div>
@@ -546,9 +546,13 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="raw">
+              <TabsContent value="raw" data-testid="email-log-detail-raw">
                 <ScrollArea className="h-[calc(92vh-13rem)] pr-2">
-                  <pre className="overflow-x-auto text-xs bg-muted p-4 rounded whitespace-pre-wrap break-all">{JSON.stringify(email, null, 2)}</pre>
+                  <pre
+                    data-testid="email-log-detail-raw-json"
+                    data-state={Object.prototype.hasOwnProperty.call(email, 'external_urls') || Object.prototype.hasOwnProperty.call(email, 'parse_rules') ? 'legacy-fields' : 'clean'}
+                    className="overflow-x-auto text-xs bg-muted p-4 rounded whitespace-pre-wrap break-all"
+                  >{JSON.stringify(email, null, 2)}</pre>
                 </ScrollArea>
               </TabsContent>
             </Tabs>

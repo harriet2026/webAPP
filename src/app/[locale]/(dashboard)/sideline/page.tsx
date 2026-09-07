@@ -234,7 +234,8 @@ export default function SidelinePage() {
   ];
 
   return (
-    <PageShell>
+    // data-testid 均为纯属性/prop 新增（QC 稳定定位点），不改变渲染结构。
+    <PageShell data-testid="sideline-page">
       <PageHeader
         eyebrow={t('sideline.eyebrow')}
         title={t('sideline.title')}
@@ -244,19 +245,21 @@ export default function SidelinePage() {
       <PageFilters>
       <div className="flex flex-wrap gap-4">
         <Input
+          data-testid="sideline-filter-sender"
           placeholder={t('sideline.sender')}
           value={sender}
           onChange={(e) => setSender(e.target.value)}
           className="w-48"
         />
         <Input
+          data-testid="sideline-filter-subject"
           placeholder={t('sideline.subject')}
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           className="w-48"
         />
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v ?? '')}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger data-testid="sideline-status-filter" className="w-40">
             <SelectValue placeholder={t('sideline.status')} />
           </SelectTrigger>
           <SelectContent>
@@ -270,7 +273,7 @@ export default function SidelinePage() {
             <SelectItem value="manual_hold">{t('sideline.statusManualHold')}</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={handleSearch}>{t('common.search')}</Button>
+        <Button data-testid="sideline-search" onClick={handleSearch}>{t('common.search')}</Button>
         <Button variant="outline" onClick={handleReset}>{t('common.reset')}</Button>
       </div>
       </PageFilters>
@@ -283,7 +286,20 @@ export default function SidelinePage() {
         </PageSurface>
       ) : (
         <PageSurface className="space-y-4">
-          <DataTable columns={columns} data={items} pageSize={pageSize} hidePagination />
+          {/* testId / columnTestId / rowTestId 是 DataTable 既有的透传 prop（见
+              components/shared/data-table.tsx），只往既有 <th>/<tr> 上加属性，
+              不包新节点、不改结构。rowTestId 用 item.id，它就是投影出来的
+              sideline_id（internal/storage/repo_sideline.go 的
+              scanSidelineProjectionRow 第一列 ml.sideline_id）。 */}
+          <DataTable
+            columns={columns}
+            data={items}
+            pageSize={pageSize}
+            hidePagination
+            testId="sideline-table"
+            columnTestId={(id) => `sideline-col-${id}`}
+            rowTestId={(row) => `sideline-row-${row.id}`}
+          />
           <ServerPagination
             page={page}
             pageSize={pageSize}

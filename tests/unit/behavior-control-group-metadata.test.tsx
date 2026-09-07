@@ -40,12 +40,17 @@ vi.mock('@/contexts/auth-context', () => ({
   useAuth: () => ({ isSystemAdmin: true, hasPermission: () => true, user: { role: 'system_admin' } }),
 }));
 
-vi.mock('@/lib/api/behavior-control', () => ({
-  createBehaviorControlRule: vi.fn(),
-  updateBehaviorControlRule: vi.fn(),
-}));
+vi.mock('@/lib/api/behavior-control', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api/behavior-control')>();
+  return {
+    ...actual,
+    createBehaviorControlRule: vi.fn(),
+    updateBehaviorControlRule: vi.fn(),
+  };
+});
 
 import { BehaviorControlDrawer } from '@/components/security/behavior-control/BehaviorControlDrawer';
+import type { BehaviorControlFormData } from '@/types/behavior-control';
 
 // dev 栈探针群组 4057（tenant 581）的真实 API 响应形态：metadata /
 // condition_tree 都是**对象**，不是字符串。
@@ -85,7 +90,12 @@ const ipGroupObjectShape = {
   condition_tree: { type: 'condition', field: 'client_ip', operator: 'within', value: '10.0.0.0/8' },
 } as unknown as { id: number; name: string; metadata: string; is_active: boolean };
 
-function renderDrawer(items: unknown[]) {
+function renderDrawer(
+  items: unknown[],
+  defaults: Partial<BehaviorControlFormData> = {
+    object_config: { type: 'sender', sub_type: 'group', value: '' },
+  },
+) {
   mockApiRequest.mockResolvedValue({ items });
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
@@ -96,8 +106,8 @@ function renderDrawer(items: unknown[]) {
         open: true,
         onOpenChange: vi.fn(),
         editing: null,
-        // 直接进入「发件人 → 群组」分支，免去两次 Select 交互。
-        defaults: { object_config: { type: 'sender', sub_type: 'group', value: '' } },
+        // 默认直接进入「发件人 → 群组」分支，免去两次 Select 交互。
+        defaults,
       }),
     ),
   );
@@ -155,5 +165,28 @@ describe('BehaviorControlDrawer 群组下拉（GT-12717）', () => {
     expect(screen.getByText('behaviorControl.groupPreview.typeSender')).toBeInTheDocument();
     expect(screen.getByText('a@probe.test')).toBeInTheDocument();
     expect(screen.getByText('b@probe.test')).toBeInTheDocument();
+  });
+});
+
+describe('BehaviorControlDrawer 当前配置效果布局（GT-13094）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('长发信人地址在预览栏内换行且不会产生横向滚动', async () => {
+    const longSender = `${'very-long-sender-identifier-'.repeat(8)}@example.test`;
+    renderDrawer([], {
+      name: 'GT-13094',
+      object_config: { type: 'sender', sub_type: 'individual', value: longSender },
+      conditions: [{ dim: 'mail_count', threshold: 10 }],
+      threshold_a: 10,
+    });
+
+    const previewPane = await screen.findByTestId('behavior-control-preview-pane');
+    const objectValue = screen.getByTestId('behavior-control-preview-object-value');
+
+    expect(previewPane).toHaveClass('min-w-0', 'overflow-x-hidden');
+    expect(objectValue).toHaveTextContent(longSender);
+    expect(objectValue).toHaveClass('max-w-full', 'whitespace-normal', 'break-all', 'h-auto');
   });
 });

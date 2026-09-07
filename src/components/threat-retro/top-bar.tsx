@@ -48,14 +48,15 @@ export function TopBar() {
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div>
+      <div data-testid="threat-retro-header">
         <div className="flex items-center gap-2">
           <div className="rounded-lg bg-primary/10 p-1.5 text-primary">
             <History className="h-5 w-5" />
           </div>
-          <h2 className="text-lg font-semibold text-foreground">{t('agentName')}</h2>
+          <h2 className="text-lg font-semibold text-foreground" data-testid="threat-retro-agent-name">{t('agentName')}</h2>
           <Badge
             variant="outline"
+            data-testid="threat-retro-async-badge"
             className="ml-1 gap-1 border-violet-200 bg-violet-50 text-violet-700 dark:bg-violet-950/40"
           >
             <Sparkles className="h-3 w-3" /> {t('asyncTag')}
@@ -73,20 +74,21 @@ export function TopBar() {
             {enabled ? t('status.running') : t('status.paused')}
           </Badge>
         </div>
-        <p className="ml-1 mt-1 text-sm text-muted-foreground">{t('description')}</p>
+        <p className="ml-1 mt-1 text-sm text-muted-foreground" data-testid="threat-retro-description">{t('description')}</p>
         {modelQuery.data && (
-          <div className="ml-1 mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="ml-1 mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground" data-testid="threat-retro-model-info">
             <Server className="h-3 w-3" />
             <span>{t('model.label')}:</span>
-            <code className="rounded bg-muted px-1.5 py-0.5">{modelQuery.data.model}</code>
+            <code className="rounded bg-muted px-1.5 py-0.5" data-testid="threat-retro-model-name">{modelQuery.data.model}</code>
             <span className="text-muted-foreground/70">@ {modelQuery.data.api_url}</span>
           </div>
         )}
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">{t('toggle.label')}</span>
+          <span className="text-sm text-muted-foreground" data-testid="threat-retro-toggle-label">{t('toggle.label')}</span>
           <Switch
+            data-testid="threat-retro-enable-switch"
             checked={enabled}
             disabled={!canEdit || toggle.isPending}
             onCheckedChange={(c) => toggle.mutate(c)}

@@ -143,6 +143,11 @@ export function InvestigationWorkbench({
   const showBlockedBanner = isMulti && blockedDispositions.length > 0 && blockedDispositions.length < dispositions.length;
   // C5: 单收件人场景，该收件人本身即处于无原文的终态。
   const singleBlocked = dispositions.length === 1 && isBlockedStatus(dispositions[0].status);
+  // Only an explicit false disables downloads. Older servers and transient
+  // availability-resolution failures omit the field, preserving the existing
+  // fail-open behavior instead of hiding a potentially usable fallback EML.
+  const emlUnavailable = detail.eml_available === false;
+  const emlUnavailableReason = t('workbench.emlUnavailable');
 
   const highlightedText = useMemo(
     () => highlightPlainText(detail.content ?? '', detail.entity_urls ?? []),
@@ -270,7 +275,12 @@ export function InvestigationWorkbench({
                 size="sm"
                 variant="outline"
                 className="ml-2"
-                onClick={() => downloadEml(detail.id, t)}
+                disabled={emlUnavailable}
+                aria-describedby={emlUnavailable ? 'email-disposal-workbench-download-unavailable' : undefined}
+                title={emlUnavailable ? emlUnavailableReason : undefined}
+                onClick={() => {
+                  if (!emlUnavailable) void downloadEml(detail.id, t);
+                }}
                 data-testid="email-disposal-workbench-download-eml"
               >
                 <Download className="mr-1 h-3.5 w-3.5" />
@@ -278,6 +288,16 @@ export function InvestigationWorkbench({
               </Button>
             </div>
           </div>
+
+          {emlUnavailable && (
+            <p
+              id="email-disposal-workbench-download-unavailable"
+              className="mb-3 text-xs text-muted-foreground"
+              data-testid="email-disposal-workbench-download-unavailable"
+            >
+              {emlUnavailableReason}
+            </p>
+          )}
 
           <div className={cn('h-64 overflow-auto rounded border bg-background p-3', singleBlocked && 'invisible')}>
             {view === 'text' && (
@@ -347,6 +367,8 @@ export function InvestigationWorkbench({
             requestFn={requestFn}
             readOnly={readOnly}
             onDownload={onDownload}
+            downloadDisabled={emlUnavailable}
+            downloadDisabledReason={emlUnavailableReason}
             onDisposed={onDisposed}
             tab={entityTab}
           />

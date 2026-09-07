@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -14,13 +15,95 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, CalendarIcon, Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { enUS, ru as ruLocale, th as thLocale, zhCN } from 'date-fns/locale';
+import type { Matcher } from 'react-day-picker';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useLoginHistory } from './api';
 import { formatTimestamp } from '@/lib/format-time';
 import { ServerPagination } from '@/components/shared/server-pagination';
 import type { LoginResult } from './types';
+import { browserLocalDayBoundary } from './login-history-date-range';
+
+const DATE_FORMATS: Record<string, { fmt: string; locale: typeof zhCN }> = {
+  zh: { fmt: 'yyyy年MM月dd日', locale: zhCN },
+  en: { fmt: 'MM/dd/yyyy', locale: enUS },
+  th: { fmt: 'dd/MM/yyyy', locale: thLocale },
+  ru: { fmt: 'dd.MM.yyyy', locale: ruLocale },
+};
+
+function localCalendarDate(value: string) {
+  return new Date(`${value}T00:00:00`);
+}
+
+interface HistoryDatePickerProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  localeCode: string;
+  min?: string;
+  max?: string;
+  invalid: boolean;
+  errorId: string;
+  testId: string;
+}
+
+function HistoryDatePicker({
+  value,
+  onChange,
+  placeholder,
+  localeCode,
+  min,
+  max,
+  invalid,
+  errorId,
+  testId,
+}: HistoryDatePickerProps) {
+  const [open, setOpen] = useState(false);
+  const dateConfig = DATE_FORMATS[localeCode] ?? DATE_FORMATS.zh;
+  const selected = value ? localCalendarDate(value) : undefined;
+  const disabledDates: Matcher[] = [];
+  if (min) disabledDates.push({ before: localCalendarDate(min) });
+  if (max) disabledDates.push({ after: localCalendarDate(max) });
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            type="button"
+            variant="outline"
+            className={cn(
+              'w-44 justify-start text-left font-normal',
+              !value && 'text-muted-foreground',
+            )}
+            aria-label={placeholder}
+            aria-invalid={invalid}
+            aria-describedby={invalid ? errorId : undefined}
+            data-testid={testId}
+          />
+        }
+      >
+        <CalendarIcon className="mr-1 h-4 w-4" />
+        {selected ? format(selected, dateConfig.fmt, { locale: dateConfig.locale }) : placeholder}
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          locale={dateConfig.locale}
+          selected={selected}
+          disabled={disabledDates}
+          onSelect={(date) => {
+            onChange(date ? format(date, 'yyyy-MM-dd') : '');
+            if (date) setOpen(false);
+          }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 function ResultBadge({ result, t }: { result: LoginResult; t: (k: string) => string }) {
   return result === 'success' ? (
@@ -37,6 +120,7 @@ function ResultBadge({ result, t }: { result: LoginResult; t: (k: string) => str
 export function LoginHistoryTab() {
   const t = useTranslations('profile');
   const tc = useTranslations('common');
+  const locale = useLocale().split('-')[0];
 
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
@@ -45,16 +129,21 @@ export function LoginHistoryTab() {
   const pageSize = 20;
 
   const { data, isLoading, isFetching } = useLoginHistory({
-    start: query.start || undefined,
-    end: query.end || undefined,
+    start: browserLocalDayBoundary(query.start, 'start'),
+    end: browserLocalDayBoundary(query.end, 'end'),
     page,
     page_size: pageSize,
   });
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
+  // ISO calendar dates sort lexicographically, so this comparison is both
+  // timezone-free and identical to the values sent to the API.
+  const invalidRange = Boolean(start && end && start > end);
+  const rangeErrorId = 'profile-history-range-error';
 
   const runQuery = () => {
+    if (invalidRange) return;
     setQuery({ start, end });
     setPage(1);
   };
@@ -64,26 +153,42 @@ export function LoginHistoryTab() {
       <h3 className="text-base font-medium">{t('tabs.history')}</h3>
       <div className="my-4 border-t border-border" />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted-foreground">{tc('timeRange')}</span>
-        <Input
-          type="date"
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
-          className="w-40"
-          aria-label={t('history.startDate')}
-          data-testid="profile-history-start-date"
-        />
-        <span className="text-muted-foreground">→</span>
-        <Input
-          type="date"
-          value={end}
-          onChange={(e) => setEnd(e.target.value)}
-          className="w-40"
-          aria-label={t('history.endDate')}
-          data-testid="profile-history-end-date"
-        />
-        <Button onClick={runQuery} data-testid="profile-history-query">{t('history.query')}</Button>
+      <div className="mb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">{tc('timeRange')}</span>
+          <HistoryDatePicker
+            value={start}
+            max={end || undefined}
+            onChange={setStart}
+            placeholder={t('history.startDate')}
+            localeCode={locale}
+            invalid={invalidRange}
+            errorId={rangeErrorId}
+            testId="profile-history-start-date"
+          />
+          <span className="text-muted-foreground">→</span>
+          <HistoryDatePicker
+            value={end}
+            min={start || undefined}
+            onChange={setEnd}
+            placeholder={t('history.endDate')}
+            localeCode={locale}
+            invalid={invalidRange}
+            errorId={rangeErrorId}
+            testId="profile-history-end-date"
+          />
+          <Button onClick={runQuery} data-testid="profile-history-query">{t('history.query')}</Button>
+        </div>
+        {invalidRange ? (
+          <p
+            id={rangeErrorId}
+            role="alert"
+            className="mt-2 text-sm text-destructive"
+            data-testid="profile-history-range-error"
+          >
+            {t('history.invalidRange')}
+          </p>
+        ) : null}
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border" data-testid="profile-history-table">
@@ -107,7 +212,7 @@ export function LoginHistoryTab() {
               </TableRow>
             ) : items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground" data-testid="profile-history-empty">
                   {t('history.empty')}
                 </TableCell>
               </TableRow>
@@ -116,6 +221,7 @@ export function LoginHistoryTab() {
                 <TableRow
                   key={r.id}
                   className={cn(r.abnormal && 'bg-amber-50/60 dark:bg-amber-950/10')}
+                  data-testid={`profile-history-row-${r.id}`}
                 >
                   <TableCell className="text-foreground">{formatTimestamp(r.time) || '-'}</TableCell>
                   <TableCell className="text-muted-foreground">{r.ip}</TableCell>

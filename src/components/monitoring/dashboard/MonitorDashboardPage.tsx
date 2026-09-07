@@ -206,10 +206,10 @@ export function MonitorDashboardPage() {
           <Select value={timeRange} onValueChange={(v) => setTimeRange(v ?? 'today')}>
             <SelectTrigger className="w-28" data-testid="monitor-dashboard-range-select"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="today">{t('range.today')}</SelectItem>
-              <SelectItem value="24h">{t('range.24h')}</SelectItem>
-              <SelectItem value="7d">{t('range.7d')}</SelectItem>
-              <SelectItem value="30d">{t('range.30d')}</SelectItem>
+              <SelectItem value="today" data-testid="monitor-dashboard-range-option-today">{t('range.today')}</SelectItem>
+              <SelectItem value="24h" data-testid="monitor-dashboard-range-option-24h">{t('range.24h')}</SelectItem>
+              <SelectItem value="7d" data-testid="monitor-dashboard-range-option-7d">{t('range.7d')}</SelectItem>
+              <SelectItem value="30d" data-testid="monitor-dashboard-range-option-30d">{t('range.30d')}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={refreshInterval} onValueChange={(v) => setRefreshInterval(v ?? '30s')}>
@@ -217,10 +217,10 @@ export function MonitorDashboardPage() {
               <RefreshCw className={`w-4 h-4 mr-1 ${isRefreshing || isFetching ? 'animate-spin' : ''}`} /><SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="5s">5s</SelectItem>
-              <SelectItem value="30s">30s</SelectItem>
-              <SelectItem value="1m">1m</SelectItem>
-              <SelectItem value="off">{t('refreshOff')}</SelectItem>
+              <SelectItem value="5s" data-testid="monitor-dashboard-refresh-option-5s">5s</SelectItem>
+              <SelectItem value="30s" data-testid="monitor-dashboard-refresh-option-30s">30s</SelectItem>
+              <SelectItem value="1m" data-testid="monitor-dashboard-refresh-option-1m">1m</SelectItem>
+              <SelectItem value="off" data-testid="monitor-dashboard-refresh-option-off">{t('refreshOff')}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" size="icon" onClick={handleRefresh} data-testid="monitor-dashboard-refresh-btn">
@@ -243,7 +243,10 @@ export function MonitorDashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6" data-testid="monitor-dashboard-kpi-grid">
         {kpiCards.map((c) => (
           <Link key={c.key} href={c.href} data-testid={`monitor-dashboard-kpi-${c.key}`}>
-            <Card className={`${statusBgClass(c.status)} border cursor-pointer hover:shadow-md transition-all ${c.key === 'todo' && kpiView.todo.value > 0 ? 'animate-pulse' : ''}`}>
+            <Card
+              data-level={c.status}
+              className={`${statusBgClass(c.status)} border cursor-pointer hover:shadow-md transition-all ${c.key === 'todo' && kpiView.todo.value > 0 ? 'animate-pulse' : ''}`}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-gray-500 dark:text-gray-400">{c.label}</span>
@@ -348,11 +351,11 @@ export function MonitorDashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card data-testid="monitor-dashboard-mailflow-trend">
           <CardHeader className="pb-2 flex flex-row items-center justify-between"><CardTitle className="text-sm font-medium flex items-center gap-2"><Activity className="w-4 h-4" />{t('mailflowTrend')}</CardTitle><Link className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground" href="/monitoring/mailflow" data-testid="monitor-dashboard-mailflow-trend-link">{t('viewDetails')}<ExternalLink className="w-3.5 h-3.5" /></Link></CardHeader>
-          <CardContent><ReactECharts option={mailflowOption} style={{ height: 260 }} /></CardContent>
+          <CardContent><ReactECharts option={mailflowOption} style={{ height: 260 }} data-render-mode={mailflowData.length === 0 ? 'empty-canvas' : mailflowData.length === 1 ? 'single-bucket' : 'trend-area'} /></CardContent>
         </Card>
         <Card data-testid="monitor-dashboard-engine-trend">
           <CardHeader className="pb-2 flex flex-row items-center justify-between"><CardTitle className="text-sm font-medium flex items-center gap-2"><Activity className="w-4 h-4" />{t('engineTrend')}</CardTitle><Link className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground" href="/monitoring/security" data-testid="monitor-dashboard-engine-trend-link">{t('viewDetails')}<ExternalLink className="w-3.5 h-3.5" /></Link></CardHeader>
-          <CardContent><ReactECharts option={engineOption} style={{ height: 260 }} /></CardContent>
+          <CardContent><ReactECharts option={engineOption} style={{ height: 260 }} data-render-mode={engineData.length === 0 ? 'empty-canvas' : engineData.length === 1 ? 'single-bucket' : 'trend-area'} /></CardContent>
         </Card>
       </div>
 

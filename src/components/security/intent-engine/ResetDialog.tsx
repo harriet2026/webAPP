@@ -21,16 +21,17 @@ export function ResetDialog({ open, onOpenChange, direction, onConfirm }: ResetD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} data-testid="ie-reset-dialog">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description', { dir: dirShort })}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button data-testid="ie-reset-cancel" variant="outline" onClick={() => onOpenChange(false)}>
             {tDir('cancel')}
           </Button>
           <Button
+            data-testid="ie-reset-confirm"
             variant="destructive"
             onClick={() => {
               onConfirm();

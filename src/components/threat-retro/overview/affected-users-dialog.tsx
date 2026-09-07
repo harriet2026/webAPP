@@ -36,7 +36,7 @@ export function AffectedUsersDialog({ open, onOpenChange, leak, runId }: Props) 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-[480px] flex flex-col gap-0 p-0">
+      <SheetContent side="right" data-testid="threat-retro-affected-users-sheet" className="sm:max-w-[480px] flex flex-col gap-0 p-0">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>{t('title')}</SheetTitle>
           <SheetDescription>{t('description')}</SheetDescription>
@@ -60,14 +60,16 @@ export function AffectedUsersDialog({ open, onOpenChange, leak, runId }: Props) 
             </div>
           ) : (
             <ul className="space-y-1.5 text-sm">
-              {(data?.recipients ?? []).map((r) => (
+              {(data?.recipients ?? []).map((r, index) => (
                 <li
                   key={r.address}
+                  data-testid={`threat-retro-affected-user-${index}`}
                   className="flex items-center justify-between rounded-md border bg-card px-3 py-2"
                 >
                   <span className="font-mono text-xs">{r.address}</span>
                   <Badge
                     variant="outline"
+                    data-testid={`threat-retro-affected-user-status-${index}`}
                     className={
                       r.is_read === true
                         ? 'border-transparent bg-sky-500/15 text-sky-700 dark:text-sky-300'
@@ -85,7 +87,7 @@ export function AffectedUsersDialog({ open, onOpenChange, leak, runId }: Props) 
                 </li>
               ))}
               {!data || data.recipients.length === 0 ? (
-                <li className="text-xs text-muted-foreground">{t('empty')}</li>
+                <li data-testid="threat-retro-affected-users-empty" className="text-xs text-muted-foreground">{t('empty')}</li>
               ) : null}
             </ul>
           )}

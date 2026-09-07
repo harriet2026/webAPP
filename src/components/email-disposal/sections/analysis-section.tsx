@@ -1,20 +1,21 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 // GT-12583：必须用 next-intl 的 locale-aware router——本项目 localePrefix 为
 // 默认 always，next/navigation 的裸 push 会丢 /zh 前缀导致 404。
 import { useRouter } from '@/i18n/navigation';
-import { CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown, Clock, ShieldAlert, ExternalLink, ArrowRight, User, RotateCcw, Loader2, Layers, Users } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown, Clock, ShieldAlert, ExternalLink, User, RotateCcw, Loader2, Layers, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { MailLogAnalysis, MailLogDetail, CheckStatus, FinalVerdict, MailChildEvent } from '@/types/email-disposal-detail';
+import type { MailLogAnalysis, MailLogDetail, CheckStatus, CheckReason, FinalVerdict, MailChildEvent } from '@/types/email-disposal-detail';
 import { formatTimestamp } from '@/lib/format-time';
 import { mailTypeConfig, stripDetailPrefix } from '../lib/detail-helpers';
+import { aggregateCheckStatus } from '../lib/check-status';
 import {
   formatHitDetail,
   getModuleName,
@@ -31,6 +32,10 @@ import {
 } from '../lib/disposal-basis-config';
 import { beatsInCollapsedRow } from '../lib/recall-timeline';
 import { useProductForm } from '@/contexts/product-form-context';
+import type { AgentCenterAccess } from '@/types/agent-center';
+import type { AgentPipelineKey } from '@/lib/agent-center/presentation';
+
+export type VisibleAgentAccess = Partial<Record<AgentPipelineKey, Exclude<AgentCenterAccess, 'hidden'>>>;
 
 interface AnalysisSectionProps {
   detail: MailLogDetail;
@@ -41,15 +46,18 @@ interface AnalysisSectionProps {
   analysisLoading?: boolean;
   analysisError?: boolean;
   onRetryAnalysis?: () => void;
+  // Resolved by the detail container from the shared Agent Center overview
+  // hook. Undefined means visibility is still unknown and therefore fails
+  // closed; hidden agents are omitted before this map reaches the renderer.
+  visibleAgentAccess?: VisibleAgentAccess;
   // Derived from capabilities.ai at the parent -- same convention as
   // overview-section.tsx's aiInterpretEnabled prop (DD-9). Gates the whole
   // AI-verdict detail AND, matching analysis-tab.tsx's pre-existing behavior,
   // hides stage 4 ("AI 智能分析") from the pipeline when off.
   aiEnabled?: boolean;
-  // Mail child events (mail_child_events), threaded straight through from
-  // detail-modal.tsx's eventsQ -- the same array OverviewSection consumes
-  // for the recipient delivery-detail line. Powers the 事后处置时间线
-  // subsection (v2 spec gap 2.5): real per-event rows, not mock data.
+  // Generic delivery events remain available to sibling sections. This prop is
+  // retained for call-site compatibility; the post-detection timeline reads
+  // only detail.post_detection_timeline.
   events?: MailChildEvent[];
   // Multi-recipient mail can be inspected either as one aggregate or as one
   // exact recipient. The parent owns this state because changing it changes
@@ -123,14 +131,8 @@ const VERDICT_TEXT_STYLE: Record<FinalVerdict, string> = {
   safe: 'text-emerald-600 dark:text-emerald-400',
 };
 
-// 检测流程连接线配色：命中阶段之前 emerald（已通过），命中阶段自身之后的
-// 连接线 red（命中段），命中阶段之后其余连接线 gray（无威胁时全程 gray）。
-function connectorLineClass(i: number, hitIndex: number): string {
-  if (hitIndex === -1) return 'bg-gray-300 dark:bg-gray-600';
-  if (i < hitIndex) return 'bg-emerald-400';
-  if (i === hitIndex) return 'bg-red-400';
-  return 'bg-gray-300 dark:bg-gray-600';
-}
+// 检测流程连接箭头配色：命中阶段之前 emerald（已通过），命中阶段自身之后的
+// 箭头 red（命中段），命中阶段之后其余箭头 gray（无威胁时全程 gray）。
 function connectorArrowClass(i: number, hitIndex: number): string {
   if (hitIndex === -1) return 'text-gray-300 dark:text-gray-600';
   if (i < hitIndex) return 'text-emerald-400';
@@ -140,6 +142,13 @@ function connectorArrowClass(i: number, hitIndex: number): string {
 
 const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
 const ALL_RECIPIENTS_SCOPE = '__all_recipients__';
+const PIPELINE_CHECK_LABEL_KEYS = {
+  authSpoofing: 'authSpoofing',
+  attachmentSecurity: 'attachment',
+  urlProtection: 'url',
+  advancedRules: 'advancedRules',
+  mailMarking: 'mailMarking',
+} as const;
 const STAGE_KEY_TO_NUM: Record<string, number> = {
   connection: 1,
   identity: 2,
@@ -161,7 +170,7 @@ type EventDotInfo = {
 // 失败/否定类结果优先（召回失败必须显示为失败，而不是被"召回"这一动作染成蓝色）。
 const NEGATIVE_RESULTS = new Set(['failed', 'failure', 'rejected', 'discarded', 'deleted', 'bounced', 'expired']);
 const POSITIVE_RESULTS = new Set(['released', 'approved', 'delivered', 'success', 'sent', 'timeout_released']);
-const RECALL_SOURCES = new Set(['admin_api', 'threat_retro_agent', 'sideline_agent']);
+const RECALL_SOURCES = new Set(['admin_api', 'threat_retro_agent', 'sideline_agent', 'phish_agent']);
 
 function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
   const src = ev.event_source ?? '';
@@ -174,18 +183,6 @@ function getEventDotInfo(ev: MailChildEvent): EventDotInfo {
   if (POSITIVE_RESULTS.has(r)) return { bg: 'bg-emerald-500', Icon: CheckCircle2 };
   return { bg: 'bg-gray-500', Icon: User };
 }
-
-// 事后处置时间线的来源过滤：排除投递流程来源和 Graph A 检测完成后的首次
-// 投递，其余事件才作为后续处置动作展示。
-//
-// 这里刻意用黑名单而不是只收录已知处置来源的白名单：时间线既有
-// workflow.* 处置事实，也有 admin_api / threat_retro_agent / sideline_agent
-// 召回事实；将来新增处置来源也不应因前端词汇表未同步而静默消失。
-//
-// workflow.sideline.initial_delivery 必须单列：它是邮件仍被 Graph A 扣住时，
-// 检测完成后执行的首次 accept 投递，不是初次裁决之后的二次处置。后续管理员
-// 手工放行仍使用 workflow.sideline，因此继续显示为「旁路处置」。
-const DELIVERY_FLOW_SOURCES = new Set(['postfix', 'antispam', 'workflow.sideline.initial_delivery']);
 
 // ---- 「操作类型」/「执行结果」两栏的文案映射 ----
 //
@@ -217,6 +214,7 @@ const OPERATION_TYPE_KEY_MAP: Record<string, string> = {
   // internal/models/delivery_events.go）。产品裁决表只列了前两个，这条文案未经产品确认，
   // 补上是为了不让它以 `sideline_agent · recall` 的原始英文示人。
   sideline_agent: 'sidelineAgentRecall',
+  phish_agent: 'phishAgentRecall',
 };
 
 // event_result → i18n sub-key（emailDisposal.detail.analysis.eventResult.*）
@@ -230,6 +228,7 @@ const EVENT_RESULT_KEY_MAP: Record<string, string> = {
   delivered: 'delivered',
   failed: 'failed',
   success: 'success',
+  partial_success: 'partialSuccess',
   // 召回发起事件的执行结果：已发起、尚无终态回调（internal/models/recall.go:12）。
   // 同样未经产品确认，见上面 sideline_agent 的注释。
   handling: 'handling',
@@ -281,8 +280,8 @@ export function AnalysisSection({
   analysisLoading = false,
   analysisError = false,
   onRetryAnalysis,
+  visibleAgentAccess,
   aiEnabled = false,
-  events = [],
   selectedRecipient,
   onSelectedRecipientChange,
   onViewRawLogs,
@@ -290,12 +289,22 @@ export function AnalysisSection({
   const t = useTranslations('emailDisposal.detail.analysis');
   const tDetail = useTranslations('emailDisposal.detail');
   const tFeatures = useTranslations('emailDisposal.detail.features');
+  const tPipeline = useTranslations('pipeline');
   const { viewer, capabilities } = useProductForm();
   // Reuses §9-A's existing "暂未实现" copy (send-receive-context-card.tsx)
   // rather than adding a fourth duplicate translation of the same string.
   const tSenderActions = useTranslations('emailDisposal.detail.overview.senderActions');
   const rawLocale = useLocale();
   const router = useRouter();
+  const checkResultLabel = (status: CheckStatus, reason?: CheckReason, access?: Exclude<AgentCenterAccess, 'hidden'>) => {
+    if (status !== 'skipped') return t(`status.${status}`);
+    if (reason === 'module_disabled') return t('moduleDisabled');
+    return access === 'enabled' ? t('status.skipped') : t('notIntegrated');
+  };
+  const checkLabel = (key: string) => {
+    const pipelineKey = PIPELINE_CHECK_LABEL_KEYS[key as keyof typeof PIPELINE_CHECK_LABEL_KEYS];
+    return pipelineKey ? tPipeline(pipelineKey) : t(`check.${key}`);
+  };
   // Same locale mapping pattern as mail-list-table.tsx; the disposal-basis
   // dictionary only carries zh/en/th/ru, so unknown locales fall back to zh.
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang) ? (rawLocale as DisposalLang) : 'zh';
@@ -340,9 +349,28 @@ export function AnalysisSection({
   // 流水线的动态阶段号语义一致。
   const stages = useMemo(() => {
     const allStages = analysis?.stages ?? [];
-    const base = aiEnabled ? allStages : allStages.filter((s) => s.key !== 'ai');
+    const base = allStages.flatMap((stage) => {
+      if (stage.key !== 'ai') return [stage];
+      if (!aiEnabled || !visibleAgentAccess) return [];
+      const checks = stage.checks.flatMap((check) => {
+        const access = visibleAgentAccess[check.key as AgentPipelineKey];
+        if (!access) return [];
+        if (access === 'locked') {
+          return [{
+            ...check,
+            status: 'skipped' as const,
+            reason: undefined,
+            ruleIds: [],
+            recipientGroups: undefined,
+          }];
+        }
+        return [check];
+      });
+      if (checks.length === 0) return [];
+      return [{ ...stage, checks, status: aggregateCheckStatus(checks) }];
+    });
     return base.map((s, i) => ({ ...s, stage: i + 1 }));
-  }, [analysis?.stages, aiEnabled]);
+  }, [analysis?.stages, aiEnabled, visibleAgentAccess]);
   // v2 spec gap 2.1: all 5 stage cards default EXPANDED (inline hit-strategy
   // detail rendered inside each card); clicking a card toggles its own
   // detail only. Initialize with every possible stage number -- harmless for
@@ -359,27 +387,62 @@ export function AnalysisSection({
   // --- 事后处置时间线（gap 2.5，两级展开）---
   // 默认展开：事后处置时间线是高频有效信息，优化前默认收起导致有事件也不可见。
   const [showTimeline, setShowTimeline] = useState(true);
-  const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set());
-  const toggleEvent = (id: number) =>
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const viewTimeline = () => {
+    setShowTimeline(true);
+    timelineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
+  const toggleEvent = (id: string) =>
     setExpandedEvents((p) => {
       const next = new Set(p);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  // 排除投递流程来源以及 Graph A 检测完成后的首次投递，其余保留。
-  const disposalEvents = useMemo(() => events.filter((ev) => !DELIVERY_FLOW_SOURCES.has(ev.event_source ?? '')), [events]);
+  // The disposal-center timeline is supplied only by the typed mail-level
+  // projection. Generic delivery facts remain for recipient diagnostics and
+  // are intentionally not inspected here.
+  const disposalEvents = useMemo<MailChildEvent[]>(() => {
+    const timeline = detail.post_detection_timeline;
+    if (!timeline || timeline.schema_version !== 1) return [];
+    return timeline.events
+      .filter((event) => event.display)
+      .map((event, index) => {
+        const recipients = event.data?.recipients ?? [];
+        return {
+          // id remains a compatibility/display ordinal; the full event_id is
+          // the only identity used for keys and expansion state.
+          id: index + 1,
+          projection_event_id: event.event_id,
+          projection_revision: event.revision,
+          projection_order: index,
+          event_source: event.source ?? '',
+          event_type: event.event_type,
+          event_result: event.status,
+          source_ref: event.operation_id,
+          queue_id: '',
+          event_time: event.occurred_at,
+          recipient: recipients.length === 1 ? recipients[0] : undefined,
+          recipients: recipients.length > 1 ? recipients.join(', ') : undefined,
+          raw_payload: event.data ? JSON.stringify(event.data) : undefined,
+          correlation_status: 'matched',
+        };
+      });
+  }, [detail.post_detection_timeline]);
   // 同一次业务动作只占一行：召回是异步的，后端会先写一条「处置中」的发起事件，
   // 终态回调到达后再写一条（事件溯源只追加，不改写历史，审计需要完整过程）。
   // 产品要求时间线上一次召回只显示一行——在途显示「处置中」，回调到达后同一行
-  // 变成「成功 / 失败」。所以这里按后端下发的关联键 source_ref 分组、每组只留
-  // 一条。source_ref 为空的事件（workflow 族等）各自独立，不参与合并。
+  // 变成「成功 / 失败」。所以这里只对 recall_requested / recall_state_changed
+  // 按后端下发的关联键 source_ref 分组、每组只留一条。workflow 事件即使共享
+  // operation_id 也代表独立业务转换，必须逐条保留。
   const collapsedEvents = useMemo(() => {
     const bestByRef = new Map<string, MailChildEvent>();
     const standalone: MailChildEvent[] = [];
     for (const ev of disposalEvents) {
       const ref = ev.source_ref ?? '';
-      if (!ref) {
+      const isRecall = ev.event_type === 'recall_requested' || ev.event_type === 'recall_state_changed';
+      if (!isRecall || !ref) {
         standalone.push(ev);
         continue;
       }
@@ -402,9 +465,15 @@ export function AnalysisSection({
   // --- 处置依据（gap 2.7）---
   const basis = detail.disposal_basis;
 
-  // GT-12727：命中模块清单。新行读 modules，老行回落 per_recipient（去重且
-  // 不伪造 effective_for），口径统一收在 resolveHitModules 里。
-  const hitModules = useMemo(() => resolveHitModules(basis), [basis]);
+  // 业务“命中”只统计至少对一个收件人实际生效的动作。终止动作只有最终赢得
+  // 处置的收件人进入 effective_for；proceed/observe 则记录自身实际作用范围。
+  // effective_for=[] 的纯候选只留给后端审计；字段缺席的旧数据保守保留。
+  const hitModules = useMemo(
+    () => resolveHitModules(basis).filter(
+      (entry) => !Array.isArray(entry.effective_for) || entry.effective_for.length > 0,
+    ),
+    [basis],
+  );
   const basisRuleGroups = useMemo(() => groupEffectiveRecipientBasisByRule(basis), [basis]);
   const displayBasisRuleGroups = useMemo(() => {
     if (!selectedRecipient) return basisRuleGroups;
@@ -436,7 +505,7 @@ export function AnalysisSection({
   // rule owned a final recipient disposition.
   const structuredBasisEntry = displayBasisRuleGroups[0]?.entry ?? (
     (!selectedRecipient || !hasRecipientAttributedBasis) &&
-    basis && basis.action !== 'proceed' && basis.action !== 'accept' &&
+    basis && basis.action !== 'proceed' && basis.action !== 'observe' && basis.action !== 'accept' &&
     (basis.rule_name || basis.rule_id || basis.action)
       ? basis
       : undefined
@@ -473,7 +542,7 @@ export function AnalysisSection({
   ) => {
     const masked = maskModule(entry.policy_key);
     const meta = entry.policy_key ? getPolicyMeta(entry.policy_key) : undefined;
-    const route = entry.policy_key ? getPolicyRoute(entry.policy_key) : undefined;
+    const route = entry.policy_key ? getPolicyRoute(entry.policy_key, entry.rule_id) : undefined;
     const hasRuleName = !!entry.rule_name && entry.rule_name !== '—';
     const ruleLabel = hasRuleName ? (entry.rule_id ? `${entry.rule_name}（${entry.rule_id}）` : entry.rule_name!) : entry.rule_id || '—';
     const suffix = options?.idSuffix ? `-${options.idSuffix}` : '';
@@ -578,10 +647,20 @@ export function AnalysisSection({
                     {t('recipientSwitcher.allRecipients', { count: recipientOptions.length })}
                   </SelectItem>
                   {recipientOptions.map((option) => (
-                    <SelectItem key={option.recipient.toLowerCase()} value={option.recipient}>
+                    <SelectItem
+                      key={option.recipient.toLowerCase()}
+                      value={option.recipient}
+                      className="group/analysis-recipient"
+                    >
                       <span className="min-w-0 truncate">{option.recipient}</span>
                       {option.action && (
-                        <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-xs font-medium', getActionColor(option.action))}>
+                        <span
+                          className={cn(
+                            'shrink-0 rounded px-1.5 py-0.5 text-xs font-medium',
+                            'group-data-[selected]/analysis-recipient:!text-foreground',
+                            getActionColor(option.action),
+                          )}
+                        >
                           {getActionLabel(option.action, disposalLang)}
                         </span>
                       )}
@@ -686,17 +765,22 @@ export function AnalysisSection({
                                 <div className="text-xs font-medium text-muted-foreground mb-2">{st.key === 'ai' ? t('agentJudgementLabel') : t('hitPolicyLabel')}</div>
                                 <div className="space-y-1.5">
                                   {st.checks.map((check) => {
-                                    const canExpandPhish = check.key === 'phishingAgent' && hasPhishAgentData;
+                                    const agentAccess = st.key === 'ai'
+                                      ? visibleAgentAccess?.[check.key as AgentPipelineKey]
+                                      : undefined;
+                                    const canExpandPhish = check.key === 'phishingAgent'
+                                      && agentAccess === 'enabled'
+                                      && hasPhishAgentData;
                                     const recipientGroups = check.recipientGroups ?? [];
                                     const isSplit = recipientGroups.length > 1;
                                     const row = (
                                       <div className="flex items-center justify-between gap-2 text-xs">
                                         <div className="flex min-w-0 items-center gap-1">
                                           {STATUS_ICON[check.status]}
-                                          <span className="truncate">{t(`check.${check.key}`)}</span>
+                                          <span className="truncate">{checkLabel(check.key)}</span>
                                         </div>
                                         <span className={cn('flex shrink-0 items-center gap-1 text-right', CHECK_RESULT_COLOR[check.status])}>
-                                          {check.status === 'skipped' ? t('notIntegrated') : t(`status.${check.status}`)}
+                                          {checkResultLabel(check.status, check.reason, agentAccess)}
                                           {canExpandPhish && confidencePct != null && (
                                             <span className="ml-1 text-muted-foreground">
                                               {t('aiVerdict.confidence', {
@@ -709,7 +793,7 @@ export function AnalysisSection({
                                       </div>
                                     );
                                     return (
-                                      <div key={check.key}>
+                                      <div key={check.key} data-testid={`analysis-check-${check.key}`}>
                                         {canExpandPhish ? (
                                           <InteractiveSurface asChild variant="control" className="-mx-1 rounded px-1 py-1 data-[hovered=true]:bg-muted/40">
                                             <button
@@ -733,7 +817,7 @@ export function AnalysisSection({
                                                   {t('recipientGroupLine', { recipients: group.recipients.join('、'), count: group.recipients.length })}
                                                 </span>
                                                 <span className={cn('shrink-0 text-right', CHECK_RESULT_COLOR[group.status])}>
-                                                  {group.status === 'skipped' ? t('notIntegrated') : t(`status.${group.status}`)}
+                                                  {checkResultLabel(group.status, check.reason, agentAccess)}
                                                 </span>
                                               </div>
                                             ))}
@@ -755,9 +839,9 @@ export function AnalysisSection({
                                             <div className="space-y-1">
                                               <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.timelineLabel')}</p>
                                               {steps.length > 0 ? (
-                                                <ol className="space-y-2 border-l-2 border-border pl-3">
+                                                <ol className="space-y-2 border-l-2 border-border pl-3" data-testid="analysis-ai-verdict-timeline">
                                                   {steps.map((step, stepIndex) => (
-                                                    <li key={stepIndex} className="text-sm">
+                                                    <li key={stepIndex} className="text-sm" data-testid={`analysis-ai-verdict-timeline-step-${stepIndex}`}>
                                                       <div className="flex items-center gap-1.5">
                                                         <span className="font-medium">{step.name}</span>
                                                         <span className="text-xs text-muted-foreground">({step.status})</span>
@@ -767,15 +851,15 @@ export function AnalysisSection({
                                                   ))}
                                                 </ol>
                                               ) : (
-                                                <p className="text-xs text-muted-foreground">{t('aiVerdict.noTimeline')}</p>
+                                                <p className="text-xs text-muted-foreground" data-testid="analysis-ai-verdict-timeline-empty">{t('aiVerdict.noTimeline')}</p>
                                               )}
                                             </div>
                                             <div className="space-y-1">
                                               <p className="text-xs font-medium text-muted-foreground">{t('aiVerdict.recommendedActionsLabel')}</p>
                                               {recommendedActions.length > 0 ? (
-                                                <ul className="space-y-1.5">
+                                                <ul className="space-y-1.5" data-testid="analysis-ai-verdict-actions">
                                                   {recommendedActions.map((action, actionIndex) => (
-                                                    <li key={actionIndex} className="rounded border bg-card p-2 text-sm">
+                                                    <li key={actionIndex} className="rounded border bg-card p-2 text-sm" data-testid={`analysis-ai-verdict-action-${actionIndex}`}>
                                                       <div className="flex items-center gap-1.5 font-medium">
                                                         <span>{action.type}</span>
                                                         {action.scope && (
@@ -790,7 +874,7 @@ export function AnalysisSection({
                                                   ))}
                                                 </ul>
                                               ) : (
-                                                <p className="text-xs text-muted-foreground">{t('aiVerdict.noRecommendedActions')}</p>
+                                                <p className="text-xs text-muted-foreground" data-testid="analysis-ai-verdict-actions-empty">{t('aiVerdict.noRecommendedActions')}</p>
                                               )}
                                             </div>
                                             {phishAgent!.error && <p className="text-xs text-destructive">{phishAgent!.error}</p>}
@@ -836,8 +920,21 @@ export function AnalysisSection({
                     </InteractiveSurface>
                     {i < stages.length - 1 && (
                       <div className="flex items-center px-1 mt-12">
-                        <div className={cn('w-4 h-0.5', connectorLineClass(i, hitIndex))} />
-                        <ArrowRight className={cn('w-3 h-3 -ml-0.5', connectorArrowClass(i, hitIndex))} />
+                        <svg
+                          data-testid={`analysis-stage-connector-${st.stage}`}
+                          viewBox="0 0 28 16"
+                          aria-hidden="true"
+                          className={cn('h-4 w-7 shrink-0', connectorArrowClass(i, hitIndex))}
+                        >
+                          <path
+                            d="M1 8h25m-5-5 5 5-5 5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
                       </div>
                     )}
                   </div>
@@ -856,7 +953,7 @@ export function AnalysisSection({
                   <div className="text-xs text-muted-foreground">{t('elapsed', { ms: totalElapsedMs })}</div>
                 </div>
               </div>
-              <Button type="button" variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" data-testid="analysis-verdict-timeline-btn" onClick={() => setShowTimeline((v) => !v)}>
+              <Button type="button" variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" data-testid="analysis-verdict-timeline-btn" aria-controls="analysis-post-detection-timeline" onClick={viewTimeline}>
                 {t('timeline')}
               </Button>
             </div>
@@ -1015,7 +1112,7 @@ export function AnalysisSection({
       )}
 
       {/* 事后处置时间线（gap 2.5，两级展开）*/}
-      <div data-testid="analysis-post-detection-timeline">
+      <div id="analysis-post-detection-timeline" ref={timelineRef} data-testid="analysis-post-detection-timeline" className="scroll-mt-4">
         <InteractiveSurface asChild variant="control" className="mb-4 flex w-full items-center justify-between px-2 py-1 text-left data-[hovered=true]:bg-muted/50">
           <button type="button" data-testid="analysis-timeline-toggle" aria-expanded={showTimeline} onClick={() => setShowTimeline((v) => !v)}>
             <h4 className="text-sm font-semibold flex items-center gap-2">
@@ -1043,11 +1140,12 @@ export function AnalysisSection({
                 </div>
               </div>
               {sortedEvents.map((ev) => {
-                const isOpen = expandedEvents.has(ev.id);
+                const eventIdentity = ev.projection_event_id ?? String(ev.id);
+                const isOpen = expandedEvents.has(eventIdentity);
                 // 优化三：语义化圆点 — 颜色和图标根据 event_type/event_result 派生。
                 const { bg: dotBg, Icon: DotIcon } = getEventDotInfo(ev);
                 return (
-                  <div key={ev.id} className="relative -ml-[25px]">
+                  <div key={eventIdentity} className="relative -ml-[25px]">
                     <div className={cn('absolute left-0 flex h-4 w-4 items-center justify-center rounded-full', dotBg)}>
                       <DotIcon className="h-2.5 w-2.5 text-white" />
                     </div>
@@ -1055,13 +1153,13 @@ export function AnalysisSection({
                       <div
                         role="button"
                         tabIndex={0}
-                        data-testid={`analysis-timeline-event-${ev.id}`}
+                        data-testid={`analysis-timeline-event-${eventIdentity}`}
                         aria-expanded={isOpen}
-                        onClick={() => toggleEvent(ev.id)}
+                        onClick={() => toggleEvent(eventIdentity)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            toggleEvent(ev.id);
+                            toggleEvent(eventIdentity);
                           }
                         }}
                       >
@@ -1084,7 +1182,7 @@ export function AnalysisSection({
                           </div>
                         </div>
                         {isOpen && (
-                          <div className="mt-3 space-y-2 border-t pt-3 text-sm" data-testid={`analysis-timeline-event-${ev.id}-detail`}>
+                          <div className="mt-3 space-y-2 border-t pt-3 text-sm" data-testid={`analysis-timeline-event-${eventIdentity}-detail`}>
                             <div className="flex items-start gap-2">
                               {/* 优化五：通用标签取代"召回范围" */}
                               <span className="w-20 shrink-0 text-muted-foreground">{t('recallScope')}:</span>
@@ -1108,7 +1206,7 @@ export function AnalysisSection({
                                 variant="outline"
                                 size="sm"
                                 className="h-7 text-xs"
-                                data-testid={`analysis-timeline-event-${ev.id}-view-log`}
+                                data-testid={`analysis-timeline-event-${eventIdentity}-view-log`}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (onViewRawLogs) {

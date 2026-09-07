@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import zh from '../../messages/zh.json';
 import { ResetPasswordDialog, generatePassword } from '@/components/admin/reset-password-dialog';
+import { ApiError } from '@/lib/api/client';
 
 const toastSuccess = vi.fn();
 const toastError = vi.fn();
@@ -66,11 +67,18 @@ describe('ResetPasswordDialog', () => {
     await waitFor(() => expect(toastSuccess).toHaveBeenCalled());
   });
 
-  it('服务端策略校验失败的消息透传到 toast（弱密码反馈可观察）', async () => {
-    const onSubmit = vi.fn().mockRejectedValue(new Error('密码长度至少 10 位'));
+  it('按稳定错误码本地化策略错误，不泄漏后端英文 message', async () => {
+    const onSubmit = vi.fn().mockRejectedValue(new ApiError(400, 'password must be at least 10 characters', {
+      error: {
+        code: 'account.password_too_short',
+        message: 'password must be at least 10 characters',
+        params: { field: 'password', min: 10 },
+      },
+    }));
     wrap(onSubmit);
-    fireEvent.change(screen.getByTestId('reset-password-input'), { target: { value: 'short' } });
+    fireEvent.change(screen.getByTestId('reset-password-input'), { target: { value: 'Abc123!xy' } });
     fireEvent.click(screen.getByTestId('reset-password-submit'));
-    await waitFor(() => expect(toastError).toHaveBeenCalledWith('密码长度至少 10 位'));
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith('密码至少需要 10 个字符'));
+    expect(toastError).not.toHaveBeenCalledWith(expect.stringContaining('password must'));
   });
 });

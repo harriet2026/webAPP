@@ -34,7 +34,7 @@ import {
   deleteDetectionProfile,
   type DetectionProfile,
 } from '@/lib/api/detection-profiles';
-import { getRBLFilterRules, createRBLFilterRule, updateRBLFilterRule } from '@/lib/api/rbl-filter';
+import { listAllRBLFilterRules, createRBLFilterRule, updateRBLFilterRule } from '@/lib/api/rbl-filter';
 import type { RBLFilterRulePayload } from '@/types/rbl-filter';
 import {
   parseRblConfig,
@@ -104,7 +104,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
   });
   const { data: rblRulesData, isLoading: rulesLoading } = useQuery({
     queryKey: ['rbl-canonical-rule'],
-    queryFn: () => getRBLFilterRules({ match_mode: 'any', page_size: 200 }, apiRequest),
+    queryFn: () => listAllRBLFilterRules({ match_mode: 'any' }, apiRequest),
     enabled: embedded || isSystemAdmin,
   });
   const isLoading = profilesLoading || rulesLoading;
@@ -265,7 +265,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
     return (
       <PageShell>
         <PageHeader title={t('rblFilter.title')} />
-        <div className="flex items-center justify-center py-20 text-muted-foreground">
+        <div className="flex items-center justify-center py-20 text-muted-foreground" data-testid="rbl-access-denied">
           {t('common.notAuthorized')}
         </div>
       </PageShell>
@@ -406,9 +406,9 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
         <div className="grid gap-6 px-6 py-5 md:grid-cols-2">
           <div className="space-y-3">
             <Label className="font-medium">{t('rblFilter.rblServers')}</Label>
-            <div className="space-y-2">
+            <div className="space-y-2" data-testid="rbl-server-list">
               {servers.map((server) => (
-                <div key={server} className="flex items-center gap-2">
+                <div key={server} className="flex items-center gap-2" data-testid={`rbl-server-${server}`}>
                   {/* GT-12263: 悬停服务器 Badge 显示该服务器来源/说明（PRD §3、TC015） */}
                   <Tooltip>
                     <TooltipTrigger render={<span className="inline-flex cursor-help" tabIndex={0} />}>
@@ -428,6 +428,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     disabled={servers.length <= 1}
                     onClick={() => removeServer(server)}
                     title={servers.length <= 1 ? t('rblFilter.keepOneServer') : t('rblFilter.deleteServer')}
+                    data-testid={`rbl-server-delete-${server}`}
                   >
                     <X className="h-3 w-3" />
                     <span className="sr-only">{t('rblFilter.deleteServer')}</span>
@@ -440,6 +441,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
               <div className="flex-1 space-y-1">
                 <Input
                   placeholder="rbl.example.com"
+                  data-testid="rbl-server-input"
                   value={newServer}
                   onChange={(event) => {
                     setNewServer(event.target.value);
@@ -452,9 +454,9 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     }
                   }}
                 />
-                {serverError ? <p className="text-xs text-destructive">{serverError}</p> : null}
+                {serverError ? <p className="text-xs text-destructive" data-testid="rbl-server-error">{serverError}</p> : null}
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={addServer} disabled={!newServer.trim()}>
+              <Button type="button" variant="outline" size="sm" onClick={addServer} disabled={!newServer.trim()} data-testid="rbl-server-add">
                 <Plus className="mr-1 h-4 w-4" />
                 {t('rblFilter.add')}
               </Button>
@@ -474,6 +476,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
               </div>
               <Input
                 type="number"
+                data-testid="rbl-timeout-input"
                 min={1}
                 max={30}
                 value={timeout}
@@ -509,6 +512,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
             {/* 卡片 A：执行动作 */}
             <label
               htmlFor="strategy-action"
+              data-testid="rbl-strategy-action"
               className={cn(
                 'flex cursor-pointer flex-col gap-3 rounded-lg border p-4 transition-colors',
                 !greylistEnabled
@@ -538,7 +542,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     markDirty();
                   }}
                 >
-                  <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()}>
+                  <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()} data-testid="rbl-action-select">
                     <SelectValue>{actionLabel[action]}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -558,6 +562,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
             {/* 卡片 B：灰名单策略 */}
             <label
               htmlFor="strategy-greylist"
+              data-testid="rbl-strategy-greylist"
               className={cn(
                 'flex cursor-pointer flex-col gap-3 rounded-lg border p-4 transition-colors',
                 greylistEnabled
@@ -576,7 +581,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                   </div>
                   <p className="text-xs text-muted-foreground">{t('rblFilter.greylistSectionDesc')}</p>
                 </div>
-                <RadioGroupItem value="greylist" id="strategy-greylist" className="mt-0.5 shrink-0" />
+                <RadioGroupItem value="greylist" id="strategy-greylist" data-testid="rbl-strategy-greylist-radio" className="mt-0.5 shrink-0" />
               </div>
               {/* 选中时展开摘要与配置入口 */}
               {greylistEnabled ? (
@@ -590,6 +595,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                     size="sm"
                     className="shrink-0 border-primary/35 text-primary hover:bg-primary/10"
                     onClick={(e) => { e.preventDefault(); openGreylistDialog(); }}
+                    data-testid="rbl-greylist-configure"
                   >
                     {t('rblFilter.greylistConfigure')}
                   </Button>
@@ -602,7 +608,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
         <div className="sticky bottom-0 z-10 flex items-center justify-between gap-3 border-t border-border bg-card/95 px-6 py-4 backdrop-blur-sm shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
           <div className="min-w-0">
             {hasUnsavedChanges ? (
-              <div className="flex items-center gap-2 text-warning">
+              <div className="flex items-center gap-2 text-warning" data-testid="rbl-unsaved-state">
                 <span className="h-2 w-2 rounded-full bg-warning" />
                 <span className="text-sm">{t('rblFilter.unsavedChanges')}</span>
               </div>
@@ -611,10 +617,10 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
             )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={handleCancel} disabled={!hasUnsavedChanges}>
+            <Button type="button" variant="outline" size="sm" onClick={handleCancel} disabled={!hasUnsavedChanges} data-testid="rbl-config-cancel">
               {t('common.cancel')}
             </Button>
-            <Button type="button" size="sm" onClick={handleSave} disabled={!hasUnsavedChanges || saveMutation.isPending || isSaving}>
+            <Button type="button" size="sm" onClick={handleSave} disabled={!hasUnsavedChanges || saveMutation.isPending || isSaving} data-testid="rbl-config-save">
               {t('common.save')}
             </Button>
           </div>
@@ -622,7 +628,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
       </div>
 
       <Dialog open={greylistDialogOpen} onOpenChange={setGreylistDialogOpen}>
-                  <DialogContent showCloseButton={false} className="max-w-lg">
+        <DialogContent showCloseButton={false} className="max-w-lg" data-testid="rbl-greylist-dialog">
           <DialogHeader>
             <DialogTitle>{t('rblFilter.greylistConfig')}</DialogTitle>
             <DialogDescription>{t('rblFilter.greylistConfigDesc')}</DialogDescription>
@@ -640,7 +646,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                 selected={greylistDraft.mode === 'delay'}
                 onSelect={() => setGreylistDraft((current) => ({ ...current, mode: 'delay' }))}
               >
-                <RadioGroupItem value="delay" id="rbl-greylist-delay" className="mt-0.5 shrink-0" />
+                <RadioGroupItem value="delay" id="rbl-greylist-delay" data-testid="rbl-greylist-mode-delay" className="mt-0.5 shrink-0" />
                 <div className="space-y-2">
                   <Label htmlFor="rbl-greylist-delay" className="cursor-pointer text-sm font-medium">
                     {t('rblFilter.greylistModeSummaryDelay', { seconds: greylistDraft.delaySeconds })}
@@ -648,6 +654,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                   <div className="flex flex-wrap items-center gap-2">
                     <Input
                       type="number"
+                      data-testid="rbl-greylist-delay-input"
                       min={10}
                       value={greylistDraft.delaySeconds}
                       onClick={(event) => event.stopPropagation()}
@@ -665,7 +672,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                 selected={greylistDraft.mode === 'rateLimit'}
                 onSelect={() => setGreylistDraft((current) => ({ ...current, mode: 'rateLimit' }))}
               >
-                <RadioGroupItem value="rateLimit" id="rbl-greylist-rate" className="mt-0.5 shrink-0" />
+                <RadioGroupItem value="rateLimit" id="rbl-greylist-rate" data-testid="rbl-greylist-mode-rate-limit" className="mt-0.5 shrink-0" />
                 <div className="space-y-2">
                   <Label htmlFor="rbl-greylist-rate" className="cursor-pointer text-sm font-medium">
                     {t('rblFilter.greylistModeSummaryRate', {
@@ -676,6 +683,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                   <div className="flex flex-wrap items-center gap-2">
                     <Input
                       type="number"
+                      data-testid="rbl-greylist-window-input"
                       min={10}
                       value={greylistDraft.windowSeconds}
                       onClick={(event) => event.stopPropagation()}
@@ -695,6 +703,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
                 <Label className="shrink-0 text-sm">{t('rblFilter.greylistMaxRequests')}</Label>
                 <Input
                   type="number"
+                  data-testid="rbl-greylist-max-requests-input"
                   min={1}
                   value={greylistDraft.maxRequests}
                   onChange={(event) =>
@@ -709,6 +718,7 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
               <Label className="shrink-0 text-sm">{t('rblFilter.greylistWhitelistTTL')}</Label>
               <Input
                 type="number"
+                data-testid="rbl-greylist-ttl-input"
                 min={1}
                 value={greylistDraft.whitelistTTL}
                 onChange={(event) =>
@@ -727,13 +737,17 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
 
             <div className="space-y-2 border-t border-border pt-4">
               <Label className="text-sm font-medium">{t('rblFilter.greylistExemptions')}</Label>
-              <div className="space-y-2">
+              <div className="space-y-2" data-testid="rbl-greylist-exemptions">
                 {[
-                  ['exemptAuthenticated', t('rblFilter.greylistExemptAuth')],
-                  ['exemptWhitelisted', t('rblFilter.greylistExemptWhitelist')],
-                  ['exemptInternal', t('rblFilter.greylistExemptInternal')],
-                ].map(([key, label]) => (
-                  <label key={key} className="flex cursor-pointer items-center gap-2">
+                  ['exemptAuthenticated', t('rblFilter.greylistExemptAuth'), 'rbl-greylist-exemption-authenticated'],
+                  ['exemptWhitelisted', t('rblFilter.greylistExemptWhitelist'), 'rbl-greylist-exemption-whitelisted'],
+                  ['exemptInternal', t('rblFilter.greylistExemptInternal'), 'rbl-greylist-exemption-internal'],
+                ].map(([key, label, testid]) => (
+                  <label
+                    key={key}
+                    className="flex cursor-pointer items-center gap-2"
+                    data-testid={testid}
+                  >
                     <Checkbox
                       checked={greylistDraft[key as keyof GreylistFormConfig] as boolean}
                       onCheckedChange={(checked) =>
@@ -748,10 +762,10 @@ export function RBLFilterPage({ embedded }: { embedded?: boolean } = {}) {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setGreylistDialogOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setGreylistDialogOpen(false)} data-testid="rbl-greylist-cancel">
               {t('common.cancel')}
             </Button>
-            <Button type="button" onClick={confirmGreylistDialog}>
+            <Button type="button" onClick={confirmGreylistDialog} data-testid="rbl-greylist-confirm">
               {t('common.confirm')}
             </Button>
           </DialogFooter>

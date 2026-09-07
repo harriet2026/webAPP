@@ -138,6 +138,7 @@ export function CredentialsStep(props: CredentialsStepProps) {
           <div className="flex items-center gap-2">
             <Input
               id="osg-login-captcha"
+              data-testid="login-captcha"
               name="captcha_answer"
               value={props.captchaAnswer}
               onChange={(e) => props.onCaptchaAnswerChange(e.target.value)}
@@ -148,6 +149,7 @@ export function CredentialsStep(props: CredentialsStepProps) {
             {props.captchaSvg ? (
               <button
                 type="button"
+                data-testid="login-captcha-refresh"
                 onClick={props.onRefreshCaptcha}
                 className="flex h-10 items-center rounded-md border border-input bg-background px-2 hover:bg-muted"
                 aria-label={t('auth.captchaRefresh')}
@@ -158,7 +160,7 @@ export function CredentialsStep(props: CredentialsStepProps) {
                 }}
               />
             ) : (
-              <Button type="button" variant="outline" size="icon" onClick={props.onRefreshCaptcha}>
+              <Button data-testid="login-captcha-refresh" type="button" variant="outline" size="icon" onClick={props.onRefreshCaptcha}>
                 <RefreshCw className="h-4 w-4" />
               </Button>
             )}

@@ -10,21 +10,33 @@ const timeRe = /^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
 
 const permissionSchema = z.object({
   enabled: z.boolean(),
-  valid_days: z.number().int().min(1).max(30),
+  valid_days: z
+    .number()
+    .int('validDaysRange')
+    .min(1, 'validDaysRange')
+    .max(30, 'validDaysRange'),
 });
 
 const categoryNotifyEntrySchema = z.object({
   enabled: z.boolean(),
-  min_score: z.number().min(0).max(1),
-  max_score: z.number().min(0).max(1),
+  min_score: z.number().min(0, 'scoreValueRange').max(1, 'scoreValueRange'),
+  max_score: z.number().min(0, 'scoreValueRange').max(1, 'scoreValueRange'),
 });
 
 export const disposalSettingsSchema = z.object({
   quarantine: z.object({
     category_notify: z.record(z.string(), categoryNotifyEntrySchema),
     notify_frequency: z.enum(['daily', 'never', 'custom']),
-    custom_weekdays: z.array(z.number().int().min(0).max(6)),
-    notify_times: z.array(z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/)),
+    custom_weekdays: z.array(
+      z
+        .number()
+        .int('customWeekdaysInvalid')
+        .min(0, 'customWeekdaysInvalid')
+        .max(6, 'customWeekdaysInvalid'),
+    ),
+    notify_times: z.array(
+      z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'notifyTimeFormatInvalid'),
+    ),
     permissions: z.record(z.string(), permissionSchema),
     // GET omits portal_base_url when unset (json:"portal_base_url,omitempty"),
     // so form.reset would set it to undefined. Must NOT be required: the
@@ -37,26 +49,40 @@ export const disposalSettingsSchema = z.object({
   }),
   review: z.object({
     duration_mode: z.enum(['unlimited', 'custom']),
-    custom_minutes: z.number().int(),
+    custom_minutes: z.number().int('customMinutesRange'),
     // 后端强制 1-60（internal/api/disposal_settings.go），schema 上限须与其对齐。
-    max_recheck_minutes: z.number().int().min(1).max(60),
+    max_recheck_minutes: z
+      .number()
+      .int('maxRecheckMinutesRange')
+      .min(1, 'maxRecheckMinutesRange')
+      .max(60, 'maxRecheckMinutesRange'),
     timeout_auto_deliver: z.boolean(),
     sender_notify_on_queue: z.boolean(),
     sender_notify_on_result: z.boolean(),
-    reviewer_emails: z.array(z.string().email()),
-    reviewer_notify_interval_minutes: z.number().int().min(1).max(1440),
-    reviewer_active_start: z.string().regex(timeRe),
-    reviewer_active_end: z.string().regex(timeRe),
+    reviewer_emails: z.array(z.string().email('emailInvalid')),
+    reviewer_notify_interval_minutes: z
+      .number()
+      .int('reviewerNotifyIntervalRange')
+      .min(1, 'reviewerNotifyIntervalRange')
+      .max(1440, 'reviewerNotifyIntervalRange'),
+    reviewer_active_start: z.string().regex(timeRe, 'reviewerActiveStartInvalid'),
+    reviewer_active_end: z.string().regex(timeRe, 'reviewerActiveEndInvalid'),
     // 超时临时处置（旁路 Session worker 读取，见 task-8/task-12）：GET 可能省略
     // （json:"...,omitempty"），必须保持 optional，否则默认 z.object 的 strip
     // 模式会在 zodResolver 校验后把这些字段从提交数据里丢掉（GT-12056 同类问题）。
     timeout_temp_disposal: z.literal('accept').optional(),
     timeout_mark_enabled: z.boolean(),
-    timeout_mark_positions: z.array(z.string()).optional(),
+    timeout_mark_positions: z
+      .array(z.enum(['subject_prefix', 'header'], 'timeoutMarkPositionsInvalid'))
+      .optional(),
     timeout_mark_text: z.string().optional(),
   }),
   recall: z.object({
-    task_timeout_seconds: z.number().int().min(1).max(300),
+    task_timeout_seconds: z
+      .number()
+      .int('recallTaskTimeoutRange')
+      .min(1, 'recallTaskTimeoutRange')
+      .max(300, 'recallTaskTimeoutRange'),
     threat_intel: z.object({
       read_policy: z.enum(['recall', 'notify', 'wait']),
       unread_policy: z.enum(['recall', 'notify', 'wait']),
@@ -65,7 +91,7 @@ export const disposalSettingsSchema = z.object({
       read_policy: z.enum(['recall', 'notify', 'wait']),
       unread_policy: z.enum(['recall', 'notify', 'wait']),
     }),
-    notify_emails: z.array(z.string().email()),
+    notify_emails: z.array(z.string().email('emailInvalid')),
     notify_frequency: z.enum(['realtime', 'hourly', 'daily', 'weekly']),
   }),
   // GET omits tz when empty (json:"tz,omitempty"), so a required z.string()
@@ -81,21 +107,21 @@ export const disposalSettingsSchema = z.object({
   ) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'custom_minutes must be 1-300 when duration_mode is custom',
+      message: 'customMinutesRange',
       path: ['review', 'custom_minutes'],
     });
   }
   if (data.quarantine.notify_frequency !== 'never' && data.quarantine.notify_times.length === 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'notify_times must not be empty when frequency is not never',
+      message: 'notifyTimesRequired',
       path: ['quarantine', 'notify_times'],
     });
   }
   if (data.quarantine.notify_frequency === 'custom' && data.quarantine.custom_weekdays.length === 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'custom_weekdays must not be empty when frequency is custom',
+      message: 'customWeekdaysRequired',
       path: ['quarantine', 'custom_weekdays'],
     });
   }
@@ -103,7 +129,7 @@ export const disposalSettingsSchema = z.object({
     if (entry.min_score > entry.max_score) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'min_score must not be greater than max_score',
+        message: 'scoreRangeError',
         path: ['quarantine', 'category_notify', key],
       });
     }
@@ -115,22 +141,51 @@ export const disposalSettingsSchema = z.object({
     (k) => data.quarantine.permissions[k]?.enabled,
   );
   const baseUrl = (data.quarantine.portal_base_url ?? '').trim();
-  let urlValid = false;
+  let portalError: string | null = null;
   if (baseUrl) {
     try {
-      // 后端（GT-12077）强制 https-only：portal token 是 bearer 凭据，不允许明文
-      // 传输，这里与后端口径一致，避免 http 地址通过前端校验后被后端 400。
-      urlValid = new URL(baseUrl).protocol === 'https:';
+      const normalized = baseUrl.replace(/\/+$/, '');
+      const url = new URL(normalized);
+      if (url.protocol !== 'https:' || !url.host) {
+        portalError = 'portalBaseUrlInvalid';
+      } else if ((url.pathname && url.pathname !== '/') || url.search || url.hash) {
+        portalError = 'portalBaseUrlNoPath';
+      }
     } catch {
-      urlValid = false;
+      portalError = 'portalBaseUrlInvalid';
     }
+  } else if (anyPortalPermEnabled) {
+    portalError = 'portalBaseUrlRequired';
   }
-  if (anyPortalPermEnabled && !urlValid) {
+  if (portalError) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'portalBaseUrlRequired',
+      message: portalError,
       path: ['quarantine', 'portal_base_url'],
     });
+  }
+  if (data.review.timeout_mark_enabled) {
+    if (!data.review.timeout_mark_positions?.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'timeoutMarkPositionsRequired',
+        path: ['review', 'timeout_mark_positions'],
+      });
+    }
+    const markText = data.review.timeout_mark_text ?? '';
+    if (!markText.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'timeoutMarkTextRequired',
+        path: ['review', 'timeout_mark_text'],
+      });
+    } else if (Array.from(markText).length > 20) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'timeoutMarkTextTooLong',
+        path: ['review', 'timeout_mark_text'],
+      });
+    }
   }
 });
 

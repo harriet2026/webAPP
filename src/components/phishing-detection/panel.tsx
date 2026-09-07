@@ -60,7 +60,7 @@ export function PhishingAgentPanel({ initialTab = 'overview', configurationEnabl
 
   return <Tabs value={activeTab} onValueChange={changeTab} className="flex h-full flex-col">
     <TabsList className="mb-4 shrink-0 self-start rounded-lg border-border bg-muted/30 shadow-none">
-      <TabsTrigger value="overview" className="min-h-8 rounded-md px-3">{t('tabs.overview')}</TabsTrigger>
+      <TabsTrigger value="overview" className="min-h-8 rounded-md px-3" data-testid="phishing-overview-tab">{t('tabs.overview')}</TabsTrigger>
       {configurationEnabled ? <TabsTrigger value="config" className="min-h-8 rounded-md px-3" data-testid="phishing-config-tab">{t('tabs.config')}</TabsTrigger> : null}
     </TabsList>
     {control.errorMessage ? <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive" data-testid="phishing-control-error">{control.errorMessage}</div> : null}

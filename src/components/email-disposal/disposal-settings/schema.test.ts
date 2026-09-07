@@ -108,7 +108,6 @@ describe('disposalSettingsSchema category_notify entry validation', () => {
     expect(res.success).toBe(true);
   });
 });
-
 // portal_base_url 必填/https-only（与后端 GT-12077 及 whitelist/blacklist 扩展对齐）
 describe('disposalSettingsSchema portal_base_url guard', () => {
   it('rejects when a portal-dependent permission (e.g. whitelist) is enabled without a URL', () => {
@@ -133,6 +132,34 @@ describe('disposalSettingsSchema portal_base_url guard', () => {
     expect(disposalSettingsSchema.safeParse(base).success).toBe(false);
   });
 
+  it.each([
+    'https://gw.example.com/quarantine',
+    'https://gw.example.com?tenant=1',
+    'https://gw.example.com#quarantine',
+  ])('rejects a URL with a path, query, or fragment: %s', (url) => {
+    const base = validBase();
+    base.quarantine.portal_base_url = url;
+    const res = disposalSettingsSchema.safeParse(base);
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues).toContainEqual(
+        expect.objectContaining({
+          message: 'portalBaseUrlNoPath',
+          path: ['quarantine', 'portal_base_url'],
+        }),
+      );
+    }
+  });
+
+  it('validates a non-empty URL even when all dependent permissions are disabled', () => {
+    const base = validBase();
+    for (const k of Object.keys(base.quarantine.permissions)) {
+      base.quarantine.permissions[k] = { ...base.quarantine.permissions[k], enabled: false };
+    }
+    base.quarantine.portal_base_url = 'not-a-url';
+    expect(disposalSettingsSchema.safeParse(base).success).toBe(false);
+  });
+
   it('accepts when every portal-dependent permission is disabled and the URL is empty', () => {
     const base = defaultDisposalSettings();
     base.quarantine.portal_base_url = '';
@@ -140,6 +167,68 @@ describe('disposalSettingsSchema portal_base_url guard', () => {
       base.quarantine.permissions[k] = { ...base.quarantine.permissions[k], enabled: false };
     }
     expect(disposalSettingsSchema.safeParse(base).success).toBe(true);
+  });
+});
+
+describe('disposalSettingsSchema timeout mark validation (GT-13284)', () => {
+  it('rejects an enabled mark without a position', () => {
+    const base = validBase();
+    base.review.timeout_mark_enabled = true;
+    base.review.timeout_mark_positions = [];
+    base.review.timeout_mark_text = '[REVIEW]';
+
+    const res = disposalSettingsSchema.safeParse(base);
+
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues).toContainEqual(
+        expect.objectContaining({
+          message: 'timeoutMarkPositionsRequired',
+          path: ['review', 'timeout_mark_positions'],
+        }),
+      );
+    }
+  });
+
+  it('rejects an unsupported mark position', () => {
+    const base = validBase();
+    base.review.timeout_mark_enabled = true;
+    base.review.timeout_mark_text = '[REVIEW]';
+    const input = {
+      ...base,
+      review: { ...base.review, timeout_mark_positions: ['body'] },
+    };
+
+    const res = disposalSettingsSchema.safeParse(input);
+
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues).toContainEqual(
+        expect.objectContaining({
+          message: 'timeoutMarkPositionsInvalid',
+          path: ['review', 'timeout_mark_positions', 0],
+        }),
+      );
+    }
+  });
+
+  it.each([
+    ['', 'timeoutMarkTextRequired'],
+    ['123456789012345678901', 'timeoutMarkTextTooLong'],
+  ])('rejects invalid enabled mark text %j', (text, message) => {
+    const base = validBase();
+    base.review.timeout_mark_enabled = true;
+    base.review.timeout_mark_positions = ['subject_prefix'];
+    base.review.timeout_mark_text = text;
+
+    const res = disposalSettingsSchema.safeParse(base);
+
+    expect(res.success).toBe(false);
+    if (!res.success) {
+      expect(res.error.issues).toContainEqual(
+        expect.objectContaining({ message, path: ['review', 'timeout_mark_text'] }),
+      );
+    }
   });
 });
 

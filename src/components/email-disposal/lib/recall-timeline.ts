@@ -17,7 +17,7 @@ export const RECALL_ROW_RANK_TERMINAL = 2;
 
 /**
  * 折叠优先级：
- *   2 真实终态（success/failed/expanded）—— 对方系统给出的权威答案，永远胜出；
+ *   2 真实终态（success/partial_success/failed/expanded）—— 对方系统给出的权威答案，永远胜出；
  *   1 timeout —— 后端补写的「超时」，比「处置中」信息量大，但真实终态一到就让位；
  *   0 其余（handling、以及后端将来新增而前端还没跟上的取值）。
  *
@@ -28,6 +28,7 @@ export const RECALL_ROW_RANK_TERMINAL = 2;
 export function recallTimelineResultRank(result: string | undefined): number {
   switch (result) {
     case 'success':
+    case 'partial_success':
     case 'failed':
     case 'expanded':
       return RECALL_ROW_RANK_TERMINAL;
@@ -39,12 +40,17 @@ export function recallTimelineResultRank(result: string | undefined): number {
 }
 
 /**
- * 先比档位，同档再按 event_time 取最新（时间相同时后来者胜，与按时间折叠的
- * 旧行为一致）。
+ * 先比档位，同档按后端契约的 revision、事件数组顺序，最后才用时间为旧数据兜底。
  */
 export function beatsInCollapsedRow(candidate: MailChildEvent, incumbent: MailChildEvent): boolean {
   const cr = recallTimelineResultRank(candidate.event_result);
   const ir = recallTimelineResultRank(incumbent.event_result);
   if (cr !== ir) return cr > ir;
+	const candidateRevision = candidate.projection_revision ?? 0;
+	const incumbentRevision = incumbent.projection_revision ?? 0;
+	if (candidateRevision !== incumbentRevision) return candidateRevision > incumbentRevision;
+	const candidateOrder = candidate.projection_order ?? -1;
+	const incumbentOrder = incumbent.projection_order ?? -1;
+	if (candidateOrder !== incumbentOrder) return candidateOrder > incumbentOrder;
   return (candidate.event_time || '') >= (incumbent.event_time || '');
 }

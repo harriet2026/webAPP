@@ -40,12 +40,13 @@ export function UserListTable(props: {
 
   return (
     <TooltipProvider>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" data-testid="user-list-table">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">
                 <Checkbox
+                  data-testid="user-list-header-select-all"
                   checked={allChecked}
                   onCheckedChange={(c) => props.onToggleAll(pageIds, Boolean(c))}
                   aria-label="全选"
@@ -64,30 +65,31 @@ export function UserListTable(props: {
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-8" data-testid="user-list-empty">
                   {t('noData')}
                 </TableCell>
               </TableRow>
             ) : (
               rows.map((r) => (
-                <TableRow key={r.id} className={selectedIds.has(r.id) ? 'bg-primary/5' : ''}>
+                <TableRow key={r.id} data-testid={`user-list-row-${r.id}`} className={selectedIds.has(r.id) ? 'bg-primary/5' : ''}>
                   <TableCell>
                     <Checkbox
+                      data-testid={`user-list-pick-${r.id}`}
                       checked={selectedIds.has(r.id)}
                       onCheckedChange={() => props.onToggleRow(r.id)}
                       aria-label={`选择 ${r.ruleId}`}
                     />
                   </TableCell>
-                  <TableCell className="font-mono text-xs">{r.ruleId}</TableCell>
-                  <TableCell className="font-mono text-xs">
+                  <TableCell className="font-mono text-xs" data-testid={`user-list-cell-ruleid-${r.id}`}>{r.ruleId}</TableCell>
+                  <TableCell className="font-mono text-xs" data-testid={`user-list-cell-sender-${r.id}`}>
                     <Mail className="inline size-3.5 mr-1 text-muted-foreground" />
                     {r.sender}
                   </TableCell>
-                  <TableCell className="font-mono text-xs">
+                  <TableCell className="font-mono text-xs" data-testid={`user-list-cell-recipient-${r.id}`}>
                     <User className="inline size-3.5 mr-1 text-muted-foreground" />
                     {r.recipient}
                   </TableCell>
-                  <TableCell>
+                  <TableCell data-testid={`user-list-cell-action-${r.id}`}>
                     <Badge variant="outline" className={ACTION_VARIANT[r.action]}>
                       {actionLabel(r.action)}
                     </Badge>
@@ -95,13 +97,14 @@ export function UserListTable(props: {
                   <TableCell>
                     {/* D-003: 用户黑白名单规则仅支持新建/删除，状态列为只读展示，与其他模块统一使用开关形态，但不可交互 */}
                     <Switch
+                      data-testid={`user-list-cell-status-${r.id}`}
                       checked={r.status === 'enabled'}
                       disabled
                       aria-label={r.status === 'enabled' ? t('enabled') : t('disabled')}
                     />
                   </TableCell>
-                  <TableCell className="font-mono text-xs">{r.createdBy}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
+                  <TableCell className="font-mono text-xs" data-testid={`user-list-cell-createdby-${r.id}`}>{r.createdBy}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground" data-testid={`user-list-cell-modifytime-${r.id}`}>
                     {formatLocalMinute(r.modifyTime)}
                   </TableCell>
                   <TableCell className="text-right">
@@ -109,6 +112,7 @@ export function UserListTable(props: {
                       <TooltipTrigger
                         render={
                           <Button
+                            data-testid={`user-list-rowdelete-${r.id}`}
                             variant="ghost"
                             size="icon"
                             className="text-destructive"

@@ -164,7 +164,13 @@ export function RolePermissionTab({ scope }: RolePermissionTabProps) {
               </Button>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="h-7 gap-1" onClick={() => openRole(role)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1"
+                  data-testid={`role-edit-${role.id}`}
+                  onClick={() => openRole(role)}
+                >
                   <Pencil className="h-3.5 w-3.5" />
                   {t('rbac.rowActions.edit')}
                 </Button>
@@ -172,6 +178,7 @@ export function RolePermissionTab({ scope }: RolePermissionTabProps) {
                   variant="ghost"
                   size="sm"
                   className="h-7 gap-1 text-destructive"
+                  data-testid={`role-delete-${role.id}`}
                   onClick={() => setDeleteTarget(role)}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

@@ -97,22 +97,27 @@ export function fieldIsSidelineStage(fieldName: string): boolean {
 }
 
 // Recursively collect sideline-stage field names from a condition tree
-export function collectSidelineFields(node: any): string[] {
-  if (!node) return []
-  if (node.type === 'condition') {
-    return fieldIsSidelineStage(node.field) ? [node.field] : []
+export function collectSidelineFields(node: unknown): string[] {
+  if (!node || typeof node !== 'object') return []
+  const candidate = node as Record<string, unknown>
+  if (candidate.type === 'condition') {
+    return typeof candidate.field === 'string' && fieldIsSidelineStage(candidate.field) ? [candidate.field] : []
   }
-  if (Array.isArray(node.children)) {
-    return [...new Set(node.children.flatMap((child: any) => collectSidelineFields(child)))] as string[]
+  if (Array.isArray(candidate.children)) {
+    return [...new Set(candidate.children.flatMap((child) => collectSidelineFields(child)))]
   }
   return []
 }
 
 // Generate companion trigger rule payload for a sideline rule
 export function generateCompanionRule(
-  sourceRule: { id?: number; priority?: number; metadata?: any },
+  sourceRule: {
+    id?: number
+    priority?: number
+    metadata?: { name?: string; scope?: string[] }
+  },
   referencedSidelineFields: string[]
-): any {
+) {
   const conditions: TriggerCondition[] = []
   const seen = new Set<string>()
 

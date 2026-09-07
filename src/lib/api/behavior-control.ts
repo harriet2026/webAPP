@@ -7,9 +7,11 @@ import type {
   RecipientCheckConfig,
 } from '@/types/behavior-control';
 import { PRODUCT_TO_BACKEND, BACKEND_TO_PRODUCT } from '@/types/behavior-control';
-import type { ApiRequestFn } from './client';
+import type { ApiRequestFn, ConfigMutationResult } from './client';
 import { apiRequest } from './client';
+import type { ScopedConfigView } from './scoped-configs';
 import { toRFC3339 } from '@/lib/format-time';
+import { fetchAllPages } from './pagination';
 
 export const BEHAVIOR_CONTROL_PAGE = 'behavior_control';
 
@@ -21,6 +23,14 @@ export type BehaviorControlRuleWire = Omit<Rule, 'condition_tree' | 'metadata'> 
   condition_tree: Rule['condition_tree'] | RuleNode;
   metadata?: Rule['metadata'] | Record<string, unknown>;
 };
+
+export interface BehaviorControlGroupRuleWire {
+  id: number;
+  name: string;
+  metadata: string | Record<string, unknown>;
+  is_active: boolean;
+  condition_tree?: string | RuleNode;
+}
 
 function parseRecord(value: unknown): Record<string, unknown> | null {
   if (typeof value === 'string') {
@@ -153,7 +163,20 @@ export function resolveBehaviorControlRule(rawRule: BehaviorControlRuleWire): Be
 export async function listBehaviorControlRules(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<{ items: BehaviorControlRuleWire[] }> {
-  return requestFn('/unified-rules?rule_page=behavior_control&rule_class=action&stage=rcpt&page_size=10000');
+  const items = await fetchAllPages<BehaviorControlRuleWire>(
+    '/unified-rules?rule_page=behavior_control&rule_class=action&stage=rcpt',
+    requestFn,
+  );
+  return { items };
+}
+
+export async function listBehaviorControlGroups(
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<BehaviorControlGroupRuleWire[]> {
+  return fetchAllPages<BehaviorControlGroupRuleWire>(
+    '/unified-rules?rule_class=tag&rule_page=groups&include=member_count',
+    requestFn,
+  );
 }
 
 export async function createBehaviorControlRule(
@@ -204,8 +227,8 @@ export async function getRecipientLimitConfig(
 export async function setRecipientLimitConfig(
   config: RecipientLimitConfig,
   requestFn: ApiRequestFn = apiRequest,
-): Promise<{ status: string }> {
-  return requestFn('/behavior-control/recipient-limit-config', {
+): Promise<ConfigMutationResult<{ status: string }>> {
+  return requestFn<ConfigMutationResult<{ status: string }>>('/behavior-control/recipient-limit-config', {
     method: 'PUT',
     body: config,
   });
@@ -213,8 +236,8 @@ export async function setRecipientLimitConfig(
 
 export async function deleteRecipientLimitConfig(
   requestFn: ApiRequestFn = apiRequest,
-): Promise<{ status: string }> {
-  return requestFn('/behavior-control/recipient-limit-config', {
+): Promise<ConfigMutationResult<{ status: string }>> {
+  return requestFn<ConfigMutationResult<{ status: string }>>('/behavior-control/recipient-limit-config', {
     method: 'DELETE',
   });
 }
@@ -228,17 +251,31 @@ export async function getRecipientCheckConfig(
 export async function setRecipientCheckConfig(
   config: RecipientCheckConfig,
   requestFn: ApiRequestFn = apiRequest,
-): Promise<{ status: string }> {
-  return requestFn('/behavior-control/recipient-check-config', {
+): Promise<ConfigMutationResult<{ status: string }>> {
+  return requestFn<ConfigMutationResult<{ status: string }>>('/behavior-control/recipient-check-config', {
     method: 'PUT',
     body: config,
   });
 }
 
+// 收信人检测页面同时编辑数量限制和存在性验证。两者现在属于同一份
+// antispam scoped-config 文档，必须由一个后端 CAS 原子提交；并行调用上面的
+// 两个兼容 PUT 会争用同一个 version，造成一个成功、一个 conflict。
+export async function setRecipientPolicy(
+  limit: RecipientLimitConfig,
+  check: RecipientCheckConfig,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<ConfigMutationResult<ScopedConfigView>> {
+  return requestFn<ConfigMutationResult<ScopedConfigView>>('/behavior-control/recipient-policy', {
+    method: 'PUT',
+    body: { limit, check },
+  });
+}
+
 export async function deleteRecipientCheckConfig(
   requestFn: ApiRequestFn = apiRequest,
-): Promise<{ status: string }> {
-  return requestFn('/behavior-control/recipient-check-config', {
+): Promise<ConfigMutationResult<{ status: string }>> {
+  return requestFn<ConfigMutationResult<{ status: string }>>('/behavior-control/recipient-check-config', {
     method: 'DELETE',
   });
 }

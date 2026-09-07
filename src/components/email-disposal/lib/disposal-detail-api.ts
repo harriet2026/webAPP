@@ -6,6 +6,7 @@ import { createUnifiedRule } from '@/lib/api/unified-rules';
 import { bulkDispose } from './disposal-api';
 import type {
   CheckStatus,
+  CheckReason,
   FinalVerdict,
   MailLogDetail,
   MailLogAnalysis,
@@ -44,6 +45,7 @@ export async function getMailLogAnalysis(id: number, recipient: string | undefin
       checks: stage.checks.map((check) => ({
         key: check.key,
         status: check.status,
+        reason: check.reason,
         ruleIds: check.rule_ids,
         recipientGroups: check.recipient_groups?.map((group) => ({
           recipients: group.recipients,
@@ -70,6 +72,7 @@ interface MailLogAnalysisWire {
     checks: Array<{
       key: string;
       status: CheckStatus;
+      reason?: CheckReason;
       rule_ids: number[];
       recipient_groups?: Array<{
         recipients: string[];
@@ -174,7 +177,7 @@ export async function getMailLogPreview(id: number, requestFn: ApiRequestFn): Pr
 }
 
 export async function getMailLogEvents(id: number, requestFn: ApiRequestFn): Promise<MailChildEvent[]> {
-  const resp = await requestFn<{ items: MailChildEvent[] }>(`/mail-logs/${id}/events?page=1&page_size=100`);
+  const resp = await requestFn<{ items: MailChildEvent[] }>(`/mail-logs/${id}/events?page=1&page_size=100&include_releases=true`);
   return resp.items ?? [];
 }
 

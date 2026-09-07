@@ -42,7 +42,7 @@ export function AttachmentTypePieCard({ data, isLoading }: AttachmentTypePieCard
   }, [data, t]);
 
   return (
-    <Card className="gap-0 rounded-lg border-0 bg-muted/40 py-0 shadow-none">
+    <Card className="gap-0 rounded-lg border-0 bg-muted/40 py-0 shadow-none" data-testid="attachment-type-distribution-card">
       <CardHeader className="p-4 pb-0">
         <CardTitle className="text-sm font-medium">{t('side.attachmentTypeDistribution')}</CardTitle>
       </CardHeader>

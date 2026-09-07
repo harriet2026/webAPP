@@ -1,5 +1,5 @@
 // 出站路由步骤三：路由规则（Task 13 接通真实后端）—— unified route 规则 ⇄ OutboundRuleRow 映射。
-// 对齐 doc/mail-routing.md §3.4/§5、internal/models/unified_rules.go RouteDecision。
+// 对齐 docs/features/mail-routing.md §3.4/§5、internal/models/unified_rules.go RouteDecision。
 //
 // 规则 CRUD 走 unified-rules（真实后端权威）；TLS 等级现在读写 metadata.tls_level（真实字段，
 // 取代旧 mock-only metadata.mr_ext.tlsLevel）；成功率读列表响应顶层的 tls_success_rate
@@ -19,7 +19,7 @@ import { isIPv4, type EnableStatus, type TlsLevel } from '../mr-types';
 export type ConditionTree = RuleNode;
 
 /** UI 侧 camelCase TlsLevel ⇄ 后端 snake_case tls_level 双向换算。空/未知值归一为 'prefer'
- * （doc/mail-routing.md §3.4："空值等价于 prefer"）。 */
+ * （docs/features/mail-routing.md §3.4："空值等价于 prefer"）。 */
 const TLS_LEVEL_TO_WIRE: Record<TlsLevel, string> = {
   plain: 'plain',
   prefer: 'prefer',

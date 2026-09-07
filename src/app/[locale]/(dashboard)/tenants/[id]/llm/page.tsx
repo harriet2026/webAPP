@@ -18,11 +18,13 @@ import {
   getTenantLLMSetting,
   upsertTenantLLMSetting,
   deleteTenantLLMSetting,
+  isTenantLLMDeletePendingResponse,
 } from '@/lib/api/tenants';
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { AccessDeniedPanel, LoadingPanel } from '@/components/shared/state-panel';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { usePermission } from '@/hooks/use-permission';
+import { isPublicationPendingResponse } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 const llmSchema = z.object({
@@ -47,6 +49,7 @@ export default function TenantLLMPage() {
   const [showDelete, setShowDelete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [hasExplicitAPIKey, setHasExplicitAPIKey] = useState(false);
 
   const { data: tenant } = useQuery({
     queryKey: ['tenant', tenantId],
@@ -76,10 +79,11 @@ export default function TenantLLMPage() {
       form.reset({
         base_url: setting.base_url,
         model: setting.model,
-	        api_key: '••••••••',
+	        api_key: setting.has_explicit_api_key ? '••••••••' : '',
 	        enabled: setting.enabled,
 	        insecure_skip_verify: setting.insecure_skip_verify,
 	      });
+	      setHasExplicitAPIKey(setting.has_explicit_api_key === true);
       setInitialized(true);
     }
   }, [setting, initialized, form]);
@@ -92,11 +96,29 @@ export default function TenantLLMPage() {
       // it, don't send the mask - the backend would store the literal mask
       // and LLM auth would break. Omit api_key so the backend keeps the
       // existing key (treats it as 'no change to this field').
-      const payload = initialized && data.api_key === '••••••••'
-        ? (() => { const { api_key: _unused, ...rest } = data; return rest; })()
+      const payload = hasExplicitAPIKey && data.api_key === '••••••••'
+        ? {
+            base_url: data.base_url,
+            model: data.model,
+            enabled: data.enabled,
+            insecure_skip_verify: data.insecure_skip_verify,
+          }
         : data;
-      await upsertTenantLLMSetting(tenantId, payload);
-      queryClient.invalidateQueries({ queryKey: ['tenant-llm', tenantId] });
+      const result = await upsertTenantLLMSetting(tenantId, payload);
+      if (isPublicationPendingResponse(result)) {
+        queryClient.setQueryData(['tenant-llm', tenantId], {
+          tenant_id: tenantId,
+          base_url: payload.base_url,
+          model: payload.model,
+          enabled: payload.enabled,
+          insecure_skip_verify: payload.insecure_skip_verify,
+          inherited: false,
+          has_explicit_api_key: true,
+        });
+      } else {
+        queryClient.setQueryData(['tenant-llm', tenantId], result);
+      }
+      setHasExplicitAPIKey(true);
       toast.success(t('common.updateSuccess'));
     } catch {
       toast.error(t('common.error'));
@@ -107,9 +129,17 @@ export default function TenantLLMPage() {
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteTenantLLMSetting(tenantId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tenant-llm', tenantId] });
-	      form.reset({ base_url: '', model: '', api_key: '', enabled: true, insecure_skip_verify: false });
+    onSuccess: (result) => {
+      if (isTenantLLMDeletePendingResponse(result)) {
+        queryClient.setQueryData(
+          ['tenant-llm', tenantId],
+          result.setting ? { ...result.setting, inherited: true } : null,
+        );
+      } else {
+        void queryClient.invalidateQueries({ queryKey: ['tenant-llm', tenantId] });
+      }
+      form.reset({ base_url: '', model: '', api_key: '', enabled: true, insecure_skip_verify: false });
+      setHasExplicitAPIKey(false);
       setInitialized(false);
       toast.success(t('common.deleteSuccess'));
       setShowDelete(false);
@@ -190,7 +220,7 @@ export default function TenantLLMPage() {
               <Input
                 {...form.register('api_key')}
                 type="password"
-                placeholder={setting ? '••••••••' : 'sk-...'}
+                placeholder={setting?.has_explicit_api_key ? '••••••••' : 'sk-...'}
               />
               <p className="text-xs text-muted-foreground">{t('tenants.llmApiKeyDesc')}</p>
             </div>
@@ -208,7 +238,7 @@ export default function TenantLLMPage() {
 
             <div className="flex items-center justify-between pt-4 border-t">
               <div>
-                {setting && (
+                {setting && !setting.inherited && (
                   <Button
                     type="button"
                     variant="outline"

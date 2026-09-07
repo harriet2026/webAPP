@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApiRequest } from '@/lib/api/client';
+import { isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import {
   fetchAlerts,
   fetchAlertStats,
@@ -18,6 +18,7 @@ import {
   type AlertQuery,
 } from '@/lib/api/monitoring';
 import type { AlertRulePayload, SmtpConfigPayload } from '@/types/alerts';
+import type { SmtpConfig } from '@/types/alerts';
 
 const POLL_MS = 30_000;
 
@@ -178,6 +179,26 @@ export function usePutSmtpConfig() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: SmtpConfigPayload) => putSmtpConfig(payload, apiRequest),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['alerts', 'smtp-config'] }),
+    onSuccess: (result, payload) => {
+      const queryKey = ['alerts', 'smtp-config'] as const;
+      if (isPublicationPendingResponse(result)) {
+        qc.setQueryData<SmtpConfig | undefined>(queryKey, (current) => {
+          if (!current) return current;
+          // Never retain the submitted clear-text password in React Query. The
+          // normal DTO only exposes the configured/masked signals, so mirror
+          // that shape while publication catches up.
+          const { password, ...publicPayload } = payload;
+          const passwordConfigured = current.password_configured || Boolean(password);
+          return {
+            ...current,
+            ...publicPayload,
+            password_configured: passwordConfigured,
+            password_masked: passwordConfigured ? '********' : '',
+          };
+        });
+      } else {
+        qc.setQueryData(queryKey, result);
+      }
+    },
   });
 }

@@ -22,16 +22,20 @@ export interface RunFilterState {
 }
 
 interface MultiSelectProps {
-  options: { value: string; labelKey: string }[];
+  // testId 逐项写字面量（而不是在这里用 `${testId}-option-${value}` 拼），
+  // 是为了让 qc 的 testid 契约闸能按字面量校验后缀：模板以变量开头时，
+  // 闸推不出任何字面前缀，会把引用报成"不存在"。
+  options: { value: string; labelKey: string; testId: string }[];
   value: string[];
   onChange: (next: string[]) => void;
   placeholder: string;
   labelPrefix: string;
   t: ReturnType<typeof useTranslations>;
   tc: ReturnType<typeof useTranslations>;
+  testId: string;
 }
 
-function MultiSelect({ options, value, onChange, placeholder, labelPrefix, t, tc }: MultiSelectProps) {
+function MultiSelect({ options, value, onChange, placeholder, labelPrefix, t, tc, testId }: MultiSelectProps) {
   const toggle = (val: string) => {
     onChange(value.includes(val) ? value.filter((v) => v !== val) : [...value, val]);
   };
@@ -43,7 +47,7 @@ function MultiSelect({ options, value, onChange, placeholder, labelPrefix, t, tc
         : `${value.length} ${tc('selected')}`;
   return (
     <Popover>
-      <PopoverTrigger render={<Button variant="outline" className="h-9 justify-between font-normal" />}>
+      <PopoverTrigger data-testid={testId} render={<Button variant="outline" className="h-9 justify-between font-normal" />}>
         <span className="truncate">{summary}</span>
         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-60" />
       </PopoverTrigger>
@@ -53,9 +57,11 @@ function MultiSelect({ options, value, onChange, placeholder, labelPrefix, t, tc
           return (
             <label
               key={option.value}
+              data-testid={`${option.testId}-row`}
               className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
             >
               <Checkbox
+                data-testid={option.testId}
                 checked={checked}
                 onCheckedChange={() => toggle(option.value)}
                 className="shrink-0"
@@ -109,28 +115,29 @@ export function RunFilters({ value, onChange, onReset }: RunFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
         <Input
+          data-testid="threat-retro-filter-keyword"
           value={value.keyword}
           onChange={(e) => update('keyword', e.target.value)}
           placeholder={t('filters.keywordPlaceholder')}
 		  className="h-9 min-w-[220px] flex-1"
         />
 		<Select value={value.rangeKey} onValueChange={(next) => update('rangeKey', next as TimeRangeKey)}>
-		  <SelectTrigger className="h-9 w-[110px] shrink-0">
+		  <SelectTrigger data-testid="threat-retro-filter-range" className="h-9 w-[110px] shrink-0">
 			<SelectValue>{t(`filters.range.${value.rangeKey}`)}</SelectValue>
 		  </SelectTrigger>
 		  <SelectContent>
 			{(['today', '7d', '30d', 'custom'] as TimeRangeKey[]).map((key) => (
-			  <SelectItem key={key} value={key}>{t(`filters.range.${key}`)}</SelectItem>
+			  <SelectItem key={key} value={key} data-testid={`threat-retro-filter-range-option-${key}`}>{t(`filters.range.${key}`)}</SelectItem>
 			))}
 		  </SelectContent>
 		</Select>
         <MultiSelect
           options={[
-            { value: 'pending', labelKey: 'taskStatus.pending' },
-            { value: 'running', labelKey: 'taskStatus.running' },
-            { value: 'completed', labelKey: 'taskStatus.completed' },
-            { value: 'failed', labelKey: 'taskStatus.failed' },
-            { value: 'cancelled', labelKey: 'taskStatus.cancelled' },
+            { value: 'pending', labelKey: 'taskStatus.pending', testId: 'threat-retro-filter-task-status-option-pending' },
+            { value: 'running', labelKey: 'taskStatus.running', testId: 'threat-retro-filter-task-status-option-running' },
+            { value: 'completed', labelKey: 'taskStatus.completed', testId: 'threat-retro-filter-task-status-option-completed' },
+            { value: 'failed', labelKey: 'taskStatus.failed', testId: 'threat-retro-filter-task-status-option-failed' },
+            { value: 'cancelled', labelKey: 'taskStatus.cancelled', testId: 'threat-retro-filter-task-status-option-cancelled' },
           ]}
           value={value.status}
           onChange={(next) => update('status', next)}
@@ -138,13 +145,14 @@ export function RunFilters({ value, onChange, onReset }: RunFiltersProps) {
           labelPrefix="taskStatus"
           t={t}
           tc={tc}
+          testId="threat-retro-filter-task-status"
         />
         <MultiSelect
           options={[
-            { value: 'recalled', labelKey: 'recallStatus.recalled' },
-            { value: 'pending_recall', labelKey: 'recallStatus.pending_recall' },
-            { value: 'recall_failed', labelKey: 'recallStatus.recall_failed' },
-            { value: 'no_need', labelKey: 'recallStatus.no_need' },
+            { value: 'recalled', labelKey: 'recallStatus.recalled', testId: 'threat-retro-filter-recall-status-option-recalled' },
+            { value: 'pending_recall', labelKey: 'recallStatus.pending_recall', testId: 'threat-retro-filter-recall-status-option-pending_recall' },
+            { value: 'recall_failed', labelKey: 'recallStatus.recall_failed', testId: 'threat-retro-filter-recall-status-option-recall_failed' },
+            { value: 'no_need', labelKey: 'recallStatus.no_need', testId: 'threat-retro-filter-recall-status-option-no_need' },
           ]}
           value={value.recall_status}
           onChange={(next) => update('recall_status', next)}
@@ -152,12 +160,13 @@ export function RunFilters({ value, onChange, onReset }: RunFiltersProps) {
           labelPrefix="recallStatus"
           t={t}
           tc={tc}
+          testId="threat-retro-filter-recall-status"
         />
         <MultiSelect
           options={[
-            { value: 'high', labelKey: 'riskLevel.high' },
-            { value: 'medium', labelKey: 'riskLevel.medium' },
-            { value: 'low', labelKey: 'riskLevel.low' },
+            { value: 'high', labelKey: 'riskLevel.high', testId: 'threat-retro-filter-risk-level-option-high' },
+            { value: 'medium', labelKey: 'riskLevel.medium', testId: 'threat-retro-filter-risk-level-option-medium' },
+            { value: 'low', labelKey: 'riskLevel.low', testId: 'threat-retro-filter-risk-level-option-low' },
           ]}
           value={value.risk_level}
           onChange={(next) => update('risk_level', next)}
@@ -165,9 +174,10 @@ export function RunFilters({ value, onChange, onReset }: RunFiltersProps) {
           labelPrefix="riskLevel"
           t={t}
           tc={tc}
+          testId="threat-retro-filter-risk-level"
         />
         {dirty ? (
-          <Button variant="outline" size="sm" onClick={onReset}>
+          <Button variant="outline" size="sm" data-testid="threat-retro-filter-reset" onClick={onReset}>
             {tc('reset')}
           </Button>
         ) : null}
@@ -175,6 +185,7 @@ export function RunFilters({ value, onChange, onReset }: RunFiltersProps) {
           <div className="flex items-center gap-2">
             <Input
               type="datetime-local"
+              data-testid="threat-retro-filter-start"
               value={value.start}
               onChange={(e) => update('start', e.target.value)}
               className="h-9 w-48"
@@ -182,6 +193,7 @@ export function RunFilters({ value, onChange, onReset }: RunFiltersProps) {
             <span className="text-xs text-muted-foreground">—</span>
             <Input
               type="datetime-local"
+              data-testid="threat-retro-filter-end"
               value={value.end}
               min={value.start || undefined}
               aria-invalid={invalidCustomRange}
@@ -190,7 +202,7 @@ export function RunFilters({ value, onChange, onReset }: RunFiltersProps) {
             />
           </div>
         )}
-        {invalidCustomRange ? <p className="text-xs text-destructive">{t('filters.invalidRange')}</p> : null}
+        {invalidCustomRange ? <p className="text-xs text-destructive" data-testid="threat-retro-filter-invalid-range">{t('filters.invalidRange')}</p> : null}
     </div>
   );
 }

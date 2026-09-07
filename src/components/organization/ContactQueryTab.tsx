@@ -171,6 +171,11 @@ export function ContactQueryTab() {
         onRefresh={() => refetch()}
         filterCount={filterCount}
         testIdPrefix="contacts-book"
+        searchTestId="contacts-book-search"
+        resetTestId="contacts-book-reset"
+        refreshTestId="contacts-book-refresh"
+        filterTestId="contacts-book-filter"
+        filterPopoverTestId="contacts-book-filter-popover"
         filterContent={
           <>
             <FilterSelect

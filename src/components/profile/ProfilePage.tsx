@@ -18,7 +18,7 @@ export function ProfilePage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs text-muted-foreground">{t('breadcrumb')}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight" data-testid="profile-page-title">
           {t('title')}
           {displayName ? (
             <span className="ml-2 align-middle text-base font-normal text-muted-foreground">
@@ -26,7 +26,7 @@ export function ProfilePage() {
             </span>
           ) : null}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
+        <p className="mt-1 text-sm text-muted-foreground" data-testid="profile-page-subtitle">{t('subtitle')}</p>
       </div>
 
       <Tabs defaultValue="account" className="w-full">

@@ -15,8 +15,8 @@ export function ViewSwitcher({ value, onChange }: ViewSwitcherProps) {
   return (
     <Tabs value={value} onValueChange={(v) => onChange(v as 'link' | 'attachment')}>
       <TabsList>
-        <TabsTrigger value="link"><Link2 className="h-4 w-4" />{t('tabs.link')}</TabsTrigger>
-        <TabsTrigger value="attachment"><Paperclip className="h-4 w-4" />{t('tabs.attachment')}</TabsTrigger>
+        <TabsTrigger value="link" data-testid="link-attachment-view-link"><Link2 className="h-4 w-4" />{t('tabs.link')}</TabsTrigger>
+        <TabsTrigger value="attachment" data-testid="link-attachment-view-attachment"><Paperclip className="h-4 w-4" />{t('tabs.attachment')}</TabsTrigger>
       </TabsList>
     </Tabs>
   );

@@ -82,7 +82,10 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
 
   if (data?.supported === false) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
+      <div
+        data-testid="monitor-infrastructure-backend-unsupported"
+        className="flex flex-col items-center justify-center py-16"
+      >
         <p className="text-muted-foreground">{t('backendUnsupported')}</p>
       </div>
     );
@@ -99,7 +102,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
         <DegradedBanner message={degradeMessage(data.degraded_code, t)} />
       )}
       <div className="grid grid-cols-2 gap-4">
-        <Card>
+        <Card data-testid="monitor-infrastructure-db-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -116,7 +119,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card data-testid="monitor-infrastructure-cache-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>

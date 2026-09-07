@@ -353,6 +353,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                     {t('tenantName')} <span className="text-destructive">*</span>
                   </Label>
                   <Input
+                    data-testid="tenant-form-name"
                     {...form.register('name')}
                     placeholder={t('namePlaceholder')}
                     aria-invalid={!!form.formState.errors.name}
@@ -370,6 +371,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                     {t('form.code')} <span className="text-destructive">*</span>
                   </Label>
                   <Input
+                    data-testid="tenant-form-code"
                     {...form.register('code')}
                     placeholder="acme"
                     disabled={!!editingTenant}
@@ -491,7 +493,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                   <SectionLabel>{t('detail.primaryAdmin')}</SectionLabel>
                   <div className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2">
                     {primaryAdmin ? (
-                      <span className="text-sm font-medium text-foreground">
+                      <span data-testid="tenant-primary-admin-account" className="text-sm font-medium text-foreground">
                         {primaryAdmin.username}
                       </span>
                     ) : (
@@ -500,6 +502,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                       </span>
                     )}
                     <Link
+                      data-testid="tenant-primary-admin-users-link"
                       href={`/users?tenant=${editingTenant.id}`}
                       onClick={() => onOpenChange(false)}
                       className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
@@ -530,6 +533,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                   </SectionLabel>
                   <Button
                     type="button"
+                    data-testid="tenant-form-add-domain"
                     variant="outline"
                     size="sm"
                     className="gap-1.5"
@@ -581,6 +585,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                           <div className="space-y-1.5 sm:col-span-2">
                             <Label>{t('domain')}</Label>
                             <Input
+                              data-testid={`tenant-form-domain-${idx}`}
                               {...form.register(`domains.${idx}.domain`)}
                               placeholder="example.com"
                               aria-invalid={!!form.formState.errors.domains?.[idx]?.domain}
@@ -664,6 +669,7 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
                     >
                       <Checkbox
                         id={`cap-${feature.id}`}
+                        data-testid={`tenant-form-capability-${feature.id}`}
                         checked={checked}
                         onCheckedChange={(c) => toggleCapability(feature.id, c)}
                       />
@@ -692,10 +698,15 @@ export function TenantFormDrawer({ open, onOpenChange, editingTenant }: TenantFo
               </div>
             )}
             <div className="ml-auto flex shrink-0 justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                data-testid="tenant-form-cancel"
+                onClick={() => onOpenChange(false)}
+              >
                 {tc('cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} data-testid="tenant-form-save">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {tc('save')}
               </Button>

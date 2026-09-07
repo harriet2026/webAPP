@@ -224,7 +224,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
             <div className="flex items-center gap-2"><span className="flex size-6 items-center justify-center rounded-md bg-warning/15 text-xs font-semibold text-warning">2</span><h4 className="text-sm font-semibold">{t('sectionRisk')}</h4></div>
             <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
               <div className="flex items-center justify-between gap-3"><div><Label>{t('requireUrl')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('urlNotQRHint')}</p></div><Switch checked={draft.require_url} data-testid="rule-require-url" onCheckedChange={(require_url) => patch({ require_url })} /></div>
-              <div className="space-y-2 border-t border-border pt-4"><div><Label htmlFor="rule-maxsize">{t('maxSize')}</Label><p className="mt-1 text-sm text-muted-foreground">{t('maxSizeHint')}</p></div><div className="relative min-w-0"><Input id="rule-maxsize" type="number" min={0} max={100000} className="w-full pr-12" value={draft.max_size_mb ?? 0} onChange={(event) => patch({ max_size_mb: Number(event.target.value) || 0 })} /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">MB</span></div></div>
+              <div className="space-y-2 border-t border-border pt-4"><div><Label htmlFor="rule-maxsize">{t('maxSize')}</Label><p className="mt-1 text-sm text-muted-foreground">{t('maxSizeHint')}</p></div><div className="relative min-w-0"><Input id="rule-maxsize" data-testid="rule-max-size-input" type="number" min={0} max={100000} className="w-full pr-12" value={draft.max_size_mb ?? 0} onChange={(event) => patch({ max_size_mb: Number(event.target.value) || 0 })} /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">MB</span></div></div>
             </div>
             {([
               ['sender_first_seen', 'senderFirstSeen', 'senderFirstSeenHint'],
@@ -235,10 +235,10 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
             ))}
             {validationError ? <p className="text-sm text-destructive" data-testid="rule-validation-error">{validationError}</p> : null}
           </section>
-          <div className="flex items-center gap-3"><Switch id="rule-enabled" checked={draft.enabled} onCheckedChange={(enabled) => patch({ enabled })} /><Label htmlFor="rule-enabled">{t('enabledLabel')}</Label></div>
+          <div className="flex items-center gap-3"><Switch id="rule-enabled" data-testid="rule-enabled" checked={draft.enabled} onCheckedChange={(enabled) => patch({ enabled })} /><Label htmlFor="rule-enabled">{t('enabledLabel')}</Label></div>
         </div>
-        <SheetFooter className="shrink-0 flex-row justify-between gap-2 border-t border-border px-6 py-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>{t('cancel')}</Button>
+        <SheetFooter data-testid="admission-rule-sheet-footer" className="shrink-0 flex-row justify-between gap-2 border-t border-border px-6 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving} data-testid="rule-cancel">{t('cancel')}</Button>
           <Button onClick={save} disabled={Boolean(validationError) || saving || readOnly} data-testid="rule-save">{saving ? t('saving') : t('save')}</Button>
         </SheetFooter>
       </SheetContent>

@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useMemo, useState, type ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
-import { AlertTriangle, Loader2, Lock, Save, Trash2, Plus, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
+import { useMemo, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { AlertTriangle, Loader2, Save, Trash2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { LoadingPanel } from '@/components/shared/state-panel';
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+} from "@/components/ui/select";
+import { LoadingPanel } from "@/components/shared/state-panel";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   useLoginPolicy,
   useUpdateLoginPolicy,
@@ -23,11 +23,10 @@ import {
   useDeleteLoginIPRule,
   type LoginPolicy,
   type LoginPolicyWrite,
-} from '@/lib/api/login-policy';
-import { isBelowBaseline, type StrictnessField } from '@/lib/api/strictness';
-import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+} from "@/lib/api/login-policy";
+import { useApiErrorMessage } from "@/lib/api/use-api-error-message";
 
-// GT-11959. Layout follows the product design (section cards, label left / control
+// GT-13320. Layout follows the product design (section cards, label left / control
 // right), with ONE deliberate departure: password complexity is an "at least N of
 // four" dropdown, not four independent checkboxes.
 //
@@ -43,11 +42,18 @@ const HISTORY_TIERS = [0, 1, 2, 3, 5, 8, 10];
 const VALIDITY_TIERS = [0, 30, 60, 90, 180, 365];
 const MAX_ONLINE_TIERS = [0, 1, 2, 3, 5, 8, 10];
 
-// Platform-scope-only. -1 = permanent: only an admin unlock lifts it, which is why
-// there is an unlock action on the user list.
+// -1 = permanent: only an admin unlock lifts it.
 const MAX_ATTEMPTS_TIERS = [3, 4, 5, 6, 8, 10];
 const LOCKOUT_TIERS = [15, 30, 60, 360, 1440, -1];
 const CAPTCHA_TIERS = [1, 2, 3, 4, 5];
+
+type NumericPolicyField =
+  | "minLength"
+  | "minCharClasses"
+  | "historyLimit"
+  | "passwordMaxAgeDays"
+  | "sessionTimeoutSecs"
+  | "maxOnline";
 
 function SectionCard({
   title,
@@ -59,14 +65,25 @@ function SectionCard({
   testId?: string;
 }) {
   return (
-    <section className="rounded-xl border border-border bg-card p-5 shadow-sm" data-testid={testId}>
+    <section
+      className="rounded-xl border border-border bg-card p-5 shadow-sm"
+      data-testid={testId}
+    >
       <h3 className="mb-3 text-sm font-semibold text-body">{title}</h3>
       <div className="space-y-1">{children}</div>
     </section>
   );
 }
 
-function Row({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
+function Row({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: ReactNode;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-3 py-1.5">
       <div className="w-48 flex-shrink-0">
@@ -79,7 +96,7 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
 }
 
 export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
-  const t = useTranslations('loginSecurity');
+  const t = useTranslations("loginSecurity");
   const apiErrorMessage = useApiErrorMessage();
   const { data, isLoading } = useLoginPolicy(tenantId);
   const update = useUpdateLoginPolicy(tenantId);
@@ -87,30 +104,14 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
   const delRule = useDeleteLoginIPRule(tenantId);
 
   const [edits, setEdits] = useState<LoginPolicyWrite>({});
-  // Which fields the user actually TOUCHED this session.
-  //
-  // §4.4: the server deliberately never rewrites a tenant's stale below-baseline
-  // override — the tenant's intent is preserved, the baseline is simply what gets
-  // enforced. The client was undoing that: the draft seeds every field from
-  // `effective`, so a tenant whose saved minLength=8 had been out-tightened to 12
-  // saw 12, and saving ANY unrelated field silently rewrote their 8 to 12 in the
-  // database. Only send what was edited.
   const [touched, setTouched] = useState<Set<string>>(new Set());
-  const [newCidr, setNewCidr] = useState('');
-  const [newRemark, setNewRemark] = useState('');
+  const [resetFields, setResetFields] = useState<Set<string>>(new Set());
+  const [newCidr, setNewCidr] = useState("");
+  const [newRemark, setNewRemark] = useState("");
   // GT-12316：重置确认弹窗开关。必须声明在 isLoading 早退 return 之前，
   // 否则加载完成后 hooks 数量变化会触发 Rules of Hooks 崩溃（整页白屏）。
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 
-  // Seeds from EFFECTIVE: a tenant whose saved value has been out-tightened by the
-  // platform must see what is actually enforced, not the inert number they once
-  // chose.
-  //
-  // `effective.ipMode` is the mode of THIS scope's own layer (the server special-
-  // cases it, because ipMode is not merged — the layers are evaluated independently
-  // and both must pass). It used to carry the BASELINE's mode, which meant a tenant
-  // saved `whitelist`, reloaded, saw 关闭, and the next save of any unrelated field
-  // wrote `ipMode: "none"` back over its own whitelist.
   const serverDraft = useMemo<LoginPolicyWrite>(() => {
     if (!data) return {};
     const e = data.effective;
@@ -123,16 +124,9 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
       maxOnline: e.maxOnline,
       overflowPolicy: e.overflowPolicy,
       ipMode: e.ipMode,
-      // Platform-only. Seeded for every scope so the tenant read-only view has
-      // something to show, but only sent on a platform save (see onSave).
-      maxLoginAttempts: data.globalOnly.maxLoginAttempts,
-      lockoutMinutes: data.globalOnly.lockoutMinutes,
-      captchaAfterFailures: data.globalOnly.captchaAfterFailures,
-      // Plan D §5 (A-18). Tenant scope self-toggle; platform scope global force.
-      // Seeded from `effective` for the same reason as everything else above —
-      // a tenant whose saved self-toggle is being overridden by a platform force
-      // must see the enforced state, not an inert one it once chose.
-      twoFactorEnabled: e.twoFactorEnabled,
+      maxLoginAttempts: e.maxLoginAttempts,
+      lockoutMinutes: e.lockoutMinutes,
+      captchaAfterFailures: e.captchaAfterFailures,
       forceTwoFactor: e.forceTwoFactor,
     };
   }, [data]);
@@ -140,30 +134,25 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
   // Rule mutations refetch the whole policy. Keep unsaved edits as a separate
   // overlay so refetches update untouched fields without replacing what the user
   // is still editing (especially ipMode before its first rule is added).
-  const draft = useMemo(() => ({ ...serverDraft, ...edits }), [serverDraft, edits]);
-
-  const isTenant = data?.scope === 'tenant';
-  const baseline = data?.baseline;
-
-  // Grey out options the server would reject anyway. UX only — the server
-  // re-validates every write, because a caller talking to the API directly is not
-  // running this code.
-  const blocked = useMemo(
-    () => (field: StrictnessField, v: number | string) =>
-      isTenant && baseline ? isBelowBaseline(field, v, baseline[field as keyof LoginPolicy] as number | string) : false,
-    [isTenant, baseline],
+  const draft = useMemo(
+    () => ({ ...serverDraft, ...edits }),
+    [serverDraft, edits],
   );
-
-  const belowBaseline = new Set(data?.belowBaseline ?? []);
 
   if (isLoading || !data) return <LoadingPanel />;
 
-  const set = <K extends keyof LoginPolicyWrite>(k: K, v: LoginPolicyWrite[K]) => {
+  const set = <K extends keyof LoginPolicyWrite>(
+    k: K,
+    v: LoginPolicyWrite[K],
+  ) => {
     setEdits((d) => ({ ...d, [k]: v }));
     setTouched((s) => new Set(s).add(k as string));
+    setResetFields((fields) => {
+      const next = new Set(fields);
+      next.delete(k as string);
+      return next;
+    });
   };
-
-  const PLATFORM_ONLY = ['maxLoginAttempts', 'lockoutMinutes', 'captchaAfterFailures'];
 
   const dirty = touched.size > 0;
 
@@ -173,77 +162,78 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
     if (!data) return;
     setEdits({});
     setTouched(new Set());
+    setResetFields(new Set());
   };
 
-  // GT-12316：重置——平台视角回产品默认值（对齐 internal/api/login_policy.go
-  // baselineLoginPolicy() 的代码缺省），租户视角回平台基线。仅填充 draft 并
-  // 标记 touched，仍需点「保存」才持久化（原型 layer-4 重置确认弹窗语义）。
+  // 重置展示 System Default，但保存时发送 null，让服务端删除当前作用域
+  // 的显式值；以后 System Default 变化时仍会自然跟随。
   const onResetToDefault = () => {
     if (!data) return;
-    const target: LoginPolicyWrite = isTenant && baseline
-      ? {
-          minLength: baseline.minLength,
-          minCharClasses: baseline.minCharClasses,
-          historyLimit: baseline.historyLimit,
-          passwordMaxAgeDays: baseline.passwordMaxAgeDays,
-          sessionTimeoutSecs: baseline.sessionTimeoutSecs,
-          maxOnline: baseline.maxOnline,
-          overflowPolicy: baseline.overflowPolicy,
-          ipMode: 'none',
-        }
-      : {
-          minLength: 10,
-          minCharClasses: 2,
-          historyLimit: 3,
-          passwordMaxAgeDays: 0,
-          sessionTimeoutSecs: 86400,
-          maxOnline: 0,
-          overflowPolicy: 'kick_earliest',
-          ipMode: 'none',
-        };
+    const d = data.defaults;
+    const target: LoginPolicyWrite = {
+      minLength: d.minLength,
+      minCharClasses: d.minCharClasses,
+      historyLimit: d.historyLimit,
+      passwordMaxAgeDays: d.passwordMaxAgeDays,
+      sessionTimeoutSecs: d.sessionTimeoutSecs,
+      maxOnline: d.maxOnline,
+      overflowPolicy: d.overflowPolicy,
+      ipMode: d.ipMode,
+      maxLoginAttempts: d.maxLoginAttempts,
+      lockoutMinutes: d.lockoutMinutes,
+      captchaAfterFailures: d.captchaAfterFailures,
+      forceTwoFactor: d.forceTwoFactor,
+    };
     setEdits((d) => ({ ...d, ...target }));
     setTouched((prev) => {
       const next = new Set(prev);
       Object.keys(target).forEach((k) => next.add(k));
       return next;
     });
+    setResetFields(new Set(Object.keys(target)));
     setResetConfirmOpen(false);
-    toast.info(t('resetApplied'));
+    toast.info(t("resetApplied"));
   };
 
   const onSave = () => {
     const body: LoginPolicyWrite = {};
     for (const k of touched) {
-      // Platform-only fields are rejected by the server on a tenant scope
-      // (deliberately — a tenant admin is told why rather than watching the change
-      // vanish), so never send them from there.
-      if (isTenant && PLATFORM_ONLY.includes(k)) continue;
-      (body as Record<string, unknown>)[k] = (draft as Record<string, unknown>)[k];
+      (body as Record<string, unknown>)[k] = resetFields.has(k)
+        ? null
+        : (draft as Record<string, unknown>)[k];
     }
     update.mutate(body, {
       onSuccess: () => {
         setEdits({});
         setTouched(new Set());
-        toast.success(t('saved'));
+        setResetFields(new Set());
+        toast.success(t("saved"));
       },
-      onError: (e) => toast.error(apiErrorMessage(e, t('saveFailed'))),
+      onError: (e) => toast.error(apiErrorMessage(e, t("saveFailed"))),
     });
   };
 
   const numSelect = (
-    field: StrictnessField,
+    field: NumericPolicyField,
     tiers: number[],
     value: number | undefined,
     onChange: (v: number) => void,
     fmt: (n: number) => string = String,
   ) => (
-    <Select value={String(value ?? '')} onValueChange={(v) => onChange(Number(v))}>
-      <SelectTrigger className="h-9 w-40" id={`lp-${field}`} aria-label={t(`fields.${field}`)}>
+    <Select
+      value={String(value ?? "")}
+      onValueChange={(v) => onChange(Number(v))}
+    >
+      <SelectTrigger
+        className="h-9 w-40"
+        id={`lp-${field}`}
+        aria-label={t(`fields.${field}`)}
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {tiers.map((n) => (
-          <SelectItem key={n} value={String(n)} disabled={blocked(field, n)}>
+          <SelectItem key={n} value={String(n)}>
             {fmt(n)}
           </SelectItem>
         ))}
@@ -251,163 +241,156 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
     </Select>
   );
 
-  const belowHint = (field: string) =>
-    belowBaseline.has(field) ? (
-      <span role="alert" className="text-xs text-warning">
-        {t('belowBaseline')}
-      </span>
-    ) : null;
-
-  const tenantRules = data.ipRules.tenant ?? [];
-  const platformRules = data.ipRules.platform ?? [];
-  const rules = isTenant ? tenantRules : platformRules;
+  const rules = data.ipRules ?? [];
 
   return (
     <div className="space-y-4" data-testid="login-security-tab">
-      {isTenant && (
-        <div className="flex items-start gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
-          <Lock className="mt-0.5 h-4 w-4 flex-shrink-0" />
-          <span>{t('tenantBanner')}</span>
+      <SectionCard title={t("sections.password")}>
+        <Row label={t("fields.minLength")}>
+          {numSelect(
+            "minLength",
+            data.tiers.minLength ?? [],
+            draft.minLength ?? undefined,
+            (v) => set("minLength", v),
+          )}
+        </Row>
+        <div data-testid="login-security-min-char-classes-row">
+          <Row
+            label={t("fields.minCharClasses")}
+            hint={t("hints.minCharClasses")}
+          >
+            {numSelect(
+              "minCharClasses",
+              data.tiers.minCharClasses ?? [1, 2, 3, 4],
+              draft.minCharClasses ?? undefined,
+              (v) => set("minCharClasses", v),
+              (n) => t("classCount", { n }),
+            )}
+          </Row>
         </div>
-      )}
-
-      <SectionCard title={t('sections.password')}>
-        <Row label={t('fields.minLength')}>
-          {numSelect('minLength', data.tiers.minLength ?? [], draft.minLength ?? undefined, (v) =>
-            set('minLength', v),
-          )}
-          {belowHint('minLength')}
-        </Row>
-        <Row label={t('fields.minCharClasses')} hint={t('hints.minCharClasses')}>
+        <Row label={t("fields.historyLimit")} hint={t("hints.historyLimit")}>
           {numSelect(
-            'minCharClasses',
-            data.tiers.minCharClasses ?? [1, 2, 3, 4],
-            draft.minCharClasses ?? undefined,
-            (v) => set('minCharClasses', v),
-            (n) => t('classCount', { n }),
-          )}
-          {belowHint('minCharClasses')}
-        </Row>
-        <Row label={t('fields.historyLimit')} hint={t('hints.historyLimit')}>
-          {numSelect(
-            'historyLimit',
+            "historyLimit",
             HISTORY_TIERS,
             draft.historyLimit ?? undefined,
-            (v) => set('historyLimit', v),
-            (n) => (n === 0 ? t('unlimited') : t('times', { n })),
+            (v) => set("historyLimit", v),
+            (n) => (n === 0 ? t("unlimited") : t("times", { n })),
           )}
-          {belowHint('historyLimit')}
         </Row>
-        <Row label={t('fields.passwordMaxAgeDays')} hint={t('hints.passwordMaxAgeDays')}>
+        <Row
+          label={t("fields.passwordMaxAgeDays")}
+          hint={t("hints.passwordMaxAgeDays")}
+        >
           {numSelect(
-            'passwordMaxAgeDays',
+            "passwordMaxAgeDays",
             VALIDITY_TIERS,
             draft.passwordMaxAgeDays ?? undefined,
-            (v) => set('passwordMaxAgeDays', v),
-            (n) => (n === 0 ? t('neverExpires') : t('days', { n })),
+            (v) => set("passwordMaxAgeDays", v),
+            (n) => (n === 0 ? t("neverExpires") : t("days", { n })),
           )}
-          {belowHint('passwordMaxAgeDays')}
         </Row>
       </SectionCard>
 
-      <SectionCard title={t('sections.loginControl')}>
-        {/* Read-only, and labelled as such rather than omitted: these are NOT
-            layered, because they are evaluated pre-auth and keyed by username — an
-            unknown user has no tenant and would fall back to the baseline while a
-            real one used its tenant's value, and the difference between those two
-            answers tells an attacker whether the account exists. */}
-        <Row label={t('fields.maxLoginAttempts')} hint={isTenant ? t('platformOnly') : undefined}>
-          {isTenant ? (
-            <span className="text-sm tabular-nums text-muted-foreground" data-testid="global-max-attempts">
-              {data.globalOnly.maxLoginAttempts}
-            </span>
-          ) : (
-            <Select
-              value={String(draft.maxLoginAttempts ?? data.globalOnly.maxLoginAttempts)}
-              onValueChange={(v) => set('maxLoginAttempts', Number(v))}
+      <SectionCard title={t("sections.loginControl")}>
+        <Row label={t("fields.maxLoginAttempts")}>
+          <Select
+            value={String(draft.maxLoginAttempts)}
+            onValueChange={(v) => set("maxLoginAttempts", Number(v))}
+          >
+            <SelectTrigger
+              className="h-9 w-40"
+              aria-label={t("fields.maxLoginAttempts")}
+              data-testid="login-security-max-login-attempts"
             >
-              <SelectTrigger className="h-9 w-40" aria-label={t('fields.maxLoginAttempts')}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MAX_ATTEMPTS_TIERS.map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {t('times', { n })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </Row>
-        <Row label={t('fields.lockoutMinutes')} hint={isTenant ? t('platformOnly') : t('hints.lockoutMinutes')}>
-          {isTenant ? (
-            <span className="text-sm tabular-nums text-muted-foreground">
-              {data.globalOnly.lockoutMinutes === -1
-                ? t('permanentLock')
-                : t('minutes', { n: data.globalOnly.lockoutMinutes })}
-            </span>
-          ) : (
-            <Select
-              value={String(draft.lockoutMinutes ?? data.globalOnly.lockoutMinutes)}
-              onValueChange={(v) => set('lockoutMinutes', Number(v))}
-            >
-              <SelectTrigger className="h-9 w-40" aria-label={t('fields.lockoutMinutes')}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LOCKOUT_TIERS.map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {n === -1 ? t('permanentLock') : t('minutes', { n })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </Row>
-        <Row label={t('fields.captchaAfterFailures')} hint={isTenant ? t('platformOnly') : t('hints.captchaAfterFailures')}>
-          {isTenant ? (
-            <span className="text-sm tabular-nums text-muted-foreground">
-              {data.globalOnly.captchaAfterFailures}
-            </span>
-          ) : (
-            <Select
-              value={String(draft.captchaAfterFailures ?? data.globalOnly.captchaAfterFailures)}
-              onValueChange={(v) => set('captchaAfterFailures', Number(v))}
-            >
-              <SelectTrigger className="h-9 w-40" aria-label={t('fields.captchaAfterFailures')}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CAPTCHA_TIERS.map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {t('times', { n })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </Row>
-        <Row label={t('fields.sessionTimeoutSecs')}>
-          {numSelect(
-            'sessionTimeoutSecs',
-            SESSION_TIMEOUT_TIERS,
-            draft.sessionTimeoutSecs ?? undefined,
-            (v) => set('sessionTimeoutSecs', v),
-            (n) => t('seconds', { n }),
-          )}
-          {belowHint('sessionTimeoutSecs')}
-        </Row>
-      </SectionCard>
-
-      <SectionCard title={t('sections.ipControl')}>
-        <Row label={t('fields.ipMode')}>
-          <Select value={draft.ipMode ?? 'none'} onValueChange={(v) => set('ipMode', v as LoginPolicy['ipMode'])}>
-            <SelectTrigger className="h-9 w-40" aria-label={t('fields.ipMode')}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {(['none', 'whitelist', 'blacklist'] as const).map((m) => (
-                <SelectItem key={m} value={m}>
+              {MAX_ATTEMPTS_TIERS.map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {t("times", { n })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Row>
+        <Row
+          label={t("fields.lockoutMinutes")}
+          hint={t("hints.lockoutMinutes")}
+        >
+          <Select
+            value={String(draft.lockoutMinutes)}
+            onValueChange={(v) => set("lockoutMinutes", Number(v))}
+          >
+            <SelectTrigger
+              className="h-9 w-40"
+              aria-label={t("fields.lockoutMinutes")}
+              data-testid="login-security-lockout-minutes"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LOCKOUT_TIERS.map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n === -1 ? t("permanentLock") : t("minutes", { n })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Row>
+        <Row
+          label={t("fields.captchaAfterFailures")}
+          hint={t("hints.captchaAfterFailures")}
+        >
+          <Select
+            value={String(draft.captchaAfterFailures)}
+            onValueChange={(v) => set("captchaAfterFailures", Number(v))}
+          >
+            <SelectTrigger
+              className="h-9 w-40"
+              aria-label={t("fields.captchaAfterFailures")}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CAPTCHA_TIERS.map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {t("times", { n })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Row>
+        <Row label={t("fields.sessionTimeoutSecs")}>
+          {numSelect(
+            "sessionTimeoutSecs",
+            SESSION_TIMEOUT_TIERS,
+            draft.sessionTimeoutSecs ?? undefined,
+            (v) => set("sessionTimeoutSecs", v),
+            (n) => t("seconds", { n }),
+          )}
+        </Row>
+      </SectionCard>
+
+      <SectionCard title={t("sections.ipControl")}>
+        <Row label={t("fields.ipMode")}>
+          <Select
+            value={draft.ipMode ?? "none"}
+            onValueChange={(v) => set("ipMode", v as LoginPolicy["ipMode"])}
+          >
+            <SelectTrigger
+              className="h-9 w-40"
+              aria-label={t("fields.ipMode")}
+              data-testid="login-security-ip-mode"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(["none", "whitelist", "blacklist"] as const).map((m) => (
+                <SelectItem
+                  key={m}
+                  value={m}
+                  data-testid={`login-security-ip-mode-option-${m}`}
+                >
                   {t(`ipModes.${m}`)}
                 </SelectItem>
               ))}
@@ -415,32 +398,44 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
           </Select>
         </Row>
 
-        {draft.ipMode && draft.ipMode !== 'none' && (
+        {draft.ipMode && draft.ipMode !== "none" && (
           <div className="space-y-2 pt-2">
-            {/* A tenant sees ONLY its own rules. The platform layer is evaluated
-                separately and a login must pass both — showing platform rules here
-                would suggest the tenant could delete them, and clearing the list
-                would look like it had lifted a platform restriction. */}
-            <ul className="divide-y divide-border rounded-md border border-border" data-testid="ip-rules">
+            {/* Each view shows only the rule set for the login population it
+                configures. Platform rules apply to platform administrators;
+                Tenant rules apply to that tenant's users. */}
+            <ul
+              className="divide-y divide-border rounded-md border border-border"
+              data-testid="ip-rules"
+            >
               {rules.length === 0 && (
-                <li className="px-3 py-3 text-center text-sm text-muted-foreground">{t('noRules')}</li>
+                <li className="px-3 py-3 text-center text-sm text-muted-foreground">
+                  {t("noRules")}
+                </li>
               )}
               {rules.map((r) => (
-                <li key={r.id} className="flex items-center gap-3 px-3 py-2">
+                <li
+                  key={r.id}
+                  className="flex items-center gap-3 px-3 py-2"
+                  data-testid={`login-security-ip-rule-${r.id}`}
+                >
                   <span className="font-mono text-sm">{r.cidr}</span>
-                  <span className="flex-1 text-sm text-muted-foreground">{r.remark || '—'}</span>
+                  <span className="flex-1 text-sm text-muted-foreground">
+                    {r.remark || "—"}
+                  </span>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="text-danger"
+                    data-testid={`login-security-ip-rule-delete-${r.id}`}
                     onClick={() =>
                       delRule.mutate(r.id, {
-                        onError: (e) => toast.error(apiErrorMessage(e, t('saveFailed'))),
+                        onError: (e) =>
+                          toast.error(apiErrorMessage(e, t("saveFailed"))),
                       })
                     }
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {t('delete')}
+                    {t("delete")}
                   </Button>
                 </li>
               ))}
@@ -451,104 +446,94 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
                 onChange={(e) => setNewCidr(e.target.value)}
                 placeholder="192.168.1.0/24"
                 className="h-9 w-48"
-                aria-label={t('fields.cidr')}
+                aria-label={t("fields.cidr")}
+                data-testid="login-security-ip-cidr"
               />
               <Input
                 value={newRemark}
                 onChange={(e) => setNewRemark(e.target.value)}
-                placeholder={t('fields.remark')}
+                placeholder={t("fields.remark")}
                 className="h-9 w-40"
-                aria-label={t('fields.remark')}
+                aria-label={t("fields.remark")}
+                data-testid="login-security-ip-remark"
               />
               <Button
                 variant="outline"
                 className="h-9"
+                data-testid="login-security-ip-add"
                 onClick={() =>
                   addRule.mutate(
                     { cidr: newCidr.trim(), remark: newRemark.trim() },
                     {
                       onSuccess: () => {
-                        setNewCidr('');
-                        setNewRemark('');
+                        setNewCidr("");
+                        setNewRemark("");
                       },
                       // The lock-out guard lives on the server: saving a whitelist
                       // that omits your own address shuts you out of the console
                       // with no way back in. Surface its message verbatim.
-                      onError: (e) => toast.error(apiErrorMessage(e, t('saveFailed'))),
+                      onError: (e) =>
+                        toast.error(apiErrorMessage(e, t("saveFailed"))),
                     },
                   )
                 }
               >
                 <Plus className="h-4 w-4" />
-                {t('addRule')}
+                {t("addRule")}
               </Button>
             </div>
           </div>
         )}
       </SectionCard>
 
-      <SectionCard title={t('sections.sso')}>
-        <Row label={t('fields.maxOnline')} hint={t('hints.maxOnline')}>
+      <SectionCard title={t("sections.sso")}>
+        <Row label={t("fields.maxOnline")} hint={t("hints.maxOnline")}>
           {numSelect(
-            'maxOnline',
+            "maxOnline",
             MAX_ONLINE_TIERS,
             draft.maxOnline ?? undefined,
-            (v) => set('maxOnline', v),
-            (n) => (n === 0 ? t('unlimited') : String(n)),
+            (v) => set("maxOnline", v),
+            (n) => (n === 0 ? t("unlimited") : String(n)),
           )}
-          {belowHint('maxOnline')}
         </Row>
-        <Row label={t('fields.overflowPolicy')} hint={t('hints.overflowPolicy')}>
+        <Row
+          label={t("fields.overflowPolicy")}
+          hint={t("hints.overflowPolicy")}
+        >
           <Select
-            value={draft.overflowPolicy ?? 'kick_earliest'}
-            onValueChange={(v) => set('overflowPolicy', v as LoginPolicy['overflowPolicy'])}
+            value={draft.overflowPolicy ?? "kick_earliest"}
+            onValueChange={(v) =>
+              set("overflowPolicy", v as LoginPolicy["overflowPolicy"])
+            }
           >
-            <SelectTrigger className="h-9 w-48" aria-label={t('fields.overflowPolicy')}>
+            <SelectTrigger
+              className="h-9 w-48"
+              aria-label={t("fields.overflowPolicy")}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {(['kick_earliest', 'reject_new'] as const).map((m) => (
-                <SelectItem key={m} value={m} disabled={blocked('overflowPolicy', m)}>
+              {(["kick_earliest", "reject_new"] as const).map((m) => (
+                <SelectItem key={m} value={m}>
                   {t(`overflowPolicies.${m}`)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {belowHint('overflowPolicy')}
         </Row>
       </SectionCard>
 
-      <SectionCard title={t('sections.twoFactor')} testId="login-security-2fa">
-        {isTenant ? (
-          <Row
-            label={t('fields.twoFactorEnabled')}
-            hint={data.effective.forceTwoFactor ? undefined : t('hints.twoFactorEnabled')}
-          >
-            <Switch
-              data-testid="twofactor-enabled-toggle"
-              checked={data.effective.forceTwoFactor ? true : (draft.twoFactorEnabled ?? false)}
-              disabled={data.effective.forceTwoFactor}
-              onCheckedChange={(v) => set('twoFactorEnabled', v)}
-            />
-            {data.effective.forceTwoFactor && (
-              <span
-                data-testid="twofactor-locked-hint"
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-              >
-                <ShieldCheck className="h-3.5 w-3.5" />
-                {t('hints.twoFactorLocked')}
-              </span>
-            )}
-          </Row>
-        ) : (
-          <Row label={t('fields.forceTwoFactor')} hint={t('hints.forceTwoFactor')}>
-            <Switch
-              data-testid="twofactor-force-toggle"
-              checked={draft.forceTwoFactor ?? false}
-              onCheckedChange={(v) => set('forceTwoFactor', v)}
-            />
-          </Row>
-        )}
+      <SectionCard title={t("sections.twoFactor")} testId="login-security-2fa">
+        <Row
+          label={t("fields.forceTwoFactor")}
+          hint={t("hints.forceTwoFactor")}
+        >
+          <Switch
+            data-testid="twofactor-force-toggle"
+            checked={draft.forceTwoFactor ?? false}
+            onCheckedChange={(v) => set("forceTwoFactor", v)}
+          />
+        </Row>
       </SectionCard>
 
       {/* GT-12316：底部按钮对齐原型——重置为默认 / 取消(dirty 可用) /
@@ -560,7 +545,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
             className="mr-auto inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2.5 py-1 text-xs text-amber-600 dark:text-amber-400"
           >
             <AlertTriangle className="h-3.5 w-3.5" />
-            {t('unsavedChanges')}
+            {t("unsavedChanges")}
           </span>
         )}
         <Button
@@ -568,7 +553,7 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
           onClick={() => setResetConfirmOpen(true)}
           data-testid="login-security-reset"
         >
-          {isTenant ? t('resetToBaseline') : t('resetToDefault')}
+          {t("resetToDefault")}
         </Button>
         <Button
           variant="outline"
@@ -576,23 +561,27 @@ export function LoginSecurityTab({ tenantId }: { tenantId?: number | null }) {
           disabled={!dirty}
           data-testid="login-security-cancel"
         >
-          {t('cancel')}
+          {t("cancel")}
         </Button>
-        <Button onClick={onSave} disabled={update.isPending || !dirty} data-testid="login-security-save">
+        <Button
+          onClick={onSave}
+          disabled={update.isPending || !dirty}
+          data-testid="login-security-save"
+        >
           {update.isPending ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Save className="mr-2 h-4 w-4" />
           )}
-          {t('save')}
+          {t("save")}
         </Button>
       </div>
 
       <ConfirmDialog
         open={resetConfirmOpen}
         onOpenChange={setResetConfirmOpen}
-        title={isTenant ? t('resetToBaseline') : t('resetToDefault')}
-        description={t('resetConfirmDescription')}
+        title={t("resetToDefault")}
+        description={t("resetConfirmDescription")}
         onConfirm={onResetToDefault}
       />
     </div>

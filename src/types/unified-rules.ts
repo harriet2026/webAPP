@@ -1,6 +1,6 @@
 export type RuleClass = 'tag' | 'action' | 'route';
 export type StageType = 'onconnect' | 'mail' | 'rcpt' | 'header' | 'data' | 'sideline';
-export type RuleAction = 'accept' | 'proceed' | 'reject' | 'quarantine' | 'sideline' | 'audit' | 'tempfail' | 'disconnect';
+export type RuleAction = 'accept' | 'proceed' | 'observe' | 'reject' | 'quarantine' | 'sideline' | 'bounce' | 'audit' | 'tempfail' | 'disconnect' | 'discard';
 
 export interface RuleNode {
   type: 'AND' | 'OR' | 'NOT' | 'condition';
@@ -31,7 +31,6 @@ export interface Rule {
   action?: string;
   metadata?: string;
   is_active: boolean;
-  observe_mode?: boolean;
   valid_from?: string | null;
   valid_until?: string | null;
   email_type?: string;
@@ -67,7 +66,6 @@ export interface CreateRuleRequest {
   action?: string;
   metadata?: Record<string, unknown>;
   is_active?: boolean;
-  observe_mode?: boolean;
   valid_from?: string | null;
   valid_until?: string | null;
   email_type?: string;
@@ -84,7 +82,6 @@ export interface UpdateRuleRequest {
   action?: string;
   metadata?: Record<string, unknown>;
   is_active?: boolean;
-  observe_mode?: boolean;
   valid_from?: string | null;
   valid_until?: string | null;
   expected_updated_at?: string | null;

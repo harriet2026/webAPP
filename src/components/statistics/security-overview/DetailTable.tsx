@@ -14,7 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { NON_SERIES_KEYS, type DetailTableData, type ViewBy } from '@/lib/api/security-overview';
+import {
+  DELIVERY_RESULT_KEYS,
+  NON_SERIES_KEYS,
+  type DetailTableData,
+  type ViewBy,
+} from '@/lib/api/security-overview';
 import { seriesColor, blockRateBgClass } from './constants';
 
 interface DetailTableProps {
@@ -46,16 +51,18 @@ export const DETAIL_SERIES_ORDER: Partial<Record<ViewBy, readonly string[]>> = {
     'recall',
   ],
   threat_level: ['normal', 'low', 'medium', 'high', 'critical'],
-  delivery_result: ['delivered', 'failed', 'cancelled', 'in_delivery', 'partial_delivered', 'unknown'],
+  delivery_result: DELIVERY_RESULT_KEYS,
 };
 
 // advanced_review（灰名单）/ sideline / greylist / mark_deliver 已从执行动作枚举中移除，安全总览同步过滤。
 const EXCLUDED_ACTION_KEYS = new Set(['advanced_review', 'sideline', 'greylist', 'mark_deliver']);
+const DELIVERY_RESULT_KEY_SET = new Set<string>(DELIVERY_RESULT_KEYS);
 
 function orderedSeriesKeys(row: Record<string, unknown>, viewBy: ViewBy): string[] {
   const available = Object.keys(row).filter((key) => {
     if (key === 'date' || NON_SERIES_KEYS.has(key)) return false;
     if (viewBy === 'action' && EXCLUDED_ACTION_KEYS.has(key)) return false;
+    if (viewBy === 'delivery_result' && !DELIVERY_RESULT_KEY_SET.has(key)) return false;
     return true;
   });
   const preferred = DETAIL_SERIES_ORDER[viewBy] ?? [];
@@ -138,21 +145,21 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
                   {/* expand toggle column */}
                   <TableHead className="w-8 sticky left-0 bg-card z-10" />
                   {/* date column */}
-                  <TableHead className="w-32 sticky left-8 bg-card z-10">{t('table.date')}</TableHead>
+                  <TableHead data-testid="security-overview-detail-header-date" className="w-32 sticky left-8 bg-card z-10">{t('table.date')}</TableHead>
                   {hasTotalColumn && (
-                    <TableHead className="text-right min-w-[90px]">{t('table.total')}</TableHead>
+                    <TableHead data-testid="security-overview-detail-header-total" className="text-right min-w-[90px]">{t('table.total')}</TableHead>
                   )}
                   {dynamicKeys.map((k) => (
-                    <TableHead key={k} title={seriesLabel(k)} className={`text-right cursor-help ${allZeroKeys.has(k) ? 'text-muted-foreground/50' : ''}`}>
+                    <TableHead key={k} data-testid={`security-overview-detail-header-${k}`} title={seriesLabel(k)} className={`text-right cursor-help ${allZeroKeys.has(k) ? 'text-muted-foreground/50' : ''}`}>
                       {seriesLabel(k)}{allZeroKeys.has(k) ? ` (${t('table.allZero')})` : ''}
                     </TableHead>
                   ))}
                   {/* summary columns (GT-11934): fixed, right-hand, backend-computed */}
                   {hasBlockRateColumn && (
-                    <TableHead className="text-right min-w-[80px]">{t('table.blockRate')}</TableHead>
+                    <TableHead data-testid="security-overview-detail-header-block-rate" className="text-right min-w-[80px]">{t('table.blockRate')}</TableHead>
                   )}
                   {hasChangeColumn && (
-                    <TableHead className="text-right sticky right-0 bg-card z-10 min-w-[90px]">
+                    <TableHead data-testid="security-overview-detail-header-change" className="text-right sticky right-0 bg-card z-10 min-w-[90px]">
                       {t('table.change')}
                     </TableHead>
                   )}
@@ -228,7 +235,7 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
                         )}
                       </TableRow>
                       {isExpanded && (
-                        <TableRow className="bg-muted/30">
+                        <TableRow className="bg-muted/30" data-testid="security-overview-detail-expanded">
                           <TableCell />
                           <TableCell colSpan={dynamicKeys.length + 1 + summaryColCount}>
                             <div className="flex flex-col gap-4 py-2 sm:flex-row sm:items-center">

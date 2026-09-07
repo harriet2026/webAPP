@@ -109,12 +109,12 @@ export function DeliveryTrafficPage() {
           </div>
         )}
         {isError && !showLoading && (
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+          <div data-testid="delivery-load-failed" className="flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
             <span className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               {t('loadFailed')}
             </span>
-            <Button variant="outline" size="sm" onClick={() => void refetch()}>
+            <Button variant="outline" size="sm" data-testid="delivery-retry" onClick={() => void refetch()}>
               <RefreshCw className="h-4 w-4" />
               {t('retry')}
             </Button>

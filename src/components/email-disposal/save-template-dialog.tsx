@@ -112,6 +112,7 @@ export function SaveTemplateDialog({
             <Label htmlFor="template-name-input">{t("templateNameLabel")}</Label>
             <Input
               id="template-name-input"
+              data-testid="save-template-name"
               value={name}
               onChange={(e) =>
                 setName(e.target.value.slice(0, MAX_NAME_LENGTH))

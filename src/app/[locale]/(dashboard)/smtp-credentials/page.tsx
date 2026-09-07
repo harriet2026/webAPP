@@ -231,17 +231,17 @@ export default function SMTPCredentialsPage() {
       cell: ({ row }) => (
         <div className="flex gap-1">
           {row.original.locked_until && (
-            <Button variant="ghost" size="icon" onClick={() => unlockMutation.mutate(row.original.id)} title={t('smtpCredentials.unlock')}>
+            <Button variant="ghost" size="icon" data-testid={`smtp-credential-unlock-${row.original.id}`} onClick={() => unlockMutation.mutate(row.original.id)} title={t('smtpCredentials.unlock')}>
               <Unlock className="h-4 w-4" />
             </Button>
           )}
-          <Button variant="ghost" size="icon" onClick={() => setResetPasswordId(row.original.id)} title={t('smtpCredentials.resetPassword')}>
+          <Button variant="ghost" size="icon" data-testid={`smtp-credential-reset-${row.original.id}`} onClick={() => setResetPasswordId(row.original.id)} title={t('smtpCredentials.resetPassword')}>
             <Key className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>
+          <Button variant="ghost" size="icon" data-testid={`smtp-credential-edit-${row.original.id}`} onClick={() => handleOpenDialog(row.original)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setDeleteId(row.original.id)} className="text-destructive">
+          <Button variant="ghost" size="icon" data-testid={`smtp-credential-delete-${row.original.id}`} onClick={() => setDeleteId(row.original.id)} className="text-destructive">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -255,7 +255,7 @@ export default function SMTPCredentialsPage() {
         eyebrow={t('smtpCredentials.eyebrow')}
         title={t('smtpCredentials.title')}
         description={t('smtpCredentials.subtitle')}
-        actions={<Button onClick={() => handleOpenDialog()}>
+        actions={<Button onClick={() => handleOpenDialog()} data-testid="smtp-credentials-create">
           <Plus className="h-4 w-4 mr-2" />
           {t('smtpCredentials.create')}
         </Button>}
@@ -275,6 +275,7 @@ export default function SMTPCredentialsPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t('smtpCredentials.username') + ' / ID ...'}
+                  data-testid="smtp-credentials-search"
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   className="pl-9 pr-9"
@@ -295,7 +296,11 @@ export default function SMTPCredentialsPage() {
             </div>
           </PageFilters>
           <PageSurface>
-            <DataTable columns={columns} data={filteredCredentials} />
+            <DataTable
+              columns={columns}
+              data={filteredCredentials}
+              rowTestId={(row) => `smtp-credential-row-${row.id}`}
+            />
           </PageSurface>
         </>
       )}
@@ -308,26 +313,26 @@ export default function SMTPCredentialsPage() {
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label>{t('smtpCredentials.username')} *</Label>
-              <Input {...form.register('username')} />
+              <Input data-testid="smtp-credential-username" {...form.register('username')} />
             </div>
             {!editingCred && (
               <div className="space-y-2">
                 <Label>{t('common.password')} *</Label>
-                <Input type="password" {...form.register('password')} />
+                <Input type="password" data-testid="smtp-credential-password" {...form.register('password')} />
               </div>
             )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t('smtpCredentials.tenant')} *</Label>
-                <Input type="number" {...form.register('tenant_id', { valueAsNumber: true })} />
+                <Input type="number" data-testid="smtp-credential-tenant-id" {...form.register('tenant_id', { valueAsNumber: true })} />
               </div>
               <div className="space-y-2">
                 <Label>{t('smtpCredentials.authBackend')} *</Label>
                 <Select value={form.watch('auth_backend')} onValueChange={(v) => form.setValue('auth_backend', v as AuthBackend)}>
-                  <SelectTrigger><SelectValue>{{ local: t('smtpCredentials.backendLocal'), smtp_relay: t('smtpCredentials.backendSmtpRelay'), ldap: t('smtpCredentials.backendLdap') }[form.watch('auth_backend')]}</SelectValue></SelectTrigger>
+                  <SelectTrigger data-testid="smtp-credential-auth-backend"><SelectValue>{{ local: t('smtpCredentials.backendLocal'), smtp_relay: t('smtpCredentials.backendSmtpRelay'), ldap: t('smtpCredentials.backendLdap') }[form.watch('auth_backend')]}</SelectValue></SelectTrigger>
                   <SelectContent>
                     {opts.map((value) => (
-                      <SelectItem key={value} value={value}>
+                      <SelectItem key={value} value={value} data-testid={`smtp-credential-auth-backend-option-${value}`}>
                         {{ local: t('smtpCredentials.backendLocal'), smtp_relay: t('smtpCredentials.backendSmtpRelay'), ldap: t('smtpCredentials.backendLdap') }[value]}
                       </SelectItem>
                     ))}
@@ -338,18 +343,18 @@ export default function SMTPCredentialsPage() {
             {form.watch('auth_backend') !== 'local' && (
               <div className="space-y-2">
                 <Label>{t('smtpCredentials.backendConfig')}</Label>
-                <Input {...form.register('backend_config')} />
+                <Input data-testid="smtp-credential-backend-config" {...form.register('backend_config')} />
               </div>
             )}
             <div className="flex items-center space-x-2">
-              <Switch checked={form.watch('is_active')} onCheckedChange={(v) => form.setValue('is_active', v)} />
+              <Switch data-testid="smtp-credential-active" checked={form.watch('is_active')} onCheckedChange={(v) => form.setValue('is_active', v)} />
               <Label>{t('smtpCredentials.isActive')}</Label>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="outline" data-testid="smtp-credential-cancel" onClick={() => setDialogOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} data-testid="smtp-credential-save">
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {t('common.save')}
               </Button>
@@ -368,18 +373,18 @@ export default function SMTPCredentialsPage() {
       />
 
       <Dialog open={!!resetPasswordId} onOpenChange={(open) => !open && setResetPasswordId(null)}>
-        <DialogContent className="max-w-sm rounded-[28px] border-border/70 shadow-2xl">
+        <DialogContent className="max-w-sm rounded-[28px] border-border/70 shadow-2xl" data-testid="smtp-credential-reset-dialog">
           <DialogHeader>
             <DialogTitle>{t('smtpCredentials.resetPassword')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>{t('smtpCredentials.newPassword')}</Label>
-              <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              <Input type="password" data-testid="smtp-credential-reset-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setResetPasswordId(null)}>{t('common.cancel')}</Button>
-              <Button onClick={() => resetPasswordMutation.mutate({ id: resetPasswordId!, password: newPassword })} disabled={!newPassword || newPassword.length < 6}>
+              <Button data-testid="smtp-credential-reset-confirm" onClick={() => resetPasswordMutation.mutate({ id: resetPasswordId!, password: newPassword })} disabled={!newPassword || newPassword.length < 6}>
                 {t('common.confirm')}
               </Button>
             </DialogFooter>

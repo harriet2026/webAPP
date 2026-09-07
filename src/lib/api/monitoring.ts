@@ -1,4 +1,4 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import { apiRequest, type ApiRequestFn, type ConfigMutationResult } from './client';
 import type {
   NodesResp,
   HardwareResp,
@@ -277,8 +277,8 @@ export async function getSmtpConfig(fn: ApiRequestFn = apiRequest): Promise<Smtp
 export async function putSmtpConfig(
   payload: SmtpConfigPayload,
   fn: ApiRequestFn = apiRequest,
-): Promise<SmtpConfig> {
-  return fn(`/monitor/alert-smtp-config`, { method: 'PUT', body: payload });
+): Promise<ConfigMutationResult<SmtpConfig>> {
+  return fn<ConfigMutationResult<SmtpConfig>>(`/monitor/alert-smtp-config`, { method: 'PUT', body: payload });
 }
 
 export async function testSmtpConfig(

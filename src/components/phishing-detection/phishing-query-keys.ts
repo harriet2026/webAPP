@@ -7,7 +7,7 @@ export const phishingQueryKeys = {
   admissionRulesRoot: ['phish-admission-rules'] as const,
   admissionRules: (tenantId: PhishingTenantScope) => [...phishingQueryKeys.admissionRulesRoot, tenantId] as const,
   statsRoot: (tenantId: PhishingTenantScope) => ['phish-stats', tenantId] as const,
-  stats: (tenantId: PhishingTenantScope, range?: unknown) => [...phishingQueryKeys.statsRoot(tenantId), range] as const,
+  stats: (tenantId: PhishingTenantScope) => phishingQueryKeys.statsRoot(tenantId),
   logsRoot: (tenantId: PhishingTenantScope) => ['phish-logs', tenantId] as const,
   logs: (tenantId: PhishingTenantScope, filters?: unknown) => [...phishingQueryKeys.logsRoot(tenantId), filters] as const,
   detail: (tenantId: PhishingTenantScope, id: string | null) => ['phish-detail', tenantId, id] as const,

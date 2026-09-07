@@ -72,10 +72,10 @@ export function BlacklistConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent data-testid="blacklist-confirm-dialog">
         <DialogHeader>
           <DialogTitle>{t('topDomains.block')}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription data-testid="blacklist-confirm-impact">
             {t('topDomains.blockConfirm', { domain })}
           </DialogDescription>
         </DialogHeader>
@@ -85,12 +85,12 @@ export function BlacklistConfirmDialog({
             {t('direction.label')}
           </Label>
           <Select value={selectedDirection} onValueChange={(v) => setSelectedDirection(v as Direction)}>
-            <SelectTrigger size="sm" className="w-32">
+            <SelectTrigger size="sm" className="w-32" data-testid="blacklist-confirm-direction">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {DIRECTIONS.map((d) => (
-                <SelectItem key={d} value={d}>
+                <SelectItem key={d} value={d} data-testid={`blacklist-confirm-direction-option-${d}`}>
                   {t(`topDomains.blockDirection.${d}`)}
                 </SelectItem>
               ))}
@@ -101,6 +101,7 @@ export function BlacklistConfirmDialog({
         <DialogFooter>
           <Button
             variant="outline"
+            data-testid="blacklist-confirm-cancel"
             onClick={() => onOpenChange(false)}
             disabled={mutation.isPending}
           >
@@ -108,6 +109,7 @@ export function BlacklistConfirmDialog({
           </Button>
           <Button
             variant="destructive"
+            data-testid="blacklist-confirm-submit"
             onClick={handleConfirm}
             disabled={mutation.isPending}
           >

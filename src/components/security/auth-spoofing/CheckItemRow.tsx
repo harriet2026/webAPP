@@ -190,15 +190,15 @@ export function CheckItemRow({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
-              {t(`${warningI18nKey}.title` as any)}
+              {t(`${warningI18nKey}.title` as Parameters<typeof t>[0])}
             </AlertDialogTitle>
             <AlertDialogDescription className="whitespace-pre-line">
-              {t(`${warningI18nKey}.desc` as any)}
+              {t(`${warningI18nKey}.desc` as Parameters<typeof t>[0])}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {t(`${warningI18nKey}.cancel` as any)}
+              {t(`${warningI18nKey}.cancel` as Parameters<typeof t>[0])}
             </AlertDialogCancel>
             <AlertDialogAction
               className="border-warning/80 bg-warning text-white data-[hovered=true]:bg-warning/90 active:bg-warning/85"
@@ -207,7 +207,7 @@ export function CheckItemRow({
                 setPendingEnable(false);
               }}
             >
-              {t(`${warningI18nKey}.confirm` as any)}
+              {t(`${warningI18nKey}.confirm` as Parameters<typeof t>[0])}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

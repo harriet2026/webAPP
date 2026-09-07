@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mockBehaviorControlRulesList, mockBehaviorControlGroupsList } from './fixtures';
 import { resolveBehaviorControlRule } from '@/lib/api/behavior-control';
+import { dispatch } from './dispatcher';
 
 describe('behavior-control mock fixtures', () => {
   it('lists 35 rules', () => {
@@ -26,6 +27,15 @@ describe('behavior-control mock fixtures', () => {
   it('exposes sender/ip/org groups', () => {
     const items = mockBehaviorControlGroupsList().items;
     const types = new Set(items.map((r) => JSON.parse(r.metadata!).group_type));
+    expect(types).toEqual(new Set(['sender', 'ip', 'org']));
+  });
+  it('routes numeric pagination in the groups namespace to behavior-control groups', () => {
+    const response = dispatch({
+      method: 'GET',
+      path: '/unified-rules?rule_class=tag&rule_page=groups&include=member_count&page=1&page_size=100',
+    });
+    const items = (response.data as ReturnType<typeof mockBehaviorControlGroupsList>).items;
+    const types = new Set(items.map((rule) => JSON.parse(rule.metadata!).group_type));
     expect(types).toEqual(new Set(['sender', 'ip', 'org']));
   });
 });

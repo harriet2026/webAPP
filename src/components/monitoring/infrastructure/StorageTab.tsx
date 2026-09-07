@@ -22,10 +22,24 @@ interface StorageTabProps {
   node: string;
 }
 
+// 分区用量的档位是**唯一**判据来源：进度条配色与 data-level 都从这里派生，
+// 所以 QC 用例断言 data-level 等价于断言配色（expect_attribute 的白名单不含
+// class，配色判据只能靠语义属性表达）。阈值沿用原 usageColor 的 >=（注意与
+// ProcessesTab 的 overlay2Color 用 > 不同，两处不可互抄）。
+function usageLevel(pct: number): 'critical' | 'warning' | 'normal' {
+  if (pct >= 95) return 'critical';
+  if (pct >= 85) return 'warning';
+  return 'normal';
+}
+
+const USAGE_BAR_CLASS: Record<ReturnType<typeof usageLevel>, string> = {
+  critical: 'bg-red-500',
+  warning: 'bg-yellow-500',
+  normal: 'bg-green-500',
+};
+
 function usageColor(pct: number) {
-  if (pct >= 95) return 'bg-red-500';
-  if (pct >= 85) return 'bg-yellow-500';
-  return 'bg-green-500';
+  return USAGE_BAR_CLASS[usageLevel(pct)];
 }
 
 function formatBytes(bytes: number) {
@@ -94,6 +108,8 @@ export function StorageTab({ node }: StorageTabProps) {
                   </div>
                   <div className="h-3 rounded-full bg-muted">
                     <div
+                      data-testid="storage-partition-bar"
+                      data-level={usageLevel(p.usage_pct)}
                       className={cn('h-3 rounded-full transition-all', usageColor(p.usage_pct))}
                       style={{ width: `${Math.min(p.usage_pct, 100)}%` }}
                     />

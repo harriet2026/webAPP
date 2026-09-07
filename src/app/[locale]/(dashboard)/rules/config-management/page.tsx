@@ -1,79 +1,87 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Check, Loader2, Pencil, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Loader2, Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+
 import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-shell';
 import { LoadingPanel } from '@/components/shared/state-panel';
-import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useApiRequest } from '@/lib/api/client';
 import {
-  getConfigFiles,
-  getConfigOverridesForFile,
-  createConfigOverride,
-  updateConfigOverride,
-  deleteConfigOverride,
-  type ConfigFile,
-  type ConfigOverride,
-  type ConfigEntry,
-  type ConfigSection,
-} from '@/lib/api/config-files';
-import { getRuleSyncStatus } from '@/lib/api/rule-sync';
+  getPlatformConfig,
+  listConfigSchemas,
+  patchPlatformConfig,
+  acceptScopedConfigMutation,
+  type ConfigNamespaceSchema,
+  type ConfigSchemaKey,
+} from '@/lib/api/scoped-configs';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
-// Task 9b: [rule_sync] lives in apiserver.cf, and switching its `role` to
-// `replica` is destructive (spec §2: first sync overwrites this node's local
-// global rules wholesale). This page is the generic config-override editor
-// for every *.cf file, so the "is this THE dangerous edit" check is
-// special-cased here rather than generalized — see root AGENTS.md's note on
-// this file for why that's the intended shape, not a layering violation.
-const RULE_SYNC_CONFIG_FILE = 'apiserver.cf';
-const RULE_SYNC_SECTION = 'rule_sync';
-
-// Exported for webapp/tests/unit/config-management-replica-switch.test.ts.
+// Kept as an exported compatibility guard for callers that still render a
+// dedicated rule-sync transition confirmation. rule_sync is system/cluster
+// configuration now and is intentionally not editable on this page.
 export function isSwitchingToReplica(sectionName: string, key: string, value: string, activeFile: string): boolean {
-  return (
-    activeFile === RULE_SYNC_CONFIG_FILE &&
-    sectionName === RULE_SYNC_SECTION &&
-    key === 'role' &&
-    // Case-insensitive on PURPOSE, even though the backend's role comparison
-    // (storage.RuleSyncRole.Valid()) is an exact-match on lowercase
-    // "replica": an admin typing "Replica"/"REPLICA" into this GENERIC *.cf
-    // editor must still trip the destructive confirm dialog here. Without
-    // this, a case-sensitive check silently skips the confirm, the write
-    // goes straight to the config API, and the admin sees only a raw 400
-    // (invalid role) with no "this replaces every local global rule" warning
-    // ever shown -- worse UX for a typo than for the intended value.
-    value.trim().toLowerCase() === 'replica'
-  );
+  return activeFile === 'apiserver.cf' && sectionName === 'rule_sync' && key === 'role' && value.trim().toLowerCase() === 'replica';
 }
-
-type ValueType = 'string' | 'int' | 'float' | 'bool';
 
 interface EditState {
-  sectionName: string;
-  key: string;
+  key: ConfigSchemaKey;
   value: string;
-  valueType: ValueType;
-  isActive: boolean;
-  description: string;
-  overrideId?: number;
 }
 
-function inferValueType(raw: string): ValueType {
-  if (raw === 'true' || raw === 'false') return 'bool';
-  if (/^\d+$/.test(raw)) return 'int';
-  if (/^\d+\.\d+$/.test(raw)) return 'float';
-  return 'string';
+const EMPTY_SCHEMAS: ConfigNamespaceSchema[] = [];
+
+function valueAtPath(document: Record<string, unknown> | undefined, path: string): unknown {
+  let current: unknown = document;
+  for (const segment of path.split('.')) {
+    if (!current || typeof current !== 'object' || Array.isArray(current)) return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return current;
+}
+
+function displayValue(value: unknown): string {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+function parseValue(key: ConfigSchemaKey, raw: string): unknown {
+  switch (key.type) {
+    case 'bool':
+      if (raw !== 'true' && raw !== 'false') throw new Error('bool value must be true or false');
+      return raw === 'true';
+    case 'int': {
+      if (!/^-?\d+$/.test(raw.trim())) throw new Error('integer value is required');
+      return Number.parseInt(raw, 10);
+    }
+    case 'float': {
+      const value = Number(raw);
+      if (!Number.isFinite(value)) throw new Error('number value is required');
+      return value;
+    }
+    case 'string_list': {
+      const value = JSON.parse(raw);
+      if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) throw new Error('JSON string array is required');
+      return value;
+    }
+    case 'object': {
+      const value = JSON.parse(raw);
+      if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('JSON object is required');
+      return value;
+    }
+    case 'any':
+      return JSON.parse(raw);
+    default:
+      return raw;
+  }
 }
 
 export default function ConfigManagementPage() {
@@ -81,413 +89,167 @@ export default function ConfigManagementPage() {
   const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
-
-  const [activeFile, setActiveFile] = useState<string>('');
+  const [activeNamespace, setActiveNamespace] = useState('');
   const [editState, setEditState] = useState<EditState | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<ConfigOverride | null>(null);
   const [saving, setSaving] = useState(false);
-  // Task 9b: non-null while the "switch to replica" destructive confirm is
-  // open; carries the local global-rule count fetched fresh at click time
-  // (not from a stale background query) so the number the admin sees is the
-  // number that is actually about to become read-only / get overwritten.
-  const [replicaSwitchConfirm, setReplicaSwitchConfirm] = useState<{ globalRuleCount: number } | null>(null);
 
-  const { data: filesData, isLoading: filesLoading } = useQuery({
-    queryKey: ['config-files'],
-    queryFn: () => getConfigFiles(apiRequest),
+  const schemasQuery = useQuery({
+    queryKey: ['config-schemas'],
+    queryFn: () => listConfigSchemas(apiRequest),
   });
-
-  const files = filesData?.files ?? [];
+  const schemas = schemasQuery.data ?? EMPTY_SCHEMAS;
 
   useEffect(() => {
-    if (files.length > 0 && !activeFile) {
-      setActiveFile(files[0].name);
-    }
-  }, [files, activeFile]);
+    if (!activeNamespace && schemas.length > 0) setActiveNamespace(schemas[0].namespace);
+  }, [activeNamespace, schemas]);
 
-  const { data: overrides = [], isLoading: overridesLoading } = useQuery({
-    queryKey: ['config-overrides', activeFile],
-    queryFn: () => getConfigOverridesForFile(activeFile, apiRequest),
-    enabled: !!activeFile,
+  const configQuery = useQuery({
+    queryKey: ['platform-config', activeNamespace],
+    queryFn: () => getPlatformConfig(activeNamespace, apiRequest),
+    enabled: activeNamespace !== '',
   });
 
-  const overrideMap = useMemo(() => {
-    const m = new Map<string, ConfigOverride>();
-    for (const o of overrides) {
-      m.set(`${o.section_name}::${o.config_key}`, o);
-    }
-    return m;
-  }, [overrides]);
+  const activeSchema = schemas.find((schema) => schema.namespace === activeNamespace);
+  const effective = configQuery.data?.effective;
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteConfigOverride(id, apiRequest),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['config-overrides', activeFile] });
-      toast.success(t('common.deleteSuccess'));
-      setDeleteTarget(null);
-    },
-    onError: (err: Error) => toast.error(apiErrorMessage(err)),
-  });
-
-  const openEdit = (sectionName: string, entry: ConfigEntry, existing?: ConfigOverride) => {
-    setEditState({
-      sectionName,
-      key: entry.key,
-      value: existing ? existing.config_value : entry.file_value,
-      valueType: existing ? existing.value_type : inferValueType(entry.file_value),
-      isActive: existing ? existing.is_active : true,
-      description: existing ? existing.description : '',
-      overrideId: existing?.id,
-    });
-  };
-
-  const openAdd = (sectionName: string) => {
-    setEditState({
-      sectionName,
-      key: '',
-      value: '',
-      valueType: 'string',
-      isActive: true,
-      description: '',
-    });
-  };
-
-  const performSave = async () => {
-    if (!editState || !activeFile) return;
+  const save = async () => {
+    if (!editState || !activeSchema || !configQuery.data?.stored) return;
     setSaving(true);
     try {
-      if (editState.overrideId != null) {
-        await updateConfigOverride(editState.overrideId, {
-          config_value: editState.value,
-          value_type: editState.valueType,
-          is_active: editState.isActive,
-          description: editState.description,
-        }, apiRequest);
-        toast.success(t('common.updateSuccess'));
-      } else {
-        await createConfigOverride({
-          config_file: activeFile,
-          section_name: editState.sectionName,
-          config_key: editState.key,
-          config_value: editState.value,
-          value_type: editState.valueType,
-          is_active: editState.isActive,
-          description: editState.description,
-        }, apiRequest);
-        toast.success(t('common.createSuccess'));
-      }
-      queryClient.invalidateQueries({ queryKey: ['config-overrides', activeFile] });
+      const value = parseValue(editState.key, editState.value);
+      const operations = [{ op: 'set' as const, path: editState.key.path, value }];
+      const result = await patchPlatformConfig(
+        activeSchema.namespace,
+        configQuery.data.stored.version,
+        operations,
+        apiRequest,
+      );
+      queryClient.setQueryData(
+        ['platform-config', activeSchema.namespace],
+        acceptScopedConfigMutation(configQuery.data, result, operations),
+      );
       setEditState(null);
-    } catch (err) {
-      toast.error(apiErrorMessage(err, t('common.error')));
+      toast.success(t('common.updateSuccess'));
+    } catch (error) {
+      toast.error(error instanceof Error ? apiErrorMessage(error) : t('common.error'));
     } finally {
       setSaving(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!editState || !activeFile) return;
-    // Task 9b: [rule_sync] role -> replica is destructive (spec §2) — gate it
-    // behind an explicit confirm listing how many local global rules will be
-    // replaced, instead of saving immediately like every other config key.
-    if (isSwitchingToReplica(editState.sectionName, editState.key, editState.value, activeFile)) {
-      setSaving(true);
-      try {
-        const status = await getRuleSyncStatus(apiRequest);
-        setReplicaSwitchConfirm({ globalRuleCount: status.global_rule_count });
-      } catch (err) {
-        toast.error(apiErrorMessage(err, t('common.error')));
-      } finally {
-        setSaving(false);
-      }
-      return;
-    }
-    await performSave();
-  };
-
-  const confirmReplicaSwitch = async () => {
-    setReplicaSwitchConfirm(null);
-    await performSave();
-  };
-
-  const activeFileData = files.find((f) => f.name === activeFile);
-
-  if (filesLoading) return <LoadingPanel />;
+  if (schemasQuery.isLoading) return <LoadingPanel />;
 
   return (
-    <PageShell>
+    <PageShell data-testid="config-management-page">
       <PageHeader
         eyebrow={t('configManagement.eyebrow')}
         title={t('configManagement.title')}
         description={t('configManagement.description')}
       />
 
-      {files.length === 0 ? (
-        <PageSurface>
-          <p className="text-sm text-muted-foreground">{t('configManagement.noFiles')}</p>
-        </PageSurface>
+      {schemas.length === 0 ? (
+        <PageSurface><p className="text-sm text-muted-foreground">{t('configManagement.noFiles')}</p></PageSurface>
       ) : (
-        <Tabs value={activeFile} onValueChange={setActiveFile}>
-          <TabsList className="mb-4 flex-wrap h-auto gap-1">
-            {files.map((f: ConfigFile) => (
-              <TabsTrigger key={f.name} value={f.name} className="font-mono text-xs">
-                {f.name}
+        <Tabs value={activeNamespace} onValueChange={(value) => { setActiveNamespace(value); setEditState(null); }}>
+          <TabsList className="mb-4 h-auto flex-wrap gap-1">
+            {schemas.map((schema: ConfigNamespaceSchema) => (
+              <TabsTrigger key={schema.namespace} value={schema.namespace} className="font-mono text-xs">
+                {schema.namespace}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {files.map((f: ConfigFile) => (
-            <TabsContent key={f.name} value={f.name}>
-              {overridesLoading && f.name === activeFile ? (
-                <LoadingPanel />
-              ) : (
-                <div className="space-y-4">
-                  {(f.sections ?? []).map((section: ConfigSection) => (
-                    <PageSurface key={section.name} className="space-y-0 p-0 overflow-hidden">
-                      <div className="flex items-center justify-between px-4 py-2 bg-muted/40 border-b border-border/60">
-                        <span className="font-mono text-sm font-semibold text-foreground/80">
-                          [{section.name}]
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openAdd(section.name)}
-                          className="h-7 text-xs"
-                        >
-                          <Plus className="mr-1 h-3 w-3" />
-                          {t('configManagement.addOverride')}
-                        </Button>
-                      </div>
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-border/40">
-                            <th className="px-4 py-2 text-left font-medium text-muted-foreground w-1/4">
-                              {t('configManagement.key')}
-                            </th>
-                            <th className="px-4 py-2 text-left font-medium text-muted-foreground w-1/4">
-                              {t('configManagement.fileValue')}
-                            </th>
-                            <th className="px-4 py-2 text-left font-medium text-muted-foreground w-1/4">
-                              {t('configManagement.overrideValue')}
-                            </th>
-                            <th className="px-4 py-2 text-left font-medium text-muted-foreground w-1/6">
-                              {t('configManagement.status')}
-                            </th>
-                            <th className="px-4 py-2 text-right font-medium text-muted-foreground">
-                              {t('common.actions')}
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(section.entries ?? []).map((entry: ConfigEntry) => {
-                            const override = overrideMap.get(`${section.name}::${entry.key}`);
-                            return (
-                              <tr key={entry.key} className="border-b border-border/20 hover:bg-muted/20">
-                                <td className="px-4 py-2 font-mono text-xs">{entry.key}</td>
-                                <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                                  {entry.file_value || <span className="italic text-muted-foreground/50">—</span>}
-                                </td>
-                                <td className="px-4 py-2 font-mono text-xs">
-                                  {override ? (
-                                    <span className={override.is_active ? 'text-foreground' : 'text-muted-foreground line-through'}>
-                                      {override.config_value}
-                                    </span>
-                                  ) : (
-                                    <span className="italic text-muted-foreground/50">—</span>
-                                  )}
-                                </td>
-                                <td className="px-4 py-2">
-                                  {override ? (
-                                    <Badge variant={override.is_active ? 'default' : 'secondary'} className="text-xs">
-                                      {override.is_active ? t('configManagement.overridden') : t('configManagement.inactive')}
-                                    </Badge>
-                                  ) : null}
-                                </td>
-                                <td className="px-4 py-2 text-right">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => openEdit(section.name, entry, override)}
-                                    aria-label={t('common.edit')}
-                                  >
-                                    <Pencil className="h-3 w-3" />
-                                  </Button>
-                                  {override && (
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 text-destructive"
-                                      onClick={() => setDeleteTarget(override)}
-                                      aria-label={t('common.delete')}
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </PageSurface>
-                  ))}
-
-                  {/* Overrides that don't match any file key (extra DB overrides) */}
-                  {(() => {
-                    const fileKeys = new Set(
-                      (activeFileData?.sections ?? []).flatMap((s: ConfigSection) =>
-                        s.entries.map((e: ConfigEntry) => `${s.name}::${e.key}`),
-                      ),
-                    );
-                    const extras = overrides.filter((o) => !fileKeys.has(`${o.section_name}::${o.config_key}`));
-                    if (extras.length === 0) return null;
-                    return (
-                      <PageSurface className="space-y-0 p-0 overflow-hidden">
-                        <div className="px-4 py-2 bg-muted/40 border-b border-border/60">
-                          <span className="font-mono text-sm font-semibold text-foreground/80">
-                            {t('configManagement.extraOverrides')}
-                          </span>
-                        </div>
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b border-border/40">
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground w-1/5">{t('configManagement.section')}</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground w-1/5">{t('configManagement.key')}</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('configManagement.overrideValue')}</th>
-                              <th className="px-4 py-2 text-left font-medium text-muted-foreground w-1/6">{t('configManagement.status')}</th>
-                              <th className="px-4 py-2 text-right font-medium text-muted-foreground">{t('common.actions')}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {extras.map((o) => (
-                              <tr key={o.id} className="border-b border-border/20 hover:bg-muted/20">
-                                <td className="px-4 py-2 font-mono text-xs">{o.section_name}</td>
-                                <td className="px-4 py-2 font-mono text-xs">{o.config_key}</td>
-                                <td className="px-4 py-2 font-mono text-xs">{o.config_value}</td>
-                                <td className="px-4 py-2">
-                                  <Badge variant={o.is_active ? 'default' : 'secondary'} className="text-xs">
-                                    {o.is_active ? t('configManagement.overridden') : t('configManagement.inactive')}
-                                  </Badge>
-                                </td>
-                                <td className="px-4 py-2 text-right">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    onClick={() => openEdit(o.section_name, { key: o.config_key, file_value: '' }, o)}
-                                    aria-label={t('common.edit')}
-                                  >
-                                    <Pencil className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-destructive"
-                                    onClick={() => setDeleteTarget(o)}
-                                    aria-label={t('common.delete')}
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </PageSurface>
-                    );
-                  })()}
+          {configQuery.isLoading || !activeSchema || !effective ? <LoadingPanel /> : (
+            <PageSurface className="overflow-hidden p-0">
+              <div className="flex items-center justify-between border-b border-border/60 bg-muted/40 px-4 py-3">
+                <div>
+                  <p className="font-mono text-sm font-semibold">{activeSchema.namespace}</p>
+                  <p className="text-xs text-muted-foreground">schema v{activeSchema.schema_version} · config v{configQuery.data?.stored?.version ?? 0}</p>
                 </div>
-              )}
-            </TabsContent>
-          ))}
+                <Badge variant={configQuery.data?.published ? 'default' : 'secondary'}>
+                  {configQuery.data?.published ? 'published' : 'pending'}
+                </Badge>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/40">
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">{t('configManagement.key')}</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">scope</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">type</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">effective value</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">source</th>
+                      <th className="px-4 py-2 text-right font-medium text-muted-foreground">{t('common.actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeSchema.keys.map((key) => {
+                      const value = valueAtPath(effective.document, key.path);
+                      const editable = key.scope !== 'system_only' && !key.secret;
+                      return (
+                        <tr
+                          key={key.path}
+                          data-testid={`config-row-${activeSchema.namespace}-${key.path}`}
+                          className="border-b border-border/20 hover:bg-muted/20"
+                        >
+                          <td className="px-4 py-2 font-mono text-xs">{key.path}</td>
+                          <td className="px-4 py-2"><Badge variant="outline" className="font-mono text-[10px]">{key.scope}</Badge></td>
+                          <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{key.type}</td>
+                          <td className="max-w-md truncate px-4 py-2 font-mono text-xs" title={displayValue(value)}>
+                            {key.secret ? '[REDACTED]' : displayValue(value) || '—'}
+                          </td>
+                          <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{effective.provenance[key.path] ?? '—'}</td>
+                          <td className="px-4 py-2 text-right">
+                            <Button
+                              data-testid={`config-edit-${activeSchema.namespace}-${key.path}`}
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              disabled={!editable}
+                              onClick={() => setEditState({ key, value: displayValue(value) })}
+                              aria-label={t('common.edit')}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </PageSurface>
+          )}
         </Tabs>
       )}
 
-      {/* Edit / Add Override Dialog */}
       {editState && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl border border-border/70 bg-background p-6 shadow-2xl">
-            <h2 className="mb-4 text-base font-semibold">
-              {editState.overrideId != null ? t('configManagement.editOverride') : t('configManagement.addOverride')}
-            </h2>
+          <div data-testid="config-edit-dialog" className="w-full max-w-lg rounded-2xl border border-border/70 bg-background p-6 shadow-2xl">
+            <h2 className="mb-4 text-base font-semibold">{t('common.edit')}</h2>
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs">{t('configManagement.section')}</Label>
-                  <Input value={editState.sectionName} readOnly className="font-mono text-xs bg-muted" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">{t('configManagement.key')} *</Label>
-                  <Input
-                    value={editState.key}
-                    readOnly={editState.overrideId != null}
-                    onChange={(e) => setEditState({ ...editState, key: e.target.value })}
-                    className="font-mono text-xs"
-                    placeholder="config_key"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs">{t('configManagement.overrideValue')} *</Label>
-                  <Input
-                    value={editState.value}
-                    onChange={(e) => setEditState({ ...editState, value: e.target.value })}
-                    className="font-mono text-xs"
-                  />
-                  {editState.sectionName === RULE_SYNC_SECTION &&
-                    activeFile === RULE_SYNC_CONFIG_FILE &&
-                    editState.key === 'site_id' && (
-                      <p
-                        data-testid="rule-sync-site-id-hint"
-                        className="text-xs text-amber-600 dark:text-amber-400"
-                      >
-                        {t('ruleSync.siteIdHint')}
-                      </p>
-                    )}
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">{t('configManagement.valueType')}</Label>
-                  <Select
-                    value={editState.valueType}
-                    onValueChange={(v) => setEditState({ ...editState, valueType: v as ValueType })}
-                  >
-                    <SelectTrigger className="text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="string">string</SelectItem>
-                      <SelectItem value="int">int</SelectItem>
-                      <SelectItem value="float">float</SelectItem>
-                      <SelectItem value="bool">bool</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{t('configManagement.key')}</Label>
+                <Input value={editState.key.path} readOnly className="bg-muted font-mono text-xs" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">{t('configManagement.noteLabel')}</Label>
+                <Label className="text-xs">value ({editState.key.type})</Label>
                 <Input
-                  value={editState.description}
-                  onChange={(e) => setEditState({ ...editState, description: e.target.value })}
-                  className="text-xs"
+                  data-testid="config-edit-value"
+                  value={editState.value}
+                  onChange={(event) => setEditState({ ...editState, value: event.target.value })}
+                  className="font-mono text-xs"
                 />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="override-active"
-                  checked={editState.isActive}
-                  onCheckedChange={(v) => setEditState({ ...editState, isActive: v })}
-                />
-                <Label htmlFor="override-active" className="text-xs">{t('common.enabled')}</Label>
+                {(editState.key.type === 'object' || editState.key.type === 'string_list') && (
+                  <p className="text-xs text-muted-foreground">JSON</p>
+                )}
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setEditState(null)}>
-                <X className="mr-1 h-3 w-3" />
-                {t('common.cancel')}
+              <Button data-testid="config-edit-cancel" variant="outline" size="sm" onClick={() => setEditState(null)}>
+                <X className="mr-1 h-3 w-3" />{t('common.cancel')}
               </Button>
-              <Button size="sm" onClick={handleSave} disabled={saving}>
+              <Button data-testid="config-edit-save" size="sm" onClick={save} disabled={saving}>
                 {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Check className="mr-1 h-3 w-3" />}
                 {t('common.save')}
               </Button>
@@ -495,28 +257,6 @@ export default function ConfigManagementPage() {
           </div>
         </div>
       )}
-
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={t('configManagement.deleteOverride')}
-        description={t('common.confirmDelete')}
-        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
-        variant="destructive"
-      />
-
-      <ConfirmDialog
-        open={!!replicaSwitchConfirm}
-        onOpenChange={(open) => !open && setReplicaSwitchConfirm(null)}
-        title={t('ruleSync.switchConfirm.title')}
-        description={t('ruleSync.switchConfirm.description', {
-          count: replicaSwitchConfirm?.globalRuleCount ?? 0,
-        })}
-        confirmText={t('ruleSync.switchConfirm.confirmText')}
-        cancelText={t('ruleSync.switchConfirm.cancelText')}
-        onConfirm={confirmReplicaSwitch}
-        variant="destructive"
-      />
     </PageShell>
   );
 }

@@ -5,7 +5,19 @@ import { API_BASE } from '@/lib/api/client';
 
 export interface ImportMembersResult {
   imported: number;
+  skipped: { line: number; value: string; reason: 'already_exists' }[];
   failed: { line: number; value: string; reason: string }[];
+}
+
+export type ImportMemberResultRow =
+  | ({ status: 'skipped' } & ImportMembersResult['skipped'][number])
+  | ({ status: 'failed' } & ImportMembersResult['failed'][number]);
+
+export function importResultRows(result: ImportMembersResult): ImportMemberResultRow[] {
+  return [
+    ...result.skipped.map(row => ({ status: 'skipped' as const, ...row })),
+    ...result.failed.map(row => ({ status: 'failed' as const, ...row })),
+  ].sort((a, b) => a.line - b.line);
 }
 
 export interface ImportMembersOptions {

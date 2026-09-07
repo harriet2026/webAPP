@@ -83,7 +83,11 @@ export function KpiCards({ data, direction, isLoading }: KpiCardsProps) {
         const trend = data?.trends?.[card.key];
 
         return (
-          <Card key={card.key} className="gap-0 rounded-xl bg-card shadow-sm backdrop-blur-none">
+          <Card
+            key={card.key}
+            data-testid={`delivery-kpi-${card.key}`}
+            className="gap-0 rounded-xl bg-card shadow-sm backdrop-blur-none"
+          >
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div>

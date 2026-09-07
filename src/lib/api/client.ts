@@ -24,6 +24,30 @@ interface RequestOptions {
 
 export type ApiRequestFn = <T>(path: string, options?: RequestOptions) => Promise<T>;
 
+/**
+ * A configuration mutation may have committed its durable CAS while this
+ * process failed to publish the refreshed immutable snapshot. This is a
+ * successful write with delayed local visibility, not the endpoint's normal
+ * response DTO. Callers must keep it as a distinct union member: treating it
+ * as the submitted request or as the normal response can lose server-owned
+ * fields such as versions, timestamps, masks, and warnings.
+ */
+export interface PublicationPendingResponse {
+  committed: true;
+  published: false;
+  status: 'publication_pending';
+}
+
+export type ConfigMutationResult<T> = T | PublicationPendingResponse;
+
+export function isPublicationPendingResponse(value: unknown): value is PublicationPendingResponse {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const candidate = value as Partial<PublicationPendingResponse>;
+  return candidate.committed === true
+    && candidate.published === false
+    && candidate.status === 'publication_pending';
+}
+
 export class ApiError extends Error {
   body: Record<string, unknown>;
   // Login-related siblings carried on the wire alongside the error envelope
@@ -253,7 +277,12 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     return response.blob() as Promise<T>;
   }
 
-  return response.json();
+  // Keep publication_pending as the server's explicit acknowledgement. The
+  // generic transport cannot know whether a request DTO is also a valid
+  // response DTO (and for versioned configuration it usually is not). Typed
+  // configuration helpers expose ConfigMutationResult<T> and decide how their
+  // page should retain submitted form state while publication recovers.
+  return await response.json() as T;
 }
 
 const USER_KEY = 'osgateway_user';

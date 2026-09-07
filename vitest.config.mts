@@ -16,6 +16,12 @@ export default defineConfig({
     // "09:40:10" for a UTC input, which only holds under UTC+8. Without this the
     // suite passes on a UTC+8 CI box but fails on a UTC host — a machine-TZ trap.
     env: { TZ: 'Asia/Shanghai' },
+    // Some build hosts expose hundreds of logical CPUs. Vitest otherwise uses
+    // almost all of them (167 workers on the current 168-CPU host), and each
+    // worker carries a jsdom runtime. Cap concurrency so the 400+ file suite
+    // remains predictable instead of exhausting memory and stalling near the
+    // end of a run.
+    maxWorkers: 4,
   },
   resolve: {
     alias: {

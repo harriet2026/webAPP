@@ -489,15 +489,16 @@ export function SenderFilterDrawer({
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
+        data-testid="sender-filter-rule-drawer"
         side="right"
         className="data-[side=right]:w-[920px] data-[side=right]:sm:max-w-[920px] p-0 flex flex-col"
         showCloseButton={false}
       >
         <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
-          <SheetTitle className="text-lg font-semibold">
+          <SheetTitle data-testid="sender-filter-rule-title" className="text-lg font-semibold">
             {t(editingRule ? 'senderFilter.editRule' : 'senderFilter.createRule')}
           </SheetTitle>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p data-testid="sender-filter-rule-subtitle" className="text-sm text-muted-foreground mt-1">
             {t(watchListType === 'whitelist' ? 'senderFilter.drawerSubtitleWhitelist' : 'senderFilter.drawerSubtitleBlacklist')}
           </p>
         </SheetHeader>
@@ -524,11 +525,12 @@ export function SenderFilterDrawer({
                         <div className="flex-1">
                           <Input
                             id="sender-filter-rule-name"
+                            data-testid="sender-filter-rule-name"
                             {...form.register('name')}
                             aria-invalid={!!form.formState.errors.name}
                           />
                           {form.formState.errors.name && (
-                            <p className="text-xs text-destructive mt-1">{t(`senderFilter.errors.${form.formState.errors.name.message}`)}</p>
+                            <p data-testid="sender-filter-rule-name-error" className="text-xs text-destructive mt-1">{t(`senderFilter.errors.${form.formState.errors.name.message}`)}</p>
                           )}
                         </div>
                       </div>
@@ -561,13 +563,13 @@ export function SenderFilterDrawer({
                                 form.setValue('sender_config.value', '', { shouldDirty: true });
                               }}
                             >
-                              <SelectTrigger className="w-28 shrink-0">
+                              <SelectTrigger data-testid="sender-filter-sender-type" className="w-28 shrink-0">
                                 <SelectValue>{senderTypeLabel[watchSenderType]}</SelectValue>
                               </SelectTrigger>
                               <SelectContent alignItemWithTrigger={false}>
-                                <SelectItem value="individual">{senderTypeLabel.individual}</SelectItem>
-                                <SelectItem value="group">{senderTypeLabel.group}</SelectItem>
-                                <SelectItem value="domain">{senderTypeLabel.domain}</SelectItem>
+                                <SelectItem data-testid="sender-filter-sender-type-individual" value="individual">{senderTypeLabel.individual}</SelectItem>
+                                <SelectItem data-testid="sender-filter-sender-type-group" value="group">{senderTypeLabel.group}</SelectItem>
+                                <SelectItem data-testid="sender-filter-sender-type-domain" value="domain">{senderTypeLabel.domain}</SelectItem>
                               </SelectContent>
                             </Select>
 
@@ -576,7 +578,7 @@ export function SenderFilterDrawer({
                                 value={watchSenderValue}
                                 onValueChange={(value) => form.setValue('sender_config.value', value ?? '', { shouldDirty: true, shouldValidate: true })}
                               >
-                                <SelectTrigger className="flex-1" aria-invalid={!!form.formState.errors.sender_config?.value}>
+                                <SelectTrigger data-testid="sender-filter-sender-group" className="flex-1" aria-invalid={!!form.formState.errors.sender_config?.value}>
                                   <SelectValue placeholder={t('senderFilter.senderPlaceholder_group')} />
                                 </SelectTrigger>
                                 <SelectContent alignItemWithTrigger={false}>
@@ -599,6 +601,7 @@ export function SenderFilterDrawer({
                               />
                             ) : (
                               <Input
+                                data-testid="sender-filter-sender-value"
                                 className="flex-1"
                                 placeholder={t('senderFilter.senderPlaceholder_individual')}
                                 {...form.register('sender_config.value')}
@@ -607,7 +610,7 @@ export function SenderFilterDrawer({
                             )}
                           </div>
                           {form.formState.errors.sender_config?.value && (
-                            <p className="text-xs text-destructive mt-1">{t(`senderFilter.errors.${form.formState.errors.sender_config.value.message}`)}</p>
+                            <p data-testid="sender-filter-sender-value-error" className="text-xs text-destructive mt-1">{t(`senderFilter.errors.${form.formState.errors.sender_config.value.message}`)}</p>
                           )}
                         </div>
                       </div>
@@ -624,14 +627,14 @@ export function SenderFilterDrawer({
                                 form.setValue('ip_range.value', undefined, { shouldDirty: true });
                               }}
                             >
-                              <SelectTrigger className="w-28 shrink-0">
+                              <SelectTrigger data-testid="sender-filter-ip-type" className="w-28 shrink-0">
                                 <SelectValue>{ipTypeLabel[watchIpType]}</SelectValue>
                               </SelectTrigger>
                               <SelectContent alignItemWithTrigger={false}>
-                                <SelectItem value="all">{ipTypeLabel.all}</SelectItem>
-                                <SelectItem value="ipGroup">{ipTypeLabel.ipGroup}</SelectItem>
-                                <SelectItem value="single">{ipTypeLabel.single}</SelectItem>
-                                <SelectItem value="range">{ipTypeLabel.range}</SelectItem>
+                                <SelectItem data-testid="sender-filter-ip-type-all" value="all">{ipTypeLabel.all}</SelectItem>
+                                <SelectItem data-testid="sender-filter-ip-type-ipGroup" value="ipGroup">{ipTypeLabel.ipGroup}</SelectItem>
+                                <SelectItem data-testid="sender-filter-ip-type-single" value="single">{ipTypeLabel.single}</SelectItem>
+                                <SelectItem data-testid="sender-filter-ip-type-range" value="range">{ipTypeLabel.range}</SelectItem>
                               </SelectContent>
                             </Select>
 
@@ -640,7 +643,7 @@ export function SenderFilterDrawer({
                                 value={form.watch('ip_range.value') ?? ''}
                                 onValueChange={(value) => form.setValue('ip_range.value', value ?? '', { shouldDirty: true, shouldValidate: true })}
                               >
-                                <SelectTrigger className="flex-1" aria-invalid={!!form.formState.errors.ip_range?.value}>
+                                <SelectTrigger data-testid="sender-filter-ip-group" className="flex-1" aria-invalid={!!form.formState.errors.ip_range?.value}>
                                   <SelectValue placeholder={t('senderFilter.ipType_ipGroup')} />
                                 </SelectTrigger>
                                 <SelectContent alignItemWithTrigger={false}>
@@ -654,6 +657,7 @@ export function SenderFilterDrawer({
                             )}
                             {(watchIpType === 'single' || watchIpType === 'range') && (
                               <Input
+                                data-testid="sender-filter-ip-value"
                                 className="flex-1"
                                 placeholder={watchIpType === 'single' ? 'e.g. 192.168.1.1' : 'e.g. 192.168.1.0/24'}
                                 {...form.register('ip_range.value')}
@@ -662,7 +666,7 @@ export function SenderFilterDrawer({
                             )}
                           </div>
                           {form.formState.errors.ip_range?.value && (
-                            <p className="text-xs text-destructive mt-1">{t(`senderFilter.errors.${form.formState.errors.ip_range.value.message}`)}</p>
+                            <p data-testid="sender-filter-ip-value-error" className="text-xs text-destructive mt-1">{t(`senderFilter.errors.${form.formState.errors.ip_range.value.message}`)}</p>
                           )}
                         </div>
                       </div>
@@ -674,6 +678,7 @@ export function SenderFilterDrawer({
                         <Label className={labelCls}>{t('senderFilter.expireAt')}</Label>
                         <div className="flex-1 flex items-center gap-2">
                           <Input
+                            data-testid="sender-filter-rule-valid-until"
                             type="date"
                             {...form.register('valid_until')}
                             className="w-40"
@@ -687,25 +692,26 @@ export function SenderFilterDrawer({
                         <Label className={cn('flex items-center justify-end gap-1', labelCls)}>
                           {t('senderFilter.priority')}
                           <Tooltip>
-                            <TooltipTrigger render={<HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />} />
-                            <TooltipContent>
+                            <TooltipTrigger render={<HelpCircle data-testid="sender-filter-rule-priority-help" className="h-3.5 w-3.5 text-muted-foreground" />} />
+                            <TooltipContent data-testid="sender-filter-rule-priority-help-tooltip">
                               <p>{t('senderFilter.priorityHelp')}</p>
                             </TooltipContent>
                           </Tooltip>
                         </Label>
                         <div className="flex-1 flex items-center gap-2">
                           <Input
+                            data-testid="sender-filter-rule-priority"
                             type="number"
                             {...form.register('priority', { valueAsNumber: true })}
                             className="w-24"
                             min={priorityRange.min}
                             max={priorityRange.max}
                           />
-                          <span className="text-xs text-muted-foreground">
+                          <span data-testid="sender-filter-rule-priority-range" className="text-xs text-muted-foreground">
                             {priorityRange.min}-{priorityRange.max}
                           </span>
                           {form.formState.errors.priority && (
-                            <p className="text-xs text-destructive">
+                            <p data-testid="sender-filter-rule-priority-error" className="text-xs text-destructive">
                               {t(`senderFilter.errors.${form.formState.errors.priority.message}`, {
                                 min: priorityRange.min,
                                 max: priorityRange.max,
@@ -733,31 +739,31 @@ export function SenderFilterDrawer({
                           value={watchAction}
                           onValueChange={(v) => form.setValue('action', v as SenderFilterAction, { shouldDirty: true })}
                         >
-                          <SelectTrigger className="w-40">
+                          <SelectTrigger data-testid="sender-filter-action" className="w-40">
                             <SelectValue>{actionLabel[watchAction]}</SelectValue>
                           </SelectTrigger>
                           <SelectContent alignItemWithTrigger={false} className="w-72">
                             {watchListType === 'blacklist' ? (
                               <>
-                                <SelectItem value="reject">
+                                <SelectItem data-testid="sender-filter-action-reject" value="reject">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.reject}</span>
                                     <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_reject_desc')}</span>
                                   </div>
                                 </SelectItem>
-                                <SelectItem value="discard">
+                                <SelectItem data-testid="sender-filter-action-discard" value="discard">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.discard}</span>
                                     <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_discard_desc')}</span>
                                   </div>
                                 </SelectItem>
-                                <SelectItem value="quarantine">
+                                <SelectItem data-testid="sender-filter-action-quarantine" value="quarantine">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.quarantine}</span>
                                     <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_quarantine_desc')}</span>
                                   </div>
                                 </SelectItem>
-                                <SelectItem value="audit">
+                                <SelectItem data-testid="sender-filter-action-audit" value="audit">
                                   <div className="flex flex-col gap-0.5 py-0.5">
                                     <span>{actionLabel.audit}</span>
                                     <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_audit_desc')}</span>
@@ -765,7 +771,7 @@ export function SenderFilterDrawer({
                                 </SelectItem>
                               </>
                             ) : (
-                              <SelectItem value="accept">
+                              <SelectItem data-testid="sender-filter-action-accept" value="accept">
                                 <div className="flex flex-col gap-0.5 py-0.5">
                                   <span>{actionLabel.accept}</span>
                                   <span className="text-xs text-muted-foreground whitespace-normal leading-snug">{t('senderFilter.action_accept_desc')}</span>
@@ -787,6 +793,7 @@ export function SenderFilterDrawer({
                     <Label className={cn(labelCls, 'pt-2')}>{t('senderFilter.remark')}</Label>
                     <div className="flex-1">
                       <Textarea
+                        data-testid="sender-filter-rule-description"
                         {...form.register('description')}
                         className="min-h-[80px] resize-none"
                         maxLength={200}
@@ -817,7 +824,7 @@ export function SenderFilterDrawer({
                     <Shield className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
                       <span className="text-muted-foreground">{t('senderFilter.effectSenderLabel')}</span>
-                      <Badge variant="secondary" className="mx-1.5 font-mono">
+                      <Badge data-testid="sender-filter-effect-sender" variant="secondary" className="mx-1.5 font-mono">
                         {watchSenderValue || t('senderFilter.effectSenderEmpty')}
                       </Badge>
                     </div>
@@ -826,17 +833,17 @@ export function SenderFilterDrawer({
                     <Ban className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
                       <span className="text-muted-foreground">{t('senderFilter.effectActionLabel')}</span>
-                      <span className="ml-1.5 font-medium">{actionLabel[watchAction]}</span>
+                      <span data-testid="sender-filter-effect-action" className="ml-1.5 font-medium">{actionLabel[watchAction]}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                     <span className="text-muted-foreground">{t('senderFilter.effectExpireLabel')}:</span>
-                    <span>{watchValidUntil || t('senderFilter.effectExpirePermanent')}</span>
+                    <span data-testid="sender-filter-effect-expire">{watchValidUntil || t('senderFilter.effectExpirePermanent')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">{t('senderFilter.effectPriorityLabel')}:</span>
-                    <Badge variant="outline" className="font-mono">{watchPriority}</Badge>
+                    <Badge data-testid="sender-filter-effect-priority" variant="outline" className="font-mono">{watchPriority}</Badge>
                   </div>
                 </div>
               </div>
@@ -845,7 +852,7 @@ export function SenderFilterDrawer({
               <Collapsible open={showExamples} onOpenChange={setShowExamples}>
                 <CollapsibleTrigger
                   render={
-                    <Button variant="ghost" className="w-full justify-between text-primary hover:text-primary">
+                    <Button data-testid="sender-filter-examples-toggle" variant="ghost" className="w-full justify-between text-primary hover:text-primary">
                       <span className="flex items-center gap-2">
                         <Lightbulb className="h-4 w-4" />
                         {t('senderFilter.viewExamples')}
@@ -864,6 +871,7 @@ export function SenderFilterDrawer({
                             <p className="text-xs text-muted-foreground">{t('senderFilter.exampleBlockSpamDesc')}</p>
                           </div>
                           <Button
+                            data-testid="sender-filter-example-use-blockSpam"
                             size="sm"
                             variant="outline"
                             className="h-7 text-xs shrink-0"
@@ -887,6 +895,7 @@ export function SenderFilterDrawer({
                             <p className="text-xs text-muted-foreground">{t('senderFilter.exampleQuarantineSuspiciousDesc')}</p>
                           </div>
                           <Button
+                            data-testid="sender-filter-example-use-quarantineSuspicious"
                             size="sm"
                             variant="outline"
                             className="h-7 text-xs shrink-0"
@@ -913,6 +922,7 @@ export function SenderFilterDrawer({
                             <p className="text-xs text-muted-foreground">{t('senderFilter.exampleAllowTrustedSenderDesc')}</p>
                           </div>
                           <Button
+                            data-testid="sender-filter-example-use-allowTrustedSender"
                             size="sm"
                             variant="outline"
                             className="h-7 text-xs shrink-0"
@@ -1042,10 +1052,10 @@ export function SenderFilterDrawer({
         </div>
 
         <div className="flex justify-end gap-2 border-t px-6 py-4 flex-shrink-0">
-          <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button data-testid="sender-filter-cancel" type="button" variant="outline" onClick={() => handleOpenChange(false)}>
             {t('common.cancel')}
           </Button>
-          <Button type="submit" form="sender-filter-form" disabled={isSubmitting}>
+          <Button data-testid="sender-filter-save" type="submit" form="sender-filter-form" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             {t('common.save')}
           </Button>

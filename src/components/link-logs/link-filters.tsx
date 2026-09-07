@@ -47,6 +47,14 @@ const DATE_FORMATS: Record<string, { fmt: string; locale: typeof zhCN }> = {
   ru: { fmt: 'dd.MM.yyyy', locale: ruLocale },
 };
 
+// 内置建议词是产品定义的确定性快捷查询，直接映射到链接日志列表接口的
+// 结构化条件；切换建议词时同时清空同一决策组里的冲突条件。
+const SUGGESTION_FILTERS: Array<Pick<LinkFilterValues, 'triggerStage' | 'finalResult' | 'userAction'>> = [
+  { triggerStage: 'local_blacklist', finalResult: '', userAction: '' },
+  { triggerStage: '', finalResult: 'alerted', userAction: 'proceeded' },
+  { triggerStage: 'phishing_agent', finalResult: '', userAction: '' },
+];
+
 export function LinkFilters({ values, onChange, onSearch, onReset, tenantScope }: LinkFiltersProps) {
   const t = useTranslations();
   const locale = useLocale();
@@ -260,7 +268,11 @@ export function LinkFilters({ values, onChange, onSearch, onReset, tenantScope }
                 <button
                   type="button"
                   data-testid={`link-logs-ai-suggestion-${index + 1}`}
-                  onClick={() => setAiInput(suggestion)}
+                  onClick={() => {
+                    setAiInput(suggestion);
+                    const filter = SUGGESTION_FILTERS[index];
+                    if (filter) onChange(filter);
+                  }}
                   className="text-muted-foreground hover:text-blue-600"
                 >
                   {suggestion}

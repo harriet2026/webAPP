@@ -1,10 +1,10 @@
 'use client';
 
 // 转发设置 Tab —— html_spec 对齐严格单表重构（Task 4）+ 接通真实后端（Task 13，
-// design/implement/spec/2026-07-29-mail-routing-backend-design.md，doc/mail-routing.md §5）。
+// design/implement/spec/2026-07-29-mail-routing-backend-design.md，docs/features/mail-routing.md §5）。
 //
 // 一条 mail-admission-rules 记录一行，8 列（优先级/来源 IP/发信域名/HELO EHLO/收信域名/垃圾邮件
-// 过滤/状态/操作）——取代旧 relay-grants（已随后端一并退役，见 doc/mail-routing.md「已移除：
+// 过滤/状态/操作）——取代旧 relay-grants（已随后端一并退役，见 docs/features/mail-routing.md「已移除：
 // /relay-grants*」）。优先级/HELO/收信域名+匹配方式现在都是后端真实列（mail_admission_rules
 // 表），不再是 mock-only 扩展位，控件恒可编辑。grants 高级能力（主开关/限速/空发件人/any-sender/
 // 特权手动开关）UI 不在本页（A7，另行安置）。
@@ -73,7 +73,7 @@ import {
 import { EmptyState } from '@/components/shared/empty-state';
 import { ListToolbar } from '@/components/mail-routing/shared/list-toolbar';
 import type { RcptMatchType } from '@/components/mail-routing/mr-types';
-import { useScopedApiRequest } from '@/lib/api/client';
+import { isPublicationPendingResponse, useScopedApiRequest } from '@/lib/api/client';
 import {
   getMailAdmissionRules,
   getMailAdmissionPolicy,
@@ -83,6 +83,7 @@ import {
   deleteMailAdmissionRule,
   type MailAdmissionRule,
   type MailAdmissionRulePayload,
+  type MailAdmissionPolicy,
 } from '@/lib/api/mail-admission';
 import { listTenantDomains } from '@/lib/api/mail-routing';
 import {
@@ -195,9 +196,22 @@ export function RelayTab({ tenantId }: RelayTabProps) {
 
   const policyMutation = useMutation({
     mutationFn: (enabled: boolean) => setMailAdmissionPolicyEnabled(enabled, apiRequest),
-    onSuccess: (nextPolicy) => {
-      queryClient.setQueryData(policyQueryKey, nextPolicy);
-      toast.success(nextPolicy.enabled ? t('toasts.masterSwitchEnabled') : t('toasts.masterSwitchDisabled'));
+    onSuccess: (nextPolicy, enabled) => {
+      if (isPublicationPendingResponse(nextPolicy)) {
+        // Preserve the already-loaded policy metadata and update only the field
+        // the operator submitted. The 202 acknowledgement has none of the
+        // trusted CIDR/prefix/privilege fields required by MailAdmissionPolicy.
+        queryClient.setQueryData<MailAdmissionPolicy | undefined>(policyQueryKey, (current) =>
+          current ? { ...current, enabled } : current,
+        );
+        // Do not immediately refetch: this endpoint has no response version with
+        // which to reject a pre-publication snapshot, so an eager GET could flip
+        // the just-committed switch back on screen. All other policy metadata is
+        // unchanged by this mutation.
+      } else {
+        queryClient.setQueryData(policyQueryKey, nextPolicy);
+      }
+      toast.success(enabled ? t('toasts.masterSwitchEnabled') : t('toasts.masterSwitchDisabled'));
     },
     onError: (e: Error) => toast.error(apiErrorMessage(e)),
   });

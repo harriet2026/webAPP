@@ -94,11 +94,12 @@ export function KpiCards({ data, isLoading, onCardClick }: KpiCardsProps) {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger
+                    data-testid={`kpi-${card.key}-tooltip-trigger`}
                     render={<div className={`flex h-12 w-12 items-center justify-center rounded-full ${card.accent}`} />}
                   >
                     <Icon className="h-6 w-6" />
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent data-testid={`kpi-${card.key}-tooltip`}>
                     <p>{t(`kpi.tooltips.${card.key}Help` as Parameters<typeof t>[0])}</p>
                   </TooltipContent>
                 </Tooltip>

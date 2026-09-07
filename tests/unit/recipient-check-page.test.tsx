@@ -122,7 +122,7 @@ describe('RecipientCheckPage', () => {
     await waitFor(() => expect(screen.getByText('recipientCheck.module.enabled')).toBeInTheDocument());
     mockApiRequest.mockClear();
 
-    const toggle = screen.getByTestId('master-switch-toggle');
+    const toggle = screen.getByTestId('recipient-check-module-switch');
     await user.click(toggle);
 
     await waitFor(() => expect(mockApiRequest).toHaveBeenCalledWith(
@@ -151,24 +151,32 @@ describe('RecipientCheckPage', () => {
     await user.click(screen.getByRole('button', { name: 'behaviorControl.recipientLimit.reset' }));
 
     await waitFor(() => expect(mockApiRequest).toHaveBeenCalledWith(
-      '/behavior-control/recipient-limit-config',
+      '/behavior-control/recipient-policy',
       expect.objectContaining({
         method: 'PUT',
-        body: expect.objectContaining({
-          mode: 'detailed',
-          is_active: true,
-          inbound_limit: { limit: 30, scope: 'local', action: 'reject' },
-          outbound_limit: { limit: 50, scope: 'all', action: 'audit' },
-          internal_limit: { limit: 20, scope: 'local', action: 'quarantine' },
-        }),
+        body: {
+          limit: expect.objectContaining({
+            mode: 'detailed',
+            is_active: true,
+            inbound_limit: { limit: 30, scope: 'local', action: 'reject' },
+            outbound_limit: { limit: 50, scope: 'all', action: 'audit' },
+            internal_limit: { limit: 20, scope: 'local', action: 'quarantine' },
+          }),
+          check: { existence_enabled: false, existence_action: 'reject' },
+        },
       }),
     ));
-    expect(mockApiRequest).toHaveBeenCalledWith(
+    const policyPutCalls = mockApiRequest.mock.calls.filter(
+      ([path, options]) => path === '/behavior-control/recipient-policy' && options?.method === 'PUT',
+    );
+    expect(policyPutCalls).toHaveLength(1);
+    expect(mockApiRequest).not.toHaveBeenCalledWith(
+      '/behavior-control/recipient-limit-config',
+      expect.objectContaining({ method: 'PUT' }),
+    );
+    expect(mockApiRequest).not.toHaveBeenCalledWith(
       '/behavior-control/recipient-check-config',
-      expect.objectContaining({
-        method: 'PUT',
-        body: { existence_enabled: false, existence_action: 'reject' },
-      }),
+      expect.objectContaining({ method: 'PUT' }),
     );
     expect(mockApiRequest).not.toHaveBeenCalledWith(
       '/behavior-control/recipient-limit-config',
@@ -183,8 +191,10 @@ describe('RecipientCheckPage', () => {
   it('数量限制关闭 → 配置模式卸载；存在性关闭 → 严格模式卸载', async () => {
     setupApi({ is_active: false }, { existence_enabled: false });
     renderPage();
-    // 等异步 query 落地后区块 body 卸载（初始 draft 默认开启，需等数据覆盖）。
-    await waitFor(() => expect(screen.queryByText('recipientCheck.limit.modeLabel')).toBeNull());
+    // 先等两份配置都成功读取并渲染；加载占位期本来就没有配置区块，不能
+    // 把那个瞬间误判成“服务端关闭值已生效”。
+    await screen.findByTestId('recipient-check-config-content');
+    expect(screen.queryByText('recipientCheck.limit.modeLabel')).toBeNull();
     expect(screen.queryByText('recipientCheck.existence.strictMode')).toBeNull();
     expect(screen.getByText('recipientCheck.limit.title')).toBeInTheDocument();
   });

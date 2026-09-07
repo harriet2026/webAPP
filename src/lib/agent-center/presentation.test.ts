@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AgentCenterCard } from '@/types/agent-center';
-import { resolveAgentPresentation } from './presentation';
+import { AGENT_PRESENTATIONS, AGENT_PRESENTATION_ORDER, resolveAgentPresentation } from './presentation';
 
 const phishingCard: AgentCenterCard = {
   key: 'phishing',
@@ -20,6 +20,17 @@ const phishingCard: AgentCenterCard = {
 };
 
 describe('resolveAgentPresentation', () => {
+  it('keeps the exhaustive Agent Center to mail-analysis key mapping stable', () => {
+    expect(AGENT_PRESENTATION_ORDER.map((moduleKey) => {
+      const presentation = AGENT_PRESENTATIONS[moduleKey];
+      return [presentation.agentKey, presentation.pipelineKey];
+    })).toEqual([
+      ['phishing', 'phishingAgent'],
+      ['spoofing', 'spoofingAgent'],
+      ['threat-retro', 'threatRetroAgent'],
+    ]);
+  });
+
   it('enables the dedicated phishing configuration route for the exact public contract', () => {
     const resolved = resolveAgentPresentation(phishingCard);
 

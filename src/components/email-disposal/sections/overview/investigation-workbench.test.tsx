@@ -78,6 +78,51 @@ describe('InvestigationWorkbench', () => {
     expect(screen.getByTestId('email-disposal-workbench-download-eml')).toBeInTheDocument();
   });
 
+  it('GT-13252: disables EML and attachment downloads when no original is retained', async () => {
+    const user = userEvent.setup();
+    render(<InvestigationWorkbench {...baseProps({
+      detail: baseDetail({
+        status: 'delivered',
+        eml_available: false,
+        attachments: [{
+          filename: 'invoice.pdf', size: 42, md5sum: '0123456789abcdef0123456789abcdef',
+          content_type: 'application/pdf', inline: false, content_length: 42,
+        }],
+      }),
+    })} />);
+
+    expect(screen.getByTestId('email-disposal-workbench-download-unavailable')).toHaveTextContent(
+      'emailDisposal.detail.overview.workbench.emlUnavailable',
+    );
+    expect(screen.getByTestId('email-disposal-workbench-download-eml')).toBeDisabled();
+
+    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
+    expect(screen.getByTestId(
+      'email-disposal-overview-entity-attachment-0123456789abcdef0123456789abcdef-download',
+    )).toBeDisabled();
+  });
+
+  it('GT-13252: keeps downloads enabled for delivered mail with a retained original', async () => {
+    const user = userEvent.setup();
+    render(<InvestigationWorkbench {...baseProps({
+      detail: baseDetail({
+        status: 'delivered',
+        eml_available: true,
+        attachments: [{
+          filename: 'invoice.pdf', size: 42, md5sum: 'fedcba9876543210fedcba9876543210',
+          content_type: 'application/pdf', inline: false, content_length: 42,
+        }],
+      }),
+    })} />);
+
+    expect(screen.queryByTestId('email-disposal-workbench-download-unavailable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('email-disposal-workbench-download-eml')).toBeEnabled();
+    await user.click(screen.getByTestId('email-disposal-overview-entity-tab-attachments'));
+    expect(screen.getByTestId(
+      'email-disposal-overview-entity-attachment-fedcba9876543210fedcba9876543210-download',
+    )).toBeEnabled();
+  });
+
   it('renders the EntityDetection component as the right column', () => {
     render(<InvestigationWorkbench {...baseProps()} />);
     expect(screen.getByTestId('email-disposal-overview-entity-detection')).toBeInTheDocument();

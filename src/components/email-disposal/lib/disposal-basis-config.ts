@@ -8,6 +8,7 @@
 // types/email-disposal.ts 的 DisposalBasis 接口定义，此处仅引用之。
 
 import type { DisposalBasis, DisposalBasisGroupSummary } from '@/types/email-disposal';
+import { buildPolicyConfigRoute } from '@/lib/policy-deep-link';
 
 export type { DisposalBasis };
 
@@ -32,7 +33,8 @@ export type DisposalAction =
   | 'bounce'
   | 'sideline'
   | 'accept'
-  | 'proceed';
+  | 'proceed'
+  | 'observe';
 
 // 命中动态变量集合（大括号变量的实际值），如
 //   { source_ip: '203.0.113.5', count: 500, limit: 100 }
@@ -42,19 +44,6 @@ export type HitValues = Record<string, string | number>;
 
 // 4 语言代码（与 webapp/src/i18n/routing.ts 一致）。
 export type DisposalLang = 'zh' | 'en' | 'th' | 'ru';
-
-// 阶段 -> 规则配置页路由（详情页点击规则名/ID 跳转）。
-// GT-12583：阶段 1/2/3/5 的策略配置统一落在「策略流水线」页（/security/
-// pipeline，页内以抽屉承载各阶段策略）；此前写的 /filter-rules/* 是 demo
-// 原型的路由，webapp 从未存在过这些页面，点击处置依据规则名直接 404。
-// 阶段 4（AI 检测）走智能体中心总览。
-const STAGE_ROUTE: Record<number, string> = {
-  1: '/security/pipeline',
-  2: '/security/pipeline',
-  3: '/security/pipeline',
-  4: '/agent-center/overview',
-  5: '/security/pipeline',
-};
 
 // 阶段配色（列表页阶段色点 / 详情页强调）。
 const STAGE_COLOR: Record<number, string> = {
@@ -1145,28 +1134,40 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleTh: 'การตรวจจับอีเมลที่คล้ายกัน',
     moduleRu: 'Похожие письма',
     idPrefix: 'SIM-',
-    listSummary: (_v, lang) => {
+	listSummary: (v, lang) => {
+		const sameSubject = optionalVal(v, 'detection_type') === 'same_subject';
       switch (lang) {
         case 'en':
-          return 'Highly similar to known mail';
+			return sameSubject ? 'Matched a repeated subject' : 'Highly similar to known mail';
         case 'th':
-          return 'คล้ายกับอีเมลที่รู้จักอย่างมาก';
+			return sameSubject ? 'ตรงกับหัวเรื่องที่ซ้ำกัน' : 'คล้ายกับอีเมลที่รู้จักอย่างมาก';
         case 'ru':
-          return 'Очень похоже на известное письмо';
+			return sameSubject ? 'Совпала повторяющаяся тема' : 'Очень похоже на известное письмо';
         default:
-          return '与已知邮件高度相似';
+			return sameSubject ? '命中相同主题检测' : '与已知邮件高度相似';
       }
     },
-    hitDetail: (_v, lang) => {
+	hitDetail: (v, lang) => {
+		const sameSubject = optionalVal(v, 'detection_type') === 'same_subject';
+		const direction = optionalVal(v, 'direction');
+		const counter = optionalVal(v, 'counter');
+		const similarity = optionalVal(v, 'similarity_pct');
+		const cluster = optionalVal(v, 'cluster_id');
+		const details = [
+			direction ? `direction: ${direction}` : undefined,
+			counter ? `count: ${counter}` : undefined,
+			!sameSubject && similarity ? `similarity: ${similarity}%` : undefined,
+			!sameSubject && cluster ? `cluster: ${cluster}` : undefined,
+		].filter(Boolean).join(', ');
       switch (lang) {
         case 'en':
-          return 'Hit a similar-mail detection rule';
+			return `${sameSubject ? 'Repeated-subject' : 'Similar-mail'} rule matched${details ? ` (${details})` : ''}`;
         case 'th':
-          return 'ตรงกับกฎตรวจจับอีเมลที่คล้ายกัน';
+			return `ตรงกับกฎ${sameSubject ? 'หัวเรื่องซ้ำ' : 'อีเมลที่คล้ายกัน'}${details ? ` (${details})` : ''}`;
         case 'ru':
-          return 'Сработало правило обнаружения похожих писем';
+			return `Сработало правило ${sameSubject ? 'повторяющейся темы' : 'похожих писем'}${details ? ` (${details})` : ''}`;
         default:
-          return '命中相似邮件检测规则';
+			return `命中${sameSubject ? '相同主题' : '相似邮件'}检测规则${details ? `（${details}）` : ''}`;
       }
     },
   },
@@ -1257,6 +1258,7 @@ const ACTION_LABEL: Record<DisposalAction, Record<DisposalLang, string>> = {
     th: 'ดำเนินการต่อ',
     ru: 'Продолжить',
   },
+  observe: { zh: '观察', en: 'Observe', th: 'สังเกต', ru: 'Наблюдение' },
 };
 
 // 动作分色（Badge）。
@@ -1272,6 +1274,7 @@ const ACTION_COLOR: Record<DisposalAction, string> = {
   sideline: 'bg-orange-100 text-orange-700',
   accept: 'bg-green-100 text-green-700',
   proceed: 'bg-blue-100 text-blue-700',
+  observe: 'bg-slate-100 text-slate-700',
 };
 
 function moduleOf(meta: PolicyMeta, lang: DisposalLang): string {
@@ -1312,9 +1315,8 @@ export function getStageColor(stage: number): string {
   return STAGE_COLOR[stage] ?? 'bg-gray-400';
 }
 
-export function getPolicyRoute(policyKey: string): string | undefined {
-  const meta = DISPOSAL_POLICY_MAP[policyKey];
-  return meta ? STAGE_ROUTE[meta.stage] : undefined;
+export function getPolicyRoute(policyKey: string, ruleRef?: string): string | undefined {
+  return buildPolicyConfigRoute(policyKey, ruleRef);
 }
 
 // 将后端返回的 hit_values (Record<string, string>) 转换为模板使用的 HitValues。
@@ -1528,10 +1530,10 @@ export interface DisposalBasisRuleRecipientGroup {
   recipients: string[];
 }
 
-// 详情页群发分叉使用“最终生效依据”而不是所有命中模块：新数据只纳入
-// effective_for 非空的规则；明确未生效（[]）的模块仍保留在命中模块清单，
-// 但不能被描述成某个收件人的最终处置依据。旧数据没有归属三态，只能按历史
-// recipients/recipient 保守回落，并由规格明确标记边界。
+// 详情页群发分叉使用“最终生效依据”而不是内部候选账本：新数据只纳入
+// effective_for 非空的终止规则；proceed/observe/MAIL-MARK 即使有实际作用
+// 收件人也不是最终依据。明确未作用（[]）的候选只保留在后端审计数据中。
+// 旧数据没有归属三态，只能按历史 recipients/recipient 保守回落。
 export function groupEffectiveRecipientBasisByRule(
   basis: DisposalBasis | undefined,
 ): DisposalBasisRuleRecipientGroup[] {
@@ -1545,11 +1547,12 @@ export function groupEffectiveRecipientBasisByRule(
 
   for (const entry of modules) {
     if (!entry.policy_key) continue;
-    // modules[] is the new hit ledger: only a non-empty effective_for proves
-    // that this rule produced a final disposition. recipients alone means hit.
-    // Legacy per_recipient[] predates effective_for and contains winners.
+    // modules[] is the new hit ledger: a terminal rule needs non-empty
+    // effective_for to prove final ownership. Non-terminal actions may also
+    // have an action scope, but are explicitly excluded below.
     const recipients = hasModules ? (entry.effective_for ?? []) : recipientsOfBasisEntry(entry);
-    if (entry.action === 'proceed' || recipients.length === 0) continue;
+    if (entry.policy_key === 'MAIL-MARK' || entry.action === 'proceed' ||
+      entry.action === 'observe' || recipients.length === 0) continue;
     const key = JSON.stringify([
       entry.policy_key,
       entry.rule_id ?? '',
@@ -1580,18 +1583,20 @@ export function groupEffectiveRecipientBasisByRule(
   // matching module cannot carry effective_for. Keep the authoritative root
   // only for a matching recipientless module. Never apply this fallback to a
   // module that names recipients: that shape proves a hit, not final ownership.
-  if (groups.length === 0 && hasModules && basis.policy_key && basis.action !== 'proceed') {
+  const rootPolicyKey = basis.policy_key;
+  if (groups.length === 0 && hasModules && rootPolicyKey && rootPolicyKey !== 'MAIL-MARK' &&
+    basis.action !== 'proceed' && basis.action !== 'observe') {
     const matchesRecipientlessFinal = basis.modules!.some(
       (entry) =>
         entry.effective_for === undefined &&
         recipientsOfBasisEntry(entry).length === 0 &&
-        entry.policy_key === basis.policy_key &&
+        entry.policy_key === rootPolicyKey &&
         entry.action?.toLowerCase() === basis.action?.toLowerCase() &&
         (!basis.rule_id || entry.rule_id === basis.rule_id),
     );
     if (matchesRecipientlessFinal) {
       groups.push({
-        policyKey: basis.policy_key,
+        policyKey: rootPolicyKey,
         entry: basis,
         recipients: [],
       });
@@ -1602,8 +1607,8 @@ export function groupEffectiveRecipientBasisByRule(
     groups.length === 0 &&
     !hasModules &&
     !hasLegacyEntries &&
-    basis.policy_key &&
-    basis.action !== 'proceed'
+    basis.policy_key && basis.policy_key !== 'MAIL-MARK' &&
+    basis.action !== 'proceed' && basis.action !== 'observe'
   ) {
     groups.push({
       policyKey: basis.policy_key,
@@ -1669,7 +1674,8 @@ export function groupsFromSummaries(
     const entries = summary.entries.filter(
       (entry) =>
         !(
-          entry.action === 'proceed' ||
+          summary.policy_key === 'MAIL-MARK' ||
+          entry.action === 'proceed' || entry.action === 'observe' ||
           (entry.effective_known && entry.effective_count === 0) ||
           (summary.policy_key === 'AUTH' &&
             entry.action === 'accept' &&

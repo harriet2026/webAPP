@@ -6,11 +6,6 @@ import type { DisposalMailItem } from "@/types/email-disposal";
 import { formatDate } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const { relativeTimeMock, relativeTimeNow } = vi.hoisted(() => ({
-  relativeTimeMock: vi.fn(),
-  relativeTimeNow: new Date("2026-07-15T10:05:00Z"),
-}));
-
 // Identity translator (keeps `namespace.key` / `namespace.key:{params}` visible)
 // so assertions stay decoupled from messages/*.json copy. `t.has` must exist
 // because mail-list-table's localizeEnum probes it (GT-11917).
@@ -24,12 +19,7 @@ vi.mock("next-intl", () => {
       key !== "filters.external-relay";
     return fn;
   };
-  return {
-    useTranslations,
-    useLocale: () => "zh",
-    useNow: () => relativeTimeNow,
-    useFormatter: () => ({ relativeTime: relativeTimeMock }),
-  };
+  return { useTranslations, useLocale: () => "zh" };
 });
 
 vi.mock("./lib/disposal-api", () => ({
@@ -84,8 +74,6 @@ function renderTable(
 describe("MailListTable toolbar (GT-11580)", () => {
   beforeEach(() => {
     localStorage.clear();
-    relativeTimeMock.mockReset();
-    relativeTimeMock.mockImplementation((date: Date) => `relative:${date.toISOString()}`);
   });
 
   it("renders the batch toolbar permanently even with no selection", () => {
@@ -150,27 +138,13 @@ describe("MailListTable toolbar (GT-11580)", () => {
     expect(onTimeSortChange).toHaveBeenCalledWith("asc");
   });
 
-  it("shows localized relative time with the absolute timestamp in a tooltip", async () => {
+  it("shows the absolute timestamp directly", () => {
     const item = makeItem(1);
     renderTable({ items: [item], total: 1 });
 
-    const relativeText = `relative:${new Date(item.timestamp).toISOString()}`;
     const timeCell = screen.getByTestId("disposal-cell-1-time");
-    await waitFor(() => expect(timeCell).toHaveTextContent(relativeText));
-    expect(relativeTimeMock).toHaveBeenCalledWith(new Date(item.timestamp), relativeTimeNow);
-
-    const timeTrigger = screen.getByText(relativeText);
-    fireEvent.pointerEnter(timeTrigger, { pointerType: "mouse" });
-    fireEvent.mouseEnter(timeTrigger);
-    expect(await screen.findByRole("tooltip")).toHaveTextContent(formatDate(item.timestamp));
-  });
-
-  it("keeps the existing absolute fallback for an invalid timestamp", () => {
-    const item = { ...makeItem(1), timestamp: "not-a-date" };
-    renderTable({ items: [item], total: 1 });
-
-    expect(screen.getByTestId("disposal-cell-1-time")).toHaveTextContent(formatDate(item.timestamp));
-    expect(relativeTimeMock).not.toHaveBeenCalled();
+    expect(timeCell).toHaveTextContent(formatDate(item.timestamp));
+    expect(timeCell).not.toHaveTextContent(/relative:/);
   });
 
   it("renders unambiguous localized direction badges with a safe unknown fallback", () => {
@@ -214,7 +188,7 @@ describe("MailListTable toolbar (GT-11580)", () => {
     expect(badgeOf(4)).toHaveClass("border-border", "text-muted-foreground", "h-5", "font-normal");
   });
 
-  it("combines the sender and all recipients into one column with a complete tooltip", async () => {
+  it("renders the sender and all recipients in separate columns with complete tooltips", async () => {
     const item = {
       ...makeItem(1),
       recipientList: ["first@example.com", "second@example.com"],
@@ -222,45 +196,82 @@ describe("MailListTable toolbar (GT-11580)", () => {
     renderTable({ items: [item], total: 1 });
 
     expect(
-      screen.getByTestId("disposal-column-header-senderRecipient"),
-    ).toHaveTextContent("emailDisposal.table.senderRecipient");
-    expect(screen.queryByTestId("disposal-column-header-sender")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("disposal-column-header-recipient")).not.toBeInTheDocument();
+      screen.getByTestId("disposal-column-header-sender"),
+    ).toHaveTextContent("emailDisposal.table.sender");
+    expect(
+      screen.getByTestId("disposal-column-header-recipient"),
+    ).toHaveTextContent("emailDisposal.table.recipient");
+    expect(screen.queryByTestId("disposal-column-header-senderRecipient")).not.toBeInTheDocument();
 
-    const cell = screen.getByTestId("disposal-cell-1-senderRecipient");
-    expect(cell).toHaveTextContent(item.sender);
-    expect(cell).toHaveTextContent("first@example.com, second@example.com");
-    expect(cell.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
-    expect(screen.queryByTestId("disposal-cell-1-sender")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("disposal-cell-1-recipient")).not.toBeInTheDocument();
+    const senderCell = screen.getByTestId("disposal-cell-1-sender");
+    const recipientCell = screen.getByTestId("disposal-cell-1-recipient");
+    expect(senderCell).toHaveTextContent(item.sender);
+    expect(recipientCell).toHaveTextContent("first@example.com, second@example.com");
+    expect(screen.queryByTestId("disposal-cell-1-senderRecipient")).not.toBeInTheDocument();
 
-    const trigger = cell.querySelector<HTMLElement>('[data-slot="tooltip-trigger"]');
-    expect(trigger).not.toBeNull();
-    fireEvent.pointerEnter(trigger!, { pointerType: "mouse" });
-    fireEvent.mouseEnter(trigger!);
+    const senderTrigger = senderCell.querySelector<HTMLElement>('[data-slot="tooltip-trigger"]');
+    expect(senderTrigger).not.toBeNull();
+    fireEvent.pointerEnter(senderTrigger!, { pointerType: "mouse" });
+    fireEvent.mouseEnter(senderTrigger!);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(item.sender);
+
+    fireEvent.pointerLeave(senderTrigger!, { pointerType: "mouse" });
+    fireEvent.mouseLeave(senderTrigger!);
+    const recipientTrigger = recipientCell.querySelector<HTMLElement>('[data-slot="tooltip-trigger"]');
+    expect(recipientTrigger).not.toBeNull();
+    fireEvent.pointerEnter(recipientTrigger!, { pointerType: "mouse" });
+    fireEvent.mouseEnter(recipientTrigger!);
     expect(await screen.findByRole("tooltip")).toHaveTextContent(
-      `${item.sender} → first@example.com, second@example.com`,
+      "first@example.com, second@example.com",
     );
   });
 
-  it("falls back to the single recipient in the combined column", () => {
+  it("falls back to the single recipient in the recipient column", () => {
     const item = makeItem(1);
     renderTable({ items: [item], total: 1 });
 
-    expect(screen.getByTestId("disposal-cell-1-senderRecipient")).toHaveTextContent(
+    expect(screen.getByTestId("disposal-cell-1-recipient")).toHaveTextContent(
       item.recipient,
     );
   });
 
-  it("offers one combined sender-recipient option in column settings", async () => {
+  it("offers separate sender and recipient options in column settings", async () => {
     renderTable();
     fireEvent.click(screen.getByTestId("disposal-column-settings"));
 
     expect(
-      await screen.findByTestId("disposal-column-toggle-senderRecipient"),
-    ).toHaveTextContent("emailDisposal.table.senderRecipient");
-    expect(screen.queryByTestId("disposal-column-toggle-sender")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("disposal-column-toggle-recipient")).not.toBeInTheDocument();
+      await screen.findByTestId("disposal-column-toggle-sender"),
+    ).toHaveTextContent("emailDisposal.table.sender");
+    expect(
+      screen.getByTestId("disposal-column-toggle-recipient"),
+    ).toHaveTextContent("emailDisposal.table.recipient");
+    expect(screen.queryByTestId("disposal-column-toggle-senderRecipient")).not.toBeInTheDocument();
+  });
+
+  it("passes the hydrated visible columns in display order when exporting", async () => {
+    localStorage.setItem(
+      "osg.disposal.hiddenColumns",
+      JSON.stringify(["direction", "sender", "status"]),
+    );
+    const onBatchAction = vi.fn();
+    renderTable({ onBatchAction });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("disposal-column-header-direction")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("disposal-column-header-sender")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("disposal-column-header-status")).not.toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("disposal-batch-export"));
+
+    expect(onBatchAction).toHaveBeenCalledWith("export", [
+      "time",
+      "subject",
+      "senderIp",
+      "recipient",
+      "disposalBasis",
+      "mailType",
+      "action",
+    ]);
   });
 
   it("switches to compact density without shrinking table text and persists the preference", async () => {

@@ -5,8 +5,8 @@ import zh from '@/../messages/zh.json';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
 import { AnalysisSection } from './analysis-section';
 
-// GT-12727：命中模块清单（spec §7.10）的渲染守卫。
-// 重点是 §7.13 明列却一直没有测试的「租户可见性」那一条，以及三态 effective_for。
+// 命中模块清单的渲染守卫：effective_for 表示动作实际作用范围；终止动作候选
+// 无人生效时隐藏，proceed/observe 则由后端写入其实际命中收件人。
 
 const wrap = (ui: React.ReactNode) => (
   <NextIntlClientProvider locale="zh" messages={zh as never}>
@@ -50,7 +50,9 @@ const SERIALIZED_BASIS = `{
      "hit_values":{"match_method":"regex","match_content":"发票","match_position":"subject","matched_content":"发票代开"},
      "recipients":["b@x.com"],"effective_for":[]},
     {"policy_key":"IPFREQ","rule_name":"连接频率","action":"reject",
-     "hit_values":{"count":"500","limit":"100"}}
+     "hit_values":{"count":"500","limit":"100"}},
+    {"policy_key":"ACF","rule_name":"高级规则A","rule_id":"ACF-77","action":"audit",
+     "recipients":["b@x.com"],"effective_for":["b@x.com"]}
   ]
 }`;
 
@@ -77,7 +79,7 @@ beforeEach(() => {
 });
 
 describe('命中模块清单（GT-12727 §7.10）', () => {
-  it('AUTH proceed 只显示为命中模块，不生成处置依据卡片', () => {
+  it('AUTH proceed 保留实际作用收件人并显示为命中模块', () => {
     const detail = detailWithModules();
     detail.reason = 'accepted by rules: 22';
     detail.disposal_basis = {
@@ -91,20 +93,19 @@ describe('命中模块清单（GT-12727 §7.10）', () => {
         rule_id: 'AUTH-22',
         action: 'proceed',
         recipients: ['qfliu@dm163.cacter.com'],
-        effective_for: [],
+        effective_for: ['qfliu@dm163.cacter.com'],
       }],
     };
 
     render(wrap(<AnalysisSection detail={detail} aiEnabled events={[]} />));
 
     expect(screen.queryByTestId('analysis-disposal-basis')).not.toBeInTheDocument();
-    const hit = screen.getByTestId('analysis-hit-module-item');
-    expect(hit).toHaveTextContent('认证与仿冒检测');
-    expect(hit).toHaveTextContent('AUTH-22');
-    expect(hit).toHaveTextContent('进行下一步');
+    const modules = screen.getByTestId('analysis-hit-modules');
+    expect(modules).toHaveTextContent('sysrule:auth_spoofing_spf_none');
+    expect(modules).toHaveTextContent('生效：qfliu@dm163.cacter.com');
   });
 
-  it('渲染每条命中模块，并逐条标注生效 / 仅命中', () => {
+  it('整条规则无人最终生效时不展示，部分生效仍逐收件人标注', () => {
     render(wrap(<AnalysisSection detail={detailWithModules()} aiEnabled events={[]} />));
     const items = screen.getAllByTestId('analysis-hit-module-item');
     expect(items).toHaveLength(3);
@@ -114,15 +115,17 @@ describe('命中模块清单（GT-12727 §7.10）', () => {
     expect(items[0].textContent).toContain('生效：a@x.com');
     expect(items[0].textContent).toContain('仅命中：b@x.com');
 
-    // CR：effective_for 为 []（确知未生效）⟹ 只有"仅命中"，没有"生效"。
-    expect(items[1].textContent).toContain('仅命中：b@x.com');
-    expect(items[1].textContent).not.toContain('生效：b@x.com');
-    // 命中详情（§7.1 的原始诉求）必须真的渲染出来。
-    expect(items[1].textContent).toContain('发票代开');
+    // CR：effective_for 为 []（确知整条规则未生效）⟹ 不算业务命中。
+    expect(items.every((item) => !item.textContent?.includes('内容规则A'))).toBe(true);
+    expect(items.every((item) => !item.textContent?.includes('CR-66'))).toBe(true);
 
     // IPFREQ：字段缺席（无归属信息）⟹ 一个归属标注都不打。
-    expect(items[2].textContent).not.toContain('生效');
-    expect(items[2].textContent).not.toContain('仅命中');
+    expect(items[1].textContent).not.toContain('生效');
+    expect(items[1].textContent).not.toContain('仅命中');
+
+    // ACF：至少对 b 生效，正常计为命中。
+    expect(items[2].textContent).toContain('高级规则A');
+    expect(items[2].textContent).toContain('生效：b@x.com');
   });
 
   it('未映射页条目的命中详情不得渲染成横杠占位（Important-3：会话级信号逐条带上）', () => {
@@ -150,7 +153,7 @@ describe('命中模块清单（GT-12727 §7.10）', () => {
     const items = screen.getAllByTestId('analysis-hit-module-item');
 
     // 阶段 1（IPBL / IPFREQ 都是 stage 1）：模块名、规则名、命中详情均遮蔽。
-    for (const idx of [0, 2]) {
+    for (const idx of [0, 1]) {
       expect(items[idx].textContent).toContain('平台管控策略');
       expect(items[idx].textContent).toContain('平台统一管控');
       expect(items[idx].textContent).not.toContain('IPBL-11');
@@ -161,10 +164,9 @@ describe('命中模块清单（GT-12727 §7.10）', () => {
     // 阶段色点本身泄露"这是阶段 1 策略"，只剩阶段 3 的那一个。
     expect(screen.getAllByTestId('analysis-hit-module-stage-dot').length).toBe(1);
 
-    // 阶段 3 内容规则不属于平台策略，照常展示。
-    expect(items[1].textContent).toContain('内容规则');
-    expect(items[1].textContent).toContain('CR-66');
-    expect(items[1].textContent).toContain('发票代开');
+    // 阶段 5 高级规则不属于平台策略，照常展示。
+    expect(items[2].textContent).toContain('高级过滤规则');
+    expect(items[2].textContent).toContain('ACF-77');
   });
 
   it('单租户形态（非多租户）不模糊化', () => {

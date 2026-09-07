@@ -6,7 +6,12 @@ import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { NON_SERIES_KEYS, type TrendData, type ViewBy } from '@/lib/api/security-overview';
+import {
+  DELIVERY_RESULT_KEYS,
+  NON_SERIES_KEYS,
+  type TrendData,
+  type ViewBy,
+} from '@/lib/api/security-overview';
 import { seriesColor, TREND_VIEW_BY_OPTIONS } from './constants';
 
 interface TrendChartCardProps {
@@ -24,6 +29,8 @@ interface TrendChartCardProps {
 export const SECURITY_OVERVIEW_VIEW_OPTIONS: ViewBy[] = [
   ...TREND_VIEW_BY_OPTIONS,
 ];
+
+const DELIVERY_RESULT_KEY_SET = new Set<string>(DELIVERY_RESULT_KEYS);
 
 export function TrendChartCard({
   trend,
@@ -52,6 +59,7 @@ export function TrendChartCard({
       if (k === 'date' || NON_SERIES_KEYS.has(k)) return false;
       // mark_deliver / greylist / sideline / advanced_review（灰名单）不在执行动作枚举中，安全总览执行动作视图同步去掉。
       if (viewBy === 'action' && (k === 'mark_deliver' || k === 'greylist' || k === 'sideline' || k === 'advanced_review')) return false;
+      if (viewBy === 'delivery_result' && !DELIVERY_RESULT_KEY_SET.has(k)) return false;
       return true;
     });
     return filtered;
@@ -168,7 +176,7 @@ export function TrendChartCard({
   };
 
   return (
-    <Card className="col-span-full overflow-hidden">
+    <Card className="col-span-full overflow-hidden" data-testid="security-overview-trend-card">
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="space-y-1">
           <div className="text-xs font-medium text-body">

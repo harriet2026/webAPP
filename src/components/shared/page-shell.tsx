@@ -103,6 +103,7 @@ export function PageHeader({
                   ? 'text-xl font-bold text-gray-900 dark:text-gray-100'
                   : 'text-xl font-semibold tracking-tight text-foreground',
               )}
+              data-testid="page-title"
             >
               {title}
             </h1>
@@ -114,6 +115,7 @@ export function PageHeader({
                     ? 'text-sm leading-5 font-normal text-gray-500 dark:text-gray-400'
                     : 'text-xs leading-4 text-body',
                 )}
+                data-testid="page-description"
               >
                 {description}
               </p>

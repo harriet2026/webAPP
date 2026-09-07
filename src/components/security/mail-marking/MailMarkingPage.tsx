@@ -175,14 +175,14 @@ export function MailMarkingPage({ embedded }: Props) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[10, 20, 50, 100].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}
+                    {[10, 20, 50, 100].map((size) => <SelectItem key={size} value={String(size)} data-testid={`mail-marking-page-size-option-${size}`}>{size}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
+                <Button variant="outline" size="icon" data-testid="mail-marking-page-prev" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="min-w-16 text-center text-sm">{safePage} / {totalPages}</span>
-                <Button variant="outline" size="icon" disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}>
+                <span className="min-w-16 text-center text-sm" data-testid="mail-marking-page-indicator">{safePage} / {totalPages}</span>
+                <Button variant="outline" size="icon" data-testid="mail-marking-page-next" disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>

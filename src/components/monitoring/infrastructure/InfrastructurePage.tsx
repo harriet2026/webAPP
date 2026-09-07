@@ -34,7 +34,7 @@ export function InfrastructurePage() {
   }, [node, nodes]);
 
   if (!isSystemAdmin) {
-    return <AccessDenied />;
+    return <div data-testid="monitor-infrastructure-access-denied"><AccessDenied /></div>;
   }
 
   // GT-11699 / GT-11534: the node list now degrades (HTTP 200 + `degraded`)

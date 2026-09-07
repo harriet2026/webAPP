@@ -193,6 +193,11 @@ export function DataSourceTab() {
         onRefresh={() => refetch()}
         filterCount={filterCount}
         testIdPrefix="contacts-source"
+        searchTestId="contacts-source-search"
+        resetTestId="contacts-source-reset"
+        refreshTestId="contacts-source-refresh"
+        filterTestId="contacts-source-filter"
+        filterPopoverTestId="contacts-source-filter-popover"
         filterContent={
           <>
             <FilterSelect

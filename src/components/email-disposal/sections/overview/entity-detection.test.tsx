@@ -208,6 +208,25 @@ describe('EntityDetection', () => {
     expect(within(row).getByText('Trojan.Generic')).toBeInTheDocument();
   });
 
+  it('shows the QR finding only on the attachment whose MD5 matches the scan result', () => {
+    const attachments = [
+      { filename: 'qr.png', size: 512, md5sum: 'qr-hash', content_type: 'image/png', inline: false, content_length: 512 },
+      { filename: 'plain.png', size: 256, md5sum: 'plain-hash', content_type: 'image/png', inline: false, content_length: 256 },
+    ];
+    const scan_results = [{
+      scan_id: 'qr-scan', message_id: 'm1', direction: 'receive', final_disposition: 'quarantine',
+      is_encrypted: false, attachment_md5: 'qr-hash', qr_code_count: 2, is_zip_bomb: false, duration_ms: 10,
+    }];
+    render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments, scan_results }), tab: 'attachments' })} />);
+
+    const qrRow = screen.getByTestId('email-disposal-overview-entity-attachment-qr-hash');
+    const plainRow = screen.getByTestId('email-disposal-overview-entity-attachment-plain-hash');
+    expect(within(qrRow).getByTestId('email-disposal-overview-entity-attachment-qr-hash-qr')).toHaveTextContent(
+      'emailDisposal.detail.overview.entityDetection.qrDetected:{"count":2}',
+    );
+    expect(within(plainRow).queryByText(/qrDetected/)).not.toBeInTheDocument();
+  });
+
   it('disables the hash-blacklist button when the attachment has no md5sum', async () => {
     const attachments = [{ filename: 'no-hash.txt', size: 10, content_type: 'text/plain', inline: false, content_length: 10 }];
     render(<EntityDetection {...baseProps({ detail: baseDetail({ attachments }), tab: 'attachments' })} />);

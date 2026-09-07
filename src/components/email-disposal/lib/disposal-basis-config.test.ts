@@ -249,6 +249,31 @@ describe('disposal-basis-config', () => {
     expect(formatHitDetail(legacy, 'zh')).not.toContain('%');
   });
 
+	it('renders unified SIM runtime evidence for similar mail and same subject', () => {
+		const similar: DisposalBasis = {
+			policy_key: 'SIM',
+			rule_name: '相似邮件-收信',
+			action: 'observe',
+			hit_values: {
+				detection_type: 'similar_email',
+				direction: 'receive',
+				counter: '12',
+				similarity_pct: '91',
+				cluster_id: 'sim_1_receive:7',
+			},
+		};
+		expect(formatHitDetail(similar, 'zh')).toContain('相似邮件');
+		expect(formatHitDetail(similar, 'zh')).toContain('similarity: 91%');
+		expect(formatHitDetail(similar, 'zh')).toContain('cluster: sim_1_receive:7');
+
+		const sameSubject: DisposalBasis = {
+			policy_key: 'SIM',
+			hit_values: { detection_type: 'same_subject', direction: 'send', counter: '50' },
+		};
+		expect(formatListReason(sameSubject, 'zh')).toContain('相同主题');
+		expect(formatHitDetail(sameSubject, 'zh')).toContain('count: 50');
+	});
+
   it('reads ACF detection tags from the top-level field', () => {
     const acf: DisposalBasis = {
       policy_key: 'ACF',
@@ -435,9 +460,16 @@ describe('IPBL / UBL allow-block list rendering (GT-12214 复开)', () => {
     );
     expect(routes.size).toBeGreaterThan(0);
     for (const route of routes) {
-      const pagePath = join(dashboardDir, route, 'page.tsx');
+      const pathname = route.split('?')[0];
+      const pagePath = join(dashboardDir, pathname, 'page.tsx');
       expect(existsSync(pagePath), `route ${route} -> ${pagePath} 不存在`).toBe(true);
     }
+  });
+
+  it('GT-12583 reopened: CR rule links carry module and rule identity', () => {
+    expect(getPolicyRoute('CR', 'CR-26694')).toBe(
+      '/security/pipeline?module=content&rule_id=CR-26694',
+    );
   });
 });
 
@@ -516,7 +548,7 @@ describe('multi-recipient disposal basis grouping (GT-12935)', () => {
           rule_id: 'AUTH-22',
           action: 'proceed',
           recipients: ['qfliu@dm163.cacter.com'],
-          effective_for: [],
+          effective_for: ['qfliu@dm163.cacter.com'],
         },
       ],
     };
@@ -524,6 +556,25 @@ describe('multi-recipient disposal basis grouping (GT-12935)', () => {
     expect(groupEffectiveRecipientBasisByRule(proceedOnly)).toEqual([]);
     expect(groupsFromSummaries(proceedOnly, undefined)).toEqual([]);
     expect(getActionLabel('proceed', 'zh')).toBe('进行下一步');
+  });
+
+  it('keeps applied observe and mail marking in hits but out of final basis', () => {
+    const hits = {
+      modules: [
+        {
+          policy_key: 'AUTH', rule_id: 'AUTH-23', action: 'observe',
+          recipients: ['a@example.test'], effective_for: ['a@example.test'],
+        },
+        {
+          policy_key: 'MAIL-MARK', rule_id: 'MAIL-MARK-24', action: 'tag',
+          recipients: ['a@example.test'], effective_for: ['a@example.test'],
+        },
+      ],
+    };
+    expect(resolveHitModules(hits)).toHaveLength(2);
+    expect(groupEffectiveRecipientBasisByRule(hits)).toEqual([]);
+    expect(groupsFromSummaries(hits, undefined)).toEqual([]);
+    expect(getActionLabel('observe', 'zh')).toBe('观察');
   });
 
   it('filters hit-only and legacy AUTH proceed entries from persisted list summaries', () => {

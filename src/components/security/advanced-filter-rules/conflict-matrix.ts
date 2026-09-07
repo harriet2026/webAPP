@@ -3,7 +3,9 @@
 // older matrix).
 import type { PolicyAction } from '@/types/policy-action';
 
-export type PrimaryAction = Exclude<PolicyAction, 'reject'>;
+// observe is the compiled runtime action for this editor's separate
+// observe_mode switch; it is not itself a configurable primary action.
+export type PrimaryAction = Exclude<PolicyAction, 'reject' | 'observe'>;
 
 export type AddonKey =
   | 'detailedLog'

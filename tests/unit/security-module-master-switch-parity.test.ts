@@ -3,8 +3,9 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 // Review P3 parity guard: most security modules use ModuleMasterSwitch.
-// `attachment_security` intentionally keeps a dedicated deferred-save switch
-// surface, while `advanced_rules` and the standalone URL/intent/recipient
+// `attachment_security` intentionally keeps a dedicated switch surface backed
+// by the same attachd document CAS as its editor, while `advanced_rules` and
+// the standalone URL/intent/recipient
 // pages keep their own wrappers.
 // Playwright only samples four pages, so a future page could accidentally lose
 // `<ModuleMasterSwitch>` and the suite would still pass.
@@ -87,9 +88,10 @@ describe('security module master switch frontend parity', () => {
     }
   });
 
-  it('attachment_security keeps its dedicated deferred master switch', () => {
+  it('attachment_security keeps its dedicated scoped-config master switch', () => {
     const src = readFileSync(path.join(SECURITY_SRC, 'AttachmentSecurityPage.tsx'), 'utf8');
-    expect(src).toContain("setSecurityModuleEnabled('attachment_security'");
+    expect(src).toContain('patchAttachmentSecurityScopedConfig(');
+    expect(src).toContain("path: 'module_enabled'");
     expect(src).toContain('rootTestId="module-master-switch-attachment_security"');
   });
 

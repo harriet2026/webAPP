@@ -170,13 +170,17 @@ export default function LinkClicksPage() {
             <div className="text-sm text-muted-foreground" data-testid="link-logs-total">{t('linkLogs.total', { count: data?.total ?? 0 })}</div>
             <LinkTable logs={data?.items ?? []} showTenant={showTenant && appliedFilter.tenantId == null}
               onView={setSelected} onDownload={handleDownload} />
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <Select value={String(pageSize)} onValueChange={(v) => { if (v != null) { setPageSize(Number(v)); setPage(1); } }}>
-                <SelectTrigger data-testid="link-logs-page-size" className="h-9 w-[110px]"><SelectValue /></SelectTrigger>
-                <SelectContent>{PAGE_SIZE_OPTIONS.map((o) => <SelectItem key={o} value={String(o)}>{o}</SelectItem>)}</SelectContent>
-              </Select>
-              <ServerPagination page={page} pageSize={pageSize} total={data?.total ?? 0} onPageChange={setPage} />
-            </div>
+            <ServerPagination
+              page={page}
+              pageSize={pageSize}
+              total={data?.total ?? 0}
+              onPageChange={setPage}
+              onPageSizeChange={(nextPageSize) => { setPageSize(nextPageSize); setPage(1); }}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+              pageSizeTestId="link-logs-page-size"
+              testId="link-logs-pagination"
+              showTotal={false}
+            />
           </PageSurface>
         )}
       </div>

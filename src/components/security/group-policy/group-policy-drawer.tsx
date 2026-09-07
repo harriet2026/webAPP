@@ -363,7 +363,7 @@ export function GroupPolicyDrawer({
                       <SelectContent>
                         <SelectItem value={TARGET_NONE}>{tGp('targetNone')}</SelectItem>
                         {options.map((g) => (
-                          <SelectItem key={g.ruleId} value={tagOf(g)}>{g.name}</SelectItem>
+                          <SelectItem key={g.ruleId} value={tagOf(g)} data-testid={`group-policy-target-${groupType}-option-${g.name}`}>{g.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

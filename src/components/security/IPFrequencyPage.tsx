@@ -10,6 +10,7 @@ import {
   Download,
   Upload,
   TestTube,
+  FlaskConical,
   Ban,
   HelpCircle,
   AlertCircle,
@@ -50,7 +51,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Fragment } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  getIPFrequencyRules,
+  listAllIPFrequencyRules,
   deleteIPFrequencyRule,
   setIPFrequencyRuleStatus,
   bulkIPFrequencyRules,
@@ -238,9 +239,8 @@ export function IPFrequencyPage({
   const { data: rulesData, isLoading } = useQuery({
     queryKey,
     queryFn: () =>
-      getIPFrequencyRules(
+      listAllIPFrequencyRules(
         {
-          page_size: 10000,
           scope_type: scopeFilter || undefined,
           is_active: activeFilter === 'true' ? true : activeFilter === 'false' ? false : undefined,
         },
@@ -250,8 +250,8 @@ export function IPFrequencyPage({
   });
 
   // GT-11795: extend search to also match rule id and IP/CIDR (client-side filter,
-  // since backend `q` only matches rule name). The list is fetched in full
-  // (page_size=10000) so client-side filtering is safe.
+  // since backend `q` only matches rule name). The API helper follows every
+  // server page, so client-side filtering covers the complete rule set.
   const filteredItems = useMemo(() => {
     const items = rulesData?.items || [];
     if (!search) return items;
@@ -362,11 +362,11 @@ export function IPFrequencyPage({
     }
   }, [dialogOpen, serializeFormDom]);
 
-  const requestCloseDialog = useCallback((eventDetails?: { preventUnmountOnClose: () => void }) => {
+  const requestCloseDialog = useCallback((eventDetails?: { cancel: () => void }) => {
     const valuesChanged = JSON.stringify(form.getValues()) !== initialFormSnapshotRef.current;
     const domValuesChanged = serializeFormDom() !== initialFormDomSnapshotRef.current;
     if (formDirtyRef.current || isFormDirty || valuesChanged || domValuesChanged) {
-      eventDetails?.preventUnmountOnClose();
+      eventDetails?.cancel();
       setDiscardChangesOpen(true);
       return;
     }
@@ -831,7 +831,10 @@ export function IPFrequencyPage({
     return (
       <PageShell>
         <PageHeader title={t('navigation.ipFrequency')} />
-        <div className="flex items-center justify-center py-20 text-muted-foreground">
+        <div
+          className="flex items-center justify-center py-20 text-muted-foreground"
+          data-testid="ipfreq-access-denied"
+        >
           {t('common.notAuthorized')}
         </div>
       </PageShell>
@@ -844,7 +847,7 @@ export function IPFrequencyPage({
         <Ban className="h-4 w-4 mr-1" />
         {t('ipFrequency.suspendedIPs')}
       </Button>
-      <Button variant="outline" size="sm" onClick={handleExport}>
+      <Button variant="outline" size="sm" data-testid="ipfreq-export" onClick={handleExport}>
         <Download className="h-4 w-4 mr-1" />
         {t('ipFrequency.export')}
       </Button>
@@ -852,7 +855,7 @@ export function IPFrequencyPage({
         <Upload className="h-4 w-4 mr-1" />
         {t('ipFrequency.import')}
       </Button>
-      <Button size="sm" onClick={() => handleOpenDialog()}>
+      <Button size="sm" data-testid="ipfreq-rule-create" onClick={() => handleOpenDialog()}>
         <Plus className="h-4 w-4 mr-1" />
         {t('ipFrequency.createRule')}
       </Button>
@@ -879,6 +882,7 @@ export function IPFrequencyPage({
                 placeholder={t('ipFrequency.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                data-testid="ipfreq-rules-search"
                 className="pl-9"
               />
             </div>
@@ -891,7 +895,7 @@ export function IPFrequencyPage({
                 group: t('ipFrequency.scopeIpGroup'),
               }}
             >
-              <SelectTrigger className="w-[120px] shrink-0">
+              <SelectTrigger className="w-[120px] shrink-0" data-testid="ipfreq-rules-scope-filter">
                 <SelectValue placeholder={t('ipFrequency.scopeFilter')} />
               </SelectTrigger>
               <SelectContent>
@@ -909,7 +913,7 @@ export function IPFrequencyPage({
                 false: t('ipFrequency.inactive'),
               }}
             >
-              <SelectTrigger className="w-[100px] shrink-0">
+              <SelectTrigger className="w-[100px] shrink-0" data-testid="ipfreq-rules-status-filter">
                 <SelectValue placeholder={t('ipFrequency.statusFilter')} />
               </SelectTrigger>
               <SelectContent>
@@ -922,6 +926,7 @@ export function IPFrequencyPage({
               variant="outline"
               size="sm"
               className="shrink-0"
+              data-testid="ipfreq-rules-reset"
               onClick={() => {
                 setSearch('');
                 setScopeFilter('');
@@ -1003,7 +1008,7 @@ export function IPFrequencyPage({
                       const isSelected = selectedIds.includes(rule.Rule.id);
                       return (
                         <Fragment key={rule.Rule.id}>
-                          <TableRow className={cn(isSelected && 'bg-primary/5', !rule.Rule.is_active && 'opacity-60')}>
+                          <TableRow data-testid={`ipfreq-rule-row-${rule.Rule.id}`} className={cn(isSelected && 'bg-primary/5', !rule.Rule.is_active && 'opacity-60')}>
                             <TableCell>
                               <Checkbox
                                 checked={isSelected}
@@ -1021,6 +1026,7 @@ export function IPFrequencyPage({
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
+                                data-testid={`ipfreq-rule-expand-${rule.Rule.id}`}
                                 onClick={() => toggleExpand(rule.Rule.id)}
                               >
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -1036,7 +1042,7 @@ export function IPFrequencyPage({
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2" data-testid={`ipfreq-rule-scope-${rule.Rule.id}`}>
                                 <StatusBadge status={scopeTypeLabel(rule.ScopeType)} variant={scopeTypeVariant(rule.ScopeType)} />
                                 {rule.ScopeValue && (
                                   <span className="text-xs text-muted-foreground font-mono">
@@ -1069,6 +1075,7 @@ export function IPFrequencyPage({
                                 <Switch
                                   checked={rule.Rule.is_active}
                                   disabled={rule.IsExpired}
+                                  data-testid={`ipfreq-rule-toggle-${rule.Rule.id}`}
                                   onCheckedChange={(checked) =>
                                     toggleMutation.mutate({
                                       id: rule.Rule.id,
@@ -1089,20 +1096,21 @@ export function IPFrequencyPage({
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenDialog(rule)}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" data-testid={`ipfreq-rule-edit-${rule.Rule.id}`} onClick={() => handleOpenDialog(rule)}>
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                                 <DropdownMenu>
-                                  <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
+                                  <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" data-testid={`ipfreq-rule-more-${rule.Rule.id}`} />}>
                                     <MoreHorizontal className="h-4 w-4" />
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => setRuleSuspendedTarget(rule)}>
+                                    <DropdownMenuItem data-testid={`ipfreq-rule-suspended-${rule.Rule.id}`} onClick={() => setRuleSuspendedTarget(rule)}>
                                       <Eye className="h-4 w-4 mr-2" />
                                       {t('ipFrequency.viewSuspendedIPs')}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="text-destructive"
+                                      data-testid={`ipfreq-rule-delete-${rule.Rule.id}`}
                                       onClick={() => setDeleteTarget({ id: rule.Rule.id, name: rule.Rule.name })}
                                     >
                                       <Trash2 className="h-4 w-4 mr-2" />
@@ -1114,7 +1122,7 @@ export function IPFrequencyPage({
                             </TableCell>
                           </TableRow>
                           {isExpanded && (
-                            <TableRow className="bg-muted/30 hover:bg-muted/30">
+                            <TableRow data-testid={`ipfreq-rule-details-${rule.Rule.id}`} className="bg-muted/30 hover:bg-muted/30">
                               <TableCell colSpan={13} className="py-3">
                                 <div className="grid grid-cols-4 gap-6 px-4">
                                   {/* IP级防护 */}
@@ -1250,7 +1258,7 @@ export function IPFrequencyPage({
         open={dialogOpen}
         onOpenChange={(open, eventDetails) => (open ? setDialogOpen(true) : requestCloseDialog(eventDetails))}
       >
-        <SheetContent side="right" className="data-[side=right]:w-[960px] data-[side=right]:sm:max-w-[960px] p-0 flex flex-col" showCloseButton={false}>
+        <SheetContent side="right" className="data-[side=right]:w-[960px] data-[side=right]:sm:max-w-[960px] p-0 flex flex-col" showCloseButton={false} data-testid="ipfreq-rule-drawer">
           <SheetHeader className="px-6 py-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
@@ -1260,6 +1268,24 @@ export function IPFrequencyPage({
                 <p className="text-sm text-muted-foreground mt-1">
                   {t('ipFrequency.description')}
                 </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTestDialogOpen(true)}
+                >
+                  <FlaskConical className="h-4 w-4 mr-2" />
+                  {t('ipFrequency.test')}
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => requestCloseDialog()} data-testid="ipfreq-rule-cancel">
+                  {t('common.cancel')}
+                </Button>
+                <Button type="button" size="sm" disabled={isSubmitting} onClick={onSubmit} data-testid="ipfreq-rule-save">
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {t('common.save')}
+                </Button>
               </div>
             </div>
           </SheetHeader>
@@ -1296,6 +1322,7 @@ export function IPFrequencyPage({
                         <Input
                           placeholder={t('ipFrequency.ruleNamePlaceholder')}
                           {...form.register('name')}
+                          data-testid="ipfreq-rule-name"
                           className={cn(form.formState.errors.name && 'border-red-500')}
                         />
                         {form.formState.errors.name && (
@@ -1328,19 +1355,20 @@ export function IPFrequencyPage({
                             <SelectValue placeholder={t('ipFrequency.scope')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">{t('ipFrequency.scopeAll')}</SelectItem>
-                            <SelectItem value="single">{t('ipFrequency.scopeSingle')}</SelectItem>
-                            <SelectItem value="range">{t('ipFrequency.scopeRange')}</SelectItem>
+                            <SelectItem value="all" data-testid="ipfreq-scope-type-option-all">{t('ipFrequency.scopeAll')}</SelectItem>
+                            <SelectItem value="single" data-testid="ipfreq-scope-type-option-single">{t('ipFrequency.scopeSingle')}</SelectItem>
+                            <SelectItem value="range" data-testid="ipfreq-scope-type-option-range">{t('ipFrequency.scopeRange')}</SelectItem>
                             {/* GT-12132：后端已端到端支持组范围（scope_type=group，
                                 scope_value=全局 IP 组规则 ID），组源为真实
                                 _meta/groups?type=ip */}
-                            <SelectItem value="group">{t('ipFrequency.scopeIpGroup')}</SelectItem>
+                            <SelectItem value="group" data-testid="ipfreq-scope-type-option-group">{t('ipFrequency.scopeIpGroup')}</SelectItem>
                           </SelectContent>
                         </Select>
                         {(watchScopeType === 'single' || watchScopeType === 'range') && (
                           <Input
                             placeholder={watchScopeType === 'range' ? 'e.g. 192.168.1.0/24' : 'e.g. 192.168.1.1'}
                             {...form.register('scope_value')}
+                            data-testid="ipfreq-scope-value"
                             className={cn(
                               'flex-1',
                               form.formState.errors.scope_value && 'border-red-500',
@@ -1363,7 +1391,7 @@ export function IPFrequencyPage({
                             </SelectTrigger>
                             <SelectContent>
                               {ipGroupOptions.map((g) => (
-                                <SelectItem key={g.rule_id} value={String(g.rule_id)}>
+                                <SelectItem key={g.rule_id} value={String(g.rule_id)} data-testid={`ipfreq-scope-group-option-${g.rule_id}`}>
                                   {g.label}
                                 </SelectItem>
                               ))}
@@ -1423,6 +1451,7 @@ export function IPFrequencyPage({
                         <Input
                           type="number"
                           {...form.register('priority', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-priority"
                           className={cn('w-[100px]', priorityConflict && 'border-amber-500')}
                           min={range.min}
                           max={range.max}
@@ -1496,6 +1525,7 @@ export function IPFrequencyPage({
                           type="number"
                           placeholder="-1"
                           {...form.register('daily_connection_limit', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-daily-limit"
                           className="w-[100px]"
                         />
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -1514,6 +1544,7 @@ export function IPFrequencyPage({
                           type="number"
                           placeholder="-1"
                           {...form.register('concurrent_connection_limit', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-concurrent-limit"
                           className="w-[100px]"
                         />
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -1532,6 +1563,7 @@ export function IPFrequencyPage({
                         <Input
                           type="number"
                           {...form.register('window_minutes', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-window-minutes"
                           className="w-[72px]"
                           min={-1}
                         />
@@ -1540,6 +1572,7 @@ export function IPFrequencyPage({
                           type="number"
                           placeholder="-1"
                           {...form.register('window_connection_limit', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-window-limit"
                           className="w-[100px]"
                         />
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -1573,6 +1606,7 @@ export function IPFrequencyPage({
                           type="number"
                           placeholder="-1"
                           {...form.register('hourly_auth_failure_limit', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-hourly-auth-limit"
                           className="w-[100px]"
                         />
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -1604,6 +1638,7 @@ export function IPFrequencyPage({
                           type="number"
                           placeholder="-1"
                           {...form.register('single_connection_command_error_limit', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-command-error-limit"
                           className="w-[100px]"
                         />
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -1622,6 +1657,7 @@ export function IPFrequencyPage({
                           type="number"
                           placeholder="3"
                           {...form.register('single_connection_auth_failure_limit', { valueAsNumber: true })}
+                          data-testid="ipfreq-rule-connection-auth-limit"
                           className="w-[100px]"
                         />
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -1656,7 +1692,7 @@ export function IPFrequencyPage({
                           disconnect: t('ipFrequency.blockDisconnect'),
                         }}
                       >
-                        <SelectTrigger className="w-48">
+                        <SelectTrigger className="w-48" data-testid="ipfreq-rule-action">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1703,7 +1739,7 @@ export function IPFrequencyPage({
                           '120': t('ipFrequency.suspend2hour'),
                         }}
                       >
-                        <SelectTrigger className="w-48">
+                        <SelectTrigger className="w-48" data-testid="ipfreq-rule-suspend">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1845,7 +1881,7 @@ export function IPFrequencyPage({
 
                 {/* Configuration Examples */}
                 <Collapsible open={showExamples} onOpenChange={setShowExamples}>
-                  <CollapsibleSectionTrigger className="px-3 py-1.5 text-xs">
+                  <CollapsibleSectionTrigger className="px-3 py-1.5 text-xs" data-testid="ipfreq-examples-toggle">
                     <Lightbulb className="h-4 w-4" />
                     <span>{t('ipFrequency.examples.title')}</span>
                   </CollapsibleSectionTrigger>
@@ -1875,6 +1911,7 @@ export function IPFrequencyPage({
                             variant="outline"
                             className="h-6 text-[10px] px-2"
                             onClick={() => applyExample(example.id)}
+                            data-testid={`ipfreq-example-apply-${example.id}`}
                           >
                             {t('ipFrequency.examples.useThis')}
                           </Button>
@@ -1889,7 +1926,7 @@ export function IPFrequencyPage({
 
                 {/* Simulation Test */}
                 <Collapsible open={showSimulator} onOpenChange={setShowSimulator}>
-                  <CollapsibleSectionTrigger className="px-3 py-1.5 text-xs">
+                  <CollapsibleSectionTrigger className="px-3 py-1.5 text-xs" data-testid="ipfreq-simulator-toggle">
                     <Play className="h-4 w-4" />
                     <span>{t('ipFrequency.simulator.title')}</span>
                   </CollapsibleSectionTrigger>
@@ -1902,6 +1939,7 @@ export function IPFrequencyPage({
                             value={simulatorIp}
                             onChange={(e) => setSimulatorIp(e.target.value)}
                             placeholder="192.168.1.1"
+                            data-testid="ipfreq-simulator-ip"
                             className="h-7 text-xs"
                           />
                         </div>
@@ -1911,15 +1949,16 @@ export function IPFrequencyPage({
                             type="number"
                             value={simulatorCount}
                             onChange={(e) => setSimulatorCount(parseInt(e.target.value) || 0)}
+                            data-testid="ipfreq-simulator-count"
                             className="h-7 text-xs"
                           />
                         </div>
                       </div>
-                      <Button size="sm" className="w-full h-7 text-xs" onClick={runSimulation}>
+                      <Button size="sm" className="w-full h-7 text-xs" onClick={runSimulation} data-testid="ipfreq-simulator-run">
                         {t('ipFrequency.simulator.start')}
                       </Button>
                       {simulatorResult && (
-                        <div className={cn(
+                        <div data-testid="ipfreq-simulator-result" className={cn(
                           'rounded-lg p-2 text-xs',
                           simulatorResult.hit
                             ? 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800'
@@ -2155,7 +2194,7 @@ export function IPFrequencyPage({
 
       {/* Layer 2: Per-rule suspended IPs Sheet (from expanded detail or more menu) */}
       <Sheet open={!!ruleSuspendedTarget} onOpenChange={(open) => { if (!open) setRuleSuspendedTarget(null); }}>
-        <SheetContent side="right" className="w-[500px] sm:w-[600px] p-0 flex flex-col" showCloseButton={false}>
+        <SheetContent side="right" className="w-[500px] sm:w-[600px] p-0 flex flex-col" showCloseButton={false} data-testid="ipfreq-rule-suspended-drawer">
           <SheetHeader className="px-4 py-4 border-b flex-shrink-0">
             <SheetTitle>
               {t('ipFrequency.currentSuspendedIPs', { count: ruleSuspendedIPs.length })}
@@ -2169,6 +2208,7 @@ export function IPFrequencyPage({
               <Button
                 variant="outline"
                 size="sm"
+                data-testid="ipfreq-rule-suspended-release-selected"
                 onClick={() => {
                   if (ruleSuspendedSelected.length > 0) {
                     ruleSuspendedSelected.forEach((ip) => releaseMutation.mutate(ip));
@@ -2183,6 +2223,7 @@ export function IPFrequencyPage({
               <Button
                 variant="ghost"
                 size="sm"
+                data-testid="ipfreq-rule-suspended-refresh"
                 onClick={() => {
                   if (ruleSuspendedTarget) {
                     setRuleSuspendedLoading(true);

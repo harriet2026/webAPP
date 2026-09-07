@@ -18,9 +18,13 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 const TENANT_ID = 42;
 
 const mockApiRequest = vi.fn();
-vi.mock('@/lib/api/client', () => ({
-  useScopedApiRequest: () => ({ apiRequest: mockApiRequest }),
-}));
+vi.mock('@/lib/api/client', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api/client')>();
+  return {
+    ...actual,
+    useScopedApiRequest: () => ({ apiRequest: mockApiRequest }),
+  };
+});
 
 interface RuleFixture {
   id: number;

@@ -120,7 +120,7 @@ export function AlertRuleEditor({ rule, onClose }: Props) {
 
   const MetricSelect = (
     <Select value={form.metric_key} onValueChange={onPickMetric}>
-      <SelectTrigger className={errors.metric_key ? 'border-red-500' : ''}>
+      <SelectTrigger className={errors.metric_key ? 'border-red-500' : ''} data-testid="alert-rule-metric-select">
         <SelectValue placeholder={t('editor.selectMetric')} />
       </SelectTrigger>
       <SelectContent>
@@ -216,13 +216,13 @@ export function AlertRuleEditor({ rule, onClose }: Props) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{t('label.ruleName')} *</Label>
-              <Input value={form.name} onChange={(e) => set('name', e.target.value)} className={errors.name ? 'border-red-500' : ''} />
-              {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+              <Input value={form.name} onChange={(e) => set('name', e.target.value)} className={errors.name ? 'border-red-500' : ''} data-testid="alert-rule-name-input" />
+              {errors.name && <p className="text-xs text-red-500" data-testid="alert-rule-err-name">{errors.name}</p>}
             </div>
             <div className="space-y-2">
               <Label>{t('editor.severity')}</Label>
               <Select value={form.severity} onValueChange={(v) => set('severity', v as AlertRulePayload['severity'])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger data-testid="alert-rule-severity-select"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(['p0', 'p1', 'p2', 'p3', 'p4'] as const).map((s) => (
                     <SelectItem key={s} value={s}>{t(`severity.${SEVERITY_KEY[s]}`)}</SelectItem>
@@ -258,7 +258,7 @@ export function AlertRuleEditor({ rule, onClose }: Props) {
             <div className="space-y-2">
               <Label>{t('editor.operator')} *</Label>
               <Select value={form.operator} onValueChange={(v) => set('operator', v as AlertRulePayload['operator'])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger data-testid="alert-rule-operator-select"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {(['gt', 'ge', 'lt', 'le', 'eq'] as const).map((op) => (
                     <SelectItem key={op} value={op}>{t(`op.${op}`)}</SelectItem>
@@ -271,13 +271,13 @@ export function AlertRuleEditor({ rule, onClose }: Props) {
           <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800/50">
             <div className="flex items-center justify-between">
               <Label>{t('editor.dualThreshold')}</Label>
-              <Switch checked={form.dual_threshold} onCheckedChange={(v) => set('dual_threshold', v)} />
+              <Switch checked={form.dual_threshold} onCheckedChange={(v) => set('dual_threshold', v)} data-testid="alert-rule-dual-threshold" />
             </div>
             {form.dual_threshold ? (
               <div className="mt-3 grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-yellow-600">{t('editor.warnThreshold')}</Label>
-                  <Input type="number" value={form.threshold_warn ?? ''} onChange={(e) => set('threshold_warn', num(e.target.value))} />
+                  <Input type="number" data-testid="alert-rule-warn-threshold-input" value={form.threshold_warn ?? ''} onChange={(e) => set('threshold_warn', num(e.target.value))} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-red-600">{t('editor.critThreshold')}</Label>
@@ -290,7 +290,7 @@ export function AlertRuleEditor({ rule, onClose }: Props) {
                 {unit && <span className="text-muted-foreground">{unit}</span>}
               </div>
             )}
-            {errors.threshold && <p className="text-sm text-red-500">{errors.threshold}</p>}
+            {errors.threshold && <p className="text-sm text-red-500" data-testid="alert-rule-err-threshold">{errors.threshold}</p>}
           </div>
 
           <div className="space-y-3">
@@ -310,7 +310,7 @@ export function AlertRuleEditor({ rule, onClose }: Props) {
                 <span className="text-sm text-muted-foreground">{t('editor.samplesUnit')}</span>
               </div>
             )}
-            {errors.duration && <p className="text-sm text-red-500">{errors.duration}</p>}
+            {errors.duration && <p className="text-sm text-red-500" data-testid="alert-rule-err-duration">{errors.duration}</p>}
           </div>
           </div>
         </details>
@@ -332,8 +332,8 @@ export function AlertRuleEditor({ rule, onClose }: Props) {
           {(form.notify_email_enabled || form.recovery_notify) && (
             <div className="space-y-2">
               <Label>{t('editor.recipients')}</Label>
-              <Input value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="ops@company.com" />
-              {errors.recipients && <p className="text-xs text-red-500">{errors.recipients}</p>}
+              <Input value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="ops@company.com" data-testid="alert-rule-recipients-input" />
+              {errors.recipients && <p className="text-xs text-red-500" data-testid="alert-rule-err-recipients">{errors.recipients}</p>}
             </div>
           )}
           </div>

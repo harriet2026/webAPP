@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/auth-context';
+import { useOptionalUnsavedGuard } from '@/contexts/unsaved-guard-context';
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ async function fetchTenants(): Promise<Tenant[]> {
 // page's child tabs already read via useAuth/useApiRequest (X-Tenant-ID header).
 export function OrganizationTenantSelector() {
   const { isSystemAdmin, selectedTenantId, setSelectedTenant } = useAuth();
+  const unsavedGuard = useOptionalUnsavedGuard();
   const t = useTranslations();
 
   const { data: tenants } = useQuery({
@@ -58,11 +60,16 @@ export function OrganizationTenantSelector() {
         if (value === null) return;
         const numValue = parseInt(value, 10);
         if (!isNaN(numValue)) {
-          setSelectedTenant(numValue);
+          const transition = () => setSelectedTenant(numValue);
+          if (unsavedGuard) {
+            unsavedGuard.requestTransition(transition);
+          } else {
+            transition();
+          }
         }
       }}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px]" data-testid="contacts-tenant-selector">
         <SelectValue placeholder={t('organizationContacts.selectTenantPlaceholder')} />
       </SelectTrigger>
       <SelectContent>

@@ -294,7 +294,7 @@ export default function InvestigationsPage() {
               <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
               {t('common.refresh')}
             </Button>
-            <Button onClick={() => setCreateOpen(true)}>
+            <Button onClick={() => setCreateOpen(true)} data-testid="investigation-create">
               <Bot className="mr-2 h-4 w-4" />
               {t('investigations.createTitle')}
             </Button>

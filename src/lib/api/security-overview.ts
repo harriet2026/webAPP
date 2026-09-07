@@ -8,6 +8,11 @@ export type ViewBy = 'threat_type' | 'action' | 'threat_level' | 'delivery_resul
 export type ChartType = 'area' | 'line' | 'bar';
 export type SecurityOverviewInterval = 'hour' | 'day' | 'month';
 
+// Public terminal delivery-result series exposed by the security-overview API.
+// Keep this allow-list on the client as well so a rolling-upgrade response from
+// an older server cannot reintroduce internal lifecycle states into the UI.
+export const DELIVERY_RESULT_KEYS = ['delivered', 'failed', 'cancelled'] as const;
+
 // Keys present in trend/detail rows that are NOT stackable counts / drillable
 // series. The delivery_result rows carry a `success_rate` percentage that must
 // be excluded from the stacked area chart and the detail-table count columns.

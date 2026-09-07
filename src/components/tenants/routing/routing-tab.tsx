@@ -130,7 +130,7 @@ export function RoutingTab() {
         return (
           <div className="flex items-center gap-3">
             <ProgressDots rp={rp} labels={PROGRESS_KEYS.map((k) => t(`routing.tabs.${k}`))} />
-            <span className="text-xs tabular-nums text-muted-foreground">
+            <span data-testid={`tenant-routing-progress-${row.original.id}`} className="text-xs tabular-nums text-muted-foreground">
               {t('routing.progressHint', { done, total: 4 })}
             </span>
           </div>
@@ -143,10 +143,12 @@ export function RoutingTab() {
       cell: ({ row }) => {
         const a = row.original.access_status;
         return (
+          <span data-testid={`tenant-routing-access-${row.original.id}`}>
           <StatusBadge
             status={t(`access.${a}` as const)}
             variant={a === 'configured' ? 'success' : 'warning'}
           />
+          </span>
         );
       },
     },
@@ -160,6 +162,7 @@ export function RoutingTab() {
             size="sm"
             className="gap-1.5"
             onClick={() => openDrilldown(row.original)}
+            data-testid={`tenant-routing-configure-${row.original.id}`}
           >
             {t('routing.actions.configure')}
             <ChevronRight className="h-4 w-4" />
@@ -177,6 +180,7 @@ export function RoutingTab() {
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            data-testid="tenant-routing-search"
             placeholder={t('tenantName')}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -240,6 +244,7 @@ export function RoutingTab() {
         <DataTable
           columns={columns}
           data={data?.items ?? []}
+          rowTestId={(row) => `tenant-routing-row-${row.id}`}
           pageCount={totalPages}
           pageIndex={page - 1}
           onPageChange={(i) => setPage(i + 1)}

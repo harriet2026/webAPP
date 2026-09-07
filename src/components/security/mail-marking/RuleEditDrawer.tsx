@@ -316,7 +316,7 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
                     <ColorField label={t('customColorBorder')} value={custom.border} onChange={(value) => setMark({ custom_colors: { ...custom, border: value } })} />
                     <div className="flex items-center gap-2">
                       <Label className="text-sm">{t('customColorRadius')}:</Label>
-                      <Input className="w-16" type="number" min={0} max={20} value={custom.radius} onChange={(event) => setMark({ custom_colors: { ...custom, radius: Number(event.target.value) } })} />
+                      <Input data-testid="mail-marking-custom-radius" className="w-16" type="number" min={0} max={20} value={custom.radius} onChange={(event) => setMark({ custom_colors: { ...custom, radius: Number(event.target.value) } })} />
                       <span className="text-sm">px</span>
                     </div>
                   </div>
@@ -339,7 +339,7 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
         {position === 'header' && (
           <FormRow label={t('headerNameLabel')} top>
             <FieldBlock error={errors.header}>
-              <Input value={mark.header_name ?? ''} placeholder={t('headerNamePlaceholder')} onChange={(event) => setMark({ header_name: event.target.value })} />
+              <Input data-testid="mail-marking-mark-header-name" value={mark.header_name ?? ''} placeholder={t('headerNamePlaceholder')} onChange={(event) => setMark({ header_name: event.target.value })} />
             </FieldBlock>
           </FormRow>
         )}
@@ -399,7 +399,7 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
         {position === 'header' && (
           <FormRow label={t('headerNameLabel')} top>
             <FieldBlock error={errors.header}>
-              <Input value={disclaimer.header_name ?? 'X-Disclaimer'} placeholder="X-Disclaimer" onChange={(event) => setDisclaimer({ header_name: event.target.value })} />
+              <Input data-testid="mail-marking-disclaimer-header-name" value={disclaimer.header_name ?? 'X-Disclaimer'} placeholder="X-Disclaimer" onChange={(event) => setDisclaimer({ header_name: event.target.value })} />
             </FieldBlock>
           </FormRow>
         )}

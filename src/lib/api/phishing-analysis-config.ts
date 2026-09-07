@@ -1,4 +1,4 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import { apiRequest, type ApiRequestFn, type PublicationPendingResponse } from './client';
 import type { PhishAnalysisConfig, PhishAnalysisConfigPutRequest } from '@/types/phishing-config';
 
 export function getPhishingAnalysisConfig(
@@ -10,6 +10,6 @@ export function getPhishingAnalysisConfig(
 export async function putPhishingAnalysisConfig(
   body: PhishAnalysisConfigPutRequest,
   requestFn: ApiRequestFn = apiRequest,
-): Promise<void> {
-  await requestFn<void>('/phishing-agent/analysis-config', { method: 'PUT', body });
+): Promise<void | PublicationPendingResponse> {
+  return requestFn<void | PublicationPendingResponse>('/phishing-agent/analysis-config', { method: 'PUT', body });
 }

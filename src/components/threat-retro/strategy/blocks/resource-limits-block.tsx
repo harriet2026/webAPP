@@ -26,6 +26,7 @@ export function ResourceLimitsBlock({ draft, patch, isAdmin, agentState, errors 
           <Label htmlFor="max-tool-calls">{t('maxToolCalls')}</Label>
           <Input
             id="max-tool-calls"
+            data-testid="strategy-max-tool-calls"
             type="number"
             min={1}
             value={draft.resource_limits.max_tool_calls}
@@ -41,13 +42,14 @@ export function ResourceLimitsBlock({ draft, patch, isAdmin, agentState, errors 
             className={cn(errors.maxToolCalls && 'border-destructive')}
           />
           {errors.maxToolCalls ? (
-            <p className="text-xs text-destructive">{t('maxToolCallsInvalid')}</p>
+            <p className="text-xs text-destructive" data-testid="strategy-max-tool-calls-error">{t('maxToolCallsInvalid')}</p>
           ) : null}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="max-url-fetches">{t('maxUrlFetches')}</Label>
           <Input
             id="max-url-fetches"
+            data-testid="strategy-max-url-fetches"
             type="number"
 			min={1}
 			max={1000}
@@ -64,7 +66,7 @@ export function ResourceLimitsBlock({ draft, patch, isAdmin, agentState, errors 
             className={cn(errors.maxUrlFetches && 'border-destructive')}
           />
           {errors.maxUrlFetches ? (
-            <p className="text-xs text-destructive">{t('maxUrlFetchesInvalid')}</p>
+            <p className="text-xs text-destructive" data-testid="strategy-max-url-fetches-error">{t('maxUrlFetchesInvalid')}</p>
           ) : null}
         </div>
       </div>

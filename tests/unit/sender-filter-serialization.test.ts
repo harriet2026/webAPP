@@ -35,7 +35,7 @@ describe('buildConditionTree', () => {
     }, {
       type: 'AND',
       children: [
-        { type: 'condition', field: 'rcpttags', operator: 'hasTag', value: 'grp:fin' },
+        { type: 'condition', field: 'sender_group', map_key: 'grp:fin', operator: 'eq', value: 'true' },
         { type: 'condition', field: 'client_ip', operator: 'cidr', value: '10.0.0.0/24' },
       ],
     }],
@@ -47,7 +47,7 @@ describe('buildConditionTree', () => {
       type: 'AND',
       children: [
         { type: 'condition', field: 'sender', operator: 'eq', value: 'x@y.com' },
-        { type: 'condition', field: 'rcpttags', operator: 'hasTag', value: 'grp:trusted' },
+        { type: 'condition', field: 'sender_ip_group', map_key: 'grp:trusted', operator: 'eq', value: 'true' },
       ],
     }],
   ];

@@ -146,14 +146,31 @@ export async function deleteUserListRule(id: number, requestFn: ApiRequestFn = a
 }
 
 // API 契约禁止 `batch`，复用 bulk 端点（internal/api/CLAUDE.md）。
-// 后端为不破坏既有调用方会「加字段」返回 deleted/failed，缺失时容错回退。
+// deleted/failed 是删除结果的权威来源；旧后端若漏返回明细，必须把所有请求项
+// 视为失败，不能再把“字段缺失”猜成“整批成功”。
+export interface UserListBulkDeleteFailure {
+  id: number;
+  code: string;
+  reason: string;
+}
+
 export async function bulkDeleteUserListRules(
   ids: number[],
   requestFn: ApiRequestFn = apiRequest,
-): Promise<{ deleted: number[]; failed: { id: number; reason: string }[] }> {
-  const resp = await requestFn<{ deleted?: number[]; failed?: { id: number; reason: string }[] }>(
+): Promise<{ deleted: number[]; failed: UserListBulkDeleteFailure[] }> {
+  const resp = await requestFn<{ deleted?: number[]; failed?: UserListBulkDeleteFailure[] }>(
     '/unified-rules/bulk',
     { method: 'POST', body: { action: 'delete', page: USER_LIST_PAGE, ids } },
   );
-  return { deleted: resp.deleted ?? ids, failed: resp.failed ?? [] };
+  if (!Array.isArray(resp.deleted) || !Array.isArray(resp.failed)) {
+    return {
+      deleted: [],
+      failed: ids.map((id) => ({
+        id,
+        code: 'missing_result',
+        reason: 'bulk delete response omitted per-item results',
+      })),
+    };
+  }
+  return { deleted: resp.deleted, failed: resp.failed };
 }

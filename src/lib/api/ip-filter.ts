@@ -1,5 +1,27 @@
 import { apiRequest, type ApiRequestFn } from './client';
 import type { IPFilterRulePayload, IPFilterRuleView, IPGroupMeta } from '@/types/ip-filter';
+import { fetchAllPages } from './pagination';
+
+export interface IPFilterRuleListParams {
+  page?: number;
+  page_size?: number;
+  q?: string;
+  list_type?: string;
+  is_active?: boolean;
+  sort?: string;
+}
+
+function ipFilterRulesPath(params: IPFilterRuleListParams): string {
+  const qs = new URLSearchParams();
+  if (params.page) qs.set('page', String(params.page));
+  if (params.page_size) qs.set('page_size', String(params.page_size));
+  if (params.q) qs.set('q', params.q);
+  if (params.list_type) qs.set('list_type', params.list_type);
+  if (params.is_active !== undefined) qs.set('is_active', String(params.is_active));
+  if (params.sort) qs.set('sort', params.sort);
+  const query = qs.toString();
+  return `/ip-filter/rules${query ? `?${query}` : ''}`;
+}
 
 interface UnifiedRuleEnvelope {
   version: string;
@@ -16,17 +38,18 @@ interface UnifiedImportResponse {
 }
 
 export async function getIPFilterRules(
-  params: { page?: number; page_size?: number; q?: string; list_type?: string; is_active?: boolean; sort?: string },
+  params: IPFilterRuleListParams,
   requestFn: ApiRequestFn = apiRequest,
 ) {
-  const qs = new URLSearchParams();
-  if (params.page) qs.set('page', String(params.page));
-  if (params.page_size) qs.set('page_size', String(params.page_size));
-  if (params.q) qs.set('q', params.q);
-  if (params.list_type) qs.set('list_type', params.list_type);
-  if (params.is_active !== undefined) qs.set('is_active', String(params.is_active));
-  if (params.sort) qs.set('sort', params.sort);
-  return requestFn<{ items: IPFilterRuleView[]; total: number }>(`/ip-filter/rules?${qs}`);
+  return requestFn<{ items: IPFilterRuleView[]; total: number }>(ipFilterRulesPath(params));
+}
+
+export async function listAllIPFilterRules(
+  params: Omit<IPFilterRuleListParams, 'page' | 'page_size'>,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<{ items: IPFilterRuleView[] }> {
+  const items = await fetchAllPages<IPFilterRuleView>(ipFilterRulesPath(params), requestFn);
+  return { items };
 }
 
 // 全局 IP 组元信息（GT-11464：expression 的组多选数据源）。

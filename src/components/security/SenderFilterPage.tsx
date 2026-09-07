@@ -246,14 +246,14 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
 
   const actionButtons = (
     <div className="flex gap-2">
-      <Button onClick={() => handleOpenDrawer()}>
+      <Button data-testid="sender-filter-create" onClick={() => handleOpenDrawer()}>
         <Plus className="h-4 w-4 mr-2" />
         {t('senderFilter.createRule')}
       </Button>
-      <Button variant="outline" size="icon" onClick={handleImport} aria-label={t('senderFilter.import')} title={t('senderFilter.import')}>
+      <Button data-testid="sender-filter-import" variant="outline" size="icon" onClick={handleImport} aria-label={t('senderFilter.import')} title={t('senderFilter.import')}>
         <Upload className="h-4 w-4" />
       </Button>
-      <Button variant="outline" size="icon" onClick={handleExport} aria-label={t('senderFilter.export')} title={t('senderFilter.export')}>
+      <Button data-testid="sender-filter-export" variant="outline" size="icon" onClick={handleExport} aria-label={t('senderFilter.export')} title={t('senderFilter.export')}>
         <Download className="h-4 w-4" />
       </Button>
     </div>
@@ -264,14 +264,15 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
       <div className="space-y-4">
         <Tabs value={listTypeTab} onValueChange={(v) => { setListTypeTab(v); setPage(1); }}>
           <TabsList className="rounded-2xl border border-border/70 bg-muted/30 p-1">
-            <TabsTrigger value="blacklist">{t('senderFilter.blacklist')}</TabsTrigger>
-            <TabsTrigger value="whitelist">{t('senderFilter.whitelist')}</TabsTrigger>
+            <TabsTrigger data-testid="sender-filter-tab-blacklist" value="blacklist">{t('senderFilter.blacklist')}</TabsTrigger>
+            <TabsTrigger data-testid="sender-filter-tab-whitelist" value="whitelist">{t('senderFilter.whitelist')}</TabsTrigger>
           </TabsList>
         </Tabs>
         {/* demo 布局：搜索行与「新建规则/导入/导出」同一行，操作按钮右对齐 */}
         <div className="flex flex-wrap gap-3 items-center justify-between">
           <div className="flex flex-1 flex-wrap gap-3 items-center">
             <Input
+              data-testid="sender-filter-search"
               placeholder={t('senderFilter.searchPlaceholder')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -283,16 +284,16 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
               value={statusFilter}
               onValueChange={(v) => { setStatusFilter((v ?? 'all') as SenderFilterStatusFilter); setPage(1); }}
             >
-              <SelectTrigger className="w-[120px]" aria-label={t('senderFilter.statusFilter')}>
+              <SelectTrigger data-testid="sender-filter-status-filter" className="w-[120px]" aria-label={t('senderFilter.statusFilter')}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('senderFilter.statusAll')}</SelectItem>
-                <SelectItem value="enabled">{t('senderFilter.statusEnabled')}</SelectItem>
-                <SelectItem value="disabled">{t('senderFilter.statusDisabled')}</SelectItem>
+                <SelectItem data-testid="sender-filter-status-all" value="all">{t('senderFilter.statusAll')}</SelectItem>
+                <SelectItem data-testid="sender-filter-status-enabled" value="enabled">{t('senderFilter.statusEnabled')}</SelectItem>
+                <SelectItem data-testid="sender-filter-status-disabled" value="disabled">{t('senderFilter.statusDisabled')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="ghost" size="icon" onClick={() => { setSearch(''); setStatusFilter('all'); setPage(1); }} aria-label={t('senderFilter.resetFilters')} title={t('senderFilter.resetFilters')}>
+            <Button data-testid="sender-filter-reset-filters" variant="ghost" size="icon" onClick={() => { setSearch(''); setStatusFilter('all'); setPage(1); }} aria-label={t('senderFilter.resetFilters')} title={t('senderFilter.resetFilters')}>
               <RotateCcw className="h-4 w-4" />
             </Button>
           </div>

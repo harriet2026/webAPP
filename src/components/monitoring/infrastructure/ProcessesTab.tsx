@@ -114,12 +114,25 @@ function useContainerStateBadge() {
   };
 }
 
-// Overlay2 usage ring color per html-spec §5: >85% warning yellow, >95%
-// critical red, otherwise green.
+// Overlay2 usage ring level per html-spec §5: >85% warning, >95% critical,
+// otherwise normal. 这是环形配色的**唯一**判据来源——overlay2Color 与渲染到
+// DOM 的 data-level 都从它派生，QC 用例便可用 data-level 表达配色判据
+// （expect_attribute 白名单不含 class）。注意阈值是 `>` 而非 `>=`，与
+// StorageTab 的 usageLevel(>=) 不同，两处不可互抄。
+function overlay2Level(pct: number): 'critical' | 'warning' | 'normal' {
+  if (pct > 95) return 'critical';
+  if (pct > 85) return 'warning';
+  return 'normal';
+}
+
+const OVERLAY2_RING_CLASS: Record<ReturnType<typeof overlay2Level>, string> = {
+  critical: 'text-red-500',
+  warning: 'text-yellow-500',
+  normal: 'text-green-500',
+};
+
 function overlay2Color(pct: number): string {
-  if (pct > 95) return 'text-red-500';
-  if (pct > 85) return 'text-yellow-500';
-  return 'text-green-500';
+  return OVERLAY2_RING_CLASS[overlay2Level(pct)];
 }
 
 // Distinct colors for up to 8 services
@@ -482,6 +495,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
                       transform="rotate(-90 70 70)"
                       className={`stroke-current transition-all ${color}`}
                       data-testid="monitor-infrastructure-overlay-arc"
+                      data-level={overlay2Level(pct)}
                     />
                   </svg>
                   <div className={`absolute inset-0 flex items-center justify-center text-xl font-bold ${color}`}>

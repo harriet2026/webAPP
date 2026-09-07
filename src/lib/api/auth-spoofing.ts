@@ -1,4 +1,4 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import { apiRequest, type ApiRequestFn, type ConfigMutationResult } from './client';
 import type { AuthSpoofingConfig, ObserveStatPoint, ProbeRequest, ProbeResponse } from '@/types/auth-spoofing';
 
 export async function getAuthSpoofingConfig(requestFn: ApiRequestFn = apiRequest) {
@@ -6,11 +6,11 @@ export async function getAuthSpoofingConfig(requestFn: ApiRequestFn = apiRequest
 }
 
 export async function putAuthSpoofingConfig(data: AuthSpoofingConfig, requestFn: ApiRequestFn = apiRequest, signal?: AbortSignal) {
-  return requestFn<{ ok: boolean; warnings?: string[] }>('/auth-spoofing/config', { method: 'PUT', body: data, signal });
+  return requestFn<ConfigMutationResult<{ ok: boolean; warnings?: string[] }>>('/auth-spoofing/config', { method: 'PUT', body: data, signal });
 }
 
 export async function deleteAuthSpoofingTenantConfig(requestFn: ApiRequestFn = apiRequest) {
-  return requestFn<{ ok: boolean }>('/auth-spoofing/config', { method: 'DELETE' });
+  return requestFn<ConfigMutationResult<{ ok: boolean }>>('/auth-spoofing/config', { method: 'DELETE' });
 }
 
 export async function getObserveStats(days = 7, requestFn: ApiRequestFn = apiRequest) {

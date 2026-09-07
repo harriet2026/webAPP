@@ -1,4 +1,4 @@
-import type { AdvancedFilter } from '@/types/log';
+import type { DisposalQuickFilter } from '@/types/email-disposal';
 
 // 「待处置邮件」的统一口径：display_status ∈
 // {quarantine_pending, audit_pending}，即「隔离中 + 待审核」（GT-12608/GT-12818）。
@@ -20,24 +20,13 @@ import type { AdvancedFilter } from '@/types/log';
 // 后端 displayStatusFilterSQL 统一承载：内部含被隔离/待审核收件人的 mixed
 // 邮件也计入「待处置」——这是刻意的包含语义（信里有待处置的收件人就该被
 // 处置入口看到），KPI 卡与落地列表读同一谓词，天然一致。
-export const PENDING_DISPOSAL_FILTER: AdvancedFilter = {
-  operator: 'AND',
-  groups: [
-    {
-      operator: 'AND',
-      conditions: [
-        {
-          field: 'display_status',
-          op: 'in',
-          value: ['quarantine_pending', 'audit_pending'],
-        },
-      ],
-    },
-  ],
+export const PENDING_DISPOSAL_QUICK_FILTER: DisposalQuickFilter = {
+  emailStatuses: ['quarantine_pending', 'audit_pending'],
 };
 
-// GT-12608：深链初始筛选映射。view=pending → 待处置口径；其余（含 null）
-// 返回 null，由调用方落回自己的默认筛选。
-export function pendingViewFilter(view: string | null): AdvancedFilter | null {
-  return view === 'pending' ? PENDING_DISPOSAL_FILTER : null;
+// GT-12608/GT-13248：深链初始筛选映射。view=pending 使用与邮件状态
+// 多选控件相同的 quick-filter 模型，因此深链与手动选择共享逐状态标签和移除
+// 行为；请求仍由 getDisposalList 编码为同一 display_status 包含语义。
+export function pendingViewQuickFilter(view: string | null): DisposalQuickFilter | null {
+  return view === 'pending' ? PENDING_DISPOSAL_QUICK_FILTER : null;
 }

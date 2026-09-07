@@ -59,6 +59,7 @@ const ROUTE_FIELD_LABEL_KEYS = {
   is_outbound: 'fields.isOutbound',
   onercpt: 'fields.oneRecipient',
   origin_kind: 'fields.originKind',
+  mx_region: 'fields.mxRegion',
   rcpt_count: 'fields.recipientCount',
   recipient: 'fields.recipient',
   recipient_domain: 'fields.recipientDomain',

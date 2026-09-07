@@ -1,5 +1,5 @@
 // 出站路由步骤二：投递通道（Task 13 接通真实后端）—— ProxysvrGroup ⇄ OutboundChannelRow 映射。
-// 对齐 doc/mail-routing.md §4、internal/models/proxysvr.go。
+// 对齐 docs/features/mail-routing.md §4、internal/models/proxysvr.go。
 
 import type { ProxysvrGroup, ProxysvrGroupRequest } from '@/types/proxysvr';
 import type { OutboundChannelRow } from './outbound-types';

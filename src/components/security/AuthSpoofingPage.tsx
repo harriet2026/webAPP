@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useApiRequest } from '@/lib/api/client';
+import { isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import { getAuthSpoofingConfig, getObserveStats, putAuthSpoofingConfig } from '@/lib/api/auth-spoofing';
 import type { AuthSpoofingConfig, CheckItem } from '@/types/auth-spoofing';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save } from 'lucide-react';
+import { AlertTriangle, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
@@ -118,19 +118,30 @@ function mergeWithDefaults(cfg: AuthSpoofingConfig): AuthSpoofingConfig {
 
 export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   const t = useTranslations('authSpoofing');
+  const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
-  const { apiRequest } = useApiRequest();
+  const { apiRequest, effectiveTenantId } = useApiRequest();
   const { isSystemAdmin, user } = useAuth();
   const { capabilities } = useProductForm();
 
   const [localConfig, setLocalConfig] = useState<AuthSpoofingConfig>(DEFAULT_CONFIG);
   const [lastSavedConfig, setLastSavedConfig] = useState<AuthSpoofingConfig>(DEFAULT_CONFIG);
+  const [hydratedConfigSource, setHydratedConfigSource] = useState<AuthSpoofingConfig | null>(null);
+  const configQueryKey = ['auth-spoofing-config', effectiveTenantId] as const;
 
-  const { data: config, isLoading } = useQuery({
-    queryKey: ['auth-spoofing-config'],
+  const configQuery = useQuery({
+    queryKey: configQueryKey,
     queryFn: () => getAuthSpoofingConfig(apiRequest),
     enabled: isSystemAdmin || user?.role === 'tenant_admin',
+    retry: false,
   });
+  const config = configQuery.data;
+  const configLoadFailed = configQuery.isError;
+  const configReady = configQuery.isSuccess
+    && !configQuery.isFetching
+    && config !== undefined
+    && hydratedConfigSource === config
+    && !configLoadFailed;
 
   // Seed the editable local copy from the loaded server config (standard
   // editable-copy-of-server-state pattern; runs only when `config` changes).
@@ -139,6 +150,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
       const mergedConfig = mergeWithDefaults(config);
       setLocalConfig(mergedConfig);
       setLastSavedConfig(mergedConfig);
+      setHydratedConfigSource(config);
     }
   }, [config]);
 
@@ -154,10 +166,12 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
     },
     onSuccess: (result, savedConfig) => {
       setLastSavedConfig(savedConfig);
-      queryClient.setQueryData(['auth-spoofing-config'], savedConfig);
+      queryClient.setQueryData(configQueryKey, savedConfig);
       toast.success(t('saveSuccess'));
-      for (const warning of result.warnings ?? []) {
-        toast.warning(warning);
+      if (!isPublicationPendingResponse(result)) {
+        for (const warning of result.warnings ?? []) {
+          toast.warning(warning);
+        }
       }
     },
     onError: () => {
@@ -169,6 +183,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   const isChanged = JSON.stringify(localConfig) !== JSON.stringify(lastSavedConfig);
 
   const handleSave = () => {
+    if (!configReady) return;
     if (hasEmptyAuthSpoofingTag(localConfig)) {
       toast.error(t('tagPanel.errorTagFieldRequired'));
       return;
@@ -182,7 +197,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
       data-testid="auth-spoofing-save"
       className="min-w-28"
       onClick={handleSave}
-      disabled={isLoading || !isChanged || saveMutation.isPending}
+      disabled={!configReady || !isChanged || saveMutation.isPending}
     >
       {saveMutation.isPending ? (
         <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -195,7 +210,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
 
   // Only used for the "预计丢弃" badge next to the protocol global-observe toggle.
   const { data: observeStatsTotal } = useQuery({
-    queryKey: ['auth-spoofing-observe-stats-total'],
+    queryKey: ['auth-spoofing-observe-stats-total', effectiveTenantId],
     queryFn: () => getObserveStats(7, apiRequest),
     enabled: isSystemAdmin || user?.role === 'tenant_admin',
   });
@@ -216,14 +231,25 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
     <ModuleMasterSwitch page="auth_spoofing">
     <div className="space-y-4">
       {/* demo 对齐：不渲染重复的模块级标题/描述/观察提示条；父级策略卡头部已提供标题与启用开关。 */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin" />
+      {configLoadFailed ? (
+        <div
+          className="flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-center"
+          data-testid="auth-spoofing-load-error"
+        >
+          <AlertTriangle className="h-6 w-6 text-destructive" />
+          <p className="text-sm text-destructive">{t('loadFailed')}</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => { void configQuery.refetch(); }}
+            disabled={configQuery.isFetching}
+            data-testid="auth-spoofing-load-retry"
+          >
+            {tCommon('retry')}
+          </Button>
         </div>
-      )}
-
-      {!isLoading && (
-        <div className="space-y-4">
+      ) : configReady ? (
+        <div className="space-y-4" data-testid="auth-spoofing-config-content">
           <FormatChecksSection
             config={localConfig.format_checks}
             onChange={(format_checks) => setLocalConfig((c) => ({ ...c, format_checks }))}
@@ -251,6 +277,11 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
             </>
           )}
 
+        </div>
+      ) : (
+        <div className="flex items-center justify-center gap-2 py-8" data-testid="auth-spoofing-loading">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="text-sm text-muted-foreground">{tCommon('loading')}</span>
         </div>
       )}
     </div>

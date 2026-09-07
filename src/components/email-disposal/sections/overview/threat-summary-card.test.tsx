@@ -8,7 +8,7 @@ import { ThreatSummaryCard } from './threat-summary-card';
 
 // Real zh messages (not an identity mock) -- this suite asserts on actual
 // rendered copy (localized action label, full mail-type label, prefix text),
-// which is the whole point of the G4/A1/A2 fixes under test.
+// which is the whole point of the G4/A1 fixes under test.
 const wrap = (ui: React.ReactNode) => (
   <NextIntlClientProvider locale="zh" messages={zh as never}>
     {ui}
@@ -92,50 +92,26 @@ describe('ThreatSummaryCard', () => {
     expect(typeEl.textContent).toContain('邮件类型：钓鱼邮件');
   });
 
-  it('renders the intent-engine score from the sum of cac.prob spam classes', () => {
-    renderCard(baseDetail({
-      cac_result: { prob: ['0.001', '0.002', '0.7', '0.2'] },
-      phish_agent_check: { status: 'done', checked: true, confidence: 0.91 },
-    }));
-    const confEl = screen.getByTestId('email-disposal-overview-confidence');
-    expect(confEl.textContent).toContain('置信度 0.9');
-    expect(confEl.textContent).not.toContain('%');
-  });
-
-  it('renders no confidence element when there is no score/hitSource (kind=none)', () => {
-    renderCard(baseDetail({ cac_result: undefined, phish_agent_check: undefined }));
+  it.each([
+    {
+      name: 'intent score',
+      overrides: { cac_result: { prob: ['0.001', '0.002', '0.7', '0.2'] } },
+    },
+    {
+      name: 'blacklist hit',
+      overrides: {
+        disposal_basis: { policy_key: 'SBL', rule_name: '发件人黑名单', rule_id: 'SBL-1', action: 'quarantine' },
+      },
+    },
+    {
+      name: 'rule hit',
+      overrides: {
+        disposal_basis: { policy_key: 'CR', rule_name: '内容规则', rule_id: 'CR-1', action: 'quarantine' },
+      },
+    },
+  ])('does not render overview confidence for $name', ({ overrides }) => {
+    renderCard(baseDetail(overrides));
     expect(screen.queryByTestId('email-disposal-overview-confidence')).not.toBeInTheDocument();
-  });
-
-  it('does not substitute phishing-agent confidence when the intent score is absent', () => {
-    renderCard(baseDetail({
-      cac_result: undefined,
-      phish_agent_check: { status: 'done', checked: true, confidence: 0.91 },
-    }));
-    expect(screen.queryByTestId('email-disposal-overview-confidence')).not.toBeInTheDocument();
-  });
-
-  // G3: a deterministic blacklist hit (disposal_basis.policy_key === 'SBL')
-  // with no real score anywhere must show 「黑名单命中（无置信度）」, not a
-  // fabricated percentage -- wired via deriveHitSource(detail).
-  it('renders 黑名单命中（无置信度） when disposal_basis is a blacklist policy and no real score exists (G3)', () => {
-    renderCard(baseDetail({
-      cac_result: undefined,
-      phish_agent_check: undefined,
-      disposal_basis: { policy_key: 'SBL', rule_name: '发件人黑名单', rule_id: 'SBL-1', action: 'quarantine' },
-    }));
-    const confEl = screen.getByTestId('email-disposal-overview-confidence');
-    expect(confEl.textContent).toContain('黑名单命中（无置信度）');
-  });
-
-  it('renders 规则命中（无置信度） when disposal_basis is a non-AI rule policy and no real score exists (G3)', () => {
-    renderCard(baseDetail({
-      cac_result: undefined,
-      phish_agent_check: undefined,
-      disposal_basis: { policy_key: 'CR', rule_name: '内容规则', rule_id: 'CR-1', action: 'quarantine' },
-    }));
-    const confEl = screen.getByTestId('email-disposal-overview-confidence');
-    expect(confEl.textContent).toContain('规则命中（无置信度）');
   });
 
   it('keeps legacy structured basis visible and does not fall back to stale reason text', () => {
@@ -158,19 +134,6 @@ describe('ThreatSummaryCard', () => {
     const basis = screen.getByTestId('email-disposal-overview-disposal-basis');
     expect(basis).toHaveTextContent('baseline:cac_high_score');
     expect(basis).not.toHaveTextContent('no rules matched');
-    expect(screen.getByTestId('email-disposal-overview-confidence')).toHaveTextContent('规则命中（无置信度）');
-  });
-
-  it('a real score still wins over a blacklist policy_key (G3 priority)', () => {
-    renderCard(baseDetail({
-      cac_result: { prob: ['0.001', '0.002', '0.91'] },
-      phish_agent_check: { status: 'done', checked: true, confidence: 0.91 },
-      disposal_basis: { policy_key: 'SBL', rule_name: '发件人黑名单', rule_id: 'SBL-1', action: 'quarantine' },
-    }));
-    const confEl = screen.getByTestId('email-disposal-overview-confidence');
-    expect(confEl.textContent).toContain('置信度 0.91');
-    expect(confEl.textContent).not.toContain('%');
-    expect(confEl.textContent).not.toContain('黑名单命中');
   });
 
   it('renders the 紧急 (urgent) hit-feature badge when sensitive_keyword_hit is true (A10)', () => {

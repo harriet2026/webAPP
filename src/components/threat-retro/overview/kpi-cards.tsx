@@ -50,7 +50,7 @@ function Card({
   const inner = (
     <>
       <div className="flex items-center justify-between">
-        <span className="flex items-center gap-1 text-sm text-muted-foreground">
+        <span className="flex items-center gap-1 text-sm text-muted-foreground" data-testid={`threat-retro-kpicard-label-${testId}`}>
           {label}
           <Tooltip>
             <TooltipTrigger

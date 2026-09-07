@@ -6,7 +6,7 @@ import type { ProtocolChecksConfig, CheckItem } from '@/types/auth-spoofing';
 import zh from '@/../messages/zh.json';
 
 const wrap = (ui: React.ReactNode) =>
-  <NextIntlClientProvider locale="zh" messages={zh as any}>{ui}</NextIntlClientProvider>;
+  <NextIntlClientProvider locale="zh" messages={zh as unknown as Record<string, unknown>}>{ui}</NextIntlClientProvider>;
 
 const item = (action: CheckItem['action']): CheckItem => ({ enabled: true, action, observe_mode: false });
 

@@ -104,6 +104,11 @@ export function SyncLogTab() {
         onRefresh={() => refetch()}
         filterCount={filterCount}
         testIdPrefix="contacts-log"
+        searchTestId="contacts-log-search"
+        resetTestId="contacts-log-reset"
+        refreshTestId="contacts-log-refresh"
+        filterTestId="contacts-log-filter"
+        filterPopoverTestId="contacts-log-filter-popover"
         filterContent={
           <>
             <FilterSelect

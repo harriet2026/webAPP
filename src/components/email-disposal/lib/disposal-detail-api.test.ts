@@ -3,6 +3,7 @@ import {
   blacklistMailLogEntity,
   disposeByObject,
   getMailLogAnalysis,
+  getMailLogEvents,
   legacyLifecycleStreamEvents,
 } from './disposal-detail-api';
 import type { ApiRequestFn } from '@/lib/api/client';
@@ -30,6 +31,11 @@ describe('getMailLogAnalysis', () => {
               { recipients: ['A+B@example.test'], status: 'threat', rule_ids: [7, 9] },
               { recipients: ['clean@example.test'], status: 'pass', rule_ids: [] },
             ],
+          }, {
+            key: 'intentEngine',
+            status: 'skipped',
+            reason: 'module_disabled',
+            rule_ids: [],
           }],
         },
       ],
@@ -44,6 +50,22 @@ describe('getMailLogAnalysis', () => {
       { recipients: ['A+B@example.test'], status: 'threat', ruleIds: [7, 9] },
       { recipients: ['clean@example.test'], status: 'pass', ruleIds: [] },
     ]);
+    expect(result.stages[0].checks[1]).toMatchObject({
+      status: 'skipped',
+      reason: 'module_disabled',
+      ruleIds: [],
+    });
+  });
+});
+
+describe('getMailLogEvents', () => {
+  test('requests release-lineage events for the original mail detail', async () => {
+    const requestFn = vi.fn().mockResolvedValue({ items: [] }) as unknown as ApiRequestFn;
+    await getMailLogEvents(42, requestFn);
+
+    expect(requestFn).toHaveBeenCalledWith(
+      '/mail-logs/42/events?page=1&page_size=100&include_releases=true',
+    );
   });
 });
 

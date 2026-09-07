@@ -21,7 +21,12 @@ interface MultiSelectFilterProps {
   selectedCountLabel: (count: number) => string;
   clearLabel?: string;
   className?: string;
-  /** 透传给触发按钮的 data-testid（表单/E2E 定位用） */
+  /**
+   * 透传给触发按钮的 data-testid（表单/E2E 定位用）。
+   * 弹层内每个选项的 testid 由它派生为 `<triggerTestId>-option-<value>`：
+   * 选项渲染进 portal，按文案定位会随语言包漂移，必须有稳定 testid。
+   * 不传则选项也不带 testid（与触发器保持一致，避免出现"孤儿"选项 id）。
+   */
   triggerTestId?: string;
 }
 
@@ -87,7 +92,9 @@ export function MultiSelectFilter({
                     variant="control"
                     className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-xs data-[hovered=true]:bg-accent/70 focus-within:ring-2 focus-within:ring-ring/60"
                   >
-                    <label>
+                    <label
+                      data-testid={triggerTestId ? `${triggerTestId}-option-${option.value}` : undefined}
+                    >
                       <Checkbox
                         checked={checked}
                         onCheckedChange={() => toggle(option.value)}

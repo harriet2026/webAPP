@@ -48,6 +48,7 @@ export function DisposalBasisCell({
   const { viewer, capabilities } = useProductForm();
   const isTenantViewer = viewer === 'tenant' && capabilities?.multiTenant === true;
   const [open, setOpen] = useState(false);
+  const noRulesMatched = reason?.trim().toLowerCase() === 'no rules matched';
 
   const summaryGroups = useMemo(
     () => groupsFromSummaries(basis, summaries),
@@ -70,6 +71,7 @@ export function DisposalBasisCell({
   });
 
   if (summaryGroups.length === 0) {
+    if (noRulesMatched) return <>-</>;
     // A structured hit ledger with no final owner is an intentional empty
     // disposition basis (for example AUTH proceed-only). Do not resurrect an
     // obsolete “accepted by rules” reason as a false final basis.

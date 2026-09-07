@@ -1817,13 +1817,12 @@ const routes: Route[] = [
   // behavior_control、advanced_rules、user_list、mail_marking，以及
   // src/lib/api/unified-rules.ts 的通用 getUnifiedRules）。这里 mock 了这些
   // query 形态：sender_filter 列表页（`rule_page=sender_filter`）、
-  // behavior_control 列表页（`rule_page=behavior_control`）和群组下拉
-  // （`page=<GROUPS_PAGE_KEY>`，注意参数名是 `page`，不是 `rule_page`）。
+  // behavior_control 列表页（`rule_page=behavior_control`）和群组下拉。
   // 群组下拉又有两个来源，靠 `include` 参数分流、互不污染：
   //   - sender_filter 的 `GROUPS_LIST_QUERY`（src/lib/api/groups.ts）发
   //     `include=member_count,reference_count` → 返回 `mockSenderFilterGroupsList()`；
-  //   - behavior-control 抽屉（BehaviorControlDrawer.tsx 的 groupsQuery）发
-  //     `include=member_count`（恰好这个值）→ 返回 `mockBehaviorControlGroupsList()`
+  //   - behavior-control 抽屉发 `rule_page=groups&include=member_count`，并使用
+  //     数值 page 分页 → 返回 `mockBehaviorControlGroupsList()`
   //     （sender/ip/org 三类）。
   // 用 `matchQuery` 精确收窄到这些 query（用 URLSearchParams 按参数值匹配，而非
   // 子串 `.includes`，避免误伤例如 `rule_page=groups` 这类恰好含有子串但语义
@@ -1886,6 +1885,9 @@ const routes: Route[] = [
             ],
           },
         };
+      }
+      if (params.get('rule_page') === 'groups' && /^\d+$/.test(params.get('page') ?? '')) {
+        return { status: 200, data: mockBehaviorControlGroupsList() };
       }
       if (params.get('rule_page') === 'groups') return { status: 200, data: mockMailMarkingGroupsList() };
       if (params.get('rule_page') === 'mail_marking') return { status: 200, data: mockMailMarkingRulesList() };

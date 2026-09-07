@@ -5,9 +5,8 @@ import { AttachmentSecurityPage } from './AttachmentSecurityPage';
 
 const mocks = vi.hoisted(() => ({
   apiRequest: vi.fn(),
-  getSecurityModules: vi.fn(),
-  setSecurityModuleEnabled: vi.fn(),
-  getTenantSettings: vi.fn(),
+  getScopedConfig: vi.fn(),
+  patchScopedConfig: vi.fn(),
   translate: (key: string) => key,
 }));
 
@@ -33,34 +32,9 @@ vi.mock('@/lib/api/client', () => ({
   useApiRequest: () => ({ apiRequest: mocks.apiRequest }),
 }));
 
-vi.mock('@/lib/api/security-modules', async (orig) => {
-  const actual = await orig<typeof import('@/lib/api/security-modules')>();
-  return {
-    ...actual,
-    getSecurityModules: mocks.getSecurityModules,
-    setSecurityModuleEnabled: mocks.setSecurityModuleEnabled,
-  };
-});
-
 vi.mock('@/lib/api/attachment-security', () => ({
-  getBasicLimitConfig: vi.fn().mockResolvedValue({}),
-  getAntivirusConfig: vi.fn().mockResolvedValue({}),
-  getAntivirusActionConfig: vi.fn().mockResolvedValue({}),
-  getImageDetectConfig: vi.fn().mockResolvedValue({}),
-  getQrDeepRoutesConfig: vi.fn().mockResolvedValue({}),
-  getImageDetectActionConfig: vi.fn().mockResolvedValue({}),
-  getEncryptedConfig: vi.fn().mockResolvedValue({}),
-  getEncryptedActionConfig: vi.fn().mockResolvedValue({}),
-  getTenantAttachmentSecuritySettings: mocks.getTenantSettings,
-  saveTenantAttachmentSecuritySettings: vi.fn(),
-  saveBasicLimitConfig: vi.fn(),
-  saveAntivirusConfig: vi.fn(),
-  saveAntivirusActionConfig: vi.fn(),
-  saveImageDetectConfig: vi.fn(),
-  saveQrDeepRoutesConfig: vi.fn(),
-  saveImageDetectActionConfig: vi.fn(),
-  saveEncryptedConfig: vi.fn(),
-  saveEncryptedActionConfig: vi.fn(),
+  getAttachmentSecurityScopedConfig: mocks.getScopedConfig,
+  patchAttachmentSecurityScopedConfig: mocks.patchScopedConfig,
 }));
 
 vi.mock('./attachment-security/BasicLimitTab', () => ({
@@ -107,25 +81,53 @@ vi.mock('./PipelinePanelHeader', () => ({
 
 beforeEach(() => {
   mocks.apiRequest.mockReset();
-  mocks.getSecurityModules.mockReset();
-  mocks.getSecurityModules.mockResolvedValue({ attachment_security: true });
-  mocks.setSecurityModuleEnabled.mockReset();
-  mocks.setSecurityModuleEnabled.mockResolvedValue(undefined);
-  mocks.getTenantSettings.mockReset();
-  mocks.getTenantSettings.mockResolvedValue({
-    antivirus: { virus_action: 'quarantine', timeout_action: 'proceed' },
-    image_detect: {
-      ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light',
-      qr_max_count: 5, qr_light_action: 'quarantine', qr_deep_exceed_action: 'proceed',
-      qr_deep_exceed_warn: true, qr_deep_routes: {},
+  mocks.getScopedConfig.mockReset();
+  mocks.getScopedConfig.mockResolvedValue(scopedView());
+  mocks.patchScopedConfig.mockReset();
+  mocks.patchScopedConfig.mockResolvedValue(scopedView(2));
+});
+
+function scopedView(version = 1) {
+  const document = {
+    module_enabled: true,
+    basic_limit: {
+      receive: {
+        attachment_count_max: 10, attachment_size_max_kb: 10240,
+        nested_zip_count_max: 2, nested_file_count_max: 20, nested_level_max: 2,
+        scan_timeout_sec: 30, exceed_action: 'quarantine', partial_skip: false,
+        danger_ext_enabled: true, danger_ext_list: ['.exe'],
+        mime_mismatch_check: true, mime_mismatch_action: 'quarantine',
+      },
+    },
+    antivirus: { host: '', port: '', virus_action: 'quarantine', timeout_action: 'proceed' },
+    image_detection: {
+      ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light', qr_max_count: 5,
+      qr_light_action: 'quarantine', qr_deep_exceed_action: 'proceed', qr_deep_exceed_warn: true,
+      qr_deep_routes: {
+        url_check: true, url_unshorten: true, keyword_filter: true,
+        keyword_scope: ['url_path', 'plain_text'], intent_engine: true,
+        intent_categories: ['high', 'medium', 'low'], advanced_rules: false,
+      },
     },
     encrypted: {
       detect_mode: 'detect_only', extract_password_from_body: true,
       extract_password_from_filename: true, use_password_book: true, recursive_detect: true,
       max_password_attempts: 100, mark_suspicious: true, decrypt_fail_action: 'proceed',
     },
-  });
-});
+  };
+  return {
+    stored: {
+      namespace: 'attachd', scope_kind: 'tenant', scope_id: 2, schema_version: 1,
+      version, document: {}, checksum: 'x', updated_at: '',
+    },
+    effective: {
+      namespace: 'attachd', tenant_id: 2, schema_version: 1,
+      snapshot_version: 's1', platform_version: 1, tenant_version: version,
+      hash: 'h', document, provenance: {},
+    },
+    published: true,
+  };
+}
 
 describe('AttachmentSecurityPage tenant permissions', () => {
   it('allows a tenant admin to change the tenant-scoped attachment-security switch', async () => {
@@ -135,9 +137,25 @@ describe('AttachmentSecurityPage tenant permissions', () => {
     expect(toggle).toBeEnabled();
 
     fireEvent.click(toggle);
-    fireEvent.click(screen.getByTestId('basic-limit-save'));
     await waitFor(() => {
-      expect(mocks.setSecurityModuleEnabled).toHaveBeenCalledWith('attachment_security', false, mocks.apiRequest);
+      expect(mocks.patchScopedConfig).toHaveBeenCalledWith(
+        'tenant',
+        expect.any(Object),
+        [{ op: 'set', path: 'module_enabled', value: false }],
+        mocks.apiRequest,
+      );
     });
+  });
+
+  it('shows a retry-only error state instead of editable defaults when loading fails', async () => {
+    mocks.getScopedConfig.mockRejectedValueOnce(new Error('database unavailable'));
+    render(<AttachmentSecurityPage embedded hideBasicLimit />);
+
+    expect(await screen.findByTestId('attachment-security-load-error')).toBeInTheDocument();
+    expect(screen.queryByTestId('basic-limit-save')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('attachment-security-retry'));
+
+    expect(await screen.findByTestId('attachment-security-page')).toBeInTheDocument();
+    expect(mocks.getScopedConfig).toHaveBeenCalledTimes(2);
   });
 });

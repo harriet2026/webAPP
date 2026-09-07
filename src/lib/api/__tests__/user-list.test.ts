@@ -63,10 +63,19 @@ describe('user-list api', () => {
     expect(result).toMatchObject({ total: 0, page: 2, pageSize: 20, serverPaginated: true });
   });
   it('bulk delete posts to /unified-rules/bulk with action=delete and returns deleted/failed', async () => {
-    const fn = vi.fn().mockResolvedValue({ deleted: [1], failed: [{ id: 2, reason: 'x' }] });
+    const fn = vi.fn().mockResolvedValue({ deleted: [1], failed: [{ id: 2, code: 'unified_rule.not_found', reason: 'x' }] });
     const r = await bulkDeleteUserListRules([1, 2], fn as never);
     expect(fn).toHaveBeenCalledWith('/unified-rules/bulk', expect.objectContaining({ method: 'POST' }));
     expect(fn.mock.calls[0][1].body).toMatchObject({ action: 'delete', page: 'user_list', ids: [1, 2] });
     expect(r.deleted).toEqual([1]); expect(r.failed[0].id).toBe(2);
+  });
+  it('never treats a response without per-item details as a successful delete', async () => {
+    const fn = vi.fn().mockResolvedValue({ message: 'ok' });
+    const r = await bulkDeleteUserListRules([1, 2], fn as never);
+    expect(r.deleted).toEqual([]);
+    expect(r.failed).toEqual([
+      { id: 1, code: 'missing_result', reason: 'bulk delete response omitted per-item results' },
+      { id: 2, code: 'missing_result', reason: 'bulk delete response omitted per-item results' },
+    ]);
   });
 });

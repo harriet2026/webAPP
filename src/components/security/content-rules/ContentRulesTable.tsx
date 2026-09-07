@@ -142,6 +142,7 @@ export function ContentRulesTable({
         return (
           <input
             type="checkbox"
+            data-testid="content-rules-select-all"
             checked={allSelected}
             disabled={!canEdit}
             aria-label={t('contentRules.selectCurrentPage')}
@@ -159,6 +160,7 @@ export function ContentRulesTable({
       cell: ({ row }) => (
         <input
           type="checkbox"
+          data-testid={`content-rule-select-${row.original.rule.id}`}
           checked={selectedIds.includes(row.original.rule.id)}
           disabled={!canEdit}
           aria-label={t('contentRules.selectRule', { name: row.original.rule.name })}

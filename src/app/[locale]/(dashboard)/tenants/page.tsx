@@ -51,12 +51,12 @@ export default function TenantsPage() {
   };
 
   return (
-    <PageShell>
+    <PageShell data-testid="tenant-management-page">
       <PageHeader
         eyebrow={t('eyebrow')}
         title={t('title')}
         actions={
-          <Button onClick={openCreate}>
+          <Button onClick={openCreate} data-testid="tenants-create">
             <Plus className="mr-2 h-4 w-4" />
             {t('createTenant')}
           </Button>

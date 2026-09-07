@@ -84,6 +84,7 @@ export function TenantScopeSelector({ value, onChange }: Props) {
               <CommandGroup>
                 <CommandItem
                   value={ALL}
+                  data-testid="tenant-scope-option-all"
                   onSelect={() => { onChange(null); setOpen(false); }}
                 >
                   <Check className={`mr-2 h-4 w-4 ${value === null ? 'opacity-100' : 'opacity-0'}`} />
@@ -93,6 +94,7 @@ export function TenantScopeSelector({ value, onChange }: Props) {
                   <CommandItem
                     key={tenant.id}
                     value={String(tenant.id)}
+                    data-testid={`tenant-scope-option-${tenant.code}`}
                     onSelect={() => { onChange(tenant.id); setOpen(false); }}
                   >
                     <Check className={`mr-2 h-4 w-4 ${value === tenant.id ? 'opacity-100' : 'opacity-0'}`} />

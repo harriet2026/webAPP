@@ -9,13 +9,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // group whose children are all hidden.
 
 let mockCanSeeRoute: (href: string) => boolean = () => true;
+let mockHasPermission: (permission: string) => boolean = () => true;
 let mockIsSystemAdmin = true;
 let mockShowAdvancedRules = true;
 let mockSwitcherEnabled = true;
 
 vi.mock('@/contexts/auth-context', () => ({
   useAuth: () => ({
-    hasPermission: () => true,
+    hasPermission: (permission: string) => mockHasPermission(permission),
     isSystemAdmin: mockIsSystemAdmin,
     showAdvancedRules: mockShowAdvancedRules,
     canSeeRoute: (href: string) => mockCanSeeRoute(href),
@@ -55,6 +56,7 @@ import { UnsavedGuardProvider } from '../../contexts/unsaved-guard-context';
 describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
   beforeEach(() => {
     mockCanSeeRoute = () => true;
+    mockHasPermission = () => true;
     mockIsSystemAdmin = true;
     mockShowAdvancedRules = true;
     mockSwitcherEnabled = true;
@@ -71,12 +73,15 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     expect(screen.getByText('sidebar.users')).toBeInTheDocument();
   });
 
-  it('hides the entire logs group when the product-form switcher is disabled', () => {
+  it('keeps link-protection logs visible while hiding switcher-only sibling logs', async () => {
     mockSwitcherEnabled = false;
 
     render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
 
-    expect(screen.queryByText('sidebar.logs')).not.toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.click(screen.getByText('sidebar.logs'));
+
+    expect(screen.getByText('sidebar.linkClicks')).toBeInTheDocument();
     expect(screen.queryByText('sidebar.authAttempts')).not.toBeInTheDocument();
     expect(screen.queryByText('sidebar.adminAuditLogs')).not.toBeInTheDocument();
   });
@@ -85,6 +90,7 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
     const brandName = screen.getByText('branding.selfHostedName');
 
+    expect(screen.getByTestId('sidebar-brand-name')).toBe(brandName);
     expect(document.title).toBe(brandName.textContent);
   });
 
@@ -133,6 +139,19 @@ describe('SidebarNav RBAC filtering (Plan C Task 6, spec §7.2)', () => {
     expect(screen.getByText('sidebar.systemStatus')).toBeInTheDocument(); // dashboard visible
     // system group's every child href is denied -> the whole group collapses (empty-parent hide).
     expect(screen.queryByText('sidebar.system')).not.toBeInTheDocument();
+  });
+
+  it('shows the shared users route when RBAC grants admin-account without manage_login_security (GT-13185)', async () => {
+    mockIsSystemAdmin = false;
+    mockShowAdvancedRules = false;
+    mockHasPermission = () => false;
+    mockCanSeeRoute = (href) => href === '/users';
+
+    render(<UnsavedGuardProvider><SidebarNav /></UnsavedGuardProvider>);
+    const user = userEvent.setup();
+    await user.click(screen.getByText('sidebar.system'));
+
+    expect(screen.getByText('sidebar.users')).toBeInTheDocument();
   });
 
   it('advance-gated groups stay hidden for a non-super even when RBAC canSeeRoute grants their routes (AND of both gates)', () => {

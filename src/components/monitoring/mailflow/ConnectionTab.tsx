@@ -129,7 +129,7 @@ export function ConnectionTab({ node, range, direction }: ConnectionTabProps) {
   }, [trendData, t, locale, range]);
 
   if (isLoading) {
-    return <Skeleton className="h-[600px] w-full rounded-lg" />;
+    return <Skeleton data-testid="monitor-mailflow-connection-skeleton" className="h-[600px] w-full rounded-lg" />;
   }
 
   if (isError && !kpiData) {

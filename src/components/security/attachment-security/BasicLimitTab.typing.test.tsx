@@ -1,18 +1,25 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-// 与本仓既有组件测试一致：把 next-intl 打桩成回显 key，只断言结构/状态，不断言文案。
-vi.mock('next-intl', () => ({
-  useTranslations: (namespace: string) => (key: string, params?: Record<string, string | number>) => {
-    if (params && Object.keys(params).length > 0) return `${namespace}.${key}:${JSON.stringify(params)}`;
-    return `${namespace}.${key}`;
+const mocks = vi.hoisted(() => ({
+  apiRequest: vi.fn(),
+  translate: (key: string, params?: Record<string, string | number>) => {
+    if (params && Object.keys(params).length > 0) return `${key}:${JSON.stringify(params)}`;
+    return key;
   },
 }));
 
-vi.mock('@/lib/api/client', () => ({
-  useApiRequest: () => ({ apiRequest: vi.fn() }),
+// 与本仓既有组件测试一致：把 next-intl 打桩成回显 key，只断言结构/状态，不断言文案。
+vi.mock('next-intl', () => ({
+  useTranslations: () => mocks.translate,
 }));
+
+vi.mock('@/lib/api/client', () => ({
+  useApiRequest: () => ({ apiRequest: mocks.apiRequest }),
+}));
+
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 import { BasicLimitTab } from './BasicLimitTab';
 import type { BasicLimitConfig } from '@/types/attachment-security';
@@ -33,6 +40,7 @@ function renderTab(overrides: Partial<BasicLimitConfig> = {}) {
     nested_level_max: 2,
     scan_timeout_sec: 30,
     exceed_action: 'quarantine',
+    partial_skip: false,
     ...overrides,
   } as unknown as BasicLimitConfig;
   const onChange = vi.fn();
@@ -86,5 +94,56 @@ describe('BasicLimitTab attachment count input (GT-12198 regression)', () => {
 
     expect(input.value).toBe('25');
     expect(screen.queryByTestId('attachment-count-error')).toBeNull();
+  });
+});
+
+describe('BasicLimitTab exceed action', () => {
+  it('projects the partial-skip selector option to both canonical fields', async () => {
+    const user = userEvent.setup();
+    const { onChange } = renderTab();
+
+    await user.click(screen.getByTestId('basic-limit-exceed-action'));
+    await user.click(await screen.findByTestId('basic-limit-exceed-action-partial_skip'));
+
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({
+      exceed_action: 'quarantine',
+      partial_skip: true,
+    }));
+  });
+});
+
+describe('BasicLimitTab standalone loading failure', () => {
+  it('does not expose editable defaults and retries the authoritative read', async () => {
+    const user = userEvent.setup();
+    mocks.apiRequest.mockReset();
+    mocks.apiRequest
+      .mockRejectedValueOnce(new Error('database unavailable'))
+      .mockResolvedValueOnce({
+        effective: {
+          document: {
+            basic_limit: {
+              receive: {
+                ...{
+                  attachment_count_max: 10, attachment_size_max_kb: 10240,
+                  nested_zip_count_max: 2, nested_file_count_max: 20, nested_level_max: 2,
+                  scan_timeout_sec: 30, exceed_action: 'quarantine', partial_skip: false,
+                  danger_ext_enabled: true, danger_ext_list: ['.exe'],
+                  mime_mismatch_check: true, mime_mismatch_action: 'quarantine',
+                },
+              },
+            },
+          },
+        },
+      });
+
+    const { container } = render(<BasicLimitTab direction="receive" />);
+    const tab = within(container);
+    expect(await tab.findByTestId('basic-limit-load-error')).toBeInTheDocument();
+    expect(tab.queryByTestId('basic-limit-save')).not.toBeInTheDocument();
+
+    await user.click(tab.getByTestId('basic-limit-retry'));
+    expect(await tab.findByTestId('basic-limit-tab')).toBeInTheDocument();
+    expect(tab.getByTestId('basic-limit-save')).toBeEnabled();
+    expect(mocks.apiRequest).toHaveBeenCalledTimes(2);
   });
 });

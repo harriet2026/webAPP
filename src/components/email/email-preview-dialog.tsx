@@ -54,7 +54,11 @@ export function EmailPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] flex-col p-0 sm:max-w-4xl">
+      {/* 三处 data-testid 均为纯属性新增（QC 稳定定位点）：弹窗根、主题行、发件人行。
+          刻意挂在既有的 <div> 上而不是把取值包一层 <span> —— 后者会改变渲染结构。
+          断言用 expect_text 的 contains：行文本形如「主题: <值>」，标签本身不含
+          被断的值，所以 contains 仍然是对**值**的断言，不是对标签的断言。 */}
+      <DialogContent data-testid="email-preview-dialog" className="flex max-h-[90vh] flex-col p-0 sm:max-w-4xl">
         <DialogHeader className="shrink-0 border-b px-6 py-4">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold">
@@ -74,11 +78,11 @@ export function EmailPreviewDialog({
         ) : preview ? (
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
             <div className="space-y-1 text-sm">
-              <div>
+              <div data-testid="email-preview-subject">
                 <span className="font-medium">{t('subject')}:</span>{' '}
                 {preview.subject || '-'}
               </div>
-              <div>
+              <div data-testid="email-preview-from">
                 <span className="font-medium">{t('from')}:</span>{' '}
                 {preview.from_name
                   ? `${preview.from_name} <${preview.from}>`

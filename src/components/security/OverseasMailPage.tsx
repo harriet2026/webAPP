@@ -177,7 +177,7 @@ export function OverseasMailPage({ embedded, onDirtyChange }: { embedded?: boole
       });
 
   const content = (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="overseas-mail-content">
       <p className="text-sm text-muted-foreground">{summaryText}</p>
 
       <div className="rounded-lg border overflow-hidden">
@@ -212,6 +212,7 @@ export function OverseasMailPage({ embedded, onDirtyChange }: { embedded?: boole
                   </TableCell>
                   <TableCell className="text-center">
                     <Switch
+                      data-testid={`direction-toggle-${dir.key}`}
                       checked={dirConfig?.enabled ?? false}
                       onCheckedChange={(v) => handleToggleDirection(dir.key, v)}
                     />

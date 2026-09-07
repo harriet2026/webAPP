@@ -6,7 +6,7 @@ import type { ProtocolChecksConfig, CheckItem } from '@/types/auth-spoofing';
 import zh from '@/../messages/zh.json';
 
 const wrap = (ui: React.ReactNode) => (
-  <NextIntlClientProvider locale="zh" messages={zh as any}>
+  <NextIntlClientProvider locale="zh" messages={zh as unknown as Record<string, unknown>}>
     {ui}
   </NextIntlClientProvider>
 );

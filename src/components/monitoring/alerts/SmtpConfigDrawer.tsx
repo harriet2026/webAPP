@@ -144,7 +144,7 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
 
             <div className="flex items-center justify-between">
               <Label>{t('smtp.useInternal')}</Label>
-              <Switch checked={form.use_internal_postfix} onCheckedChange={(v) => set('use_internal_postfix', v)} />
+              <Switch data-testid="smtp-use-internal" checked={form.use_internal_postfix} onCheckedChange={(v) => set('use_internal_postfix', v)} />
             </div>
 
             {!form.use_internal_postfix && (
@@ -152,16 +152,16 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2 space-y-2">
                     <Label>{t('smtp.server')} *</Label>
-                    <Input value={form.server} onChange={(e) => set('server', e.target.value)} className={errors.server ? 'border-red-500' : ''} placeholder="smtp.company.com" />
+                    <Input data-testid="smtp-server-input" value={form.server} onChange={(e) => set('server', e.target.value)} className={errors.server ? 'border-red-500' : ''} placeholder="smtp.company.com" />
                     {errors.server && <p className="text-xs text-red-500">{errors.server}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>{t('smtp.port')} *</Label>
-                    <Input type="number" value={form.port} onChange={(e) => set('port', Number(e.target.value))} className={errors.port ? 'border-red-500' : ''} />
+                    <Input data-testid="smtp-port-input" type="number" value={form.port} onChange={(e) => set('port', Number(e.target.value))} className={errors.port ? 'border-red-500' : ''} />
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" data-testid="smtp-encryption-methods">
                   <Label>{t('smtp.encryption')} *</Label>
                   <RadioGroup value={form.encryption} onValueChange={(v) => onEncryption(v as SmtpEncryption)} className="flex gap-4">
                     <label className="flex items-center gap-2"><RadioGroupItem value="none" id="enc-none" />{t('smtp.encNone')}</label>
@@ -170,7 +170,7 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
                   </RadioGroup>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2" data-testid="smtp-auth-methods">
                   <Label>{t('smtp.auth')} *</Label>
                   <RadioGroup value={form.auth_method} onValueChange={(v) => set('auth_method', v as SmtpAuthMethod)} className="flex gap-4">
                     {authOptions.map((a) => (
@@ -202,11 +202,11 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('smtp.senderEmail')} *</Label>
-                    <Input value={form.sender_email} onChange={(e) => set('sender_email', e.target.value)} className={errors.sender ? 'border-red-500' : ''} />
+                    <Input data-testid="smtp-sender-email-input" value={form.sender_email} onChange={(e) => set('sender_email', e.target.value)} className={errors.sender ? 'border-red-500' : ''} />
                   </div>
                   <div className="space-y-2">
                     <Label>{t('smtp.senderName')}</Label>
-                    <Input value={form.sender_name} onChange={(e) => set('sender_name', e.target.value)} />
+                    <Input data-testid="smtp-sender-name-input" value={form.sender_name} onChange={(e) => set('sender_name', e.target.value)} />
                   </div>
                 </div>
               </div>
@@ -215,7 +215,7 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
             <div className="space-y-3 border-t pt-4">
               <Label>{t('smtp.testRecipient')}</Label>
               <div className="flex items-end gap-3">
-                <Input className="flex-1" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} placeholder="admin@company.com" />
+                <Input data-testid="smtp-test-recipient-input" className="flex-1" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} placeholder="admin@company.com" />
                 <Button onClick={onTest} disabled={testing} data-testid="smtp-test-btn">
                   {testing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                   {t('smtp.sendTest')}
@@ -240,14 +240,14 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
       </Sheet>
 
       <AlertDialog open={confirmClose} onOpenChange={setConfirmClose}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="smtp-unsaved-confirm">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('smtp.unsavedTitle')}</AlertDialogTitle>
             <AlertDialogDescription>{t('smtp.unsavedDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => { setConfirmClose(false); onOpenChange(false); }}>{t('smtp.leave')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setConfirmClose(false)}>{t('smtp.continueEdit')}</AlertDialogAction>
+            <AlertDialogCancel data-testid="smtp-unsaved-leave" onClick={() => { setConfirmClose(false); onOpenChange(false); }}>{t('smtp.leave')}</AlertDialogCancel>
+            <AlertDialogAction data-testid="smtp-unsaved-continue" onClick={() => setConfirmClose(false)}>{t('smtp.continueEdit')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

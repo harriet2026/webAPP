@@ -17,6 +17,18 @@ const SOURCE = readFileSync(
 );
 
 describe('RBL filter html-spec text alignment', () => {
+  it('exposes stable QC selectors for the policy, greylist strategy, dialog and exemption collection', () => {
+    for (const testid of [
+      'rbl-strategy-greylist',
+      'rbl-greylist-configure',
+      'rbl-greylist-dialog',
+      'rbl-greylist-exemptions',
+      'rbl-greylist-exemption-authenticated',
+      'rbl-greylist-exemption-whitelisted',
+      'rbl-greylist-exemption-internal',
+    ]) expect(SOURCE).toContain(testid);
+  });
+
   // GT-12682 取代了 GT-12045：处置区改版后不再有「操作」这个字段标签，
   // 执行动作变成一张标题为「执行动作」的策略卡片（与灰名单策略互斥）。
   // productAction 这个 key 仍保留在词表里供其他处复用，但配置页不再渲染它。

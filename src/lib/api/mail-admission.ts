@@ -1,4 +1,4 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import { apiRequest, type ApiRequestFn, type ConfigMutationResult } from './client';
 
 /**
  * 统一准入规则（GT-12329 / 邮件路由后端方案 B1，取代 relay-grants；
@@ -82,8 +82,8 @@ export async function getMailAdmissionPolicy(
 export async function setMailAdmissionPolicyEnabled(
   enabled: boolean,
   request: ApiRequestFn = apiRequest,
-): Promise<MailAdmissionPolicy> {
-  return request<MailAdmissionPolicy>('/mail-admission/_meta/policy', {
+): Promise<ConfigMutationResult<MailAdmissionPolicy>> {
+  return request<ConfigMutationResult<MailAdmissionPolicy>>('/mail-admission/_meta/policy', {
     method: 'PUT',
     body: { enabled },
   });

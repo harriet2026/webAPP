@@ -13,7 +13,7 @@ interface StatePanelProps {
 
 export function StatePanel({ title, description, className, icon }: StatePanelProps) {
   return (
-    <div className={cn('flex min-h-[260px] items-center justify-center rounded-[28px] border border-border/70 bg-card/96 p-8 shadow-[0_18px_40px_rgba(15,23,42,0.06)]', className)}>
+    <div data-testid="state-panel" className={cn('flex min-h-[260px] items-center justify-center rounded-[28px] border border-border/70 bg-card/96 p-8 shadow-[0_18px_40px_rgba(15,23,42,0.06)]', className)}>
       <div className="text-center">
         {icon ? <div className="mb-4 flex justify-center">{icon}</div> : null}
         {title ? <h1 className="text-2xl font-semibold tracking-tight">{title}</h1> : null}

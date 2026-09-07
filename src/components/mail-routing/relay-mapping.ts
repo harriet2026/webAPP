@@ -4,7 +4,7 @@
 // 数据层落 mail-admission-rules API（取代 relay-grants）：来源 IP=client_cidr、SPF=use_spf、
 // 发信域=sender_domain、垃圾过滤=!skip_antispam、启停=is_active、规则名=note、优先级=priority、
 // HELO=helo_pattern、收信域名+匹配方式=rcpt_domain/rcpt_match——全部是后端真实列（替代旧
-// mail_routing_ext mock-only 扩展位，见 doc/mail-routing.md §5）。
+// mail_routing_ext mock-only 扩展位，见 docs/features/mail-routing.md §5）。
 //
 // 已知限制（未改后端，超出本次范围）：`sender_domain` 是 JOIN 派生的只读字段
 // （internal/models/mail_admission.go `db:"-"`，来自 tenant_domain_id → tenant_domains.domain），

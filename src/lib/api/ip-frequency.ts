@@ -6,19 +6,19 @@ import type {
   IPFrequencyTestResponse,
   SuspendedIP,
 } from '@/types/ip-frequency';
+import { fetchAllPages } from './pagination';
 
-export async function getIPFrequencyRules(
-  params: {
-    page?: number;
-    page_size?: number;
-    q?: string;
-    search?: string;
-    scope_type?: string;
-    is_active?: boolean;
-    sort?: string;
-  },
-  requestFn: ApiRequestFn = apiRequest,
-) {
+export interface IPFrequencyRuleListParams {
+  page?: number;
+  page_size?: number;
+  q?: string;
+  search?: string;
+  scope_type?: string;
+  is_active?: boolean;
+  sort?: string;
+}
+
+function ipFrequencyRulesPath(params: IPFrequencyRuleListParams): string {
   const searchParams = new URLSearchParams();
   if (params.page) searchParams.set('page', String(params.page));
   if (params.page_size) searchParams.set('page_size', String(params.page_size));
@@ -27,9 +27,24 @@ export async function getIPFrequencyRules(
   if (params.is_active !== undefined) searchParams.set('is_active', String(params.is_active));
   if (params.sort) searchParams.set('sort', params.sort);
   const qs = searchParams.toString();
+  return `/ip-frequency/rules${qs ? `?${qs}` : ''}`;
+}
+
+export async function getIPFrequencyRules(
+  params: IPFrequencyRuleListParams,
+  requestFn: ApiRequestFn = apiRequest,
+) {
   return requestFn<{ items: IPFrequencyRuleView[]; total: number; page: number; page_size: number }>(
-    `/ip-frequency/rules${qs ? `?${qs}` : ''}`,
+    ipFrequencyRulesPath(params),
   );
+}
+
+export async function listAllIPFrequencyRules(
+  params: Omit<IPFrequencyRuleListParams, 'page' | 'page_size'>,
+  requestFn: ApiRequestFn = apiRequest,
+): Promise<{ items: IPFrequencyRuleView[] }> {
+  const items = await fetchAllPages<IPFrequencyRuleView>(ipFrequencyRulesPath(params), requestFn);
+  return { items };
 }
 
 export async function getIPFrequencyRule(id: number, requestFn: ApiRequestFn = apiRequest) {

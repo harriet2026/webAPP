@@ -14,6 +14,7 @@ import { listTenants, getTenant } from '@/lib/api/tenants';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useOptionalUnsavedGuard } from '@/contexts/unsaved-guard-context';
 
 interface TenantSelectorProps {
   /**
@@ -27,6 +28,7 @@ interface TenantSelectorProps {
 
 export function TenantSelector({ value, onChange, className }: TenantSelectorProps = {}) {
   const { isSystemAdmin, selectedTenantId, setSelectedTenant } = useAuth();
+  const unsavedGuard = useOptionalUnsavedGuard();
   const t = useTranslations('header');
   const isPageScoped = onChange !== undefined;
   const currentTenantId = isPageScoped ? value ?? null : selectedTenantId;
@@ -59,6 +61,8 @@ export function TenantSelector({ value, onChange, className }: TenantSelectorPro
     if (!selectedNotInList || verifying) return;
     // verifiedTenant is undefined while loading; null/error means not found
     if (!verifiedTenant || verifiedTenant.status !== 'active') {
+      // 这是服务端事实驱动的失效上下文修复，不是用户主动切换；原租户已无法
+      // 继续可靠保存，因此不能让未保存守卫把无效 X-Tenant-ID 留在会话中。
       if (isPageScoped) {
         onChange(null);
       } else {
@@ -96,7 +100,14 @@ export function TenantSelector({ value, onChange, className }: TenantSelectorPro
     if (isPageScoped) {
       onChange(tenantId);
     } else {
-      setSelectedTenant(tenantId);
+      // 全局租户切换会替换当前页面的取数范围，必须像侧栏导航一样先处理
+      // 未保存草稿。页面局部 selector 由其所属表单自行管理，不改全局上下文。
+      const switchTenant = () => setSelectedTenant(tenantId);
+      if (unsavedGuard) {
+        unsavedGuard.requestTransition(switchTenant);
+      } else {
+        switchTenant();
+      }
     }
   };
 

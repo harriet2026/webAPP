@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
 
@@ -23,6 +24,7 @@ vi.mock('@/lib/api/unified-rules', () => ({
   exportUnifiedRules: vi.fn(),
   previewUnifiedRulesImport: vi.fn(),
   executeUnifiedRulesImport: vi.fn(),
+  getFieldDefinitions: vi.fn().mockResolvedValue({ fields: {} }),
 }));
 
 vi.mock('next-intl', () => ({
@@ -127,5 +129,16 @@ describe('StageRulesPage managed 规则只读(GT-12729)', () => {
 
     managedButtons.forEach((btn) => expect(btn).toBeDisabled());
     normalButtons.forEach((btn) => expect(btn).not.toBeDisabled());
+  });
+
+  it('统一规则动作下拉提供原生 observe', async () => {
+    const user = userEvent.setup();
+    mockGetUnifiedRules.mockResolvedValue([]);
+    renderPage(createElement(StageRulesPage, { stage: 'data' }));
+
+    await user.click(await screen.findByRole('button', { name: 'rules.createRule' }));
+    await user.click(screen.getByTestId('stage-rule-action-data'));
+
+    expect(await screen.findByTestId('stage-rule-action-data-option-observe')).toBeTruthy();
   });
 });

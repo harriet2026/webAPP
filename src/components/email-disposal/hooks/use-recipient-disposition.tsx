@@ -326,6 +326,38 @@ export function useRecipientDisposition({
     return r.reason || t('recipientStatus.notApplicable');
   }
 
+  // The recall API returns stable machine-readable reason codes at both the
+  // whole-message and per-recipient levels. Never expose those raw codes in
+  // the operator UI: the per-recipient result is the authoritative reason,
+  // while the whole-message reason remains a compatibility fallback for an
+  // older backend response that has no recipient_results.
+  function reasonForRecallFailure(reason?: string): string {
+    switch (reason) {
+      case 'unsupported_backend':
+        return t('recipientStatus.recallUnsupportedBackend');
+      case 'tracking_id_missing':
+        return t('recipientStatus.recallTrackingIdMissing');
+      case 'not_delivered':
+        return t('recipientStatus.recallNotDelivered');
+      case 'delivery_status_unknown':
+        return t('recipientStatus.recallDeliveryStatusUnknown');
+      case 'no_delivered_recipients':
+        return t('recipientStatus.recallNoDeliveredRecipients');
+      case 'resolve_backends_failed':
+        return t('recipientStatus.recallBackendResolutionFailed');
+      case 'create_failed':
+        return t('recipientStatus.recallRequestCreateFailed');
+      case 'no_recallable_recipients':
+        return t('recipientStatus.recallNoRecallableRecipients');
+      case 'not_found':
+        return t('recipientStatus.recallMailNotFound');
+      case 'forbidden':
+        return t('recipientStatus.recallForbidden');
+      default:
+        return t('recipientStatus.actionFailed');
+    }
+  }
+
   async function dispatch(finalType: string | undefined, whitelistSender?: boolean) {
     if (!pending) return;
     setBusy(true);
@@ -384,10 +416,6 @@ export function useRecipientDisposition({
         const targetGroups = groups.filter((g) => pending.groupKeys.includes(g.key));
         const applicable = targetGroups.filter((g) => g.actions.includes('recall'));
         const notApplicable = targetGroups.filter((g) => !g.actions.includes('recall'));
-        const failures: FailureRow[] = notApplicable.map((g) => ({
-          recipients: g.dispositions.map((d) => d.recipient).join(', '),
-          reason: t('recipientStatus.notApplicable'),
-        }));
         const notApplicableRows: RecipientResultRow[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
           recipient: d.recipient,
           prevStatus: g.status,
@@ -401,23 +429,40 @@ export function useRecipientDisposition({
         } else {
           try {
             const resp = await recallMails({ mail_log_ids: [mailLogId], final_type: finalType }, apiRequest);
-            // GT-12772：后端返回的 failed 列表里的收件人实际上没有召回成功，
-            // 不能恒为 ok:true。
-            const isRecallFailed = resp.failed?.some((f) => f.id === mailLogId);
-            const failedReason = resp.failed?.find((f) => f.id === mailLogId)?.reason;
-            const applicableRows: RecipientResultRow[] = applicable.flatMap((g) => g.dispositions.map((d) => ({
-              recipient: d.recipient, prevStatus: g.status, ok: !isRecallFailed,
-              reason: isRecallFailed ? (failedReason || t('recipientStatus.actionFailed')) : undefined,
-            })));
-            finishResults([...notApplicableRows, ...applicableRows]);
-            if (isRecallFailed) {
-              toast.error(failedReason || t('recipientStatus.actionFailed'));
+            const messageFailure = resp.failed?.find((f) => f.id === mailLogId);
+            const recipientResults = (resp.recipient_results ?? []).filter((r) => r.mail_log_id === mailLogId);
+            const applicableRows: RecipientResultRow[] = applicable.flatMap((g) => g.dispositions.map((d) => {
+              const normalizedRecipient = d.recipient.trim().toLowerCase();
+              const recipientResult = recipientResults.find((r) => r.recipients.some(
+                (recipient) => recipient.trim().toLowerCase() === normalizedRecipient,
+              ));
+              const ok = recipientResult
+                ? recipientResult.status === 'succeeded'
+                : !messageFailure;
+              return {
+                recipient: d.recipient,
+                prevStatus: g.status,
+                ok,
+                reason: ok
+                  ? undefined
+                  : reasonForRecallFailure(recipientResult?.reason ?? messageFailure?.reason),
+              };
+            }));
+            const resultRows = [...notApplicableRows, ...applicableRows];
+            const failedRows = resultRows.filter((row) => !row.ok);
+            const succeeded = applicableRows.filter((row) => row.ok).length;
+
+            finishResults(resultRows);
+            if (failedRows.length > 0 && succeeded > 0) {
+              toast.error(t('recipientStatus.bulkResult', { success: succeeded, failed: failedRows.length }));
+            } else if (failedRows.length > 0) {
+              toast.error(failedRows[0].reason ?? t('recipientStatus.actionFailed'));
             } else if (resp.reclassify_failed?.includes(mailLogId)) {
               toast.warning(t('reclassifyPartialFail'));
             } else {
               toast.success(t('recipientStatus.actionSuccess'));
             }
-            onDisposed();
+            if (succeeded > 0) onDisposed();
           } catch {
             const applicableFailRows: RecipientResultRow[] = applicable.flatMap((g) => g.dispositions.map((d) => ({
               recipient: d.recipient, prevStatus: g.status, ok: false, reason: t('recipientStatus.actionFailed'),
@@ -442,10 +487,12 @@ export function useRecipientDisposition({
           ok: false,
           reason: t('recipientStatus.notApplicable'),
         })));
-        // G6: deliver/discard resolve to a concrete, recipient-visible
-        // status, so their success rows carry newStatus (unlike
-        // recall/notify, which have no such mapping in this backend).
-        const newStatusKey = action === 'deliver' ? 'delivered' : 'discarded';
+        // GT-13273: a successful release response only confirms that the
+        // asynchronous delivery was accepted. The backend persists
+        // `delivering` here and delivery facts later converge it to
+        // delivered/delivery_failed, so the result dialog must not announce
+        // terminal success early. Delete remains an immediate terminal state.
+        const newStatusKey = action === 'deliver' ? 'delivering' : 'discarded';
         let succeeded = 0;
         let reclassifyFailedAny = false;
 
@@ -662,7 +709,7 @@ export function useRecipientDisposition({
         open={pending != null && pending.action === 'discard'}
         onOpenChange={(o) => !o && setPending(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="email-disposal-discard-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-600 dark:text-red-400">
               {t('recipientStatus.confirmDiscard.title')}
@@ -679,8 +726,9 @@ export function useRecipientDisposition({
             </div>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogCancel data-testid="email-disposal-discard-cancel" disabled={busy}>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
+              data-testid="email-disposal-discard-confirm"
               disabled={busy}
               className="border-transparent bg-red-600 text-white data-[hovered=true]:bg-red-700"
               onClick={(e) => { e.preventDefault(); confirmDiscard(); }}
@@ -695,14 +743,14 @@ export function useRecipientDisposition({
         open={pending != null && pending.action === 'notify'}
         onOpenChange={(o) => !o && setPending(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="email-disposal-notify-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('recipientStatus.confirmNotify.title')}</AlertDialogTitle>
             <AlertDialogDescription>{t('recipientStatus.confirmNotify.body')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction disabled={busy} onClick={(e) => { e.preventDefault(); confirmNotify(); }}>
+            <AlertDialogCancel data-testid="email-disposal-notify-cancel" disabled={busy}>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction data-testid="email-disposal-notify-confirm" disabled={busy} onClick={(e) => { e.preventDefault(); confirmNotify(); }}>
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : t('confirmBtn')}
             </AlertDialogAction>
           </AlertDialogFooter>

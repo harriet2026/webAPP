@@ -68,11 +68,12 @@ export function SpoofingAgentHeaderControls({ className }: { className?: string 
   const { canEdit, enabled, isLoading, isPending, toggle } = useSpoofingEngineToggle();
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
-      <span className={cn('text-sm', enabled ? 'text-primary' : 'text-muted-foreground')}>
+    <div className={cn('flex items-center gap-2', className)} data-testid="spoofing-header-engine">
+      <span className={cn('text-sm', enabled ? 'text-primary' : 'text-muted-foreground')} data-testid="spoofing-engine-state">
         {enabled ? tc('enabled') : tc('disabled')}
       </span>
       <Switch
+        data-testid="spoofing-engine-toggle"
         checked={enabled}
         disabled={!canEdit || isLoading || isPending}
         onCheckedChange={toggle}
@@ -87,9 +88,9 @@ export function SpoofingAgentHeaderActions({ className }: { className?: string }
   const { enabled } = useSpoofingEngineToggle();
 
   return (
-    <div className={cn('flex items-center gap-3', className)}>
+    <div className={cn('flex items-center gap-3', className)} data-testid="spoofing-header-actions">
       <Popover>
-        <PopoverTrigger render={<Button variant="outline" size="sm" />}>
+        <PopoverTrigger render={<Button variant="outline" size="sm" data-testid="spoof-whitelist-trigger" />}>
           <ListChecks className="mr-1.5 h-4 w-4" />
           {t('whitelistEntry')}
         </PopoverTrigger>
@@ -127,12 +128,12 @@ export function SpoofingAgentPage({
     <div className="flex h-full flex-col gap-4">
       <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
-            <span className="shrink-0">{tSidebar('agentCenter')}</span>
+          <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground" data-testid="spoofing-breadcrumb">
+            <span className="shrink-0" data-testid="spoofing-breadcrumb-seg-center">{tSidebar('agentCenter')}</span>
             <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-            <span className="shrink-0">{t('eyebrow')}</span>
+            <span className="shrink-0" data-testid="spoofing-breadcrumb-seg-layer">{t('eyebrow')}</span>
             <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate font-medium text-foreground">
+            <span className="truncate font-medium text-foreground" data-testid="spoofing-breadcrumb-seg-agent">
               {embedded ? t('title') : t('navSpoofingAgent')}
             </span>
           </div>
@@ -142,7 +143,7 @@ export function SpoofingAgentPage({
 
       {/* Audit-only banner */}
       {!enabled ? (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+        <div className="flex items-start gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300" data-testid="spoofing-audit-only-banner">
           <Info className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{t('auditOnlyBanner')}</span>
         </div>
@@ -150,8 +151,8 @@ export function SpoofingAgentPage({
 
       {/* Tabs */}
       <Tabs key={activeTab} defaultValue={activeTab} onValueChange={changeTab} className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="h-10 shrink-0 self-start rounded-lg p-1">
-          <TabsTrigger value="overview" className="px-4 text-sm">{t('tabs.overview')}</TabsTrigger>
+        <TabsList className="h-10 shrink-0 self-start rounded-lg p-1" data-testid="spoofing-tabs">
+          <TabsTrigger value="overview" className="px-4 text-sm" data-testid="spoofing-overview-tab">{t('tabs.overview')}</TabsTrigger>
           {configurationEnabled ? (
             <>
               <TabsTrigger value="protected-objects" className="px-4 text-sm" data-testid="spoofing-protected-objects-tab">

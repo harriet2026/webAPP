@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
+import { useOptionalUnsavedGuard } from '@/contexts/unsaved-guard-context';
 import { apiRequest } from '@/lib/api/client';
 
 interface TenantListItem {
@@ -28,6 +29,7 @@ export function ImpersonationBanner() {
   const t = useTranslations();
   const { isSystemAdmin, selectedTenantId, setSelectedTenant } = useAuth();
   const { viewer, setViewer } = useProductForm();
+  const unsavedGuard = useOptionalUnsavedGuard();
 
   // Reuse the shared ['tenants'] query key to look up the impersonated tenant's name.
   const { data: tenants } = useQuery({
@@ -47,21 +49,29 @@ export function ImpersonationBanner() {
     (selectedTenantId != null ? `#${selectedTenantId}` : '');
 
   const exitImpersonation = () => {
-    // Order matters: clear the selected tenant (cookie + localStorage + state)
-    // first so the subsequent bootstrap fetch (driven by cookie change) drops
-    // X-Tenant-ID, then flip the viewer back to platform.
-    setSelectedTenant(null);
-    setViewer('platform');
+    const transition = () => {
+      // Order matters: clear the selected tenant (cookie + localStorage + state)
+      // first so the subsequent bootstrap fetch (driven by cookie change) drops
+      // X-Tenant-ID, then flip the viewer back to platform.
+      setSelectedTenant(null);
+      setViewer('platform');
+    };
+    if (unsavedGuard) {
+      unsavedGuard.requestTransition(transition);
+    } else {
+      transition();
+    }
   };
 
   return (
-    <div className="flex items-center gap-3 border-b border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm sm:px-6 lg:px-8">
+    <div data-testid="impersonation-banner" className="flex items-center gap-3 border-b border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm sm:px-6 lg:px-8">
       <span className="font-medium text-amber-700 dark:text-amber-300">
         {t('header.impersonating', { name: tenantName })}
       </span>
       <Button
         variant="outline"
         size="sm"
+        data-testid="impersonation-exit"
         className="ml-auto gap-1.5 border-amber-500/50 text-amber-700 hover:bg-amber-500/15 dark:text-amber-300"
         onClick={exitImpersonation}
       >

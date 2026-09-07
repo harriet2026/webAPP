@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
+import type { Root, RootContent } from 'mdast';
+import type { Plugin } from 'unified';
 
 // GT-12923【0813】要求 HTML Spec 索引可以直接深链到某个需求名称（如
 // GT-12931）在这份 .md 文件里的具体章节。react-markdown 默认不会给标题生成
@@ -13,16 +14,6 @@ import type { Components } from 'react-markdown';
 // 结果附加一个由标题文本派生的 id，供 `#slug` 深链跳转；同一份文档内重复的
 // slug 通过计数器去重。算法思路与 skill 文档约定的锚点生成规则保持一致
 // （小写化、空格转短横线、保留中文字符、去除标点）。
-function extractText(node: ReactNode): string {
-  if (node == null || typeof node === 'boolean') return '';
-  if (typeof node === 'string' || typeof node === 'number') return String(node);
-  if (Array.isArray(node)) return node.map(extractText).join('');
-  if (typeof node === 'object' && 'props' in node) {
-    return extractText((node as { props?: { children?: ReactNode } }).props?.children);
-  }
-  return '';
-}
-
 // MD Spec 文档里的图片全部用 `./assets/<TICKET>/<file>.png` 这种相对当前
 // .md 文件所在目录（doc/md_spec-version/）的路径引用。react-markdown 只是
 // 把 src 原样传给 <img>，浏览器会拿它去拼当前页面 URL（/md-spec/version/...
@@ -49,41 +40,59 @@ function slugify(text: string): string {
     .replace(/[^a-z0-9\-_\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7a3]/g, '');
 }
 
-function useHeadingIdFactory() {
-  return useMemo(() => {
-    const seen = new Map<string, number>();
-    return (children: ReactNode) => {
-      const base = slugify(extractText(children)) || 'section';
+function markdownText(node: Root | RootContent): string {
+  if ('value' in node && typeof node.value === 'string') return node.value;
+  if ('children' in node) return node.children.map((child) => markdownText(child)).join('');
+  return '';
+}
+
+// Assign heading IDs during the remark AST transform, before React renders.
+// Keeping the duplicate counter in the processor avoids mutating a closure from
+// a render callback and makes repeated renders deterministic.
+const remarkHeadingIds: Plugin<[], Root> = () => (tree) => {
+  const seen = new Map<string, number>();
+
+  const walk = (node: Root | RootContent) => {
+    if (node.type === 'heading') {
+      const base = slugify(markdownText(node)) || 'section';
       const count = seen.get(base) ?? 0;
       seen.set(base, count + 1);
-      return count === 0 ? base : `${base}-${count}`;
-    };
-  }, []);
-}
+      const id = count === 0 ? base : `${base}-${count}`;
+      const data = node.data as { hProperties?: Record<string, unknown> } | undefined;
+      node.data = {
+        ...data,
+        hProperties: { ...data?.hProperties, id },
+      };
+    }
+    if ('children' in node) node.children.forEach(walk);
+  };
+
+  walk(tree);
+};
 
 // 项目未安装 @tailwindcss/typography（`prose` 类在本项目里是无样式的空类），
 // 所以这里不依赖 `prose`，而是给每个 Markdown 元素显式指定 Tailwind 类，
 // 只在这一个只读查看器内生效，不影响全局样式。
-function buildComponents(getHeadingId: (children: ReactNode) => string): Components {
+function buildComponents(): Components {
   return {
-    h1: ({ children }) => (
+    h1: ({ children, id }) => (
       <h1
-        id={getHeadingId(children)}
+        id={id}
         className="mt-8 mb-4 scroll-mt-20 text-2xl font-semibold tracking-tight text-foreground first:mt-0"
       >
         {children}
       </h1>
     ),
-    h2: ({ children }) => (
+    h2: ({ children, id }) => (
       <h2
-        id={getHeadingId(children)}
+        id={id}
         className="mt-8 mb-3 scroll-mt-20 border-b border-border pb-2 text-xl font-semibold text-foreground"
       >
         {children}
       </h2>
     ),
-    h3: ({ children }) => (
-      <h3 id={getHeadingId(children)} className="mt-6 mb-2 scroll-mt-20 text-base font-semibold text-foreground">
+    h3: ({ children, id }) => (
+      <h3 id={id} className="mt-6 mb-2 scroll-mt-20 text-base font-semibold text-foreground">
         {children}
       </h3>
     ),
@@ -145,8 +154,7 @@ function buildComponents(getHeadingId: (children: ReactNode) => string): Compone
 }
 
 export function MarkdownSpecViewer({ title, content }: { title: string; content: string }) {
-  const getHeadingId = useHeadingIdFactory();
-  const components = useMemo(() => buildComponents(getHeadingId), [getHeadingId]);
+  const components = useMemo(() => buildComponents(), []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,7 +163,7 @@ export function MarkdownSpecViewer({ title, content }: { title: string; content:
         <h1 className="text-lg font-semibold text-foreground">{title}</h1>
       </header>
       <main className="mx-auto max-w-4xl px-6 py-8">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        <ReactMarkdown remarkPlugins={[remarkGfm, remarkHeadingIds]} components={components}>
           {content}
         </ReactMarkdown>
       </main>

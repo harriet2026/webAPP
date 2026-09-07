@@ -834,18 +834,18 @@ export default function UsersPage() {
                   <Label>{t('users.accountUsername')}<span className="ml-0.5 text-destructive">*</span></Label>
                   {/* GT-12313：用户名是账号唯一标识，编辑时一律不可改（原型
                       "账号不可修改，密码留空表示不修改"），不再区分平台/租户视角。 */}
-                  <Input {...form.register('username')} disabled={!!editingUser} />
+                  <Input data-testid="new-admin-username" {...form.register('username')} disabled={!!editingUser} />
                   {fieldError('username')}
                 </div>
                 <div className="space-y-2">
                   <Label>{t('users.name')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
-                  <Input {...form.register('name')} />
+                  <Input data-testid="new-admin-name" {...form.register('name')} />
                   {fieldError('name')}
                 </div>
                 {/* 字段顺序与列表列序保持一致：姓名 → 邮箱 → 手机号 */}
                 <div className="space-y-2">
                   <Label>{t('users.email')}{!editingUser && <span className="ml-0.5 text-destructive">*</span>}</Label>
-                  <Input type="email" {...form.register('email')} />
+                  <Input data-testid="new-admin-email" type="email" {...form.register('email')} />
                   {fieldError('email')}
                 </div>
                 <div className="space-y-2">
@@ -859,7 +859,7 @@ export default function UsersPage() {
                     {!editingUser && <span className="ml-0.5 text-destructive">*</span>}
                   </Label>
                   <div className="flex items-center gap-2">
-                    <Input type="password" {...form.register('password')} placeholder={editingUser ? t('users.leaveBlank') : ''} className="flex-1" />
+                    <Input data-testid="new-admin-password" type="password" {...form.register('password')} placeholder={editingUser ? t('users.leaveBlank') : ''} className="flex-1" />
                     {!editingUser && (
                       <Button
                         type="button"
@@ -891,7 +891,7 @@ export default function UsersPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {roleOptions.map((r) => (
-                        <SelectItem key={r.id} value={String(r.id)}>{r.name}</SelectItem>
+                        <SelectItem key={r.id} value={String(r.id)} data-testid={`new-admin-role-option-${r.id}`}>{r.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -938,7 +938,7 @@ export default function UsersPage() {
 
             {/* 页脚：对齐原型「确定 / 取消」顺序（确定在前）。 */}
             <div className="flex items-center gap-2 border-t border-border px-6 py-3">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" data-testid="new-admin-save" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('common.save')}
               </Button>

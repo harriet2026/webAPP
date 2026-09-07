@@ -156,16 +156,15 @@ export const sidebarNavItems: NavItem[] = [
     id: 'logs',
     titleKey: 'sidebar.logs',
     icon: AlertCircle,
-    // 日志审计整组暂不对外露出，仅在产品形态切换器开启的演示/开发环境显示。
-    // 这与 advanced-rules 权限门控相互独立：切换器开启后，子项仍按各自
-    // permission 决定是否可见。
-    requiresProductFormSwitcher: true,
+    // GT-13199: 链接保护日志已对外开放，不再跟随产品形态切换器隐藏。
+    // 认证日志和管理员操作日志仍是演示/开发能力，因此把临时门控下沉到
+    // 两个对应子项；父分组会在至少一个有权限的子项可见时显示。
     children: [
       // GT-12501: 「邮件调查中心」入口按验收要求从导航隐藏（页面
       // /logs/mail-investigation 保留，同 /logs/email、/investigations 先例）。
-      { id: 'auth-attempts', titleKey: 'sidebar.authAttempts', href: '/logs/auth-attempts', permission: 'view_auth_attempts' },
+      { id: 'auth-attempts', titleKey: 'sidebar.authAttempts', href: '/logs/auth-attempts', permission: 'view_auth_attempts', requiresProductFormSwitcher: true },
       { id: 'link-clicks', titleKey: 'sidebar.linkClicks', href: '/logs/link-clicks', permission: 'view_link_logs' },
-      { id: 'admin-audit-logs', titleKey: 'sidebar.adminAuditLogs', href: '/logs/admin-audit', permission: 'view_admin_audit_logs' },
+      { id: 'admin-audit-logs', titleKey: 'sidebar.adminAuditLogs', href: '/logs/admin-audit', permission: 'view_admin_audit_logs', requiresProductFormSwitcher: true },
     ],
   },
   {
@@ -188,10 +187,13 @@ export const sidebarNavItems: NavItem[] = [
       // GT-11874: 平台安全策略入口（仅 system_admin 可见）
       { id: 'platform-security-policy', titleKey: 'sidebar.platformSecurityPolicy', href: '/system/platform-security', permission: 'manage_tenants' },
       { id: 'password-policy', titleKey: 'sidebar.passwordPolicy', href: '/system/password-policy', permission: 'manage_users' },
-      // GT-11959: reachable by a tenant admin too — they hold manage_login_security
-      // (for the 登录安全 tab) even though they lack manage_users (the 管理员账号 tab).
-      // The page gates each tab separately.
-      { id: 'users', titleKey: 'sidebar.users', href: '/users', permission: 'manage_login_security' },
+      // GT-13185: /users is shared by admin-account, role-permission and
+      // login-security. Do not add one tab's legacy coarse permission here:
+      // canSeeRoute('/users') already grants the route when ANY of the three
+      // RBAC submodules is visible+viewable, and the page gates each tab and
+      // every backend operation separately. A manage_login_security gate here
+      // made an admin-account-only custom role lose the whole parent menu.
+      { id: 'users', titleKey: 'sidebar.users', href: '/users' },
       { id: 'smtp-credentials', titleKey: 'sidebar.smtpCredentials', href: '/smtp-credentials' },
       { id: 'organization-contacts', titleKey: 'sidebar.organizationContacts', href: '/organization-contacts', icon: Contact },
     ],

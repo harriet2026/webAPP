@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect, useSyncExternalStore } from 'react';
-import { useTranslations, useLocale, useFormatter, useNow } from 'next-intl';
+import { useState, useCallback, useEffect } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, ArrowUpDown, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
+import { Search, Download, Trash2, CheckCircle, Loader2, RotateCcw, Eye, Settings, Filter, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   DropdownMenu,
@@ -35,6 +35,11 @@ import { type DisposalLang } from './lib/disposal-basis-config';
 import { DisplayStatusBadges, RecipientStatusBadges } from './components/recipient-status-badges';
 import { DisposalBasisCell } from './components/disposal-basis-cell';
 import { mailTypeLabelKey, correctionSourceLabelKey } from './lib/detail-helpers';
+import {
+  DISPOSAL_TABLE_COLUMNS,
+  visibleDisposalColumns,
+  type DisposalTableColumn,
+} from './lib/csv-export';
 
 interface MailListTableProps {
   items: DisposalMailItem[];
@@ -43,7 +48,10 @@ interface MailListTableProps {
   selectedIds: Set<number>;
   onSelectionChange: (ids: Set<number>) => void;
   onItemClick: (id: number) => void;
-  onBatchAction: (action: 'find_similar' | 'release' | 'delete' | 'export' | 'recall') => void;
+  onBatchAction: (
+    action: 'find_similar' | 'release' | 'delete' | 'export' | 'recall',
+    visibleColumns?: readonly DisposalTableColumn[],
+  ) => void;
   onFindSimilar?: (id: number) => void;
   aiEnabled?: boolean;
   similarMode?: boolean;
@@ -78,11 +86,8 @@ export interface TableHeaderFilters {
 // GT-11580: columns the operator can show/hide via the toolbar 设置 button.
 // The leading select checkbox and the trailing operations column are
 // structural and always rendered.
-const TOGGLEABLE_COLUMNS = [
-  'time', 'direction', 'subject', 'senderIp', 'senderRecipient',
-  'disposalBasis', 'mailType', 'similarity', 'action', 'status',
-] as const;
-type ToggleableColumn = (typeof TOGGLEABLE_COLUMNS)[number];
+const TOGGLEABLE_COLUMNS = DISPOSAL_TABLE_COLUMNS;
+type ToggleableColumn = DisposalTableColumn;
 const COLUMN_PREF_KEY = 'osg.disposal.hiddenColumns';
 const DENSITY_PREF_KEY = 'osg.disposal.density';
 type TableDensity = 'comfortable' | 'compact';
@@ -92,10 +97,6 @@ const DIRECTION_BADGE_CLASSES: Record<string, string> = {
   internal: 'border-border text-muted-foreground',
 };
 const NEUTRAL_DIRECTION_BADGE_CLASS = 'border-border text-muted-foreground';
-
-const subscribeToClientEnvironment = () => () => undefined;
-const getClientSnapshot = () => true;
-const getServerSnapshot = () => false;
 
 export function MailListTable({
   items,
@@ -121,13 +122,6 @@ export function MailListTable({
 }: MailListTableProps) {
   const t = useTranslations('emailDisposal');
   const rawLocale = useLocale();
-  const format = useFormatter();
-  const now = useNow({ updateInterval: 60_000 });
-  const mounted = useSyncExternalStore(
-    subscribeToClientEnvironment,
-    getClientSnapshot,
-    getServerSnapshot,
-  );
   // Map next-intl locale to one of the disposal-basis dictionary's supported
   // langs; unknown locales fall back to zh (the dictionary's primary language).
   const disposalLang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
@@ -142,13 +136,6 @@ export function MailListTable({
   const localizeEnum = useCallback((key: string, fallback: string) => {
     return t.has(key as never) ? t(key as never) : fallback;
   }, [t]);
-
-  const formatRelativeTime = useCallback((timestamp: string | undefined | null) => {
-    if (!timestamp) return formatDate(timestamp);
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.getTime()) || !mounted) return formatDate(timestamp);
-    return format.relativeTime(date, now);
-  }, [format, mounted, now]);
 
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
   const hasSelection = selectedIds.size > 0;
@@ -295,7 +282,7 @@ export function MailListTable({
                 variant="control"
                 className="flex items-center gap-2 rounded px-2 py-1 text-xs data-[hovered=true]:bg-accent/70 focus-within:ring-2 focus-within:ring-ring/60"
               >
-                <label>
+                <label data-testid={`disposal-table-filter-${key}-option-${option}`}>
                   <Checkbox checked={selected.includes(option)} onCheckedChange={(checked) => updateHeaderFilter(key, option, checked === true)} />
                   {optionLabel(option)}
                 </label>
@@ -332,9 +319,9 @@ export function MailListTable({
   // mail. (GT-12164: 默认筛选已改为“全部”，不再默认隔离+旁路。)
   const toolbar = (
     <div data-testid="disposal-batch-toolbar" className="flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2">
-      <span className="text-sm text-muted-foreground">{t('table.total', { n: total })}</span>
+      <span data-testid="disposal-batch-total" className="text-sm text-muted-foreground">{t('table.total', { n: total })}</span>
       {hasSelection && (
-        <span className="text-sm font-medium text-primary">
+        <span data-testid="disposal-batch-selected-count" className="text-sm font-medium text-primary">
           {t('batch.crossPageSelected', { n: selectedIds.size })}
         </span>
       )}
@@ -378,7 +365,10 @@ export function MailListTable({
               variant="outline"
               size="sm"
               className="h-7 text-xs"
-              onClick={() => onBatchAction('export')}
+              onClick={() => onBatchAction(
+                'export',
+                visibleDisposalColumns(hiddenColumns, aiEnabled && similarMode),
+              )}
               disabled={exportLoading}
             >
               {exportLoading
@@ -485,7 +475,8 @@ export function MailListTable({
                 {colHead('direction')}
                 {colHead('subject')}
                 {colHead('senderIp')}
-                {colHead('senderRecipient')}
+                {colHead('sender')}
+                {colHead('recipient')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
@@ -525,7 +516,8 @@ export function MailListTable({
                 {colHead('direction')}
                 {colHead('subject')}
                 {colHead('senderIp')}
-                {colHead('senderRecipient')}
+                {colHead('sender')}
+                {colHead('recipient')}
                 {colHead('disposalBasis')}
                 {colHead('mailType')}
                 {aiEnabled && similarMode && colHead('similarity')}
@@ -631,14 +623,15 @@ export function MailListTable({
                 data-testid="disposal-select-column"
               >
                 <div className="flex items-center justify-center h-full w-10">
-                  <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
+                  <Checkbox data-testid="disposal-select-all" checked={allSelected} onCheckedChange={toggleAll} aria-label="Select all" />
                 </div>
               </TableHead>
               {colHead('time')}
               {colHead('direction')}
               {colHead('subject')}
               {colHead('senderIp')}
-              {colHead('senderRecipient')}
+              {colHead('sender')}
+              {colHead('recipient')}
               {colHead('disposalBasis')}
               {colHead('mailType')}
               {aiEnabled && similarMode && colHead('similarity')}
@@ -675,6 +668,7 @@ export function MailListTable({
                 >
                   <div className="flex items-center justify-center h-full w-10">
                     <Checkbox
+                      data-testid={`disposal-row-checkbox-${item.id}`}
                       checked={selectedIds.has(item.id)}
                       onCheckedChange={() => toggleOne(item.id)}
                       aria-label={`Select email ${item.id}`}
@@ -683,12 +677,7 @@ export function MailListTable({
                 </TableCell>
                 {isColVisible('time') && (
                 <TableCell className={cn('text-xs whitespace-nowrap', cellDensityClass)} data-testid={`disposal-cell-${item.id}-time`}>
-                  <Tooltip>
-                    <TooltipTrigger render={<span className="cursor-default" />}>
-                      {formatRelativeTime(item.timestamp)}
-                    </TooltipTrigger>
-                    <TooltipContent>{formatDate(item.timestamp)}</TooltipContent>
-                  </Tooltip>
+                  {formatDate(item.timestamp)}
                 </TableCell>
                 )}
                 {isColVisible('direction') && (
@@ -717,22 +706,20 @@ export function MailListTable({
                   </Tooltip>
                 </TableCell>
                 )}
-                {isColVisible('senderRecipient') && (
-                <TableCell className={cn('text-xs max-w-[320px] truncate', cellDensityClass)} data-testid={`disposal-cell-${item.id}-senderRecipient`}>
-                  {(() => {
-                    const recipients = (item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—';
-                    const full = `${item.sender} → ${recipients}`;
-                    return (
-                      <Tooltip>
-                        <TooltipTrigger render={<span className="inline-flex items-center gap-1 cursor-default" />}>
-                          <span className="truncate">{item.sender}</span>
-                          <ArrowRight className="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
-                          <span className="truncate">{recipients}</span>
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-md text-xs">{full}</TooltipContent>
-                      </Tooltip>
-                    );
-                  })()}
+                {isColVisible('sender') && (
+                <TableCell className={cn('text-xs max-w-[200px] truncate', cellDensityClass)} data-testid={`disposal-cell-${item.id}-sender`}>
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="cursor-default" />}>{item.sender}</TooltipTrigger>
+                    <TooltipContent className="max-w-md text-xs">{item.sender}</TooltipContent>
+                  </Tooltip>
+                </TableCell>
+                )}
+                {isColVisible('recipient') && (
+                <TableCell className={cn('text-xs max-w-[200px] truncate', cellDensityClass)} data-testid={`disposal-cell-${item.id}-recipient`}>
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="cursor-default" />}>{(item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—'}</TooltipTrigger>
+                    <TooltipContent className="max-w-md text-xs">{(item.recipientList ?? (item.recipient ? [item.recipient] : [])).join(', ') || '—'}</TooltipContent>
+                  </Tooltip>
                 </TableCell>
                 )}
                 {isColVisible('disposalBasis') && (
@@ -757,11 +744,11 @@ export function MailListTable({
                       {item.emailTypeOverridden && (
                         <Tooltip>
                           <TooltipTrigger render={<span />}>
-                            <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-green-500 text-green-600">
+                            <Badge data-testid={`disposal-corrected-badge-${item.id}`} variant="outline" className="text-[10px] px-1 py-0 h-4 border-green-500 text-green-600">
                               {t('table.corrected')}
                             </Badge>
                           </TooltipTrigger>
-                          <TooltipContent className="max-w-md text-xs">
+                          <TooltipContent data-testid={`disposal-corrected-tooltip-${item.id}`} className="max-w-md text-xs">
                             {item.emailTypeOriginal && (
                               <span>{t('table.correctedTooltip', {
                                 original: t(mailTypeLabelKey(item.emailTypeOriginal)),

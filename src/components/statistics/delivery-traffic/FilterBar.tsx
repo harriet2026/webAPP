@@ -118,7 +118,7 @@ export function FilterBar({
           />
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-testid="delivery-direction-group">
           <Label className="sr-only">{t('direction.label')}</Label>
           <SegmentedControl
             value={direction}
@@ -128,7 +128,7 @@ export function FilterBar({
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-testid="delivery-time-range-group">
           <Label className="sr-only">{t('timeRange.label')}</Label>
           <SegmentedControl
             value={timeRange}

@@ -86,6 +86,7 @@ const DEFAULT_EXCHANGE_CONFIG: ExchangeConfig = {
 // Backend masks the stored admin_password with this sentinel on read paths and
 // treats it as "keep existing" on write paths (see api/tenant_domain_actions.go).
 const KEEP_PASSWORD_SENTINEL = '__OSG_KEEP_PASSWORD__';
+const BULK_MAIL_SYSTEM_TYPES: MailSystemType[] = ['standard_smtp', 'coremail', 'exchange'];
 
 export default function TenantDomainsPage() {
   const t = useTranslations();
@@ -329,6 +330,7 @@ export default function TenantDomainsPage() {
       id: 'select',
       header: () => (
         <Checkbox
+          data-testid="tenant-domain-select-all"
           checked={domains && domains.length > 0 && selectedIds.size === domains.length}
           onCheckedChange={toggleAll}
           aria-label="Select all"
@@ -336,6 +338,7 @@ export default function TenantDomainsPage() {
       ),
       cell: ({ row }) => (
         <Checkbox
+          data-testid={`tenant-domain-select-${row.original.id}`}
           checked={selectedIds.has(row.original.id)}
           onCheckedChange={() => toggleSelect(row.original.id)}
           aria-label={`Select domain ${row.original.id}`}
@@ -372,7 +375,7 @@ export default function TenantDomainsPage() {
       cell: ({ row }) => {
         const mst = (row.original.mail_system_type || 'standard_smtp') as MailSystemType;
         return (
-          <Badge variant={mst === 'exchange' ? 'default' : mst === 'coremail' ? 'secondary' : 'outline'}>
+          <Badge data-testid={`tenant-domain-type-${row.original.id}`} variant={mst === 'exchange' ? 'default' : mst === 'coremail' ? 'secondary' : 'outline'}>
             {MAIL_SYSTEM_TYPE_LABELS[mst]}
           </Badge>
         );
@@ -431,12 +434,18 @@ export default function TenantDomainsPage() {
           >
             <KeyRound className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            data-testid={`tenant-domain-edit-${row.original.id}`}
+            onClick={() => handleOpenDialog(row.original)}
+          >
             <Pencil className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            data-testid={`tenant-domain-delete-${row.original.id}`}
             onClick={() => setDeleteId(row.original.id)}
             className="text-destructive"
           >
@@ -462,12 +471,12 @@ export default function TenantDomainsPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           {selectedIds.size > 0 && (
-            <Button variant="outline" onClick={() => setBulkTypeOpen(true)}>
+            <Button data-testid="tenant-domain-bulk-open" variant="outline" onClick={() => setBulkTypeOpen(true)}>
               <Zap className="h-4 w-4 mr-2" />
               批量设置类型 ({selectedIds.size})
             </Button>
           )}
-          <Button onClick={() => handleOpenDialog()}>
+          <Button onClick={() => handleOpenDialog()} data-testid="tenant-domain-add">
           <Plus className="h-4 w-4 mr-2" />
           {t('tenants.addDomain')}
           </Button>
@@ -478,7 +487,11 @@ export default function TenantDomainsPage() {
         <LoadingPanel />
       ) : (
         <PageSurface>
-          <DataTable columns={columns} data={domains || []} />
+          <DataTable
+            columns={columns}
+            data={domains || []}
+            rowTestId={(row) => `tenant-domain-row-${row.id}`}
+          />
         </PageSurface>
       )}
 
@@ -493,6 +506,7 @@ export default function TenantDomainsPage() {
             <div className="space-y-2">
               <Label>{t('tenants.domain')} *</Label>
               <Input
+                data-testid="tenant-domain-input"
                 {...form.register('domain')}
                 placeholder="example.com"
               />
@@ -500,12 +514,12 @@ export default function TenantDomainsPage() {
             <div className="space-y-2">
               <Label>{t('tenants.nextHopType')} *</Label>
               <Select value={form.watch('next_hop_type')} onValueChange={(v) => form.setValue('next_hop_type', v as 'domain' | 'ip')}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" data-testid="tenant-domain-nexthop-type">
                   <SelectValue>{{ domain: t('tenants.nextHopTypeDomain'), ip: t('tenants.nextHopTypeIp') }[form.watch('next_hop_type')]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="domain">{t('tenants.nextHopTypeDomain')}</SelectItem>
-                  <SelectItem value="ip">{t('tenants.nextHopTypeIp')}</SelectItem>
+                  <SelectItem value="domain" data-testid="tenant-domain-nexthop-type-option-domain">{t('tenants.nextHopTypeDomain')}</SelectItem>
+                  <SelectItem value="ip" data-testid="tenant-domain-nexthop-type-option-ip">{t('tenants.nextHopTypeIp')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -513,6 +527,7 @@ export default function TenantDomainsPage() {
               <div className="col-span-2 space-y-2">
                 <Label>{t('tenants.nextHopHost')} *</Label>
                 <Input
+                  data-testid="tenant-domain-nexthop-host"
                   {...form.register('next_hop_host')}
                   placeholder={form.watch('next_hop_type') === 'ip' ? '192.168.1.1' : 'smtp.internal'}
                 />
@@ -521,6 +536,7 @@ export default function TenantDomainsPage() {
                 <Label>{t('tenants.nextHopPort')} *</Label>
                 <Input
                   type="number"
+                  data-testid="tenant-domain-nexthop-port"
                   {...form.register('next_hop_port', { valueAsNumber: true })}
                   placeholder="25"
                 />
@@ -537,13 +553,13 @@ export default function TenantDomainsPage() {
                   else setEwsExpanded(false);
                 }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger data-testid="tenant-domain-mail-system-type" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="standard_smtp">标准 SMTP</SelectItem>
+                  <SelectItem data-testid="tenant-domain-mail-system-standard" value="standard_smtp">标准 SMTP</SelectItem>
                   <SelectItem value="coremail">Coremail</SelectItem>
-                  <SelectItem value="exchange">Exchange</SelectItem>
+                  <SelectItem data-testid="tenant-domain-mail-system-exchange" value="exchange">Exchange</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -555,7 +571,7 @@ export default function TenantDomainsPage() {
                   EWS 连接参数
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="mt-3 space-y-3 rounded-lg border p-4">
+                  <div data-testid="tenant-domain-ews-config" className="mt-3 space-y-3 rounded-lg border p-4">
                     <div className="space-y-2">
                       <Label>EWS Endpoint</Label>
                       <Input
@@ -660,7 +676,7 @@ export default function TenantDomainsPage() {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} data-testid="tenant-domain-save">
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {t('common.save')}
               </Button>
@@ -679,7 +695,7 @@ export default function TenantDomainsPage() {
       />
 
       <Dialog open={bulkTypeOpen} onOpenChange={setBulkTypeOpen}>
-        <DialogContent className="max-w-sm rounded-[28px] border-border/70 shadow-2xl">
+        <DialogContent data-testid="tenant-domain-bulk-dialog" className="max-w-sm rounded-[28px] border-border/70 shadow-2xl">
           <DialogHeader>
             <DialogTitle>批量设置邮件系统类型</DialogTitle>
           </DialogHeader>
@@ -690,13 +706,15 @@ export default function TenantDomainsPage() {
             <div className="space-y-2">
               <Label>邮件系统类型</Label>
               <Select value={bulkMailSystemType} onValueChange={(v) => setBulkMailSystemType(v as MailSystemType)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger data-testid="tenant-domain-bulk-type" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="standard_smtp">标准 SMTP</SelectItem>
-                  <SelectItem value="coremail">Coremail</SelectItem>
-                  <SelectItem value="exchange">Exchange</SelectItem>
+                  {BULK_MAIL_SYSTEM_TYPES.map((type) => (
+                    <SelectItem key={type} data-testid={`tenant-domain-bulk-type-${type}`} value={type}>
+                      {MAIL_SYSTEM_TYPE_LABELS[type]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -705,7 +723,7 @@ export default function TenantDomainsPage() {
             <Button variant="outline" onClick={() => setBulkTypeOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleBulkSetType} disabled={bulkSubmitting}>
+            <Button data-testid="tenant-domain-bulk-confirm" onClick={handleBulkSetType} disabled={bulkSubmitting}>
               {bulkSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               确认
             </Button>

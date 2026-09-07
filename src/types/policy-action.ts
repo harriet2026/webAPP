@@ -2,16 +2,18 @@
 export type PolicyAction =
   | 'accept'
   | 'proceed'
+  | 'observe'
   | 'quarantine'
   | 'audit'
   | 'reject'
   | 'discard';
 
-export type TerminalPolicyAction = Exclude<PolicyAction, 'proceed'>;
+export type TerminalPolicyAction = Exclude<PolicyAction, 'proceed' | 'observe'>;
 
 export const POLICY_ACTIONS: readonly PolicyAction[] = [
   'accept',
   'proceed',
+  'observe',
   'quarantine',
   'audit',
   'reject',

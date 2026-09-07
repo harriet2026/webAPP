@@ -322,6 +322,7 @@ export function SearchBar({
                             variant="ghost"
                             size="icon-xs"
                             aria-label={`${t("renameTemplate")}: ${template.name}`}
+                            data-testid="disposal-template-rename"
                             className="text-muted-foreground data-[hovered=true]:bg-muted data-[hovered=true]:text-foreground"
                             onClick={(event) => {
                               event.stopPropagation();
@@ -335,6 +336,7 @@ export function SearchBar({
                             variant="ghost"
                             size="icon-xs"
                             aria-label={`${t("deleteTemplate")}: ${template.name}`}
+                            data-testid="disposal-template-delete"
                             className="text-muted-foreground data-[hovered=true]:bg-destructive/10 data-[hovered=true]:text-destructive"
                             onClick={(event) => {
                               event.stopPropagation();
@@ -373,7 +375,7 @@ export function SearchBar({
       </div>
 
       {aiError && (
-        <Alert variant="destructive" className="py-2">
+        <Alert variant="destructive" className="py-2" data-testid="disposal-search-error">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-xs">{aiError}</AlertDescription>
         </Alert>

@@ -96,7 +96,7 @@ export function SessionsTab() {
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-border">
+          <div className="overflow-x-auto rounded-lg border border-border" data-testid="profile-sessions-table">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40">
@@ -198,7 +198,7 @@ export function SessionsTab() {
         <AlertDialogContent className="max-w-[360px]">
           <AlertDialogHeader>
             <AlertDialogTitle>{t('devices.logoutOthersTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription data-testid="profile-device-batch-desc">
               {t('devices.logoutOthersConfirm', { n: others.length })}
             </AlertDialogDescription>
           </AlertDialogHeader>

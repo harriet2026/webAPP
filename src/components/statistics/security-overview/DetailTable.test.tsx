@@ -123,4 +123,35 @@ describe('DetailTable summary columns (GT-11934)', () => {
     // Total comes straight from the backend field.
     expect(within(row).getByText('40')).toBeInTheDocument();
   });
+
+  it('hides internal delivery states returned by an older backend', () => {
+    const rows = {
+      delivery_result: [{
+        date: '2026-07-01',
+        delivered: 50,
+        failed: 10,
+        cancelled: 5,
+        in_delivery: 4,
+        partial_delivered: 3,
+        unknown: 2,
+        success_rate: 83.3,
+        total: 74,
+        block_rate: 20,
+        change: 0,
+        change_pct: 0,
+      }],
+    } as never;
+
+    render(<DetailTable data={rows} isLoading={false} viewBy="delivery_result" />);
+
+    const headers = screen.getAllByRole('columnheader').map((header) => header.textContent ?? '');
+    expect(headers).toEqual(expect.arrayContaining([
+      'delivered',
+      'failed',
+      'cancelled',
+    ]));
+    expect(headers.join(' ')).not.toContain('in_delivery');
+    expect(headers.join(' ')).not.toContain('partial_delivered');
+    expect(headers.join(' ')).not.toContain('unknown');
+  });
 });

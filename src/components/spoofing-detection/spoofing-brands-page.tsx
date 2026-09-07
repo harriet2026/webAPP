@@ -74,7 +74,7 @@ export function SpoofingBrandsPage({ auditOnly }: { auditOnly?: boolean }) {
               <CardTitle className="text-lg">{tsd('brand.title')}</CardTitle>
               <p className="mt-1 text-xs text-muted-foreground">{tsd('brand.subtitle')}</p>
             </div>
-            <Button disabled={readonly} onClick={() => { setEditing(null); setFormOpen(true); }}>
+            <Button data-testid="spoof-brand-add" disabled={readonly} onClick={() => { setEditing(null); setFormOpen(true); }}>
               <Plus className="mr-2 h-4 w-4" />{tsd('brand.add')}
             </Button>
           </div>
@@ -82,28 +82,28 @@ export function SpoofingBrandsPage({ auditOnly }: { auditOnly?: boolean }) {
             <div className="relative min-w-60 flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input value={keyword} onChange={(e) => { setKeyword(e.target.value); setPage(1); }}
-                placeholder={tsd('brand.searchPlaceholder')} className="h-9 pl-9" />
+                placeholder={tsd('brand.searchPlaceholder')} className="h-9 pl-9" data-testid="spoof-brand-search" />
             </div>
             <Select value={modeFilter} onValueChange={(v) => { setModeFilter(v ?? 'all'); setPage(1); }}>
-              <SelectTrigger className="h-9 w-full sm:w-40"><SelectValue>{modeFilterLabel}</SelectValue></SelectTrigger>
+              <SelectTrigger className="h-9 w-full sm:w-40" data-testid="spoof-brand-mode-filter"><SelectValue>{modeFilterLabel}</SelectValue></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{tsd('brand.allModes')}</SelectItem>
-                <SelectItem value="observe">{tsd('brand.mode.observe')}</SelectItem>
-                <SelectItem value="standard">{tsd('brand.mode.standard')}</SelectItem>
-                <SelectItem value="strict">{tsd('brand.mode.strict')}</SelectItem>
-                <SelectItem value="custom">{tsd('brand.mode.custom')}</SelectItem>
+                <SelectItem value="all" data-testid="spoof-brand-mode-option-all">{tsd('brand.allModes')}</SelectItem>
+                <SelectItem value="observe" data-testid="spoof-brand-mode-option-observe">{tsd('brand.mode.observe')}</SelectItem>
+                <SelectItem value="standard" data-testid="spoof-brand-mode-option-standard">{tsd('brand.mode.standard')}</SelectItem>
+                <SelectItem value="strict" data-testid="spoof-brand-mode-option-strict">{tsd('brand.mode.strict')}</SelectItem>
+                <SelectItem value="custom" data-testid="spoof-brand-mode-option-custom">{tsd('brand.mode.custom')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 px-6 pb-6">
+        <CardContent className="space-y-4 px-6 pb-6" data-testid="spoof-brand-list">
           {filtered.map((b) => (
             <SpoofingBrandCard key={b.id} brand={b} disabled={readonly || b.read_only}
               onObserve={(next) => observeMutation.mutate({ id: b.id, next })}
               onEdit={() => { setEditing(b); setFormOpen(true); }}
               onDelete={() => setDeleting(b)} />
           ))}
-          {filtered.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">{tsd('brand.emptyFiltered')}</p> : null}
+          {filtered.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground" data-testid="spoof-brand-empty">{tsd('brand.emptyFiltered')}</p> : null}
           <div data-testid="spoof-brand-pagination">
             <ServerPagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
           </div>
@@ -111,14 +111,14 @@ export function SpoofingBrandsPage({ auditOnly }: { auditOnly?: boolean }) {
       </Card>
 
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="spoof-brand-delete-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>{tsd('brand.deleteConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{tsd('brand.deleteConfirmDesc')}</AlertDialogDescription>
+            <AlertDialogTitle data-testid="spoof-brand-delete-title">{tsd('brand.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription data-testid="spoof-brand-delete-desc">{tsd('brand.deleteConfirmDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tsd('brandForm.cancel')}</AlertDialogCancel>
-            <AlertDialogAction className="bg-rose-600 hover:bg-rose-700"
+          <AlertDialogFooter data-testid="spoof-brand-delete-footer">
+            <AlertDialogCancel data-testid="spoof-brand-delete-cancel">{tsd('brandForm.cancel')}</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-600 hover:bg-rose-700" data-testid="spoof-brand-delete-confirm"
               onClick={() => { if (deleting) deleteMutation.mutate(deleting.id); setDeleting(null); }}>
               {tsd('brand.delete')}
             </AlertDialogAction>

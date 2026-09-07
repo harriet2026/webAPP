@@ -26,15 +26,18 @@ describe('security overview view contract', () => {
       'sensitive', 'spoofing', 'phishing', 'virus', 'account_compromised',
     ]));
     expect(overview.trend.action).toHaveLength(7);
-    // 与真实后端 internal/models/security_overview.go AllActions 对齐：
-    // 第 3 个动作是 advanced_review（sideline_pending），不存在 greylist。
+    // 与真实后端 internal/models/security_overview.go AllActions 对齐。
     expect(Object.keys(overview.trend.action?.[0] ?? {})).toEqual(expect.arrayContaining([
-      'deliver', 'mark_deliver', 'advanced_review', 'quarantine', 'review', 'block', 'drop', 'recall',
+      'deliver', 'quarantine', 'review', 'block', 'drop', 'recall',
     ]));
-    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('greylist');
-    expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain('cancelled');
+    for (const retired of ['mark_deliver', 'advanced_review', 'greylist', 'cancel_delivery']) {
+      expect(Object.keys(overview.trend.action?.[0] ?? {})).not.toContain(retired);
+    }
     expect(overview.trend.threat_level).toHaveLength(7);
     expect(overview.trend.delivery_result).toHaveLength(7);
+    expect(Object.keys(overview.trend.delivery_result?.[0] ?? {}).filter(
+      (key) => !['date', 'total', 'block_rate', 'change', 'change_pct', 'success_rate'].includes(key),
+    )).toEqual(['delivered', 'failed', 'cancelled']);
     expect(overview.trend_previous_period?.email_type).toHaveLength(7);
     expect(mockSecurityGeo('phishing').countries).toHaveLength(10);
     expect(mockSecurityTime('daily').peak_hours).toHaveLength(4);

@@ -52,6 +52,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
   const cards = [
     {
       key: 'totalFiltered',
+      testid: 'security-overview-kpi-total-filtered',
       icon: Shield,
       value: data?.total_filtered,
       delta: data?.total_filtered_delta,
@@ -62,6 +63,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
     },
     {
       key: 'blockRate',
+      testid: 'security-overview-kpi-block-rate',
       icon: ShieldAlert,
       value: data?.block_rate,
       delta: data?.block_rate_delta,
@@ -74,6 +76,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
     },
     {
       key: 'recallRate',
+      testid: 'security-overview-kpi-recall-rate',
       icon: ShieldCheck,
       value: data?.recall_rate,
       delta: data?.recall_rate_delta,
@@ -85,6 +88,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
     },
     {
       key: 'pendingReview',
+      testid: 'security-overview-kpi-pending-review',
       icon: Clock,
       value: data?.pending_review,
       delta: data?.pending_review_delta,
@@ -105,7 +109,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
         const valueColorClass = data && card.colorFn ? card.colorFn(card.value ?? 0) : '';
 
         return (
-          <Card key={card.key} className="gap-4 overflow-hidden">
+          <Card key={card.key} data-testid={`security-overview-kpi-card-${card.key}`} className="gap-4 overflow-hidden">
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-0">
               <div className="space-y-2">
                 <CardTitle className="text-xs font-normal text-body">
@@ -114,7 +118,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
                 {isLoading ? (
                   <Skeleton className="h-8 w-20" />
                 ) : (
-                  <div className={`text-2xl font-bold tracking-tight ${valueColorClass}`}>
+                  <div className={`text-2xl font-bold tracking-tight ${valueColorClass}`} data-testid={card.testid}>
                     {displayValue}
                   </div>
                 )}

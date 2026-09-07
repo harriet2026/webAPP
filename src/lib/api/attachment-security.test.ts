@@ -1,76 +1,112 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
+  getAttachmentSecurityScopedConfig,
+  patchAttachmentSecurityScopedConfig,
   saveBasicLimitConfig,
   getBasicLimitConfig,
   saveTenantAttachmentSecuritySettings,
   type TenantAttachmentSecuritySettings,
 } from './attachment-security';
 
-// GT-12197: 平台管理员在「附件基础限制」点保存时，网络侧只出现 GET、没有写请求，页面报保存失败。
-// 根因：附件安全各节配置走通用 /config-overrides；当该节还没有任何配置行时，后端
-// QueryConfigOverrides 的 `var overrides []models.ConfigOverride` 保持 nil，JSON 序列化为
-// `"items": null`。saveConfigSection 里 `for (const item of resp.items)` 未做空值兜底
-// （而读路径 fetchConfigSection 有 `?? []`），于是在发出任何 PUT/POST 之前就抛
-// TypeError —— 表现正是「只有 GET、无写请求、保存失败」。
-describe('attachment-security config save (GT-12197)', () => {
-  it('saves (POSTs) new keys even when the list response has items: null', async () => {
-    const calls: Array<{ path: string; method?: string }> = [];
-    const requestFn = vi.fn(async (path: string, opts?: { method?: string; body?: unknown }) => {
-      calls.push({ path, method: opts?.method });
-      if (path.startsWith('/config-overrides?')) {
-        // 后端在该节无配置行时返回 items: null（Go nil slice）
-        return { total: 0, page: 1, limit: 200, items: null } as never;
-      }
-      return {} as never;
+describe('attachment-security scoped configuration', () => {
+  const view = {
+    stored: { namespace: 'attachd', scope_kind: 'platform', scope_id: 0, schema_version: 1, version: 7, document: {} },
+    effective: {
+      namespace: 'attachd', tenant_id: 0, schema_version: 1, snapshot_version: 's1', platform_version: 7,
+      tenant_version: 0, hash: 'h', provenance: {},
+      document: { basic_limit: { receive: { attachment_count_max: 5, danger_ext_list: ['.exe', '.js'] } } },
+    },
+    published: true,
+  };
+
+  it('patches the attachd platform document with CAS instead of writing config_overrides', async () => {
+    const requestFn = vi.fn(async (path: string) => path === '/configs/platform/attachd' ? view as never : {} as never);
+    await saveBasicLimitConfig('receive', {
+      attachment_count_max: 10,
+      exceed_action: 'audit',
+      partial_skip: false,
+      mime_mismatch_action: 'proceed',
+      danger_ext_list: '.exe,.js',
+    } as never, requestFn as never);
+    expect(requestFn).toHaveBeenCalledTimes(2);
+    const [path, options] = requestFn.mock.calls[1] as unknown as [string, { method: string; body: Record<string, unknown> }];
+    expect(path).toBe('/configs/platform/attachd');
+    expect(options.method).toBe('PATCH');
+    expect(options.body).toMatchObject({ expected_version: 7 });
+    expect(JSON.stringify(options.body)).not.toContain('config_overrides');
+    expect(options.body).toMatchObject({
+      operations: expect.arrayContaining([
+        { op: 'set', path: 'basic_limit.receive.exceed_action', value: 'audit' },
+        { op: 'set', path: 'basic_limit.receive.partial_skip', value: false },
+        { op: 'set', path: 'basic_limit.receive.mime_mismatch_action', value: 'proceed' },
+      ]),
     });
-
-    await expect(
-      saveBasicLimitConfig('receive', { max_attachment_count: 10 } as never, requestFn as never),
-    ).resolves.not.toThrow();
-
-    // 必须真的发出写请求，而不是在 GET 之后就抛错
-    const writes = calls.filter((c) => c.method === 'POST' || c.method === 'PUT');
-    expect(writes.length).toBeGreaterThan(0);
-    expect(writes[0].path).toBe('/config-overrides');
-    expect(writes[0].method).toBe('POST');
   });
 
-  it('still PUTs existing keys when items is a populated array', async () => {
-    const calls: Array<{ path: string; method?: string }> = [];
-    const requestFn = vi.fn(async (path: string, opts?: { method?: string; body?: unknown }) => {
-      calls.push({ path, method: opts?.method });
-      if (path.startsWith('/config-overrides?')) {
-        return {
-          total: 1,
-          page: 1,
-          limit: 200,
-          items: [
-            {
-              id: 7,
-              config_file: 'attachd.cf',
-              section_name: 'basic_limit_receive',
-              config_key: 'max_attachment_count',
-              config_value: '5',
-              value_type: 'int',
-              is_active: true,
-              description: '',
-            },
-          ],
-        } as never;
-      }
-      return {} as never;
+  it('projects canonical string lists back to the existing form shape', async () => {
+    const requestFn = vi.fn(async () => view as never);
+    await expect(getBasicLimitConfig('receive', requestFn as never)).resolves.toMatchObject({
+      attachment_count_max: 5,
+      danger_ext_list: '.exe,.js',
     });
-
-    await saveBasicLimitConfig('receive', { max_attachment_count: 10 } as never, requestFn as never);
-    const writes = calls.filter((c) => c.method === 'PUT');
-    expect(writes.length).toBe(1);
-    expect(writes[0].path).toBe('/config-overrides/7');
   });
 
-  // 读路径本来就有 `?? []` 兜底，这条固定住该不变量（否则两条路径又会分叉）。
-  it('read path tolerates items: null and returns an empty config', async () => {
-    const requestFn = vi.fn(async () => ({ total: 0, page: 1, limit: 200, items: null }) as never);
-    await expect(getBasicLimitConfig('receive', requestFn as never)).resolves.toEqual({});
+  it('surfaces central read failures instead of presenting writable defaults', async () => {
+    const requestFn = vi.fn(async () => {
+      throw new Error('configuration database unavailable');
+    });
+    await expect(getBasicLimitConfig('receive', requestFn as never)).rejects.toThrow(
+      'configuration database unavailable',
+    );
+  });
+
+  it.each([
+    ['platform', '/configs/platform/attachd'],
+    ['tenant', '/configs/tenant/attachd'],
+  ] as const)('loads the one authoritative %s attachd view', async (scope, expectedPath) => {
+    const requestFn = vi.fn(async () => view as never);
+    await getAttachmentSecurityScopedConfig(scope, requestFn as never);
+    expect(requestFn).toHaveBeenCalledOnce();
+    expect(requestFn).toHaveBeenCalledWith(expectedPath);
+  });
+
+  it('starts a first tenant override at CAS version zero and retains a pending commit locally', async () => {
+    const tenantView = {
+      ...view,
+      stored: undefined,
+      effective: {
+        ...view.effective,
+        tenant_id: 832,
+        tenant_version: 0,
+        document: { module_enabled: true },
+      },
+    };
+    const requestFn = vi.fn(async () => ({
+      committed: true,
+      published: false,
+      status: 'publication_pending',
+    } as never));
+
+    const committed = await patchAttachmentSecurityScopedConfig(
+      'tenant',
+      tenantView as never,
+      [{ op: 'set', path: 'module_enabled', value: false }],
+      requestFn as never,
+    );
+
+    expect(requestFn).toHaveBeenCalledWith('/configs/tenant/attachd', {
+      method: 'PATCH',
+      body: {
+        expected_version: 0,
+        operations: [{ op: 'set', path: 'module_enabled', value: false }],
+      },
+    });
+    expect(committed.published).toBe(false);
+    expect(committed.stored).toMatchObject({ scope_kind: 'tenant', scope_id: 832, version: 1 });
+    expect(committed.effective).toMatchObject({
+      tenant_version: 1,
+      document: { module_enabled: false },
+    });
   });
 });
 

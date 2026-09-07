@@ -16,7 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { DisposalSettings } from '@/types/disposal-settings';
+import type { DisposalSettings, TimeoutMarkPosition } from '@/types/disposal-settings';
+import { firstValidationMessage } from './validation-error';
 
 interface Props {
   control: Control<DisposalSettings>;
@@ -32,7 +33,7 @@ function normalizeSecondsValue(v: string): string {
 
 // 后端仅接受 subject_prefix/header（internal/api/disposal_settings.go 校验），
 // 之前误用 subject/body 会导致整页保存 PUT 400（Task 12 审查发现的跨层缺陷）。
-const MARK_POSITIONS = ['subject_prefix', 'header'] as const;
+const MARK_POSITIONS = ['subject_prefix', 'header'] as const satisfies readonly TimeoutMarkPosition[];
 
 export function ReviewSettingsTab({ control, watch, setValue }: Props) {
   const t = useTranslations('disposalSettings');
@@ -51,6 +52,34 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
 
   const { errors } = useFormState({ control });
   const customMinutesError = errors.review?.custom_minutes;
+  const reviewerEmailsError = errors.review?.reviewer_emails;
+  const timeoutMarkPositionsError = errors.review?.timeout_mark_positions;
+  const validationText = (message: string | undefined, fallback: string) => {
+    switch (message ?? fallback) {
+      case 'customMinutesRange':
+        return t('customMinutesRange');
+      case 'maxRecheckMinutesRange':
+        return t('maxRecheckMinutesRange');
+      case 'reviewerNotifyIntervalRange':
+        return t('reviewerNotifyIntervalRange');
+      case 'reviewerActiveStartInvalid':
+        return t('reviewerActiveStartInvalid');
+      case 'reviewerActiveEndInvalid':
+        return t('reviewerActiveEndInvalid');
+      case 'emailInvalid':
+        return t('emailInvalid');
+      case 'timeoutMarkPositionsRequired':
+        return t('timeoutMarkPositionsRequired');
+      case 'timeoutMarkPositionsInvalid':
+        return t('timeoutMarkPositionsInvalid');
+      case 'timeoutMarkTextRequired':
+        return t('timeoutMarkTextRequired');
+      case 'timeoutMarkTextTooLong':
+        return t('timeoutMarkTextTooLong');
+      default:
+        return message ?? t('saveValidationFailed');
+    }
+  };
 
   const [emailError, setEmailError] = useState('');
 
@@ -68,20 +97,27 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
       return;
     }
     setEmailError('');
-    setValue('review.reviewer_emails', [...reviewerEmails, trimmed], { shouldDirty: true });
+    setValue('review.reviewer_emails', [...reviewerEmails, trimmed], {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
     setNewEmail('');
   };
 
   const removeEmail = (email: string) =>
     setValue('review.reviewer_emails', reviewerEmails.filter((e) => e !== email), {
       shouldDirty: true,
+      shouldValidate: true,
     });
 
-  const toggleMarkPosition = (position: string, checked: boolean) => {
+  const toggleMarkPosition = (position: TimeoutMarkPosition, checked: boolean) => {
     const next = checked
       ? [...timeoutMarkPositions.filter((p) => p !== position), position]
       : timeoutMarkPositions.filter((p) => p !== position);
-    setValue('review.timeout_mark_positions', next, { shouldDirty: true });
+    setValue('review.timeout_mark_positions', next, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -157,7 +193,7 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
                   role="alert"
                   data-testid="disposal-settings-custom-minutes-error"
                 >
-                  {t('customMinutesRange')}
+                  {validationText(firstValidationMessage(customMinutesError), 'customMinutesRange')}
                 </p>
               )}
             </div>
@@ -192,7 +228,7 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
           <Controller
             control={control}
             name="review.max_recheck_minutes"
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <div className="space-y-2">
                 <Label>{t('maxRecheckMinutes')}</Label>
                 <Input
@@ -201,9 +237,19 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
                   max={60}
                   className="w-32"
                   value={field.value}
+                  aria-invalid={fieldState.error ? true : undefined}
                   onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
                   data-testid="disposal-settings-max-recheck-minutes"
                 />
+                {fieldState.error && (
+                  <p
+                    className="text-sm text-destructive"
+                    role="alert"
+                    data-testid="disposal-settings-max-recheck-minutes-error"
+                  >
+                    {validationText(firstValidationMessage(fieldState.error), 'maxRecheckMinutesRange')}
+                  </p>
+                )}
               </div>
             )}
           />
@@ -224,7 +270,10 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
               <Switch
                 checked={timeoutMarkEnabled}
                 onCheckedChange={(checked) =>
-                  setValue('review.timeout_mark_enabled', checked, { shouldDirty: true })
+                  setValue('review.timeout_mark_enabled', checked, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
                 }
                 data-testid="disposal-settings-timeout-mark-enabled"
               />
@@ -254,12 +303,24 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
                       </label>
                     ))}
                   </div>
+                  {timeoutMarkPositionsError && (
+                    <p
+                      className="text-sm text-destructive"
+                      role="alert"
+                      data-testid="disposal-settings-timeout-mark-positions-error"
+                    >
+                      {validationText(
+                        firstValidationMessage(timeoutMarkPositionsError),
+                        'timeoutMarkPositionsRequired',
+                      )}
+                    </p>
+                  )}
                 </div>
 
                 <Controller
                   control={control}
                   name="review.timeout_mark_text"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">
                         {t('timeoutMarkText')}
@@ -267,8 +328,18 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
                       <Input
                         value={field.value ?? ''}
                         onChange={(e) => field.onChange(e.target.value)}
+                        aria-invalid={fieldState.error ? true : undefined}
                         data-testid="disposal-settings-timeout-mark-text"
                       />
+                      {fieldState.error && (
+                        <p
+                          className="text-sm text-destructive"
+                          role="alert"
+                          data-testid="disposal-settings-timeout-mark-text-error"
+                        >
+                          {validationText(firstValidationMessage(fieldState.error), 'timeoutMarkTextRequired')}
+                        </p>
+                      )}
                     </div>
                   )}
                 />
@@ -379,6 +450,15 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
                 {emailError}
               </p>
             )}
+            {!emailError && reviewerEmailsError && (
+              <p
+                className="mt-1 text-sm text-destructive"
+                role="alert"
+                data-testid="disposal-settings-reviewer-emails-error"
+              >
+                {validationText(firstValidationMessage(reviewerEmailsError), 'emailInvalid')}
+              </p>
+            )}
           </div>
 
           {reviewerEmails.length > 0 && (
@@ -403,16 +483,28 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
             <Controller
               control={control}
               name="review.reviewer_notify_interval_minutes"
-              render={({ field }) => (
-                <Input
-                  type="number"
-                  min={1}
-                  max={1440}
-                  className="w-32"
-                  value={field.value}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-                  data-testid="disposal-settings-notify-interval"
-                />
+              render={({ field, fieldState }) => (
+                <>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={1440}
+                    className="w-32"
+                    value={field.value}
+                    aria-invalid={fieldState.error ? true : undefined}
+                    onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                    data-testid="disposal-settings-notify-interval"
+                  />
+                  {fieldState.error && (
+                    <p
+                      className="text-sm text-destructive"
+                      role="alert"
+                      data-testid="disposal-settings-notify-interval-error"
+                    >
+                      {validationText(firstValidationMessage(fieldState.error), 'reviewerNotifyIntervalRange')}
+                    </p>
+                  )}
+                </>
               )}
             />
             <p className="text-xs text-muted-foreground">{t('intervalHint')}</p>
@@ -424,14 +516,26 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
               <Controller
                 control={control}
                 name="review.reviewer_active_start"
-                render={({ field }) => (
-                  <Input
-                    type="time"
-                    step={1}
-                    value={field.value}
-                    onChange={(e) => field.onChange(normalizeSecondsValue(e.target.value))}
-                    data-testid="disposal-settings-active-start"
-                  />
+                render={({ field, fieldState }) => (
+                  <>
+                    <Input
+                      type="time"
+                      step={1}
+                      value={field.value}
+                      aria-invalid={fieldState.error ? true : undefined}
+                      onChange={(e) => field.onChange(normalizeSecondsValue(e.target.value))}
+                      data-testid="disposal-settings-active-start"
+                    />
+                    {fieldState.error && (
+                      <p
+                        className="text-sm text-destructive"
+                        role="alert"
+                        data-testid="disposal-settings-active-start-error"
+                      >
+                        {validationText(firstValidationMessage(fieldState.error), 'reviewerActiveStartInvalid')}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -440,14 +544,26 @@ export function ReviewSettingsTab({ control, watch, setValue }: Props) {
               <Controller
                 control={control}
                 name="review.reviewer_active_end"
-                render={({ field }) => (
-                  <Input
-                    type="time"
-                    step={1}
-                    value={field.value}
-                    onChange={(e) => field.onChange(normalizeSecondsValue(e.target.value))}
-                    data-testid="disposal-settings-active-end"
-                  />
+                render={({ field, fieldState }) => (
+                  <>
+                    <Input
+                      type="time"
+                      step={1}
+                      value={field.value}
+                      aria-invalid={fieldState.error ? true : undefined}
+                      onChange={(e) => field.onChange(normalizeSecondsValue(e.target.value))}
+                      data-testid="disposal-settings-active-end"
+                    />
+                    {fieldState.error && (
+                      <p
+                        className="text-sm text-destructive"
+                        role="alert"
+                        data-testid="disposal-settings-active-end-error"
+                      >
+                        {validationText(firstValidationMessage(fieldState.error), 'reviewerActiveEndInvalid')}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>

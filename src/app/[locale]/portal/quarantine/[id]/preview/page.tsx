@@ -49,11 +49,30 @@ export default function PortalPreviewPage() {
     );
   }
 
-  if (status !== 'ready' || !data) {
-    const titleKey = status === 'expired' ? 'expiredTitle' : status === 'purged' ? 'purgedTitle' : 'errorTitle';
-    const descKey = status === 'expired' ? 'expiredDesc' : status === 'purged' ? 'purgedDesc' : 'errorDesc';
+  if (status === 'expired') {
     return (
-      <div className="text-center">
+      <div data-testid="portal-preview-expired" className="text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+          <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <h2 className="mb-2 text-lg font-semibold text-red-600">{t('expiredTitle')}</h2>
+        <p className="text-sm text-slate-500">{t('expiredDesc')}</p>
+      </div>
+    );
+  }
+
+  if (status !== 'ready' || !data) {
+    // 上面第 52 行的 `if (status === 'expired')` 已经处理并 return，所以到这里
+    // status 已被收窄为 'error' | 'ready' | 'purged' —— 原先这两行里的
+    // `status === 'expired'` 是**编译器可证的死分支**，TypeScript 因此报
+    // "This comparison appears to be unintentional"，webapp 镜像自 2026-08-28 起构建失败。
+    // 删掉死分支，行为完全等价（那两个分支在此处永远取不到）。
+    const titleKey = status === 'purged' ? 'purgedTitle' : 'errorTitle';
+    const descKey = status === 'purged' ? 'purgedDesc' : 'errorDesc';
+    return (
+      <div data-testid="portal-preview-status" className="text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
           <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -66,16 +85,16 @@ export default function PortalPreviewPage() {
   }
 
   return (
-    <div>
+    <div data-testid="portal-preview-content">
       <h1 className="mb-4 text-lg font-semibold">{t('title')}</h1>
       <dl className="mb-4 space-y-1 text-sm">
         <div>
           <dt className="inline text-slate-500">{t('senderLabel')}: </dt>
-          <dd className="inline">{data.from_name ? `${data.from_name} <${data.from}>` : data.from}</dd>
+          <dd data-testid="portal-preview-sender" className="inline">{data.from_name ? `${data.from_name} <${data.from}>` : data.from}</dd>
         </div>
         <div>
           <dt className="inline text-slate-500">{t('subjectLabel')}: </dt>
-          <dd className="inline">{data.subject}</dd>
+          <dd data-testid="portal-preview-subject" className="inline">{data.subject}</dd>
         </div>
         <div>
           <dt className="inline text-slate-500">{t('timeLabel')}: </dt>
@@ -113,5 +132,5 @@ function PortalPreviewBody({ html, text }: { html: string; text: string }) {
       </pre>
     );
   }
-  return <p className="text-sm text-slate-500">{t('emptyBody')}</p>;
+  return <p data-testid="portal-preview-empty-body" className="text-sm text-slate-500">{t('emptyBody')}</p>;
 }

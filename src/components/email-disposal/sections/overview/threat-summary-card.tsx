@@ -4,7 +4,7 @@
 // design/implement/spec/email-disposal-overview-html-spec-alignment.md §2 A
 // 节）。渲染为单张紧凑边框卡片（对齐 demo html_spec 的
 // layer-10-detail-overview-single），内部按行排列：
-//   Row1 邮件类型 badge（A1）+ 置信度（A2）+ 已纠正角标（A3）| 头部处置按钮组
+//   Row1 邮件类型 badge（A1）+ 已纠正角标（A3）| 头部处置按钮组
 //        （A4/A5/A6，内嵌 SenderActions + 单收件人时的 SingleRecipientActions，
 //        Task 11b）
 //   Row2 命中特征（A7/A8/A9/A10，inline label）-- SPF/DKIM/DMARC + 首次出现 +
@@ -28,7 +28,7 @@ import type { ApiRequestFn } from '@/lib/api/client';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
 import {
   mailTypeConfig, correctionSourceLabelKey,
-  stripDetailPrefix, isNewSender, deriveConfidence, deriveHitSource, isSensitiveUrgent, deriveDomainAge,
+  stripDetailPrefix, isNewSender, isSensitiveUrgent, deriveDomainAge,
 } from '../../lib/detail-helpers';
 import {
   getModuleName, getActionLabel, getActionColor, getPolicyMeta, getStageColor,
@@ -213,10 +213,6 @@ export function ThreatSummaryCard({
 
   const typeCfg = detail.email_type ? mailTypeConfig[detail.email_type] : null;
 
-  // This overview value follows the intent engine's score. The phishing
-  // agent's independent confidence remains in its expandable analysis row.
-  const confidence = deriveConfidence(detail.cac_result, deriveHitSource(detail));
-
   // A9 域名年龄：仅在存在且够"新"（deriveDomainAge 的阈值判断）时才是一个命中
   // 特征，否则不渲染（后端暂无 whois/RDAP 数据，真实环境下这个字段本就缺席）。
   const domainAge = deriveDomainAge(detail);
@@ -239,6 +235,7 @@ export function ThreatSummaryCard({
   ) ?? primaryBasisGroup?.entries[0];
 	const primaryBasisEntry = groupedPrimaryBasisEntry ?? (
 		detail.disposal_basis && detail.disposal_basis.action !== 'proceed' &&
+		detail.disposal_basis.action !== 'observe' &&
 		detail.disposal_basis.action !== 'accept' && (
 			detail.disposal_basis.rule_name || detail.disposal_basis.rule_id || detail.disposal_basis.action
 		) ? detail.disposal_basis : undefined
@@ -262,7 +259,7 @@ export function ThreatSummaryCard({
         </div>
       )}
 
-      {/* Row 1: 邮件类型（A1）+ 置信度（A2）+ 已纠正（A3）  |  头部处置按钮组（A4/A5/A6） */}
+      {/* Row 1: 邮件类型（A1）+ 已纠正（A3）  |  头部处置按钮组（A4/A5/A6） */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {typeCfg && (
@@ -273,22 +270,15 @@ export function ThreatSummaryCard({
               </Badge>
             </div>
           )}
-          {confidence.kind !== 'none' && (
-            <span className="text-xs text-muted-foreground" data-testid="email-disposal-overview-confidence">
-              {confidence.kind === 'blacklist' && t('confidenceBlacklist')}
-              {confidence.kind === 'rule' && t('confidenceRule')}
-              {confidence.kind === 'score' && t('confidenceScore', { score: confidence.score ?? 0 })}
-            </span>
-          )}
           {detail.email_type_overridden && typeCfg && (
             <Tooltip>
               <TooltipTrigger render={<span className="cursor-help" />}>
-                <Badge variant="outline" className="gap-1 border-purple-200 bg-purple-50 text-purple-700">
+                <Badge data-testid="email-disposal-overview-corrected-badge" variant="outline" className="gap-1 border-purple-200 bg-purple-50 text-purple-700">
                   <Pencil className="h-3 w-3" />
                   {t('corrected')}
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent data-testid="email-disposal-overview-corrected-tooltip">
                 {t('correctedTooltip', {
                   original: tDetail(stripDetailPrefix(
                     mailTypeConfig[detail.email_type_original ?? detail.email_type!].labelKey,

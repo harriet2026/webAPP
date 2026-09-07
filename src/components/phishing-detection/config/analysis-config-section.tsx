@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { useApiRequest } from '@/lib/api/client';
+import { isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { getPhishingAnalysisConfig, putPhishingAnalysisConfig } from '@/lib/api/phishing-analysis-config';
 import { phishingQueryKeys } from '../phishing-query-keys';
@@ -32,6 +32,10 @@ export function updateAnalysisConfig(
     : { ...current, [field]: checked };
 }
 
+export function committedAnalysisConfig(submitted: PhishAnalysisConfig): PhishAnalysisConfig {
+  return { ...submitted, version: submitted.version + 1 };
+}
+
 export function AnalysisConfigSection({ readOnly = false }: { readOnly?: boolean }) {
   const t = useTranslations('phishingConfig.analysis');
   const { apiRequest, effectiveTenantId } = useApiRequest();
@@ -49,9 +53,19 @@ export function AnalysisConfigSection({ readOnly = false }: { readOnly?: boolean
       netdisk_spoof: value.netdisk_spoof,
       expected_version: value.version,
     }, apiRequest),
-    onSuccess: () => {
+    onSuccess: (result, submitted) => {
+      if (isPublicationPendingResponse(result)) {
+        const committed = committedAnalysisConfig(submitted);
+        queryClient.setQueryData(phishingQueryKeys.analysisConfig(effectiveTenantId), committed);
+        void getPhishingAnalysisConfig(apiRequest).then((refreshed) => {
+          if (refreshed.version >= committed.version) {
+            queryClient.setQueryData(phishingQueryKeys.analysisConfig(effectiveTenantId), refreshed);
+          }
+        }).catch(() => undefined);
+      } else {
+        void queryClient.invalidateQueries({ queryKey: phishingQueryKeys.analysisConfig(effectiveTenantId) });
+      }
       setDraft(null);
-      queryClient.invalidateQueries({ queryKey: phishingQueryKeys.analysisConfig(effectiveTenantId) });
       toast.success(t('saved'));
     },
     onError: (error) => {

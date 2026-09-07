@@ -156,7 +156,7 @@ describe('DetailModal raw lifecycle logs', () => {
       if (path === '/mail-logs/1/analysis?recipient=blocked%40example.test') {
         return { ...analysisResponse(), scope: 'recipient', recipient: 'blocked@example.test', action: 'discard', status: 'discarded' };
       }
-      if (path === '/mail-logs/1/events?page=1&page_size=100') {
+      if (path === '/mail-logs/1/events?page=1&page_size=100&include_releases=true') {
         return {
           items: [
             { id: 11, event_source: 'workflow.quarantine', event_type: 'workflow', event_result: 'discarded', queue_id: 'q1', event_time: '2026-07-31T07:00:03.000Z', recipient: 'BLOCKED@example.test', correlation_status: 'matched' },
@@ -247,7 +247,7 @@ describe('DetailModal raw lifecycle logs', () => {
   it.each([
     ['phishing', 'bg-red-500', '钓鱼邮件'],
     ['spam', 'bg-amber-500', '垃圾邮件'],
-    ['normal', 'bg-emerald-500', '正常'],
+    ['normal', 'bg-emerald-500', '正常邮件'],
   ] as const)('shows the %s final verdict risk tone on the security analysis navigation item', async (emailType, toneClass, label) => {
     detailResponse = { ...detailResponse, email_type: emailType };
     const queryClient = new QueryClient({

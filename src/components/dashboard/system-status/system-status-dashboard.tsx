@@ -117,7 +117,12 @@ export function SystemStatusDashboard() {
 
       <KpiCards data={data} showInfra={showInfra} />
 
-      <ThreatTrend trend={data.threatTrend} isLoading={data.isLoading} isError={data.isError} />
+      <ThreatTrend
+        trend={data.threatTrend}
+        range={range}
+        isLoading={data.isLoading}
+        isError={data.isError}
+      />
 
       <div className={`grid grid-cols-1 gap-6 ${overviewGrid}`}>
         {showAgents && <AgentOverview agents={data.agents} isLoading={data.agentsLoading} />}

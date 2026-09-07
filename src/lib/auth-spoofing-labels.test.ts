@@ -5,7 +5,7 @@ import en from '../../messages/en.json';
 import ru from '../../messages/ru.json';
 import th from '../../messages/th.json';
 
-const LOCALES = { zh, en, ru, th } as Record<string, any>;
+const LOCALES = { zh, en, ru, th };
 
 describe('auth-spoofing protocol action labels (GT-12650)', () => {
   // `protocolActionLabel.*`是协议检查下拉框的文案，`action.*`是同一 namespace 里
@@ -29,8 +29,8 @@ describe('auth-spoofing protocol action labels (GT-12650)', () => {
   it('zh: protocolActionLabel 以 action 规范名开头，括号内只作补充说明', () => {
     const ns = zh.authSpoofing;
     for (const a of ANCHORED) {
-      const canonical: string = (ns.action as any)[a];
-      const label: string = (ns.protocolActionLabel as any)[a];
+      const canonical: string = ns.action[a];
+      const label: string = ns.protocolActionLabel[a];
       expect(canonical, `action.${a} 缺失`).toBeTruthy();
       expect(label, `protocolActionLabel.${a} 缺失`).toBeTruthy();
       expect(

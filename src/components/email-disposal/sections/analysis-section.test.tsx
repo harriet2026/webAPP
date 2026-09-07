@@ -1,12 +1,18 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { NextIntlClientProvider } from 'next-intl';
 import zh from '@/../messages/zh.json';
 import type { MailLogAnalysis, MailLogDetail } from '@/types/email-disposal-detail';
 import type { MailChildEvent } from '@/types/log';
 import { buildDetectionStages, deriveFinalVerdict } from '../hooks/use-detection-stages';
 import { AnalysisSection } from './analysis-section';
+
+const ALL_AGENT_ACCESS = {
+  phishingAgent: 'enabled',
+  spoofingAgent: 'enabled',
+  threatRetroAgent: 'enabled',
+} as const;
 
 // Real zh messages (not an identity mock) -- assertions read actual rendered
 // copy (检测流程/总耗时/事后处置时间线/etc), matching the pattern established
@@ -18,12 +24,21 @@ const wrap = (ui: React.ReactNode) => (
 );
 
 const routerPush = vi.fn();
+const scrollIntoViewMock = vi.fn();
 // GT-12583：组件改用 next-intl 的 locale-aware router（@/i18n/navigation），
 // mock 对应模块（真实实现会向 push 的路径自动补 /zh 前缀，这里按透传断言）。
 vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ push: routerPush, replace: vi.fn(), prefetch: vi.fn() }),
   Link: ({ children }: { children: React.ReactNode }) => children,
 }));
+
+beforeEach(() => {
+  scrollIntoViewMock.mockReset();
+  Object.defineProperty(Element.prototype, 'scrollIntoView', {
+    configurable: true,
+    value: scrollIntoViewMock,
+  });
+});
 
 function baseDetail(overrides: Partial<MailLogDetail> = {}): MailLogDetail {
   return {
@@ -109,7 +124,31 @@ function analysisFor(detail: MailLogDetail): MailLogAnalysis {
 }
 
 function TestAnalysisSection(props: React.ComponentProps<typeof AnalysisSection>) {
-  return <AnalysisSection {...props} analysis={props.analysis ?? analysisFor(props.detail)} />;
+  const projectedDetail: MailLogDetail = {
+    ...props.detail,
+    post_detection_timeline: {
+      schema_version: 1,
+      events: (props.events ?? []).map((event, index) => ({
+        event_id: `event-${event.id}`,
+        event_type: event.event_type === 'recall' ? 'recall_state_changed' : 'workflow_action',
+        occurred_at: event.event_time,
+        operation_id: event.source_ref || `operation-${event.id}`,
+        revision: index + 1,
+        source: event.event_source,
+        status: event.event_result,
+        display: event.event_source !== 'workflow.sideline.initial_delivery',
+        data: event.recipient ? { recipients: [event.recipient] } : undefined,
+      })),
+    },
+  };
+  return (
+    <AnalysisSection
+      visibleAgentAccess={ALL_AGENT_ACCESS}
+      {...props}
+      detail={projectedDetail}
+      analysis={props.analysis ?? analysisFor(projectedDetail)}
+    />
+  );
 }
 
 function sampleEvents(): MailChildEvent[] {
@@ -129,6 +168,124 @@ function sampleEvents(): MailChildEvent[] {
 }
 
 describe('AnalysisSection (v2 spec alignment)', () => {
+  it('shows only enabled agents and labels an unexecuted phishing check as skipped', () => {
+    const detail = baseDetail({ email_type: 'phishing' });
+    const authoritative = analysisFor(detail);
+    authoritative.stages = authoritative.stages.map((stage) => stage.key !== 'ai' ? stage : ({
+      ...stage,
+      status: 'threat',
+      checks: [
+        { key: 'phishingAgent', status: 'skipped', ruleIds: [] },
+        { key: 'spoofingAgent', status: 'threat', ruleIds: [41] },
+        { key: 'threatRetroAgent', status: 'threat', ruleIds: [99] },
+      ],
+    }));
+
+    render(wrap(
+      <AnalysisSection
+        detail={detail}
+        analysis={authoritative}
+        aiEnabled
+        visibleAgentAccess={{ phishingAgent: 'enabled' }}
+        events={[]}
+      />,
+    ));
+
+    const aiStage = screen.getByTestId('analysis-stage-4');
+    expect(aiStage).toHaveTextContent('1 项策略');
+    expect(aiStage).toHaveTextContent('跳过');
+    expect(aiStage).not.toHaveTextContent('威胁');
+    expect(screen.getByTestId('analysis-check-phishingAgent')).toHaveTextContent('跳过');
+    expect(screen.getByTestId('analysis-check-phishingAgent')).not.toHaveTextContent('未接入');
+    expect(screen.queryByTestId('analysis-check-spoofingAgent')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('analysis-check-threatRetroAgent')).not.toBeInTheDocument();
+    expect(screen.getByTestId('analysis-stage-5')).toBeInTheDocument();
+  });
+
+  it('omits the AI stage while visibility is unresolved and when no agent is visible', () => {
+    const detail = baseDetail();
+    const authoritative = analysisFor(detail);
+    const { rerender } = render(wrap(
+      <AnalysisSection detail={detail} analysis={authoritative} aiEnabled events={[]} />,
+    ));
+
+    expect(screen.queryByText('AI 智能分析')).not.toBeInTheDocument();
+    expect(screen.getByTestId('analysis-stage-4')).toHaveTextContent('综合分析');
+
+    rerender(wrap(
+      <AnalysisSection
+        detail={detail}
+        analysis={authoritative}
+        aiEnabled
+        visibleAgentAccess={{}}
+        events={[]}
+      />,
+    ));
+
+    expect(screen.queryByText('AI 智能分析')).not.toBeInTheDocument();
+    expect(screen.getByTestId('analysis-stage-4')).toHaveTextContent('综合分析');
+    expect(screen.queryByTestId('analysis-stage-5')).not.toBeInTheDocument();
+  });
+
+  it('uses access and reason independently for locked, skipped, and module-disabled agents', () => {
+    const detail = baseDetail();
+    const authoritative = analysisFor(detail);
+    authoritative.stages = authoritative.stages.map((stage) => stage.key !== 'ai' ? stage : ({
+      ...stage,
+      status: 'skipped',
+      checks: [
+        { key: 'phishingAgent', status: 'skipped', ruleIds: [] },
+        { key: 'spoofingAgent', status: 'skipped', reason: 'module_disabled', ruleIds: [] },
+        { key: 'threatRetroAgent', status: 'threat', ruleIds: [99] },
+      ],
+    }));
+
+    render(wrap(
+      <AnalysisSection
+        detail={detail}
+        analysis={authoritative}
+        aiEnabled
+        visibleAgentAccess={{
+          phishingAgent: 'enabled',
+          spoofingAgent: 'enabled',
+          threatRetroAgent: 'locked',
+        }}
+        events={[]}
+      />,
+    ));
+
+    expect(screen.getByTestId('analysis-check-phishingAgent')).toHaveTextContent('跳过');
+    expect(screen.getByTestId('analysis-check-spoofingAgent')).toHaveTextContent('已禁用');
+    expect(screen.getByTestId('analysis-check-threatRetroAgent')).toHaveTextContent('未接入');
+  });
+
+  it.each([
+    ['pass', '通过'],
+    ['suspicious', '可疑'],
+    ['threat', '威胁'],
+    ['processing', '处理中'],
+  ] as const)('renders the authoritative phishing %s result without deriving risk in the browser', (status, label) => {
+    const detail = baseDetail();
+    const authoritative = analysisFor(detail);
+    authoritative.stages = authoritative.stages.map((stage) => stage.key !== 'ai' ? stage : ({
+      ...stage,
+      status,
+      checks: [{ key: 'phishingAgent', status, ruleIds: [] }],
+    }));
+
+    render(wrap(
+      <AnalysisSection
+        detail={detail}
+        analysis={authoritative}
+        aiEnabled
+        visibleAgentAccess={{ phishingAgent: 'enabled' }}
+        events={[]}
+      />,
+    ));
+
+    expect(screen.getByTestId('analysis-check-phishingAgent')).toHaveTextContent(label);
+  });
+
   it('shows a multi-recipient selector with disposal actions and reports the selected value', async () => {
     const user = userEvent.setup();
     const onSelectedRecipientChange = vi.fn();
@@ -212,6 +369,27 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(screen.getByTestId('analysis-verdict-card')).toHaveTextContent('钓鱼邮件');
     expect(screen.getByTestId('analysis-verdict-card')).not.toHaveTextContent('安全邮件');
     expect(screen.getByTestId('analysis-stage-3')).toHaveTextContent('通过');
+  });
+
+  it('renders a disabled module as 已禁用 instead of pass or 未接入 (GT-13158)', () => {
+    const detail = baseDetail({ email_type: 'phishing' });
+    const authoritative = analysisFor(detail);
+    authoritative.stages = authoritative.stages.map((stage) => stage.key !== 'content' ? stage : ({
+      ...stage,
+      checks: stage.checks.map((check) => check.key !== 'intentEngine' ? check : ({
+        ...check,
+        status: 'skipped',
+        reason: 'module_disabled',
+        ruleIds: [],
+      })),
+    }));
+
+    render(wrap(<TestAnalysisSection detail={detail} analysis={authoritative} aiEnabled events={[]} />));
+
+    const contentDetail = screen.getByTestId('analysis-stage-3-detail');
+    expect(contentDetail).toHaveTextContent('意图引擎');
+    expect(contentDetail).toHaveTextContent('已禁用');
+    expect(contentDetail).not.toHaveTextContent('未接入');
   });
 
   it('shows phishing investigation details inline under the stage-4 agent row', () => {
@@ -408,6 +586,32 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(screen.getByTestId('analysis-stage-2-detail')).toBeInTheDocument();
   });
 
+  it('renders each stage connector as one continuous decorative path', () => {
+    render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={[]} />));
+
+    for (const n of [1, 2, 3, 4]) {
+      const connector = screen.getByTestId(`analysis-stage-connector-${n}`);
+      expect(connector.tagName).toBe('svg');
+      expect(connector).toHaveAttribute('aria-hidden', 'true');
+      expect(connector.querySelectorAll('path')).toHaveLength(1);
+    }
+  });
+
+  it('uses the policy pipeline canonical names for shared security modules', () => {
+    render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={[]} />));
+
+    const expectedNames = {
+      authSpoofing: '身份认证与仿冒检测',
+      attachmentSecurity: '附件安全检测',
+      urlProtection: 'URL检测与防护',
+      advancedRules: '高级过滤规则',
+      mailMarking: '邮件标记与声明',
+    };
+    for (const [key, name] of Object.entries(expectedNames)) {
+      expect(screen.getByTestId(`analysis-check-${key}`)).toHaveTextContent(name);
+    }
+  });
+
   it('uses pointer-compatible card feedback without relying on CSS hover', () => {
     render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={[]} />));
     const stage = screen.getByTestId('analysis-stage-1');
@@ -428,35 +632,41 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(screen.getByTestId('analysis-verdict-card').textContent).toContain('耗时: 536ms');
   });
 
-  it('verdict card 时间线 button toggles the post-detection timeline (gap 2.4/2.5)', () => {
-    // 时间线现在默认展开（原型优化一：默认收起会让已有事件不可见），
-    // 按钮仍需双向切换。
+  it('verdict card 时间线 button expands and scrolls to the post-detection timeline', () => {
     render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={sampleEvents()} />));
     expect(screen.getByTestId('analysis-timeline-body')).toBeInTheDocument();
+
+    // 默认已展开时，入口用于定位，不能反向把目标收起。
     fireEvent.click(screen.getByTestId('analysis-verdict-timeline-btn'));
+    expect(screen.getByTestId('analysis-timeline-body')).toBeInTheDocument();
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+
+    // 用户从时间线标题收起后，入口应先恢复展开，再定位到目标。
+    fireEvent.click(screen.getByTestId('analysis-timeline-toggle'));
     expect(screen.queryByTestId('analysis-timeline-body')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('analysis-verdict-timeline-btn'));
     expect(screen.getByTestId('analysis-timeline-body')).toBeInTheDocument();
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(2);
   });
 
   it('timeline renders events at L1 (summary only) and event detail at L2 on click', () => {
     // 时间线默认展开，无需先点 toggle。
     render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={sampleEvents()} />));
 
-    const eventRow = screen.getByTestId('analysis-timeline-event-501');
+    const eventRow = screen.getByTestId('analysis-timeline-event-event-501');
     expect(eventRow).toBeInTheDocument();
     expect(eventRow.textContent).toContain('victim@company.com');
     // L1: no detail (操作对象/操作类型/执行结果) until the card itself is clicked.
-    expect(screen.queryByTestId('analysis-timeline-event-501-detail')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('analysis-timeline-event-event-501-detail')).not.toBeInTheDocument();
 
     fireEvent.click(eventRow);
-    const detail = screen.getByTestId('analysis-timeline-event-501-detail');
+    const detail = screen.getByTestId('analysis-timeline-event-event-501-detail');
     // 优化五：标签从召回专用（召回范围/召回动作）改为通用（操作对象/操作类型），
     // 因为时间线要承载召回之外的处置动作；「查看召回日志」同步改为「查看原始日志」。
     expect(detail.textContent).toContain('操作对象');
     expect(detail.textContent).toContain('操作类型');
     expect(detail.textContent).toContain('执行结果');
-    expect(screen.getByTestId('analysis-timeline-event-501-view-log')).toHaveTextContent('查看原始日志');
+    expect(screen.getByTestId('analysis-timeline-event-event-501-view-log')).toHaveTextContent('查看原始日志');
   });
 
   it('does not classify the Graph A initial delivery as post-disposal, but keeps a later sideline release', () => {
@@ -481,9 +691,43 @@ describe('AnalysisSection (v2 spec alignment)', () => {
       />,
     ));
 
-    expect(screen.queryByTestId('analysis-timeline-event-700')).not.toBeInTheDocument();
-    expect(screen.getByTestId('analysis-timeline-event-701')).toHaveTextContent('旁路处置');
+    expect(screen.queryByTestId('analysis-timeline-event-event-700')).not.toBeInTheDocument();
+    expect(screen.getByTestId('analysis-timeline-event-event-701')).toHaveTextContent('旁路处置');
     expect(screen.getByText('1 个事件')).toBeInTheDocument();
+  });
+
+  it('keeps every workflow transition even when they share one operation id', () => {
+    const detail = baseDetail({
+      post_detection_timeline: {
+        schema_version: 1,
+        events: [
+          {
+            event_id: 'workflow-started',
+            event_type: 'workflow_action',
+            occurred_at: '2026-07-20T09:20:00.000Z',
+            operation_id: 'audit-1',
+            revision: 1,
+            source: 'workflow.audit',
+            status: 'rejected',
+            display: true,
+          },
+          {
+            event_id: 'workflow-finished',
+            event_type: 'workflow_action',
+            occurred_at: '2026-07-20T09:21:00.000Z',
+            operation_id: 'audit-1',
+            revision: 2,
+            source: 'workflow.audit',
+            status: 'released',
+            display: true,
+          },
+        ],
+      },
+    });
+    render(wrap(<AnalysisSection detail={detail} analysis={analysisFor(detail)} aiEnabled events={[]} />));
+    expect(screen.getByTestId('analysis-timeline-event-workflow-started')).toBeInTheDocument();
+    expect(screen.getByTestId('analysis-timeline-event-workflow-finished')).toBeInTheDocument();
+    expect(screen.getByText('2 个事件')).toBeInTheDocument();
   });
 
   it('does not duplicate basic, sender, URL, and attachment data in 内容详情', () => {
@@ -525,10 +769,10 @@ describe('AnalysisSection (v2 spec alignment)', () => {
 
   it('召回超时补写后，时间线那一行折叠为一条并显示「超时未回执」', () => {
     render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={recallEvents([601, 'handling', '2026-07-20T09:20:00.000Z'], [602, 'timeout', '2026-07-21T09:20:00.000Z'])} />));
-    expect(screen.queryByTestId('analysis-timeline-event-601')).not.toBeInTheDocument();
-    const row = screen.getByTestId('analysis-timeline-event-602');
+    expect(screen.queryByTestId('analysis-timeline-event-event-601')).not.toBeInTheDocument();
+    const row = screen.getByTestId('analysis-timeline-event-event-602');
     fireEvent.click(row);
-    expect(screen.getByTestId('analysis-timeline-event-602-detail').textContent).toContain('超时未回执');
+    expect(screen.getByTestId('analysis-timeline-event-event-602-detail').textContent).toContain('超时未回执');
   });
 
   it('迟到的真实回调盖过超时那一行，即便它的 event_time 更早', () => {
@@ -541,15 +785,46 @@ describe('AnalysisSection (v2 spec alignment)', () => {
         />,
       ),
     );
-    expect(screen.queryByTestId('analysis-timeline-event-602')).not.toBeInTheDocument();
-    const row = screen.getByTestId('analysis-timeline-event-603');
+    expect(screen.queryByTestId('analysis-timeline-event-event-602')).not.toBeInTheDocument();
+    const row = screen.getByTestId('analysis-timeline-event-event-603');
     fireEvent.click(row);
-    expect(screen.getByTestId('analysis-timeline-event-603-detail').textContent).toContain('成功');
+    expect(screen.getByTestId('analysis-timeline-event-event-603-detail').textContent).toContain('成功');
   });
 
   it('shows 暂无事件 when there are no events', () => {
     render(wrap(<TestAnalysisSection detail={baseDetail()} aiEnabled events={[]} />));
     expect(screen.getByTestId('analysis-timeline-empty')).toHaveTextContent('暂无事件');
+  });
+
+  it('does not fall back to generic delivery events when the mail timeline is absent', () => {
+    const detail = baseDetail();
+    render(wrap(
+      <AnalysisSection
+        detail={detail}
+        analysis={analysisFor(detail)}
+        aiEnabled
+        events={sampleEvents()}
+      />,
+    ));
+    expect(screen.getByTestId('analysis-timeline-empty')).toHaveTextContent('暂无事件');
+    expect(screen.queryByTestId('analysis-timeline-event-event-501')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['explicit null', null],
+    ['empty document', { schema_version: 1 as const, events: [] }],
+  ])('renders %s timeline as empty without falling back to delivery events', (_label, timeline) => {
+    const detail = { ...baseDetail(), post_detection_timeline: timeline };
+    render(wrap(
+      <AnalysisSection
+        detail={detail}
+        analysis={analysisFor(detail)}
+        aiEnabled
+        events={sampleEvents()}
+      />,
+    ));
+    expect(screen.getByTestId('analysis-timeline-empty')).toHaveTextContent('暂无事件');
+    expect(screen.queryByTestId('analysis-timeline-event-event-501')).not.toBeInTheDocument();
   });
 
   it('处置依据 header has the action badge top-right and a combined rule link (gap 2.7)', () => {
@@ -562,6 +837,8 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(ruleLink).toHaveAttribute('title', '前往策略配置页');
 
     fireEvent.click(ruleLink);
-    expect(routerPush).toHaveBeenCalledWith('/agent-center/overview');
+    expect(routerPush).toHaveBeenCalledWith(
+      '/agent-center/overview?agent=spoofing&tab=sender-name&rule_id=AI-SPOOF-012',
+    );
   });
 });

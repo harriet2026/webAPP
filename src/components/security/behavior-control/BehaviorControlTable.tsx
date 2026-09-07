@@ -60,24 +60,24 @@ export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Prop
 
   return (
     <div className="border rounded-lg overflow-hidden">
-      <Table>
+      <Table data-testid="behavior-control-table">
         <TableHeader>
           <TableRow className="bg-gray-50 dark:bg-gray-900">
-            <TableHead className="w-[90px]">{t('behaviorControl.col.id')}</TableHead>
-            <TableHead className="min-w-[180px]">{t('behaviorControl.col.name')}</TableHead>
-            <TableHead className="w-[110px]">{t('behaviorControl.col.direction')}</TableHead>
-            <TableHead className="min-w-[220px]">{t('behaviorControl.col.object')}</TableHead>
-            <TableHead className="w-[90px]">{t('behaviorControl.col.action')}</TableHead>
-            <TableHead className="w-[80px]">{t('behaviorControl.col.priority')}</TableHead>
-            <TableHead className="w-[80px]">{t('behaviorControl.col.status')}</TableHead>
-            <TableHead className="w-[130px]">{t('behaviorControl.col.modified')}</TableHead>
-            <TableHead className="w-[100px]">{t('behaviorControl.col.operations')}</TableHead>
+            <TableHead className="w-[90px]" data-testid="behavior-control-col-id">{t('behaviorControl.col.id')}</TableHead>
+            <TableHead className="min-w-[180px]" data-testid="behavior-control-col-name">{t('behaviorControl.col.name')}</TableHead>
+            <TableHead className="w-[110px]" data-testid="behavior-control-col-direction">{t('behaviorControl.col.direction')}</TableHead>
+            <TableHead className="min-w-[220px]" data-testid="behavior-control-col-object">{t('behaviorControl.col.object')}</TableHead>
+            <TableHead className="w-[90px]" data-testid="behavior-control-col-action">{t('behaviorControl.col.action')}</TableHead>
+            <TableHead className="w-[80px]" data-testid="behavior-control-col-priority">{t('behaviorControl.col.priority')}</TableHead>
+            <TableHead className="w-[80px]" data-testid="behavior-control-col-status">{t('behaviorControl.col.status')}</TableHead>
+            <TableHead className="w-[130px]" data-testid="behavior-control-col-modified">{t('behaviorControl.col.modified')}</TableHead>
+            <TableHead className="w-[100px]" data-testid="behavior-control-col-operations">{t('behaviorControl.col.operations')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {views.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="h-32 text-center">
+              <TableCell colSpan={9} className="h-32 text-center" data-testid="behavior-control-empty">
                 <div className="text-muted-foreground">{t('behaviorControl.empty')}</div>
                 <p className="text-sm text-muted-foreground">{t('behaviorControl.emptyHint')}</p>
               </TableCell>
@@ -85,7 +85,7 @@ export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Prop
           ) : views.map((v) => {
             const productAction = BACKEND_TO_PRODUCT[v.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? v.rule.action;
             return (
-              <TableRow key={v.rule.id}>
+              <TableRow key={v.rule.id} data-testid={`behavior-control-row-${v.rule.id}`}>
                 <TableCell className="font-mono text-xs text-muted-foreground">{v.list_id_display}</TableCell>
                 <TableCell className="font-medium">
                   {v.is_complex && (
@@ -112,6 +112,7 @@ export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Prop
                 <TableCell className="font-mono text-xs">{v.rule.priority}</TableCell>
                 <TableCell>
                   <Switch
+                    data-testid={`behavior-control-toggle-${v.rule.id}`}
                     checked={v.rule.is_active}
                     onCheckedChange={(isActive) => onToggle(v.rule.id, isActive)}
                     aria-label={t(v.rule.is_active ? 'common.disabled' : 'common.enabled')}
@@ -122,11 +123,11 @@ export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Prop
                 <TableCell>
                   <div className="flex items-center gap-1">
                     {v.is_complex ? (
-                      <Link href={`/rules/action/${v.rule.id}`} className="inline-flex"><Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button></Link>
+                      <Link href={`/rules/action/${v.rule.id}`} className="inline-flex"><Button data-testid={`behavior-control-edit-${v.rule.id}`} variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button></Link>
                     ) : (
-                      <Button variant="ghost" size="sm" onClick={() => onEdit(v)}><Edit className="h-4 w-4" /></Button>
+                      <Button data-testid={`behavior-control-edit-${v.rule.id}`} variant="ghost" size="sm" onClick={() => onEdit(v)}><Edit className="h-4 w-4" /></Button>
                     )}
-                    <Button variant="ghost" size="sm" onClick={() => onDelete(v)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                    <Button data-testid={`behavior-control-delete-${v.rule.id}`} variant="ghost" size="sm" onClick={() => onDelete(v)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                   </div>
                 </TableCell>
               </TableRow>

@@ -14,12 +14,14 @@ import {
 import { FORM_METADATA, formMeta } from '@/lib/product-form/resolve';
 import { useProductForm } from '@/contexts/product-form-context';
 import { useAuth } from '@/contexts/auth-context';
+import { useOptionalUnsavedGuard } from '@/contexts/unsaved-guard-context';
 import { ViewerSwitcherTenantDialog } from './viewer-switcher-tenant-dialog';
 import { isMockEnabled, toggleMock, subscribeMockEnabled } from '@/lib/mock/storage';
 
 export function ProductFormSwitcher() {
   const { switcherEnabled, effectiveForm, setFormOverride, viewer, setViewer } = useProductForm();
   const { isSystemAdmin, selectedTenantId, setSelectedTenant } = useAuth();
+  const unsavedGuard = useOptionalUnsavedGuard();
   const t = useTranslations('productForm');
   const tViewer = useTranslations('viewer');
   const tMock = useTranslations('mock');
@@ -44,7 +46,7 @@ export function ProductFormSwitcher() {
   const i18nKey = formMeta(effectiveForm)?.i18nKey ?? 'aiMulti';
 
   // 切换登录视角的处理：
-  // - 切 platform：直接 setViewer('platform')。
+  // - 切 platform：把清租户与切 viewer 作为一个受保护的原子 transition。
   // - 切 tenant：若已有 selectedTenantId，复用之（与 useImpersonate 顺序一致：
   //   setSelectedTenant → setViewer），否则弹租户选择 dialog（见下方渲染）。
   //   不弹 dialog 直接切的话，security-scope 会把 viewer==='tenant' &&
@@ -54,8 +56,15 @@ export function ProductFormSwitcher() {
     if (next === 'platform') {
       // Global security modules must be edited without X-Tenant-ID.  Keep the
       // viewer and tenant context in sync when returning from a tenant view.
-      setSelectedTenant(null);
-      setViewer('platform');
+      const transition = () => {
+        setSelectedTenant(null);
+        setViewer('platform');
+      };
+      if (unsavedGuard) {
+        unsavedGuard.requestTransition(transition);
+      } else {
+        transition();
+      }
       return;
     }
     if (selectedTenantId != null) {
@@ -63,7 +72,12 @@ export function ProductFormSwitcher() {
       // 不必再 setSelectedTenant —— React 对相同原始值短路不 re-render，
       // cookie/localStorage 也已是该值；X-Tenant-ID 头由 selectedTenantId
       // 决定，本来就非 null，无需重写。
-      setViewer('tenant');
+      const transition = () => setViewer('tenant');
+      if (unsavedGuard) {
+        unsavedGuard.requestTransition(transition);
+      } else {
+        transition();
+      }
     } else {
       setTenantDialogOpen(true);
     }
@@ -73,6 +87,7 @@ export function ProductFormSwitcher() {
     <>
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger
+          data-testid="product-form-switcher"
           className="inline-flex h-8 items-center gap-1 rounded border border-border/80 bg-card px-2.5 text-xs font-medium text-muted-foreground shadow-none transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           aria-label={t('label')}
         >
@@ -108,6 +123,8 @@ export function ProductFormSwitcher() {
           {FORM_METADATA.map((meta) => (
             <DropdownMenuItem
               key={meta.id}
+              data-testid={`product-form-option-${meta.id}`}
+              aria-current={effectiveForm === meta.id ? 'true' : undefined}
               onClick={() => setFormOverride(meta.id)}
               className="flex items-center justify-between"
             >
@@ -125,6 +142,8 @@ export function ProductFormSwitcher() {
                 {tViewer('label')}
               </div>
               <DropdownMenuItem
+                data-testid="viewer-option-platform"
+                aria-current={viewer === 'platform' ? 'true' : undefined}
                 onClick={() => handleSwitchViewer('platform')}
                 className="flex items-center justify-between"
               >
@@ -135,6 +154,8 @@ export function ProductFormSwitcher() {
                 {viewer === 'platform' && <Check className="ml-2 h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuItem
+                data-testid="viewer-option-tenant"
+                aria-current={viewer === 'tenant' ? 'true' : undefined}
                 onClick={() => handleSwitchViewer('tenant')}
                 className="flex items-center justify-between"
               >

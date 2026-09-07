@@ -2,7 +2,7 @@
 
 // 出站路由步骤二：投递通道（Task 13 接通真实后端 —— proxysvr-groups，取代 mock-only 虚拟
 // endpoint）。对齐 doc/html-spec/admin-forwarding/index.html §2.5 c-5「交互层级 0」+
-// layer-6-outbound-channels.html（列表 6a + 抽屉 6b + 删除确认 6c）、doc/mail-routing.md §4。
+// layer-6-outbound-channels.html（列表 6a + 抽屉 6b + 删除确认 6c）、docs/features/mail-routing.md §4。
 //
 // 代理数据由父组件（OutboundRoutingTab，与步骤一共用同一份 listProxysvrEndpoints 查询结果）通过
 // props 传入，本组件不重复发起代理列表请求。

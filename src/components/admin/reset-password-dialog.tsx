@@ -77,11 +77,9 @@ export function ResetPasswordDialog({ open, onOpenChange, username, onSubmit }: 
       toast.success(t('users.resetPassword.success'));
       close(false);
     } catch (e) {
-      // 服务端按目标作用域的密码策略校验，失败消息（长度/复杂度）直接透传。
-      // GT-12614 刻意保留这条透传：密码策略按租户可配，服务端返回的就是当前生效
-      // 策略的权威描述，前端没有等价文案可替代（同 tenant-form-drawer 的
-      // admin_password_weak 分支）。守卫见 reset-password-dialog.test.tsx。
-      toast.error(e instanceof Error ? e.message : t('common.error'));
+      // 密码策略按目标账号的租户动态生效；后端通过稳定错误码携带阈值参数，
+      // 这里按当前 locale 渲染，不能把后端英文 message 直接暴露到四语界面。
+      toast.error(apiErrorMessage(e, t('common.error')));
     } finally {
       setSubmitting(false);
     }

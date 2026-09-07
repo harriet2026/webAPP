@@ -25,7 +25,7 @@ export function TopMaliciousAttachmentsCard({ startDate, endDate, direction, ten
   const attachments = data?.items ?? [];
 
   return (
-    <Card className="gap-0 rounded-lg border-0 bg-muted/40 py-0 shadow-none">
+    <Card className="gap-0 rounded-lg border-0 bg-muted/40 py-0 shadow-none" data-testid="top-malicious-attachments-card">
       <CardHeader className="flex flex-row items-center justify-between p-4 pb-3">
         <CardTitle className="text-sm font-medium">{t('side.topMaliciousAttachments')}</CardTitle>
         <Button

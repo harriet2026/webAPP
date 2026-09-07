@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -24,6 +24,8 @@ function PwdInput({
   showLabel,
   hideLabel,
   testId,
+  errorTestId,
+  visibilityTestId,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -32,13 +34,17 @@ function PwdInput({
   onBlur?: () => void;
   showLabel: string;
   hideLabel: string;
-  testId?: string;
+  testId: string;
+  // 错误提示只在 error 非空时渲染，故为可选。
+  errorTestId?: string;
+  visibilityTestId: string;
 }) {
   const [show, setShow] = useState(false);
   return (
     <div className="max-w-md">
       <div className="relative">
         <Input
+          id={testId}
           type={show ? 'text' : 'password'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -53,11 +59,14 @@ function PwdInput({
           onClick={() => setShow((s) => !s)}
           className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           aria-label={show ? hideLabel : showLabel}
+          aria-controls={testId}
+          aria-pressed={show}
+          data-testid={visibilityTestId}
         >
           {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </div>
-      {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-destructive" data-testid={errorTestId}>{error}</p> : null}
     </div>
   );
 }
@@ -83,6 +92,8 @@ export function PasswordTab() {
   const [oldErr, setOldErr] = useState('');
   const [confirmErr, setConfirmErr] = useState('');
   const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   const strength = passwordStrength(newPwd);
   const ruleResults = rules.map((r) => ({ ...r, passed: r.test(newPwd) }));
@@ -96,7 +107,9 @@ export function PasswordTab() {
   };
 
   const save = async () => {
-    if (!canSave) return;
+    if (!canSave || submittingRef.current) return;
+    submittingRef.current = true;
+    setIsSubmitting(true);
     try {
       const res = await changePassword.mutateAsync({
         current_password: oldPwd,
@@ -125,6 +138,9 @@ export function PasswordTab() {
       } else {
         toast.error(profileApiErrorMessage(e, 'pwd.changeFailed', t, tRoot));
       }
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -170,6 +186,8 @@ export function PasswordTab() {
             showLabel={t('pwd.show')}
             hideLabel={t('pwd.hide')}
             testId="profile-password-old-input"
+            errorTestId="profile-password-old-error"
+            visibilityTestId="profile-password-old-visibility-toggle"
           />
         </div>
 
@@ -186,6 +204,7 @@ export function PasswordTab() {
               showLabel={t('pwd.show')}
               hideLabel={t('pwd.hide')}
               testId="profile-password-new-input"
+              visibilityTestId="profile-password-new-visibility-toggle"
             />
 
             <div className="flex items-center gap-3">
@@ -241,6 +260,8 @@ export function PasswordTab() {
             showLabel={t('pwd.show')}
             hideLabel={t('pwd.hide')}
             testId="profile-password-confirm-input"
+            errorTestId="profile-password-confirm-error"
+            visibilityTestId="profile-password-confirm-visibility-toggle"
           />
         </div>
 
@@ -248,9 +269,9 @@ export function PasswordTab() {
           <Button variant="outline" onClick={reset} data-testid="profile-password-cancel">
             {tc('cancel')}
           </Button>
-          <Button disabled={!canSave || changePassword.isPending} onClick={save} data-testid="profile-password-save">
-            {changePassword.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            {changePassword.isPending ? tc('loading') : tc('save')}
+          <Button disabled={!canSave || isSubmitting} onClick={save} data-testid="profile-password-save">
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            {isSubmitting ? tc('loading') : tc('save')}
           </Button>
         </div>
       </div>

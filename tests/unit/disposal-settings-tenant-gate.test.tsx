@@ -9,22 +9,27 @@ import { createElement } from 'react';
 // a future refactor that drops `enabled` is caught.
 
 const apiRequestMock = vi.fn();
+const translationMock = vi.hoisted(() =>
+  vi.fn((key: string, params?: Record<string, string | number>) => {
+    if (params) {
+      return Object.entries(params).reduce(
+        (value, [name, replacement]) => value.replace(`{${name}}`, String(replacement)),
+        key,
+      );
+    }
+    return key;
+  }),
+);
 
 vi.mock('@/lib/api/client', () => ({
   useApiRequest: () => ({ apiRequest: apiRequestMock }),
 }));
 
 vi.mock('next-intl', () => ({
-  useTranslations: (_ns?: string) => (key: string, params?: Record<string, string | number>) => {
-    void _ns;
-    if (params) {
-      return Object.entries(params).reduce(
-        (s, [k, v]) => s.replace(`{${k}}`, String(v)),
-        key,
-      );
-    }
-    return key;
-  },
+  // next-intl returns a stable translator. Returning a new function on every
+  // render changes DisposalSettingsPage's save callback, which re-registers
+  // the unsaved guard and creates an artificial render loop in this test.
+  useTranslations: () => translationMock,
 }));
 
 vi.mock('next/navigation', () => ({

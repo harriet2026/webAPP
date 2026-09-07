@@ -44,6 +44,8 @@ interface EntityDetectionProps {
   // 下载附件的真实实现由调用方注入；未提供时点击「下载」只弹一句「暂未实现」
   // 提示（复用 senderActions.notImplementedToast，不新造一句同义文案）。
   onDownload?: (attachment: AttachmentInfo) => void;
+  downloadDisabled?: boolean;
+  downloadDisabledReason?: string;
   // 成功创建加黑规则后回调，供调用方刷新任何派生视图（对齐 SenderActions 的
   // onDisposed）。
   onDisposed?: () => void;
@@ -85,7 +87,10 @@ function vtScoreIsPositive(vtScore: string): boolean {
   return Number.isFinite(numerator) && numerator > 0;
 }
 
-export function EntityDetection({ detail, requestFn, readOnly = false, onDownload, onDisposed, tab: tabProp }: EntityDetectionProps) {
+export function EntityDetection({
+  detail, requestFn, readOnly = false, onDownload, downloadDisabled = false,
+  downloadDisabledReason, onDisposed, tab: tabProp,
+}: EntityDetectionProps) {
   const t = useTranslations('emailDisposal.detail.overview.entityDetection');
   const tOverview = useTranslations('emailDisposal.detail.overview');
   const tCommon = useTranslations('common');
@@ -113,6 +118,7 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
   }
 
   function handleDownload(a: AttachmentInfo) {
+    if (downloadDisabled) return;
     if (onDownload) onDownload(a);
     else toast.info(tOverview('senderActions.notImplementedToast'));
   }
@@ -237,6 +243,15 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                         {scan.virus_name}
                       </Badge>
                     )}
+                    {scan && scan.qr_code_count > 0 && (
+                      <Badge
+                        variant="outline"
+                        className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
+                        data-testid={`email-disposal-overview-entity-attachment-${key}-qr`}
+                      >
+                        {t('qrDetected', { count: scan.qr_code_count })}
+                      </Badge>
+                    )}
                   </div>
                   <p className="mt-1 font-mono text-xs text-muted-foreground">
                     MD5: {a.md5sum || '—'}
@@ -257,6 +272,8 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
                       type="button"
                       size="sm"
                       variant="outline"
+                      disabled={downloadDisabled}
+                      title={downloadDisabled ? downloadDisabledReason : undefined}
                       onClick={() => handleDownload(a)}
                       data-testid={`email-disposal-overview-entity-attachment-${key}-download`}
                     >
@@ -299,7 +316,12 @@ export function EntityDetection({ detail, requestFn, readOnly = false, onDownloa
             </div>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={busyKey !== null}>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogCancel
+              disabled={busyKey !== null}
+              data-testid="email-disposal-entity-blacklist-cancel"
+            >
+              {tCommon('cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction
               disabled={busyKey !== null}
               onClick={() => void confirmBlacklist()}

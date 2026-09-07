@@ -101,6 +101,39 @@ function fallbackDispositions(detail: MailLogDetail): RecipientDisposition[] {
   }));
 }
 
+interface DeliverySubjectCopy {
+  key: string;
+  subject: string;
+  recipients: string[];
+}
+
+// GT-12954：`subject` 永远表示入口原主题；最终主题按收件人落在
+// recipient_dispositions。同一 mail_log 无需因为不同 RFC 副本而拆行。
+// 主题未变化时不重复展示，避免把同一个值误读成两个事实。
+function deliverySubjectCopies(detail: MailLogDetail): DeliverySubjectCopy[] {
+  const grouped = new Map<string, string[]>();
+  const addDisposition = (disposition: RecipientDisposition) => {
+    const deliverySubject = disposition.delivery_subject?.trim();
+    if (!deliverySubject || deliverySubject === detail.subject.trim()) return;
+    const recipients = grouped.get(deliverySubject) ?? [];
+    if (!recipients.includes(disposition.recipient)) recipients.push(disposition.recipient);
+    grouped.set(deliverySubject, recipients);
+  };
+  for (const disposition of detail.recipient_dispositions ?? []) {
+    addDisposition(disposition);
+  }
+  for (const release of detail.release_mails ?? []) {
+    for (const disposition of release.recipient_dispositions ?? []) {
+      addDisposition(disposition);
+    }
+  }
+  return Array.from(grouped, ([subject, recipients], index) => ({
+    key: `recipient-subject-${index}`,
+    subject,
+    recipients,
+  }));
+}
+
 export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnly, events, onViewPolicyDetail }: SendReceiveContextCardProps) {
   const t = useTranslations('emailDisposal.detail.overview');
   const [expanded, setExpanded] = useState(false);
@@ -111,15 +144,18 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
   const isSingle = dispositions.length === 1;
   const single = isSingle ? dispositions[0] : undefined;
   // 「查看策略命中详情」GT-12596 起跳安全分析区的处置依据卡（onViewPolicyDetail）。
-  // GT-12880：投递失败（delivery_failed）是"网关已放行投递、下游接收失败"，
-  // 与拦截族（rejected/discarded 等，网关拦下且未保留原文）语义相反——两者都
-  // 落在"无可用动作"里，但绝不能共用"已被阻断/丢弃"文案。
+  // GT-12880/GT-13193：投递族（投递中/成功/失败/暂缓）与拦截族语义
+  // 相反。即使当前没有人工操作，也绝不能共用"已被阻断/丢弃"文案。
   const singleDeliveryFailed = !!single && single.status === 'delivery_failed';
-  const singleNotOperable = !!single && !singleDeliveryFailed
+  const singleInDeliveryFlow = !!single && [
+    'delivering', 'delivered', 'marked_delivered', 'delivery_failed', 'deferred',
+  ].includes(single.status);
+  const singleNotOperable = !!single && !singleInDeliveryFlow
     && recipientActionsForStatus(single.status, !!single.object_id).length === 0;
 
   const statusCounts: Record<string, number> = {};
   for (const d of dispositions) statusCounts[d.status] = (statusCounts[d.status] ?? 0) + 1;
+  const deliveredSubjectCopies = deliverySubjectCopies(detail);
 
   return (
     <div className="rounded-lg border bg-muted/30 p-4 space-y-3" data-testid="email-disposal-overview-context-card">
@@ -129,6 +165,35 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
       </h3>
 
       <div className="space-y-2 text-sm">
+        <div
+          className="flex flex-wrap items-baseline gap-2"
+          data-testid="email-disposal-overview-context-original-subject"
+        >
+          <span className="w-20 shrink-0 text-muted-foreground">{t('context.originalSubject')}:</span>
+          <span className="min-w-0 break-words font-medium">{detail.subject || '—'}</span>
+        </div>
+
+        {deliveredSubjectCopies.length > 0 && (
+          <div
+            className="flex items-start gap-2"
+            data-testid="email-disposal-overview-context-delivery-subjects"
+          >
+            <span className="w-20 shrink-0 text-muted-foreground">{t('context.deliverySubject')}:</span>
+            <div className="min-w-0 space-y-1">
+              {deliveredSubjectCopies.map((copy) => (
+                <div key={copy.key} className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="break-words font-medium">{copy.subject}</span>
+                  {copy.recipients.length > 0 && (
+                    <span className="break-all text-xs text-muted-foreground">
+                      ({copy.recipients.join(', ')})
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* B1 发件人 */}
         <div className="flex flex-wrap items-center gap-2" data-testid="email-disposal-overview-context-sender">
           <span className="w-16 shrink-0 text-muted-foreground">{t('sender')}:</span>
@@ -143,8 +208,8 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
         </div>
 
         {/* B2 收件人（单投 pill / 多投状态分布） */}
-        <div className="flex flex-wrap items-start gap-2" data-testid="email-disposal-overview-context-recipient">
-          <span className="w-16 shrink-0 pt-1 text-muted-foreground">{t('recipient')}:</span>
+        <div className="flex flex-wrap items-baseline gap-2" data-testid="email-disposal-overview-context-recipient">
+          <span className="w-16 shrink-0 text-muted-foreground">{t('recipient')}:</span>
           {isSingle && single ? (
             <div className="flex items-center gap-2">
               <span className="font-medium">{single.recipient}</span>

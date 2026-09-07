@@ -56,7 +56,7 @@ export function CopyDirectionDialog({ open, onOpenChange, source, onConfirm }: C
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} data-testid="ie-copy-dialog">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description', { src: dirShort(source) })}</DialogDescription>
@@ -65,6 +65,7 @@ export function CopyDirectionDialog({ open, onOpenChange, source, onConfirm }: C
           {otherDirections.map((dir) => (
             <label key={dir} className="flex items-center gap-2 cursor-pointer">
               <Checkbox
+                data-testid={`ie-copy-target-${dir}`}
                 checked={targets.includes(dir)}
                 onCheckedChange={() => toggleTarget(dir)}
               />
@@ -79,7 +80,7 @@ export function CopyDirectionDialog({ open, onOpenChange, source, onConfirm }: C
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             {tDir('cancel')}
           </Button>
-          <Button onClick={handleConfirm} disabled={targets.length === 0}>
+          <Button data-testid="ie-copy-confirm" onClick={handleConfirm} disabled={targets.length === 0}>
             {t('confirm')}
           </Button>
         </DialogFooter>

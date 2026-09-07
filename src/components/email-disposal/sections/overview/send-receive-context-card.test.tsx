@@ -99,6 +99,34 @@ function renderCard(detail: MailLogDetail, overrides: Partial<React.ComponentPro
 }
 
 describe('SendReceiveContextCard', () => {
+  it('GT-12954: shows immutable original and recipient delivery-copy subjects separately', () => {
+    renderCard(baseDetail({
+      subject: 'original subject',
+      recipient_dispositions: [
+        { recipient: 'victim@company.com', final_action: 'accept', status: 'delivering', delivery_subject: '【可疑】 original subject' },
+      ],
+    }));
+    expect(screen.getByTestId('email-disposal-overview-context-original-subject')).toHaveTextContent('原始主题');
+    expect(screen.getByTestId('email-disposal-overview-context-original-subject')).toHaveTextContent('original subject');
+    expect(screen.getByTestId('email-disposal-overview-context-delivery-subjects')).toHaveTextContent('投递主题');
+    expect(screen.getByTestId('email-disposal-overview-context-delivery-subjects')).toHaveTextContent('【可疑】 original subject');
+  });
+
+  it('GT-12954: groups different per-recipient delivery subjects without splitting mail_log', () => {
+    renderCard(baseDetail({
+      subject: 'original subject',
+      recipient_dispositions: [
+        { recipient: 'a@example.test', final_action: 'accept', status: 'delivering', delivery_subject: '【高风险】 original subject' },
+        { recipient: 'b@example.test', final_action: 'accept', status: 'delivering', delivery_subject: '【外部】 original subject' },
+      ],
+    }));
+    const subjects = screen.getByTestId('email-disposal-overview-context-delivery-subjects');
+    expect(subjects).toHaveTextContent('【高风险】 original subject');
+    expect(subjects).toHaveTextContent('a@example.test');
+    expect(subjects).toHaveTextContent('【外部】 original subject');
+    expect(subjects).toHaveTextContent('b@example.test');
+  });
+
   it('renders 发件人 row with domain name, IP, and geo (B1)', () => {
     renderCard(baseDetail());
     const senderRow = screen.getByTestId('email-disposal-overview-context-sender');

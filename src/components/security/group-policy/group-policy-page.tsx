@@ -201,13 +201,13 @@ export function GroupPolicyPage() {
         }
       />
       {/* 卡片一：群组管理（demo 顺序：群组管理在上、群组策略规则在下） */}
-      <PageSurface>
+      <PageSurface data-testid="security-groups-section-management">
         <GroupManagementPage />
       </PageSurface>
 
       {/* 卡片二：群组策略规则（OSGATEWAY_PRODUCT_FORM_SWITCHER 门控，暂不对外露出） */}
       {switcherEnabled && (
-      <PageSurface>
+      <PageSurface data-testid="security-groups-section-policy">
         <Card data-testid="group-policy-card">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-2">
@@ -342,7 +342,7 @@ export function GroupPolicyPage() {
                     );
                   })}
                   {(policies ?? []).length === 0 && (
-                    <TableRow>
+                    <TableRow data-testid="group-policy-empty">
                       <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                         {tCommon('noData')}
                       </TableCell>

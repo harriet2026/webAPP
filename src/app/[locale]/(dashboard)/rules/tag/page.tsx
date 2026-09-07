@@ -216,8 +216,8 @@ export default function RulesPage() {
       queryClient.invalidateQueries({ queryKey: ['unified-rules', 'tag', effectiveTenantId] });
       toast.success(t(editingRule ? 'common.updateSuccess' : 'common.createSuccess'));
       setDialogOpen(false);
-    } catch (err: any) {
-      toast.error(err?.message || t('common.error'));
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -287,7 +287,7 @@ export default function RulesPage() {
         title={t('tagRules.title')}
         description={t('tagRules.subtitle')}
         actions={
-          <Button onClick={() => handleOpenDialog()}>
+          <Button data-testid="tag-rule-create" onClick={() => handleOpenDialog()}>
           <Plus className="h-4 w-4 mr-2" />
           {t('rules.createRule')}
           </Button>
@@ -315,12 +315,13 @@ export default function RulesPage() {
           <DataTable
             columns={columns}
             data={(rules || []).filter(r => filterStage === 'all' || r.stage === filterStage)}
+            rowTestId={(row) => `tag-rule-row-${row.id}`}
           />
         )}
       </PageSurface>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[28px] border-border/70 shadow-2xl">
+        <DialogContent data-testid="tag-rule-dialog" className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[28px] border-border/70 shadow-2xl">
           <DialogHeader>
             <DialogTitle>{editingRule ? t('rules.editRule') : t('rules.createRule')}</DialogTitle>
           </DialogHeader>
@@ -338,7 +339,7 @@ export default function RulesPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>{t('advancedRules.name')} *</Label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder={t('advancedRules.name')} />
+              <Input data-testid="tag-rule-name" value={name} onChange={e => setName(e.target.value)} placeholder={t('advancedRules.name')} />
             </div>
 
             <div className="space-y-2">
@@ -365,7 +366,7 @@ export default function RulesPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t('rules.priority')}</Label>
-                <Input type="number" value={priority} onChange={e => setPriority(parseInt(e.target.value) || 0)} />
+                <Input data-testid="tag-rule-priority" type="number" value={priority} onChange={e => setPriority(parseInt(e.target.value) || 0)} />
               </div>
               <div className="space-y-2">
                 <Label>{t('tagRules.tags')} *</Label>
@@ -378,6 +379,7 @@ export default function RulesPage() {
                           const selected = tags.includes(st.key);
                           return (
                             <Badge
+                              data-testid={`tag-rule-system-tag-${st.key}`}
                               key={st.key}
                               variant={selected ? 'default' : 'outline'}
                               className="cursor-pointer text-xs select-none"
@@ -399,6 +401,7 @@ export default function RulesPage() {
                     <span className="text-xs text-muted-foreground">{t('tagRules.customTags')}</span>
                     <div className="flex gap-1">
                       <Input
+                        data-testid="tag-rule-custom-tag-input"
                         value={customTagInput}
                         onChange={e => setCustomTagInput(e.target.value)}
                         placeholder={t('tagRules.tagPlaceholder')}
@@ -436,8 +439,9 @@ export default function RulesPage() {
                       {tags.map((tag, i) => {
                         const isSys = tag.startsWith('sys:');
                         return (
-                          <Badge
-                            key={i}
+                           <Badge
+                             data-testid={`tag-rule-selected-tag-${tag}`}
+                             key={i}
                             variant={isSys ? 'default' : 'secondary'}
                             className="text-xs cursor-pointer group"
                             onClick={() => setTags(tags.filter((_, idx) => idx !== i))}
@@ -476,7 +480,7 @@ export default function RulesPage() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
+            <Button data-testid="tag-rule-save" onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {t('common.save')}
             </Button>

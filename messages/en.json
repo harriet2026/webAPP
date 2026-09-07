@@ -180,17 +180,18 @@
       "targetTenantPlaceholder": "Choose a tenant",
       "importTypesTitle": "Import types",
       "importTypesDescription": "Only types present in the file can be selected.",
-      "previewButton": "Preview import",
+      "previewLoading": "Checking import contents automatically…",
       "previewSummaryTitle": "Preview summary",
       "summaryLine": "Parsed {parsed}, importable {importable}, duplicates {duplicates}, invalid {invalid}",
       "duplicateHandlingTitle": "Duplicate handling",
-      "skipAllRemainingDuplicates": "Skip all remaining duplicates",
-      "skipDuplicate": "Skip duplicate {previewItemId}",
+      "duplicatesWillBeSkipped": "Duplicates will not overwrite existing data and are skipped automatically during import.",
+      "duplicateWillBeSkipped": "Duplicate {previewItemId} will be skipped",
       "showDetails": "Show details",
       "sourcePayload": "Source payload",
       "existingItem": "Existing item",
       "invalidItemsTitle": "Invalid items",
       "closeButton": "Close",
+      "importTemplateButton": "Import template",
       "importButton": "Import",
       "group": {
         "rules": "Rules",
@@ -204,7 +205,6 @@
         "selectAtLeastOneType": "Select at least one import type",
         "chooseTargetTenant": "Choose a target tenant",
         "previewNotWired": "{variant} preview is not wired yet",
-        "previewLoaded": "Preview loaded",
         "previewFailed": "Preview failed",
         "runPreviewFirst": "Run preview before importing",
         "importNotWired": "{variant} import is not wired yet",
@@ -431,7 +431,7 @@
     },
     "collaboration": {
       "title": "Collaboration Overview",
-      "description": "The three agents share the intelligent analysis layer in the policy pipeline while keeping separate configuration, logs, and authorization boundaries.",
+      "description": "The enabled agents shown here use the policy pipeline's intelligent analysis layer while keeping separate configuration, logs, and authorization boundaries.",
       "phishing": {
         "title": "Phishing detection",
         "body": "Produces phishing decisions after real-time sideline sessions and drives quarantine, marking, review, or release."
@@ -981,9 +981,10 @@
           "rcptKindBcc": "Bcc",
           "intentTag": "Intent Engine Tag",
           "intentTagAny": "Any",
-          "intentTagHint": "Match the intent engine classification (cac_int_tag); multiple values may be selected and any selected value matches. Leave unselected to ignore this condition",
+          "intentTagHint": "Match the intent engine classification (cac_int_tag); select Not Detected (0) for released mail whose CAC scan has not run. Leave unselected to ignore this condition",
           "intentTagSelected": "{count} selected",
           "intentTagClear": "Clear",
+          "intentTagValue0": "Not Detected (0)",
           "intentTagValue1": "Non-Spam (1)",
           "intentTagValue2": "Subscription (2)",
           "intentTagValue3": "Spam (3)",
@@ -1585,6 +1586,7 @@
     "sideline": "Sideline",
     "accept": "Accept",
     "proceed": "Proceed",
+    "observe": "Observe",
     "reject": "Reject",
     "discard": "Discard",
     "audit": "Audit",
@@ -1686,14 +1688,21 @@
     "exportMembersFor": "Export: {name}",
     "importSuccess": "Imported {count} member(s)",
     "importPartial": "Imported {imported} member(s); {failed} line(s) failed",
+    "importSummary": "Import result: {imported} added; {skipped} skipped; {failed} failed",
     "importFileHint": "Choose a .txt or .csv file, one member per line",
     "noGroupSelected": "Select a group first",
     "eyebrow": "Group Management",
     "columnType": "Type",
     "importFailuresTitle": "Import result for \"{name}\": {imported} succeeded, {failed} failed",
+    "importResultsTitle": "Import result for \"{name}\": {imported} added, {skipped} skipped, {failed} failed",
     "importFailureLine": "Line",
+    "importResultStatus": "Result",
+    "importResultSkipped": "Skipped",
+    "importResultFailed": "Failed",
+    "importResultReason": "Reason",
     "importFailureValue": "Value",
     "importFailureReason": "Reason",
+    "importSkipAlreadyExists": "Member already exists",
     "platformIpGroupTitle": "Platform IP Groups",
     "platformScopeHint": "Platform-level IP groups apply to all tenants and are referenced by IP strategy (IP black/white list expressions)."
   },
@@ -1979,6 +1988,7 @@
       "isOutbound": "Is Outbound",
       "oneRecipient": "One Recipient",
       "originKind": "Mail Origin Kind",
+      "mxRegion": "Recipient MX Region",
       "recipient": "Recipient",
       "recipientCount": "Recipient Count",
       "recipientDomain": "Recipient Domain",
@@ -2777,6 +2787,7 @@
     "columns": {
       "clickTime": "Click time",
       "tid": "Mail TID",
+      "tenant": "Owning tenant",
       "clicker": "Clicker",
       "sender": "Sender",
       "originalUrl": "Original URL",
@@ -3119,6 +3130,7 @@
       "query": "Query",
       "startDate": "Start date",
       "endDate": "End date",
+      "invalidRange": "End date cannot be earlier than start date",
       "empty": "No records"
     },
     "username": "Username",
@@ -3295,6 +3307,7 @@
   },
   "pipeline": {
     "title": "Strategy Pipeline",
+    "deepLinkRuleContext": "Located from mail disposal evidence: matched rule {ruleId}",
     "executionPipeline": "Execution Pipeline",
     "phase1IP": "IP Policy",
     "phase2Sender": "Sender/Recipient Policy",
@@ -4259,6 +4272,8 @@
   },
   "contentRules": {
     "title": "Content Rules",
+    "deepLinkLoading": "Locating matched rule {ruleId}…",
+    "deepLinkUnavailable": "Cannot open rule {ruleId}: it was deleted, is not a content rule, or is not accessible to this account.",
     "description": "Match email content by keywords, patterns, or content groups",
     "ruleDescription": "Description",
     "basicSettings": "Basic Settings",
@@ -4449,6 +4464,7 @@
     "save": "Save",
     "saveSuccess": "Saved successfully",
     "saveFailed": "Save failed",
+    "loadFailed": "Failed to load auth spoofing configuration. Please retry.",
     "warning": "Warning",
     "viewObserveStats": "View Observe Stats",
     "restoreDefault": "Restore Default",
@@ -5090,12 +5106,13 @@
     },
     "common": {
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "retry": "Retry"
     },
     "toast": {
       "saveSuccess": "Configuration saved",
       "saveFailed": "Save failed",
-      "loadFailed": "Failed to load configuration; defaults are shown",
+      "loadFailed": "Failed to load configuration. Please retry.",
       "deleteSuccess": "Rule deleted"
     },
     "antivirus": {
@@ -6070,7 +6087,6 @@
       "direction": "Direction",
       "senderIp": "Sender IP",
       "sender": "Sender",
-      "senderRecipient": "Sender → Recipient",
       "recipient": "Recipient",
       "subject": "Subject",
       "mailType": "Mail Type",
@@ -6234,6 +6250,8 @@
         "recipient": "Recipient",
         "context": {
           "title": "Send/Receive Context",
+          "originalSubject": "Original subject",
+          "deliverySubject": "Delivery subject",
           "recipientsCount": "{n} recipients",
           "notOperableWarning": "This email was blocked/discarded; no content is stored and no further action is possible.",
           "deliveryFailedWarning": "This email was released and delivered by the gateway, but the downstream mail system failed to accept it (see recipient status and delivery details). Use the “Redeliver” action to recover delivery.",
@@ -6280,7 +6298,13 @@
           "expandAll": "Show all {n} recipients",
           "colRecipients": "Recipients",
           "colStatus": "Status",
+          "colRecall": "Recall status",
           "colActions": "Actions",
+          "recall": {
+            "handling": "Recalling",
+            "success": "Recalled",
+            "failed": "Recall failed"
+          },
           "status": {
             "delivered": "Delivered",
             "marked_delivered": "Marked Delivered",
@@ -6317,9 +6341,19 @@
           "readOnlyTooltip": "Drill-down view is read-only",
           "selected": "{n} recipients selected",
           "empty": "No recipient disposal records",
-          "actionSuccess": "Action succeeded",
-          "actionFailed": "Action failed",
-          "redeliverSuccess": "Redelivery submitted; the delivery result will update in the status shortly",
+      "actionSuccess": "Action succeeded",
+      "actionFailed": "Action failed",
+      "recallUnsupportedBackend": "This recipient's mail system does not support recall",
+      "recallTrackingIdMissing": "The mail-system tracking ID is missing, so recall cannot be started",
+      "recallNotDelivered": "Delivery to this recipient has not been confirmed",
+      "recallDeliveryStatusUnknown": "This recipient's delivery status is unknown, so recall cannot be performed safely",
+      "recallNoDeliveredRecipients": "There are no delivered recipients eligible for recall",
+      "recallBackendResolutionFailed": "The recipient's mail system could not be identified; try again later",
+      "recallRequestCreateFailed": "The recall request could not be created; try again later",
+      "recallNoRecallableRecipients": "No recipients currently meet the recall requirements",
+      "recallMailNotFound": "The mail record does not exist or has been deleted",
+      "recallForbidden": "You do not have permission to recall this mail",
+      "redeliverSuccess": "Redelivery submitted; the delivery result will update in the status shortly",
           "deferredRetrying": "Delivery deferred; retrying automatically",
           "redeliverDialog": {
             "title": "Redeliver",
@@ -6396,6 +6430,7 @@
           "confirm": "Add to blacklist",
           "confirming": "Creating…",
           "vtScore": "VirusTotal: {score}",
+          "qrDetected": "QR code: Yes ({count})",
           "title": "Content Entity Detection & Disposal"
         },
         "reclassify": {
@@ -6409,6 +6444,7 @@
           "viewHtml": "HTML",
           "viewRaw": "Source",
           "downloadEml": "Download EML",
+          "emlUnavailable": "The original message was not retained; EML and attachments cannot be downloaded",
           "rawLoading": "Loading…",
           "rawUnavailable": "Source not available",
           "blockedBanner": "Some recipients ({names}) have blocked/discarded emails; the original content is unavailable.",
@@ -6423,6 +6459,7 @@
         "items": "items",
         "finalVerdict": "Final Verdict",
         "notIntegrated": "Not Integrated",
+        "moduleDisabled": "Disabled",
         "stageName": {
           "connection": "Connection",
           "connectionPlatform": "Platform-managed",
@@ -6501,7 +6538,8 @@
           "forwardDelivery": "Forward Delivery",
           "adminRecall": "Admin Recall",
           "agentRecall": "Agent Recall",
-          "sidelineAgentRecall": "Sideline Agent Recall"
+          "sidelineAgentRecall": "Sideline Agent Recall",
+          "phishAgentRecall": "Phishing Agent Recall"
         },
         "eventResult": {
           "released": "Released",
@@ -6514,6 +6552,7 @@
           "delivered": "Success",
           "failed": "Failed",
           "success": "Success",
+          "partialSuccess": "Partially Successful",
           "handling": "In Progress",
           "expanded": "Expanded into sub-requests",
           "timeoutReleased": "Auto-released on timeout",
@@ -6598,7 +6637,7 @@
         "platformPolicyListReason": "Intercepted by platform-managed policy",
         "basisScope": "Applies to",
         "hitModules": "Modules hit",
-        "hitModulesHint": "Modules this message hit. Rules never evaluated (an earlier module already produced a decisive action) are not listed.",
+        "hitModulesHint": "Modules whose actions applied to at least one recipient. Terminal candidates that only matched conditions but affected no recipient are not counted as hits.",
         "effectiveFor": "Effective for: {list}",
         "matchedOnlyFor": "Matched only: {list}"
       },
@@ -7591,6 +7630,8 @@
     "weekday_6": "Sat",
     "timePoints": "Notification Times",
     "addTimePoint": "Add Time",
+    "notifyTimeAddHint": "After selecting a time, click “Add Time” to add it to the list below before saving.",
+    "notifyTimesRequired": "No notification time has been added. Select a time and click “Add Time” before saving.",
     "tzComputedIn": "Notification times are computed in {tz}",
     "tzMismatchHint": "Your browser time zone ({browserTz}) differs from the current notification time zone ({effectiveTz}). Choose which time zone the notification times should be interpreted in:",
     "tzUseBrowser": "Use browser time zone ({tz})",
@@ -7703,6 +7744,22 @@
     "emailInvalid": "Invalid email format. Use an address like user@example.com",
     "emailDuplicate": "This email is already in the list",
     "customMinutesRange": "Review duration must be between 1 and 300 minutes",
+    "scoreValueRange": "The confidence threshold must be between 0 and 1",
+    "customWeekdaysRequired": "Select at least one weekday for a custom notification schedule",
+    "customWeekdaysInvalid": "The notification weekday setting is invalid",
+    "notifyTimeFormatInvalid": "The notification time is invalid. Add it again",
+    "validDaysRange": "Valid days must be between 1 and 30",
+    "portalBaseUrlInvalid": "The external access URL must be an HTTPS URL with a host name",
+    "portalBaseUrlNoPath": "The external access URL cannot contain a path, query, or fragment",
+    "maxRecheckMinutesRange": "The recheck window must be between 1 and 60 minutes",
+    "reviewerNotifyIntervalRange": "The reviewer notification interval must be between 1 and 1440 minutes",
+    "reviewerActiveStartInvalid": "Select a valid reviewer notification start time",
+    "reviewerActiveEndInvalid": "Select a valid reviewer notification end time",
+    "timeoutMarkPositionsRequired": "Select at least one mark position when delivery marking is enabled",
+    "timeoutMarkPositionsInvalid": "The delivery mark position is invalid",
+    "timeoutMarkTextRequired": "Enter mark text when delivery marking is enabled",
+    "timeoutMarkTextTooLong": "Mark text cannot exceed 20 characters",
+    "recallTaskTimeoutRange": "The recall task timeout must be between 1 and 300 seconds",
     "saveValidationFailed": "Some settings are invalid. Fix them and save again",
     "notifyMode": "Notification Mode",
     "notifyModeAll": "All Users (Default)",
@@ -7972,10 +8029,7 @@
       "delivered": "Delivered",
       "success_rate": "Delivery Success Rate",
       "failed": "Failed",
-      "cancelled": "Cancelled",
-      "in_delivery": "In Delivery",
-      "partial_delivered": "Partial Delivered",
-      "unknown": "Unknown"
+      "cancelled": "Cancelled"
     },
     "threatLevels": {
       "normal": "Normal",
@@ -8878,14 +8932,12 @@
         "realtime": "Apply audit, quarantine, discard, or continue according to the four risk levels.",
         "observe": "Keep complete findings without applying risk-policy actions."
       },
-      "observeModeBanner": "Observe mode does not apply four-level risk actions; hidden saved values are preserved.",
+      "observeModeBanner": "Observe mode records hits only and applies no disposition, mark, or other addon; hidden saved values are preserved.",
       "timeoutPolicy": "Timeout timeline",
       "timeoutMinutes": "Realtime wait (minutes)",
       "maxRecheckMinutes": "Background recheck (minutes)",
       "timeoutAsync": "Continue in background after timeout",
       "timeoutAsyncHint": "Deliver after the realtime timeout, then continue analysis and recall when needed.",
-      "observeMark": "Add an observation mark",
-      "observeMarkHint": "Off delivers normally; on adds a mark using the observe action.",
       "confidencePolicy": "Confidence disposition policy",
       "confidenceHint": "Four levels continuously cover 0–100; edit only the three shared cutoffs.",
       "cutoff": { "low": "Low starts", "medium": "Medium starts", "high": "High starts" },
@@ -8901,11 +8953,6 @@
       "markTextRequired": "Mark text is required when an add-on mark is enabled.",
       "markTextTooLong": "Mark text cannot exceed 20 characters.",
       "markTextLimit": "Up to 20 characters.",
-      "observeAction": "Observe action",
-      "observeActionValue": {
-        "accept": "Deliver (whitelist)"
-      },
-      "observeMarkEnabled": "Add a risk mark when delivered",
       "timeoutSectionTitle": "Timeout timeline",
       "timeoutScopeNote": "Total timeout / async timeout apply to all sideline checks.",
       "soon": "Coming soon",
@@ -9250,7 +9297,7 @@
       "sectionBatch": "Bulk data",
       "sectionContacts": "Organization import",
       "sectionNotify": "Notification settings",
-      "modeObserveDesc": "Mark and deliver only, no blocking",
+      "modeObserveDesc": "Observe only; no blocking or marking",
       "modeStandardDesc": "Quarantine for admin review",
       "modeStrictDesc": "Block or discard, reject inbound",
       "markPreview": "Mark style preview",
@@ -9346,7 +9393,7 @@
       "editDistance": "Edit-distance threshold",
       "confidenceThreshold": "Confidence threshold",
       "confidenceThresholdHint": "Trigger disposition when spoof confidence reaches this value",
-      "modeObserveDesc": "Mark and deliver without blocking",
+      "modeObserveDesc": "Observe only; no blocking or marking",
       "modeStandardDesc": "Quarantine matched mail",
       "modeStrictDesc": "Reject or discard matched mail",
       "modeCustomHint": "Custom: the disposition action was adjusted manually",
@@ -10452,9 +10499,8 @@
   "loginSecurity": {
     "unsavedChanges": "Unsaved changes",
     "cancel": "Cancel",
-    "resetToDefault": "Reset to defaults",
-    "resetToBaseline": "Reset to platform baseline",
-    "resetConfirmDescription": "The form values will be reset; click \"Save\" to apply. Continue?",
+    "resetToDefault": "Reset to system defaults",
+    "resetConfirmDescription": "This clears explicit values in the current scope and restores system defaults after you click Save. Continue?",
     "resetApplied": "Reset applied; save to take effect",
     "sections": {
       "password": "Password policy",
@@ -10477,8 +10523,7 @@
       "cidr": "IP / CIDR",
       "remark": "Remark",
       "captchaAfterFailures": "Failures before captcha",
-      "twoFactorEnabled": "Enable two-factor authentication for this tenant",
-      "forceTwoFactor": "Force two-factor authentication globally"
+      "forceTwoFactor": "Require two-factor authentication"
     },
     "hints": {
       "minCharClasses": "At least N of: uppercase, lowercase, digit, special",
@@ -10488,9 +10533,7 @@
       "overflowPolicy": "\"Reject new login\" is stricter: while a legitimate session is live, an attacker holding stolen credentials is denied outright",
       "lockoutMinutes": "-1 = permanent; only an admin unlock (from the user list) lifts it",
       "captchaAfterFailures": "After this many consecutive failures, a captcha is required",
-      "twoFactorEnabled": "Once enabled, every member of this tenant must complete two-factor authentication at login",
-      "twoFactorLocked": "The platform has force-enabled two-factor authentication; this tenant cannot turn it off",
-      "forceTwoFactor": "Once enabled, members of every tenant on the platform must complete two-factor authentication at login"
+      "forceTwoFactor": "Applies only to accounts in the current scope"
     },
     "ipModes": {
       "none": "No restriction",
@@ -10509,9 +10552,6 @@
     "unlimited": "Unlimited",
     "neverExpires": "Never expires",
     "permanentLock": "Permanent",
-    "platformOnly": "Set by the platform; tenants cannot change it",
-    "tenantBanner": "The platform has published a login-security baseline. This tenant may only tighten it, never fall below it; greyed-out options are values weaker than the baseline.",
-    "belowBaseline": "Below the platform baseline — the baseline is what is enforced",
     "noRules": "No IP rules",
     "addRule": "Add IP",
     "delete": "Delete",
@@ -10521,6 +10561,7 @@
   },
   "recipientCheck": {
     "banner": "Inspect recipient addresses at the RCPT TO stage to guard against directory harvest attacks (DHA), mail bombing, and intra-domain lateral phishing",
+    "loadFailed": "Failed to load the configuration. Editing and saving are unavailable to protect the existing settings. Please retry.",
     "module": {
       "enabled": "Enabled",
       "disabled": "Disabled",
@@ -10629,7 +10670,12 @@
     "loadFailed": "Failed to load",
     "retry": "Retry",
     "deleteSuccess": "Deleted successfully",
-    "deleteFailed": "Delete failed"
+    "deleteFailed": "Delete failed",
+    "deletePartial": "Deleted {deleted}; {failed} could not be deleted",
+    "failureNotFound": "The rule no longer exists; it may have been deleted",
+    "failureAccessDenied": "You do not have permission to access this user-list rule",
+    "failureProtected": "This protected rule cannot be deleted here",
+    "failureMissingResult": "The server did not return a delete result for this rule; try again"
   },
   "portalWhitelist": {
     "loading": "Loading...",
@@ -10821,6 +10867,7 @@
   },
   "apiErrors": {
     "demo_unavailable": "Phishing-agent configuration and controls are unavailable in demo mode",
+    "internal_error": "Internal server error. Please try again later",
     "redeliver": {
       "in_progress": "A redelivery for this mail is already in progress, please retry later",
       "original_expired": "The original message is not retained (or has expired); redelivery is unavailable",
@@ -10831,7 +10878,9 @@
       "last_super_admin": "The last enabled super administrator cannot be disabled — no one would be left to manage the system",
       "last_system_admin": "The last system administrator cannot be deleted or demoted — no one would be left to manage the system",
       "not_found": "The account no longer exists; it may have been deleted",
+      "password_complexity_insufficient": "The password must contain at least {min_classes} of these character types: uppercase, lowercase, digits, and special characters",
       "password_recently_used": "The new password must differ from your recently used passwords",
+      "password_too_short": "The password must contain at least {min} characters",
       "role_id_required": "Select a role",
       "tenant_id_required": "A tenant must be specified for the “{role}” role",
       "tenant_scope_required": "Select a tenant before performing this action",
@@ -11142,6 +11191,7 @@
       "domain_delete_gated": "The receiving domain must stay disabled for the full drain window (default 7 days, letting queued in-flight mail finish delivering) before it can be deleted",
       "admin_account_password_pair_required": "The admin account and password must be provided together",
       "admin_account_too_long": "The admin account must not exceed {max} characters",
+      "code_too_long": "The tenant code must not exceed {max} characters",
       "code_immutable": "The tenant code cannot be changed after creation",
       "has_withheld_mail": "This tenant still has withheld mail (quarantine / sideline / outbound audit); release or purge those items before deleting it",
       "next_hop_pair_required": "The next-hop host and port must be provided together",
@@ -11216,6 +11266,7 @@
     "attachment_security": {
       "password_blank": "The password must not be blank",
       "password_too_long": "The password must not exceed {max} characters",
+      "password_already_exists": "The password already exists",
       "id_invalid": "Invalid ID",
       "id_required": "An ID is required",
       "sideline_item_not_found": "Sideline item not found",
@@ -11248,7 +11299,7 @@
       "two_factor_platform_admin_only": "Only platform admins may set the two-factor enforcement policy",
       "two_factor_locked_by_platform": "Two-factor authentication is enforced by the platform and cannot be disabled by a tenant",
       "two_factor_self_service_tenant_only": "The two-factor self-service switch is tenant-scoped and not supported on the global baseline",
-      "baseline_platform_admin_only": "Only platform admins may change the platform baseline",
+      "baseline_platform_admin_only": "Only platform admins may change the platform login-security settings",
       "rule_platform_admin_only": "Only platform admins may change platform rules",
       "ip_or_cidr_format_invalid": "Enter a valid IP address or CIDR (e.g. 192.168.1.0/24)",
       "rule_already_exists": "This IP/CIDR rule already exists",
@@ -11504,7 +11555,8 @@
     },
     "portal_quarantine_listadd": {
       "quarantine_item_has_no_tenant_cannot": "This quarantine item has no tenant, so it cannot be added to a user list",
-      "quarantined_mail_has_no_usable_sender": "This quarantined mail has no usable sender to add"
+      "quarantined_mail_has_no_usable_sender": "This quarantined mail has no usable sender to add",
+      "rule_already_exists": "A user-list rule already exists for this recipient and sender"
     },
     "portal_quarantine_release": {
       "quarantine_item_not_found": "Quarantine item not found",
@@ -11515,6 +11567,7 @@
     },
     "recall_admin": {
       "backend_coremail_exchange": "The backend must be coremail or exchange",
+      "key_id_exists": "This key ID already exists. Choose another one and try again",
       "mail_log_does_not_belong_your": "This mail log does not belong to your tenant",
       "recall_request_not_found": "Recall request not found",
       "recall_request_does_not_belong_your": "This recall request does not belong to your tenant"

@@ -124,7 +124,7 @@ export function AgentCenterOverviewPage() {
             onToggleCollapsed={() => setSummaryCollapsed((collapsed) => !collapsed)}
           >
             <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
-              <h2 className="text-lg font-semibold text-foreground">{detailTitle}</h2>
+              <h2 className="text-lg font-semibold text-foreground" data-testid="agent-center-detail-title">{detailTitle}</h2>
               {selectedAgent === 'phishing' && !detailLocked
                 ? <PhishingAgentHeaderActions onGoToConfig={() => router.replace(`${agentHref('phishing', 'config')}&action=create-admission-rule`)} />
                 : null}
@@ -186,15 +186,17 @@ export function AgentCenterOverviewPage() {
                   </div>
                 </section>
                 <section>
-                  <div className="grid gap-4 xl:grid-cols-3">
+                  <div className="grid gap-4 xl:grid-cols-3" data-testid="agent-center-cards">
                     {visibleCards.map((card) => (
                       <AgentCard key={card.key} card={card} numberFmt={numberFmt} />
                     ))}
                   </div>
                 </section>
-                {/* 协作总览描述的是三个智能体间的协同，切换器未开启时仅剩
-                    钓鱼智能体，整块随门控隐藏，避免文案泄漏未开放能力。 */}
-                {switcherEnabled ? <CollaborationOverview /> : null}
+                {/* 协作总览与上方卡片共用当前租户的可见智能体集合；切换器
+                    未开启时整块隐藏，避免文案泄漏未开放能力。 */}
+                {switcherEnabled
+                  ? <CollaborationOverview agents={visibleCards.map((card) => card.key)} />
+                  : null}
               </div>
             </>
           )}
@@ -211,12 +213,12 @@ function AgentCenterHeader({ currentTitle, description }: { currentTitle: ReactN
       <div className="flex items-start gap-2">
         <Bot className="mt-1 h-4 w-4 shrink-0 text-primary" />
         <div className="min-w-0">
-          <div className="flex flex-wrap items-baseline gap-2">
-            <h1 className="text-lg font-semibold tracking-tight text-foreground">{t('centerTitle')}</h1>
+          <div className="flex flex-wrap items-baseline gap-2" data-testid="agent-center-breadcrumb">
+            <h1 className="text-lg font-semibold tracking-tight text-foreground" data-testid="agent-center-breadcrumb-root">{t('centerTitle')}</h1>
             <span className="text-sm text-muted-foreground">/</span>
-            <span className="text-sm font-medium text-muted-foreground">{currentTitle}</span>
+            <span className="text-sm font-medium text-muted-foreground" data-testid="agent-center-breadcrumb-current">{currentTitle}</span>
           </div>
-          <p className="mt-1 max-w-4xl text-xs leading-5 text-muted-foreground">{description}</p>
+          <p className="mt-1 max-w-4xl text-xs leading-5 text-muted-foreground" data-testid="agent-center-page-description">{description}</p>
         </div>
       </div>
     </section>
@@ -442,11 +444,16 @@ function AgentCard({ card, numberFmt }: { card: AgentCenterCard; numberFmt: Intl
           }
           value={formatRate(card.hit_rate)}
         />
-        <Metric label={t('metrics.stage')} value={stageLabel} />
+        <Metric label={t('metrics.stage')} value={stageLabel} testId={`agent-center-stage-${card.key}`} />
       </CardContent>
       <CardFooter className="mt-4 gap-2 border-t border-gray-100 px-4 py-3">
+        {/* 三个分支共用同一个 data-testid 族：卡片底部**恒有且只有一个**操作入口，
+            但它的 role 随授权状态而变（未授权=禁用的原生 <button>，已授权=渲染成
+            <a> 的链接，未开通=锁定按钮）。E2E 要断"每卡只提供一个配置入口"时，
+            按 role 定位会随环境授权状态时红时绿；testid 是唯一稳定的锚点。
+            纯定位标记，不参与任何渲染逻辑。 */}
         {locked ? (
-          <Button size="xs" variant="outline" disabled>
+          <Button size="xs" variant="outline" disabled data-testid={`agent-card-action-${card.key}`}>
             <Lock className="h-4 w-4" />
             {t('actions.locked')}
           </Button>
@@ -456,13 +463,14 @@ function AgentCard({ card, numberFmt }: { card: AgentCenterCard; numberFmt: Intl
             variant="outline"
             className="w-full bg-cyan-50 shadow-none"
             nativeButton={false}
+            data-testid={`agent-card-action-${card.key}`}
             render={<Link href={presentation.configHref} />}
           >
             <Settings className="h-3.5 w-3.5" />
             {t('actions.configure')}
           </Button>
         ) : (
-          <Button size="xs" variant="outline" className="w-full" disabled>
+          <Button size="xs" variant="outline" className="w-full" disabled data-testid={`agent-card-action-${card.key}`}>
             <Settings className="h-3.5 w-3.5" />
             {t('actions.configure')}
           </Button>
@@ -472,17 +480,25 @@ function AgentCard({ card, numberFmt }: { card: AgentCenterCard; numberFmt: Intl
   );
 }
 
-function Metric({ label, value }: { label: ReactNode; value: ReactNode }) {
+function Metric({ label, value, testId }: { label: ReactNode; value: ReactNode; testId?: string }) {
   return (
     <div className="flex items-center justify-between gap-4 text-sm">
       <div className="text-muted-foreground">{label}</div>
-      <div className="font-medium text-foreground">{value}</div>
+      <div className="font-medium text-foreground" data-testid={testId}>{value}</div>
     </div>
   );
 }
 
-function CollaborationOverview() {
+export function CollaborationOverview({ agents }: { agents: AgentCenterKey[] }) {
   const t = useTranslations('agentCenterOverview');
+  if (agents.length === 0) return null;
+
+  const gridColumns = agents.length >= 3
+    ? 'md:grid-cols-3'
+    : agents.length === 2
+      ? 'md:grid-cols-2'
+      : 'md:grid-cols-1';
+
   return (
     <details
       data-testid="agent-center-collaboration"
@@ -497,13 +513,17 @@ function CollaborationOverview() {
       </summary>
       <div className="border-t border-border px-3 py-3">
         <p className="mb-3 text-xs leading-5 text-muted-foreground">{t('collaboration.description')}</p>
-        <div className="grid gap-2 md:grid-cols-3">
-        {(['phishing', 'spoofing', 'threat-retro'] as AgentCenterKey[]).map((key) => (
-          <div key={key} className="rounded border border-border bg-muted/20 p-2">
-            <div className="text-xs font-medium text-foreground">{t(`collaboration.${key}.title`)}</div>
-            <div className="mt-1 text-[11px] leading-4 text-muted-foreground">{t(`collaboration.${key}.body`)}</div>
-          </div>
-        ))}
+        <div className={`grid gap-2 ${gridColumns}`}>
+          {agents.map((key) => (
+            <div
+              key={key}
+              data-testid={`agent-center-collaboration-${key}`}
+              className="rounded border border-border bg-muted/20 p-2"
+            >
+              <div className="text-xs font-medium text-foreground">{t(`collaboration.${key}.title`)}</div>
+              <div className="mt-1 text-[11px] leading-4 text-muted-foreground">{t(`collaboration.${key}.body`)}</div>
+            </div>
+          ))}
         </div>
       </div>
     </details>

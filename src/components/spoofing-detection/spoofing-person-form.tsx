@@ -63,6 +63,14 @@ function clamp(n: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, n));
 }
 
+function effectiveMode(e: SpoofPersonDTO | null): SpoofDispositionMode {
+  if (e?.observe_mode) return 'observe';
+  if (e?.disposition?.mode && e.disposition.mode !== 'observe') return e.disposition.mode;
+  if (e?.disposition?.action === 'quarantine') return 'standard';
+  if (e?.disposition?.action === 'reject' || e?.disposition?.action === 'discard') return 'strict';
+  return e ? 'custom' : 'standard';
+}
+
 async function listAllSpoofPersons(apiRequest: Parameters<typeof listSpoofPersons>[1]) {
   const pageSize = 100;
   const first = await listSpoofPersons({ page: 1, page_size: pageSize }, apiRequest);
@@ -85,7 +93,7 @@ function initFromEditing(e: SpoofPersonDTO | null) {
     legitEmails: e?.legit_emails?.length
       ? e.legit_emails.map((x) => ({ ...x }))
       : ([] as SpoofLegitEmail[]),
-    mode: (e?.disposition?.mode ?? 'standard') as SpoofDispositionMode,
+    mode: effectiveMode(e),
     action: (e?.disposition?.action ?? 'quarantine') as SpoofDispositionAction,
     markStyle: (e?.disposition?.mark_style ?? (['subject'] as SpoofMarkPosition[])),
     markText: e?.disposition?.mark_text ?? '',
@@ -234,7 +242,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
         admin_emails: adminList.length ? adminList : undefined,
       },
       enabled: editing?.enabled ?? true,
-      observe_mode: editing?.observe_mode ?? false,
+      observe_mode: mode === 'observe',
     };
   }
 
@@ -376,9 +384,9 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
   return (
     <>
     <Sheet open={open} onOpenChange={(next) => next ? onOpenChange(true) : requestClose()}>
-      <SheetContent side="right" className="flex max-w-[80vw] flex-col gap-0 p-0 data-[side=right]:w-[80vw]">
+      <SheetContent side="right" className="flex max-w-[80vw] flex-col gap-0 p-0 data-[side=right]:w-[80vw]" data-testid="spoof-person-form">
         <SheetHeader className="border-b px-6 py-4">
-          <SheetTitle className="flex items-center gap-2">
+          <SheetTitle className="flex items-center gap-2" data-testid="spoof-person-form-title">
             <ChevronLeft className="h-5 w-5 text-muted-foreground" />
             {isEdit ? tsd('personForm.editTitle') : tsd('personForm.addTitle')}
           </SheetTitle>
@@ -946,65 +954,6 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
             </button>
           ))}
         </div>
-
-        {/* Observe sub-panel */}
-        {mode === 'observe' ? (
-          <div className="space-y-4 rounded-lg border border-border/60 bg-muted/30 p-4">
-            <div className="space-y-2">
-              <Label>{tsd('personForm.markStyle')}</Label>
-              <RadioGroup
-                value={markPos}
-                onValueChange={(v) => setMarkStyle([v as SpoofMarkPosition])}
-                className="flex flex-col gap-2"
-              >
-                {MARK_POSITIONS.map((p) => (
-                  <label key={p} className="flex items-center gap-2 cursor-pointer text-sm">
-                    <RadioGroupItem value={p} id={`mark-${p}`} />
-                    {tsd(`personForm.mark${p.charAt(0).toUpperCase()}${p.slice(1)}`)}
-                  </label>
-                ))}
-              </RadioGroup>
-            </div>
-            <div className="space-y-1.5">
-              <Input value={markText} onChange={(e) => setMarkText(e.target.value)} placeholder="[Spoof Alert]" />
-            </div>
-            {/* Mark preview */}
-            <div className="space-y-1.5">
-              <p className="text-xs font-medium text-muted-foreground">{tsd('personForm.markPreview')}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {MARK_POSITIONS.map((p) => (
-                  <div key={p} className={cn(
-                    "rounded border p-2 space-y-1.5 text-[10px] transition-opacity",
-                    markPos === p
-                      ? "border-blue-400 bg-blue-50/50 dark:bg-blue-950/20"
-                      : "border-border opacity-40"
-                  )}>
-                    <p className="font-medium uppercase tracking-wide text-muted-foreground">
-                      {tsd(`personForm.mark${p.charAt(0).toUpperCase()}${p.slice(1)}`)}
-                    </p>
-                    {p === 'subject' && (
-                      <p className="truncate">
-                        <span className="text-blue-600 dark:text-blue-400">{markText || '[Alert]'}</span>
-                        {' '}Re: Meeting
-                      </p>
-                    )}
-                    {p === 'header' && (
-                      <p className="font-mono text-amber-700 dark:text-amber-400 truncate">
-                        X-Spoof: detected
-                      </p>
-                    )}
-                    {p === 'banner' && (
-                      <div className="inline-flex items-center gap-1 rounded bg-rose-100 px-1 py-0.5 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
-                        <AlertTriangle className="h-3 w-3" />
-                        {tsd('personForm.modeObserve')}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : null}
 
         {/* Standard sub-panel */}
         {mode === 'standard' ? (

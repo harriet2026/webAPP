@@ -166,20 +166,20 @@ export function SpoofingOverviewPage() {
     <div className="space-y-4">
       <SpoofingKpiCards stats={statsQuery.data} isLoading={statsQuery.isLoading} onCategoryClick={applyCategory} />
 
-      <section>
+      <section data-testid="spoof-detection-logs-section">
         <h3 className="mb-3 text-sm font-medium text-foreground/80">{tsd('detectionLogs')}</h3>
         <div className="mb-3 rounded-lg border border-border bg-card p-4">
           <SpoofingLogFilters value={filters} onChange={setFilters} onReset={handleReset} onSearch={doSearch} />
         </div>
 
         <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span>
+          <span data-testid="spoof-log-total">
             {tsd('table.totalPrefix')}
-            <span className="font-medium text-foreground">{totalLogs}</span>
+            <span className="font-medium text-foreground" data-testid="spoof-log-total-value">{totalLogs}</span>
             {tsd('table.totalSuffix')}
           </span>
           {applied.category.length > 0 ? (
-            <Badge variant="secondary" className="gap-1 font-normal">
+            <Badge variant="secondary" className="gap-1 font-normal" data-testid="spoof-log-category-badge">
               {tsd(`category.${applied.category[0]}`)}
               <button onClick={() => applyCategory('all')}><X className="h-3 w-3" /></button>
             </Badge>
@@ -194,7 +194,7 @@ export function SpoofingOverviewPage() {
           onBlock={handleRowBlock}
           onExempt={handleRowExempt}
         />
-        <div className="mt-3">
+        <div className="mt-3" data-testid="spoof-log-pagination">
           <ServerPagination
             page={page}
             pageSize={PAGE_SIZE}

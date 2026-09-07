@@ -138,7 +138,7 @@ export function DeliveryTab({ range, direction }: DeliveryTabProps) {
   }, [bounceData, t]);
 
   if (isLoading) {
-    return <Skeleton className="h-[600px] w-full rounded-lg" />;
+    return <Skeleton data-testid="monitor-mailflow-delivery-skeleton" className="h-[600px] w-full rounded-lg" />;
   }
 
   if (isError && !data) {
@@ -208,6 +208,7 @@ export function DeliveryTab({ range, direction }: DeliveryTabProps) {
                     <TableRow
                       key={d.domain}
                       data-testid={`monitor-mailflow-bounce-row-${d.domain}`}
+                      data-level={critical ? 'critical' : 'normal'}
                       className={critical ? 'bg-red-50 dark:bg-red-950/40' : undefined}
                     >
                       <TableCell className="font-medium">{d.domain}</TableCell>
