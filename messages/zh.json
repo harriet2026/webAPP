@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒���������������������件检测�������������������能�������������",
+    "spoofingDetection": "仿冒�����������������������件检测�������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1181,7 +1181,7 @@
     "quarantine": "隔离",
     "sideline": "旁路",
     "accept": "接收",
-    "reject": "拒绝",
+    "reject": "��绝",
     "discard": "丢弃",
     "audit": "审核",
     "timeoutMinutes": "超时(分��)",
@@ -1333,7 +1333,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展���该规则���每个模块的配置，���色为「继承全局」，彩色��「另行配置」。",
+    "configDetailHint": "按阶段流��线顺序展���该规则���每个模块的配置，���色为「继承全局」，彩色��「另行配置」。",
     "priorityHintAria": "优�����级说明",
     "name": "名称",
     "targetGroups": "�����������",
@@ -1652,7 +1652,7 @@
     "retryCount": "���试次数",
     "delete": "删除",
     "confirmDelete": "确定要删除此��路��件吗？",
-    "noItems": "无旁路邮件",
+    "noItems": "无旁路邮��",
     "statusPending": "待处理",
     "statusProcessing": "处理中",
     "statusQuarantined": "已隔离",
@@ -2444,7 +2444,7 @@
     "location": "归属地",
     "stats": {
       "total": "认证���次���",
-      "successRate": "认证成功率",
+      "successRate": "���证成功率",
       "failed": "认证失败数"
     },
     "protocols": {
@@ -2928,7 +2928,7 @@
     "createDescription": "基于邮件日志发起一次 Agent 调查。当前前端先开放已落地的邮件调查 Agent。",
     "createSuccess": "调查任务已创建",
     "launch": "启动调查",
-    "launchForMailLog": "对此邮件启动 Agent 调查",
+    "launchForMailLog": "对此邮件��动 Agent 调查",
     "mailDetailTitle": "Agent 调查",
     "mailDetailDescription": "无需离开邮件详情弹窗，即可直接发起调查并查看这封邮件最近的调查记录。",
     "openFullPage": "打开完整页面",
@@ -3512,7 +3512,7 @@
     "scopeFilter": "作用范围",
     "statusFilter": "状态",
     "resetFilters": "重置",
-    "priorityConflict": "优先级 {priority} 已被规则「{name}」占用，建议保持唯一",
+    "priorityConflict": "优先级 {priority} 已被规则「{name}」占用，建议保持唯��",
     "priorityConflictNew": "优先级 {priority} 已被其他规则占用，建议保持唯一",
     "activate": "启用",
     "deactivate": "停用",
@@ -3812,7 +3812,7 @@
     "importJsonNotEnvelope": "不是有效的规则导出文件���缺少 data.rules）",
     "importJsonWrongScope": "不是 IP 黑白名单的导出文件",
     "importJsonEmpty": "导出文件中没有规则",
-    "importJsonBadRule": "规��数据不完整或非 IP 规���",
+    "importJsonBadRule": "规��数据不完��或非 IP 规���",
     "importListTypeMismatch": "名单类型与���前页不符",
     "importExpressionUnsupported": "表达��规则不支持批量导入，请手动创建"
   },
@@ -4391,7 +4391,7 @@
     "scopeDisplayAttachmentTypes": "附件类型",
     "scopeDisplayUrls": "URL",
     "attachmentContentUnavailable": "附件内容匹配仅由旁路扫描器提供，当前编辑器暂不能配置。",
-    "legacyScopesPreserved": "此规则保留了 {count} 个简化编辑器未展示的兼容作用域。",
+    "legacyScopesPreserved": "此规则保留了 {count} 个简化编辑器未展示的兼容作用���。",
     "headerOnlyTagHint": "标记��添加邮件头，不会修改邮件主题。",
     "headerRequired": "请同时填写邮件头名称和值",
     "contentGroup": "内容组",
@@ -5277,10 +5277,11 @@
         "discard": "丢弃"
       },
       "riskAttachmentPolicyLabel": "附加策略",
-      "riskAttachmentPolicyOptions": {
-        "mark": "标记",
-        "discard": "丢弃附件"
-      },
+  "riskAttachmentPolicyOptions": {
+  "none": "不设置",
+  "mark": "标记",
+  "discard": "丢弃附件"
+  },
       "markLocationLabel": "标记位置",
       "markLocationOptions": {
         "subject": "主题",
@@ -5983,7 +5984,7 @@
       "conditionRelation": "组内条件关系",
       "groupLabel": "条件组 {n}",
       "deleteGroup": "删���条件组 {n}",
-      "groupLimit": "最多可添加 {n} 个���件组",
+      "groupLimit": "最多可添加 {n} 个�����件组",
       "operator": "运算符",
       "operators": {
         "eq": "等于",
@@ -6520,7 +6521,7 @@
         "hitDetail": "命中详情",
         "detectionTags": "检测标签",
         "viewBasisDetail": "查看依据详情",
-        "viewPolicyConfigTitle": "前往策略配置页",
+        "viewPolicyConfigTitle": "前往策略���置页",
         "platformPolicyModule": "平台管控策略",
         "platformPolicyRuleName": "平台统一管控",
         "platformPolicyHitDetail": "该邮件由平台连接层策略拦截���如需了解详情请联系平台管理员",
@@ -7794,7 +7795,7 @@
       "forbiddenTitle": "无权查看邮件安全总览",
       "forbiddenDescription": "当前账号缺少统计查看权限，请联系管理员授权后重试。",
       "loadFailedTitle": "邮件安全总览加载失败",
-      "loadFailedDescription": "服务暂时不可用或网络异常，请稍后重试。",
+      "loadFailedDescription": "服务暂时不可用或网络异常，���稍后重试。",
       "retry": "重新加载",
       "retrying": "正在重试…"
     },
@@ -9179,7 +9180,7 @@
       "sectionIdentity": "身份信息",
       "sectionBasicIdentity": "基础身份信息",
       "importIdentitySectionHint": "从组织��构导入时自动填充",
-      "sectionDetection": "检测配置",
+      "sectionDetection": "检测配��",
       "sectionBatch": "批量数据",
       "sectionContacts": "组织架构导入",
       "sectionNotify": "通知设置",
@@ -10429,7 +10430,7 @@
       "passwordMaxAgeDays": "0 表示永不过期",
       "maxOnline": "0 表示不限制",
       "overflowPolicy": "「拒绝新登录」更严：合法会话在线时，攻击者的新登录会被直接拒绝",
-      "lockoutMinutes": "-1 = 永久��定，只能由管理员在用户列表里手工解锁",
+      "lockoutMinutes": "-1 = 永久��定，只能由管理员在用户列表里���工解锁",
       "captchaAfterFailures": "连续失败达该次数后，后续登录需输入图形验证码",
       "twoFactorEnabled": "启用后，本租户全体成员登录需进行二次认证",
       "twoFactorLocked": "平台已强制启用二次认证，本租户无法关闭",
@@ -10465,7 +10466,7 @@
   "recipientCheck": {
     "banner": "在 RCPT TO 阶段检测收件人地���，防范目���收割攻击（DHA）、邮件轰炸及域内横向钓鱼",
     "module": {
-      "enabled": "已启用",
+      "enabled": "已启���",
       "disabled": "已禁用",
       "switchLabel": "模块启用开关"
     },
@@ -11017,7 +11018,7 @@
       "system_baseline_no_create": "系统基线规则不能通过接口创建",
       "system_baseline_no_edit": "系统基线规则不能由租户管理员编辑",
       "tag_required": "标记类规则至少要���定一个标记",
-      "tenant_config_managed": "该规则由租户附件安全设置管理，无法直接修改，请前往附件安全设置页编辑",
+      "tenant_config_managed": "该���则由租户附件安全设置管理，无法直接修改，请前往附件安全设置页编辑",
       "tenant_context_required": "该操作需要先选择租户",
       "valid_range_invalid": "生效结束时间不能早于开始时间"
     },
@@ -11030,7 +11031,7 @@
       "type_unsupported": "不支持的调查类型",
       "target_type_unsupported": "不支持的调查对象类型",
       "traceback_created_elsewhere": "威胁回溯任务由威胁回溯扫描创建，不能从此处新建",
-      "traceback_cancelled_elsewhere": "威胁回溯任务请在威胁回溯运行记��中取消"
+      "traceback_cancelled_elsewhere": "威胁回溯任务请在威胁��溯运行记��中取消"
     },
     "profile": {
       "user_not_found": "用户���存在",

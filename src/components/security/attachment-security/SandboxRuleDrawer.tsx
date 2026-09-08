@@ -58,7 +58,7 @@ const FILE_TYPE_CHILDREN: Record<(typeof FILE_TYPE_CATEGORY_KEYS)[number], strin
 const SANDBOX_DIRECTIONS: Direction[] = ['receive', 'send', 'internal'];
 
 const RISK_ACTION_OPTIONS: SandboxRiskAction[] = ['quarantine', 'audit', 'discard'];
-const ATTACHMENT_POLICY_OPTIONS: SandboxAttachmentPolicy[] = ['mark', 'discard'];
+const ATTACHMENT_POLICY_OPTIONS: SandboxAttachmentPolicy[] = ['none', 'mark', 'discard'];
 const MARK_LOCATION_OPTIONS: SandboxMarkLocation[] = ['subject', 'header', 'body_start'];
 const TIMEOUT_ACTION_OPTIONS: SandboxTimeoutActionType[] = ['recall', 'notify_admin'];
 

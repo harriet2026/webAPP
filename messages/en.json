@@ -5272,6 +5272,7 @@
   },
       "riskAttachmentPolicyLabel": "Attachment Policy",
   "riskAttachmentPolicyOptions": {
+  "none": "Not set",
   "mark": "Mark",
   "discard": "Discard attachment"
   },

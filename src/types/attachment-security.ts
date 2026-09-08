@@ -100,10 +100,10 @@ export type SandboxRiskLevel = 'low' | 'medium' | 'high';
  * 选项。不含 accept，风险判定结果不应默认放行。 */
 export type SandboxRiskAction = 'quarantine' | 'audit' | 'discard';
 
-/** 附加策略：对命中风险的附件本身进行标记，或直接丢弃该附件，同样不提供
- * "不设置"选项。与执行动作（隔离/审核/丢弃整封邮件）互为独立维度，可同时
- * 生效。 */
-export type SandboxAttachmentPolicy = 'mark' | 'discard';
+/** 附加策略：对命中风险的附件本身进行标记，或直接丢弃该附件；也可选择
+ * "不设置"，表示不对附件本身做任何额外处理，仅按执行动作处置整封邮件。
+ * 与执行动作（隔离/审核/丢弃整封邮件）互为独立维度，可同时生效。 */
+export type SandboxAttachmentPolicy = 'none' | 'mark' | 'discard';
 
 /** 标记生效位置，仅在附加策略为“标记”时有效，可任意组合勾选（含 0 项）。 */
 export type SandboxMarkLocation = 'subject' | 'header' | 'body_start';
