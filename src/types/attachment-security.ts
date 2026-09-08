@@ -96,13 +96,14 @@ export interface ActiveContentConfig {
 /** 沙箱判定风险等级：低危 / 中危 / 高危三档，分别独立配置处置动作。 */
 export type SandboxRiskLevel = 'low' | 'medium' | 'high';
 
-/** 风险等级处置动作：隔离 / 审核 / 丢弃，或不设置（none）。不含 accept，
- * 风险判定结果不应默认放行。 */
-export type SandboxRiskAction = 'quarantine' | 'audit' | 'discard' | 'none';
+/** 风险等级处置动作：隔离 / 审核 / 丢弃，三档均为强制处置，不提供"不设置"
+ * 选项。不含 accept，风险判定结果不应默认放行。 */
+export type SandboxRiskAction = 'quarantine' | 'audit' | 'discard';
 
-/** 附加策略：对命中风险的附件本身进行标记，或直接丢弃该附件，或不设置
- * （none）。与执行动作（隔离/审核/丢弃整封邮件）互为独立维度，可同时生效。 */
-export type SandboxAttachmentPolicy = 'mark' | 'discard' | 'none';
+/** 附加策略：对命中风险的附件本身进行标记，或直接丢弃该附件，同样不提供
+ * "不设置"选项。与执行动作（隔离/审核/丢弃整封邮件）互为独立维度，可同时
+ * 生效。 */
+export type SandboxAttachmentPolicy = 'mark' | 'discard';
 
 /** 标记生效位置，仅在附加策略为“标记”时有效，可任意组合勾选（含 0 项）。 */
 export type SandboxMarkLocation = 'subject' | 'header' | 'body_start';
@@ -113,16 +114,18 @@ export interface PlatformSandboxPolicy {
   analysis_timeout_seconds: number;
 }
 
-/** 超时/引擎不可用后的处置动作，三者可任意组合勾选。 */
-export type SandboxTimeoutActionType = 'recall' | 'notify_admin' | 'notify_recipient';
+/** 超时/引擎不可用后的处置动作，二者可任意组合勾选，均非必选：不勾选任何
+ * 动作时默认按原有检测流程继续下一步，不额外处置（不再提供"通知收件人"
+ * 选项）。 */
+export type SandboxTimeoutActionType = 'recall' | 'notify_admin';
 
 /** 单个风险等级的处置配置：执行动作 + 附加策略两个独立维度，附加策略为
- * “标记”时可再选择标记生效位置。执行动作与附加策略至少设置一个（不可同
- * 时为 none）。 */
+ * “标记”时可再选择标记生效位置。执行动作与附加策略均为必选项（三档风险
+ * 等级均不提供"不设置"选项）。 */
 export interface SandboxRiskLevelConfig {
-  /** 执行动作：隔离 / 审核 / 丢弃 / 不设置（作用于整封邮件的处置）。 */
+  /** 执行动作：隔离 / 审核 / 丢弃（作用于整封邮件的处置，必选）。 */
   action: SandboxRiskAction;
-  /** 附加策略：标记 / 丢弃附件 / 不设置（作用于命中风险的附件本身）。 */
+  /** 附加策略：标记 / 丢弃附件（作用于命中风险的附件本身，必选）。 */
   attachment_policy: SandboxAttachmentPolicy;
   /** 标记生效位置，仅 attachment_policy 为 'mark' 时生效。 */
   mark_locations: SandboxMarkLocation[];
@@ -135,8 +138,8 @@ export interface SandboxRiskActionConfig {
   high: SandboxRiskLevelConfig;
 }
 
-/** 超时处置配置：超时阈值 + 可组合的超时动作集合。通知收件人使用系统默认
- * 通知模板，不在本模块内配置模板内容。 */
+/** 超时处置配置：超时阈值 + 可组合的超时动作集合。actions 允许为空数组，
+ * 不勾选任何动作时表示不额外处置，检测流程默认继续下一步。 */
 export interface SandboxTimeoutConfig {
   actions: SandboxTimeoutActionType[];
   /** 启用通知管理员时使用的管理员邮箱地址。 */

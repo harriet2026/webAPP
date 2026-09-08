@@ -5268,14 +5268,12 @@
   "riskActionOptions": {
   "quarantine": "Quarantine",
   "audit": "Review",
-  "discard": "Discard",
-  "none": "None"
+  "discard": "Discard"
   },
       "riskAttachmentPolicyLabel": "Attachment Policy",
   "riskAttachmentPolicyOptions": {
   "mark": "Mark",
-  "discard": "Discard attachment",
-  "none": "None"
+  "discard": "Discard attachment"
   },
   "markLocationLabel": "Mark locations",
   "markLocationOptions": {
@@ -5283,16 +5281,15 @@
   "header": "Header",
   "body_start": "Start of body"
   },
-      "riskActionHint": "Each of the three risk levels has its own independent action and attachment policy; at least one of the two must be set",
+      "riskActionHint": "Each of the three risk levels has its own independent action and attachment policy; both are required",
       "timeoutSecLabel": "Sandbox Analysis Timeout",
       "timeoutActionLabel": "Action on Timeout / Engine Unavailable",
-      "timeoutActionHint": "Select any combination; selected actions run in sequence",
+      "timeoutActionHint": "Select any combination; selected actions run in sequence. If none is selected, detection continues to the next step by default after timeout.",
+      "timeoutActionOptionalHint": "Optional. If left unchecked, detection continues to the next step by default after timeout.",
       "timeoutAction": {
         "recall": "Recall message",
-        "notify_admin": "Notify administrator",
-        "notify_recipient": "Notify recipient"
+        "notify_admin": "Notify administrator"
       },
-      "timeoutActionNotifyHint": "Notifying the recipient uses the system's default notification template",
       "timeoutAdminEmailLabel": "Administrator email",
       "timeoutAdminEmailPlaceholder": "Enter administrator email",
       "enabledLabel": "Enable this rule",
@@ -5300,10 +5297,8 @@
         "needName": "Please enter a rule name",
         "needDirection": "Select at least one detection direction",
         "needFileTypeOrExt": "Select at least one preset file type category or enter one custom extension",
-        "needTimeoutAction": "Select at least one timeout disposal action",
         "needAdminEmail": "Enter an administrator email",
         "invalidAdminEmail": "Enter a valid administrator email",
-        "needRiskAction": "Set at least one of action or attachment policy",
         "invalidExtFormat": "Custom extensions must start with \".\"",
         "duplicateExt": "This extension has already been added"
       },

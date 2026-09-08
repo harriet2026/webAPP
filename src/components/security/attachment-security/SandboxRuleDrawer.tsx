@@ -57,14 +57,10 @@ const FILE_TYPE_CHILDREN: Record<(typeof FILE_TYPE_CATEGORY_KEYS)[number], strin
  * 实现一个多选分段控件，不改动共享的 `DirectionSwitcher`。 */
 const SANDBOX_DIRECTIONS: Direction[] = ['receive', 'send', 'internal'];
 
-const RISK_ACTION_OPTIONS: SandboxRiskAction[] = ['quarantine', 'audit', 'discard', 'none'];
-const ATTACHMENT_POLICY_OPTIONS: SandboxAttachmentPolicy[] = ['mark', 'discard', 'none'];
+const RISK_ACTION_OPTIONS: SandboxRiskAction[] = ['quarantine', 'audit', 'discard'];
+const ATTACHMENT_POLICY_OPTIONS: SandboxAttachmentPolicy[] = ['mark', 'discard'];
 const MARK_LOCATION_OPTIONS: SandboxMarkLocation[] = ['subject', 'header', 'body_start'];
-const TIMEOUT_ACTION_OPTIONS: SandboxTimeoutActionType[] = [
-  'recall',
-  'notify_admin',
-  'notify_recipient',
-];
+const TIMEOUT_ACTION_OPTIONS: SandboxTimeoutActionType[] = ['recall', 'notify_admin'];
 
 function emptyDraft(): SandboxRule {
   return {
@@ -257,9 +253,8 @@ export function SandboxRuleDrawer({
     if (draft.file_type_categories.length === 0 && draft.custom_extensions.length === 0) {
       next.fileType = t('errors.needFileTypeOrExt');
     }
-    if (draft.timeout.actions.length === 0) {
-      next.timeoutAction = t('errors.needTimeoutAction');
-    }
+    // 超时处置动作为可选项：不勾选任何动作时，超时后默认按原有检测流程继续
+    // 下一步，不再要求至少选择一项。
     if (draft.timeout.actions.includes('notify_admin')) {
       const adminEmail = draft.timeout.admin_email?.trim() ?? '';
       if (!adminEmail) {
@@ -268,22 +263,13 @@ export function SandboxRuleDrawer({
         next.adminEmail = t('errors.invalidAdminEmail');
       }
     }
-    const riskActionInvalidLevel = (['low', 'medium', 'high'] as const).find((level) => {
-      const cfg = draft.risk_actions[level];
-      return cfg.action === 'none' && cfg.attachment_policy === 'none';
-    });
-    if (riskActionInvalidLevel) {
-      next.riskAction = t('errors.needRiskAction');
-    }
     setErrors((e) => ({
       ...e,
       ...next,
       name: next.name ?? '',
       direction: next.direction ?? '',
       fileType: next.fileType ?? '',
-      timeoutAction: next.timeoutAction ?? '',
       adminEmail: next.adminEmail ?? '',
-      riskAction: next.riskAction ?? '',
     }));
     return Object.keys(next).length === 0;
   };
@@ -611,12 +597,7 @@ export function SandboxRuleDrawer({
                   </div>
                 ))}
               </div>
-              {draft.timeout.actions.includes('notify_recipient') && (
-                <p className="text-xs text-muted-foreground">{t('timeoutActionNotifyHint')}</p>
-              )}
-              {errors.timeoutAction && (
-                <p className="text-xs text-destructive">{errors.timeoutAction}</p>
-              )}
+              <p className="text-xs text-muted-foreground">{t('timeoutActionOptionalHint')}</p>
             </div>
           </div>
 

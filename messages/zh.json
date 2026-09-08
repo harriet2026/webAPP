@@ -362,7 +362,7 @@
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
-    "spoofingDetection": "仿冒�������������������件检测�������������������能�������������",
+    "spoofingDetection": "仿冒���������������������件检测�������������������能�������������",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
@@ -1333,7 +1333,7 @@
     "stagePrefix": "【阶段{stage}】",
     "expandConfig": "查看完整配置",
     "collapseConfig": "收起完整配置",
-    "configDetailHint": "按阶段流水线顺序展示该规则���每个模块的配置，���色为「继承全局」，彩色��「另行配置」。",
+    "configDetailHint": "按阶段流水线顺序展���该规则���每个模块的配置，���色为「继承全局」，彩色��「另行配置」。",
     "priorityHintAria": "优�����级说明",
     "name": "名称",
     "targetGroups": "�����������",
@@ -2207,7 +2207,7 @@
     "selectAll": "全选",
     "selectRow": "选择该行",
     "batchSelected": "已选 {count} 项",
-    "batchEnableTitle": "批量启���",
+    "batchEnableTitle": "���量启���",
     "batchEnableDescription": "确定批量启用选中的 {count} 个账号？",
     "batchDisableTitle": "批量停用",
     "batchDisableDescription": "确定批量停用选中的 {count} 个账号？停用��将立即终止其登录会话。",
@@ -2409,7 +2409,7 @@
       "subject": "邮件主题",
       "clientIp": "客户端 IP",
       "rewrittenUrl": "改写后链接",
-      "clickSource": "链接来源"
+      "clickSource": "链接来��"
     },
     "downloadErrors": {
       "invalidId": "下载失败：记录标识无效",
@@ -2974,7 +2974,7 @@
     "emptySkippedUrls": "暂无跳过 URL",
     "emptyRankedUrls": "暂无排序 URL",
     "emptyCandidateRules": "暂无候选规则",
-    "emptyCandidateRuleAnalysis": "暂无候选规则分析",
+    "emptyCandidateRuleAnalysis": "暂无候选规则��析",
     "emptyRecallCandidates": "暂无召回候选",
     "emptyTopSimilarMessages": "暂无相似邮件",
     "tabs": {
@@ -3349,7 +3349,7 @@
     "actionBlockDesc": "拒绝并退信",
     "actionDrop": "丢弃",
     "actionDropDesc": "直接删除不通知",
-    "flowControlLegend": "流程控制",
+    "flowControlLegend": "流程控��",
     "flowTerminate": "终止",
     "flowContinue": "继续",
     "aiSync": "AI同步",
@@ -4535,7 +4535,7 @@
       "pendingVerify": "待验证",
       "manage": "���理",
       "loading": "���载中…",
-      "selectTenant": "请��在页��顶部选择一个租户，再管理其 DKIM 外发签��。",
+      "selectTenant": "请��在页��顶部选择一个��户，再管理其 DKIM 外发签��。",
       "noDomains": "该租户暂无发信域名，请先在「租户域名管理」中添加域名后再配置签名。"
     },
     "flow": {
@@ -4750,7 +4750,7 @@
         "quarantine": "隔离",
         "audit": "审核"
       },
-      "reset": "重置为默认"
+      "reset": "��置为默认"
     },
     "action": {
       "review": "审核",
@@ -5119,7 +5119,7 @@
       "qrMaxCount": "二维码最大数量",
       "qrDeepRoutesSection": "二维码深度路由配置",
       "urlCheck": "URL 检查",
-      "urlUnshorten": "URL 短链展开",
+      "urlUnshorten": "URL 短链展���",
       "keywordScope": "关键词范围",
       "advancedRules": "高级规则",
       "arbitration_highest_priority": "最高优先级",
@@ -5274,14 +5274,12 @@
       "riskActionOptions": {
         "quarantine": "隔离",
         "audit": "审核",
-        "discard": "丢弃",
-        "none": "不设置"
+        "discard": "丢弃"
       },
       "riskAttachmentPolicyLabel": "附加策略",
       "riskAttachmentPolicyOptions": {
         "mark": "标记",
-        "discard": "丢弃附件",
-        "none": "不设��"
+        "discard": "丢弃附件"
       },
       "markLocationLabel": "标记位置",
       "markLocationOptions": {
@@ -5289,16 +5287,15 @@
         "header": "信头",
         "body_start": "邮件正文开头"
       },
-      "riskActionHint": "三档风险等级分别独立配置执行动作与附加策略，两者至少设置一项",
+      "riskActionHint": "三档风险等级分别独立配置执行动作与附加策略，均为必选项",
       "timeoutSecLabel": "沙箱分析超时时间",
       "timeoutActionLabel": "超时/引擎不可用后的处置",
-      "timeoutActionHint": "可任意组合勾选，将依次执行",
+      "timeoutActionHint": "可任意组合勾选，将依次执行；不选择时超时后默认继续下一步检测流程",
+      "timeoutActionOptionalHint": "本项非必选，不勾选时超时后默认继续下一步检测流程",
       "timeoutAction": {
         "recall": "召回邮件",
-        "notify_admin": "通知管理员",
-        "notify_recipient": "通知收件人"
+        "notify_admin": "通知管理员"
       },
-  "timeoutActionNotifyHint": "通知收件人使用系统默认通知模板",
   "timeoutAdminEmailLabel": "管理员邮箱",
   "timeoutAdminEmailPlaceholder": "请输入管理员邮箱",
   "enabledLabel": "启用此规则",
@@ -5306,10 +5303,8 @@
   "needName": "请填写规则名称",
   "needDirection": "请至少选择一个检测方向",
   "needFileTypeOrExt": "请至少选择一个预置文件类型分类或填写一个自定义扩展名",
-  "needTimeoutAction": "请至少选择一项超时处置动作",
   "needAdminEmail": "请输入管理员邮箱",
   "invalidAdminEmail": "请输入有效的管理员邮箱",
-  "needRiskAction": "执行动作和附加策略至少需要设置一项",
   "invalidExtFormat": "自定义扩展名需以 \".\" 开头",
   "duplicateExt": "该扩展名已添加"
   },
@@ -5398,7 +5393,7 @@
       "toggleTip": "将邮件中的URL改写为网关代理链接，用户点击时实时检测",
       "directionSend": "发送方向",
       "directionInternal": "内部方向",
-      "publicBaseUrl": "点击主机名",
+      "publicBaseUrl": "��击主机名",
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
       "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
@@ -5710,7 +5705,7 @@
     "styleBlueTag": "蓝色标签",
     "styleOrangeWarning": "橙色警告",
     "stylePlainText": "纯文本",
-    "styleCustom": "自定义配色",
+    "styleCustom": "自定义配���",
     "customColorBg": "背景色",
     "customColorText": "文字色",
     "customColorBorder": "边框色",
@@ -6099,7 +6094,7 @@
       "mailType": "邮件类型",
       "corrected": "已纠正",
       "correctedTooltip": "原判定：{original} → 纠正为：{current}（{source}）",
-      "action": "执行动作",
+      "action": "执行��作",
       "status": "邮件状���",
       "operations": "操作",
       "view": "查看",
@@ -6529,7 +6524,7 @@
         "platformPolicyModule": "平台管控策略",
         "platformPolicyRuleName": "平台统一管控",
         "platformPolicyHitDetail": "该邮件由平台连接层策略拦截���如需了解详情请联系平台管理员",
-        "platformPolicyListReason": "平台管控策略拦截"
+        "platformPolicyListReason": "平��管控策略拦截"
       },
       "delivery": {
         "noData": "暂无投递记录",
@@ -6757,7 +6752,7 @@
       "externalReminderAmberHint": "外部邮件提醒仅对判定为外部发件人的邮件生效",
       "forwardServerModeRedirect": "重定向 (redirect)",
       "modifyHeaderCustomFieldName": "自定义字段名",
-      "modifyHeaderDkimWarning": "修改信头可能破坏 SPF/DKIM 验证结果",
+      "modifyHeaderDkimWarning": "修改信头可能破��� SPF/DKIM 验证结果",
       "modifyHeaderNewValue": "新值",
       "modifyHeaderOperation": "操作类型",
       "modifyHeaderOperationDelete": "删除",
@@ -7216,7 +7211,7 @@
         "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命���高度相似域名；介于：命中差异落在指定区间的域名。",
         "example": "对象选择「公司主域名档案」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
         "recommended": "推荐使用「小于等于 2��，与内置相似域名规则一致，兼顾召回与误报。",
-        "note": "先选择受保护域��档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越��似。内置的相似域名规则用「小于等于 2」。"
+        "note": "先选择受保护域��档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5）���越小越��似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检测模块",
@@ -7372,7 +7367,7 @@
         "select": "从下拉选择固定结果值（如 pass / fail），或输入单个值做等于 / 不等于匹配。",
         "group": "从预置群组 / 档案���选择���象；* 表示任意对象。",
         "featureGroup": "选择一个特征组进行匹配。",
-        "orgDept": "从组织通讯录部门树中勾选一个或多个部门；勾选父部门会自动匹配其所有子部门的发信人。"
+        "orgDept": "从组织通讯录部门树中勾选一个或多个部门；勾��父部门会自动匹配其所有子部门的发信人。"
       }
     },
     "placeholder": {
@@ -7867,7 +7862,7 @@
       "subscription": "订阅资讯",
       "advertising": "广告邮件",
       "spam": "垃圾邮件",
-      "harmful": "有害内容邮件",
+      "harmful": "有害内容��件",
       "suspicious": "可疑邮件",
       "sensitive": "敏感内容邮件",
       "spoofing": "仿冒邮件",
@@ -8289,7 +8284,7 @@
       "fileType": "类型",
       "threatType": "威胁类型",
       "engine": "引擎",
-      "count": "检出次数",
+      "count": "检出���数",
       "viewSample": "查看样本",
       "viewSampleHelp": "跳转到邮件�����按此 MD5 过滤"
     },
@@ -8645,7 +8640,7 @@
       "liveStateHint": "邮件仍在旁路处理中，请在旁路队列处置",
       "mailContext": "邮件上下文",
       "sender": "发件人",
-      "recipients": "收件人",
+      "recipients": "收件��",
       "subject": "主题",
       "sidelinedAt": "旁路时间",
       "direction": "方向",
@@ -8698,7 +8693,7 @@
     "urlThreatType": {
       "phishing": "钓鱼链接",
       "suspicious": "可疑链接",
-      "malicious": "恶意链接",
+      "malicious": "恶意���接",
       "benign": "安全链接"
     },
     "urlEvidence": {
@@ -8950,7 +8945,7 @@
       "brand": "品牌保护"
     },
     "kpi": {
-      "todayDetected": "今日检测",
+      "todayDetected": "今日检���",
       "todayIntercepted": "今日拦截",
       "pendingReview": "待审核",
       "displaynameHits": "发信人名称仿冒",
@@ -9023,7 +9018,7 @@
       "empty": "暂无检测日志",
       "totalPrefix": "共 ",
       "totalSuffix": " 条",
-      "fallbackHint": "内联回退记录（已投���并标记），无可处置旁路件"
+      "fallbackHint": "内联���退记录（已投���并标记），无可处置旁路件"
     },
     "detail": {
       "title": "检测详情",
@@ -9183,7 +9178,7 @@
       "sectionSource": "数据来源",
       "sectionIdentity": "身份信息",
       "sectionBasicIdentity": "基础身份信息",
-      "importIdentitySectionHint": "从组织架构导入时自动填充",
+      "importIdentitySectionHint": "从组织��构导入时自动填充",
       "sectionDetection": "检测配置",
       "sectionBatch": "批量数据",
       "sectionContacts": "组织架构导入",
@@ -9359,7 +9354,7 @@
     },
     "kpi": {
       "runningTasks": "进行中任务",
-      "totalLeaks": "发现漏报",
+      "totalLeaks": "发��漏报",
       "pendingRecall": "待��认漏报",
       "todayRecalled": "召回成功",
       "recallSucceeded": "召回成功",
@@ -10125,7 +10120,7 @@
       "stepBasic": "基本信息",
       "stepTrigger": "触发条件",
       "stepNotification": "通知设置",
-      "stepAdvanced": "高级降噪",
+      "stepAdvanced": "高���降噪",
       "stepPreview": "规则预览",
       "saveAndTest": "保存并测试",
       "testUnavailable": "暂未开放",
@@ -10488,7 +10483,7 @@
         "internal": "域内方向"
       },
       "hint": {
-        "inbound": "（外部→内部）",
+        "inbound": "（外部→内���）",
         "outbound": "（内部→外部）",
         "internal": "（内部→内部）",
         "merged": "外发与域内合并累计计数，防止把收件人拆分到不同方向以规避阈值"
@@ -10816,7 +10811,7 @@
       "test_connection_required": "请先测试连接成功后再保存",
       "updated_at_required": "缺少数据版本信息，请刷新页面后重试",
       "upload_token_empty": "请先上传 CSV 文件",
-      "upload_token_invalid": "上传凭证无效或已过期，请重新上传 CSV 文件",
+      "upload_token_invalid": "上传凭证无效或已过期，请重新上传 CSV ���件",
       "user_file_empty": "上传的 CSV ���件为空",
       "user_file_missing": "请选择要上传的用户通讯录 CSV ��件",
       "user_file_read_failed": "读取上传的 CSV 文件失败，请确认文件未损坏��重试",
@@ -10918,7 +10913,7 @@
       "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
       "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
-      "rcpt_domain_regex_invalid": "收件域匹配的正则表达式不合法，请��查语法",
+      "rcpt_domain_regex_invalid": "收件域匹��的正则表达式不合法，请��查语法",
       "rcpt_match_invalid": "收件人匹配方式无效，只��是：{allowed}",
       "source_auth_required": "至少要��定一种来源认证方式：来源 IP 段或 SPF 校验",
       "tenant_domain_cross_tenant": "所选域名属于其他租户",
@@ -11021,7 +11016,7 @@
       "system_baseline_no_convert": "普通规则不能转换为系统基线规则",
       "system_baseline_no_create": "系统基线规则不能通过接口创建",
       "system_baseline_no_edit": "系统基线规则不能由租户管理员编辑",
-      "tag_required": "标记类规则至少要指定一个标记",
+      "tag_required": "标记类规则至少要���定一个标记",
       "tenant_config_managed": "该规则由租户附件安全设置管理，无法直接修改，请前往附件安全设置页编辑",
       "tenant_context_required": "该操作需要先选择租户",
       "valid_range_invalid": "生效结束时间不能早于开始时间"
