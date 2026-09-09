@@ -366,6 +366,7 @@
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
     "opsTopTrend": "运营 TOP 与趋势",
+    "ruleEffectiveness": "规则效能统计",
     "emailLogs": "邮件日志",
     "investigations": "Agent 调查",
     "tenantSystemManagement": "组织与成员",
@@ -698,7 +699,7 @@
         "sourceIpPlaceholder": "单IP/CIDR/多IP",
         "fromDomainPlaceholder": "模糊匹配",
         "rcptDomainPlaceholder": "模糊匹配",
-        "statusAll": "全部",
+        "statusAll": "全���",
         "statusEnabled": "启用",
         "statusDisabled": "禁用"
       },
@@ -1337,12 +1338,12 @@
     "configDetailClose": "关闭配置面板",
     "policyStateLabel": "策略状态",
     "globalRefTitle": "全局默认配置",
-    "globalRefInheritNote": "选择「继承全局配置」时，本群组该模块将采用以上默认值；选择其它状态则在此基础上覆盖。",
+    "globalRefInheritNote": "选择「继承全局配置」时，本群组该模块将采用以上默认值；选择其它状态则���此基础上覆盖。",
     "comingSoon": "敬请期待",
     "customParams": "自定义参数",
     "customSubChecks": "自定义子检查",
     "customComingSoonNote": "自定义参数覆盖待参数契约落地后开放；当前保存不支持该档位。",
-    "highRiskWarnTitle": "高风险操作警告",
+    "highRiskWarnTitle": "高��险操作警告",
     "highRiskWarnIntentEngine": "禁用意图引擎将大幅降低钓鱼邮件检测能力",
     "highRiskAck": "我已知晓风险",
     "overseasExemptReason": "豁免原因",
@@ -1482,7 +1483,7 @@
     "previewSimulationNote": "基于策略配置的模拟推演，实际处置以引擎判定为准。",
     "previewEmpty": "该群组暂无已启用的命中策略。",
     "previewHitBadge": "优先级 {priority} · {name}",
-    "previewIgnoredHigher": "注意：「{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线的固定顺序决定的，并非优先级失效。",
+    "previewIgnoredHigher": "注意：「{rules}」优先级数值更大（更优先），但其模块位于更后阶段，因此不会生效。这是阶段流水线���固定顺序决定的，并非优先级失效。",
     "previewNotExecuted": "未执行（前序已短路）",
     "previewShortCircuitPoint": "短路点 · {action}",
     "previewNoGroupConfig": "无群组配置（按全局执行）",
@@ -1646,7 +1647,7 @@
     "sidelineAsyncWarningOptOut": "⚠️ 该字段由「{label}」检查产出。默认运行。若所有收件人都被打上 {tag} 标签，该规则不会对那些邮件命中。",
     "pipelineEyebrow": "规则管理",
     "pipelineTitle": "规则流水线总览",
-    "pipelineSubtitle": "以数据流图展示各阶段的标签与动作规则，直观了解邮件从连接到投递的完整处理流程。"
+    "pipelineSubtitle": "以数据流图展示各阶段的标签与动作规则，直观了���邮件从连接到投递的完整处理流程。"
   },
   "quarantine": {
     "title": "隔离区",
@@ -2056,7 +2057,7 @@
       "activated": "租户已启用",
       "conflict": "该租户已被他人修改,请刷新后重试",
       "codeConflict": "租户编码已存在，请更换后重试",
-      "partial": "部分项未保存成功,请检查标红项"
+      "partial": "部分项未��存成功,请检查标红项"
     },
     "detail": {
       "primaryAdmin": "主管理员",
@@ -2241,7 +2242,7 @@
     "batchDisableTitle": "批量停用",
     "batchDisableDescription": "确定批量停用选中的 {count} 个账号？停用后将立即终止其登录会话。",
     "batchDeleteTitle": "批量删除",
-    "batchDeleteDescription": "确定批量删除选中的 {count} 个账号？此操作不可撤销。",
+    "batchDeleteDescription": "确定批量删除选中的 {count} 个账号？此操作不可撤销���",
     "batchSuccess": "批量操作成功",
     "rbac": {
       "searchPlaceholder": "搜索角色名称…",
@@ -2443,7 +2444,7 @@
     },
     "downloadErrors": {
       "invalidId": "下载失败：记录标识无效",
-      "notFound": "下载失败：记录不存在或已被清理",
+      "notFound": "下���失败：记录不存在或已被清理",
       "generic": "下载失败：服务端读取失败，请稍后重试"
     }
   },
@@ -4438,7 +4439,7 @@
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
     "keywordPlaceholder": "例如：机密|绝密|内部资料",
-    "keywordDividerHint": "多个关键词用竖线 | 分隔",
+    "keywordDividerHint": "��个关键词用竖线 | 分隔",
     "regexPlaceholder": "输入兼容 Go 的正则表达式",
     "runTest": "运行测试",
     "simulateTest": "模拟测试",
@@ -5127,7 +5128,7 @@
       "engineConfig": "引擎配置",
       "primaryEngine": "主引擎",
       "backupEngine": "备引擎",
-      "engineQianxin": "奇安信（国内病毒库覆盖好）",
+      "engineQianxin": "奇安信（国内病��库覆盖好）",
       "engineKaspersky": "卡巴斯基（国际病毒库覆盖好）",
       "engineQianxinShort": "奇安信",
       "engineKasperskyShort": "卡巴斯基",
@@ -5376,7 +5377,7 @@
     },
     "linkProtection": {
       "toggle": "链接保护",
-      "toggleTip": "将邮件中的URL改写为网关代理链接，用户点击时实时检测",
+      "toggleTip": "将邮件中的URL改写为网关��理链接，用户点击时实时检测",
       "directionSend": "发送方向",
       "directionInternal": "内部方向",
       "publicBaseUrl": "点击主机名",
@@ -5426,7 +5427,7 @@
       },
       "m2": {
         "title": "查询情报",
-        "desc": "查询本地与云端威胁情报库，命中已知恶意情报即拦截"
+        "desc": "查询本地与云端威胁情报库，命中已知���意情报即拦截"
       },
       "m3": {
         "title": "深度复检",
@@ -5533,7 +5534,7 @@
       "classification": "分类优先",
       "threshold": "分段阈值",
       "classificationDesc": "只要识别为该意图即执行处置，忽略置信度分数。",
-      "thresholdDesc": "根据置信度分数落入的区间执行不同处置动作。"
+      "thresholdDesc": "根据置信度分数落入��区间执行不同处置动作。"
     },
     "threshold": {
       "segment": "区间",
@@ -6349,7 +6350,7 @@
       "recallMailNotFound": "邮件记录不存在或已删除",
       "recallForbidden": "无权召回这封邮件",
       "redeliverSuccess": "重投请求已提交，投递结果稍后在状态中更新",
-          "deferredRetrying": "投递暂缓，系统自动重试中",
+          "deferredRetrying": "投递暂缓，系统自���重试中",
           "redeliverDialog": {
             "title": "重新投递",
             "body": "将对勾选的收件人重新投递这封邮件（使用系统保留的原文）。",
@@ -6422,7 +6423,7 @@
             "url": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。",
             "attachment_hash": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。"
           },
-          "confirm": "确认加黑",
+          "confirm": "确认��黑",
           "confirming": "正在创建…",
           "vtScore": "VirusTotal检测：{score}",
           "qrDetected": "二维码：是（{count}）",
@@ -6696,7 +6697,7 @@
         "copyFailed": "复制失败，请手动选择并复制",
         "loading": "正在加载原始日志...",
         "loadFailed": "原始日志加载失败，请稍后重试",
-        "empty": "暂无原始日志",
+        "empty": "暂无��始日志",
         "noMatch": "没有匹配的日志记录"
       }
     },
@@ -7133,12 +7134,12 @@
         "note": "抄送收件人可见此字段"
       },
       "desc_bcc": {
-        "source": "邮件头 BCC 字段",
+        "source": "邮件��� BCC 字段",
         "usage": "识别密送给哪些收件人",
         "note": "密送收件人通常不可见，仅发件人知晓"
       },
       "desc_body": {
-        "source": "邮件正文内容",
+        "source": "邮��正文内容",
         "usage": "过滤邮件正文中的敏感内容",
         "note": "支持文本和HTML格式，HTML会自动提取纯文本"
       },
@@ -7465,7 +7466,7 @@
       ],
       "formats": {
         "number": "填写整数阈值并配合比较方式使用；可点「应用推荐配置」一键填入常用值。",
-        "text": "每行一个值；按所选匹配方式（包含 / 等于 / 通配符 / 正则）进行匹配。",
+        "text": "���行一个值；按所选匹配方式（包含 / 等于 / 通配符 / 正则）进行匹配。",
         "mime": "每行一个 MIME 类型，如 application/zip；也可点下方常用类型快捷添加。",
         "cidr": "每行一个 IP 或 CIDR，如 192.168.1.0/24。",
         "time": "24 小时制时间区间，如 09:00 ~ 18:00。",
@@ -7793,7 +7794,7 @@
     "keyId": "密钥 ID",
     "keySecret": "密钥",
     "coremailAgent": "Coremail 代理",
-    "exchangeAgent": "Exchange 代理",
+    "exchangeAgent": "Exchange 代��",
     "keyIdPlaceholder": "输入密钥 ID",
     "keySecretPlaceholder": "输入密钥",
     "emailInvalid": "邮箱格式不正确，请输入如 user@example.com 的地址",
@@ -7829,7 +7830,7 @@
     "column": "DKIM",
     "none": "— 未配置",
     "noActive": "未启用",
-    "manage": "DKIM 管理",
+    "manage": "DKIM ��理",
     "manageTitle": "DKIM 管理 — {domain}",
     "manageDescription": "管理该发信域的 DKIM 签名密钥，并将公钥发布到公共 DNS。",
     "setupGuide": "DNS 发布教程",
@@ -8092,6 +8093,110 @@
       "medium": "中危",
       "high": "高危",
       "critical": "严重"
+    }
+  },
+  "ruleEffectiveness": {
+    "title": "规则效能统计",
+    "subtitle": "统计当前观察模式策略/规则的命中与拦截缺口，辅助判断是否转为正式生效",
+    "trendCardTitle": "观察命中趋势",
+    "noData": "暂无数据",
+    "error": {
+      "forbiddenTitle": "无权查看规则效能统计",
+      "forbiddenDescription": "当前账号缺少统计查看权限，请联系管理员授权后重试。",
+      "loadFailedTitle": "规则效能统计加载失败",
+      "loadFailedDescription": "服务暂时不可用或网络异常，请稍后重试。",
+      "retry": "重新加载",
+      "retrying": "正在重试…"
+    },
+    "kpi": {
+      "observingCount": "观察中对象数",
+      "totalHits": "观察期总命中数",
+      "wouldBlockCount": "拦截缺口数",
+      "avgObservedDays": "平均观察时长",
+      "pendingReviewCount": "待评估数",
+      "vsPrevious": "较上期",
+      "days": "天"
+    },
+    "filter": {
+      "timeRange": {
+        "today": "今天",
+        "7d": "近7天",
+        "30d": "近30天",
+        "custom": "自定义"
+      },
+      "customRange": {
+        "start": "开始日期",
+        "end": "结束日期",
+        "error": {
+          "invalid": "请选择起止日期",
+          "order": "结束日期不能早于开始日期",
+          "tooLong": "时间跨度不能超过 {max} 天"
+        }
+      },
+      "modules": {
+        "label": "策略模块",
+        "auth_spoofing": "身份认证与仿冒检测",
+        "similar_detection": "相似邮件检测",
+        "phishing_detection": "钓鱼检测智能体"
+      },
+      "durationBucket": {
+        "label": "观察时长",
+        "lt7": "小于7天",
+        "7to30": "7~30天",
+        "gt30": "超过30天"
+      }
+    },
+    "wouldBeActions": {
+      "reject": "拒绝",
+      "quarantine": "隔离",
+      "discard": "丢弃",
+      "bounce": "退信",
+      "sideline": "边列",
+      "recall": "召回",
+      "tag": "打标"
+    },
+    "timeoutAlert": {
+      "warning": "有 {count} 个观察对象已观察超过 {days} 天，建议评估是否转为正式生效",
+      "viewDetails": "查看",
+      "drawerTitle": "超时观察对象清单",
+      "observedDays": "已观察 {days} 天",
+      "hits": "命中 {count} 次",
+      "goToConfig": "前往策略配置"
+    },
+    "detail": {
+      "title": "效能明细",
+      "empty": "当前筛选条件下没有处于观察模式的策略/规则",
+      "expandRow": "展开查看动作分布",
+      "deletedSuffix": "（已删除）",
+      "deletedTooltip": "该规则已被删除，无法前往配置页",
+      "daysValue": "{days} 天",
+      "dataInsufficient": "样本不足",
+      "col": {
+        "module": "策略模块",
+        "subStrategy": "子策略/方向名称",
+        "observedSince": "观察起始时间",
+        "observedDays": "观察时长",
+        "hits": "命中数",
+        "wouldBlockCount": "拦截缺口数",
+        "falsePositiveRate": "误杀风险",
+        "suggestion": "系统建议",
+        "actions": "操作"
+      },
+      "tooltip": {
+        "wouldBlockCount": "若该规则不是观察模式，这些命中原本会被执行的拦截类动作（退信/隔离/丢弃/边列/召回）次数",
+        "falsePositiveRate": "基于处置中心已有处置结果派生：确认误判命中数 / 已判定命中数（按判定可信度加权）"
+      },
+      "suggestion": {
+        "confirm_promote": "建议转正式",
+        "keep_observing": "继续观察",
+        "needs_tuning": "建议调参",
+        "needs_more_data": "数据不足"
+      },
+      "viewHits": "查看命中详情",
+      "goToConfig": "前往策略配置"
+    },
+    "bottomActions": {
+      "exportCsv": "导出 CSV"
     }
   },
   "deliveryTraffic": {
@@ -8459,7 +8564,7 @@
       "7d": "近7天"
     },
     "refresh": "刷新",
-    "updatedAt": "数据更新时间",
+    "updatedAt": "数据��新时间",
     "noData": "暂无数据",
     "loadTimeout": "加载超时，请稍后重试",
     "retry": "重试",
@@ -9349,7 +9454,7 @@
       "sectionBasicIdentity": "基础身份信息",
       "importIdentitySectionHint": "从组织架构导入时自动填充",
       "sectionDetection": "检测配置",
-      "sectionBatch": "批量数据",
+      "sectionBatch": "批量��据",
       "sectionContacts": "组织架构导入",
       "sectionNotify": "通知设置",
       "modeObserveDesc": "仅记录观察命中，不拦截也不标记",
@@ -9908,7 +10013,7 @@
     },
     "delete": {
       "title": "删除策略",
-      "description": "将删除策略「{name}」，此操作不可撤销。已有任务和已入队通知仍会按冻结配置继续执行。",
+      "description": "将删���策略「{name}」，此操作不可撤销。已有任务和已入队通知仍会按冻结配置继续执行。",
       "confirm": "删除",
       "cancel": "取消"
     },
@@ -10076,7 +10181,7 @@
     "selectRowAria": "选择 {name}",
     "selectTenantDesc": "请使用上方的租户选择器选择租户后，再管理组织通讯录。",
     "selectTenantPlaceholder": "选择租户",
-    "selectTenantTitle": "请先选择租户",
+    "selectTenantTitle": "请先选择租���",
     "selected": "已选 {count} 条",
     "serverPlaceholder": "如 ldap.corp.com",
     "sheetDesc": "配置通讯录数据来源，保存前需完成连接测试",
@@ -10486,7 +10591,7 @@
   },
   "platformSecurity": {
     "title": "平台安全策略",
-    "subtitle": "平台级安全基线，作用于所有租户。以下策略仅平台管理员可配置，租户管理员不可见、不可修改。",
+    "subtitle": "平台级安全基线，���用于所有租户。以下策略仅平台管理员可配置，租户管理员不可见、不可修改。",
     "accessDenied": "仅平台管理员可访问。",
     "tabs": {
       "ipStrategy": "IP 策略",
@@ -10832,7 +10937,7 @@
       "scanThroughput": "扫描吞吐量（封/秒）",
       "averageLatency": "平均耗时（毫秒）",
       "queueBacklog": "队列积压",
-      "attachmentThroughput": "附件吞吐量（附件/秒）",
+      "attachmentThroughput": "附件吞���量（附件/秒）",
       "largeFileTimeout": "大文件超时",
       "nodeName": "节点名称",
       "nodeStatus": "节点状态",
@@ -11213,7 +11318,7 @@
     "profile": {
       "user_not_found": "用户不存在",
       "session_not_found": "登录会话不存在或已失效",
-      "session_id_missing": "缺少会话标识",
+      "session_id_missing": "缺少会话��识",
       "name_required": "姓名不能为空",
       "password_incorrect": "密码错误",
       "verification_code_incorrect": "验证码错误",
@@ -11496,7 +11601,7 @@
     "mail_lifecycle_logs": {
       "access_denied": "无权执行该操作",
       "mail_log_entry_not_found": "邮件日志不存在",
-      "raw_log_search_busy_all_gateway": "所有网关节点的原始日志检索都在忙，请稍后重试",
+      "raw_log_search_busy_all_gateway": "所��网关节点的原始日志检索都在忙，请稍后重试",
       "message_uuid_required": "请提供邮件 UUID",
       "from_define_valid_time_range": "开始时间必须早于结束时间",
       "raw_log_search_busy_retry_shortly": "原始日志检索正忙，请稍后重试"

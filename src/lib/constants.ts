@@ -69,6 +69,7 @@ export const sidebarNavItems: NavItem[] = [
       { id: 'security-overview', titleKey: 'sidebar.securityOverview', href: '/statistics/security-overview' },
       { id: 'delivery-traffic', titleKey: 'sidebar.deliveryTraffic', href: '/statistics/delivery-traffic' },
       { id: 'ops-top-trend', titleKey: 'sidebar.opsTopTrend', href: '/statistics/ops-top-trend' },
+      { id: 'rule-effectiveness', titleKey: 'sidebar.ruleEffectiveness', href: '/statistics/rule-effectiveness' },
       // 「链接与附件安全」暂时从导航隐藏，页面与直达路由保留。
       // { id: 'link-attachment-security', titleKey: 'sidebar.linkAttachmentSecurity', href: '/statistics/link-attachment-security' },
     ],

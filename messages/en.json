@@ -356,6 +356,7 @@
     "organizationContacts": "Organization Contacts",
     "mailRouting": "Mail Routing",
     "opsTopTrend": "Ops TOP & Trend",
+    "ruleEffectiveness": "Rule Effectiveness Statistics",
     "emailLogs": "Email Logs",
     "investigations": "Investigations",
     "tenantSystemManagement": "Organization & Members",
@@ -1675,7 +1676,7 @@
     "contentScopeHeader": "Header",
     "contentScopeAttachmentNames": "Attachment Names",
     "contentScopeUrls": "URLs",
-    "warningOnTagPage": "This rule is managed by the Group Management page. Modifying stage or condition may cause the Group Management page to fail to parse it. If not strictly necessary, please edit via 'Security → Group Management'.",
+    "warningOnTagPage": "This rule is managed by the Group Management page. Modifying stage or condition may cause the Group Management page to fail to parse it. If not strictly necessary, please edit via 'Security ��� Group Management'.",
     "goToGroupManagement": "Go to Group Management",
     "featureFieldDisallowed": "These fields are not allowed in a feature group: {fields}",
     "featureGroup": "Feature Group",
@@ -8037,6 +8038,110 @@
       "medium": "Medium",
       "high": "High",
       "critical": "Critical"
+    }
+  },
+  "ruleEffectiveness": {
+    "title": "Rule Effectiveness Statistics",
+    "subtitle": "Track hits and blocking gaps for policies/rules currently in observe mode, to help decide whether to promote them to enforced",
+    "trendCardTitle": "Observed Hits Trend",
+    "noData": "No data available",
+    "error": {
+      "forbiddenTitle": "No permission to view rule effectiveness statistics",
+      "forbiddenDescription": "Your account lacks statistics permission. Please contact an administrator.",
+      "loadFailedTitle": "Failed to load rule effectiveness statistics",
+      "loadFailedDescription": "The service is temporarily unavailable or a network error occurred. Please retry later.",
+      "retry": "Reload",
+      "retrying": "Retrying…"
+    },
+    "kpi": {
+      "observingCount": "Objects in Observe Mode",
+      "totalHits": "Total Hits During Observation",
+      "wouldBlockCount": "Blocking Gap",
+      "avgObservedDays": "Avg. Observed Duration",
+      "pendingReviewCount": "Pending Evaluation",
+      "vsPrevious": "vs previous",
+      "days": "days"
+    },
+    "filter": {
+      "timeRange": {
+        "today": "Today",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+        "custom": "Custom"
+      },
+      "customRange": {
+        "start": "Start date",
+        "end": "End date",
+        "error": {
+          "invalid": "Please select a start and end date",
+          "order": "End date cannot be earlier than start date",
+          "tooLong": "Range cannot exceed {max} days"
+        }
+      },
+      "modules": {
+        "label": "Policy Module",
+        "auth_spoofing": "Auth & Spoofing Detection",
+        "similar_detection": "Similar Email Detection",
+        "phishing_detection": "Phishing Detection Agent"
+      },
+      "durationBucket": {
+        "label": "Observed Duration",
+        "lt7": "Under 7 days",
+        "7to30": "7-30 days",
+        "gt30": "Over 30 days"
+      }
+    },
+    "wouldBeActions": {
+      "reject": "Reject",
+      "quarantine": "Quarantine",
+      "discard": "Discard",
+      "bounce": "Bounce",
+      "sideline": "Sideline",
+      "recall": "Recall",
+      "tag": "Tag"
+    },
+    "timeoutAlert": {
+      "warning": "{count} objects have been in observe mode for over {days} days. Consider evaluating whether to promote them to enforced.",
+      "viewDetails": "View",
+      "drawerTitle": "Objects Exceeding Observation Timeout",
+      "observedDays": "Observed for {days} days",
+      "hits": "{count} hits",
+      "goToConfig": "Go to Policy Config"
+    },
+    "detail": {
+      "title": "Effectiveness Detail",
+      "empty": "No policies/rules are currently in observe mode under the selected filters",
+      "expandRow": "Expand to view action breakdown",
+      "deletedSuffix": "(deleted)",
+      "deletedTooltip": "This rule has been deleted; cannot navigate to its config page",
+      "daysValue": "{days} days",
+      "dataInsufficient": "Insufficient samples",
+      "col": {
+        "module": "Policy Module",
+        "subStrategy": "Sub-strategy/Direction",
+        "observedSince": "Observed Since",
+        "observedDays": "Observed Duration",
+        "hits": "Hits",
+        "wouldBlockCount": "Blocking Gap",
+        "falsePositiveRate": "False Positive Risk",
+        "suggestion": "System Suggestion",
+        "actions": "Actions"
+      },
+      "tooltip": {
+        "wouldBlockCount": "Number of hits that would have been blocked (bounce/quarantine/discard/sideline/recall) had this rule not been in observe mode",
+        "falsePositiveRate": "Derived from existing email disposal outcomes: confirmed false positives / reviewed hits (weighted by confidence)"
+      },
+      "suggestion": {
+        "confirm_promote": "Promote to Enforced",
+        "keep_observing": "Keep Observing",
+        "needs_tuning": "Needs Tuning",
+        "needs_more_data": "Insufficient Data"
+      },
+      "viewHits": "View Hit Details",
+      "goToConfig": "Go to Policy Config"
+    },
+    "bottomActions": {
+      "exportCsv": "Export CSV"
     }
   },
   "deliveryTraffic": {
