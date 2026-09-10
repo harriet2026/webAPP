@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级，请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级��请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -2189,7 +2189,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 1,
       name: "高频发信限制",
-      description: "合作伙伴IP，放宽限制",
+      description: "合作伙伴IP，放宽��制",
       priority: 100,
       scopeType: "range",
       scopeValue: "203.0.113.0/24",
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）──────────────────────────────────
+// ─── 自定义 IP 定位库（GeoIP rules，mock）─────────────────────────────────��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -3538,7 +3538,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
 //   - member_count / reference_count 显式下发（与真实后端 include=member_count,reference_count
 //     的响应一致），memberCount 不再依赖成员数组长度，特征组的 member_count = 条件数。
 // 数据值照抄群组策略页 demo 的 staticGroups + 特征组（html_spec filter-rules-group-policy），
-// 群组在真实产品中是唯一数据面，sender_filter 下拉与群组管理共享这份数据。
+// 群���在真实产品中是唯一数据面，sender_filter 下拉与群组管理共享这份数据。
 function sfGroupRule(o: {
   id: number;
   name: string;
@@ -4515,7 +4515,7 @@ const BC_IP_GROUPS: DemoNamedGroup[] = [
 // 照抄 demo `generateMockRules()`：7 条手工命名规则 + 生成的 #8..#35。
 function generateDemoBehaviorRules(): DemoBehaviorRule[] {
   const rules: DemoBehaviorRule[] = [
-    // 入站防护规则
+    // 入站防护规��
     {
       id: "rule-1",
       name: "全局入站IP数量限制",
@@ -8786,7 +8786,7 @@ export function mockDeliveryTrafficFor(
   const n = (value: number) => Math.max(0, Math.round(value * scale));
 
   // 系统状态「收发信总量」与本页「全部」KPI 必须共享同一组三向量。
-  // 无日期请求保留原有 7 日 demo 基线；带日期请求按当前期/上一期匹配系统状态范围。
+  // 无日期请求保��原有 7 日 demo 基线；带日期请求按当前期/上一期匹配系统状态范围。
   const deliveryTotals = startDate && endDate
     ? (() => {
         const span = deliverySpanDays(startDate, endDate);
@@ -9360,3 +9360,335 @@ export function mockAgentCenterOverview() {
     ],
   };
 }
+
+// ---------------------------------------------------------------------------
+// 规则效能统计（观察模式）— mock 数据
+//
+// 固定覆盖需求方案中的 3 类观察态模块：身份认证与仿冒检测（按子策略）、
+// 相似邮件检测（按方向）、钓鱼邮件检测智能体（整引擎级，无子策略维度）。
+// 所有数值按 index 用 threatSeriesValue 同款确定性伪值生成，保证可复现。
+// ---------------------------------------------------------------------------
+
+interface RuleEffectivenessMockRow {
+  id: string;
+  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection';
+  sub_strategy_id: string;
+  sub_strategy_name_snapshot: string;
+  is_deleted: boolean;
+  observed_days: number;
+  hits: number;
+  would_block_ratio: number;
+  reviewed_ratio: number;
+  weighted_reviewed_ratio: number;
+  false_positive_rate: number | null;
+  attribution_status: 'attributable' | 'excluded_not_attributable' | 'module_level_only';
+  suggestion: 'confirm_promote' | 'keep_observing' | 'needs_tuning' | 'needs_more_data';
+  config_path: string;
+}
+
+const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_module'], string> = {
+  auth_spoofing: '/security/pipeline?module=authSpoofing',
+  similar_detection: '/security/pipeline?module=similarDetection',
+  phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
+};
+
+const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
+  {
+    id: 'auth-protocol_check',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'protocol_check',
+    sub_strategy_name_snapshot: '协议检查（SPF/DKIM/DMARC）',
+    is_deleted: false,
+    observed_days: 12,
+    hits: 86,
+    would_block_ratio: 0.62,
+    reviewed_ratio: 0.4,
+    weighted_reviewed_ratio: 0.32,
+    false_positive_rate: 0.04,
+    attribution_status: 'attributable',
+    suggestion: 'confirm_promote',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-format_check',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'format_check',
+    sub_strategy_name_snapshot: '格式检查',
+    is_deleted: false,
+    observed_days: 5,
+    hits: 14,
+    would_block_ratio: 0.5,
+    reviewed_ratio: 0.14,
+    weighted_reviewed_ratio: 0.08,
+    false_positive_rate: null,
+    attribution_status: 'attributable',
+    suggestion: 'needs_more_data',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-display_name_spoofing',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'display_name_spoofing',
+    sub_strategy_name_snapshot: '展示名仿冒检测',
+    is_deleted: false,
+    observed_days: 34,
+    hits: 152,
+    would_block_ratio: 0.71,
+    reviewed_ratio: 0.55,
+    weighted_reviewed_ratio: 0.46,
+    false_positive_rate: 0.18,
+    attribution_status: 'attributable',
+    suggestion: 'needs_tuning',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-similar_domain',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'similar_domain',
+    sub_strategy_name_snapshot: '相似域名检测',
+    is_deleted: false,
+    observed_days: 41,
+    hits: 203,
+    would_block_ratio: 0.68,
+    reviewed_ratio: 0.61,
+    weighted_reviewed_ratio: 0.53,
+    false_positive_rate: 0.06,
+    attribution_status: 'attributable',
+    suggestion: 'confirm_promote',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-dkim_outbound_signature',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'dkim_outbound_signature',
+    sub_strategy_name_snapshot: 'DKIM 外发签名',
+    is_deleted: false,
+    observed_days: 9,
+    hits: 21,
+    would_block_ratio: 0.33,
+    reviewed_ratio: 0.19,
+    weighted_reviewed_ratio: 0.12,
+    false_positive_rate: 0.09,
+    attribution_status: 'module_level_only',
+    suggestion: 'keep_observing',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-arc_signature',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'arc_signature',
+    sub_strategy_name_snapshot: 'ARC 签名',
+    is_deleted: true,
+    observed_days: 58,
+    hits: 7,
+    would_block_ratio: 0.29,
+    reviewed_ratio: 0.86,
+    weighted_reviewed_ratio: 0.71,
+    false_positive_rate: 0.02,
+    attribution_status: 'attributable',
+    suggestion: 'confirm_promote',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'similar-receive',
+    policy_module: 'similar_detection',
+    sub_strategy_id: 'receive',
+    sub_strategy_name_snapshot: '收件方向',
+    is_deleted: false,
+    observed_days: 18,
+    hits: 97,
+    would_block_ratio: 0.58,
+    reviewed_ratio: 0.37,
+    weighted_reviewed_ratio: 0.29,
+    false_positive_rate: 0.11,
+    attribution_status: 'attributable',
+    suggestion: 'keep_observing',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.similar_detection,
+  },
+  {
+    id: 'similar-send',
+    policy_module: 'similar_detection',
+    sub_strategy_id: 'send',
+    sub_strategy_name_snapshot: '发件方向',
+    is_deleted: false,
+    observed_days: 27,
+    hits: 63,
+    would_block_ratio: 0.44,
+    reviewed_ratio: 0.48,
+    weighted_reviewed_ratio: 0.4,
+    false_positive_rate: 0.21,
+    attribution_status: 'attributable',
+    suggestion: 'needs_tuning',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.similar_detection,
+  },
+  {
+    id: 'similar-internal',
+    policy_module: 'similar_detection',
+    sub_strategy_id: 'internal',
+    sub_strategy_name_snapshot: '内部方向',
+    is_deleted: false,
+    observed_days: 3,
+    hits: 5,
+    would_block_ratio: 0.4,
+    reviewed_ratio: 0,
+    weighted_reviewed_ratio: 0,
+    false_positive_rate: null,
+    attribution_status: 'attributable',
+    suggestion: 'needs_more_data',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.similar_detection,
+  },
+  {
+    id: 'phishing-agent',
+    policy_module: 'phishing_detection',
+    sub_strategy_id: 'engine',
+    sub_strategy_name_snapshot: '钓鱼检测智能体',
+    is_deleted: false,
+    observed_days: 22,
+    hits: 341,
+    would_block_ratio: 0.74,
+    reviewed_ratio: 0.29,
+    weighted_reviewed_ratio: 0.24,
+    false_positive_rate: 0.05,
+    attribution_status: 'attributable',
+    suggestion: 'confirm_promote',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
+  },
+];
+
+const RULE_EFFECTIVENESS_SUGGESTION_REASON: Record<RuleEffectivenessMockRow['suggestion'], (row: RuleEffectivenessMockRow) => string> = {
+  confirm_promote: (row) =>
+    `已观察 ${row.observed_days} 天，命中 ${row.hits} 次，加权误判率 ${Math.round((row.false_positive_rate ?? 0) * 100)}%，建议转为正式生效`,
+  keep_observing: (row) =>
+    `已观察 ${row.observed_days} 天，命中 ${row.hits} 次，样本仍在积累，建议继续观察`,
+  needs_tuning: (row) =>
+    `已观察 ${row.observed_days} 天，加权误判率 ${Math.round((row.false_positive_rate ?? 0) * 100)}%，偏高，建议调参后再评估`,
+  needs_more_data: (row) =>
+    `已观察 ${row.observed_days} 天，命中样本不足（已判定 ${Math.round(row.hits * row.reviewed_ratio)} 次），暂不建议判断`,
+};
+
+const RULE_EFFECTIVENESS_WOULD_BE_ACTIONS = ['reject', 'quarantine', 'discard', 'bounce', 'sideline', 'recall'] as const;
+
+type RuleEffectivenessWouldBeAction = 'reject' | 'quarantine' | 'discard' | 'bounce' | 'sideline' | 'recall' | 'tag';
+
+function ruleEffectivenessActionBreakdown(
+  row: RuleEffectivenessMockRow,
+  index: number,
+): { action: RuleEffectivenessWouldBeAction; count: number }[] {
+  const blockCount = Math.round(row.hits * row.would_block_ratio);
+  const tagCount = row.hits - blockCount;
+  const weights = RULE_EFFECTIVENESS_WOULD_BE_ACTIONS.map((_, i) => 0.4 + threatSeriesValue(index + i, 1, 4, 1) / 10);
+  const weightSum = weights.reduce((sum, w) => sum + w, 0);
+  let allocated = 0;
+  const breakdown: { action: RuleEffectivenessWouldBeAction; count: number }[] = RULE_EFFECTIVENESS_WOULD_BE_ACTIONS.map((action, i) => {
+    const isLast = i === RULE_EFFECTIVENESS_WOULD_BE_ACTIONS.length - 1;
+    const count = isLast ? blockCount - allocated : Math.round((weights[i] / weightSum) * blockCount);
+    allocated += count;
+    return { action, count: Math.max(0, count) };
+  });
+  if (tagCount > 0) breakdown.push({ action: 'tag', count: tagCount });
+  return breakdown;
+}
+
+function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number) {
+  const observedSince = new Date(Date.now() - row.observed_days * 86_400_000).toISOString().slice(0, 10);
+  const wouldBlockCount = Math.round(row.hits * row.would_block_ratio);
+  const reviewedCount = Math.round(row.hits * row.reviewed_ratio);
+  const weightedReviewedCount = Math.round(row.hits * row.weighted_reviewed_ratio);
+  return {
+    id: row.id,
+    policy_module: row.policy_module,
+    sub_strategy_id: row.sub_strategy_id,
+    sub_strategy_name_snapshot: row.sub_strategy_name_snapshot,
+    is_deleted: row.is_deleted,
+    observed_since: observedSince,
+    observed_days: row.observed_days,
+    hits: row.hits,
+    would_block_count: wouldBlockCount,
+    reviewed_count: reviewedCount,
+    weighted_reviewed_count: weightedReviewedCount,
+    false_positive_rate: row.false_positive_rate,
+    attribution_status: row.attribution_status,
+    suggestion: row.suggestion,
+    suggestion_reason: RULE_EFFECTIVENESS_SUGGESTION_REASON[row.suggestion](row),
+    action_breakdown: ruleEffectivenessActionBreakdown(row, index),
+    config_path: row.config_path,
+  };
+}
+
+const RULE_EFFECTIVENESS_TREND_DATES = [
+  '11/1', '11/2', '11/3', '11/4', '11/5', '11/6', '11/7',
+];
+
+export function mockRuleEffectivenessFor(
+  startDate: string,
+  endDate: string,
+  modules: string[],
+  durationBuckets: string[],
+) {
+  const moduleFilter = modules.length > 0 ? new Set(modules) : null;
+  const durationFilter = durationBuckets.length > 0 ? new Set(durationBuckets) : null;
+
+  function bucketOf(days: number): string {
+    if (days < 7) return 'lt7';
+    if (days <= 30) return '7to30';
+    return 'gt30';
+  }
+
+  const filteredRows = RULE_EFFECTIVENESS_MOCK_ROWS.filter((row) => {
+    if (moduleFilter && !moduleFilter.has(row.policy_module)) return false;
+    if (durationFilter && !durationFilter.has(bucketOf(row.observed_days))) return false;
+    return true;
+  });
+
+  const rows = filteredRows.map((row, index) => ruleEffectivenessRowToApi(row, index));
+
+  const totalHits = rows.reduce((sum, row) => sum + row.hits, 0);
+  const wouldBlockCount = rows.reduce((sum, row) => sum + row.would_block_count, 0);
+  const avgObservedDays = rows.length > 0
+    ? Math.round(rows.reduce((sum, row) => sum + row.observed_days, 0) / rows.length)
+    : 0;
+  const pendingReviewCount = rows.filter((row) => row.observed_days > 30 && row.hits > 0).length;
+
+  const trend = RULE_EFFECTIVENESS_TREND_DATES.map((date, i) => ({
+    date,
+    auth_spoofing: threatSeriesValue(i, 8, 14, 1),
+    similar_detection: threatSeriesValue(i + 2, 4, 10, 1),
+    phishing_detection: threatSeriesValue(i + 4, 12, 18, 1),
+  }));
+
+  return {
+    kpi: {
+      observing_count: rows.length,
+      observing_count_delta: rows.length > 0 ? 1 : null,
+      total_hits: totalHits,
+      total_hits_delta: totalHits > 0 ? 42 : null,
+      would_block_count: wouldBlockCount,
+      would_block_count_delta: wouldBlockCount > 0 ? 18 : null,
+      avg_observed_days: avgObservedDays,
+      pending_review_count: pendingReviewCount,
+    },
+    trend,
+    rows,
+    degraded_modules: [],
+  };
+}
+
+const RULE_EFFECTIVENESS_CSV_HEADER = '策略模块,子策略/方向,观察起始时间,观察天数,命中数,拦截缺口数,误判率,系统建议';
+
+export const mockRuleEffectivenessCsv = [
+  RULE_EFFECTIVENESS_CSV_HEADER,
+  ...RULE_EFFECTIVENESS_MOCK_ROWS.map((row) => {
+    const api = ruleEffectivenessRowToApi(row, 0);
+    const fpRate = api.false_positive_rate === null ? '-' : `${Math.round(api.false_positive_rate * 100)}%`;
+    return [
+      row.policy_module,
+      row.sub_strategy_name_snapshot,
+      api.observed_since,
+      api.observed_days,
+      api.hits,
+      api.would_block_count,
+      fpRate,
+      api.suggestion,
+    ].join(',');
+  }),
+].join('\n');

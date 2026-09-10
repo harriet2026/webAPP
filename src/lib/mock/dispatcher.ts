@@ -220,6 +220,8 @@ import {
   mockUpdateProxysvrGroup,
   mockDeleteProxysvrGroup,
   mockConnectivityTest,
+  mockRuleEffectivenessFor,
+  mockRuleEffectivenessCsv,
 } from './fixtures';
 import {
   mockDkimSigningDomainsFor,
@@ -1076,6 +1078,28 @@ const routes: Route[] = [
           p.get('end_date') ?? '',
           p.get('compare_previous_period') === 'true',
           p.get('interval') ?? undefined,
+        ),
+      };
+    },
+  },
+  // 规则效能统计（观察模式）：子资源必须放在基础路径前，保持整页 mock 数据闭环。
+  {
+    method: 'GET',
+    pattern: /^\/statistics\/rule-effectiveness\/export\.csv$/,
+    handler: () => ({ status: 200, data: mockRuleEffectivenessCsv }),
+  },
+  {
+    method: 'GET',
+    pattern: /^\/statistics\/rule-effectiveness$/,
+    handler: (req) => {
+      const p = new URLSearchParams(rawQuery(req.path));
+      return {
+        status: 200,
+        data: mockRuleEffectivenessFor(
+          p.get('start_date') ?? '',
+          p.get('end_date') ?? '',
+          p.getAll('module'),
+          p.getAll('duration_bucket'),
         ),
       };
     },
@@ -2479,7 +2503,7 @@ const routes: Route[] = [
     pattern: '/threat-retro-agent/stats',
     handler: () => ({ status: 200, data: mockThreatRetroStats() }),
   },
-  // 系统与服务健康卡片（新端点，demo SYSTEM_HEALTH 形状）。
+  // 系统与服务健康卡片（新端点��demo SYSTEM_HEALTH 形状）。
   {
     method: 'GET',
     pattern: '/system/health-summary',
