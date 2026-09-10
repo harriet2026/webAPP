@@ -8100,6 +8100,28 @@
       "recall": "Recall",
       "tag": "Tag"
     },
+    "path": {
+      "authSpoofing": "Auth & Impersonation Detection",
+      "protocolCheck": "Authentication Protocol Checks",
+      "protocolCheckSpf": "SPF Check",
+      "protocolCheckDkim": "DKIM Check",
+      "protocolCheckDmarc": "DMARC Check",
+      "protocolCheckPtr": "PTR Check",
+      "formatCheck": "Basic Format Checks",
+      "formatCheckMailfromEmpty": "Empty MAIL FROM",
+      "formatCheckMailfromInvalid": "Invalid MAIL FROM Format",
+      "formatCheckEnvelopeMismatch": "Envelope Header Mismatch",
+      "displayNameSpoofing": "Display Name Spoofing Detection",
+      "similarDomain": "Similar Domain Detection",
+      "similarDetection": "Similar Detection",
+      "similarEmail": "Similar Email Detection",
+      "sameSubject": "Same Subject Detection",
+      "directionReceive": "Inbound Direction",
+      "directionSend": "Outbound Direction",
+      "directionInternal": "Internal Direction",
+      "aggregateScope": "All Directions Aggregated",
+      "phishingDetection": "Phishing Detection Agent"
+    },
     "timeoutAlert": {
       "warning": "{count} objects have been in observe mode for over {days} days. Consider evaluating whether to promote them to enforced.",
       "viewDetails": "View",
