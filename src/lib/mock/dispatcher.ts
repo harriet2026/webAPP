@@ -374,7 +374,7 @@ const mockSecurityModules: Record<string, boolean> = {
   similar_detection: true,
   attachment_security: true,
   advanced_rules: true,
-  // demo URL检测与防护默认总开关为启用；用于统一模块注册表的 GET/PUT mock。
+  // demo URL检测��防护默认总开关为启用；用于统一模块注册表的 GET/PUT mock。
   url_protection: true,
 };
 
@@ -1100,6 +1100,7 @@ const routes: Route[] = [
           p.get('end_date') ?? '',
           p.getAll('module'),
           p.getAll('duration_bucket'),
+          p.getAll('similar_detection_type'),
         ),
       };
     },

@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级��请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级���请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）─────────────────────────────────��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────────────────────────��─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4515,7 +4515,7 @@ const BC_IP_GROUPS: DemoNamedGroup[] = [
 // 照抄 demo `generateMockRules()`：7 条手工命名规则 + 生成的 #8..#35。
 function generateDemoBehaviorRules(): DemoBehaviorRule[] {
   const rules: DemoBehaviorRule[] = [
-    // 入站防护规��
+    // ��站防护规��
     {
       id: "rule-1",
       name: "全局入站IP数量限制",
@@ -4702,7 +4702,7 @@ const BEHAVIOR_CONTROL_DEMO_RULES: DemoBehaviorRule[] =
 // senderIp/single→ipAddress，senderIp/ipGroup→ipGroupName，
 // senderDomain→domain，global→{type:'global'}。
 // 群组/IP群组用「名称」而非 id 作为 value —— 与真实抽屉一致（下拉 SelectItem
-// value=群组名），也让表格直接显示 demo 的名称（海外IP/VIP客户/销售团队）。
+// value=群组名），也让表格直接显示 demo 的名称（海外IP/VIP客户/销售团���）。
 function behaviorObjectConfig(
   d: DemoBehaviorRule,
 ): BehaviorControlObjectConfig {
@@ -8786,7 +8786,7 @@ export function mockDeliveryTrafficFor(
   const n = (value: number) => Math.max(0, Math.round(value * scale));
 
   // 系统状态「收发信总量」与本页「全部」KPI 必须共享同一组三向量。
-  // 无日期请求保��原有 7 日 demo 基线；带日期请求按当前期/上一期匹配系统状态范围。
+  // ��日期请求保��原有 7 日 demo 基线；带日期请求按当前期/上一期匹配系统状态范围。
   const deliveryTotals = startDate && endDate
     ? (() => {
         const span = deliverySpanDays(startDate, endDate);
@@ -9237,7 +9237,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 15, operation_id: 'OP20260622020', admin_user_id: 7, username: 'limin@example.cn', operator_name: '黎敏',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 1, tenant_name: '晨星科技', action: 'update',
     resource_type: 'attachment_security', status: 'success', client_ip: '58.32.10.4', ip_location: '上海',
-    details: { summary: '新增可执行文件后缀拦截' }, before_value: { text: 'exe, bat' },
+    details: { summary: '新增可执行文件后缀��截' }, before_value: { text: 'exe, bat' },
     after_value: { text: 'exe, bat, js, vbs' }, created_at: '2026-06-22T11:05:01Z' },
   { id: 20, operation_id: 'OP20260622040', admin_user_id: 8, username: 'guoqiang@hengfeng.cn', operator_name: '郭强',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 4, tenant_name: '恒峰金融服务', action: 'update',
@@ -9372,6 +9372,11 @@ export function mockAgentCenterOverview() {
 interface RuleEffectivenessMockRow {
   id: string;
   policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection';
+  // 相似邮件检测/相同主题检测是两条独立策略（不同判定维度、不同误判特征），
+  // 观察对象必须按策略拆分，不能合并为一个笼统的「相似检测」模块级观察对象。
+  similar_detection_type?: 'similar_email' | 'same_subject';
+  // 该策略自身的聚合方式：aggregate=全方向聚合为一个观察对象；否则为具体方向。
+  similar_detection_scope?: 'aggregate' | 'receive' | 'send' | 'internal';
   sub_strategy_id: string;
   sub_strategy_name_snapshot: string;
   is_deleted: boolean;
@@ -9390,6 +9395,13 @@ const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_mo
   auth_spoofing: '/security/pipeline?module=authSpoofing',
   similar_detection: '/security/pipeline?module=similarDetection',
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
+};
+
+// 相似检测配置页按 detectionType Tab 划分（相似邮件检测/相同主题检测），跳转时
+// 需要带上具体 Tab，而不是笼统跳到模块首个 Tab，否则用户还要自己再切一次。
+const RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH: Record<'similar_email' | 'same_subject', string> = {
+  similar_email: '/security/pipeline?module=similarDetection&detectionType=similar_email',
+  same_subject: '/security/pipeline?module=similarDetection&detectionType=same_subject',
 };
 
 const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
@@ -9489,9 +9501,13 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     suggestion: 'confirm_promote',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
+  // 相似邮件检测（similar_email）——按内容相似度判定，命中样本天然偏少。
+  // 该策略在 mock 场景下设为 separate（按方向独立配置），故拆成 3 个观察对象。
   {
-    id: 'similar-receive',
+    id: 'similar-similar_email-receive',
     policy_module: 'similar_detection',
+    similar_detection_type: 'similar_email',
+    similar_detection_scope: 'receive',
     sub_strategy_id: 'receive',
     sub_strategy_name_snapshot: '收件方向',
     is_deleted: false,
@@ -9503,11 +9519,13 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     false_positive_rate: 0.11,
     attribution_status: 'attributable',
     suggestion: 'keep_observing',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.similar_detection,
+    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
   },
   {
-    id: 'similar-send',
+    id: 'similar-similar_email-send',
     policy_module: 'similar_detection',
+    similar_detection_type: 'similar_email',
+    similar_detection_scope: 'send',
     sub_strategy_id: 'send',
     sub_strategy_name_snapshot: '发件方向',
     is_deleted: false,
@@ -9519,11 +9537,13 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     false_positive_rate: 0.21,
     attribution_status: 'attributable',
     suggestion: 'needs_tuning',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.similar_detection,
+    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
   },
   {
-    id: 'similar-internal',
+    id: 'similar-similar_email-internal',
     policy_module: 'similar_detection',
+    similar_detection_type: 'similar_email',
+    similar_detection_scope: 'internal',
     sub_strategy_id: 'internal',
     sub_strategy_name_snapshot: '内部方向',
     is_deleted: false,
@@ -9535,7 +9555,28 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     false_positive_rate: null,
     attribution_status: 'attributable',
     suggestion: 'needs_more_data',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.similar_detection,
+    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
+  },
+  // 相同主题检测（same_subject）——按主题标准化后判定，命中样本量通常更大，
+  // 误判后果（正常批量通知邮件被打标/拦截）也更广，误判率阈值应更严格。
+  // 该策略在 mock 场景下设为 aggregate（全方向聚合为一个观察对象）。
+  {
+    id: 'similar-same_subject-aggregate',
+    policy_module: 'similar_detection',
+    similar_detection_type: 'same_subject',
+    similar_detection_scope: 'aggregate',
+    sub_strategy_id: 'aggregate',
+    sub_strategy_name_snapshot: '全方向聚合',
+    is_deleted: false,
+    observed_days: 15,
+    hits: 214,
+    would_block_ratio: 0.31,
+    reviewed_ratio: 0.42,
+    weighted_reviewed_ratio: 0.35,
+    false_positive_rate: 0.27,
+    attribution_status: 'attributable',
+    suggestion: 'needs_tuning',
+    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.same_subject,
   },
   {
     id: 'phishing-agent',
@@ -9597,6 +9638,8 @@ function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number)
   return {
     id: row.id,
     policy_module: row.policy_module,
+    similar_detection_type: row.similar_detection_type,
+    similar_detection_scope: row.similar_detection_scope,
     sub_strategy_id: row.sub_strategy_id,
     sub_strategy_name_snapshot: row.sub_strategy_name_snapshot,
     is_deleted: row.is_deleted,
@@ -9624,9 +9667,13 @@ export function mockRuleEffectivenessFor(
   endDate: string,
   modules: string[],
   durationBuckets: string[],
+  // 仅在 modules 命中 similar_detection 时生效——进一步收窄到相似邮件检测/
+  // 相同主题检测中的具体策略。为空表示两条策略都要。
+  similarDetectionTypes: string[] = [],
 ) {
   const moduleFilter = modules.length > 0 ? new Set(modules) : null;
   const durationFilter = durationBuckets.length > 0 ? new Set(durationBuckets) : null;
+  const similarTypeFilter = similarDetectionTypes.length > 0 ? new Set(similarDetectionTypes) : null;
 
   function bucketOf(days: number): string {
     if (days < 7) return 'lt7';
@@ -9637,6 +9684,14 @@ export function mockRuleEffectivenessFor(
   const filteredRows = RULE_EFFECTIVENESS_MOCK_ROWS.filter((row) => {
     if (moduleFilter && !moduleFilter.has(row.policy_module)) return false;
     if (durationFilter && !durationFilter.has(bucketOf(row.observed_days))) return false;
+    if (
+      row.policy_module === 'similar_detection' &&
+      similarTypeFilter &&
+      row.similar_detection_type &&
+      !similarTypeFilter.has(row.similar_detection_type)
+    ) {
+      return false;
+    }
     return true;
   });
 
@@ -9649,10 +9704,13 @@ export function mockRuleEffectivenessFor(
     : 0;
   const pendingReviewCount = rows.filter((row) => row.observed_days > 30 && row.hits > 0).length;
 
+  // 相似邮件检测/相同主题检测是两条独立策略，各占一条趋势线，不合并成一条
+  // 「相似检测」总量线，否则会掩盖两条策略各自的真实变化趋势。
   const trend = RULE_EFFECTIVENESS_TREND_DATES.map((date, i) => ({
     date,
     auth_spoofing: threatSeriesValue(i, 8, 14, 1),
-    similar_detection: threatSeriesValue(i + 2, 4, 10, 1),
+    similar_detection_similar_email: threatSeriesValue(i + 2, 3, 7, 1),
+    similar_detection_same_subject: threatSeriesValue(i + 3, 6, 13, 1),
     phishing_detection: threatSeriesValue(i + 4, 12, 18, 1),
   }));
 
@@ -9675,13 +9733,24 @@ export function mockRuleEffectivenessFor(
 
 const RULE_EFFECTIVENESS_CSV_HEADER = '策略模块,子策略/方向,观察起始时间,观察天数,命中数,拦截缺口数,误判率,系统建议';
 
+// 相似检测按归属策略显示模块名（相似邮件检测/相同主题检测），而非笼统的
+// 「相似检测」——与页面明细表的显示口径保持一致。
+const RULE_EFFECTIVENESS_CSV_MODULE_LABEL: Record<string, string> = {
+  auth_spoofing: '身份认证与仿冒检测',
+  phishing_detection: '钓鱼邮件检测智能体',
+  similar_email: '相似邮件检测',
+  same_subject: '相同主题检测',
+};
+
 export const mockRuleEffectivenessCsv = [
   RULE_EFFECTIVENESS_CSV_HEADER,
   ...RULE_EFFECTIVENESS_MOCK_ROWS.map((row) => {
     const api = ruleEffectivenessRowToApi(row, 0);
     const fpRate = api.false_positive_rate === null ? '-' : `${Math.round(api.false_positive_rate * 100)}%`;
+    const moduleLabel =
+      RULE_EFFECTIVENESS_CSV_MODULE_LABEL[row.similar_detection_type ?? row.policy_module] ?? row.policy_module;
     return [
-      row.policy_module,
+      moduleLabel,
       row.sub_strategy_name_snapshot,
       api.observed_since,
       api.observed_days,

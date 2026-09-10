@@ -6,7 +6,7 @@ import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { OBSERVE_TIMEOUT_DAYS } from './constants';
+import { moduleLabelKey, OBSERVE_TIMEOUT_DAYS } from './constants';
 import type { RuleEffectivenessRow } from '@/lib/api/rule-effectiveness';
 
 interface Props {
@@ -51,7 +51,7 @@ export function ObserveTimeoutAlert({ rows, onNavigateToConfig }: Props) {
               <div key={row.id} className="rounded-lg border border-border/60 p-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 truncate">
-                    <Badge variant="outline">{tModule(row.policy_module)}</Badge>
+                    <Badge variant="outline">{tModule(moduleLabelKey(row))}</Badge>
                     <span className="font-medium truncate">{row.sub_strategy_name_snapshot}</span>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => onNavigateToConfig(row)}>

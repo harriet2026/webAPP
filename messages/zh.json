@@ -361,7 +361,7 @@
     "agentCenter": "智能体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
-    "threatRetro": "威胁回溯智能体",
+    "threatRetro": "威胁回��智能体",
     "spoofingDetection": "仿冒邮件检测智能体",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
@@ -1012,7 +1012,7 @@
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
           "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高安全策略存在差距，建议提升至 TLSv1.2。",
-          "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在数据泄露风险，建议使用「优先 TLS」。",
+          "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在数据泄露风险���建议使用「优先 TLS」。",
           "channel": "投递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
           "channelProxyColumns": {
@@ -1109,7 +1109,7 @@
         "tlsModeHint": "优先 TLS：服务器支持则用 TLS，不支持自动降级明文；强制 TLS：必须 TLS，握手失败即认证失败",
         "verifyCert": "校验服务器证书合法性",
         "warnPlaintext": "未启用传输加密：认证凭据将以明文传输，建议仅在受信任的内网环境使用。",
-        "warnNoCertVerify": "已关闭证书校验：将不验证服务器证书合法性，存在中间人攻击风险，仅建议用于内部自签名证书服务器。",
+        "warnNoCertVerify": "已关闭证书校验：将不验证服务器证书合法性，��在中间人攻击风险，仅建议用于内部自签名证书服务器。",
         "authTimeout": "认证超时（秒）",
         "authTimeoutRange": "超时范围 1-300 秒",
         "scenesRequired": "请至少选择一个生效场景",
@@ -1342,7 +1342,7 @@
     "comingSoon": "敬请期待",
     "customParams": "自定义参数",
     "customSubChecks": "自定义子检查",
-    "customComingSoonNote": "自定义参数覆盖待参数契约落地后开放；当前保存不支持该档位。",
+    "customComingSoonNote": "自定义参数覆盖待参数契约落地后开放；当前��存不支持该档位。",
     "highRiskWarnTitle": "高��险操作警告",
     "highRiskWarnIntentEngine": "禁用意图引擎将大幅降低钓鱼邮件检测能力",
     "highRiskAck": "我已知晓风险",
@@ -2991,7 +2991,7 @@
     "targetMailHelp": "输入单个邮件日志 ID。",
     "targetMailBatchHelp": "输入多个邮件日志 ID，支持逗号、空格或换行分隔。",
     "targetAccountHelp": "输入一个账号标识，例如 SMTP 用户名或发件人地址。",
-    "targetClusterHelp": "输入簇标识，如 cac_tid:abc123，或直接输入一组邮件日志 ID。",
+    "targetClusterHelp": "输入簇标识，如 cac_tid:abc123，或��接输入一组邮件日志 ID。",
     "createdByPlaceholder": "按创建人筛选",
     "promptPlaceholder": "可选：补充调查上下文、关注点或人工线索。",
     "emptyEvidence": "暂无证据项",
@@ -3525,7 +3525,7 @@
     "failureLimits": "失败次数限制（-1 = 不限制）",
     "hourlyAuthFailureLimit": "每小时认证失败限制",
     "commandErrorLimit": "单连接命令错误限制",
-    "authFailureLimit": "单连接认证失败限制",
+    "authFailureLimit": "单连接认证失败限���",
     "suspendMinutes": "封禁时长（分钟）",
     "validityPeriod": "有效期",
     "validFrom": "生效时间",
@@ -3557,7 +3557,7 @@
     "import": "批量导入",
     "ipHeader": "IP",
     "ruleHeader": "规则",
-    "suspendedHeader": "封禁时间",
+    "suspendedHeader": "封��时间",
     "expiresHeader": "到期时间",
     "reasonHeader": "原因",
     "preview": {
@@ -3729,7 +3729,7 @@
     "cidrPrefixMax": "CIDR前缀长度必须在0-32之间",
     "ipConfigTypeExpression": "表达式",
     "expressionPlaceholder": "192.0.2.1;10.0.0.0/8;192.0.2.10-192.0.2.50;!192.0.2.33",
-    "expressionHelp": "多项用 ; 或 , 分隔；支持单个IP、CIDR网段、起-止区间；! 前缀表示排除；最多100项",
+    "expressionHelp": "多项用 ; 或 , 分隔；支持单个IP、CIDR网段、起-止区间；! 前缀表示排��；最多100项",
     "expressionRequired": "请输入表达式或至少选择一个IP组",
     "expressionOnlyExclusions": "表达式不能只包含排除项（!），请添加正向IP/网段/区间或选择IP组",
     "expressionItemInvalid": "表达式包含无效项，请检查IP/CIDR格式",
@@ -5126,7 +5126,7 @@
       "virusAction": "发现病毒后的处置",
       "timeoutAction": "扫描超时处置（超过30秒）",
       "engineConfig": "引擎配置",
-      "primaryEngine": "主引擎",
+      "primaryEngine": "主引���",
       "backupEngine": "备引擎",
       "engineQianxin": "奇安信（国内病��库覆盖好）",
       "engineKaspersky": "卡巴斯基（国际病毒库覆盖好）",
@@ -5442,7 +5442,7 @@
       "costBanner": "深度复检由【{engine}】执行，通常需 30-60 秒。用户点击链接后需等待，请结合下方超时策略配置。",
       "skip": {
         "title": "允许用户跳过深度检测",
-        "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
+        "desc": "允许终端用户在等待���间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
         "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录到链接日志以供审计。"
       },
       "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险链接，展示提示页。",
@@ -5533,7 +5533,7 @@
       "label": "检测模式",
       "classification": "分类优先",
       "threshold": "分段阈值",
-      "classificationDesc": "只要识别为该意图即执行处置，忽略置信度分数。",
+      "classificationDesc": "只要识别��该意图即执行处置，忽略置信度分数。",
       "thresholdDesc": "根据置信度分数落入��区间执行不同处置动作。"
     },
     "threshold": {
@@ -5686,7 +5686,7 @@
     "markConfig": "标记配置",
     "markText": "标记文案",
     "markTextPlaceholder": "如：【外站邮件】",
-    "markTextTip": "最多 50 个字符；点击变量标签可插入动态内容",
+    "markTextTip": "最多 50 个字符；点击变��标签可插入动态内容",
     "availableVariables": "可用变量",
     "markPosition": "标记位置",
     "posSubjectPrefix": "主题前缀",
@@ -5740,7 +5740,7 @@
     "sendTip2": "自动格式会同时适配 HTML 和纯文本邮件",
     "sendTip3": "正文底部最适合常规企业免责声明",
     "sendTip4": "变量会在邮件投递时替换为实际信息",
-    "sendTip5": "优先级数值越大，越先匹配执行",
+    "sendTip5": "优先级数值越大，越���匹配执行",
     "sampleRecipient": "张三",
     "sampleSubject": "项目进展说明",
     "sampleGreeting": "您好，",
@@ -6421,7 +6421,7 @@
           "confirmImpact": {
             "domain": "确认后将创建一条发信人域名黑名单拒绝规则；后续以该域名作为发信人域名的邮件会被拒绝，可在“发信人黑白名单”中管理。",
             "url": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。",
-            "attachment_hash": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。"
+            "attachment_hash": "确认后将创建一条与当前邮件同方向的内容规则；后��命中邮件会进入隔离，可在“内容规则”中管理。"
           },
           "confirm": "确认��黑",
           "confirming": "正在创建…",
@@ -7135,7 +7135,7 @@
       },
       "desc_bcc": {
         "source": "邮件��� BCC 字段",
-        "usage": "识别密送给哪些收件人",
+        "usage": "识别密送给哪些收件���",
         "note": "密送收件人通常不可见，仅发件人知晓"
       },
       "desc_body": {
@@ -7824,7 +7824,7 @@
     "category": "分类",
     "notifyStatus": "状态",
     "portalBaseUrlRequired": "请先填写合法的外部访问地址（https），开启权限后该地址用于生成通知链接。",
-    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，请先填写后再开启对应权限。"
+    "portalBaseUrlMissingHint": "外部访问地址未填写——取回、预览、加白、加黑权限依赖该地址生成通知链接，请先填写后再开启对��权限。"
   },
   "dkim": {
     "column": "DKIM",
@@ -8136,7 +8136,8 @@
       "modules": {
         "label": "策略模块",
         "auth_spoofing": "身份认证与仿冒检测",
-        "similar_detection": "相似邮件检测",
+        "similar_detection_similar_email": "相似邮件检测",
+        "similar_detection_same_subject": "相同主题检测",
         "phishing_detection": "钓鱼检测智能体"
       },
       "durationBucket": {
@@ -9038,7 +9039,7 @@
       "senderFirstSeen": "收发信人之前没有邮件往来",
       "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
-      "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
+      "qrcodeDesc": "附件/图片中解码出二维码���命中（需附件深度检查）",
       "executable": "可执行文件",
       "executableDesc": "检测邮件中可能执行代码或触发程序行为的文件。",
       "urlNotQRHint": "「包含 URL」不含二维码解码出的链接；若只想用二维码风险，建议关闭此项",
@@ -9519,7 +9520,7 @@
       "keywordsCount": "品牌关键词：{count}个",
       "confidenceThreshold": "置信度阈值",
       "todaySpoofs": "今日仿冒",
-      "emptyFiltered": "未找到匹配的品牌",
+      "emptyFiltered": "未找到匹配���品牌",
       "edit": "编辑",
       "delete": "删除",
       "deleteConfirmTitle": "删除品牌",
@@ -9717,7 +9718,7 @@
       "recallStatus": "召回状态",
       "affectedUsers": "影响用户",
       "actions": "操作",
-      "selectAndRecall": "选择并召回",
+      "selectAndRecall": "选择并���回",
       "viewLeaks": "查看漏报",
       "cancel": "取消",
       "batchRecall": "批量召回（{count}）",
@@ -10264,7 +10265,7 @@
       "currentValue": "当前值",
       "threshold": "阈值",
       "firstSeen": "首次发生",
-      "lastSeen": "最近发生",
+      "lastSeen": "��近发生",
       "count": "发生次数",
       "confirmedBy": "确认人",
       "resolvedBy": "解决人"
@@ -10433,7 +10434,7 @@
         "reservedPrefix": "名称不能以 __deleted__ 开头",
         "thresholdRequired": "阈值为必填",
         "thresholdPositive": "阈值必须为正数",
-        "durationPositive": "持续时间必须大于 0",
+        "durationPositive": "持续��间必须大于 0",
         "samplesPositive": "采样数必须大于 0",
         "email": "收件人邮箱格式不正确",
         "recipientsRequired": "已开启通知时必须填写至少一个收件人"
@@ -10659,7 +10660,7 @@
   "loginSecurity": {
     "unsavedChanges": "有未保存的修改",
     "cancel": "取消",
-    "resetToDefault": "重置为系统默认",
+    "resetToDefault": "重置为系���默认",
     "resetConfirmDescription": "将清除当前作用域的显式配置并恢复系统默认值，需点击“保存”后生效。确定继续？",
     "resetApplied": "已重置，保存后生效",
     "sections": {
@@ -11145,7 +11146,7 @@
       "recipient_not_in_mail": "该收件人不属于这封邮件",
       "recipient_required": "请指定收件人",
       "review": {
-        "custom_minutes_out_of_range": "自定义审核时长需在 {min}–{max} 分钟之间",
+        "custom_minutes_out_of_range": "自定义审核时长需��� {min}–{max} 分钟之间",
         "duration_mode_invalid": "审核时长模式取值无效，只能是：{allowed}",
         "max_recheck_minutes_out_of_range": "最长复检时间需在 {min}–{max} 分钟之间",
         "reviewer_active_end_format_invalid": "审核人值班结束时间格式不正确，应为 HH:MM:SS",
@@ -11433,7 +11434,7 @@
       "access_denied": "无权访问该附件记录",
       "request_body_unreadable": "请求内容读取失败",
       "scan_result_format_invalid": "附件扫描结果数据格式不正确",
-      "scan_result_missing": "未提供附件扫描结果数据",
+      "scan_result_missing": "未提供附���扫描结果数据",
       "scan_result_all_invalid": "校验后没有任何有效的扫描结果"
     },
     "url_protection": {
@@ -11514,7 +11515,7 @@
       "audit_log_not_found": "审计日志不存在"
     },
     "advanced_rules_config": {
-      "review_timeout_action_accept_reject_keep": "审核超时处置只能是放行、拒绝或继续等待",
+      "review_timeout_action_accept_reject_keep": "审核超时处��只能是放行、拒绝或继续等待",
       "forward_rate_limit_per_minute_non": "每分钟转发速率上限不能为负数",
       "admin_notify_max_recipients_non_negative": "管理员通知收件人上限不能为负数"
     },

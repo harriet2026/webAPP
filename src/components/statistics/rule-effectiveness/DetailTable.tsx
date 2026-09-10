@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { actionColor, OBSERVE_TIMEOUT_DAYS, SUGGESTION_BADGE_CLASS, SUGGESTION_TONE } from './constants';
+import { actionColor, moduleLabelKey, OBSERVE_TIMEOUT_DAYS, SUGGESTION_BADGE_CLASS, SUGGESTION_TONE } from './constants';
 import type { RuleEffectivenessRow } from '@/lib/api/rule-effectiveness';
 
 interface DetailTableProps {
@@ -103,7 +103,8 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                             </button>
                           </TableCell>
                           <TableCell className="sticky left-0 bg-card">
-                            <Badge variant="outline">{tModule(row.policy_module)}</Badge>
+                            {/* 相似检测按归属策略（相似邮件检测/相同主题检测）显示，而非笼统的「相似检测」 */}
+                            <Badge variant="outline">{tModule(moduleLabelKey(row))}</Badge>
                           </TableCell>
                           <TableCell className="max-w-[220px] truncate">
                             {row.sub_strategy_name_snapshot}

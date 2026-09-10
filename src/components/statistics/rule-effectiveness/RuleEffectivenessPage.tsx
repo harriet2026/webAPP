@@ -17,7 +17,7 @@ import { TenantScopeSelector } from '@/components/statistics/security-overview/T
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { useRuleEffectiveness } from './hooks/useRuleEffectiveness';
 import { timeRangeToDates, defaultCustomRange, type CustomRange } from './date-range';
-import { POLICY_MODULES } from './constants';
+import { MODULE_FILTER_OPTIONS, resolveModuleFilterParams, type ModuleFilterOption } from './constants';
 import {
   buildEmailDisposalCenterQuery,
   getRuleEffectivenessExportCsvUrl,
@@ -42,7 +42,9 @@ export function RuleEffectivenessPage() {
 
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [customRange, setCustomRange] = useState<CustomRange>(() => defaultCustomRange());
-  const [modules, setModules] = useState<PolicyModule[]>([]);
+  // 相似检测下相似邮件检测/相同主题检测是两条独立策略，筛选项按策略拆分，
+  // 而不是沿用 PolicyModule 三选一（那样无法单独筛出某一条相似检测策略）。
+  const [moduleOptions, setModuleOptions] = useState<ModuleFilterOption[]>([]);
   const [durationBuckets, setDurationBuckets] = useState<ObserveDurationBucket[]>([]);
   const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
   const { scopeActive } = useSecurityScope(scopeTenantId);
@@ -52,12 +54,17 @@ export function RuleEffectivenessPage() {
     [timeRange, customRange],
   );
 
-  const effectiveModules = modules.length > 0 ? modules : POLICY_MODULES;
+  const effectiveModuleOptions = moduleOptions.length > 0 ? moduleOptions : MODULE_FILTER_OPTIONS;
+  const { modules: effectiveModules, similarDetectionTypes: effectiveSimilarDetectionTypes } = useMemo(
+    () => resolveModuleFilterParams(effectiveModuleOptions),
+    [effectiveModuleOptions],
+  );
 
   const { data, error, isError, isFetching, isLoading, refetch } = useRuleEffectiveness({
     startDate,
     endDate,
     modules: effectiveModules,
+    similarDetectionTypes: effectiveSimilarDetectionTypes,
     durationBuckets,
     scopeTenantId,
   });
@@ -73,6 +80,8 @@ export function RuleEffectivenessPage() {
       policy_module: row.policy_module,
       sub_strategy_id: row.sub_strategy_id,
       observed_since: row.observed_since,
+      similar_detection_type: row.similar_detection_type,
+      similar_detection_scope: row.similar_detection_scope,
     });
     router.push(`/email-disposal/center?${query}`);
   }, [router]);
@@ -81,6 +90,7 @@ export function RuleEffectivenessPage() {
     startDate,
     endDate,
     modules: effectiveModules,
+    similarDetectionTypes: effectiveSimilarDetectionTypes,
     durationBuckets,
     tenantId: scopeTenantId,
   });
@@ -94,8 +104,8 @@ export function RuleEffectivenessPage() {
         onTimeRangeChange={setTimeRange}
         customRange={customRange}
         onCustomRangeChange={setCustomRange}
-        modules={modules}
-        onModulesChange={setModules}
+        moduleOptions={moduleOptions}
+        onModuleOptionsChange={setModuleOptions}
         durationBuckets={durationBuckets}
         onDurationBucketsChange={setDurationBuckets}
         leftSlot={scopeActive ? <TenantScopeSelector value={scopeTenantId} onChange={setScopeTenantId} /> : null}

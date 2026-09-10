@@ -8,16 +8,18 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { MAX_RANGE_DAYS, validateCustomRange, type CustomRange } from './date-range';
-import { POLICY_MODULES, OBSERVE_DURATION_BUCKETS } from './constants';
-import type { ObserveDurationBucket, PolicyModule, TimeRange } from '@/lib/api/rule-effectiveness';
+import { MODULE_FILTER_OPTIONS, OBSERVE_DURATION_BUCKETS, type ModuleFilterOption } from './constants';
+import type { ObserveDurationBucket, TimeRange } from '@/lib/api/rule-effectiveness';
 
 interface FilterBarProps {
   timeRange: TimeRange;
   onTimeRangeChange: (r: TimeRange) => void;
   customRange: CustomRange;
   onCustomRangeChange: (r: CustomRange) => void;
-  modules: PolicyModule[];
-  onModulesChange: (m: PolicyModule[]) => void;
+  // 相似检测下相似邮件检测/相同主题检测是两条独立策略，筛选项按策略拆分展示，
+  // 而不是用 PolicyModule 三选一（那样相似检测只能整体勾选/取消，无法单独看某一条策略）。
+  moduleOptions: ModuleFilterOption[];
+  onModuleOptionsChange: (m: ModuleFilterOption[]) => void;
   durationBuckets: ObserveDurationBucket[];
   onDurationBucketsChange: (b: ObserveDurationBucket[]) => void;
   leftSlot?: ReactNode;
@@ -32,8 +34,8 @@ export function FilterBar({
   onTimeRangeChange,
   customRange,
   onCustomRangeChange,
-  modules,
-  onModulesChange,
+  moduleOptions,
+  onModuleOptionsChange,
   durationBuckets,
   onDurationBucketsChange,
   leftSlot,
@@ -71,11 +73,11 @@ export function FilterBar({
     timer.current = setTimeout(() => onCustomRangeChange(next), CUSTOM_RANGE_DEBOUNCE_MS);
   };
 
-  const toggleModule = (m: PolicyModule) => {
-    if (modules.includes(m)) {
-      onModulesChange(modules.filter((x) => x !== m));
+  const toggleModule = (m: ModuleFilterOption) => {
+    if (moduleOptions.includes(m)) {
+      onModuleOptionsChange(moduleOptions.filter((x) => x !== m));
     } else {
-      onModulesChange([...modules, m]);
+      onModuleOptionsChange([...moduleOptions, m]);
     }
   };
 
@@ -139,15 +141,15 @@ export function FilterBar({
         <PopoverTrigger render={
           <Button variant="outline" size="sm" data-testid="rule-effectiveness-module-filter">
             {t('modules.label')}
-            {modules.length > 0 && modules.length < POLICY_MODULES.length && (
-              <Badge variant="secondary" className="ml-1 px-1.5 text-[10px]">{modules.length}</Badge>
+            {moduleOptions.length > 0 && moduleOptions.length < MODULE_FILTER_OPTIONS.length && (
+              <Badge variant="secondary" className="ml-1 px-1.5 text-[10px]">{moduleOptions.length}</Badge>
             )}
           </Button>
         } />
         <PopoverContent align="start" className="w-56 p-2">
           <div className="space-y-1">
-            {POLICY_MODULES.map((m) => {
-              const checked = modules.length === 0 || modules.includes(m);
+            {MODULE_FILTER_OPTIONS.map((m) => {
+              const checked = moduleOptions.length === 0 || moduleOptions.includes(m);
               return (
                 <button
                   key={m}
