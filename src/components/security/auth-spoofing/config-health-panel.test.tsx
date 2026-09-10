@@ -13,7 +13,10 @@ const item = (action: CheckItem['action']): CheckItem => ({ enabled: true, actio
 function makeConfig(overrides: Partial<ProtocolChecksConfig> = {}): ProtocolChecksConfig {
   return {
     template: 'standard',
-    observe_mode: true,
+    spf_observe_mode: true,
+    dkim_observe_mode: true,
+    dmarc_observe_mode: true,
+    ptr_observe_mode: true,
     spf: { fail: item('reject'), softfail: item('audit') },
     dkim: { fail: item('reject') },
     dmarc: { reject: item('reject') },
@@ -23,8 +26,8 @@ function makeConfig(overrides: Partial<ProtocolChecksConfig> = {}): ProtocolChec
 }
 
 describe('ConfigHealthPanel', () => {
-  it('renders only the title row when observe_mode=false and no discard actions', () => {
-    const config = makeConfig({ observe_mode: false });
+  it('renders only the title row when spf/dmarc observe_mode=false and no discard actions', () => {
+    const config = makeConfig({ spf_observe_mode: false, dmarc_observe_mode: false });
     render(wrap(<ConfigHealthPanel config={config} onChange={() => {}} />));
     expect(screen.getByText('配置健康检查')).toBeTruthy();
     expect(screen.queryByText('改为隔离')).toBeNull();
@@ -34,7 +37,7 @@ describe('ConfigHealthPanel', () => {
 
   it('shows softfail row with quick-fix buttons and fires onChange with the right action', () => {
     const config = makeConfig({
-      observe_mode: true,
+      spf_observe_mode: true,
       spf: { fail: item('reject'), softfail: item('discard') },
     });
     const onChange = vi.fn();
@@ -57,9 +60,9 @@ describe('ConfigHealthPanel', () => {
     expect(next.spf.softfail.action).toBe('proceed');
   });
 
-  it('shows the observe-mode row and fires onChange when a discard action is present', () => {
+  it('shows the observe-mode row and fires onChange (only spf_observe_mode) when spf.fail is discard', () => {
     const config = makeConfig({
-      observe_mode: false,
+      spf_observe_mode: false,
       spf: { fail: item('discard'), softfail: item('audit') },
     });
     const onChange = vi.fn();
@@ -69,18 +72,18 @@ describe('ConfigHealthPanel', () => {
     fireEvent.click(screen.getByText('开启观察模式'));
     expect(onChange).toHaveBeenCalledTimes(1);
     const next = onChange.mock.calls[0][0] as ProtocolChecksConfig;
-    expect(next.observe_mode).toBe(true);
+    expect(next.spf_observe_mode).toBe(true);
     expect(next).not.toBe(config);
   });
 
-  it('renders null when observe_mode=true and no discard actions', () => {
-    const config = makeConfig({ observe_mode: true });
+  it('renders null when spf/dmarc observe_mode=true and no discard actions', () => {
+    const config = makeConfig({ spf_observe_mode: true, dmarc_observe_mode: true });
     const { container } = render(wrap(<ConfigHealthPanel config={config} onChange={() => {}} />));
     expect(container.firstChild).toBeNull();
   });
 
   it('is resilient to missing subkeys', () => {
-    const config = makeConfig({ observe_mode: false, spf: {}, dmarc: {} });
+    const config = makeConfig({ spf_observe_mode: false, dmarc_observe_mode: false, spf: {}, dmarc: {} });
     render(wrap(<ConfigHealthPanel config={config} onChange={() => {}} />));
     expect(screen.getByText('配置健康检查')).toBeTruthy();
   });

@@ -43,16 +43,23 @@ const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 
 
 const TEMPLATE_NAMES: Template[] = ['loose', 'standard', 'strict', 'custom'];
 
+type ProtocolKey = 'spf' | 'dkim' | 'dmarc' | 'ptr';
+type ProtocolObserveKey = `${ProtocolKey}_observe_mode`;
+
+function observeKeyFor(protocol: ProtocolKey): ProtocolObserveKey {
+  return `${protocol}_observe_mode`;
+}
+
 interface ProtocolChecksSectionProps {
   config: ProtocolChecksConfig;
   onChange: (config: ProtocolChecksConfig) => void;
   disabled?: boolean;
   ptrReadonly?: boolean;
-  /** Estimated count of mail that would have been dropped, shown next to the global observe switch (Task 9 wires the real value) */
-  wouldDrop?: number;
+  /** 按协议（SPF/DKIM/DMARC/PTR）分别统计的预计丢弃量，随当前激活的协议 Tab 切换展示 */
+  wouldDropByProtocol?: Record<'spf' | 'dkim' | 'dmarc' | 'ptr', number>;
 }
 
-export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly, wouldDrop = 0 }: ProtocolChecksSectionProps) {
+export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly, wouldDropByProtocol }: ProtocolChecksSectionProps) {
   const t = useTranslations('authSpoofing');
   const [open, setOpen] = useState(true);
   const [pendingTemplate, setPendingTemplate] = useState<Template | null>(null);
@@ -73,7 +80,17 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
       onChange({ ...config, template: 'custom' });
     } else {
       const applied = applyTemplate(config, pendingTemplate);
-      onChange(pendingTemplate === 'strict' ? { ...applied, observe_mode: true } : applied);
+      onChange(
+        pendingTemplate === 'strict'
+          ? {
+              ...applied,
+              spf_observe_mode: true,
+              dkim_observe_mode: true,
+              dmarc_observe_mode: true,
+              ptr_observe_mode: true,
+            }
+          : applied,
+      );
     }
     setPendingTemplate(null);
   };
@@ -95,6 +112,10 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
     dmarc: dominantAction(config.dmarc),
     ptr: dominantAction(config.ptr),
   };
+
+  const activeProtocolGroup = PROTOCOL_GROUPS.find((g) => g.key === activeTab) ?? PROTOCOL_GROUPS[0];
+  const activeObserveKey = observeKeyFor(activeTab);
+  const activeObserveOn = config[activeObserveKey] ?? false;
 
   return (
     <Card>
@@ -130,16 +151,21 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={config.observe_mode ?? false}
-                      onCheckedChange={(observe_mode) => onChange({ ...config, observe_mode })}
+                      data-testid={`protocol-observe-${activeTab}`}
+                      checked={activeObserveOn}
+                      onCheckedChange={(checked) =>
+                        onChange({ ...config, [activeObserveKey]: checked })
+                      }
                       disabled={disabled}
                     />
-                    <span className="text-sm font-medium">{t('globalObserve')}</span>
+                    <span className="text-sm font-medium">
+                      {t(activeProtocolGroup.labelKey as Parameters<typeof t>[0])} {t('globalObserve')}
+                    </span>
                   </div>
-                  {config.observe_mode && (
+                  {activeObserveOn && (
                     <div className="flex items-center gap-2 rounded bg-amber-100 px-2 py-1 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                       <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                      {t('wouldDropCount')}: {wouldDrop}
+                      {t('wouldDropCount')}: {wouldDropByProtocol?.[activeTab] ?? 0}
                     </div>
                   )}
                 </div>

@@ -20,7 +20,10 @@ const item = (action: CheckItem['action'], enabled = true): CheckItem => ({
 function makeConfig(overrides: Partial<ProtocolChecksConfig> = {}): ProtocolChecksConfig {
   return {
     template: 'standard',
-    observe_mode: false,
+    spf_observe_mode: false,
+    dkim_observe_mode: false,
+    dmarc_observe_mode: false,
+    ptr_observe_mode: false,
     spf: {
       fail: item('reject'),
       softfail: item('quarantine'),
@@ -79,38 +82,52 @@ describe('ProtocolChecksSection', () => {
     );
   });
 
-  it('shows wouldDropCount text and a pulse badge when observe_mode is true', () => {
-    const config = makeConfig({ observe_mode: true });
+  it('shows wouldDropCount text and a pulse badge when the active protocol observe_mode is true', () => {
+    const config = makeConfig({ spf_observe_mode: true });
     const { container } = render(
-      wrap(<ProtocolChecksSection config={config} onChange={() => {}} wouldDrop={7} />),
+      wrap(
+        <ProtocolChecksSection
+          config={config}
+          onChange={() => {}}
+          wouldDropByProtocol={{ spf: 7, dkim: 0, dmarc: 0, ptr: 0 }}
+        />,
+      ),
     );
     expect(screen.getByText(/预计丢弃/)).toBeInTheDocument();
     expect(screen.getByText(/7/)).toBeInTheDocument();
     expect(container.querySelector('.animate-pulse')).not.toBeNull();
   });
 
-  it('does not show wouldDropCount text when observe_mode is false', () => {
-    const config = makeConfig({ observe_mode: false });
-    render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} wouldDrop={7} />));
+  it('does not show wouldDropCount text when the active protocol observe_mode is false', () => {
+    const config = makeConfig({ spf_observe_mode: false });
+    render(
+      wrap(
+        <ProtocolChecksSection
+          config={config}
+          onChange={() => {}}
+          wouldDropByProtocol={{ spf: 7, dkim: 0, dmarc: 0, ptr: 0 }}
+        />,
+      ),
+    );
     expect(screen.queryByText(/预计丢弃/)).toBeNull();
   });
 
   it('does not render a per-row observe switch in protocol checks (hideObserve)', () => {
     const config = makeConfig();
     render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
-    // Only the global observe Switch should exist as a "switch" role, plus one
-    // enable/disable Switch per visible row in the active (spf) tab. None of
-    // those extra switches should carry the "observing" badge text.
+    // Only the active protocol's observe Switch should exist as a "switch" role,
+    // plus one enable/disable Switch per visible row in the active (spf) tab.
+    // None of those extra switches should carry the "observing" badge text.
     expect(screen.queryByText('观察中')).toBeNull();
   });
 
-  it('calls onChange with observe_mode toggled via the global observe switch', () => {
-    const config = makeConfig({ observe_mode: false });
+  it('calls onChange with only the active protocol observe_mode toggled via its own switch', () => {
+    const config = makeConfig({ spf_observe_mode: false });
     const onChange = vi.fn();
     render(wrap(<ProtocolChecksSection config={config} onChange={onChange} />));
-    const globalSwitch = screen.getAllByRole('switch')[0];
-    globalSwitch.click();
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ observe_mode: true }));
+    const activeSwitch = screen.getByTestId('protocol-observe-spf');
+    activeSwitch.click();
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ spf_observe_mode: true }));
   });
 
   it('shows the SPF drop alert when spf.fail.action is discard', () => {

@@ -62,7 +62,10 @@ export function resolveModuleFilterParams(options: ModuleFilterOption[]): {
  * 而不是让路径直接显示一个陌生的技术 id。
  */
 const KNOWN_AUTH_SUB_STRATEGY_IDS = new Set<string>([
-  'protocol_check',
+  'protocol_check_spf',
+  'protocol_check_dkim',
+  'protocol_check_dmarc',
+  'protocol_check_ptr',
   'format_check_mailfrom_empty',
   'format_check_mailfrom_invalid',
   'format_check_envelope_header_mismatch',
@@ -101,8 +104,14 @@ export function strategyPathKeys(
     return ['phishingDetection'];
   }
   switch (row.sub_strategy_id) {
-    case 'protocol_check':
-      return ['authSpoofing', 'protocolCheck'];
+    case 'protocol_check_spf':
+      return ['authSpoofing', 'protocolCheck', 'protocolCheckSpf'];
+    case 'protocol_check_dkim':
+      return ['authSpoofing', 'protocolCheck', 'protocolCheckDkim'];
+    case 'protocol_check_dmarc':
+      return ['authSpoofing', 'protocolCheck', 'protocolCheckDmarc'];
+    case 'protocol_check_ptr':
+      return ['authSpoofing', 'protocolCheck', 'protocolCheckPtr'];
     case 'format_check_mailfrom_empty':
       return ['authSpoofing', 'formatCheck', 'formatCheckMailfromEmpty'];
     case 'format_check_mailfrom_invalid':

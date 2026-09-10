@@ -18,7 +18,10 @@ function config(): AuthSpoofingConfig {
     },
     protocol_checks: {
       template: 'custom',
-      observe_mode: false,
+      spf_observe_mode: false,
+      dkim_observe_mode: false,
+      dmarc_observe_mode: false,
+      ptr_observe_mode: false,
       spf: { fail: item() },
       dkim: { fail: item() },
       dmarc: { reject: item() },

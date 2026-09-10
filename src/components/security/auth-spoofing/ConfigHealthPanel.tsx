@@ -17,14 +17,21 @@ export function ConfigHealthPanel({ config, onChange }: ConfigHealthPanelProps) 
   const spfSoftfail = config.spf?.softfail;
   const dmarcFail = config.dmarc?.reject;
 
+  // 观察开关已按协议拆分：SPF 相关提示只看 spf_observe_mode，DMARC 相关提示
+  // 只看 dmarc_observe_mode，不再用同一个全局开关判断，避免一个协议已经开启
+  // 观察、另一个协议的丢弃风险却被误判为"已在观察中"而隐藏提示。
   const visible =
-    spfFail?.action === 'discard' || spfSoftfail?.action === 'discard' || !config.observe_mode;
+    spfFail?.action === 'discard' ||
+    spfSoftfail?.action === 'discard' ||
+    !config.spf_observe_mode ||
+    !config.dmarc_observe_mode;
 
   if (!visible) return null;
 
   const showSoftfailRow = spfSoftfail?.action === 'discard';
   const showObserveRow =
-    !config.observe_mode && (spfFail?.action === 'discard' || dmarcFail?.action === 'discard');
+    (!config.spf_observe_mode && spfFail?.action === 'discard') ||
+    (!config.dmarc_observe_mode && dmarcFail?.action === 'discard');
 
   const handleSoftfailAction = (action: 'quarantine' | 'proceed') => {
     if (!spfSoftfail) return;
@@ -35,7 +42,11 @@ export function ConfigHealthPanel({ config, onChange }: ConfigHealthPanelProps) 
   };
 
   const handleEnableObserve = () => {
-    onChange({ ...config, observe_mode: true });
+    onChange({
+      ...config,
+      ...(!config.spf_observe_mode && spfFail?.action === 'discard' ? { spf_observe_mode: true } : {}),
+      ...(!config.dmarc_observe_mode && dmarcFail?.action === 'discard' ? { dmarc_observe_mode: true } : {}),
+    });
   };
 
   return (

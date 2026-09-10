@@ -27,7 +27,10 @@ const item = (action: CheckItem['action'], enabled = true): CheckItem => ({
 function protocolConfig(overrides: Partial<ProtocolChecksConfig> = {}): ProtocolChecksConfig {
   return {
     template: 'custom',
-    observe_mode: false,
+    spf_observe_mode: false,
+    dkim_observe_mode: false,
+    dmarc_observe_mode: false,
+    ptr_observe_mode: false,
     spf: {
       fail: item('reject'),
       softfail: item('quarantine'),

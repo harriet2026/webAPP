@@ -25,15 +25,22 @@ export type SimilarDetectionScope = 'aggregate' | Direction;
 
 /**
  * 身份认证与仿冒检测下的子策略枚举——按配置页真实的观察开关颗粒度拆分：
- *   - protocol_check：SPF/DKIM/DMARC/PTR 共用同一个全局观察开关，视为 1 个对象；
- *   - format_check_*：三项各自独立 observe_mode，必须拆成 3 个独立对象；
+ *   - protocol_check_spf / _dkim / _dmarc / _ptr：认证协议检查下四个协议
+ *     各自拥有独立的 observe_mode 开关（spf_observe_mode/dkim_observe_mode/
+ *     dmarc_observe_mode/ptr_observe_mode），不再共用一个全局开关，必须拆成
+ *     4 个独立观察对象；协议内部各判定结果（如 SPF fail/softfail）仍共用同一个
+ *     协议级开关，作为该行的「命中构成」下钻信息展示，不再单独拆分；
+ *   - format_check_*：三项各自独立 observe_mode，拆成 3 个独立对象；
  *   - display_name_spoofing_*：按方向（收/发/内部）各自独立 observe_mode，拆成 3 个对象；
  *   - similar_domain：单一开关，1 个对象。
  * DKIM 外发签名、ARC 签名管理的是密钥/域名生命周期，没有 action/observe_mode，
  * 不是可观察的检测规则，不纳入本枚举与观察模式统计范围。
  */
 export type AuthSpoofingSubStrategy =
-  | 'protocol_check'
+  | 'protocol_check_spf'
+  | 'protocol_check_dkim'
+  | 'protocol_check_dmarc'
+  | 'protocol_check_ptr'
   | 'format_check_mailfrom_empty'
   | 'format_check_mailfrom_invalid'
   | 'format_check_envelope_header_mismatch'
@@ -41,6 +48,13 @@ export type AuthSpoofingSubStrategy =
   | 'display_name_spoofing_outbound'
   | 'display_name_spoofing_internal'
   | 'similar_domain';
+
+/** 认证协议检查下四个协议各自的判定结果构成——用于命中数下钻展示，不参与观察对象拆分。 */
+export interface ProtocolHitBreakdownItem {
+  protocol: 'spf' | 'dkim' | 'dmarc' | 'ptr';
+  subkey: string;
+  hits: number;
+}
 
 export type TimeRange = 'today' | '7d' | '30d' | 'custom';
 export type ObserveDurationBucket = 'lt7' | '7to30' | 'gt30';
@@ -111,6 +125,8 @@ export interface RuleEffectivenessRow {
   suggestion: PromotionSuggestion;
   suggestion_reason: string;
   action_breakdown: ActionBreakdownItem[];
+  /** 仅认证协议检查（protocol_check_spf/dkim/dmarc/ptr）行有值：该协议下各判定结果的命中构成。 */
+  protocol_hit_breakdown?: ProtocolHitBreakdownItem[];
   /** 前往策略配置页的路径。 */
   config_path: string;
 }

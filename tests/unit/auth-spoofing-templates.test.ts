@@ -7,7 +7,10 @@ function makeFromTemplate(name: 'loose' | 'standard' | 'strict'): ProtocolChecks
   const toItem = (a: string) => ({ enabled: a !== 'accept', action: a as import('@/types/auth-spoofing').AuthSpoofingAction, observe_mode: false });
   return {
     template: name,
-    observe_mode: false,
+    spf_observe_mode: false,
+    dkim_observe_mode: false,
+    dmarc_observe_mode: false,
+    ptr_observe_mode: false,
     spf:   Object.fromEntries(Object.entries(t.spf).map(([k, a]) => [k, toItem(a)])) as Record<string, import('@/types/auth-spoofing').CheckItem>,
     dkim:  Object.fromEntries(Object.entries(t.dkim).map(([k, a]) => [k, toItem(a)])) as Record<string, import('@/types/auth-spoofing').CheckItem>,
     dmarc: Object.fromEntries(Object.entries(t.dmarc).map(([k, a]) => [k, toItem(a)])) as Record<string, import('@/types/auth-spoofing').CheckItem>,

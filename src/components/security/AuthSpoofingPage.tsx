@@ -32,7 +32,10 @@ const DEFAULT_CONFIG: AuthSpoofingConfig = {
   },
   protocol_checks: {
     template: 'standard',
-    observe_mode: false,
+    spf_observe_mode: false,
+    dkim_observe_mode: false,
+    dmarc_observe_mode: false,
+    ptr_observe_mode: false,
     spf: {
       fail: { enabled: true, action: 'reject', observe_mode: false },
       softfail: { enabled: true, action: 'quarantine', observe_mode: false },
@@ -208,13 +211,25 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
     </Button>
   );
 
-  // Only used for the "预计丢弃" badge next to the protocol global-observe toggle.
+  // Only used for the "预计丢弃" badge next to each protocol's own observe toggle.
+  // 观察开关按协议（SPF/DKIM/DMARC/PTR）独立拆分后，这里也需要按 subfeature 分组，
+  // 不能再合并成一个总数——否则一个协议的高命中量会掩盖另一个协议的真实情况。
   const { data: observeStatsTotal } = useQuery({
     queryKey: ['auth-spoofing-observe-stats-total', effectiveTenantId],
     queryFn: () => getObserveStats(7, apiRequest),
     enabled: isSystemAdmin || user?.role === 'tenant_admin',
   });
-  const wouldDrop = (observeStatsTotal?.points ?? []).reduce((sum, p) => sum + p.hits, 0);
+  const wouldDropByProtocol = (observeStatsTotal?.points ?? []).reduce<
+    Record<'spf' | 'dkim' | 'dmarc' | 'ptr', number>
+  >(
+    (acc, p) => {
+      if (p.subfeature === 'spf' || p.subfeature === 'dkim' || p.subfeature === 'dmarc' || p.subfeature === 'ptr') {
+        acc[p.subfeature] += p.hits;
+      }
+      return acc;
+    },
+    { spf: 0, dkim: 0, dmarc: 0, ptr: 0 },
+  );
 
   if (!isSystemAdmin && user?.role !== 'tenant_admin') {
     return (
@@ -260,7 +275,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
             onChange={(protocol_checks) => setLocalConfig((c) => ({ ...c, protocol_checks }))}
             disabled={!isSystemAdmin && user?.role !== 'tenant_admin'}
             ptrReadonly={localConfig.protocol_checks.ptr_readonly ?? false}
-            wouldDrop={wouldDrop}
+            wouldDropByProtocol={wouldDropByProtocol}
           />
 
           {!capabilities?.ai && (

@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级����请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级�����请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -2189,7 +2189,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 1,
       name: "高频发信限制",
-      description: "合作伙伴IP，放宽����制",
+      description: "合作伙伴IP��放宽����制",
       priority: 100,
       scopeType: "range",
       scopeValue: "203.0.113.0/24",
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）──────────────────────────────����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────────────────────��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4318,7 +4318,10 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
     },
     protocol_checks: {
       template: "standard",
-      observe_mode: false,
+      spf_observe_mode: false,
+      dkim_observe_mode: false,
+      dmarc_observe_mode: false,
+      ptr_observe_mode: false,
       spf: {
         fail: { enabled: true, action: "reject", observe_mode: false },
         softfail: { enabled: true, action: "quarantine", observe_mode: false },
@@ -5480,7 +5483,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     isMixed: true,
     mixedBasis: [
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
-      { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
+      { policyKey: "SBL", ruleName: "营销发件人白名���", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
       { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
       { policyKey: "SIM", ruleName: "相似邮件批量检测", ruleId: "SIM-077", hitValues: { detection_type: "similar_email", direction: "receive", cluster_id: "marketing-cluster", counter: "12", similarity_pct: "91" } },
@@ -5697,7 +5700,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "procurement@company.com",
     subject: "供应商门户密码重置（单投信）",
     action: "quarantine",
-    reason: "发件人域名风险评分异常",
+    reason: "发件人���名风险评分异常",
     mailType: "suspicious",
     deliveryStatus: "audit_pending",
     sourceIp: "104.21.33.77",
@@ -6423,7 +6426,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "user20@company.com",
     subject: "IRS: Immediate tax refund available",
     action: "block",
-    reason: "仿冒政府税务机构",
+    reason: "仿冒政府税务���构",
     mailType: "phishing",
     deliveryStatus: "rejected",
     sourceIp: "192.42.116.40",
@@ -9405,22 +9408,71 @@ const RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH: Record<'similar_email' |
 };
 
 const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
-  // 协议检测（SPF/DKIM/DMARC/PTR）在配置页只有一个全局观察开关，是 1 个观察
-  // 对象，不能按协议拆成多个——拆了就是无中生有，配置层根本没有那个开关。
+  // 认证协议检查下 SPF/DKIM/DMARC/PTR 四个协议在配置页各自拥有独立的观察开关
+  // （spf_observe_mode/dkim_observe_mode/dmarc_observe_mode/ptr_observe_mode），
+  // 已不再共用同一个全局开关，因此拆成 4 个独立观察对象，而不是 1 个。
   {
-    id: 'auth-protocol_check',
+    id: 'auth-protocol_check_spf',
     policy_module: 'auth_spoofing',
-    sub_strategy_id: 'protocol_check',
-    sub_strategy_name_snapshot: '协议检测（SPF/DKIM/DMARC/PTR）',
+    sub_strategy_id: 'protocol_check_spf',
+    sub_strategy_name_snapshot: 'SPF 检查',
     is_deleted: false,
     observed_days: 12,
-    hits: 86,
-    would_block_ratio: 0.62,
-    reviewed_ratio: 0.4,
-    weighted_reviewed_ratio: 0.32,
-    false_positive_rate: 0.04,
+    hits: 58,
+    would_block_ratio: 0.66,
+    reviewed_ratio: 0.42,
+    weighted_reviewed_ratio: 0.35,
+    false_positive_rate: 0.03,
     attribution_status: 'attributable',
     suggestion: 'confirm_promote',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-protocol_check_dkim',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'protocol_check_dkim',
+    sub_strategy_name_snapshot: 'DKIM 检查',
+    is_deleted: false,
+    observed_days: 12,
+    hits: 14,
+    would_block_ratio: 0.5,
+    reviewed_ratio: 0.36,
+    weighted_reviewed_ratio: 0.29,
+    false_positive_rate: 0.07,
+    attribution_status: 'attributable',
+    suggestion: 'keep_observing',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-protocol_check_dmarc',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'protocol_check_dmarc',
+    sub_strategy_name_snapshot: 'DMARC 检查',
+    is_deleted: false,
+    observed_days: 12,
+    hits: 11,
+    would_block_ratio: 0.55,
+    reviewed_ratio: 0.45,
+    weighted_reviewed_ratio: 0.31,
+    false_positive_rate: 0.05,
+    attribution_status: 'attributable',
+    suggestion: 'keep_observing',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-protocol_check_ptr',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'protocol_check_ptr',
+    sub_strategy_name_snapshot: 'PTR 检查',
+    is_deleted: false,
+    observed_days: 4,
+    hits: 3,
+    would_block_ratio: 0.33,
+    reviewed_ratio: 0.1,
+    weighted_reviewed_ratio: 0.04,
+    false_positive_rate: null,
+    attribution_status: 'attributable',
+    suggestion: 'needs_more_data',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   // 基础格式检查——每一项在配置页各自独立 observe_mode，必须拆成 3 个独立
@@ -9795,8 +9847,11 @@ const RULE_EFFECTIVENESS_PATH_LABEL_ZH: Record<string, string> = {
   phishingDetection: '钓鱼检测智能体',
 };
 
-const KNOWN_AUTH_SUB_STRATEGY_IDS = new Set<string>([
-  'protocol_check',
+  const KNOWN_AUTH_SUB_STRATEGY_IDS = new Set<string>([
+  'protocol_check_spf',
+  'protocol_check_dkim',
+  'protocol_check_dmarc',
+  'protocol_check_ptr',
   'format_check_mailfrom_empty',
   'format_check_mailfrom_invalid',
   'format_check_envelope_header_mismatch',
@@ -9816,9 +9871,15 @@ function ruleEffectivenessPathKeys(row: RuleEffectivenessMockRow): string[] {
   }
   if (row.policy_module === 'phishing_detection') return ['phishingDetection'];
   switch (row.sub_strategy_id) {
-    case 'protocol_check':
-      return ['authSpoofing', 'protocolCheck'];
-    case 'format_check_mailfrom_empty':
+  case 'protocol_check_spf':
+  return ['authSpoofing', 'protocolCheck', 'protocolCheckSpf'];
+  case 'protocol_check_dkim':
+  return ['authSpoofing', 'protocolCheck', 'protocolCheckDkim'];
+  case 'protocol_check_dmarc':
+  return ['authSpoofing', 'protocolCheck', 'protocolCheckDmarc'];
+  case 'protocol_check_ptr':
+  return ['authSpoofing', 'protocolCheck', 'protocolCheckPtr'];
+  case 'format_check_mailfrom_empty':
       return ['authSpoofing', 'formatCheck', 'formatCheckMailfromEmpty'];
     case 'format_check_mailfrom_invalid':
       return ['authSpoofing', 'formatCheck', 'formatCheckMailfromInvalid'];
