@@ -361,7 +361,7 @@
     "agentCenter": "智能体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
-    "threatRetro": "威胁回��智能体",
+    "threatRetro": "威胁回���智能体",
     "spoofingDetection": "仿冒邮件检测智能体",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
@@ -388,7 +388,7 @@
     "accessDenied": "当前账号没有查看智能体管理的权限。",
     "loadFailed": "智能体总览加载失败",
     "detailLockedTitle": "当前智能体未开通",
-    "detailLockedDescription": "该智能体在当前产品形态或租户授权下不可配置，请返回总览查看可用智能体。",
+    "detailLockedDescription": "该智��体在当前产品形态或租户授权下不可配置，请返回总览查看可用智能体。",
     "actions": {
       "configure": "配置",
       "logs": "日志",
@@ -1012,7 +1012,7 @@
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
           "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高安全策略存在差距，建议提升至 TLSv1.2。",
-          "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在数据泄露风险���建议使用「优先 TLS」。",
+          "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在数据泄露风������建议使用「优先 TLS」。",
           "channel": "投递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
           "channelProxyColumns": {
@@ -1109,7 +1109,7 @@
         "tlsModeHint": "优先 TLS：服务器支持则用 TLS，不支持自动降级明文；强制 TLS：必须 TLS，握手失败即认证失败",
         "verifyCert": "校验服务器证书合法性",
         "warnPlaintext": "未启用传输加密：认证凭据将以明文传输，建议仅在受信任的内网环境使用。",
-        "warnNoCertVerify": "已关闭证书校验：将不验证服务器证书合法性，��在中间人攻击风险，仅建议用于内部自签名证书服务器。",
+        "warnNoCertVerify": "已关闭证书校验：将不验证服务器证书合��性，��在中间人攻击风险，仅建议用于内部自签名证书服务器。",
         "authTimeout": "认证超时（秒）",
         "authTimeoutRange": "超时范围 1-300 秒",
         "scenesRequired": "请至少选择一个生效场景",
@@ -1342,7 +1342,7 @@
     "comingSoon": "敬请期待",
     "customParams": "自定义参数",
     "customSubChecks": "自定义子检查",
-    "customComingSoonNote": "自定义参数覆盖待参数契约落地后开放；当前��存不支持该档位。",
+    "customComingSoonNote": "自定义参数覆盖待参数契约落地后开��；当前��存不支持该档位。",
     "highRiskWarnTitle": "高��险操作警告",
     "highRiskWarnIntentEngine": "禁用意图引擎将大幅降低钓鱼邮件检测能力",
     "highRiskAck": "我已知晓风险",
@@ -1464,7 +1464,7 @@
       "behaviorControl": "按全局发信行为管控生效",
       "authSpoofing": "按全局身份认证与仿冒策略生效",
       "recipientCheck": "按全局收信人检测策略生效",
-      "attachment": "按全局附件安全策略生效",
+      "attachment": "按全局附件安���策略生效",
       "url": "按全局 URL 防护策略生效",
       "content": "按全局内容规则生效",
       "intentEngine": "按全局意图引擎配置生效",
@@ -1629,7 +1629,7 @@
       "wildcard": "通配符"
     },
     "sidelineConfig": "旁路配置",
-    "maxCheckTime": "最大检查时间",
+    "maxCheckTime": "最大检查时��",
     "minutes": "分钟",
     "acceptConfig": "接收配置",
     "subjectPrefixConfig": "邮件前缀",
@@ -1827,7 +1827,7 @@
       "geo_city": "城市",
       "geo_asn": "ASN",
       "geo_isp": "ISP",
-      "smtp_user": "SMTP 用户",
+      "smtp_user": "SMTP 用��",
       "authenticated": "已认证",
       "auth_type": "认证方式",
       "spf_valid": "SPF",
@@ -2033,7 +2033,7 @@
       "adminPasswordHint": "需满足密码策略；该管理员首次登录时将被强制修改密码"
     },
     "capability": {
-      "phishing-detection": "钓鱼邮件检测智能体",
+      "phishing-detection": "钓鱼邮件检测智能���",
       "spoofing-detection": "仿冒邮件检测智能体",
       "threat-retro": "威胁回溯智能体"
     },
@@ -5423,7 +5423,7 @@
       "costHint": "复检耗时预期：回扫黑名单（即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
         "title": "回扫黑名单",
-        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命中即按其动作处置"
+        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命中即按其动作��置"
       },
       "m2": {
         "title": "查询情报",
@@ -5739,7 +5739,7 @@
     "sendTip1": "免责声明应经过法务或合规团队确认",
     "sendTip2": "自动格式会同时适配 HTML 和纯文本邮件",
     "sendTip3": "正文底部最适合常规企业免责声明",
-    "sendTip4": "变量会在邮件投递时替换为实际信息",
+    "sendTip4": "变量会在邮件投递时替换为实际信��",
     "sendTip5": "优先级数值越大，越���匹配执行",
     "sampleRecipient": "张三",
     "sampleSubject": "项目进展说明",
@@ -6372,7 +6372,7 @@
           },
           "confirmNotify": {
             "title": "确认发送安全提醒",
-            "body": "向该收件人发送一封安全提醒邮件，告知其近期收到的邮件存在风险？"
+            "body": "向该收件人发送一封安全提醒邮件，告知其近��收到的邮件存在风险？"
           },
           "whitelistCheckbox": "同时将发信人加入白名单"
         },
@@ -6421,7 +6421,7 @@
           "confirmImpact": {
             "domain": "确认后将创建一条发信人域名黑名单拒绝规则；后续以该域名作为发信人域名的邮件会被拒绝，可在“发信人黑白名单”中管理。",
             "url": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。",
-            "attachment_hash": "确认后将创建一条与当前邮件同方向的内容规则；后��命中邮件会进入隔离，可在“内容规则”中管理。"
+            "attachment_hash": "确认后��创建一条与当前邮件同方向的内容规则；后��命中邮件会进入隔离，可在“内容规则”中管理。"
           },
           "confirm": "确认��黑",
           "confirming": "正在创建…",
@@ -6784,7 +6784,7 @@
       "proceed": "进行下一步",
       "proceedDesc": "执行附加策略后继续匹配后续规则",
       "quarantine": "隔离",
-      "quarantineDesc": "将邮件放入隔离区",
+      "quarantineDesc": "将邮件放入���离区",
       "audit": "审核",
       "auditDesc": "将邮件提交管理员审核",
       "discard": "丢弃",
@@ -7215,7 +7215,7 @@
       },
       "desc_attachmentType": {
         "source": "MIME Content-Type",
-        "usage": "过滤特定MIME类型的附件",
+        "usage": "过滤特定MIME类���的附件",
         "note": "如application/pdf、application/x-msdownload"
       },
       "desc_attachmentCount": {
@@ -7462,7 +7462,7 @@
       "stepGuideMapNumber": [
         "先在「选择对象」中选择要比较的对象（* 表示全部对象）。",
         "再选择比较方式（大于 / 小于 / 介于等）。",
-        "最后填写阈值，可点「应用推荐配置」快速填入常用值。"
+        "最后填写阈值，可点「应用推荐配置」快速��入常用值。"
       ],
       "formats": {
         "number": "填写整数阈值并配合比较方式使用；可点「应用推荐配置」一键填入常用值。",
@@ -8156,6 +8156,24 @@
       "recall": "召回",
       "tag": "打标"
     },
+    "path": {
+      "authSpoofing": "身份认证与仿冒检测",
+      "protocolCheck": "协议检测",
+      "formatCheck": "基础格式检查",
+      "formatCheckMailfromEmpty": "无效 MAIL FROM",
+      "formatCheckMailfromInvalid": "MAIL FROM 格式错误",
+      "formatCheckEnvelopeMismatch": "信封头不一致",
+      "displayNameSpoofing": "展示名仿冒检测",
+      "similarDomain": "相似域名检测",
+      "similarDetection": "相似检测",
+      "similarEmail": "相似邮件检测",
+      "sameSubject": "相同主题检测",
+      "directionReceive": "收件方向",
+      "directionSend": "发件方向",
+      "directionInternal": "内部方向",
+      "aggregateScope": "全方向聚合",
+      "phishingDetection": "钓鱼检测智能体"
+    },
     "timeoutAlert": {
       "warning": "有 {count} 个观察对象已观察超过 {days} 天，建议评估是否转为正式生效",
       "viewDetails": "查看",
@@ -8173,8 +8191,7 @@
       "daysValue": "{days} 天",
       "dataInsufficient": "样本不足",
       "col": {
-        "module": "策略模块",
-        "subStrategy": "子策略/方向名称",
+        "path": "策略路径",
         "observedSince": "观察起始时间",
         "observedDays": "观察时长",
         "hits": "命中数",
@@ -8184,7 +8201,7 @@
         "actions": "操作"
       },
       "tooltip": {
-        "wouldBlockCount": "若该规则不是观察模式，这些命中原本会被执行的拦截类动作（退信/隔离/丢弃/边列/召回）次数",
+        "wouldBlockCount": "若该规则不是观察模式，这些命中原本会被执行���拦截类动作（退信/隔离/丢弃/边列/召回）次数",
         "falsePositiveRate": "基于处置中心已有处置结果派生：确认误判命中数 / 已判定命中数（按判定可信度加权）"
       },
       "suggestion": {
@@ -8657,7 +8674,7 @@
       "logEmpty": "该任务未上报日志内容",
       "logLoadError": "备份任务数据加载失败"
     },
-    "nodesUnavailable": "监控节点列表不可用，请检查数据采集 Agent 或 TSDB 状态"
+    "nodesUnavailable": "���控节点列表不可用，请检查数据采集 Agent 或 TSDB 状态"
   },
   "mailflow": {
     "title": "邮件流",
@@ -9037,7 +9054,7 @@
       "maxSize": "邮件大小 ≤",
       "maxSizeHint": "0 表示不限制邮件大小",
       "senderFirstSeen": "收发信人之前没有邮件往来",
-      "senderFirstSeenHint": "仅对无历史收发记录的发信人启用——常见钓鱼/社工高风险来源。",
+      "senderFirstSeenHint": "仅对无历史收发记录的发信人启用��—常见钓鱼/社工高风险来源。",
       "qrcode": "邮件包含二维码",
       "qrcodeDesc": "附件/图片中解码出二维码���命中（需附件深度检查）",
       "executable": "可执行文件",
@@ -9494,7 +9511,7 @@
       "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象。",
       "importDisabledInvalidEmail": "邮箱无效",
       "importDisabledInactive": "人员失效",
-      "importCheckingExisting": "检查中",
+      "importCheckingExisting": "���查中",
       "importExistingCheckFailed": "检查失败",
       "importDisabledExisting": "已存在",
       "importDisabledLimit": "已达上限"
@@ -9660,7 +9677,7 @@
       "pending": "等待中",
       "running": "进行中",
       "completed": "已完成",
-      "failed": "失败",
+      "failed": "失���",
       "cancelled": "已取消"
     },
     "recallStatus": {
@@ -11130,7 +11147,7 @@
         "notify_times_empty": "通知频率不为「从不」时，至少要设置一个通知时间",
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
-        "portal_base_url_invalid": "外部访问地址不是合法的网址",
+        "portal_base_url_invalid": "���部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
         "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即可",
         "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的操作链接需要它才能生成",
@@ -11251,7 +11268,7 @@
       "scope_invalid": "角色范围无效，只能是：{allowed}",
       "status_invalid": "角色状态无效，只能是：{allowed}",
       "super_admin_required": "管理平台级角色需要超级管理员权限",
-      "system_default_cannot_delete": "系统内置角色不能删除",
+      "system_default_cannot_delete": "系统内置角色���能删除",
       "system_default_cannot_disable": "系统内置角色与超级管理员角色不能停用",
       "system_default_cannot_edit": "系统内置角色不能编辑"
     },
@@ -11354,7 +11371,7 @@
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_too_long": "租户编码长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
-      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再删除租户",
+      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再��除租户",
       "next_hop_pair_required": "下一跳主机与端口必须同时填写",
       "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
       "next_hop_host_empty": "下一跳主机不能为空"
@@ -11511,7 +11528,7 @@
       "protocol_unsupported": "不支持的协议"
     },
     "admin_audit": {
-      "tenant_admin_has_no_tenant_bound": "该租户管理员未绑定任何租户",
+      "tenant_admin_has_no_tenant_bound": "该租户管理���未绑定任何租户",
       "audit_log_not_found": "审计日志不存在"
     },
     "advanced_rules_config": {

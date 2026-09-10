@@ -23,14 +23,24 @@ export type SimilarDetectionType = 'similar_email' | 'same_subject';
 /** 相似检测每条策略自身的聚合方式：全方向聚合为一个观察对象，或按方向拆分为多个。 */
 export type SimilarDetectionScope = 'aggregate' | Direction;
 
-/** 身份认证与仿冒检测下的子策略枚举。 */
+/**
+ * 身份认证与仿冒检测下的子策略枚举——按配置页真实的观察开关颗粒度拆分：
+ *   - protocol_check：SPF/DKIM/DMARC/PTR 共用同一个全局观察开关，视为 1 个对象；
+ *   - format_check_*：三项各自独立 observe_mode，必须拆成 3 个独立对象；
+ *   - display_name_spoofing_*：按方向（收/发/内部）各自独立 observe_mode，拆成 3 个对象；
+ *   - similar_domain：单一开关，1 个对象。
+ * DKIM 外发签名、ARC 签名管理的是密钥/域名生命周期，没有 action/observe_mode，
+ * 不是可观察的检测规则，不纳入本枚举与观察模式统计范围。
+ */
 export type AuthSpoofingSubStrategy =
   | 'protocol_check'
-  | 'format_check'
-  | 'display_name_spoofing'
-  | 'similar_domain'
-  | 'dkim_outbound_signature'
-  | 'arc_signature';
+  | 'format_check_mailfrom_empty'
+  | 'format_check_mailfrom_invalid'
+  | 'format_check_envelope_header_mismatch'
+  | 'display_name_spoofing_inbound'
+  | 'display_name_spoofing_outbound'
+  | 'display_name_spoofing_internal'
+  | 'similar_domain';
 
 export type TimeRange = 'today' | '7d' | '30d' | 'custom';
 export type ObserveDurationBucket = 'lt7' | '7to30' | 'gt30';

@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { moduleLabelKey, OBSERVE_TIMEOUT_DAYS } from './constants';
+import { OBSERVE_TIMEOUT_DAYS, strategyPathLabels } from './constants';
+import { StrategyPathBreadcrumb } from './StrategyPathBreadcrumb';
 import type { RuleEffectivenessRow } from '@/lib/api/rule-effectiveness';
 
 interface Props {
@@ -20,7 +20,7 @@ interface Props {
  */
 export function ObserveTimeoutAlert({ rows, onNavigateToConfig }: Props) {
   const t = useTranslations('ruleEffectiveness.timeoutAlert');
-  const tModule = useTranslations('ruleEffectiveness.filter.modules');
+  const tPath = useTranslations('ruleEffectiveness.path');
   const [open, setOpen] = useState(false);
 
   const timeoutRows = rows.filter((r) => r.observed_days > OBSERVE_TIMEOUT_DAYS && r.hits > 0);
@@ -50,9 +50,8 @@ export function ObserveTimeoutAlert({ rows, onNavigateToConfig }: Props) {
             {timeoutRows.map((row) => (
               <div key={row.id} className="rounded-lg border border-border/60 p-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 truncate">
-                    <Badge variant="outline">{tModule(moduleLabelKey(row))}</Badge>
-                    <span className="font-medium truncate">{row.sub_strategy_name_snapshot}</span>
+                  <div className="min-w-0 truncate">
+                    <StrategyPathBreadcrumb segments={strategyPathLabels(row, tPath)} />
                   </div>
                   <Button variant="outline" size="sm" onClick={() => onNavigateToConfig(row)}>
                     {t('goToConfig')}

@@ -22,7 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { actionColor, moduleLabelKey, OBSERVE_TIMEOUT_DAYS, SUGGESTION_BADGE_CLASS, SUGGESTION_TONE } from './constants';
+import { actionColor, OBSERVE_TIMEOUT_DAYS, strategyPathLabels, SUGGESTION_BADGE_CLASS, SUGGESTION_TONE } from './constants';
+import { StrategyPathBreadcrumb } from './StrategyPathBreadcrumb';
 import type { RuleEffectivenessRow } from '@/lib/api/rule-effectiveness';
 
 interface DetailTableProps {
@@ -34,7 +35,7 @@ interface DetailTableProps {
 
 export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }: DetailTableProps) {
   const t = useTranslations('ruleEffectiveness.detail');
-  const tModule = useTranslations('ruleEffectiveness.filter.modules');
+  const tPath = useTranslations('ruleEffectiveness.path');
   const tAction = useTranslations('ruleEffectiveness.wouldBeActions');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
@@ -65,8 +66,7 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-8" />
-                    <TableHead className="sticky left-0 bg-card">{t('col.module')}</TableHead>
-                    <TableHead>{t('col.subStrategy')}</TableHead>
+                    <TableHead className="sticky left-0 bg-card">{t('col.path')}</TableHead>
                     <TableHead>{t('col.observedSince')}</TableHead>
                     <TableHead>{t('col.observedDays')}</TableHead>
                     <TableHead>{t('col.hits')}</TableHead>
@@ -102,12 +102,11 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                               {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                             </button>
                           </TableCell>
-                          <TableCell className="sticky left-0 bg-card">
-                            {/* 相似检测按归属策略（相似邮件检测/相同主题检测）显示，而非笼统的「相似检测」 */}
-                            <Badge variant="outline">{tModule(moduleLabelKey(row))}</Badge>
-                          </TableCell>
-                          <TableCell className="max-w-[220px] truncate">
-                            {row.sub_strategy_name_snapshot}
+                          <TableCell className="sticky left-0 bg-card max-w-[320px]">
+                            {/* 策略路径：与配置页导航层级一致（如「身份认证与仿冒检测 → 基础格式检查 →
+                                无效 MAIL FROM」），用户一眼就能定位该去配置页的哪一级处理，
+                                不再需要「策略模块」+「子策略/方向名称」两栏拆分。 */}
+                            <StrategyPathBreadcrumb segments={strategyPathLabels(row, tPath)} />
                             {row.is_deleted && (
                               <span className="ml-1 text-xs text-muted-foreground">{t('deletedSuffix')}</span>
                             )}
@@ -148,7 +147,7 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                         </TableRow>
                         {isExpanded && (
                           <TableRow key={`${row.id}-expanded`}>
-                            <TableCell colSpan={10} className="bg-muted/20">
+                            <TableCell colSpan={9} className="bg-muted/20">
                               <div className="flex items-center gap-6 py-2">
                                 {row.action_breakdown.length === 0 ? (
                                   <span className="text-sm text-muted-foreground">{t('empty')}</span>

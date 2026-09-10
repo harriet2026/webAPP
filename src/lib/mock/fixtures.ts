@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级���请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级����请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -2189,7 +2189,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 1,
       name: "高频发信限制",
-      description: "合作伙伴IP，放宽��制",
+      description: "合作伙伴IP，放宽����制",
       priority: 100,
       scopeType: "range",
       scopeValue: "203.0.113.0/24",
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────────────────────────��─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）──────────────────────────────����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4702,7 +4702,7 @@ const BEHAVIOR_CONTROL_DEMO_RULES: DemoBehaviorRule[] =
 // senderIp/single→ipAddress，senderIp/ipGroup→ipGroupName，
 // senderDomain→domain，global→{type:'global'}。
 // 群组/IP群组用「名称」而非 id 作为 value —— 与真实抽屉一致（下拉 SelectItem
-// value=群组名），也让表格直接显示 demo 的名称（海外IP/VIP客户/销售团���）。
+// value=群组名），也让表格直接显示 demo 的名称（海外IP/VIP客户/���售团���）。
 function behaviorObjectConfig(
   d: DemoBehaviorRule,
 ): BehaviorControlObjectConfig {
@@ -9237,7 +9237,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 15, operation_id: 'OP20260622020', admin_user_id: 7, username: 'limin@example.cn', operator_name: '黎敏',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 1, tenant_name: '晨星科技', action: 'update',
     resource_type: 'attachment_security', status: 'success', client_ip: '58.32.10.4', ip_location: '上海',
-    details: { summary: '新增可执行文件后缀��截' }, before_value: { text: 'exe, bat' },
+    details: { summary: '新增可���行文件后缀��截' }, before_value: { text: 'exe, bat' },
     after_value: { text: 'exe, bat, js, vbs' }, created_at: '2026-06-22T11:05:01Z' },
   { id: 20, operation_id: 'OP20260622040', admin_user_id: 8, username: 'guoqiang@hengfeng.cn', operator_name: '郭强',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 4, tenant_name: '恒峰金融服务', action: 'update',
@@ -9405,11 +9405,13 @@ const RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH: Record<'similar_email' |
 };
 
 const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
+  // 协议检测（SPF/DKIM/DMARC/PTR）在配置页只有一个全局观察开关，是 1 个观察
+  // 对象，不能按协议拆成多个——拆了就是无中生有，配置层根本没有那个开关。
   {
     id: 'auth-protocol_check',
     policy_module: 'auth_spoofing',
     sub_strategy_id: 'protocol_check',
-    sub_strategy_name_snapshot: '协议检查（SPF/DKIM/DMARC）',
+    sub_strategy_name_snapshot: '协议检测（SPF/DKIM/DMARC/PTR）',
     is_deleted: false,
     observed_days: 12,
     hits: 86,
@@ -9421,36 +9423,104 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     suggestion: 'confirm_promote',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
+  // 基础格式检查——每一项在配置页各自独立 observe_mode，必须拆成 3 个独立
+  // 观察对象，合并统计会掩盖各项截然不同的命中特征。
   {
-    id: 'auth-format_check',
+    id: 'auth-format_check_mailfrom_empty',
     policy_module: 'auth_spoofing',
-    sub_strategy_id: 'format_check',
-    sub_strategy_name_snapshot: '格式检查',
+    sub_strategy_id: 'format_check_mailfrom_empty',
+    sub_strategy_name_snapshot: '无效 MAIL FROM',
     is_deleted: false,
     observed_days: 5,
-    hits: 14,
-    would_block_ratio: 0.5,
-    reviewed_ratio: 0.14,
-    weighted_reviewed_ratio: 0.08,
+    hits: 9,
+    would_block_ratio: 0.44,
+    reviewed_ratio: 0.11,
+    weighted_reviewed_ratio: 0.06,
     false_positive_rate: null,
     attribution_status: 'attributable',
     suggestion: 'needs_more_data',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
-    id: 'auth-display_name_spoofing',
+    id: 'auth-format_check_mailfrom_invalid',
     policy_module: 'auth_spoofing',
-    sub_strategy_id: 'display_name_spoofing',
-    sub_strategy_name_snapshot: '展示名仿冒检测',
+    sub_strategy_id: 'format_check_mailfrom_invalid',
+    sub_strategy_name_snapshot: 'MAIL FROM 格式错误',
+    is_deleted: false,
+    observed_days: 19,
+    hits: 33,
+    would_block_ratio: 0.52,
+    reviewed_ratio: 0.36,
+    weighted_reviewed_ratio: 0.27,
+    false_positive_rate: 0.08,
+    attribution_status: 'attributable',
+    suggestion: 'keep_observing',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-format_check_envelope_header_mismatch',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'format_check_envelope_header_mismatch',
+    sub_strategy_name_snapshot: '信封头不一致',
+    is_deleted: false,
+    observed_days: 38,
+    hits: 47,
+    would_block_ratio: 0.38,
+    reviewed_ratio: 0.62,
+    weighted_reviewed_ratio: 0.49,
+    false_positive_rate: 0.23,
+    attribution_status: 'attributable',
+    suggestion: 'needs_tuning',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  // 展示名仿冒检测——按方向（收/发/内部）各自独立 observe_mode，风险模型
+  // 不同（内部方向样本天然更少），必须拆成 3 个独立观察对象。
+  {
+    id: 'auth-display_name_spoofing_inbound',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'display_name_spoofing_inbound',
+    sub_strategy_name_snapshot: '收件方向',
     is_deleted: false,
     observed_days: 34,
-    hits: 152,
+    hits: 121,
     would_block_ratio: 0.71,
     reviewed_ratio: 0.55,
     weighted_reviewed_ratio: 0.46,
     false_positive_rate: 0.18,
     attribution_status: 'attributable',
     suggestion: 'needs_tuning',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-display_name_spoofing_outbound',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'display_name_spoofing_outbound',
+    sub_strategy_name_snapshot: '发件方向',
+    is_deleted: false,
+    observed_days: 34,
+    hits: 24,
+    would_block_ratio: 0.42,
+    reviewed_ratio: 0.5,
+    weighted_reviewed_ratio: 0.38,
+    false_positive_rate: 0.07,
+    attribution_status: 'attributable',
+    suggestion: 'keep_observing',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+  },
+  {
+    id: 'auth-display_name_spoofing_internal',
+    policy_module: 'auth_spoofing',
+    sub_strategy_id: 'display_name_spoofing_internal',
+    sub_strategy_name_snapshot: '内部方向',
+    is_deleted: false,
+    observed_days: 4,
+    hits: 3,
+    would_block_ratio: 0.33,
+    reviewed_ratio: 0,
+    weighted_reviewed_ratio: 0,
+    false_positive_rate: null,
+    attribution_status: 'attributable',
+    suggestion: 'needs_more_data',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
@@ -9469,38 +9539,8 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     suggestion: 'confirm_promote',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
-  {
-    id: 'auth-dkim_outbound_signature',
-    policy_module: 'auth_spoofing',
-    sub_strategy_id: 'dkim_outbound_signature',
-    sub_strategy_name_snapshot: 'DKIM 外发签名',
-    is_deleted: false,
-    observed_days: 9,
-    hits: 21,
-    would_block_ratio: 0.33,
-    reviewed_ratio: 0.19,
-    weighted_reviewed_ratio: 0.12,
-    false_positive_rate: 0.09,
-    attribution_status: 'module_level_only',
-    suggestion: 'keep_observing',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
-  },
-  {
-    id: 'auth-arc_signature',
-    policy_module: 'auth_spoofing',
-    sub_strategy_id: 'arc_signature',
-    sub_strategy_name_snapshot: 'ARC 签名',
-    is_deleted: true,
-    observed_days: 58,
-    hits: 7,
-    would_block_ratio: 0.29,
-    reviewed_ratio: 0.86,
-    weighted_reviewed_ratio: 0.71,
-    false_positive_rate: 0.02,
-    attribution_status: 'attributable',
-    suggestion: 'confirm_promote',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
-  },
+  // DKIM 外发签名、ARC 签名管理的是密钥/域名生命周期，没有 action/observe_mode，
+  // 不是可观察的检测规则，不纳入观察模式统计范围（已从 mock 数据中移除）。
   // 相似邮件检测（similar_email）——按内容相似度判定，命中样本天然偏少。
   // 该策略在 mock 场景下设为 separate（按方向独立配置），故拆成 3 个观察对象。
   {
@@ -9731,27 +9771,87 @@ export function mockRuleEffectivenessFor(
   };
 }
 
-const RULE_EFFECTIVENESS_CSV_HEADER = '策略模块,子策略/方向,观察起始时间,观察天数,命中数,拦截缺口数,误判率,系统建议';
+const RULE_EFFECTIVENESS_CSV_HEADER = '策略路径,观察起始时间,观察天数,命中数,拦截缺口数,误判率,系统建议';
 
-// 相似检测按归属策略显示模块名（相似邮件检测/相同主题检测），而非笼统的
-// 「相似检测」——与页面明细表的显示口径保持一致。
-const RULE_EFFECTIVENESS_CSV_MODULE_LABEL: Record<string, string> = {
-  auth_spoofing: '身份认证与仿冒检测',
-  phishing_detection: '钓鱼邮件检测智能体',
-  similar_email: '相似邮件检测',
-  same_subject: '相同主题检测',
+// 与页面明细表「策略路径」列同一套 key、同一份中文文案——CSV 导出是纯 TS 侧
+// 生成，不走 next-intl，所以在这里单独维护一份镜像文案，key 命名与
+// `ruleEffectiveness.path`（messages/zh.json）保持一致，避免两处文案漂移。
+const RULE_EFFECTIVENESS_PATH_LABEL_ZH: Record<string, string> = {
+  authSpoofing: '身份认证与仿冒检测',
+  protocolCheck: '协议检测',
+  formatCheck: '基础格式检查',
+  formatCheckMailfromEmpty: '无效 MAIL FROM',
+  formatCheckMailfromInvalid: 'MAIL FROM 格式错误',
+  formatCheckEnvelopeMismatch: '信封头不一致',
+  displayNameSpoofing: '展示名仿冒检测',
+  similarDomain: '相似域名检测',
+  similarDetection: '相似检测',
+  similarEmail: '相似邮件检测',
+  sameSubject: '相同主题检测',
+  directionReceive: '收件方向',
+  directionSend: '发件方向',
+  directionInternal: '内部方向',
+  aggregateScope: '全方向聚合',
+  phishingDetection: '钓鱼检测智能体',
 };
+
+const KNOWN_AUTH_SUB_STRATEGY_IDS = new Set<string>([
+  'protocol_check',
+  'format_check_mailfrom_empty',
+  'format_check_mailfrom_invalid',
+  'format_check_envelope_header_mismatch',
+  'display_name_spoofing_inbound',
+  'display_name_spoofing_outbound',
+  'display_name_spoofing_internal',
+  'similar_domain',
+]);
+
+function ruleEffectivenessPathKeys(row: RuleEffectivenessMockRow): string[] {
+  if (row.policy_module === 'similar_detection') {
+    const typeKey = row.similar_detection_type === 'same_subject' ? 'sameSubject' : 'similarEmail';
+    const scope = row.similar_detection_scope ?? 'aggregate';
+    const scopeKey =
+      scope === 'receive' ? 'directionReceive' : scope === 'send' ? 'directionSend' : scope === 'internal' ? 'directionInternal' : 'aggregateScope';
+    return ['similarDetection', typeKey, scopeKey];
+  }
+  if (row.policy_module === 'phishing_detection') return ['phishingDetection'];
+  switch (row.sub_strategy_id) {
+    case 'protocol_check':
+      return ['authSpoofing', 'protocolCheck'];
+    case 'format_check_mailfrom_empty':
+      return ['authSpoofing', 'formatCheck', 'formatCheckMailfromEmpty'];
+    case 'format_check_mailfrom_invalid':
+      return ['authSpoofing', 'formatCheck', 'formatCheckMailfromInvalid'];
+    case 'format_check_envelope_header_mismatch':
+      return ['authSpoofing', 'formatCheck', 'formatCheckEnvelopeMismatch'];
+    case 'display_name_spoofing_inbound':
+      return ['authSpoofing', 'displayNameSpoofing', 'directionReceive'];
+    case 'display_name_spoofing_outbound':
+      return ['authSpoofing', 'displayNameSpoofing', 'directionSend'];
+    case 'display_name_spoofing_internal':
+      return ['authSpoofing', 'displayNameSpoofing', 'directionInternal'];
+    case 'similar_domain':
+      return ['authSpoofing', 'similarDomain'];
+    default:
+      return ['authSpoofing'];
+  }
+}
+
+function ruleEffectivenessPathLabel(row: RuleEffectivenessMockRow): string {
+  const labels = ruleEffectivenessPathKeys(row).map((key) => RULE_EFFECTIVENESS_PATH_LABEL_ZH[key] ?? key);
+  if (row.policy_module === 'auth_spoofing' && !KNOWN_AUTH_SUB_STRATEGY_IDS.has(row.sub_strategy_id)) {
+    labels.push(row.sub_strategy_name_snapshot);
+  }
+  return labels.join(' → ');
+}
 
 export const mockRuleEffectivenessCsv = [
   RULE_EFFECTIVENESS_CSV_HEADER,
   ...RULE_EFFECTIVENESS_MOCK_ROWS.map((row) => {
     const api = ruleEffectivenessRowToApi(row, 0);
     const fpRate = api.false_positive_rate === null ? '-' : `${Math.round(api.false_positive_rate * 100)}%`;
-    const moduleLabel =
-      RULE_EFFECTIVENESS_CSV_MODULE_LABEL[row.similar_detection_type ?? row.policy_module] ?? row.policy_module;
     return [
-      moduleLabel,
-      row.sub_strategy_name_snapshot,
+      ruleEffectivenessPathLabel(row),
       api.observed_since,
       api.observed_days,
       api.hits,
