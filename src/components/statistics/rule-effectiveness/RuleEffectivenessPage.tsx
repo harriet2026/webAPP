@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { AlertCircle, Gauge, RefreshCw, ShieldX } from 'lucide-react';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,7 @@ const CONFIG_PATH_BY_MODULE: Record<PolicyModule, string> = {
 
 export function RuleEffectivenessPage() {
   const t = useTranslations('ruleEffectiveness');
+  const locale = useLocale();
   const router = useRouter();
 
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
@@ -83,8 +84,8 @@ export function RuleEffectivenessPage() {
       similar_detection_type: row.similar_detection_type,
       similar_detection_scope: row.similar_detection_scope,
     });
-    router.push(`/email-disposal/center?${query}`);
-  }, [router]);
+    router.push(`/${locale}/email-disposal/center?${query}`);
+  }, [locale, router]);
 
   const csvUrl = getRuleEffectivenessExportCsvUrl({
     startDate,
