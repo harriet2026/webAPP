@@ -26,6 +26,7 @@ import { SimilarDetectionPage } from '@/components/security/similar-detection/Si
 import { MailMarkingPage } from '@/components/security/mail-marking/MailMarkingPage';
 import { AdvancedFilterRulesModule } from '@/components/security/advanced-filter-rules/AdvancedFilterRulesModule';
 import { PipelinePolicyCard, PipelineDrawerNavButton, type PipelinePolicy } from '@/components/security/pipeline-policy-card';
+import { BackToContextBanner } from '@/components/shared/back-to-context-banner';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
@@ -230,6 +231,15 @@ export function PolicyPipelinePage() {
   // GT-11636: 多租户形态 + 租户视角下，阶段1 IP策略由平台统一管控
   const lockStage1 = caps.multiTenant && effectiveViewer === 'tenant';
   const deepLinkAllowed = !!deepLink && !(deepLink.stage === 1 && lockStage1);
+  // 规则效能统计跳转来源标记——仅展示上下文提示条与返回入口，不影响 deep-link
+  // 自身的抽屉打开逻辑。目标策略名称沿用该策略在流水线左导航/卡片已有的
+  // nameKey 翻译，不新增一套重复的策略名称文案。
+  const source = searchParams.get('source');
+  const backContextNameKey = (source === 'rule_effectiveness' && deepLinkAllowed)
+    ? [...stage1NavItems, ...stage2NavItems, ...stage3NavItems, ...stage5NavItems].find(
+      (item) => item.key === deepLink.key,
+    )?.nameKey
+    : undefined;
   const [drawerOpen, setDrawerOpen] = useState(deepLinkAllowed);
   const [activeDrawerPolicy, setActiveDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string }>(
     deepLinkAllowed ? deepLink : { stage: 1, key: 'ipFrequency' },
@@ -258,7 +268,7 @@ export function PolicyPipelinePage() {
 
   // F10: stage5 综合策略抽屉宿主对齐 — 左导航启用圆点 + 页级
   // 综合策略开关状态（阶段5 各子模块是否被总开关关停）的数据源。仅在抽屉处于阶段5时取数;
-  // 开关本身的 UI 入口（ComprehensiveStrategyHeader）已随原型改版移除，这里只读不写。
+  // 开关本身的 UI 入口（ComprehensiveStrategyHeader）已随原���改版移除，这里只读不写。
   // (`enabled` gate)，不影响阶段1/2/3；其余阶段完全不读取这些 query。
   const stage5Active = drawerOpen && activeDrawerPolicy.stage === 5;
 
@@ -723,7 +733,7 @@ export function PolicyPipelinePage() {
     // GT-12731：stage3（url/attachment/intentEngine）在对应子页把真实启用态回传前，
     // 本地状态为 undefined。此前会退回 item.functional（恒 true），使「未启用」模块的
     // 圆点先亮起、子页加载完成后再闪回熄灭。改为优先用父级预取的 securityModulesMap
-    // 作为加载期兜底真值，让首帧就正确。子页回传后（含未保存草稿）本地状态优先。
+    // 作为加载期���底真值，让首帧就正确。子页回传后（含未保存草稿）本地状态优先。
     // GT-12731：stage3 在对应子页把真实启用态回传前，本地状态为 undefined。
     // 此前会退回 item.functional（恒 true），使「未启用」模块的圆点先亮起、子页加载
     // 完成后再闪回熄灭。改为优先用父级预取的 securityModulesMap 作为加载期兜底真值，
@@ -918,6 +928,22 @@ export function PolicyPipelinePage() {
           </Button>
         }
       />
+
+      {backContextNameKey && (
+        <BackToContextBanner
+          label={t('common.ruleEffectivenessContext.label')}
+          contextText={t(backContextNameKey)}
+          backLabel={t('common.ruleEffectivenessContext.back')}
+          onBack={() => {
+            if (typeof window !== 'undefined' && window.history.length > 1) {
+              router.back();
+              return;
+            }
+            router.push('/statistics/rule-effectiveness');
+          }}
+          data-testid="pipeline-rule-effectiveness-context-banner"
+        />
+      )}
 
       {lockStage1 && (
         <Alert className="border-primary/20 bg-primary/5">

@@ -90,6 +90,10 @@
     "refresh": "Refresh",
     "showMore": "Show more",
     "collapse": "Collapse",
+    "ruleEffectivenessContext": {
+      "label": "From Rule Effectiveness Statistics:",
+      "back": "Back to Rule Effectiveness Statistics"
+    },
     "selectColumns": "Select columns",
     "timeRange": "Time range",
     "customRange": "Custom range",

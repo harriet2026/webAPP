@@ -89,6 +89,10 @@
     "refresh": "รีเฟรช",
     "showMore": "แสดงเพิ่มเติม",
     "collapse": "ย่อ",
+    "ruleEffectivenessContext": {
+      "label": "จากสถิติประสิทธิภาพกฎ:",
+      "back": "กลับไปที่สถิติประสิทธิภาพกฎ"
+    },
     "selectColumns": "เลือกคอลัมน์",
     "timeRange": "ช่วงเวลา",
     "customRange": "กำหนดเอง",

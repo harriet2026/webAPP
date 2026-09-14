@@ -80,6 +80,10 @@
     "refresh": "刷新",
     "showMore": "显示更多",
     "collapse": "收起",
+    "ruleEffectivenessContext": {
+      "label": "来自规则效能统计：",
+      "back": "返回规则效能统计"
+    },
     "selectColumns": "选择列",
     "timeRange": "时间范围",
     "customRange": "自定义范围",

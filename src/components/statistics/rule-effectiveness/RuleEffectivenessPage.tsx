@@ -70,9 +70,12 @@ export function RuleEffectivenessPage() {
     scopeTenantId,
   });
 
+  // 携带 source=rule_effectiveness 标记，供目标配置页（策略流水线/智能体中心）
+  // 识别来源并展示可返回的上下文提示条，不改变目标页原有的 deep-link 参数解析。
   const handleNavigateToConfig = useCallback((row: RuleEffectivenessRow) => {
     const configPath = row.config_path || CONFIG_PATH_BY_MODULE[row.policy_module];
-    router.push(`/${locale}${configPath}`);
+    const separator = configPath.includes('?') ? '&' : '?';
+    router.push(`/${locale}${configPath}${separator}source=rule_effectiveness`);
   }, [locale, router]);
 
   // 统一跳转到邮件处置中心，携带模块/子策略/观察起始时间作为预置筛选条件，

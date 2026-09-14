@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import type { AgentCenterCard, AgentCenterKey } from '@/types/agent-center';
 import { PageShell, PageSurface } from '@/components/shared/page-shell';
 import { AccessDeniedPanel, LoadingPanel } from '@/components/shared/state-panel';
+import { BackToContextBanner } from '@/components/shared/back-to-context-banner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -111,11 +112,32 @@ export function AgentCenterOverviewPage() {
     const detailLocked = !detailCard || detailCard.access === 'locked' || detailCard.status === 'locked';
     const detailPresentation = detailCard ? resolveAgentPresentation(detailCard) : undefined;
     const detailTitle = t(`agents.${selectedAgent}.title`);
+    // 规则效能统计跳转来源标记——仅展示上下文提示条与返回入口，不影响
+    // agent/tab 自身的 deep-link 解析。目前只有钓鱼检测智能体可从规则效能
+    // 统计跳转到此页（见 rule-effectiveness.ts 的 CONFIG_PATH_BY_MODULE）。
+    const showBackToRuleEffectiveness = searchParams.get('source') === 'rule_effectiveness' && selectedAgent === 'phishing';
 
     return (
       <TooltipProvider>
         <PageShell className="space-y-0" data-testid="agent-center-detail">
           <AgentCenterHeader currentTitle={detailTitle} description={t(`agents.${selectedAgent}.description`)} />
+          {showBackToRuleEffectiveness && (
+            <div className="px-8 pt-3">
+              <BackToContextBanner
+                label={t('common.ruleEffectivenessContext.label')}
+                contextText={detailTitle}
+                backLabel={t('common.ruleEffectivenessContext.back')}
+                onBack={() => {
+                  if (typeof window !== 'undefined' && window.history.length > 1) {
+                    router.back();
+                    return;
+                  }
+                  router.push('/statistics/rule-effectiveness');
+                }}
+                data-testid="agent-center-rule-effectiveness-context-banner"
+              />
+            </div>
+          )}
           <AgentCenterWorkspace
             cards={visibleCards}
             numberFmt={numberFmt}
