@@ -5812,6 +5812,11 @@
     "pageTitle": "Email Disposal Center",
     "investigationTitle": "Mail Investigation Center",
     "investigationSubtitle": "View and analyze mail security incidents for threat investigation and disposal",
+    "ruleEffectivenessContext": {
+      "label": "From rule effectiveness statistics:",
+      "observedSince": "Observed since: {date}",
+      "back": "Back to rule effectiveness statistics"
+    },
     "recipientStatusBar": {
       "delivered": "Delivered",
       "sideline": "Pending decision",

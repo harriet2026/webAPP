@@ -5837,6 +5837,11 @@
     "pageTitle": "ศูนย์จัดการอีเมล",
     "investigationTitle": "ศูนย์สอบสวนอีเมล",
     "investigationSubtitle": "ดูและวิเคราะห์เหตุการณ์ความปลอดภัยอีเมลเพื่อการสอบสวนภัยคุกคามและการกำจัด",
+    "ruleEffectivenessContext": {
+      "label": "จากสถิติประสิทธิภาพของกฎ:",
+      "observedSince": "สังเกตตั้งแต่: {date}",
+      "back": "กลับไปที่สถิติประสิทธิภาพของกฎ"
+    },
     "recipientStatusBar": {
       "delivered": "ส่งแล้ว",
       "sideline": "รอการตัดสิน",

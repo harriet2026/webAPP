@@ -5817,6 +5817,11 @@
     "pageTitle": "邮件处置中心",
     "investigationTitle": "邮件调查中心",
     "investigationSubtitle": "查看和分析邮件安全事件，进行威胁调查和处置",
+    "ruleEffectivenessContext": {
+      "label": "来自规则效能统计：",
+      "observedSince": "观察起始时间：{date}",
+      "back": "返回规则效能统计"
+    },
     "recipientStatusBar": {
       "delivered": "投递",
       "sideline": "待判定",

@@ -5650,6 +5650,11 @@
     "pageTitle": "Центр обработки почты",
     "investigationTitle": "Центр расследования почты",
     "investigationSubtitle": "Просмотр и анализ инцидентов безопасности почты для расследования угроз и принятия мер",
+    "ruleEffectivenessContext": {
+      "label": "Из статистики эффективности правил:",
+      "observedSince": "Наблюдение с: {date}",
+      "back": "Назад к статистике эффективности правил"
+    },
     "recipientStatusBar": {
       "delivered": "Доставлено",
       "sideline": "Ожидает решения",

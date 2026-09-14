@@ -58,6 +58,7 @@ import {
 } from "./mail-list-table";
 import { DetailModal } from "./detail-modal";
 import { ReclassifyDialog } from "./components/reclassify-dialog";
+import { RuleEffectivenessContextBanner } from "./rule-effectiveness-context-banner";
 import { ServerPagination } from "@/components/shared/server-pagination";
 import {
   PageShell,
@@ -879,6 +880,8 @@ export function EmailDisposalCenterPage({
         )}
         icon={InboxIcon}
       />
+
+      <RuleEffectivenessContextBanner />
 
       <SearchFilterPanel
         testId="disposal-search-workbench"
