@@ -87,16 +87,6 @@ export interface RuleEffectivenessKpi {
   pending_review_count: number;
 }
 
-export interface RuleEffectivenessTrendPoint {
-  date: string;
-  auth_spoofing: number;
-  // 相似检测的两条策略语义不同（内容相似度 vs 主题标准化），趋势必须分开两条线，
-  // 不能合并成一条「相似检测」总量线，否则会掩盖各自的真实变化趋势。
-  similar_detection_similar_email: number;
-  similar_detection_same_subject: number;
-  phishing_detection: number;
-}
-
 export interface ActionBreakdownItem {
   action: WouldBeAction;
   count: number;
@@ -130,7 +120,6 @@ export interface RuleEffectivenessRow {
 
 export interface RuleEffectivenessResponse {
   kpi: RuleEffectivenessKpi;
-  trend: RuleEffectivenessTrendPoint[];
   rows: RuleEffectivenessRow[];
   /** 本次请求中数据源降级（超时/不可用）的模块，其余模块数据仍可正常展示。 */
   degraded_modules: PolicyModule[];
@@ -188,7 +177,7 @@ export async function getRuleEffectiveness(
 
 /**
  * 构造跳转到邮件处置中心的查询参数——携带模块/子策略/观察起始时间，
- * 由处置中心侧按 source=rule_effectiveness 识别来源并展示上下文提示条。
+ * 由处置中心侧按 source=rule_effectiveness 识别来��并展示上下文提示条。
  * 本函数只负责生成参数，不修改邮件处置中心自身的筛选实现。
  */
 export function buildEmailDisposalCenterQuery(row: {
