@@ -929,22 +929,6 @@ export function PolicyPipelinePage() {
         }
       />
 
-      {backContextNameKey && (
-        <BackToContextBanner
-          label={t('common.ruleEffectivenessContext.label')}
-          contextText={t(backContextNameKey)}
-          backLabel={t('common.ruleEffectivenessContext.back')}
-          onBack={() => {
-            if (typeof window !== 'undefined' && window.history.length > 1) {
-              router.back();
-              return;
-            }
-            router.push('/statistics/rule-effectiveness');
-          }}
-          data-testid="pipeline-rule-effectiveness-context-banner"
-        />
-      )}
-
       {lockStage1 && (
         <Alert className="border-primary/20 bg-primary/5">
           <Lock className="h-4 w-4 text-primary" />
@@ -1058,6 +1042,26 @@ export function PolicyPipelinePage() {
             </div>
 
           </div>
+
+          {backContextNameKey
+            && activeDrawerPolicy.stage === deepLink?.stage
+            && activeDrawerPolicy.key === deepLink?.key && (
+            <div className="px-6 pt-4 flex-shrink-0">
+              <BackToContextBanner
+                label={t('common.ruleEffectivenessContext.label')}
+                contextText={t(backContextNameKey)}
+                backLabel={t('common.ruleEffectivenessContext.back')}
+                onBack={() => {
+                  if (typeof window !== 'undefined' && window.history.length > 1) {
+                    router.back();
+                    return;
+                  }
+                  router.push('/statistics/rule-effectiveness');
+                }}
+                data-testid="pipeline-rule-effectiveness-context-banner"
+              />
+            </div>
+          )}
 
           <TooltipProvider>
           <div className="flex flex-1 overflow-hidden relative">
