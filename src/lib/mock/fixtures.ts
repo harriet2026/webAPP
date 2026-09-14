@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级�����请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────────────────────��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）─────────────────────────��─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4704,7 +4704,7 @@ const BEHAVIOR_CONTROL_DEMO_RULES: DemoBehaviorRule[] =
 // object_config 映射：individual→senderEmail，group→senderGroupName，
 // senderIp/single→ipAddress，senderIp/ipGroup→ipGroupName，
 // senderDomain→domain，global→{type:'global'}。
-// 群组/IP群组用「名称」而非 id 作为 value —— 与真实抽屉一致（下拉 SelectItem
+// 群组/IP群组用「名称」而非 id 作为 value —— 与��实抽屉一致（下拉 SelectItem
 // value=群组名），也让表格直接显示 demo 的名称（海外IP/VIP客户/���售团���）。
 function behaviorObjectConfig(
   d: DemoBehaviorRule,
@@ -9410,7 +9410,7 @@ const RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH: Record<'similar_email' |
 const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   // 认证协议检查下 SPF/DKIM/DMARC/PTR 四个协议在配置页各自拥有独立的观察开关
   // （spf_observe_mode/dkim_observe_mode/dmarc_observe_mode/ptr_observe_mode），
-  // 已不再共用同一个全局开关，因此拆成 4 个独立观察对象，而不是 1 个。
+  // 已不再共用同一个全局开关，因此拆成 4 个独立观���对象，而不是 1 个。
   {
     id: 'auth-protocol_check_spf',
     policy_module: 'auth_spoofing',
@@ -9694,7 +9694,7 @@ const RULE_EFFECTIVENESS_SUGGESTION_REASON: Record<RuleEffectivenessMockRow['sug
   keep_observing: (row) =>
     `已观察 ${row.observed_days} 天，命中 ${row.hits} 次，样本仍在积累，建议继续观察`,
   needs_tuning: (row) =>
-    `已观察 ${row.observed_days} 天，加权误判率 ${Math.round((row.false_positive_rate ?? 0) * 100)}%，偏高，建议调参后再评估`,
+    `已观察 ${row.observed_days} 天，加权误判率 ${Math.round((row.false_positive_rate ?? 0) * 100)}%，���高，建议调参后再评估`,
   needs_more_data: (row) =>
     `已观察 ${row.observed_days} 天，命中样本不足（已判定 ${Math.round(row.hits * row.reviewed_ratio)} 次），暂不建议判断`,
 };
@@ -9724,7 +9724,6 @@ function ruleEffectivenessActionBreakdown(
 
 function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number) {
   const observedSince = new Date(Date.now() - row.observed_days * 86_400_000).toISOString().slice(0, 10);
-  const wouldBlockCount = Math.round(row.hits * row.would_block_ratio);
   const reviewedCount = Math.round(row.hits * row.reviewed_ratio);
   const weightedReviewedCount = Math.round(row.hits * row.weighted_reviewed_ratio);
   return {
@@ -9738,7 +9737,6 @@ function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number)
     observed_since: observedSince,
     observed_days: row.observed_days,
     hits: row.hits,
-    would_block_count: wouldBlockCount,
     reviewed_count: reviewedCount,
     weighted_reviewed_count: weightedReviewedCount,
     false_positive_rate: row.false_positive_rate,
@@ -9790,7 +9788,6 @@ export function mockRuleEffectivenessFor(
   const rows = filteredRows.map((row, index) => ruleEffectivenessRowToApi(row, index));
 
   const totalHits = rows.reduce((sum, row) => sum + row.hits, 0);
-  const wouldBlockCount = rows.reduce((sum, row) => sum + row.would_block_count, 0);
   const avgObservedDays = rows.length > 0
     ? Math.round(rows.reduce((sum, row) => sum + row.observed_days, 0) / rows.length)
     : 0;
@@ -9812,8 +9809,6 @@ export function mockRuleEffectivenessFor(
       observing_count_delta: rows.length > 0 ? 1 : null,
       total_hits: totalHits,
       total_hits_delta: totalHits > 0 ? 42 : null,
-      would_block_count: wouldBlockCount,
-      would_block_count_delta: wouldBlockCount > 0 ? 18 : null,
       avg_observed_days: avgObservedDays,
       pending_review_count: pendingReviewCount,
     },
@@ -9823,11 +9818,11 @@ export function mockRuleEffectivenessFor(
   };
 }
 
-const RULE_EFFECTIVENESS_CSV_HEADER = '策略路径,观察起始时间,观察天数,命中数,拦截缺口数,误判率,系统建议';
+const RULE_EFFECTIVENESS_CSV_HEADER = '策略路径,观察起始时间,观察天数,命中数,误判率,系统建议';
 
 // 与页面明细表「策略路径」列同一套 key、同一份中文文案——CSV 导出是纯 TS 侧
 // 生成，不走 next-intl，所以在这里单独维护一份镜像文案，key 命名与
-// `ruleEffectiveness.path`（messages/zh.json）保持一致，避免两处文案漂移。
+// `ruleEffectiveness.path`��messages/zh.json）保持一致，避免两处文案漂移。
 const RULE_EFFECTIVENESS_PATH_LABEL_ZH: Record<string, string> = {
   authSpoofing: '身份认证与仿冒检测',
   protocolCheck: '协议检测',
@@ -9916,7 +9911,6 @@ export const mockRuleEffectivenessCsv = [
       api.observed_since,
       api.observed_days,
       api.hits,
-      api.would_block_count,
       fpRate,
       api.suggestion,
     ].join(',');

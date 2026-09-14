@@ -8042,7 +8042,7 @@
   },
   "ruleEffectiveness": {
     "title": "Rule Effectiveness Statistics",
-    "subtitle": "Track hits and blocking gaps for policies/rules currently in observe mode, to help decide whether to promote them to enforced",
+    "subtitle": "Track hits for policies/rules currently in observe mode, to help decide whether to promote them to enforced",
     "trendCardTitle": "Observed Hits Trend",
     "noData": "No data available",
     "error": {
@@ -8054,11 +8054,10 @@
       "retrying": "Retrying…"
     },
     "kpi": {
-      "observingCount": "Objects in Observe Mode",
-      "totalHits": "Total Hits During Observation",
-      "wouldBlockCount": "Blocking Gap",
-      "avgObservedDays": "Avg. Observed Duration",
-      "pendingReviewCount": "Pending Evaluation",
+  "observingCount": "Observing Policies",
+  "totalHits": "Total Hits During Observation",
+  "avgObservedDays": "Avg. Observed Duration",
+  "pendingReviewCount": "Policies Pending Promotion",
       "vsPrevious": "vs previous",
       "days": "days"
     },
@@ -8123,7 +8122,7 @@
       "phishingDetection": "Phishing Detection Agent"
     },
     "timeoutAlert": {
-      "warning": "{count} objects have been in observe mode for over {days} days. Consider evaluating whether to promote them to enforced.",
+      "warning": "{count} policies have been in observe mode for over {days} days and are pending promotion evaluation.",
       "viewDetails": "View",
       "drawerTitle": "Objects Exceeding Observation Timeout",
       "observedDays": "Observed for {days} days",
@@ -8143,16 +8142,14 @@
         "subStrategy": "Sub-strategy/Direction",
         "observedSince": "Observed Since",
         "observedDays": "Observed Duration",
-        "hits": "Hits",
-        "wouldBlockCount": "Blocking Gap",
-        "falsePositiveRate": "False Positive Risk",
+  "hits": "Hits",
+  "falsePositiveRate": "False Positive Risk",
         "suggestion": "System Suggestion",
         "actions": "Actions"
       },
-      "tooltip": {
-        "wouldBlockCount": "Number of hits that would have been blocked (bounce/quarantine/discard/sideline/recall) had this rule not been in observe mode",
-        "falsePositiveRate": "Derived from existing email disposal outcomes: confirmed false positives / reviewed hits (weighted by confidence)"
-      },
+  "tooltip": {
+  "falsePositiveRate": "Derived from existing email disposal outcomes: confirmed false positives / reviewed hits (weighted by confidence)"
+  },
       "suggestion": {
         "confirm_promote": "Promote to Enforced",
         "keep_observing": "Keep Observing",

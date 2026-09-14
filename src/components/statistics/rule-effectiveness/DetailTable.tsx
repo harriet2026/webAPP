@@ -72,12 +72,6 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                     <TableHead>{t('col.hits')}</TableHead>
                     <TableHead>
                       <UiTooltip>
-                        <TooltipTrigger render={<span className="cursor-help underline decoration-dotted">{t('col.wouldBlockCount')}</span>} />
-                        <TooltipContent>{t('tooltip.wouldBlockCount')}</TooltipContent>
-                      </UiTooltip>
-                    </TableHead>
-                    <TableHead>
-                      <UiTooltip>
                         <TooltipTrigger render={<span className="cursor-help underline decoration-dotted">{t('col.falsePositiveRate')}</span>} />
                         <TooltipContent>{t('tooltip.falsePositiveRate')}</TooltipContent>
                       </UiTooltip>
@@ -116,7 +110,6 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                             {t('daysValue', { days: row.observed_days })}
                           </TableCell>
                           <TableCell>{row.hits}</TableCell>
-                          <TableCell className="text-danger font-medium">{row.would_block_count}</TableCell>
                           <TableCell>{fpRateText}</TableCell>
                           <TableCell>
                             <UiTooltip>
@@ -147,7 +140,7 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                         </TableRow>
                         {isExpanded && (
                           <TableRow key={`${row.id}-expanded`}>
-                            <TableCell colSpan={9} className="bg-muted/20">
+                            <TableCell colSpan={8} className="bg-muted/20">
                               <div className="flex items-center gap-6 py-2">
                                 {row.action_breakdown.length === 0 ? (
                                   <span className="text-sm text-muted-foreground">{t('empty')}</span>

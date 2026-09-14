@@ -361,7 +361,7 @@
     "agentCenter": "智能体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
-    "threatRetro": "威胁回���智能体",
+    "threatRetro": "威胁回����智能体",
     "spoofingDetection": "仿冒邮件检测智能体",
     "organizationContacts": "组织通讯录",
     "mailRouting": "邮件路由",
@@ -388,7 +388,7 @@
     "accessDenied": "当前账号没有查看智能体管理的权限。",
     "loadFailed": "智能体总览加载失败",
     "detailLockedTitle": "当前智能体未开通",
-    "detailLockedDescription": "该智��体在当前产品形态或租户授权下不可配置，请返回总览查看可用智能体。",
+    "detailLockedDescription": "该����体在当前产品形态或租户授权下不可配置，请返回总览查看可用智能体。",
     "actions": {
       "configure": "配置",
       "logs": "日志",
@@ -533,7 +533,7 @@
       "change": "环比",
       "trend": "趋势",
       "authAccount": "认证账号",
-      "authCount": "认证次数",
+      "authCount": "认证��数",
       "failReason": "失败原因",
       "bruteForce": "暴力破解",
       "firstAuth": "首次认证",
@@ -1012,13 +1012,13 @@
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
           "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高安全策略存在差距，建议提升至 TLSv1.2。",
-          "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在数据泄���风������建议使用「优先 TLS」。",
+          "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在数据泄�����风������建议使用「优先 TLS」。",
           "channel": "投递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
           "channelProxyColumns": {
             "name": "代理名称",
             "proxyIp": "代理 IP",
-            "egressIp": "出口 IP",
+            "egressIp": "出��� IP",
             "helo": "HELO 主机名",
             "status": "状态"
           },
@@ -1109,7 +1109,7 @@
         "tlsModeHint": "优先 TLS：服务器支持则用 TLS，不支持自动降级明文；强制 TLS：必须 TLS，握手失败即认证失败",
         "verifyCert": "校验服务器证书合法性",
         "warnPlaintext": "未启用传输加密：认证凭据将以明文传输，建议仅在受信任的内网环境使用。",
-        "warnNoCertVerify": "已关闭证书校验：将不验证服务器证书合��性，��在中间人攻击风险，仅建议用于内部自签名证书服务器。",
+        "warnNoCertVerify": "已关闭证书校验：将不验证��务器证书合��性，��在中间人攻击风险，仅建议用于内部自签名证书服务器。",
         "authTimeout": "认证超时（秒）",
         "authTimeoutRange": "超时范围 1-300 秒",
         "scenesRequired": "请至少选择一个生效场景",
@@ -1342,7 +1342,7 @@
     "comingSoon": "敬请期待",
     "customParams": "自定义参数",
     "customSubChecks": "自定义子检查",
-    "customComingSoonNote": "自定义参数覆盖待参数契约落地后开��；当前��存不支持该档位。",
+    "customComingSoonNote": "自定义参数覆盖待参��契约落地后开��；当前��存不支持该档位。",
     "highRiskWarnTitle": "高��险操作警告",
     "highRiskWarnIntentEngine": "禁用意图引擎将大幅降低钓鱼邮件检测能力",
     "highRiskAck": "我已知晓风险",
@@ -2055,7 +2055,7 @@
       "updated": "租户已更新",
       "suspended": "租户已暂停",
       "activated": "租户已启用",
-      "conflict": "该租户已被他人��改,请刷新后重试",
+      "conflict": "该租户��被他人��改,请刷新后重试",
       "codeConflict": "租户编码已存在，请更换后重试",
       "partial": "部分项未��存成功,请检查标红项"
     },
@@ -2836,7 +2836,7 @@
     "noActiveProxysvrGroups": "暂无活跃的代理服务器分组（请先在系统管理 → 代理服务器管理中创建）"
   },
   "proxysvr": {
-    "title": "代理服务器管理",
+    "title": "代理服务��管理",
     "pageDescription": "管理代理服务器目录与故障转移分组，供路由规则的「代理服务器分组」投递通道引用。",
     "endpointsTab": "代理服务器目录",
     "groupsTab": "代理服务器分组",
@@ -3959,11 +3959,11 @@
     "saveSuccess": "RBL 过滤配置已保存",
     "serverExists": "该服务器已存在",
     "serverReferenced": "该服务器被 {count} 条命中规则使用，无法删除",
-    "loadError": "加载 RBL 配置失败",
+    "loadError": "���载 RBL 配置失败",
     "disposalStrategyTitle": "处置策略",
     "disposalStrategyDesc": "选择命中 RBL 后的处置方式，两种策略互斥，仅能启用其一。",
     "actionSectionTitle": "执行动作",
-    "actionSectionDesc": "当命中 RBL 时，对邮件立即执行的处置方式。",
+    "actionSectionDesc": "��命中 RBL 时，对邮件立即执行的处置方式。",
     "greylistSectionTitle": "灰名单策略",
     "greylistSectionDesc": "对未知发件方临时挂起，等待重试验证身份，可有效过滤僵尸网络。",
     "greylistEnabled": "启用灰名单策略",
@@ -4129,7 +4129,7 @@
     "action_discard": "丢弃",
     "action_discard_desc": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃",
     "action_quarantine": "隔离",
-    "action_quarantine_desc": "邮件进入隔离区，管理员可审阅后���定是否放行",
+    "action_quarantine_desc": "邮件进入隔离区���管理员可审阅后���定是否放行",
     "action_audit": "审核",
     "action_audit_desc": "邮件正常投递，同时写入审核日志供管理员事后审查",
     "action_accept": "投递",
@@ -4253,7 +4253,7 @@
     "exampleBlockSenderDesc": "拒绝 spam@bad.com 发给 user@example.com 的邮件",
     "exampleWhitelistDomain": "白名单合作域名",
     "exampleWhitelistDomainDesc": "放行来自 partner.com 发给 user@example.com 的邮件",
-    "exampleRecipientOnly": "拦截所有发往特定用户的邮件",
+    "exampleRecipientOnly": "拦截所有发往��定用户的邮件",
     "exampleRecipientOnlyDesc": "拒绝任何发信人发给 user@example.com 的邮件",
     "simulationTest": "模拟测试",
     "simSenderPlaceholder": "输入测试发信人，如 spam@bad.com",
@@ -4435,7 +4435,7 @@
     "attachmentContentUnavailable": "附件内容匹配仅由旁路扫描器提供，当前编辑器暂不能配置。",
     "legacyScopesPreserved": "此规则保留了 {count} 个简化编辑器未展示的兼容作用域。",
     "headerOnlyTagHint": "标记仅添加邮件头，不会修改邮件主题。",
-    "headerRequired": "请同时填写邮件头名称和值",
+    "headerRequired": "请同时填写邮件头名称和��",
     "contentGroup": "内容组",
     "selectContentGroup": "选择全局内容组",
     "keywordPlaceholder": "例如：机密|绝密|内部资料",
@@ -4521,7 +4521,7 @@
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
     "protocolChecks": {
-      "title": "认证协议检查",
+      "title": "认证协议��查",
       "spf": "SPF",
       "dkim": "DKIM",
       "dmarc": "DMARC",
@@ -5372,7 +5372,7 @@
       "cleanupHint": "自动清理超过该天数的旧记录（有效范围：30-365天）",
       "cleanupError": "清理周期需在 30-365 天之间",
       "cloudIntel": "云端URL情报查询",
-      "cloudIntelDesc": "启用后，查询云端威胁情报库；禁用后仅依赖本地沙箱",
+      "cloudIntelDesc": "启用后，查询云端威胁情报库；禁用后仅依���本地沙箱",
       "cloudIntelTip": "查询云端威胁情报库，获取更全面的URL风险评估"
     },
     "linkProtection": {
@@ -5423,7 +5423,7 @@
       "costHint": "复检耗时预期：回扫黑名单（即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
         "title": "回扫黑名单",
-        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审核·隔离·丢弃·阻断 的 URL 黑名单规则，命中即按其动作��置"
+        "desc": "比对「高级过滤规则」与「内容规则」中动作为 审��·隔离·丢弃·阻断 的 URL 黑名单规则，命中即按其动作��置"
       },
       "m2": {
         "title": "查询情报",
@@ -5839,7 +5839,7 @@
       "advancedFilter": "高级筛选",
       "collapse": "收起",
       "saveCurrent": "保存当前条件",
-      "savedTemplates": "已保存模板",
+      "savedTemplates": "已保存��板",
       "deleteTemplate": "删除模板",
       "renameTemplate": "重命名",
       "templateDefaultName": "搜索模板",
@@ -5995,7 +5995,7 @@
         "contains": "包含",
         "not_contains": "不包含",
         "starts_with": "开头是",
-        "ends_with": "结尾是",
+        "ends_with": "结尾��",
         "regex": "正则匹配",
         "is_null": "为空",
         "is_not_null": "非空",
@@ -6107,7 +6107,7 @@
       "download": "下载",
       "loading": "加载中...",
       "empty": "暂无数据",
-      "selected": "已选 {n} 封",
+      "selected": "已��� {n} 封",
       "disposalBasis": "处置依据",
       "disposalBasisGroupHeader": "{module}（{count} 人）",
       "disposalBasisRuleLine": "{recipient} — 规则：{ruleName}（{ruleId}）· {state}",
@@ -6691,7 +6691,7 @@
           "failed": "失败"
         },
         "searchPlaceholder": "搜索日志内容...",
-        "copyAll": "复制全部",
+        "copyAll": "复制���部",
         "downloadLog": "下载",
         "copied": "已复制",
         "copyFailed": "复制失败，请手动选择并复制",
@@ -7126,7 +7126,7 @@
       "desc_subject": {
         "source": "邮件头 Subject 字段",
         "usage": "过滤包含特定关键词的邮件主题",
-        "note": "支持正则表达式和通配符匹配"
+        "note": "���持正则表达式和通配符匹配"
       },
       "desc_cc": {
         "source": "邮件头 CC 字段",
@@ -7461,7 +7461,7 @@
       },
       "stepGuideMapNumber": [
         "先在「选择对象」中选择要比较的对象（* 表示全部对象）。",
-        "再选择比较方式（大于 / 小于 / 介于等）。",
+        "再选择比较方��（大于 / 小于 / 介于等）。",
         "最后填写阈值，可点「应用推荐配置」快速��入常用值。"
       ],
       "formats": {
@@ -8097,7 +8097,7 @@
   },
   "ruleEffectiveness": {
     "title": "规则效能统计",
-    "subtitle": "统计当前观察模式策略/规则的命中与拦截缺口，辅助判断是否转为正式生效",
+    "subtitle": "统计当前观察模式策略/规则的命中情况，辅助判断是否转为正式生效",
     "trendCardTitle": "观察命中趋势",
     "noData": "暂无数据",
     "error": {
@@ -8109,11 +8109,10 @@
       "retrying": "正在重试…"
     },
     "kpi": {
-      "observingCount": "观察中对象数",
+      "observingCount": "观察策略数",
       "totalHits": "观察期总命中数",
-      "wouldBlockCount": "拦截缺口数",
       "avgObservedDays": "平均观察时长",
-      "pendingReviewCount": "待评估数",
+      "pendingReviewCount": "待转正策略数",
       "vsPrevious": "较上期",
       "days": "天"
     },
@@ -8179,7 +8178,7 @@
       "phishingDetection": "钓鱼检测智能体"
     },
     "timeoutAlert": {
-      "warning": "有 {count} 个观察对象已观察超过 {days} 天，建议评估是否转为正式生效",
+      "warning": "有 {count} 个策略已观察超过 {days} 天，待转正评估",
       "viewDetails": "查看",
       "drawerTitle": "超时观察对象清单",
       "observedDays": "已观察 {days} 天",
@@ -8199,14 +8198,12 @@
         "observedSince": "观察起始时间",
         "observedDays": "观察时长",
         "hits": "命中数",
-        "wouldBlockCount": "拦截缺口数",
         "falsePositiveRate": "误杀风险",
         "suggestion": "系统建议",
         "actions": "操作"
       },
       "tooltip": {
-        "wouldBlockCount": "若该规则不是观察模式，这些命中原本会被执行���拦截类动作（退信/隔离/丢弃/边列/召回）次数",
-        "falsePositiveRate": "基于处置中心已有处置结果派生：确认误判命中数 / 已判定命中数（按判定可信度加权）"
+        "falsePositiveRate": "基于现有邮件处置结果推算：确认误判数 / 已复核命中数（按置信度加权）"
       },
       "suggestion": {
         "confirm_promote": "建议转正式",
@@ -9039,7 +9036,7 @@
       "selectedCount": "已选 {count} 项",
       "clearAll": "清空",
       "searchDepartments": "搜索部门",
-      "searchPeople": "按姓名或邮箱搜索人员；也可输入完整邮箱后回车",
+      "searchPeople": "按姓���或邮箱搜索人员；也可输入完整邮箱后回车",
       "noDepartmentsHint": "组织通讯录暂未同步部门",
       "recipientScope": "收件人筛选",
       "senderScope": "发件人筛选",
@@ -9314,7 +9311,7 @@
       "empty": "暂无检测日志",
       "totalPrefix": "共 ",
       "totalSuffix": " 条",
-      "fallbackHint": "内联回退记录（已投递并标记），无可处置旁路件"
+      "fallbackHint": "内联回退记录（已投递并标记），无��处置旁路件"
     },
     "detail": {
       "title": "检测详情",
@@ -10166,7 +10163,7 @@
     "markKey": "标记为关键岗位",
     "markUntag": "取消标记",
     "namePlaceholder": "如 总部 AD",
-    "openIdPlaceholder": "如 open-3391",
+    "openIdPlaceholder": "�� open-3391",
     "orgIdPlaceholder": "如 RD-001",
     "orgNamePlaceholder": "如 研发中心",
     "pagerGoto": "前往",
@@ -10256,7 +10253,7 @@
     "toastSyncSuccess": "同步成功",
     "toastTestFirst": "请先完成连接测试并通过",
     "toastUnmarked": "已取消标记",
-    "toastUpdated": "数据源已更新",
+    "toastUpdated": "数据源���更新",
     "toggleAutoSyncAria": "切换自动同步",
     "typeCoremail": "Coremail API",
     "typeCsv": "CSV 导入",
@@ -10464,7 +10461,7 @@
     "smtp": {
       "title": "邮件服务配置",
       "useInternal": "使用内置 Postfix（无需凭据）",
-      "encKeyMissing": "告警 SMTP 加密密钥未配置；外部 SMTP 凭据存储已禁用。内置 Postfix 仍可正常使用。",
+      "encKeyMissing": "告警 SMTP 加密密钥未配置；外部 SMTP 凭据存储已禁用。内��� Postfix 仍可正常使用。",
       "server": "SMTP 服务器",
       "port": "端口",
       "encryption": "加密方式",
@@ -10658,7 +10655,7 @@
     "subjectLabel": "主题",
     "senderLabel": "发件人",
     "timeLabel": "时间",
-    "expiredTitle": "链接已过期或无效",
+    "expiredTitle": "链接已过期或无���",
     "expiredDesc": "请联系管理员获取新的预览链接。",
     "purgedTitle": "邮件已超出保留期",
     "purgedDesc": "该邮件已超出隔离区保留期限并被清理，无法再预览。",
@@ -11255,7 +11252,7 @@
       "group_name_exists": "已存在同名的代理分组",
       "group_not_found": "代理分组不存在，可能已被删除",
       "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
-      "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或留空",
+      "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP ��址），或留空",
       "license_key_missing": "服务端未配置授权加密密钥，无法保存授权信息，请联系管理员",
       "member_endpoint_duplicate": "同一个节点不能在分组里重复出现",
       "member_endpoint_id_invalid": "分组成员的节点必须是有效选择",
@@ -11375,7 +11372,7 @@
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
       "code_too_long": "租户编码长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
-      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请先放行或清除后再��除租户",
+      "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请���放行或清除后再��除租户",
       "next_hop_pair_required": "下一跳主机与端口必须同时填写",
       "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
       "next_hop_host_empty": "下一跳主机不能为空"
@@ -11728,7 +11725,7 @@
       "not_found": "记录不存在",
       "match_type_invalid": "匹配类型只能是邮箱或域名",
       "value_required": "值不能为空",
-      "whitelist_entry_exists": "该白名单条目已存在"
+      "whitelist_entry_exists": "该白名单条目已���在"
     },
     "phishing_screenshot": {
       "invalid_storage_node_key": "存储节点或键无效",

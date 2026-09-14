@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Eye, ShieldAlert, Clock, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Eye, Clock, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import type { RuleEffectivenessKpi } from '@/lib/api/rule-effectiveness';
 
 interface KpiCardsProps {
@@ -47,15 +47,6 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
       valueColor: '',
     },
     {
-      key: 'wouldBlockCount',
-      icon: ShieldAlert,
-      value: data?.would_block_count,
-      delta: data?.would_block_count_delta,
-      accent: 'bg-danger-soft',
-      iconColor: 'text-danger',
-      valueColor: 'text-danger',
-    },
-    {
       key: 'avgObservedDays',
       icon: Clock,
       value: data?.avg_observed_days,
@@ -77,7 +68,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5" data-testid="rule-effectiveness-kpi-cards">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="rule-effectiveness-kpi-cards">
       {cards.map((card) => {
         const Icon = card.icon;
         const deltaStr = formatDelta(card.delta);

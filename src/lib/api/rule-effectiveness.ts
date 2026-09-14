@@ -83,8 +83,6 @@ export interface RuleEffectivenessKpi {
   observing_count_delta: number | null;
   total_hits: number;
   total_hits_delta: number | null;
-  would_block_count: number;
-  would_block_count_delta: number | null;
   avg_observed_days: number;
   pending_review_count: number;
 }
@@ -117,7 +115,6 @@ export interface RuleEffectivenessRow {
   observed_since: string;
   observed_days: number;
   hits: number;
-  would_block_count: number;
   reviewed_count: number;
   weighted_reviewed_count: number;
   false_positive_rate: number | null;
@@ -190,7 +187,7 @@ export async function getRuleEffectiveness(
 }
 
 /**
- * 构造跳转到邮件处置中心的查询参数——携带模块/子策略/观察起始时间，
+ * 构造跳转到邮件处置中心的查询参数——携��模块/子策略/观察起始时间，
  * 由处置中心侧按 source=rule_effectiveness 识别来源并展示上下文提示条。
  * 本函数只负责生成参数，不修改邮件处置中心自身的筛选实现。
  */

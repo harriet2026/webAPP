@@ -195,9 +195,6 @@ export function actionColor(action: WouldBeAction): string {
   return WOULD_BE_ACTION_COLORS[action] ?? '#6b7280';
 }
 
-/** 拦截缺口口径：这些动作若发生在非观察模式下，均代表本应拦截。 */
-export const BLOCKING_ACTIONS: WouldBeAction[] = ['reject', 'quarantine', 'discard', 'bounce', 'sideline', 'recall'];
-
 export type SuggestionTone = 'success' | 'muted' | 'warning' | 'neutral';
 
 export const SUGGESTION_TONE: Record<PromotionSuggestion, SuggestionTone> = {
