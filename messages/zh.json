@@ -1015,7 +1015,7 @@
           "targetPort": "目的端口",
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
-          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高安全策略存在差距，建议提升至 TLSv1.2。",
+          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高���全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
           "channel": "投递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
@@ -1465,7 +1465,7 @@
       "overseas": "按全局海外检测策略生效",
       "senderFilter": "按全局发信人黑白名单生效",
       "userList": "按全局用户黑白名单生效",
-      "behaviorControl": "按全局发信行为管控生效",
+      "behaviorControl": "��全局发信行为管控生效",
       "authSpoofing": "按全局身份认证与仿冒策略生效",
       "recipientCheck": "按全局收信人检���策略生效",
       "attachment": "���全局附件安���策略生效",
@@ -2439,7 +2439,7 @@
       "linkInfo": "链接信息",
       "context": "邮件与点击上下文",
       "hit": "命中",
-      "checkedPassed": "已检测 · 未命中",
+      "checkedPassed": "���检测 · 未命中",
       "skipped": "未执行（前序已命中）",
       "subject": "邮件主题",
       "clientIp": "客户端 IP",
@@ -2836,7 +2836,7 @@
     "channelProxysvr": "代理服务器分组",
     "proxysvrGroup": "代理服务器分组",
     "proxysvrGroupRequired": "请选择代理服务器分组",
-    "proxysvrGroupPlaceholder": "选择一个活跃的代理服务器分组",
+    "proxysvrGroupPlaceholder": "选择一个活跃的代理服务器���组",
     "noActiveProxysvrGroups": "暂无活跃的代理服务器分组（请先在系统管理 → 代理服务器管理中创建）"
   },
   "proxysvr": {
@@ -4722,7 +4722,7 @@
       "audit": "邮件放入审核队列，等待管理员人工审批后再投递",
       "proceed": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
       "reject": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
-      "discard": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃"
+      "discard": "静默丢弃邮件，发信方收到投递成功响应但邮件���际被丢弃"
     },
     "protocolActionShort": {
       "accept": "投递",
@@ -5992,7 +5992,7 @@
       },
       "addCondition": "添加条件",
       "addGroup": "添加条件组",
-      "groupRelation": "条件组关系",
+      "groupRelation": "条��组关系",
       "conditionRelation": "组内条件关系",
       "groupLabel": "条件组 {n}",
       "deleteGroup": "删除条件组 {n}",
@@ -6106,7 +6106,7 @@
       "subject": "主题",
       "mailType": "邮件类型",
       "corrected": "已纠正",
-      "correctedTooltip": "原判定：{original} → 纠正为：{current}（{source}）",
+      "correctedTooltip": "��判定：{original} → 纠正为：{current}（{source}）",
       "action": "执行动作",
       "status": "邮件状态",
       "operations": "操作",
@@ -6424,7 +6424,7 @@
           "ruleFailed": "加入黑名单规则失败",
           "confirmTitle": {
             "domain": "确认将此域名加入黑名单？",
-            "url": "确认将此 URL 加入黑名单？",
+            "url": "确���将此 URL 加入黑名单？",
             "attachment_hash": "确认将此附件哈希加入黑名单？"
           },
           "confirmImpact": {
@@ -6687,7 +6687,7 @@
         "loadFailedBadge": "加载失败",
         "foundCount": "找到 {matched} / {total} 条记录",
         "truncated": "已截断至 10,000 行",
-        "partial": "部分节点或日志模块查询超时/失败，已返回的日志仍可查看。",
+        "partial": "部分节点或日志模块查询超时/失败，已返回的日志仍可查看��",
         "elapsed": "{seconds} 秒",
         "moduleCompleted": "已完成 · {count} 条",
         "retryNode": "重试未完成模块",
@@ -8206,8 +8206,8 @@
         "observedSince": "观察起始时间",
         "observedDays": "观察时长",
         "hits": "命中数",
-        "falsePositiveRate": "误杀风险",
-        "suggestion": "系统建议",
+        "falsePositiveRate": "误判风险",
+        "suggestion": "转正建议",
         "actions": "操作"
       },
       "tooltip": {
@@ -9040,7 +9040,7 @@
       "selectGroups": "选择群组",
       "searchGroups": "搜索群组",
       "noGroupsHint": "暂无匹配方向的群组，请先到「群组管理」创建",
-      "noMatch": "无匹配结果",
+      "noMatch": "无���配结果",
       "selectedCount": "已选 {count} 项",
       "clearAll": "清空",
       "searchDepartments": "搜索部门",
@@ -9164,7 +9164,7 @@
       "timeoutMarkTextHint": "最长 20 字符。",
       "markPosition": {
         "subject_prefix": "主题前缀",
-        "header": "邮件头"
+        "header": "邮���头"
       },
       "minutes": "分钟"
     },
@@ -9316,7 +9316,7 @@
       "detail": "详情",
       "block": "拦截",
       "exempt": "放行",
-      "empty": "暂无检测日志",
+      "empty": "暂���检测日志",
       "totalPrefix": "共 ",
       "totalSuffix": " 条",
       "fallbackHint": "内联回退记录（已投递并标记），无��处置旁路件"
@@ -9358,7 +9358,7 @@
       "title": "放行此邮件",
       "description": "将该仿冒判定标记为误报并放行",
       "reasonPlaceholder": "请输入放行原因",
-      "reasonRequired": "请填写放行原因",
+      "reasonRequired": "���填写放行原因",
       "submit": "确认放行",
       "success": "已放行",
       "error": "放行失败"
@@ -9516,7 +9516,7 @@
       "importEmpty": "暂无联系人",
       "importHint": "仅保存姓名、邮箱、分类、灵敏度和检测处置配置；部门、职位、外部 ID 只用于导入判断与预览。",
       "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方检测配置将统一应用。",
-      "importIdentityHint": "姓名、邮箱和职位来自组织架构，仅用于导入确认；姓名和邮箱不可在此修改。",
+      "importIdentityHint": "姓名、邮��和职位来自组织架构，仅用于导入确认；姓名和邮箱不可在此修改。",
       "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象。",
       "importDisabledInvalidEmail": "邮箱无效",
       "importDisabledInactive": "人员失效",
@@ -9984,7 +9984,7 @@
         "auto": "自动（达到阈值自动召回）",
         "semi_auto": "半自动"
       },
-      "decisionModeHint": "保守模式仅产生待召回；自动模式达到阈值即召回。",
+      "decisionModeHint": "保守模式���产生待召回；自动模式达到阈值即召回。",
       "autoConfidenceThreshold": "自动召回阈值（1–100）",
       "decisionTimeoutHours": "决策超时（小时）",
       "numberInvalid": "请输入服务端允许范围内的正整数",
@@ -10092,7 +10092,7 @@
     "colLogId": "日志 ID",
     "colName": "数据源名称",
     "colRawValue": "原始值",
-    "colResultSummary": "结果摘要",
+    "colResultSummary": "结果摘��",
     "colSource": "数据源",
     "colSourceType": "同步方式",
     "colStartedAt": "开始时间",
@@ -11153,7 +11153,7 @@
         "custom_weekdays_empty": "自定义频率下至少要选择一天",
         "notify_frequency_invalid": "通知频率取值无效���只能是：{allowed}",
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
-        "notify_times_empty": "通知频率不为「从不」时，至少要设置一个通知时间",
+        "notify_times_empty": "通知频率不为「从不」时，至少���设置一个通知时间",
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "���部访问地址不是合法的网址",
@@ -11378,7 +11378,7 @@
       "domain_delete_gated": "收信域必须先停用并保持停用满排水窗口（默认 7 天，让队列在途邮件投递完毕）才能删除",
       "admin_account_password_pair_required": "管理员账号与密码必须同时填写",
       "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
-      "code_too_long": "租户编码长度不能超过 {max} 个字符",
+      "code_too_long": "��户编码长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
       "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请���放行或清除后再��除租户",
       "next_hop_pair_required": "下一跳主机与端口必须同时填写",
@@ -11513,7 +11513,7 @@
       "rule_id_invalid": "规则 ID 必须是整数"
     },
     "threat_retro_mail": {
-      "mail_log_id_invalid": "邮件日志 ID 无效",
+      "mail_log_id_invalid": "邮件日��� ID 无效",
       "mail_not_found": "邮件不存在",
       "email_content_not_found": "邮件正文不存在或已被清除"
     },

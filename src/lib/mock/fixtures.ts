@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级�������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -2189,7 +2189,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 1,
       name: "高频发信限制",
-      description: "合作伙伴IP��放宽����制",
+      description: "合作伙���IP��放宽����制",
       priority: 100,
       scopeType: "range",
       scopeValue: "203.0.113.0/24",
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）─────────────────────────��─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）────────────────────────����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -5947,7 +5947,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "user6@company.com",
     subject: "限时优惠，点击短链领取",
     action: "block",
-    reason: "高级内容过滤命中：批量群发+短链",
+    reason: "高级内容过滤命中��批量群发+短链",
     mailType: "advertising",
     deliveryStatus: "rejected",
     sourceIp: "103.44.90.12",
@@ -7670,7 +7670,7 @@ export function mockEmailDisposalEvents(id: number) {
     correlation_status: "matched",
   }));
   // 每个收件人一条投递事件——补 `recipient`（单数）+ `dsn`，供 RecipientStatus
-  // 的已投递分组按收件人匹配投递明细行（webapp/src/components/email-disposal/
+  // 的已投递分组按收件人匹配投递明细行���webapp/src/components/email-disposal/
   // components/recipient-status.tsx: events.find(e => e.recipient === d.recipient)）。
   const deliveredStatuses = new Set(["delivered", "marked_delivered"]);
   const perRecipientEvents = (item.recipient_dispositions ?? []).map(
@@ -9410,7 +9410,7 @@ const RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH: Record<'similar_email' |
 const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   // 认证协议检查下 SPF/DKIM/DMARC/PTR 四个协议在配置页各自拥有独立的观察开关
   // （spf_observe_mode/dkim_observe_mode/dmarc_observe_mode/ptr_observe_mode），
-  // 已不再共用同一个全局开关，因此拆成 4 个独立观���对象，而不是 1 个。
+  // 已不再共用同一个全局开关，因此拆成 4 个���立观���对象，而不是 1 个。
   {
     id: 'auth-protocol_check_spf',
     policy_module: 'auth_spoofing',
@@ -9818,7 +9818,7 @@ export function mockRuleEffectivenessFor(
   };
 }
 
-const RULE_EFFECTIVENESS_CSV_HEADER = '策略路径,观察起始时间,观察天数,命中数,误判率,系统建议';
+const RULE_EFFECTIVENESS_CSV_HEADER = '策略路径,观察起始时间,观察天数,命中数,误判率,转正建议';
 
 // 与页面明细表「策略路径」列同一套 key、同一份中文文案——CSV 导出是纯 TS 侧
 // 生成，不走 next-intl，所以在这里单独维护一份镜像文案，key 命名与
