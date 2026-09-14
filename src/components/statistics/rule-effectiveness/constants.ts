@@ -2,7 +2,6 @@ import type {
   PolicyModule,
   PromotionSuggestion,
   RuleEffectivenessRow,
-  RuleEffectivenessTrendPoint,
   SimilarDetectionType,
   WouldBeAction,
 } from '@/lib/api/rule-effectiveness';
@@ -164,22 +163,6 @@ export const MODULE_COLORS: Record<PolicyModule, string> = {
 export function moduleColor(module: PolicyModule): string {
   return MODULE_COLORS[module] ?? '#6b7280';
 }
-
-/**
- * 趋势图的独立数据系列——相似检测拆成两条线（相似邮件检测/相同主题检测），
- * 而不是与 auth_spoofing/phishing_detection 一样各占一条线，
- * 因为这两条策略的命中特征完全不同，合并展示会掩盖各自的真实趋势。
- */
-export const TREND_SERIES: {
-  key: Exclude<keyof RuleEffectivenessTrendPoint, 'date'>;
-  labelKey: string;
-  color: string;
-}[] = [
-  { key: 'auth_spoofing', labelKey: 'auth_spoofing', color: MODULE_COLORS.auth_spoofing },
-  { key: 'similar_detection_similar_email', labelKey: 'similar_detection_similar_email', color: '#8B5CF6' },
-  { key: 'similar_detection_same_subject', labelKey: 'similar_detection_same_subject', color: '#14B8A6' },
-  { key: 'phishing_detection', labelKey: 'phishing_detection', color: MODULE_COLORS.phishing_detection },
-];
 
 export const WOULD_BE_ACTION_COLORS: Record<WouldBeAction, string> = {
   reject: '#EF4444',

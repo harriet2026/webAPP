@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FilterBar } from './FilterBar';
 import { KpiCards } from './KpiCards';
-import { TrendChartCard } from './TrendChartCard';
 import { DetailTable } from './DetailTable';
 import { ObserveTimeoutAlert } from './ObserveTimeoutAlert';
 import { BottomActions } from './BottomActions';
@@ -159,8 +158,6 @@ export function RuleEffectivenessPage() {
           )}
 
           <KpiCards data={data?.kpi} isLoading={isLoading} />
-
-          <TrendChartCard trend={data?.trend} isLoading={isLoading} />
 
           <DetailTable
             rows={data?.rows ?? []}

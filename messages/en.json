@@ -8043,7 +8043,6 @@
   "ruleEffectiveness": {
     "title": "Rule Effectiveness Statistics",
     "subtitle": "Track hits for policies/rules currently in observe mode, to help decide whether to promote them to enforced",
-    "trendCardTitle": "Observed Hits Trend",
     "noData": "No data available",
     "error": {
       "forbiddenTitle": "No permission to view rule effectiveness statistics",
