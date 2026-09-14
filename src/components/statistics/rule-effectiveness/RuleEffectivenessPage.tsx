@@ -28,11 +28,12 @@ import {
 import { ApiError } from '@/lib/api/client';
 
 // 各观察模块「前往策略配置」的跳转目标——固定映射到 3 个已有的配置页，
-// 本页只做导航，不修改这些配置页自身的逻辑。
+// 本页只做导航，不修改这些配置页自身的逻辑。与 fixtures.ts 中
+// RULE_EFFECTIVENESS_CONFIG_PATH 的真实路径保持一致，避免兜底路径失效。
 const CONFIG_PATH_BY_MODULE: Record<PolicyModule, string> = {
-  auth_spoofing: '/security/auth-spoofing/config',
-  similar_detection: '/security/similar-detection/config',
-  phishing_detection: '/security/phishing-detection/config',
+  auth_spoofing: '/security/pipeline?module=authSpoofing',
+  similar_detection: '/security/pipeline?module=similarDetection',
+  phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
 };
 
 export function RuleEffectivenessPage() {
@@ -70,8 +71,9 @@ export function RuleEffectivenessPage() {
   });
 
   const handleNavigateToConfig = useCallback((row: RuleEffectivenessRow) => {
-    router.push(row.config_path || CONFIG_PATH_BY_MODULE[row.policy_module]);
-  }, [router]);
+    const configPath = row.config_path || CONFIG_PATH_BY_MODULE[row.policy_module];
+    router.push(`/${locale}${configPath}`);
+  }, [locale, router]);
 
   // 统一跳转到邮件处置中心，携带模块/子策略/观察起始时间作为预置筛选条件，
   // 由处置中心侧解析 source=rule_effectiveness 并展示上下文提示条。
