@@ -11,15 +11,14 @@ import { FilterBar } from './FilterBar';
 import { KpiCards } from './KpiCards';
 import { DetailTable } from './DetailTable';
 import { ObserveTimeoutAlert } from './ObserveTimeoutAlert';
-import { BottomActions } from './BottomActions';
 import { TenantScopeSelector } from '@/components/statistics/security-overview/TenantScopeSelector';
+
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { useRuleEffectiveness } from './hooks/useRuleEffectiveness';
 import { timeRangeToDates, defaultCustomRange, type CustomRange } from './date-range';
 import { MODULE_FILTER_OPTIONS, resolveModuleFilterParams, type ModuleFilterOption } from './constants';
 import {
   buildEmailDisposalCenterQuery,
-  getRuleEffectivenessExportCsvUrl,
   type ObserveDurationBucket,
   type PolicyModule,
   type RuleEffectivenessRow,
@@ -90,15 +89,6 @@ export function RuleEffectivenessPage() {
     });
     router.push(`/${locale}/email-disposal/center?${query}`);
   }, [locale, router]);
-
-  const csvUrl = getRuleEffectivenessExportCsvUrl({
-    startDate,
-    endDate,
-    modules: effectiveModules,
-    similarDetectionTypes: effectiveSimilarDetectionTypes,
-    durationBuckets,
-    tenantId: scopeTenantId,
-  });
 
   return (
     <PageShell data-testid="rule-effectiveness-page">
@@ -171,7 +161,6 @@ export function RuleEffectivenessPage() {
             onNavigateToConfig={handleNavigateToConfig}
           />
 
-          <BottomActions csvUrl={csvUrl} />
         </>
       )}
     </PageShell>

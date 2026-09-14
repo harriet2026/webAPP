@@ -8166,9 +8166,6 @@
       },
       "viewHits": "View Hit Details",
       "goToConfig": "Go to Policy Config"
-    },
-    "bottomActions": {
-      "exportCsv": "Export CSV"
     }
   },
   "deliveryTraffic": {

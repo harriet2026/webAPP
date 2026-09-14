@@ -7989,9 +7989,6 @@
       },
       "viewHits": "Просмотр срабатываний",
       "goToConfig": "К настройкам политики"
-    },
-    "bottomActions": {
-      "exportCsv": "Экспорт CSV"
     }
   },
   "deliveryTraffic": {

@@ -138,27 +138,6 @@ function buildQuery(params: Record<string, unknown>): string {
   return query.toString();
 }
 
-export function getRuleEffectivenessExportCsvUrl(params: {
-  startDate: string;
-  endDate: string;
-  modules?: PolicyModule[];
-  similarDetectionTypes?: SimilarDetectionType[];
-  durationBuckets?: ObserveDurationBucket[];
-  tenantId: number | null;
-}): string {
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
-  const query = buildQuery({
-    start_date: params.startDate,
-    end_date: params.endDate,
-    module: params.modules,
-    similar_detection_type: params.similarDetectionTypes,
-    duration_bucket: params.durationBuckets,
-    tenant_id: params.tenantId ?? undefined,
-    mode: 'observe',
-  });
-  return `${API_BASE}/statistics/rule-effectiveness/export.csv?${query}`;
-}
-
 export async function getRuleEffectiveness(
   params: RuleEffectivenessParams = {},
   requestFn: ApiRequestFn = apiRequest,

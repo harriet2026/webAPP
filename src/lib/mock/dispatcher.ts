@@ -221,7 +221,6 @@ import {
   mockDeleteProxysvrGroup,
   mockConnectivityTest,
   mockRuleEffectivenessFor,
-  mockRuleEffectivenessCsv,
 } from './fixtures';
 import {
   mockDkimSigningDomainsFor,
@@ -1081,12 +1080,6 @@ const routes: Route[] = [
         ),
       };
     },
-  },
-  // 规则效能统计（观察模式）：子资源必须放在基础路径前，保持整页 mock 数据闭环。
-  {
-    method: 'GET',
-    pattern: /^\/statistics\/rule-effectiveness\/export\.csv$/,
-    handler: () => ({ status: 200, data: mockRuleEffectivenessCsv }),
   },
   {
     method: 'GET',

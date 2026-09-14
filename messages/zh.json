@@ -8221,9 +8221,6 @@
       },
       "viewHits": "查看命中详情",
       "goToConfig": "前往策略配置"
-    },
-    "bottomActions": {
-      "exportCsv": "导出 CSV"
     }
   },
   "deliveryTraffic": {

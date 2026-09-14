@@ -8177,9 +8177,6 @@
       },
       "viewHits": "ดูรายละเอียดการตรวจจับ",
       "goToConfig": "ไปที่การตั้งค่านโยบาย"
-    },
-    "bottomActions": {
-      "exportCsv": "ส่งออก CSV"
     }
   },
   "deliveryTraffic": {
