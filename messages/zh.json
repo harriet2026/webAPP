@@ -362,7 +362,7 @@
     "mailflow": "邮件流",
     "monitorSecurity": "检测引擎状态",
     "phishingDetection": "钓鱼邮件检测智能体",
-    "agentCenter": "智能体中心",
+    "agentCenter": "智���体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回�����智能体",
@@ -1015,7 +1015,7 @@
           "targetPort": "目的端口",
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
-          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高���全策略存在差距，建议提升至 TLSv1.2。",
+          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高�����全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
           "channel": "投递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
@@ -1648,7 +1648,7 @@
     "booleanTrue": "是",
     "booleanFalse": "否",
     "sidelineAsyncWarningOptIn": "⚠️ 该字段由「{label}」检查产出。默认不运行。除非有标签规则给收件人打上 {tag}，否则该规则不会对任何邮件命中。",
-    "sidelineAsyncWarningOptOut": "⚠️ 该字段由「{label}」检查产出。默认运行。若所有收件人都被打上 {tag} 标签，该规则不会对那些邮件命中。",
+    "sidelineAsyncWarningOptOut": "⚠��� 该字段由「{label}」检查产出。默认运行。若所有收件人都被打上 {tag} 标签，该规则不会对那些邮件命中。",
     "pipelineEyebrow": "规则管理",
     "pipelineTitle": "规则流水线总览",
     "pipelineSubtitle": "以数据流图展示各阶段的标签与动作规则，直观了���邮件从连接到投递的完整处理流程。"
@@ -2032,7 +2032,7 @@
       "domains": "租户域名",
       "capabilities": "能力开通",
       "adminAccount": "主管理员账号",
-      "adminAccountHint": "该账号将作为该租户管理员的登录入口",
+      "adminAccountHint": "该账号将作为该租户管理员的登录���口",
       "adminPassword": "初始密码",
       "adminPasswordHint": "需满足密码策略；该管理员首次登录时将被强制修改密码"
     },
@@ -2616,7 +2616,7 @@
     "before": "变更前",
     "after": "变更后",
     "unknownError": "未知错误",
-    "description": "查看该次管理员操作的详细信息与变更内容",
+    "description": "查看该次管���员操作的详细信息与变更内容",
     "close": "关闭",
     "summaryField": "操作摘要",
     "logNoField": "日志编号",
@@ -2836,7 +2836,7 @@
     "channelProxysvr": "代理服务器分组",
     "proxysvrGroup": "代理服务器分组",
     "proxysvrGroupRequired": "请选择代理服务器分组",
-    "proxysvrGroupPlaceholder": "选择一个活跃的代理服务器���组",
+    "proxysvrGroupPlaceholder": "选择一个活跃的代���服务器���组",
     "noActiveProxysvrGroups": "暂无活跃的代理服务器分组（请先在系统管理 → 代理服务器管理中创建）"
   },
   "proxysvr": {
@@ -2992,7 +2992,7 @@
     "targetMailBatchPlaceholder": "例如 1024, 1025, 1031",
     "targetAccountPlaceholder": "例如 alice@corp.local",
     "targetClusterPlaceholder": "例如 cac_tid:abc123 或 1024,1025",
-    "targetMailHelp": "输入单个邮件日志 ID。",
+    "targetMailHelp": "输入单个邮件���志 ID。",
     "targetMailBatchHelp": "输入多个邮件日志 ID，支持逗号、空格或换行分隔。",
     "targetAccountHelp": "输入一个账号标识，例如 SMTP 用户名或发件人地址。",
     "targetClusterHelp": "输入簇标识，如 cac_tid:abc123，或��接输入一组邮件日志 ID。",
@@ -3364,7 +3364,7 @@
     "threatRetroAgentDesc": "阶段 4.8 异步历史威胁回溯",
     "intentEngine": "意图引擎",
     "intentEngineDesc": "综合意图判断引擎",
-    "intentEngineTooltipAction": "按分类优先配置（标记投递 / 隔离 / 审核 / 阻断 / 丢弃）",
+    "intentEngineTooltipAction": "按分类优先���置（标记投递 / 隔离 / 审核 / 阻断 / 丢弃）",
     "intentEngineTooltipEffect": "按意图分类得分与分段阈值区间匹配，执行对应区间已配置的处置动作",
     "similarDetection": "相似检测",
     "similarDetectionDesc": "相似邮件聚类检测",
@@ -4521,7 +4521,7 @@
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
       "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
-      "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，建议阻断。",
+      "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，��议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
     "protocolChecks": {
@@ -4722,7 +4722,7 @@
       "audit": "邮件放入审核队列，等待管理员人工审批后再投递",
       "proceed": "不拦截，继续走后续检测流程，可选择附加标记后再投递",
       "reject": "向发信方返回 SMTP 拒绝响应，邮件不进入系统",
-      "discard": "静默丢弃邮件，发信方收到投递成功响应但邮件���际被丢弃"
+      "discard": "静默丢弃邮件，发信方收到投递���功响应但邮件���际被丢弃"
     },
     "protocolActionShort": {
       "accept": "投递",
@@ -4896,7 +4896,7 @@
       "ipGroupSource": "数据来源：IP群组管理",
       "domainLabel": "域名",
       "expireLabel": "有效期至",
-      "expireTooltip": "留空表示永久有效",
+      "expireTooltip": "���空表示永久有效",
       "expireHint": "(留空=永久有效)",
       "priorityLabel": "优先级",
       "priorityHint": "范围 {min}–{max}，数值越大优先级越高",
@@ -5395,7 +5395,7 @@
         "knownMalicious": "已知恶意URL",
         "unknown": "未知URL",
         "blockAndAlert": "阻断并提示",
-        "fixedNotice": "安全策略为系统固定配置，不可修改",
+        "fixedNotice": "安全策略为系统固��配置，不可修改",
         "knownMaliciousDesc": "用户点击恶意URL时，显示警告页面并拦截访问",
         "unknownDesc": "用户点击未知URL时，显示警告页面并拦截访问"
       },
@@ -5424,7 +5424,7 @@
     "rescan": {
       "title": "点击时复检策略",
       "engine": "钓鱼邮件智能体",
-      "costHint": "复检耗时预期：回扫黑名单（即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
+      "costHint": "复检耗时预期：回扫黑名单���即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
         "title": "回扫黑名单",
         "desc": "比对「高级过滤规则」与「内容规则」中动作为 审��·隔离·丢弃·阻断 的 URL 黑名单规则，命中即按其动作��置"
@@ -5713,7 +5713,7 @@
     "disclaimerConfig": "声明配置",
     "disclaimerContent": "声明内容",
     "disclaimerContentPlaceholder": "输入免责声明，支持 HTML 格式与变量",
-    "disclaimerContentTip": "支持 HTML 和变量，按 UTF-8 计算最多 10240 bytes",
+    "disclaimerContentTip": "支持 HTML 和变量，按 UTF-8 计算��多 10240 bytes",
     "disclaimerPosition": "声明位置",
     "disclaimerFormat": "声明格式",
     "formatAuto": "自动适配（HTML+纯文本）",
@@ -5865,7 +5865,7 @@
       "templateOverwriteWarning": "已存在同名模板，保存将覆盖原有条件",
       "templateOverwriteConfirm": "覆盖保存",
       "templateLimitWarning": "已达上限（{max} 个），保存将删除最旧的一条模板",
-      "templateApplyConfirmTitle": "应用搜索模板",
+      "templateApplyConfirmTitle": "应用搜���模板",
       "templateApplyConfirmDesc": "应用「{name}」将替换当前所有搜索条件，是否继续？",
       "templateApplyConfirm": "确认应用",
       "cancel": "取消",
@@ -6187,7 +6187,7 @@
     "similarResults": {
       "title": "相似邮件",
       "description": "找到 {n} 封相似邮件（按 textsim 聚类）",
-      "loading": "正在查找相似邮件...",
+      "loading": "正在查找相似���件...",
       "empty": "未找到相似邮件"
     },
     "detail": {
@@ -6349,7 +6349,7 @@
       "actionSuccess": "操作成功",
       "actionFailed": "操作失败",
       "recallUnsupportedBackend": "该收件人的邮箱系统不支持召回",
-      "recallTrackingIdMissing": "缺少邮件系统追踪标识，无法发起召回",
+      "recallTrackingIdMissing": "缺少邮件系统��踪标识，无法发起召回",
       "recallNotDelivered": "该收件人尚未确认投递成功",
       "recallDeliveryStatusUnknown": "该收件人的投递状态未知，无法安全召回",
       "recallNoDeliveredRecipients": "没有可召回的已投递收件人",
@@ -6687,7 +6687,7 @@
         "loadFailedBadge": "加载失败",
         "foundCount": "找到 {matched} / {total} 条记录",
         "truncated": "已截断至 10,000 行",
-        "partial": "部分节点或日志模块查询超时/失败，已返回的日志仍可查看��",
+        "partial": "部分节点或日志模块查询超时/���败，已返回的日志仍可查看��",
         "elapsed": "{seconds} 秒",
         "moduleCompleted": "已完成 · {count} 条",
         "retryNode": "重试未完成模块",
@@ -7823,7 +7823,7 @@
     "timeoutMarkPositionsRequired": "启用投递标记时，至少选择一个标记位置",
     "timeoutMarkPositionsInvalid": "投递标记位置配置无效",
     "timeoutMarkTextRequired": "启用投递标记时，必须填写标记文本",
-    "timeoutMarkTextTooLong": "标记文本不能超过 20 个字符",
+    "timeoutMarkTextTooLong": "标记文���不能超过 20 个字符",
     "recallTaskTimeoutRange": "召回任务超时需为 1-300 秒",
     "saveValidationFailed": "部分设置填写有误，请修正后再保存",
     "notifyMode": "通知模式",
@@ -8158,10 +8158,7 @@
       "reject": "拒绝",
       "quarantine": "隔离",
       "discard": "丢弃",
-      "bounce": "退信",
-      "sideline": "边列",
-      "recall": "召回",
-      "tag": "打标"
+      "audit": "审核"
     },
     "path": {
       "authSpoofing": "身份认证与仿冒检测",
@@ -8993,7 +8990,7 @@
     "readOnlyNotice": "当前账号只有查看权限，配置控件不可操作。",
     "admission": {
       "title": "检测范围与准入规则",
-      "description": "以规则列表方式管理准入条件，可创建多条规则。命中任一启用规则的邮件将进入本智能体检测。",
+      "description": "以规���列表方式管理准入条件，可创建多条规则。命中任一启用规则的邮件将进入本智能体检测。",
       "loading": "加载中...",
       "empty": "暂无准入规则，点击「新增规则」添加。",
       "loadFailed": "准入规则加载失败",
@@ -9513,7 +9510,7 @@
       "importEmpty": "暂无联系人",
       "importHint": "仅保存姓名、邮箱、分类、灵敏度和检测处置配置；部门、职位、外部 ID 只用于导入判断与预览。",
       "importBatchIdentity": "已选择 {n} 人进行批量创建，身份信息以组织架构为准，保护等级与下方检测配置将统一应用。",
-      "importIdentityHint": "姓名、邮��和职位来自组织架构，仅用于导入确认；姓名和邮箱不可在此修改。",
+      "importIdentityHint": "姓名、邮����和职位来自组织架构，仅用于导入确认；姓名和邮箱不可在此修改。",
       "importSensitivityHint": "导入对象的分类与灵敏度按联系人职位自动推荐；部门、职位不会写入保护对象。",
       "importDisabledInvalidEmail": "邮箱无效",
       "importDisabledInactive": "人员失效",
@@ -9653,7 +9650,7 @@
     "kpi": {
       "runningTasks": "进行中任务",
       "totalLeaks": "发现漏报",
-      "pendingRecall": "待确认漏报",
+      "pendingRecall": "待确认���报",
       "todayRecalled": "召回成功",
       "recallSucceeded": "召回成功",
       "recallFailed": "召回失败",
@@ -9697,7 +9694,7 @@
       "expanded": "等待执行",
       "pending": "等待执行",
       "success": "召回成功",
-      "failed": "召回失败"
+      "failed": "召��失败"
     },
     "riskLevel": {
       "high": "高危",
@@ -10089,7 +10086,7 @@
     "colLogId": "日志 ID",
     "colName": "数据源名称",
     "colRawValue": "原始值",
-    "colResultSummary": "结果摘��",
+    "colResultSummary": "结���摘��",
     "colSource": "数据源",
     "colSourceType": "同步方式",
     "colStartedAt": "开始时间",
@@ -11150,7 +11147,7 @@
         "custom_weekdays_empty": "自定义频率下至少要选择一天",
         "notify_frequency_invalid": "通知频率取值无效���只能是：{allowed}",
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
-        "notify_times_empty": "通知频率不为「从不」时，至少���设置一个通知时间",
+        "notify_times_empty": "通知频率不为「从���」时，至少���设置一个通知时间",
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "���部访问地址不是合法的网址",
@@ -11666,7 +11663,7 @@
     "group_management_access": {
       "group_management_requires_tenant_administrator_a": "分组管理需要租户管理员权限",
       "group_management_accessed_within_tenant_context": "多租户模式下，分组管理需要先选择租户",
-      "access_denied_group_management_rule": "无权访问该分组管理规则",
+      "access_denied_group_management_rule": "无权访问该分组管理规��",
       "group_management_rules_imported_with_scope": "分组管理规则必须以 scope=groups 导入"
     },
     "group_policy": {

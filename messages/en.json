@@ -8102,10 +8102,7 @@
       "reject": "Reject",
       "quarantine": "Quarantine",
       "discard": "Discard",
-      "bounce": "Bounce",
-      "sideline": "Sideline",
-      "recall": "Recall",
-      "tag": "Tag"
+      "audit": "Audit"
     },
     "path": {
       "authSpoofing": "Auth & Impersonation Detection",

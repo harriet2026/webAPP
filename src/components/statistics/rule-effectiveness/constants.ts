@@ -166,12 +166,9 @@ export function moduleColor(module: PolicyModule): string {
 
 export const WOULD_BE_ACTION_COLORS: Record<WouldBeAction, string> = {
   reject: '#EF4444',
-  quarantine: '#F59E0B',
   discard: '#DC2626',
-  bounce: '#F97316',
-  sideline: '#EAB308',
-  recall: '#0EA5E9',
-  tag: '#8B5CF6',
+  quarantine: '#F59E0B',
+  audit: '#8B5CF6',
 };
 
 export function actionColor(action: WouldBeAction): string {

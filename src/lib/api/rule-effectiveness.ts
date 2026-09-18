@@ -59,8 +59,18 @@ export interface ProtocolHitBreakdownItem {
 export type TimeRange = 'today' | '7d' | '30d' | 'custom';
 export type ObserveDurationBucket = 'lt7' | '7to30' | 'gt30';
 
-/** 若不是观察模式，命中原本会被执行的处置动作。 */
-export type WouldBeAction = 'reject' | 'quarantine' | 'discard' | 'bounce' | 'sideline' | 'recall' | 'tag';
+/**
+ * 若不是观察模式，命中原本会被执行的处置动作——严格取自本期范围三个模块
+ * 各自动作枚举的并集（AuthSpoofingAction / SimilarDetectionAction /
+ * PolicyDisposition），并排除 proceed/accept 等放行态：
+ *   - reject：仅身份认证与仿冒检测支持（AuthSpoofingAction 含 reject，
+ *     相似检测、钓鱼检测智能体的动作枚举里都没有 reject）；
+ *   - quarantine / discard / audit：三个模块共有。
+ * bounce（退信）/ sideline（边列）/ recall（召回）/ tag（打标）不是这三个
+ * 模块规则本身可配置的处置动作——分别属于路由退信、邮件处置中心的中间态、
+ * 人工召回、邮件标记模块的能力，不应出现在本统计的命中构成里。
+ */
+export type WouldBeAction = 'reject' | 'quarantine' | 'discard' | 'audit';
 
 /** 转正式建议引擎输出的四态标签。 */
 export type PromotionSuggestion = 'confirm_promote' | 'keep_observing' | 'needs_tuning' | 'needs_more_data';
