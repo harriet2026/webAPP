@@ -8098,12 +8098,14 @@
         "gt30": "Over 30 days"
       }
     },
-    "wouldBeActions": {
-      "reject": "Reject",
-      "quarantine": "Quarantine",
-      "discard": "Discard",
-      "audit": "Audit"
-    },
+  "wouldBeActions": {
+  "accept": "Deliver",
+  "quarantine": "Quarantine",
+  "audit": "Audit",
+  "reject": "Reject",
+  "discard": "Discard",
+  "recall": "Recall"
+  },
     "path": {
       "authSpoofing": "Auth & Impersonation Detection",
       "protocolCheck": "Authentication Protocol Checks",

@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级��������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级���������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -1925,7 +1925,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
     display_statuses: [{ status: 'recall_failed', count: 1 }], recipient_dispositions: [{ recipient: 'licheng@example.com', final_action: 'audit', status: 'recall_failed' }, { recipient: 'wangfang@example.com', final_action: 'audit', status: 'recall_failed' }], recalls: [{ receiver: 'licheng@example.com', operate_result: 'failed' }, { receiver: 'wangfang@example.com', operate_result: 'failed' }], disposition_actions: ['audit', 'recall'], disposition: 'audit', detection_mode: 'realtime', recall_status: 'recall_failed', agent_rounds: 3, url_summary: { total: 2, phishing: 1, suspicious: 1, normal: 0 }, result_truncated: false,
   },
   {
-    sideline_id: 'ph-100005', message_id: '<8f2c1a0005@oa-portal-cn.com>', sender: 'security-noreply@oa-portal-cn.com', subject: '紧急：您的OA账号将于今日过期，请立即验证', recipients: ['zhangwei@example.com'], direction: 'inbound', status: 'recalled', sidelined_at: phishingHoursAgo(6), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.94, mail_log_id: 9005,
+    sideline_id: 'ph-100005', message_id: '<8f2c1a0005@oa-portal-cn.com>', sender: 'security-noreply@oa-portal-cn.com', subject: '紧急：您的OA账号将���今日过期，请立即验证', recipients: ['zhangwei@example.com'], direction: 'inbound', status: 'recalled', sidelined_at: phishingHoursAgo(6), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.94, mail_log_id: 9005,
     display_statuses: [{ status: 'recall_success', count: 1 }], recipient_dispositions: [{ recipient: 'zhangwei@example.com', final_action: 'recall', status: 'recall_success', object_kind: 'mail_log', object_id: '9005' }], recalls: [{ receiver: 'zhangwei@example.com', operate_result: 'success' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'recalled', agent_rounds: 4, url_summary: { total: 3, phishing: 2, suspicious: 1, normal: 0 }, result_truncated: false,
   },
   {
@@ -2189,7 +2189,7 @@ function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
     makeRule({
       id: 1,
       name: "高频发信限制",
-      description: "合作伙���IP��放宽����制",
+      description: "合���伙���IP��放宽����制",
       priority: 100,
       scopeType: "range",
       scopeValue: "203.0.113.0/24",
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）─────────────────────��──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）────────────────────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -3537,7 +3537,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
 //     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形态）；
 //   - member_count / reference_count 显式下发（与真实后端 include=member_count,reference_count
 //     的响应一致），memberCount 不再依赖成员数组长度，特征组的 member_count = 条件数。
-// 数据值照抄群组策略页 demo 的 staticGroups + 特征��（html_spec filter-rules-group-policy），
+// 数据值照抄群组策略页 demo 的 staticGroups + ��征��（html_spec filter-rules-group-policy），
 // 群���在真实产品中是唯一数据面，sender_filter 下拉与群组管理共享这份数据。
 function sfGroupRule(o: {
   id: number;
@@ -4515,7 +4515,7 @@ const BC_IP_GROUPS: DemoNamedGroup[] = [
   { id: "ip-5", name: "可疑来源", memberCount: 200 },
 ];
 
-// 照抄 demo `generateMockRules()`：7 条手工命名规则 + 生成的 #8..#35。
+// 照抄 demo `generateMockRules()`��7 条手工命名规则 + 生成的 #8..#35。
 function generateDemoBehaviorRules(): DemoBehaviorRule[] {
   const rules: DemoBehaviorRule[] = [
     // ��站防护规��
@@ -5737,7 +5737,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "incoming",
     sender: "client@customer.com",
     recipients: "sales@company.com",
-    subject: "Re: 产品报价单（单投信）",
+    subject: "Re: 产品报价单（��投信）",
     action: "deliver",
     reason: "所有检测通过",
     mailType: "normal",
@@ -6204,7 +6204,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     attachmentCount: 0,
     hasQrCode: false,
     score: 95,
-    basis: ["AI-SPOOF", "Unicode 域名欺诈", "AI-011"],
+    basis: ["AI-SPOOF", "Unicode ���名欺诈", "AI-011"],
     domainAgeDays: 2,
     senderIsNewOnThisMail: true,
   },
@@ -9410,7 +9410,7 @@ const RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH: Record<'similar_email' |
 const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   // 认证协议检查下 SPF/DKIM/DMARC/PTR 四个协议在配置页各自拥有独立的观察开关
   // （spf_observe_mode/dkim_observe_mode/dmarc_observe_mode/ptr_observe_mode），
-  // 已不再共用同一个全局开关���因此拆成 4 个���立观���对象，而不是 1 个。
+  // 已不再共用���一个全局开关���因此拆成 4 个���立观���对象，而不是 1 个。
   {
     id: 'auth-protocol_check_spf',
     policy_module: 'auth_spoofing',
@@ -9699,13 +9699,13 @@ const RULE_EFFECTIVENESS_SUGGESTION_REASON: Record<RuleEffectivenessMockRow['sug
     `已观察 ${row.observed_days} 天，命中样本不足（已判定 ${Math.round(row.hits * row.reviewed_ratio)} 次），暂不建议判断`,
 };
 
-type RuleEffectivenessWouldBeAction = 'reject' | 'quarantine' | 'discard' | 'audit';
+type RuleEffectivenessWouldBeAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard' | 'recall';
 
-// 命中构成的候选动作必须逐模块对齐系统真实支持的动作枚举，不能三个模块共用
-// 同一份列表：reject 只有身份认证与仿冒检测（AuthSpoofingAction）支持，相似
-// 检测（SimilarDetectionAction）与钓鱼检测智能体（PolicyDisposition）都没有
-// reject，只有 quarantine/discard/audit。bounce/sideline/recall/打标不是这
-// 三个模块规则本身可配置的处置动作，不出现在候选列表里。
+// 命中构成的候选「拦截类」处置动作必须逐模块对齐系统真实支持的动作枚举，不能
+// 三个模块共用同一份列表：reject 只有身份认证与仿冒检测（AuthSpoofingAction）
+// 支持，相似检测（SimilarDetectionAction）与钓鱼检测智能体（PolicyDisposition）
+// 都没有 reject，只有 quarantine/discard/audit。accept（投递）/recall（召回）
+// 是命中最终结果里必然存在的两类，与模块无关，单独在下方计算。
 const RULE_EFFECTIVENESS_MODULE_ACTIONS: Record<RuleEffectivenessMockRow['policy_module'], RuleEffectivenessWouldBeAction[]> = {
   auth_spoofing: ['reject', 'discard', 'quarantine', 'audit'],
   similar_detection: ['discard', 'quarantine', 'audit'],
@@ -9734,15 +9734,32 @@ function ruleEffectivenessActionBreakdown(
   index: number,
 ): { action: RuleEffectivenessWouldBeAction; count: number }[] {
   const actions = RULE_EFFECTIVENESS_MODULE_ACTIONS[row.policy_module];
-  // would_block_ratio 控制命中中走「拒绝/丢弃」等强处置的比例，剩余命中走
-  // 「隔离/审核」等弱处置；每组内部再按权重细分，保证命中总数不丢失。
-  const strictCount = Math.round(row.hits * row.would_block_ratio);
-  const looseCount = row.hits - strictCount;
+  const total = row.hits;
+  if (total <= 0) return [];
+
+  // 投递（accept）：观察模式下命中本身不拦截，最终正常送达的占比——用确定性
+  // 伪随机取 55%~75% 区间，作为观察态命中结果里天然占大头的一类。
+  const acceptRatio = (55 + threatSeriesValue(index, 1, 20, 1)) / 100;
+  const acceptCount = Math.min(total, Math.round(total * acceptRatio));
+
+  // 召回（recall）：投递之后小比例人工召回，2%~6%，数据来源与规则拦截逻辑
+  // 无关，按小比例随机生成。
+  const recallRatio = (2 + threatSeriesValue(index + 5, 1, 4, 1)) / 100;
+  const recallCount = Math.min(total - acceptCount, Math.round(total * recallRatio));
+
+  // 剩余命中走「拒收/丢弃」等强处置或「隔离/审核」等弱处置；would_block_ratio
+  // 控制强弱处置的比例，每组内部再按权重细分，保证命中总数不丢失。
+  const remaining = total - acceptCount - recallCount;
+  const strictCount = Math.round(remaining * row.would_block_ratio);
+  const looseCount = remaining - strictCount;
   const strictActions = actions.filter((a) => a === 'reject' || a === 'discard');
   const looseActions = actions.filter((a) => a === 'quarantine' || a === 'audit');
+
   return [
+    { action: 'accept' as const, count: acceptCount },
     ...allocateActionCounts(strictActions, strictCount, index),
     ...allocateActionCounts(looseActions, looseCount, index + 10),
+    { action: 'recall' as const, count: recallCount },
   ].filter((item) => item.count > 0);
 }
 

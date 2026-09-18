@@ -60,17 +60,22 @@ export type TimeRange = 'today' | '7d' | '30d' | 'custom';
 export type ObserveDurationBucket = 'lt7' | '7to30' | 'gt30';
 
 /**
- * 若不是观察模式，命中原本会被执行的处置动作——严格取自本期范围三个模块
- * 各自动作枚举的并集（AuthSpoofingAction / SimilarDetectionAction /
- * PolicyDisposition），并排除 proceed/accept 等放行态：
- *   - reject：仅身份认证与仿冒检测支持（AuthSpoofingAction 含 reject，
- *     相似检测、钓鱼检测智能体的动作枚举里都没有 reject）；
- *   - quarantine / discard / audit：三个模块共有。
- * bounce（退信）/ sideline（边列）/ recall（召回）/ tag（打标）不是这三个
- * 模块规则本身可配置的处置动作——分别属于路由退信、邮件处置中心的中间态、
- * 人工召回、邮件标记模块的能力，不应出现在本统计的命中构成里。
+ * 命中构成——展示该观察对象命中的邮件最终的实际结果分布，口径与系统实际
+ * 支持的执行动作保持一致（投递/隔离/审核/拒收/丢弃/召回），不再是「若规则
+ * 不处于观察模式会执行的假设动作」：
+ *   - accept（投递）：观察模式下命中本身不拦截，且未被同一封邮件命中的其他
+ *     生效规则拦截，最终正常送达——观察模式下的命中默认占比最大；
+ *   - quarantine（隔离）/ audit（审核）/ reject（拒收）/ discard（丢弃）：
+ *     命中后被同一封邮件命中的其他生效规则拦截产生的处置结果。reject 仅
+ *     身份认证与仿冒检测支持（AuthSpoofingAction 含 reject，相似检测、
+ *     钓鱼检测智能体的动作枚举里都没有 reject）；quarantine/audit/discard
+ *     三个模块共有；
+ *   - recall（召回）：命中后先被投递，随后管理员在邮件处置中心发起人工召回，
+ *     不属于三个模块规则自身的处置能力，正式接口需邮件处置中心侧提供关联字段。
+ * sideline（边列）/ tag（打标）不是「规则命中的最终结果」，分别属于邮件
+ * 处置中心的中间态、邮件标记模块的能力，不出现在本统计的命中构成里。
  */
-export type WouldBeAction = 'reject' | 'quarantine' | 'discard' | 'audit';
+export type WouldBeAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard' | 'recall';
 
 /** 转正式建议引擎输出的四态标签。 */
 export type PromotionSuggestion = 'confirm_promote' | 'keep_observing' | 'needs_tuning' | 'needs_more_data';

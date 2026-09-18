@@ -362,7 +362,7 @@
     "mailflow": "邮件流",
     "monitorSecurity": "检测引擎状态",
     "phishingDetection": "钓鱼邮件检测智能体",
-    "agentCenter": "智���体中心",
+    "agentCenter": "智�����体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回�����智能体",
@@ -533,7 +533,7 @@
       "failureCount": "失败次数",
       "failureRate": "失败占比",
       "firstConn": "首次连接",
-      "lastConn": "末次连接",
+      "lastConn": "��次连接",
       "change": "环比",
       "trend": "趋势",
       "authAccount": "认证账号",
@@ -1015,7 +1015,7 @@
           "targetPort": "目的端口",
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
-          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」的高�����全策略存在差距，建议提升至 TLSv1.2。",
+          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
           "channel": "投递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
@@ -1338,7 +1338,7 @@
     "namePlaceholder": "请输入便于识别的规则名称，如「研发部门外发」",
     "nameRequired": "请输入规则名称",
     "sectionPipeline": "策略流水线配置",
-    "configDetail": "配置详情",
+    "configDetail": "配��详情",
     "configDetailClose": "关闭配置面板",
     "policyStateLabel": "策略状态",
     "globalRefTitle": "全局默认配置",
@@ -1459,7 +1459,7 @@
       "mailMarking": "邮件标记规则"
     },
     "globalDefaults": {
-      "ipFrequency": "按全局 IP 频率阈值生效",
+      "ipFrequency": "按全局 IP 频率阈��生效",
       "ipFilter": "按全局 IP 黑白名单生效",
       "rbl": "按全局 RBL 列表生效",
       "overseas": "按全局海外检测策略生效",
@@ -1626,7 +1626,7 @@
       "isNull": "为空",
       "isNotNull": "不为空",
       "hasTag": "包含标签",
-      "hasAnyTag": "包含任一标签",
+      "hasAnyTag": "包含任��标签",
       "hasAllTags": "包含所有标签",
       "within": "在行列表中",
       "between": "介于",
@@ -2032,7 +2032,7 @@
       "domains": "租户域名",
       "capabilities": "能力开通",
       "adminAccount": "主管理员账号",
-      "adminAccountHint": "该账号将作为该租户管理员的登录���口",
+      "adminAccountHint": "该账号将作为该租户���理员的登录���口",
       "adminPassword": "初始密码",
       "adminPasswordHint": "需满足密码策略；该管理员首次登录时将被强制修改密码"
     },
@@ -2727,7 +2727,7 @@
       "emailPlaceholder": "请输入邮箱",
       "phoneInvalid": "请输入正确的手机号",
       "emailInvalid": "请输入正确的邮箱地址",
-      "codePlaceholder": "6位验证码",
+      "codePlaceholder": "6位验证���",
       "codeInvalid": "验证码错误，请重新输入",
       "getCode": "获取验证码",
       "resendIn": "{n}s 后重新获取",
@@ -4099,7 +4099,7 @@
       "priorityRange": "优先级需在 {min}–{max} 之间",
       "whitelistModeRequired": "请选择白名单模式",
       "invalidEmail": "请输入有效的邮箱地址",
-      "invalidDomain": "请输入有效的域名",
+      "invalidDomain": "请输入有效���域名",
       "selectGroup": "请选择群组",
       "senderValueRequired": "请输入发信人邮箱",
       "ipValueRequired": "请输入IP地址",
@@ -4253,7 +4253,7 @@
     "effectBlacklist": "发信人 [{sender}] 发往 [{recipient}] 的邮件将被{action}",
     "effectWhitelist": "发信人 [{sender}] 发往 [{recipient}] 的邮件将被放行",
     "configExamples": "配置示例",
-    "exampleBlockSender": "拦截特定发信人",
+    "exampleBlockSender": "拦截特定发信��",
     "exampleBlockSenderDesc": "拒绝 spam@bad.com 发给 user@example.com 的邮件",
     "exampleWhitelistDomain": "白名单合作域名",
     "exampleWhitelistDomainDesc": "放行来自 partner.com 发给 user@example.com 的邮件",
@@ -4436,7 +4436,7 @@
     "scopeDisplayAttachmentHash": "附件哈希",
     "scopeDisplayUrls": "URL",
     "sourceEmailDisposal": "邮件处置中心",
-    "attachmentContentUnavailable": "附件内容匹配仅由旁路扫描器提供，当前编辑器暂不能配置。",
+    "attachmentContentUnavailable": "附件内容匹配仅由旁路扫描器提供，��前编辑器暂不能配置。",
     "legacyScopesPreserved": "此规则保留了 {count} 个简化编辑器未展示的兼容作用域。",
     "headerOnlyTagHint": "标记仅添加邮件头，不会修改邮件主题。",
     "headerRequired": "请同时填写邮件头名称和��",
@@ -4521,7 +4521,7 @@
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
       "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
-      "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常是垃圾邮件或恶意软件生成的特征，��议阻断。",
+      "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常��垃圾邮件或恶意软件生成的特征，��议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
     "protocolChecks": {
@@ -5090,7 +5090,7 @@
       "performanceProtection": "性能保护",
       "seconds": "秒",
       "receiveDefault": "接收方向默认隔离",
-      "countSection": "数量与大小限制",
+      "countSection": "数���与大小限制",
       "nestedSection": "嵌套压缩包限制",
       "scanSection": "扫描设置",
       "dangerExtSection": "危险扩展名",
@@ -5120,7 +5120,7 @@
       "retry": "重试"
     },
     "toast": {
-      "saveSuccess": "配置已保存",
+      "saveSuccess": "配���已保存",
       "saveFailed": "保存失败",
       "loadFailed": "加载配置失败，请重试",
       "deleteSuccess": "规则已删除"
@@ -5423,7 +5423,7 @@
     },
     "rescan": {
       "title": "点击时复检策略",
-      "engine": "钓鱼邮件智能体",
+      "engine": "钓鱼邮件智能���",
       "costHint": "复检耗时预期：回扫黑名单���即时）→ 查询情报（秒级）→ 深度复检（约 30-60 秒）。开启深度复检会让用户点击后产生等待。",
       "m1": {
         "title": "回扫黑名单",
@@ -5712,7 +5712,7 @@
     "headerNamePlaceholder": "如：X-External-Source",
     "disclaimerConfig": "声明配置",
     "disclaimerContent": "声明内容",
-    "disclaimerContentPlaceholder": "输入免责声明，支持 HTML 格式与变量",
+    "disclaimerContentPlaceholder": "输入免责声明，支持 HTML 格式与���量",
     "disclaimerContentTip": "支持 HTML 和变量，按 UTF-8 计算��多 10240 bytes",
     "disclaimerPosition": "声明位置",
     "disclaimerFormat": "声明格式",
@@ -6168,7 +6168,7 @@
     },
     "recall": {
       "title": "邮件召回",
-      "loading": "正在查询收件人域名类型...",
+      "loading": "正在��询收件人域名类型...",
       "colSelect": "选择",
       "colRecipient": "收件人",
       "colMailSystem": "邮件系统",
@@ -6348,7 +6348,7 @@
           "empty": "暂无收件人处置记录",
       "actionSuccess": "操作成功",
       "actionFailed": "操作失败",
-      "recallUnsupportedBackend": "该收件人的邮箱系统不支持召回",
+      "recallUnsupportedBackend": "该收件人��邮箱系统不支持召回",
       "recallTrackingIdMissing": "缺少邮件系统��踪标识，无法发起召回",
       "recallNotDelivered": "该收件人尚未确认投递成功",
       "recallDeliveryStatusUnknown": "该收件人的投递状态未知，无法安全召回",
@@ -7205,7 +7205,7 @@
       "desc_sendTime": {
         "source": "邮件头 Date 字段",
         "usage": "过滤特定时间段发送的邮件",
-        "note": "支持时间范围过滤，可配合排除匹配使用"
+        "note": "支持时间范围过滤，��配合排除匹配使用"
       },
       "desc_sendDayOfWeek": {
         "source": "邮件头 Date 字段",
@@ -7670,7 +7670,7 @@
     "category_suspicious": "可疑邮件",
     "category_sensitive": "敏感内容",
     "category_phishing": "钓鱼邮件",
-    "category_virus": "病毒邮件",
+    "category_virus": "病毒邮��",
     "category_account_compromised": "账号被盗",
     "category_spoofing": "身份仿冒",
     "category_harmful": "有害内容",
@@ -8154,12 +8154,14 @@
         "gt30": "超过30天"
       }
     },
-    "wouldBeActions": {
-      "reject": "拒绝",
-      "quarantine": "隔离",
-      "discard": "丢弃",
-      "audit": "审核"
-    },
+  "wouldBeActions": {
+  "accept": "投递",
+  "quarantine": "隔离",
+  "audit": "审核",
+  "reject": "拒收",
+  "discard": "丢弃",
+  "recall": "召回"
+  },
     "path": {
       "authSpoofing": "身份认证与仿冒检测",
       "protocolCheck": "认证协议检查",
@@ -9034,7 +9036,7 @@
       "selectGroups": "选择群组",
       "searchGroups": "搜索群组",
       "noGroupsHint": "暂无匹配方向的群组，请先到「群组管理」创建",
-      "noMatch": "无���配结果",
+      "noMatch": "无�����配结果",
       "selectedCount": "已选 {count} 项",
       "clearAll": "清空",
       "searchDepartments": "搜索部门",
@@ -9903,7 +9905,7 @@
       "nameRequired": "请输入策略名称（最长 50 字符）",
       "status": "启用状态",
       "statusHint": "关闭后该策略不再被调度执行。",
-      "mode": "检测模式",
+      "mode": "检测��式",
       "modeRealtime": "实时检测",
       "modeDeep": "深度检测",
       "modeHint": "实时：事件触发；深度：定时巡检。"
@@ -10044,7 +10046,7 @@
       "saveError": "保存策略失败",
       "testStarted": "测试扫描已启动",
       "invalid": "请修正表单错误后再保存",
-      "cloned": "策略已克隆",
+      "cloned": "策略已��隆",
       "deleted": "策略已删除"
     }
   },
@@ -10457,7 +10459,7 @@
         "durationPositive": "持续��间必须大于 0",
         "samplesPositive": "采样数必须大于 0",
         "email": "收件人邮箱格式不正确",
-        "recipientsRequired": "已开启通知时必须填写至少一个收件人"
+        "recipientsRequired": "已开启通知时必须填写至少一��收件人"
       }
     },
     "smtp": {
@@ -10649,7 +10651,7 @@
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
     "alreadyReleased": "该邮件已被管理员删除，无法取回",
-    "confirmWarning": "您正在取回被网关隔离的邮件，成功后该邮件将重新投递到您的收件箱，请谨慎操作！"
+    "confirmWarning": "您正在取回被网关隔离的邮件，成功后该邮件将重新投递到您的收件箱，请谨慎��作！"
   },
   "portalPreview": {
     "loading": "加载中...",
@@ -11371,7 +11373,7 @@
       "access_denied": "无权访问该租户",
       "domain_delete_gated": "收信域必须先停用并保持停用满排水窗口（默认 7 天，让队列在途邮件投递完毕）才能删除",
       "admin_account_password_pair_required": "管理员账号与密码必须同时填写",
-      "admin_account_too_long": "管理员账号长度不能超过 {max} 个字符",
+      "admin_account_too_long": "管理��账号长度不能超过 {max} 个字符",
       "code_too_long": "��户编码长度不能超过 {max} 个字符",
       "code_immutable": "租户编码创建后不可修改",
       "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请���放行或清除后再��除租户",
