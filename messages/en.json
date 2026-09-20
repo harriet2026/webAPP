@@ -8150,11 +8150,11 @@
         "observedSince": "Observed Since",
         "observedDays": "Observed Duration",
   "hits": "Hits",
-  "falsePositiveRate": "False Positive Risk",
-            "actions": "Actions"
-      },
+  "falsePositiveRate": "False Positive / Negative Risk",
+  "actions": "Actions"
+  },
   "tooltip": {
-  "falsePositiveRate": "Derived from existing email disposal outcomes: confirmed false positives / reviewed hits (weighted by confidence)"
+  "falsePositiveRate": "Derived from existing email disposal outcomes: confirmed false positives or false negatives / reviewed hits (weighted by confidence)"
   },
 
       "viewHits": "View Hit Details",
