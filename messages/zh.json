@@ -362,7 +362,7 @@
     "mailflow": "邮件流",
     "monitorSecurity": "检测引擎状态",
     "phishingDetection": "钓鱼邮件检测智能体",
-    "agentCenter": "智�����体中心",
+    "agentCenter": "智�������体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回�����智能体",
@@ -937,7 +937,7 @@
         "systemDefaultHelo": "系统默认",
         "tlsLevelLabels": {
           "plain": "明文传输",
-          "prefer": "优先 TLS",
+          "prefer": "��先 TLS",
           "force": "强制 TLS",
           "forceVerify": "强制 TLS + 证书校验"
         },
@@ -1015,7 +1015,7 @@
           "targetPort": "目的端口",
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
-          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书校验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
+          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与「证书���验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
           "channel": "投递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
@@ -1464,7 +1464,7 @@
       "rbl": "按全局 RBL 列表生效",
       "overseas": "按全局海外检测策略生效",
       "senderFilter": "按全局发信人黑白名单生效",
-      "userList": "按全局用户黑白名单生效",
+      "userList": "按全局用户黑白名���生效",
       "behaviorControl": "��全局发信行为管控生效",
       "authSpoofing": "按全局身份认证与仿冒策略生效",
       "recipientCheck": "按全局收信人检���策略生效",
@@ -2052,7 +2052,7 @@
       "suspend": "确认暂停该租户?",
       "activate": "确认启用该租户?",
       "removeDomains": "确认移除 {count} 个域名？",
-      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已配置路由，移除后该域名的下一跳与出口绑定会一并删除，收信将立即中断。此操作不可撤销。"
+      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已配置路由，移除后该域名的下一跳与出口绑定会一并删除，收信将立��中断。此操作不可撤销。"
     },
     "toast": {
       "created": "租户已创建",
@@ -2437,7 +2437,7 @@
       "timeline": "顺序检测过程",
       "timelineHint": "点击改写链接后，按「回扫黑名单 → 云端情报 → 钓鱼邮件检测智能体」顺序检测，任一环节命中即告警并停止后续检测。",
       "linkInfo": "链接信息",
-      "context": "邮件与点击上下文",
+      "context": "邮件与点击上���文",
       "hit": "命中",
       "checkedPassed": "���检测 · 未命中",
       "skipped": "未执行（前序已命中）",
@@ -2714,7 +2714,7 @@
     },
     "twoFactor": {
       "statusLabel": "二次认证状态",
-      "enabled": "已开启",
+      "enabled": "已开���",
       "disabled": "已关闭",
       "forced": "已强制开启",
       "sms": "短信验证码",
@@ -3168,7 +3168,7 @@
       "header_mismatch": "头部信息不一致",
       "empty_visible_content": "可见内容过少",
       "cac_cluster": "CAC 簇关联",
-      "historical_similarity": "历史相似性",
+      "historical_similarity": "历���相似性",
       "target_threat_signal": "目标威胁信号",
       "missed_detection": "可能漏判",
       "possible_false_positive": "可能误杀",
@@ -3522,7 +3522,7 @@
     "tempfailMessage": "临时拒绝消息",
     "tempfailPlaceholder": "自定义 421 消息",
     "connectionLimits": "连接数限制（-1 = 不限制）",
-    "dailyLimit": "每日连接数限制",
+    "dailyLimit": "���日连接数限制",
     "concurrentLimit": "并发连接数限制",
     "windowMinutes": "时间窗口（分钟）",
     "windowLimit": "窗口内连接数限制",
@@ -3962,7 +3962,7 @@
     "serverRequired": "请至少添加一个 RBL 服务器",
     "saveSuccess": "RBL 过滤配置已保存",
     "serverExists": "该服务器已存在",
-    "serverReferenced": "该服务器被 {count} 条命中规则使用，无法删除",
+    "serverReferenced": "该服务器被 {count} 条���中规则使用，无法删除",
     "loadError": "���载 RBL 配置失败",
     "disposalStrategyTitle": "处置策略",
     "disposalStrategyDesc": "选择命中 RBL 后的处置方式，两种策略互斥，仅能启用其一。",
@@ -4521,7 +4521,7 @@
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
       "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
-      "mailFromInvalidDesc": "检查发信人地址格式是否符合RFC标准。格式错误通常��垃圾邮件或恶意软件生成的特征，��议阻断。",
+      "mailFromInvalidDesc": "检查发信人地址��式是否符合RFC标准。格式错误通常��垃圾邮件或恶意软件生成的特征，��议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
     "protocolChecks": {
@@ -4780,7 +4780,7 @@
       "operations": "操作"
     },
     "direction": {
-      "inbound": "接收",
+      "inbound": "���收",
       "outbound": "外发",
       "internal": "域内",
       "bidirectional": "外发 + 域内"
@@ -6420,7 +6420,7 @@
           "blacklistUrl": "URL加黑",
           "blacklistHash": "哈希加黑",
           "download": "下载",
-          "ruleSuccess": "已加入黑名单规则",
+          "ruleSuccess": "���加入黑名单规则",
           "ruleFailed": "加入黑名单规则失败",
           "confirmTitle": {
             "domain": "确认将此域名加入黑名单？",
@@ -7820,7 +7820,7 @@
     "reviewerNotifyIntervalRange": "审核人通知频率需为 1-1440 分钟",
     "reviewerActiveStartInvalid": "请选择合法的审核通知开始时间",
     "reviewerActiveEndInvalid": "请选择合法的审核通知结束时间",
-    "timeoutMarkPositionsRequired": "启用投递标记时，至少选择一个标记位置",
+    "timeoutMarkPositionsRequired": "启用投递标记时，至少选择一个标记位���",
     "timeoutMarkPositionsInvalid": "投递标记位置配置无效",
     "timeoutMarkTextRequired": "启用投递标记时，必须填写标记文本",
     "timeoutMarkTextTooLong": "标记文���不能超过 20 个字符",
@@ -8014,7 +8014,7 @@
       },
       "blockRateLegend": "横条颜色 = 拦截率",
       "blockRateGood": "≥97%  防护良好",
-      "blockRateWarn": "95–97%  需关注",
+      "blockRateWarn": "95���97%  需关注",
       "blockRateBad": "<95%  风险较高"
     },
     "time": {
@@ -8206,18 +8206,12 @@
         "observedDays": "观察时长",
         "hits": "命中数",
         "falsePositiveRate": "误判风险",
-        "suggestion": "转正建议",
-        "actions": "操作"
+            "actions": "操作"
       },
       "tooltip": {
         "falsePositiveRate": "基于现有邮件处置结果推算：确认误判数 / 已复核命中数（按置信度加权）"
       },
-      "suggestion": {
-        "confirm_promote": "建议转正式",
-        "keep_observing": "继续观察",
-        "needs_tuning": "建议调参",
-        "needs_more_data": "数据不足"
-      },
+
       "viewHits": "查看命中详情",
       "goToConfig": "前往策略配置"
     }
@@ -8430,7 +8424,7 @@
     },
     "detailTitle": "明细数据",
     "chartType": {
-      "line": "折线图",
+      "line": "折���图",
       "area": "堆叠面积图"
     },
     "linkType": {
@@ -8845,7 +8839,7 @@
       "unknown": "未知"
     },
     "policyDisposition": { "proceed": "进行下一步", "audit": "审核", "quarantine": "隔离", "discard": "丢弃", "undecided": "未判定" },
-    "taskStatus": { "submitting": "提交中", "pending": "等待中", "processing": "检测中", "running": "运行中", "completed": "已完成", "failed": "失败", "expired": "已过期", "needs_approval": "待批准", "cancelled": "已取消", "partial": "部分完成", "unknown": "未知" },
+    "taskStatus": { "submitting": "提交中", "pending": "等待中", "processing": "检测中", "running": "运行中", "completed": "已完成", "failed": "失败", "expired": "已过期", "needs_approval": "待批准", "cancelled": "已取消", "partial": "部分完成", "unknown": "未��" },
     "directionValue": { "inbound": "入站", "outbound": "外发", "internal": "域内", "unknown": "未知" },
     "evidenceSeverity": { "low": "低", "medium": "中", "high": "高", "critical": "严重", "unknown": "未知" },
     "detectionMode": {
@@ -8989,7 +8983,7 @@
   "phishingConfig": {
     "pageTitle": "检测引擎配置",
     "pageDescription": "调整钓鱼检测引擎的准入规则、运行模式与置信度分级处置。",
-    "readOnlyNotice": "当前账号只有查看权限，配置控件不可操作。",
+    "readOnlyNotice": "当前账号只有查看权���，配置控件不可操作。",
     "admission": {
       "title": "检测范围与准入规则",
       "description": "以规���列表方式管理准入条件，可创建多条规则。命中任一启用规则的邮件将进入本智能体检测。",
@@ -9647,7 +9641,7 @@
     },
     "tabs": {
       "overview": "检测总览",
-      "strategy": "回溯策略"
+      "strategy": "回���策略"
     },
     "kpi": {
       "runningTasks": "进行中任务",
@@ -10250,7 +10244,7 @@
     "toastDeleted": "数据源已删除",
     "toastFailuresExported": "已导出失败明细 CSV",
     "toastFixErrors": "请修正表单中的校验错误",
-    "toastMarkedExec": "已标记为高管",
+    "toastMarkedExec": "已标记为���管",
     "toastMarkedKey": "已标记为关键岗位",
     "toastSyncFailed": "同步失败：连接异常",
     "toastSyncPartial": "同步完成，存在 {count} 条失败记录",
@@ -10812,7 +10806,7 @@
         "stale": "通讯录数据已超过 24 小时未更新"
       }
     },
-    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
+    "footerNote": "收信人检���在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
   },
   "userList": {
     "blacklistRules": "黑名单规则",
@@ -11826,7 +11820,7 @@
       "invalid_metadata": "元数据格式不正确"
     },
     "user_list_access": {
-      "user_list_rules_require_tenant_administrator": "用户名单规则需要租户管理员权限",
+      "user_list_rules_require_tenant_administrator": "用户名单��则需要租户管理员权限",
       "user_list_rules_available_owning_tenant": "多租户模式下，用户名单规则仅归属租户可见",
       "user_list_rules_require_tenant_context": "用户名单规则需要先选择租户",
       "user_list_rules_created_managed_by": "用户名单规则由用户自行创建和管理，不通过通用管理接口",

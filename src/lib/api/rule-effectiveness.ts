@@ -77,9 +77,6 @@ export type ObserveDurationBucket = 'lt7' | '7to30' | 'gt30';
  */
 export type WouldBeAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard' | 'recall';
 
-/** 转正式建议引擎输出的四态标签。 */
-export type PromotionSuggestion = 'confirm_promote' | 'keep_observing' | 'needs_tuning' | 'needs_more_data';
-
 /** 规则归因状态——判断最终处置动作是否确实由被观察的规则本身主导。 */
 export type AttributionStatus = 'attributable' | 'excluded_not_attributable' | 'module_level_only';
 
@@ -124,8 +121,6 @@ export interface RuleEffectivenessRow {
   weighted_reviewed_count: number;
   false_positive_rate: number | null;
   attribution_status: AttributionStatus;
-  suggestion: PromotionSuggestion;
-  suggestion_reason: string;
   action_breakdown: ActionBreakdownItem[];
   /** 仅认证协议检查（protocol_check_spf/dkim/dmarc/ptr）行有值：该协议下各判定结果的命中构成。 */
   protocol_hit_breakdown?: ProtocolHitBreakdownItem[];

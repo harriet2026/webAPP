@@ -1,6 +1,5 @@
 import type {
   PolicyModule,
-  PromotionSuggestion,
   RuleEffectivenessRow,
   SimilarDetectionType,
   WouldBeAction,
@@ -176,19 +175,3 @@ export const WOULD_BE_ACTION_COLORS: Record<WouldBeAction, string> = {
 export function actionColor(action: WouldBeAction): string {
   return WOULD_BE_ACTION_COLORS[action] ?? '#6b7280';
 }
-
-export type SuggestionTone = 'success' | 'muted' | 'warning' | 'neutral';
-
-export const SUGGESTION_TONE: Record<PromotionSuggestion, SuggestionTone> = {
-  confirm_promote: 'success',
-  keep_observing: 'muted',
-  needs_tuning: 'warning',
-  needs_more_data: 'neutral',
-};
-
-export const SUGGESTION_BADGE_CLASS: Record<SuggestionTone, string> = {
-  success: 'bg-success/10 text-success border-success/20',
-  muted: 'bg-muted text-muted-foreground border-border',
-  warning: 'bg-warning-soft text-warning border-warning/20',
-  neutral: 'bg-muted/50 text-muted-foreground border-border/60',
-};

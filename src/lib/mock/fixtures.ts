@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级���������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级����������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -2950,7 +2950,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
       priority: 310,
       is_active: true,
     }),
-    // ─── Whitelist (10 条) ───
+    // ─── Whitelist (10 条) ���──
     makeIpFilterRule({
       id: 100,
       name: "可信IP组",
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）────────────────────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────────��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -9390,7 +9390,6 @@ interface RuleEffectivenessMockRow {
   weighted_reviewed_ratio: number;
   false_positive_rate: number | null;
   attribution_status: 'attributable' | 'excluded_not_attributable' | 'module_level_only';
-  suggestion: 'confirm_promote' | 'keep_observing' | 'needs_tuning' | 'needs_more_data';
   config_path: string;
 }
 
@@ -9424,8 +9423,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.35,
     false_positive_rate: 0.03,
     attribution_status: 'attributable',
-    suggestion: 'confirm_promote',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-protocol_check_dkim',
@@ -9440,8 +9438,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.29,
     false_positive_rate: 0.07,
     attribution_status: 'attributable',
-    suggestion: 'keep_observing',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-protocol_check_dmarc',
@@ -9456,8 +9453,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.31,
     false_positive_rate: 0.05,
     attribution_status: 'attributable',
-    suggestion: 'keep_observing',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-protocol_check_ptr',
@@ -9472,8 +9468,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.04,
     false_positive_rate: null,
     attribution_status: 'attributable',
-    suggestion: 'needs_more_data',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   // 基础格式检查——每一项在配置页各自独立 observe_mode，必须拆成 3 个独立
   // 观察对象，合并统计会掩盖各项截然不同的命中特征。
@@ -9490,8 +9485,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.06,
     false_positive_rate: null,
     attribution_status: 'attributable',
-    suggestion: 'needs_more_data',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-format_check_mailfrom_invalid',
@@ -9506,8 +9500,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.27,
     false_positive_rate: 0.08,
     attribution_status: 'attributable',
-    suggestion: 'keep_observing',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-format_check_envelope_header_mismatch',
@@ -9522,8 +9515,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.49,
     false_positive_rate: 0.23,
     attribution_status: 'attributable',
-    suggestion: 'needs_tuning',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   // 展示名仿冒检测——按方向（收/发/内部）各自独立 observe_mode，风险模型
   // 不同（内部方向样本天然更少），必须拆成 3 个独立观察对象。
@@ -9540,8 +9532,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.46,
     false_positive_rate: 0.18,
     attribution_status: 'attributable',
-    suggestion: 'needs_tuning',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-display_name_spoofing_outbound',
@@ -9556,8 +9547,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.38,
     false_positive_rate: 0.07,
     attribution_status: 'attributable',
-    suggestion: 'keep_observing',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-display_name_spoofing_internal',
@@ -9572,8 +9562,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0,
     false_positive_rate: null,
     attribution_status: 'attributable',
-    suggestion: 'needs_more_data',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   {
     id: 'auth-similar_domain',
@@ -9588,8 +9577,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.53,
     false_positive_rate: 0.06,
     attribution_status: 'attributable',
-    suggestion: 'confirm_promote',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
   },
   // DKIM 外发签名、ARC 签名管理的是密钥/域名生命周期，没有 action/observe_mode，
   // 不是可观察的检测规则，不纳入观察模式统计范围（已从 mock 数据中移除）。
@@ -9610,8 +9598,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.29,
     false_positive_rate: 0.11,
     attribution_status: 'attributable',
-    suggestion: 'keep_observing',
-    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
+      config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
   },
   {
     id: 'similar-similar_email-send',
@@ -9628,8 +9615,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.4,
     false_positive_rate: 0.21,
     attribution_status: 'attributable',
-    suggestion: 'needs_tuning',
-    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
+      config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
   },
   {
     id: 'similar-similar_email-internal',
@@ -9646,12 +9632,11 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0,
     false_positive_rate: null,
     attribution_status: 'attributable',
-    suggestion: 'needs_more_data',
-    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
+      config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.similar_email,
   },
   // 相同主题检测（same_subject）——按主题标准化后判定，命中样本量通常更大，
   // 误判后果（正常批量通知邮件被打标/拦截）也更广，误判率阈值应更严格。
-  // 该策略在 mock 场景下设为 aggregate（全方向聚合为一个观察对象）。
+  // 该策略在 mock 场景下设为 aggregate（全方向聚合为一个��察对象）。
   {
     id: 'similar-same_subject-aggregate',
     policy_module: 'similar_detection',
@@ -9667,8 +9652,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.35,
     false_positive_rate: 0.27,
     attribution_status: 'attributable',
-    suggestion: 'needs_tuning',
-    config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.same_subject,
+      config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.same_subject,
   },
   {
     id: 'phishing-agent',
@@ -9683,21 +9667,10 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.24,
     false_positive_rate: 0.05,
     attribution_status: 'attributable',
-    suggestion: 'confirm_promote',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
+      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
   },
 ];
 
-const RULE_EFFECTIVENESS_SUGGESTION_REASON: Record<RuleEffectivenessMockRow['suggestion'], (row: RuleEffectivenessMockRow) => string> = {
-  confirm_promote: (row) =>
-    `已观察 ${row.observed_days} 天，命中 ${row.hits} 次，加权误判率 ${Math.round((row.false_positive_rate ?? 0) * 100)}%，建议转为正式生效`,
-  keep_observing: (row) =>
-    `已观察 ${row.observed_days} 天，命中 ${row.hits} 次，样本仍在积累，建议继续观察`,
-  needs_tuning: (row) =>
-    `已观察 ${row.observed_days} 天，加权误判率 ${Math.round((row.false_positive_rate ?? 0) * 100)}%，���高，建议调参后再评估`,
-  needs_more_data: (row) =>
-    `已观察 ${row.observed_days} 天，命中样本不足（已判定 ${Math.round(row.hits * row.reviewed_ratio)} 次），暂不建议判断`,
-};
 
 type RuleEffectivenessWouldBeAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard' | 'recall';
 
@@ -9782,8 +9755,7 @@ function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number)
     weighted_reviewed_count: weightedReviewedCount,
     false_positive_rate: row.false_positive_rate,
     attribution_status: row.attribution_status,
-    suggestion: row.suggestion,
-    suggestion_reason: RULE_EFFECTIVENESS_SUGGESTION_REASON[row.suggestion](row),
+
     action_breakdown: ruleEffectivenessActionBreakdown(row, index),
     config_path: row.config_path,
   };

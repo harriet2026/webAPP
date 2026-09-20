@@ -6,7 +6,6 @@ import ReactECharts from 'echarts-for-react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip as UiTooltip,
@@ -22,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { actionColor, OBSERVE_TIMEOUT_DAYS, strategyPathLabels, SUGGESTION_BADGE_CLASS, SUGGESTION_TONE } from './constants';
+import { actionColor, OBSERVE_TIMEOUT_DAYS, strategyPathLabels } from './constants';
 import { StrategyPathBreadcrumb } from './StrategyPathBreadcrumb';
 import type { RuleEffectivenessRow } from '@/lib/api/rule-effectiveness';
 
@@ -76,7 +75,6 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                         <TooltipContent>{t('tooltip.falsePositiveRate')}</TooltipContent>
                       </UiTooltip>
                     </TableHead>
-                    <TableHead>{t('col.suggestion')}</TableHead>
                     <TableHead className="sticky right-0 bg-card">{t('col.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -86,7 +84,6 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                     const fpRateText = row.false_positive_rate == null
                       ? t('dataInsufficient')
                       : `${(row.false_positive_rate * 100).toFixed(1)}%`;
-                    const tone = SUGGESTION_TONE[row.suggestion];
                     const isTimeout = row.observed_days > OBSERVE_TIMEOUT_DAYS;
                     return (
                       <>
@@ -111,16 +108,6 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                           </TableCell>
                           <TableCell>{row.hits}</TableCell>
                           <TableCell>{fpRateText}</TableCell>
-                          <TableCell>
-                            <UiTooltip>
-                              <TooltipTrigger render={
-                                <Badge className={SUGGESTION_BADGE_CLASS[tone]} variant="outline">
-                                  {t(`suggestion.${row.suggestion}`)}
-                                </Badge>
-                              } />
-                              <TooltipContent>{row.suggestion_reason}</TooltipContent>
-                            </UiTooltip>
-                          </TableCell>
                           <TableCell className="sticky right-0 bg-card">
                             <div className="flex items-center gap-2">
                               <Button variant="outline" size="sm" onClick={() => onViewHits(row)}>
@@ -140,7 +127,7 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                         </TableRow>
                         {isExpanded && (
                           <TableRow key={`${row.id}-expanded`}>
-                            <TableCell colSpan={8} className="bg-muted/20">
+                            <TableCell colSpan={7} className="bg-muted/20">
                               <div className="flex items-center gap-6 py-2">
                                 {row.action_breakdown.length === 0 ? (
                                   <span className="text-sm text-muted-foreground">{t('empty')}</span>

@@ -8151,18 +8151,12 @@
         "observedDays": "Observed Duration",
   "hits": "Hits",
   "falsePositiveRate": "False Positive Risk",
-        "suggestion": "System Suggestion",
-        "actions": "Actions"
+            "actions": "Actions"
       },
   "tooltip": {
   "falsePositiveRate": "Derived from existing email disposal outcomes: confirmed false positives / reviewed hits (weighted by confidence)"
   },
-      "suggestion": {
-        "confirm_promote": "Promote to Enforced",
-        "keep_observing": "Keep Observing",
-        "needs_tuning": "Needs Tuning",
-        "needs_more_data": "Insufficient Data"
-      },
+
       "viewHits": "View Hit Details",
       "goToConfig": "Go to Policy Config"
     }
