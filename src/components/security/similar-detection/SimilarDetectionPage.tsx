@@ -31,6 +31,17 @@ import {
 } from '@/lib/api/similar-detection';
 import { useApiRequest, ApiError, isPublicationPendingResponse } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -82,6 +93,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [showVersionResetDialog, setShowVersionResetDialog] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -183,7 +195,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
     return null;
   }, [config, validateCard, t]);
 
-  const handleSave = useCallback(async () => {
+  const persistSave = useCallback(async () => {
     const err = validate();
     if (err) {
       toast.error(err);
@@ -235,6 +247,15 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       setSaving(false);
     }
   }, [config, apiRequest, t, validate]);
+
+  const handleSave = useCallback(() => {
+    const err = validate();
+    if (err) {
+      toast.error(err);
+      return;
+    }
+    setShowVersionResetDialog(true);
+  }, [validate]);
 
   const handleCancel = useCallback(() => {
     setLoading(true);
@@ -419,11 +440,33 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
               <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
             </span>
           )}
-          <Button size="sm" disabled={saving || !dirty} onClick={handleSave} data-testid="similar-detection-save">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
-            {tc('save')}
-          </Button>
-        </div>
+      <Button size="sm" disabled={saving || !dirty} onClick={handleSave} data-testid="similar-detection-save">
+        {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+        {tc('save')}
+      </Button>
+      <AlertDialog open={showVersionResetDialog} onOpenChange={setShowVersionResetDialog}>
+        <AlertDialogContent data-testid="similar-detection-version-reset-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>此次修改将创建新策略版本</AlertDialogTitle>
+            <AlertDialogDescription>
+              相似检测配置会影响规则判断逻辑。保存后将从当前时间重新开始观察周期，历史命中数据仍保留在历史版本中。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="similar-detection-version-reset-cancel">取消</AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="similar-detection-version-reset-confirm"
+              onClick={() => {
+                setShowVersionResetDialog(false);
+                void persistSave();
+              }}
+            >
+              确认保存
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
       </div>
     </div>
   );

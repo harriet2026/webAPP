@@ -5,6 +5,16 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Info, AlertTriangle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -245,12 +255,13 @@ export function RecipientCheckPage({ embedded = false }: Props) {
   const [check, setCheck] = useState<RecipientCheckConfig>(DEFAULT_RECIPIENT_CHECK_CONFIG);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [showVersionResetDialog, setShowVersionResetDialog] = useState(false);
 
   // GT-12157：目录可用性改为读真实状态，替代此前写死的 true
   // （写死导致下方的离线告警面板永远不可达，成了死代码）。
   //
   // 语义：存在性验证查的是本地通讯录（contact_book），不是实时打 LDAP，因此
-  // 「可用」= 同步健康且数据新鲜；同步失败或数据陈旧时结论不可信，应提示运维。
+  // 「可用」= 同步健康且��据新鲜；同步失败或数据陈旧时结论不可信，应提示运维。
   const directoryQueryKey = ['recipient-directory-status', effectiveTenantId] as const;
   const limitQueryKey = ['recipient-limit-config', effectiveTenantId] as const;
   const checkQueryKey = ['recipient-check-config', effectiveTenantId] as const;
@@ -318,7 +329,7 @@ export function RecipientCheckPage({ embedded = false }: Props) {
     }
   };
 
-  const handleSave = async () => {
+  const persistSave = async () => {
     if (!configReady) return;
     setSaving(true);
     try {
@@ -330,6 +341,11 @@ export function RecipientCheckPage({ embedded = false }: Props) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSave = () => {
+    if (!configReady) return;
+    setShowVersionResetDialog(true);
   };
 
   const handleReset = async () => {
@@ -614,6 +630,28 @@ export function RecipientCheckPage({ embedded = false }: Props) {
         <Button type="button" onClick={handleSave} disabled={!configReady || saving} data-testid="recipient-check-save">
           {t('common.save')}
         </Button>
+        <AlertDialog open={showVersionResetDialog} onOpenChange={setShowVersionResetDialog}>
+          <AlertDialogContent data-testid="recipient-check-version-reset-dialog">
+            <AlertDialogHeader>
+              <AlertDialogTitle>此次修改将创建新策略版本</AlertDialogTitle>
+              <AlertDialogDescription>
+                收件人检查配置会影响规则判断逻辑。保存后将重新开始观察周期，历史命中数据仍保留在历史版本中。
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel data-testid="recipient-check-version-reset-cancel">取消</AlertDialogCancel>
+              <AlertDialogAction
+                data-testid="recipient-check-version-reset-confirm"
+                onClick={() => {
+                  setShowVersionResetDialog(false);
+                  void persistSave();
+                }}
+              >
+                确认保存
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       </div>
       </PipelinePanelHeader>
