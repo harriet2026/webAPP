@@ -7,7 +7,6 @@ import { isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import { getAuthSpoofingConfig, getObserveStats, putAuthSpoofingConfig } from '@/lib/api/auth-spoofing';
 import type { AuthSpoofingConfig, CheckItem } from '@/types/auth-spoofing';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -306,29 +305,6 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
         </div>
       ) : configReady ? (
         <div className="space-y-4" data-testid="auth-spoofing-config-content">
-          <Card data-testid="auth-spoofing-version-summary">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">{t('versionSummary')} · {t('versionLabel', { version: localConfig.version ?? 1 })}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-              <span><span className="font-medium text-foreground">{t('observationStartedAt')}</span> {localConfig.observation_started_at ?? t('notAvailable')}</span>
-              <span><span className="font-medium text-foreground">{t('observationDays')}</span> {localConfig.observation_days ?? 0} {t('daysUnit')}</span>
-              <span><span className="font-medium text-foreground">{t('hitCount')}</span> {localConfig.hit_count ?? 0}</span>
-            </CardContent>
-          </Card>
-          <Card data-testid="auth-spoofing-version-history">
-            <CardHeader className="pb-3"><CardTitle className="text-base">{t('versionHistory')}</CardTitle></CardHeader>
-            <CardContent className="flex flex-col gap-2 text-sm">
-              {(localConfig.history ?? []).length === 0 ? <span className="text-muted-foreground">{t('historyEmpty')}</span> : (localConfig.history ?? []).map((item) => (
-                <div key={item.version} className="flex flex-wrap items-center gap-3 rounded-md border p-3">
-                  <span className="font-medium">{t('versionLabel', { version: item.version })}</span>
-                  <span className="text-muted-foreground">{item.created_at}</span>
-                  <span><span className="font-medium">{t('historyChangeSummary')}</span> {item.change_summary}</span>
-                  <span><span className="font-medium">{t('historyHits')}</span> {item.hit_count}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
           <FormatChecksSection
             config={localConfig.format_checks}
             onChange={(format_checks) => setLocalConfig((c) => ({ ...c, format_checks }))}

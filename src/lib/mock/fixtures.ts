@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台��全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台���全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -2840,7 +2840,7 @@ function makeMockIPFilterRules(): IPFilterRuleView[] {
     makeIpFilterRule({
       id: 4,
       name: "已下线临时封禁",
-      description: "原攻击来源已清除",
+      description: "原攻击来��已清除",
       list_type: "blacklist",
       ip_config_type: "range",
       ip_value: "203.0.113.64/27",
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）─────��──��──����──��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）────����──��──����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4318,7 +4318,26 @@ export function mockContentGroupsList(): { items: Rule[] } {
 function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
   return {
     format_checks: {
-      mailfrom_empty: { enabled: true, action: "quarantine", observe_mode: false },
+      mailfrom_empty: {
+        enabled: true,
+        action: "quarantine",
+        observe_mode: false,
+        version: 2,
+        observation_started_at: "2026-08-20T09:00:00+08:00",
+        observation_days: 7,
+        hit_count: 18,
+        history: [
+          {
+            version: 1,
+            created_at: "2026-08-01T09:00:00+08:00",
+            observation_started_at: "2026-08-01T09:00:00+08:00",
+            observation_days: 19,
+            hit_count: 31,
+            change_summary: "调整空 MAIL FROM 处置动作",
+            config: { enabled: true, action: "proceed", observe_mode: false },
+          },
+        ],
+      },
       mailfrom_invalid: {
         enabled: true,
         action: "reject",
@@ -4418,6 +4437,10 @@ export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
 export function mockPutAuthSpoofingConfig(body: AuthSpoofingConfig): AuthSpoofingConfig {
   const current = mockAuthSpoofingConfig();
   const nextVersion = (current.version ?? 0) + 1;
+  const currentEmptyRule = current.format_checks.mailfrom_empty;
+  const nextEmptyRule = body.format_checks.mailfrom_empty;
+  const emptyRuleChanged = JSON.stringify(currentEmptyRule) !== JSON.stringify(nextEmptyRule);
+  const nextRuleVersion = (currentEmptyRule.version ?? 1) + (emptyRuleChanged ? 1 : 0);
   const next: AuthSpoofingConfig = {
     ...structuredClone(body),
     version: nextVersion,
@@ -4425,6 +4448,27 @@ export function mockPutAuthSpoofingConfig(body: AuthSpoofingConfig): AuthSpoofin
     observation_days: 0,
     hit_count: 0,
     history: [...(current.history ?? []), authSpoofingVersionSnapshot(current.version ?? 1, current, '更新认证与仿冒检测条件或处置动作')],
+  };
+  next.format_checks.mailfrom_empty = {
+    ...next.format_checks.mailfrom_empty,
+    version: nextRuleVersion,
+    observation_started_at: emptyRuleChanged ? '2026-09-21T09:00:00+08:00' : currentEmptyRule.observation_started_at,
+    observation_days: emptyRuleChanged ? 0 : currentEmptyRule.observation_days,
+    hit_count: emptyRuleChanged ? 0 : currentEmptyRule.hit_count,
+    history: emptyRuleChanged
+      ? [
+          ...(currentEmptyRule.history ?? []),
+          {
+            version: currentEmptyRule.version ?? 1,
+            created_at: '2026-09-21T09:00:00+08:00',
+            observation_started_at: currentEmptyRule.observation_started_at ?? '2026-08-20T09:00:00+08:00',
+            observation_days: currentEmptyRule.observation_days ?? 0,
+            hit_count: currentEmptyRule.hit_count ?? 0,
+            change_summary: '更新空 MAIL FROM 规则配置',
+            config: structuredClone(currentEmptyRule),
+          },
+        ]
+      : currentEmptyRule.history,
   };
   authSpoofingMockState = next;
   return structuredClone(next);
@@ -4478,7 +4522,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
     hits: [
       {
         rule_id: 1,
-        rule_name: "SPF 校验",
+        rule_name: "SPF 校��",
         action: "quarantine",
         observed: false,
         subfeature: "spf",
@@ -4909,7 +4953,7 @@ export function mockBehaviorControlGroupsList(): { items: Rule[] } {
 // 逐字段对齐，供 resolveUserListRule（src/lib/api/user-list.ts）解析回展示 ID/
 // sender/recipient/createdBy。sender/recipient 均存字面值（含 `*@…`）——
 // mock 只需与 demo 展示对齐，*@domain / 收信人组的真实匹配语义是 Phase 2 后端职责。
-// ════════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════���═════════════════════════
 
 function ulRule(o: {
   id: number;
@@ -6335,7 +6379,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "dev@company.com",
     subject: "Your GitHub repository has a new issue",
     action: "block",
-    reason: "仿冒 GitHub 官方通知域名",
+    reason: "��冒 GitHub 官方通知域名",
     mailType: "phishing",
     deliveryStatus: "rejected",
     sourceIp: "185.220.101.50",
@@ -7632,7 +7676,7 @@ export function mockEmailDisposalBlacklistEntity(
     const rule: Rule = {
       id: 9000 + mockEmailDisposalSenderDomainRules.length + 1,
       name: `域名加黑 ${value}-sender-filter-mock`,
-      description: `由邮件处置中心的邮件日志 #${id} 创建发信人域名黑名单`,
+      description: `由邮件处���中心的邮件日志 #${id} 创建发信人域名黑名单`,
       tenant_id: 1,
       page: "sender_filter",
       rule_class: "action",
@@ -9648,7 +9692,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     version_no: 2,
     version_change_summary: '信封头比对范围调整（新增 Reply-To 校验），触发观察期重置',
   },
-  // 展示名仿冒检测——按方向（收/发/内部）各自独立 observe_mode，风险模型
+  // 展示名��冒检测——按方向（收/发/内部）各自独立 observe_mode，风险模型
   // 不同（内部方向样本天然更少），必须拆成 3 个独立观察对象。
   {
     id: 'auth-display_name_spoofing_inbound',
@@ -9850,7 +9894,7 @@ function ruleEffectivenessActionBreakdown(
   const acceptRatio = (55 + threatSeriesValue(index, 1, 20, 1)) / 100;
   const acceptCount = Math.min(total, Math.round(total * acceptRatio));
 
-  // 召回（recall）：投递之后小比例人工召回，2%~6%，数据来源与规则拦截逻辑
+  // 召回（recall）：投���之后小比例人工召回，2%~6%，数据来源与规则拦截逻辑
   // 无关，按小比例随机生成。
   const recallRatio = (2 + threatSeriesValue(index + 5, 1, 4, 1)) / 100;
   const recallCount = Math.min(total - acceptCount, Math.round(total * recallRatio));

@@ -1,5 +1,15 @@
 export type AuthSpoofingAction = 'proceed' | 'quarantine' | 'audit' | 'reject' | 'discard';
 
+export interface AuthSpoofingRuleVersionSnapshot {
+  version: number;
+  created_at: string;
+  observation_started_at: string;
+  observation_days: number;
+  hit_count: number;
+  change_summary: string;
+  config: CheckItem;
+}
+
 export interface CheckItem {
   enabled: boolean;
   action: AuthSpoofingAction;
@@ -13,6 +23,11 @@ export interface CheckItem {
   tag_header_value?: string;
   tag_body_enabled?: boolean;
   tag_body_content?: string;
+  version?: number;
+  observation_started_at?: string;
+  observation_days?: number;
+  hit_count?: number;
+  history?: AuthSpoofingRuleVersionSnapshot[];
 }
 
 export interface FormatChecksConfig {
