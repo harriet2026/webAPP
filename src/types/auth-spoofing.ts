@@ -30,10 +30,12 @@ export interface ProtocolChecksConfig {
    * SPF、DKIM、DMARC、PTR 四类协议的误判特征、可信度差异很大，需要各自独立
    * 决定是否先观察再转正式，不能被同一个开关联动。
    */
-  spf_observe_mode: boolean;
-  dkim_observe_mode: boolean;
-  dmarc_observe_mode: boolean;
-  ptr_observe_mode: boolean;
+  spf_observe_mode?: boolean;
+  dkim_observe_mode?: boolean;
+  dmarc_observe_mode?: boolean;
+  ptr_observe_mode?: boolean;
+  /** 兼容既有 mock 与测试数据，正式展示使用各协议独立观察开关。 */
+  observe_mode?: boolean;
   spf:   Record<string, CheckItem>;
   dkim:  Record<string, CheckItem>;
   dmarc: Record<string, CheckItem>;
