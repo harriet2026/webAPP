@@ -1,6 +1,17 @@
 export type SimilarDetectionDirection = 'receive' | 'send' | 'internal';
 export type SimilarDetectionMode = 'aggregate' | 'separate';
 export type SimilarDetectionType = 'similar_email' | 'same_subject';
+export type SimilarDetectionHistoryScope = 'aggregate' | SimilarDetectionDirection;
+
+export interface SimilarDetectionModeTransition {
+  id: string;
+  from_mode: SimilarDetectionMode;
+  to_mode: SimilarDetectionMode;
+  created_at: string;
+  source_version: number;
+  target_scopes: SimilarDetectionHistoryScope[];
+  summary: string;
+}
 
 export type SimilarDetectionAction =
   | 'accept'
@@ -55,6 +66,8 @@ export interface SimilarDetectionConfig {
   observation_days?: number;
   hit_count?: number;
   history?: SimilarDetectionVersionSnapshot[];
+  history_by_scope?: Partial<Record<SimilarDetectionHistoryScope, SimilarDetectionVersionSnapshot[]>>;
+  mode_transitions?: SimilarDetectionModeTransition[];
 }
 
 export interface SimilarDetectionPutRequest extends Omit<SimilarDetectionConfig, 'version' | 'updated_at' | 'updated_by'> {

@@ -11,6 +11,7 @@ import type {
   SimilarDetectionType,
   SimilarDetectionConfig,
   SimilarDetectionDirectionConfig,
+  SimilarDetectionHistoryScope,
   SubjectNormalization,
 } from './types';
 import {
@@ -32,6 +33,14 @@ import {
 import { useApiRequest, ApiError, isPublicationPendingResponse } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,6 +104,8 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [showVersionResetDialog, setShowVersionResetDialog] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyScope, setHistoryScope] = useState<SimilarDetectionDirection | 'aggregate'>('aggregate');
 
   useEffect(() => {
     let cancelled = false;
@@ -117,9 +128,25 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
   }, [dirty, onDirtyChange]);
 
   const handleModeChange = useCallback((mode: SimilarDetectionMode) => {
-    setConfig((prev) => ({ ...prev, mode }));
+    setConfig((prev) => ({
+      ...prev,
+      mode,
+      mode_transitions: [
+        ...(prev.mode_transitions ?? []),
+        {
+          id: `transition-${Date.now()}`,
+          from_mode: prev.mode,
+          to_mode: mode,
+          created_at: new Date().toISOString(),
+          source_version: prev.version,
+          target_scopes: mode === 'aggregate' ? ['aggregate'] : prev.enabled_directions,
+          summary: mode === 'aggregate' ? t('transitionToAggregate') : t('transitionToSeparate'),
+        },
+      ],
+    }));
+    setHistoryScope(mode === 'aggregate' ? 'aggregate' : (config.enabled_directions[0] ?? 'receive'));
     setDirty(true);
-  }, []);
+  }, [config.enabled_directions, t]);
 
   const toggleDirection = useCallback((dir: SimilarDetectionDirection, checked: boolean) => {
     setConfig((prev) => ({
@@ -269,6 +296,16 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       .finally(() => setLoading(false));
   }, [apiRequest]);
 
+  // 版本历史属于策略实例：聚合模式共用一套，独立模式按方向分别记录。
+  const currentHistory = config.history_by_scope?.[historyScope as SimilarDetectionHistoryScope]
+    ?? (historyScope === 'aggregate' ? config.history : undefined)
+    ?? [];
+  const historyScopeLabel = config.mode === 'aggregate'
+    ? t('modeAggregate')
+    : historyScope === 'aggregate'
+      ? t('historySelectDirection')
+      : t(DIR_FULL_LABEL_KEY[historyScope]);
+
   // 观察集合：aggregate 模式下只看 aggregate.observe_mode；separate 模式下看当前 Tab 组内各已启用方向
   const currentGroup = config[activeTab];
   const observingDirections = useMemo(() => {
@@ -357,29 +394,57 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
 
   const content = (
     <div className="space-y-4">
-      <Card data-testid="similar-detection-version-summary">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">{t('versionSummary')} · {t('versionLabel', { version: config.version || 1 })}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-          <span><span className="font-medium text-foreground">{t('observationStartedAt')}</span> {config.observation_started_at ?? t('notAvailable')}</span>
-          <span><span className="font-medium text-foreground">{t('observationDays')}</span> {config.observation_days ?? 0} {t('daysUnit')}</span>
-          <span><span className="font-medium text-foreground">{t('hitCount')}</span> {config.hit_count ?? 0}</span>
-        </CardContent>
-      </Card>
-      <Card data-testid="similar-detection-version-history">
-        <CardHeader className="pb-3"><CardTitle className="text-base">{t('versionHistory')}</CardTitle></CardHeader>
-        <CardContent className="flex flex-col gap-2 text-sm">
-          {(config.history ?? []).length === 0 ? <span className="text-muted-foreground">{t('historyEmpty')}</span> : (config.history ?? []).map((item) => (
-            <div key={item.version} className="flex flex-wrap items-center gap-3 rounded-md border p-3">
-              <span className="font-medium">{t('versionLabel', { version: item.version })}</span>
-              <span className="text-muted-foreground">{item.created_at}</span>
-              <span><span className="font-medium">{t('historyChangeSummary')}</span> {item.change_summary}</span>
-              <span><span className="font-medium">{t('historyHits')}</span> {item.hit_count}</span>
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card px-4 py-3" data-testid="similar-detection-version-summary">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+          <span className="font-semibold">{t('versionSummary')} · {t('versionLabel', { version: config.version || 1 })}</span>
+          <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('observationStartedAt')}</span> {config.observation_started_at ?? t('notAvailable')}</span>
+          <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('observationDays')}</span> {config.observation_days ?? 0} {t('daysUnit')}</span>
+          <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('hitCount')}</span> {config.hit_count ?? 0}</span>
+        </div>
+        <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+          <SheetTrigger render={<Button variant="outline" size="sm" data-testid="similar-detection-version-history-trigger" />}>
+            {t('versionHistory')} · {currentHistory.length} {t('versionCountUnit')}
+          </SheetTrigger>
+          <SheetContent className="w-full sm:max-w-xl" data-testid="similar-detection-version-history">
+            <SheetHeader>
+              <SheetTitle>{t('versionHistory')}</SheetTitle>
+              <SheetDescription>{t('historyScopeDescription', { scope: historyScopeLabel })}</SheetDescription>
+            </SheetHeader>
+            <div className="flex flex-col gap-4 py-4">
+              {config.mode === 'separate' && (
+                <div className="flex flex-wrap gap-2" aria-label={t('historyScopeLabel')}>
+                  {DIRECTIONS.filter((dir) => config.enabled_directions.includes(dir)).map((dir) => (
+                    <Button
+                      key={dir}
+                      size="sm"
+                      variant={historyScope === dir ? 'default' : 'outline'}
+                      onClick={() => setHistoryScope(dir)}
+                    >
+                      {t(DIR_FULL_LABEL_KEY[dir])}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {currentHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t('historyEmpty')}</p>
+              ) : (
+                <div className="flex flex-col gap-2 text-sm">
+                  {currentHistory.map((item) => (
+                    <div key={`${historyScope}-${item.version}`} className="flex flex-col gap-1 rounded-md border p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-medium">{t('versionLabel', { version: item.version })}</span>
+                        <span className="text-muted-foreground">{item.created_at}</span>
+                      </div>
+                      <span><span className="font-medium">{t('historyChangeSummary')}</span> {item.change_summary}</span>
+                      <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('historyHits')}</span> {item.hit_count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          </SheetContent>
+        </Sheet>
+      </div>
       {/* 观察模式全局提示 */}
       {observingDirections.length > 0 && (
         <div
@@ -471,10 +536,8 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       <AlertDialog open={showVersionResetDialog} onOpenChange={setShowVersionResetDialog}>
         <AlertDialogContent data-testid="similar-detection-version-reset-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>此次修改将创建新策略版本</AlertDialogTitle>
-            <AlertDialogDescription>
-              相似检测配置会影响规则判断逻辑。保存后将从当前时间重新开始观察周期，历史命中数据仍保留在历史版本中。
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t('versionResetTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('versionResetDescription')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel data-testid="similar-detection-version-reset-cancel">取消</AlertDialogCancel>
