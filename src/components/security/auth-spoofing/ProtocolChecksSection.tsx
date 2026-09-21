@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { CollapsibleCardTrigger } from '@/components/ui/collapsible-section-trigger';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -64,6 +65,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
   const [open, setOpen] = useState(true);
   const [pendingTemplate, setPendingTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState<'spf' | 'dkim' | 'dmarc' | 'ptr'>('spf');
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const lockNonCustom = disabled || config.template !== 'custom';
 
@@ -162,6 +164,31 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                       {t(activeProtocolGroup.labelKey as Parameters<typeof t>[0])} {t('globalObserve')}
                     </span>
                   </div>
+                  <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+                    <SheetTrigger render={<button type="button" className="rounded-md border px-2 py-1 text-xs text-muted-foreground hover:bg-muted" data-testid={`protocol-version-history-trigger-${activeTab}`} />}>
+                      {t('versionSummary')} · {t('versionLabel', { version: config.rule_versions?.[activeTab] ?? 1 })}
+                    </SheetTrigger>
+                    <SheetContent className="w-full sm:max-w-xl" data-testid={`protocol-version-history-${activeTab}`}>
+                      <SheetHeader>
+                        <SheetTitle>{t(activeProtocolGroup.labelKey as Parameters<typeof t>[0])} · {t('versionHistory')}</SheetTitle>
+                        <SheetDescription>{t('versionSummary')} · {t(activeProtocolGroup.labelKey as Parameters<typeof t>[0])}</SheetDescription>
+                      </SheetHeader>
+                      <div className="flex flex-col gap-2 py-4 text-sm">
+                        {(config.rule_history?.[activeTab] ?? []).length === 0 ? (
+                          <p className="text-muted-foreground">{t('historyEmpty')}</p>
+                        ) : (config.rule_history?.[activeTab] ?? []).map((historyItem) => (
+                          <div key={historyItem.version} className="flex flex-col gap-1 rounded-md border p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-medium">{t('versionLabel', { version: historyItem.version })}</span>
+                              <span className="text-muted-foreground">{historyItem.created_at}</span>
+                            </div>
+                            <span><span className="font-medium">{t('historyChangeSummary')}</span> {historyItem.change_summary}</span>
+                            <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('historyHits')}</span> {historyItem.hit_count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                   {activeObserveOn && (
                     <div className="flex items-center gap-2 rounded bg-amber-100 px-2 py-1 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                       <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />

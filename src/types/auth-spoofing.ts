@@ -38,6 +38,16 @@ export interface FormatChecksConfig {
 
 export type Template = 'loose' | 'standard' | 'strict' | 'custom';
 
+export interface ProtocolRuleVersion {
+  version: number;
+  created_at: string;
+  observation_started_at: string;
+  observation_days: number;
+  hit_count: number;
+  change_summary: string;
+  config: Record<string, CheckItem>;
+}
+
 export interface ProtocolChecksConfig {
   template: Template;
   /**
@@ -54,6 +64,11 @@ export interface ProtocolChecksConfig {
   dmarc: Record<string, CheckItem>;
   ptr:   Record<string, CheckItem>;
   ptr_readonly?: boolean;
+  rule_versions?: Partial<Record<'spf' | 'dkim' | 'dmarc' | 'ptr', number>>;
+  rule_history?: Partial<Record<'spf' | 'dkim' | 'dmarc' | 'ptr', ProtocolRuleVersion[]>>;
+  rule_observation_started_at?: Partial<Record<'spf' | 'dkim' | 'dmarc' | 'ptr', string>>;
+  rule_observation_days?: Partial<Record<'spf' | 'dkim' | 'dmarc' | 'ptr', number>>;
+  rule_hit_count?: Partial<Record<'spf' | 'dkim' | 'dmarc' | 'ptr', number>>;
 }
 
 export interface SimilarDomainConfig {

@@ -458,14 +458,14 @@ export function mockBootstrap(): Bootstrap {
     // 的菜单语义完全一致，且不会再因为「漏登记某个功能」而失败开放。
     featureRegistry: canonicalRegistry as FeatureDef[],
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
-    // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
+    // grantable）。这样切到租户视角能完整演示「智能体中心」——对�� parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
     // platformHidden:true，多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
 
-// ─── 租户 ──────────────���──────────────────────────────────────────────────────
+// ─── 租户 ──────────���───���──────────────────────────────────────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1663,7 +1663,7 @@ export function mockMailflowConnectionFailure(direction: MailflowDirection): Mai
 // 生命周期、批量操作、规则 CRUD 和 SMTP 配置都能在 mock 模式完整走通。
 const ALERT_DATE = "2026-07-23";
 const alertSeed = [
-  [1, 101, "数据目录使用率告警", "system.data_dir_usage", "system", "node-1", "系统资源", "p0", "unconfirmed", "数据目录使用率 96%", 96, 95, 1, "10:03:25"],
+  [1, 101, "数据目录使用��告警", "system.data_dir_usage", "system", "node-1", "系统资源", "p0", "unconfirmed", "数据目录使用率 96%", 96, 95, 1, "10:03:25"],
   [2, 102, "deferred 队列堆积", "mailflow.queue_deferred", "mailflow_queue", "gateway-1", "邮件流", "p0", "processing", "deferred队列堆积 62,341", 62341, 50000, 3, "09:51:12"],
   [3, 104, "RBL 响应超时", "detection.rbl_latency", "detection", "engine-1", "检测引擎", "p3", "confirmed", "RBL响应超时 >5s", 5.8, 5, 5, "09:30:45"],
   [4, 103, "Kingbase 主从延迟", "database.kb_repl_delay", "database", "db-standby", "基础设施", "p1", "unconfirmed", "Kingbase主从延迟 45s", 45, 60, 1, "09:15:33"],
@@ -3307,7 +3307,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）──��─����──��──����──��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules��mock）──��─����──��──����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4155,7 +4155,7 @@ export function mockDeleteContentRule(id: number): boolean {
   return mockContentRules.length < before;
 }
 
-// GT-14159「策略版本化」：批量修改执行动作会改变规则的判断结果，属于实质性
+// GT-14159「策略版本化」：批量修改执行动作会改���规则的判断结果，属于实质性
 // 变更（同单条编辑一样需要重新观察），因此单独区分出 accept/quarantine/audit/
 // reject/discard 这组处置动作，与仅切换运行状态的 enable/disable（不改变判断
 // 逻辑，不触发重新观察）分开处理。
@@ -4389,6 +4389,11 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
         no_record: { enabled: true, action: "quarantine", observe_mode: false },
         query_fail: { enabled: true, action: "audit", observe_mode: false },
       },
+      rule_versions: { spf: 1, dkim: 1, dmarc: 1, ptr: 1 },
+      rule_history: { spf: [], dkim: [], dmarc: [], ptr: [] },
+      rule_observation_started_at: { spf: "2026-09-01T09:00:00+08:00", dkim: "2026-09-01T09:00:00+08:00", dmarc: "2026-09-01T09:00:00+08:00", ptr: "2026-09-01T09:00:00+08:00" },
+      rule_observation_days: { spf: 20, dkim: 20, dmarc: 20, ptr: 20 },
+      rule_hit_count: { spf: 12, dkim: 8, dmarc: 5, ptr: 3 },
       ptr: {
         noptr: { enabled: true, action: "audit", observe_mode: false },
         nomatch: { enabled: true, action: "quarantine", observe_mode: false },
@@ -4463,6 +4468,15 @@ export function mockPutAuthSpoofingConfig(body: AuthSpoofingConfig): AuthSpoofin
     hit_count: 0,
     history: [...(current.history ?? []), authSpoofingVersionSnapshot(current.version ?? 1, current, '更新认证与仿冒检测条件或处置动作')],
   };
+  const protocolKeys = ['spf', 'dkim', 'dmarc', 'ptr'] as const;
+  const protocolChanges = Object.fromEntries(protocolKeys.map((protocolKey) => {
+    const currentGroup = current.protocol_checks[protocolKey];
+    const nextGroup = body.protocol_checks[protocolKey];
+    const changed = JSON.stringify(currentGroup) !== JSON.stringify(nextGroup);
+    const currentVersion = current.protocol_checks.rule_versions?.[protocolKey] ?? 1;
+    return [protocolKey, { currentGroup, changed, nextVersion: currentVersion + (changed ? 1 : 0) }];
+  })) as Record<(typeof protocolKeys)[number], { currentGroup: Record<string, CheckItem>; changed: boolean; nextVersion: number }>;
+
   for (const ruleKey of versionedRuleKeys) {
     const { currentRule, changed, nextVersion: ruleVersion } = ruleChanges[ruleKey];
     next.format_checks[ruleKey] = {
@@ -4485,6 +4499,27 @@ export function mockPutAuthSpoofingConfig(body: AuthSpoofingConfig): AuthSpoofin
             },
           ]
         : currentRule.history,
+    };
+  }
+  for (const protocolKey of protocolKeys) {
+    const { currentGroup, changed, nextVersion: protocolVersion } = protocolChanges[protocolKey];
+    next.protocol_checks.rule_versions = { ...next.protocol_checks.rule_versions, [protocolKey]: protocolVersion };
+    next.protocol_checks.rule_observation_started_at = { ...next.protocol_checks.rule_observation_started_at, [protocolKey]: changed ? '2026-09-21T09:00:00+08:00' : current.protocol_checks.rule_observation_started_at?.[protocolKey] };
+    next.protocol_checks.rule_observation_days = { ...next.protocol_checks.rule_observation_days, [protocolKey]: changed ? 0 : current.protocol_checks.rule_observation_days?.[protocolKey] };
+    next.protocol_checks.rule_hit_count = { ...next.protocol_checks.rule_hit_count, [protocolKey]: changed ? 0 : current.protocol_checks.rule_hit_count?.[protocolKey] };
+    next.protocol_checks.rule_history = {
+      ...next.protocol_checks.rule_history,
+      [protocolKey]: changed
+        ? [...(current.protocol_checks.rule_history?.[protocolKey] ?? []), {
+            version: current.protocol_checks.rule_versions?.[protocolKey] ?? 1,
+            created_at: '2026-09-21T09:00:00+08:00',
+            observation_started_at: current.protocol_checks.rule_observation_started_at?.[protocolKey] ?? '2026-09-01T09:00:00+08:00',
+            observation_days: current.protocol_checks.rule_observation_days?.[protocolKey] ?? 0,
+            hit_count: current.protocol_checks.rule_hit_count?.[protocolKey] ?? 0,
+            change_summary: `更新${protocolKey.toUpperCase()}规则配置`,
+            config: structuredClone(currentGroup),
+          }]
+        : current.protocol_checks.rule_history?.[protocolKey],
     };
   }
   authSpoofingMockState = next;
@@ -4539,7 +4574,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
     hits: [
       {
         rule_id: 1,
-        rule_name: "SPF 校���",
+        rule_name: "SPF 校验",
         action: "quarantine",
         observed: false,
         subfeature: "spf",
@@ -4963,7 +4998,7 @@ export function mockBehaviorControlGroupsList(): { items: Rule[] } {
   return { items: [...senderItems, ...ipItems, ...orgItems] };
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════���════════════
 // 用户黑白名单（user_list，mock）
 // 与 demo `generateUserBlacklistRules()`/`generateUserWhitelistRules()`
 // （design/origin/demo/components/filter-rules-new/identity-strategy-page.tsx）
