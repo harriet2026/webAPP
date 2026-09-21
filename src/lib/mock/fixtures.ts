@@ -464,7 +464,7 @@ export function mockBootstrap(): Bootstrap {
   };
 }
 
-// ─── 租户 ─────────────────────────────────────────────────────────────────────
+// ─── 租户 ──────────────���──────────────────────────────────────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级�����������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）────────────��──��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4154,6 +4154,18 @@ export function mockDeleteContentRule(id: number): boolean {
   return mockContentRules.length < before;
 }
 
+// GT-14159「策略版本化」：批量修改执行动作会改变规则的判断结果，属于实质性
+// 变更（同单条编辑一样需要重新观察），因此单独区分出 accept/quarantine/audit/
+// reject/discard 这组处置动作，与仅切换运行状态的 enable/disable（不改变判断
+// 逻辑，不触发重新观察）分开处理。
+const CONTENT_RULE_DISPOSAL_ACTIONS = new Set([
+  "accept",
+  "quarantine",
+  "audit",
+  "reject",
+  "discard",
+]);
+
 export function mockBulkContentRules(body: unknown): number[] {
   const source = readObject(body);
   const ids = Array.isArray(source.ids) ? source.ids.map(Number) : [];
@@ -4161,6 +4173,8 @@ export function mockBulkContentRules(body: unknown): number[] {
   if (action === "delete") ids.forEach(mockDeleteContentRule);
   if (action === "enable" || action === "disable")
     ids.forEach((id) => mockSetContentRuleStatus(id, action === "enable"));
+  if (CONTENT_RULE_DISPOSAL_ACTIONS.has(action))
+    ids.forEach((id) => mockUpdateContentRule(id, { action }));
   return ids;
 }
 
@@ -5837,7 +5851,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     mailType: "spam",
     deliveryStatus: "rejected",
     sourceIp: "112.84.22.9",
-    ipLocation: "中国",
+    ipLocation: "���国",
     cluster: "Node 1",
     attachmentCount: 0,
     hasQrCode: false,
@@ -8126,7 +8140,7 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 // 复用既有的 sfGroupRule（见本文件 group-management 区）生成一个符合
 // ruleToGroup（webapp/src/lib/api/groups.ts）判型条件的 Rule：
 // stage='rcpt' → GroupType 'recipient'，且 tags 带 `grp:<name>` 前缀
-// （否则 ruleToGroup 会因找不到 tag 直接判空丢弃这条��据）。member_count
+// （否则 ruleToGroup 会因找不到 tag 直接判空丢��这条��据）。member_count
 // �� demo 的聚合数字直接覆盖（不虚构不存在的真实成员邮箱列表）。
 export function mockRecipientGroupRulesList(): { items: Rule[]; total: number } {
   const groups: Array<[number, string, number]> = [
@@ -9823,7 +9837,7 @@ export function mockRuleEffectivenessFor(
   modules: string[],
   durationBuckets: string[],
   // 仅在 modules 命中 similar_detection 时生效——进一步收窄到相似邮件检测/
-  // 相同主题检测中的具体策略。为空表示两条策略都要。
+  // 相同主题检测中的具体策���。为空表示两条策略都要。
   similarDetectionTypes: string[] = [],
 ) {
   const moduleFilter = modules.length > 0 ? new Set(modules) : null;

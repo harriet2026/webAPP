@@ -109,6 +109,11 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
   const [importExportTab, setImportExportTab] = useState<"export" | "import">("export");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  // GT-14159「策略版本化」：批量修改执行动作会改变规则的判断结果，属于实质性
+  // 变更，需要在应用前明确提示"将重新开始观察周期"，与批量启用/禁用（仅切换
+  // 运行状态，不改变判断逻辑，不重置观察期）区分开，避免用户在批量场景下忽略后果。
+  const [bulkTargetAction, setBulkTargetAction] = useState<string>("");
+  const [bulkActionChangeOpen, setBulkActionChangeOpen] = useState(false);
   const [handledDeepLinkRuleID, setHandledDeepLinkRuleID] = useState<number | undefined>(undefined);
   const importTemplate = useMemo(
     () => buildContentRuleImportTemplate(selectedTenantId ?? user?.tenant_id),
@@ -247,6 +252,26 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       setSelectedIds([]);
+      toast.success(t("common.updateSuccess"));
+    },
+    onError: (error: Error) => {
+      toast.error(apiErrorMessage(error));
+    },
+  });
+
+  // GT-14159：批量修改执行动作，语义上等价于逐条把选中规则的"命中后执行动作"
+  // 改成同一个值，因此复用同一个 unified-rules/bulk 端点、按目标动作值传参，
+  // 后端（正式接口）据此判定为实质性变更并逐条重置对应规则的观察起始时间。
+  const bulkActionChangeMutation = useMutation({
+    mutationFn: ({ ids, action }: { ids: number[]; action: string }) =>
+      apiRequest("/unified-rules/bulk?scope=content_rules", {
+        method: "POST",
+        body: { ids, action },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      setSelectedIds([]);
+      setBulkTargetAction("");
       toast.success(t("common.updateSuccess"));
     },
     onError: (error: Error) => {
@@ -514,6 +539,35 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
               >
                 {t("common.delete")}
               </Button>
+              <Select
+                value={bulkTargetAction}
+                onValueChange={(value) => setBulkTargetAction(value ?? "")}
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="w-40"
+                  data-testid="content-rules-bulk-action-select"
+                  aria-label={t("contentRules.batchChangeAction")}
+                >
+                  <SelectValue placeholder={t("contentRules.batchChangeActionPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="accept">{t("contentRules.actionDeliver")}</SelectItem>
+                  <SelectItem value="quarantine">{t("contentRules.actionIsolate")}</SelectItem>
+                  <SelectItem value="audit">{t("contentRules.actionReview")}</SelectItem>
+                  <SelectItem value="reject">{t("contentRules.actionBlock")}</SelectItem>
+                  <SelectItem value="discard">{t("contentRules.actionDiscard")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!bulkTargetAction}
+                data-testid="content-rules-bulk-action-apply"
+                onClick={() => setBulkActionChangeOpen(true)}
+              >
+                {t("contentRules.batchChangeActionApply")}
+              </Button>
             </>
           )}
         </div>
@@ -564,6 +618,24 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
         editingRule={editingRule}
         contentGroups={contentGroups}
         onSubmit={handleSubmit}
+      />
+
+      <ConfirmDialog
+        open={bulkActionChangeOpen}
+        onOpenChange={setBulkActionChangeOpen}
+        title={t("contentRules.batchChangeActionDialogTitle")}
+        description={t("contentRules.batchChangeActionDialogDescription", {
+          count: selectedIds.length,
+        })}
+        onConfirm={() => {
+          setBulkActionChangeOpen(false);
+          if (bulkTargetAction) {
+            bulkActionChangeMutation.mutate({
+              ids: selectedIds,
+              action: bulkTargetAction,
+            });
+          }
+        }}
       />
 
       <ConfirmDialog
