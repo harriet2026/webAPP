@@ -458,14 +458,14 @@ export function mockBootstrap(): Bootstrap {
     // 的菜单语义完全一致，且不会再因为「漏登记某个功能」而失败开放。
     featureRegistry: canonicalRegistry as FeatureDef[],
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
-    // grantable）。这样切到租户视角能完整演示「智能体中心」——对�� parity_vectors
+    // grantable）。这样切到租户视角能完整演示「智能体中心」——对��� parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
     // platformHidden:true，多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
 
-// ─── 租户 ──────────���───���──────────────────────────────────────────────────────
+// ─── 租户 ─────────������───���──────────────────────────────────────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -1663,7 +1663,7 @@ export function mockMailflowConnectionFailure(direction: MailflowDirection): Mai
 // 生命周期、批量操作、规则 CRUD 和 SMTP 配置都能在 mock 模式完整走通。
 const ALERT_DATE = "2026-07-23";
 const alertSeed = [
-  [1, 101, "数据目录使用��告警", "system.data_dir_usage", "system", "node-1", "系统资源", "p0", "unconfirmed", "数据目录使用率 96%", 96, 95, 1, "10:03:25"],
+  [1, 101, "数据目��使用��告警", "system.data_dir_usage", "system", "node-1", "系统资源", "p0", "unconfirmed", "数据目录使用率 96%", 96, 95, 1, "10:03:25"],
   [2, 102, "deferred 队列堆积", "mailflow.queue_deferred", "mailflow_queue", "gateway-1", "邮件流", "p0", "processing", "deferred队列堆积 62,341", 62341, 50000, 3, "09:51:12"],
   [3, 104, "RBL 响应超时", "detection.rbl_latency", "detection", "engine-1", "检测引擎", "p3", "confirmed", "RBL响应超时 >5s", 5.8, 5, 5, "09:30:45"],
   [4, 103, "Kingbase 主从延迟", "database.kb_repl_delay", "database", "db-standby", "基础设施", "p1", "unconfirmed", "Kingbase主从延迟 45s", 45, 60, 1, "09:15:33"],
@@ -3828,7 +3828,7 @@ export function mockGroupPolicyRulesList(): { items: Rule[] } {
 }
 
 // PUT /unified-rules/{id}（mock id 段 9xxx）：合并部分字段（状态开关只发 {is_active}），
-// 全量保存则同步 name/priority/metadata。
+// 全量保存则同��� name/priority/metadata。
 export function mockUpdateGroupPolicyRule(id: number, body: unknown): Rule | null {
   const state = gpState();
   const idx = state.findIndex((r) => r.id === id);
@@ -6315,7 +6315,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "audit@external-firm.com",
     subject: "Q2 财务审计材料",
     action: "deliver",
-    reason: "正常出站邮件",
+    reason: "正��出站邮件",
     mailType: "normal",
     deliveryStatus: "delivered",
     sourceIp: "10.0.1.8",
@@ -7660,6 +7660,33 @@ export function mockEmailDisposalRuleOptions(path: string) {
 export function mockEmailDisposalDetail(id: number) {
   const item = mockDisposalMailLogs.find((entry) => entry.id === id);
   return item ? withDisplayStatuses(item) : null;
+}
+
+export function mockEmailDisposalAnalysis(id: number, path?: string) {
+  const item = mockDisposalMailLogs.find((entry) => entry.id === id);
+  if (!item) return null;
+  const recipient = new URLSearchParams(path?.split('?')[1] ?? '').get('recipient') ?? undefined;
+  const hasThreat = item.email_type === 'phishing' || item.email_type === 'malicious';
+  const checks = [
+    { key: 'authSpoofing', status: hasThreat ? 'threat' : 'pass', rule_ids: hasThreat ? [101] : [] },
+    { key: 'attachmentSecurity', status: 'pass', rule_ids: [] },
+    { key: 'urlProtection', status: hasThreat ? 'suspicious' : 'pass', rule_ids: hasThreat ? [205] : [] },
+  ] as const;
+  return {
+    scope: recipient ? 'recipient' : 'all',
+    recipient,
+    action: item.action,
+    status: item.status,
+    final_verdict: hasThreat ? 'malicious' : 'safe',
+    total_elapsed_ms: 536,
+    stages: [
+      { stage: 1, key: 'connection', status: 'pass', duration_ms: 12, checks: [] },
+      { stage: 2, key: 'identity', status: hasThreat ? 'threat' : 'pass', duration_ms: 45, checks: [checks[0]] },
+      { stage: 3, key: 'content', status: hasThreat ? 'suspicious' : 'pass', duration_ms: 156, checks: [checks[1], checks[2]] },
+      { stage: 4, key: 'comprehensive', status: hasThreat ? 'threat' : 'pass', duration_ms: 89, checks: [] },
+      { stage: 5, key: 'ai', status: 'skipped', duration_ms: 234, checks: [] },
+    ],
+  };
 }
 
 export function mockEmailDisposalBlacklistEntity(

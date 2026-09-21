@@ -155,6 +155,7 @@ import {
   mockEmailDisposalList,
   mockEmailDisposalRuleOptions,
   mockEmailDisposalDetail,
+  mockEmailDisposalAnalysis,
   mockEmailDisposalBlacklistEntity,
   mockEmailDisposalPreview,
   mockEmailDisposalEvents,
@@ -818,6 +819,14 @@ const routes: Route[] = [
     handler: (req) => {
       const item = mockEmailDisposalPreview(Number(pathname(req.path).split('/')[2]));
       return item ? { status: 200, data: item } : { status: 404, data: {} };
+    },
+  },
+  {
+    method: 'GET', pattern: /^\/mail-logs\/\d+\/analysis$/,
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const data = mockEmailDisposalAnalysis(id, req.path);
+      return data ? { status: 200, data } : { status: 404, data: {} };
     },
   },
   {
@@ -2056,7 +2065,7 @@ const routes: Route[] = [
     handler: (req) => ({ status: 200, data: mockExecuteContentRulesImport(req.body) }),
   },
   // 邮件路由出站规则（mock id 段 5000-5999）：必须排在下面通用的无 scope
-  // DELETE 兜底之前，否则会被那条更早注册的同样匹��� \d+ 的路由吞掉，
+  // DELETE 兜底之前，否则会被���条更早注册的同样匹��� \d+ 的路由吞掉，
   // 导致状态假装删除成功但 outboundRulesState 从未真正变化。
   {
     method: 'DELETE',
