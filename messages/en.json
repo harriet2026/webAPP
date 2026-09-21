@@ -4489,7 +4489,13 @@
       "noHits": "Detection passed",
       "close": "Close"
     },
-    "observing": "Observing",
+      "observing": "Observing",
+      "versionResetDialog": {
+        "title": "This change will start a new observation cycle",
+        "description": "Changes to matching conditions, actions, or observe-mode toggles are substantive. After saving, the observed-since date will be recalculated. Prior observation data remains viewable in the version history on the Rule Effectiveness page but will not count toward the current observation cycle.",
+        "confirm": "Save and restart observation",
+        "cancel": "Cancel"
+      },
     "observe": "Observe",
     "legacyDisabled": "Currently not enabled",
     "legacyDisabledHint": "This check is left disabled by an older version. The new auth-spoofing model has no \"off\" switch, so once you change this row to another action it cannot be set back to disabled.",
@@ -8144,6 +8150,13 @@
       "deletedTooltip": "This rule has been deleted; cannot navigate to its config page",
       "daysValue": "{days} days",
       "dataInsufficient": "Insufficient samples",
+      "versionBadge": "v{version}",
+      "versionResetTooltip": "This policy was substantively modified during observation; the observed-since date was recalculated, and prior-version hit data is excluded from current statistics. See version history below.",
+      "versionHistory": {
+        "title": "Version history (audit only, excluded from current statistics)",
+        "empty": "No substantive changes since it entered observation",
+        "hits": "{count} hits"
+      },
       "col": {
         "module": "Policy Module",
         "subStrategy": "Sub-strategy/Direction",

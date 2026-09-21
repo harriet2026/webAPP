@@ -102,7 +102,23 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                               <span className="ml-1 text-xs text-muted-foreground">{t('deletedSuffix')}</span>
                             )}
                           </TableCell>
-                          <TableCell>{row.observed_since}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              <span>{row.observed_since}</span>
+                              {row.version_no > 1 && (
+                                <UiTooltip>
+                                  <TooltipTrigger
+                                    render={
+                                      <span className="cursor-help rounded border border-border px-1 text-[11px] leading-4 text-muted-foreground">
+                                        {t('versionBadge', { version: row.version_no })}
+                                      </span>
+                                    }
+                                  />
+                                  <TooltipContent>{t('versionResetTooltip')}</TooltipContent>
+                                </UiTooltip>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell className={isTimeout ? 'text-warning font-medium' : ''}>
                             {t('daysValue', { days: row.observed_days })}
                           </TableCell>
@@ -157,6 +173,27 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
                                       ))}
                                     </div>
                                   </>
+                                )}
+                              </div>
+                              {/* 版本历史：只读，仅供审计追溯——历史版本的命中数不叠加进上方
+                                  命中构成饼图和当前行的 hits，避免旧逻辑的数据污染当前版本统计。 */}
+                              <div className="border-t border-border/60 py-2">
+                                <div className="mb-1.5 text-xs font-medium text-foreground">{t('versionHistory.title')}</div>
+                                {row.version_history.length === 0 ? (
+                                  <span className="text-xs text-muted-foreground">{t('versionHistory.empty')}</span>
+                                ) : (
+                                  <div className="flex flex-col gap-1.5">
+                                    {row.version_history.map((v) => (
+                                      <div key={v.version_no} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                        <span className="rounded border border-border px-1 text-foreground">
+                                          {t('versionBadge', { version: v.version_no })}
+                                        </span>
+                                        <span>{v.effective_at} → {v.superseded_at ?? '—'}</span>
+                                        <span>{t('versionHistory.hits', { count: v.hits })}</span>
+                                        <span className="text-foreground/80">{v.change_summary}</span>
+                                      </div>
+                                    ))}
+                                  </div>
                                 )}
                               </div>
                             </TableCell>

@@ -80,6 +80,31 @@ export type WouldBeAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'disc
 /** 规则归因状态——判断最终处置动作是否确实由被观察的规则本身主导。 */
 export type AttributionStatus = 'attributable' | 'excluded_not_attributable' | 'module_level_only';
 
+/**
+ * 策略版本变更类型——区分是否影响判断逻辑：
+ *   - substantive（实质性变更）：匹配条件/范围/执行动作/模块类型等影响命中结果或
+ *     处置结果的字段被修改，触发观察期重置（observed_since 重新计算，命中数/
+ *     命中构成/误判漏判风险只统计新版本产生的数据，历史版本数据保留在
+ *     version_history 中供审计追溯，不参与当前 KPI 计算）；
+ *   - non_substantive（非实质性变更）：仅名称、备注等不影响判断逻辑的字段被
+ *     修改，不触发观察期重置，version_no 不变。
+ */
+export type PolicyVersionChangeType = 'substantive' | 'non_substantive';
+
+/** 已归档的历史版本条目——只读，仅供审计追溯，不参与当前行的 KPI 计算。 */
+export interface PolicyVersionEntry {
+  version_no: number;
+  /** 该版本开始生效的时间。 */
+  effective_at: string;
+  /** 该版本被下一次修改替换（结束生效）的时间；当前版本为 null。 */
+  superseded_at: string | null;
+  change_type: PolicyVersionChangeType;
+  /** 变更摘要，用于版本历史列表展示，如「执行动作：隔离 → 审核」。 */
+  change_summary: string;
+  /** 该版本生效期间累计的命中数，与当前行的 hits 字段口径一致但范围限定在该版本内。 */
+  hits: number;
+}
+
 export interface RuleEffectivenessParams {
   startDate?: string;
   endDate?: string;
@@ -114,7 +139,14 @@ export interface RuleEffectivenessRow {
   sub_strategy_id: string;
   sub_strategy_name_snapshot: string;
   is_deleted: boolean;
+  /**
+   * 当前生效的策略版本号，从 1 开始。规则被实质性修改（影响判断逻辑的字段变更）
+   * 后版本号 +1，observed_since 重新计算，历史版本移入 version_history。
+   */
+  version_no: number;
+  /** 观察起始时间——即当前版本（version_no）开始生效的时间，规则被实质性修改后会重新计算，不是策略最初创建的时间。 */
   observed_since: string;
+  /** 观察时长——按当前版本的 observed_since 计算，不叠加历史版本的观察天数。 */
   observed_days: number;
   hits: number;
   reviewed_count: number;
@@ -124,6 +156,12 @@ export interface RuleEffectivenessRow {
   action_breakdown: ActionBreakdownItem[];
   /** 仅认证协议检查（protocol_check_spf/dkim/dmarc/ptr）行有值：该协议下各判定结果的命中构成。 */
   protocol_hit_breakdown?: ProtocolHitBreakdownItem[];
+  /**
+   * 历史版本清单，按 version_no 升序排列，仅包含已被替换的版本（不包含当前版本，
+   * 当前版本信息见 version_no/observed_since/observed_days/hits 等顶层字段）。
+   * 为空表示该策略自纳入观察以来未发生过实质性变更。
+   */
+  version_history: PolicyVersionEntry[];
   /** 前往策略配置页的路径。 */
   config_path: string;
 }

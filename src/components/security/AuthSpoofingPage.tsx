@@ -7,6 +7,16 @@ import { isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
 import { getAuthSpoofingConfig, getObserveStats, putAuthSpoofingConfig } from '@/lib/api/auth-spoofing';
 import type { AuthSpoofingConfig, CheckItem } from '@/types/auth-spoofing';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { AlertTriangle, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
@@ -130,6 +140,10 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   const [localConfig, setLocalConfig] = useState<AuthSpoofingConfig>(DEFAULT_CONFIG);
   const [lastSavedConfig, setLastSavedConfig] = useState<AuthSpoofingConfig>(DEFAULT_CONFIG);
   const [hydratedConfigSource, setHydratedConfigSource] = useState<AuthSpoofingConfig | null>(null);
+  // 本页面的每一项编辑（匹配条件/执行动作/观察开关）都直接影响规则的判断逻辑
+  // 或处置结果，属于「策略版本化」方案中的实质性变更——保存前需二次确认，
+  // 提示用户观察时长将重新计算，避免用户在不知情的情况下重置观察期。
+  const [showVersionResetDialog, setShowVersionResetDialog] = useState(false);
   const configQueryKey = ['auth-spoofing-config', effectiveTenantId] as const;
 
   const configQuery = useQuery({
@@ -191,24 +205,50 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
       toast.error(t('tagPanel.errorTagFieldRequired'));
       return;
     }
+    setShowVersionResetDialog(true);
+  };
+
+  const confirmSave = () => {
+    setShowVersionResetDialog(false);
     saveMutation.mutate(localConfig);
   };
 
   const saveButton = (
-    <Button
-      type="button"
-      data-testid="auth-spoofing-save"
-      className="min-w-28"
-      onClick={handleSave}
-      disabled={!configReady || !isChanged || saveMutation.isPending}
-    >
-      {saveMutation.isPending ? (
-        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-      ) : (
-        <Save className="mr-1 h-4 w-4" />
-      )}
-      {t('save')}
-    </Button>
+    <>
+      <Button
+        type="button"
+        data-testid="auth-spoofing-save"
+        className="min-w-28"
+        onClick={handleSave}
+        disabled={!configReady || !isChanged || saveMutation.isPending}
+      >
+        {saveMutation.isPending ? (
+          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+        ) : (
+          <Save className="mr-1 h-4 w-4" />
+        )}
+        {t('save')}
+      </Button>
+      <AlertDialog open={showVersionResetDialog} onOpenChange={setShowVersionResetDialog}>
+        <AlertDialogContent data-testid="auth-spoofing-version-reset-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('versionResetDialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('versionResetDialog.description')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="auth-spoofing-version-reset-cancel">
+              {t('versionResetDialog.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="auth-spoofing-version-reset-confirm"
+              onClick={confirmSave}
+            >
+              {t('versionResetDialog.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 
   // Only used for the "预计丢弃" badge next to each protocol's own observe toggle.

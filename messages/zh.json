@@ -362,7 +362,7 @@
     "mailflow": "邮件流",
     "monitorSecurity": "检测引擎状态",
     "phishingDetection": "钓鱼邮件检测智能体",
-    "agentCenter": "智���������体中心",
+    "agentCenter": "智�����������体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回�����智能体",
@@ -1017,7 +1017,7 @@
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
           "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版本为 {version}，与���证书���验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
-          "channel": "投递通道",
+          "channel": "��递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
           "channelProxyColumns": {
             "name": "代理名称",
@@ -1337,7 +1337,7 @@
     "drawerSubtitle": "针对特定业务对象配置差异化检测策略",
     "namePlaceholder": "请输入便于识别的规则名称，如「研发部门外发」",
     "nameRequired": "请输入规则名称",
-    "sectionPipeline": "策略流水线配置",
+    "sectionPipeline": "策略���水线配置",
     "configDetail": "配��详情",
     "configDetailClose": "关闭配置面板",
     "policyStateLabel": "策略状态",
@@ -1647,7 +1647,7 @@
     "timeoutMinutes": "超时(分钟)",
     "booleanTrue": "是",
     "booleanFalse": "否",
-    "sidelineAsyncWarningOptIn": "⚠️ 该字段由「{label}」检查产出。默认不运行。除非有标签规则给收件人打上 {tag}，否则该规则不会对任��邮件命中。",
+    "sidelineAsyncWarningOptIn": "⚠️ 该字段由「{label}」检查产出。默认不运行。除非有标签规则给收件人打上 {tag}，否则��规则不会对任��邮件命中。",
     "sidelineAsyncWarningOptOut": "⚠��� 该字段由「{label}」检查产出。默认运行。若所有收件人都被打上 {tag} 标签，该规则不会对那些邮件命中。",
     "pipelineEyebrow": "规则管理",
     "pipelineTitle": "规则流水线总览",
@@ -2031,7 +2031,7 @@
       "language": "通知语言",
       "domains": "租户域名",
       "capabilities": "能力开通",
-      "adminAccount": "主管理员账号",
+      "adminAccount": "���管理员账号",
       "adminAccountHint": "该账号将作为该租户���理员的登录���口",
       "adminPassword": "初始密码",
       "adminPasswordHint": "需满足密码策略；该管理员首次登录时将被强制修改密码"
@@ -2052,7 +2052,7 @@
       "suspend": "确认暂停该租户?",
       "activate": "确认启用该租户?",
       "removeDomains": "确认移除 {count} 个域名？",
-      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已配置路由，移除后该域名的下一跳与出口绑定会一并��除，收信将立��中断。此操作不可撤销。"
+      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已配置路由，移除后该域名的下一跳��出口绑定会一并��除，收信将立��中断。此操作不可撤销。"
     },
     "toast": {
       "created": "租户已创建",
@@ -2725,7 +2725,7 @@
       "boundEmail": "接收邮箱",
       "phonePlaceholder": "请输入手机号",
       "emailPlaceholder": "请输入邮箱",
-      "phoneInvalid": "请输入正确的手机号",
+      "phoneInvalid": "请输入正确的手��号",
       "emailInvalid": "��输入正确的邮箱地址",
       "codePlaceholder": "6位验证���",
       "codeInvalid": "验证码错误，请重新输入",
@@ -2834,7 +2834,7 @@
     "channel": "投递通道",
     "channelSmtp": "SMTP 下一跳",
     "channelProxysvr": "代理服务器分组",
-    "proxysvrGroup": "代理服务器分组",
+    "proxysvrGroup": "代理服��器分组",
     "proxysvrGroupRequired": "请选择代理服务器分组",
     "proxysvrGroupPlaceholder": "选择一个活跃的代���服务器���组",
     "noActiveProxysvrGroups": "暂无活跃的代理服务器分组（请先在系统管理 → 代理服务器管理中创建）"
@@ -3166,7 +3166,7 @@
       "cac_signal": "CAC 信号",
       "auth_failure": "认证失败",
       "header_mismatch": "头部信息不一致",
-      "empty_visible_content": "可见内容过少",
+      "empty_visible_content": "可见内容过��",
       "cac_cluster": "CAC 簇关联",
       "historical_similarity": "历���相似性",
       "target_threat_signal": "目标威胁信号",
@@ -3520,7 +3520,7 @@
     "actionTempfail": "421 错误（临时拒绝）",
     "actionDisconnect": "断开连接",
     "tempfailMessage": "临时拒绝消息",
-    "tempfailPlaceholder": "自定义 421 消息",
+    "tempfailPlaceholder": "自定义 421 消���",
     "connectionLimits": "连接数限制（-1 = 不限制）",
     "dailyLimit": "���日连接数限制",
     "concurrentLimit": "并发连接数限制",
@@ -3960,7 +3960,7 @@
     "actionGreylistTip": "首次连接临时拒绝，要求发信方重试。可有效过滤僵尸网络，但会延迟正常邮件",
     "timeoutRangeError": "超时时间必须在 1-30 秒之间",
     "serverRequired": "请至少添加一个 RBL 服务器",
-    "saveSuccess": "RBL 过滤配置已保存",
+    "saveSuccess": "RBL 过滤配��已保存",
     "serverExists": "该服务器已存在",
     "serverReferenced": "该服务器被 {count} 条���中规则使用，无法删除",
     "loadError": "���载 RBL 配置失败",
@@ -4496,6 +4496,12 @@
     },
     "observing": "观察中",
     "observe": "观察",
+    "versionResetDialog": {
+      "title": "此修改将开始新的观察周期",
+      "description": "匹配条件、执行动作或观察开关的修改属于实质性变更，保存后观察起始时间将重新计算，历史观察数据仍可在规则效能统计页的版本历史中查看，但不计入当前观察周期的统计。",
+      "confirm": "确认保存并重新观察",
+      "cancel": "取消"
+    },
     "legacyDisabled": "此项当前未启用",
     "legacyDisabledHint": "这是旧版本遗留的关闭状态。新版本的认证仿冒检查没有「关闭」入口，一旦把此项改为其他动作，将无法再恢复为未启用。",
     "notAuthorized": "无权访问此页面",
@@ -4520,7 +4526,7 @@
       "mailFromEmpty": "空MAIL FROM",
       "mailFromInvalid": "无效MAIL FROM",
       "envelopeHeaderMismatch": "信封与头部不匹配",
-      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、邮件列表等系统邮件，但也可能被滥用发送匿名邮件。",
+      "mailFromEmptyDesc": "检查SMTP信封发信人是否为空，空信封常用于退信通知、自动回复、��件列表等系统邮件，但也可能被滥用发送匿名邮件。",
       "mailFromInvalidDesc": "检查发信人地址��式是否符合RFC标准。格式错误通常��垃圾邮件或恶意软件生成的特征，��议阻断。",
       "envelopeHeaderDesc": "检查邮件头中的From发信人与SMTP信封Mail From是否一致。不一致可能是合法代发服务或恶意身份仿冒。"
     },
@@ -5416,7 +5422,7 @@
       },
       "nonReceive": {
         "title": "该功能仅适用于接收方向",
-        "body": "链接保护仅支持接收方向（防外部钓鱼）。请在页面顶部切换至【接收方向】进行配置。",
+        "body": "链接保护仅支持接收方向（防外部钓鱼）。请在页面顶部切换至【接收方向】进行���置。",
         "policyCard": "安全策略",
         "disabled": "已���用"
       }
@@ -5678,7 +5684,7 @@
     "ruleNameTip": "用于识别规则，建议说明适用部门和用途",
     "priorityTip": "取值范围 {min}～{max}；数值越大，规则越优先执行",
     "selectGroup": "选择群组...",
-    "selectDepartment": "选择部门...",
+    "selectDepartment": "��择部门...",
     "departments": "适用部门",
     "recipientGroups": "收件人群组",
     "senderGroups": "发件人群组",
@@ -6097,7 +6103,7 @@
       "testRun": "测试",
       "selectRuns": "选择任务",
       "similarity": "相似度",
-      "threatLevel": "威胁等级",
+      "threatLevel": "���胁等级",
       "intentLabel": "意图标签",
       "direction": "收发类型",
       "senderIp": "发信 IP",
@@ -6162,7 +6168,7 @@
       "exportSelected": "导出已选 {n} 条",
       "exportAll": "导出全部筛选（{n} 条）",
       "exportAllLimit": "导出全部筛选（共 {n} 条，超出上限将只导出前 {limit} 条）",
-      "exportLimitWarning": "筛选结果较多（{n} 条），将导出前 {limit} 条，建议缩小筛选范围",
+      "exportLimitWarning": "筛选结果较多（{n} 条��，将导出前 {limit} 条，建议缩小筛选范围",
       "exportAllFiltered": "导出全部筛选",
       "crossPageSelected": "已跨页选中 {n} 条"
     },
@@ -6343,7 +6349,7 @@
             "notify": "通知",
             "redeliver": "重新投递"
           },
-          "readOnlyTooltip": "下钻视图仅供查看",
+          "readOnlyTooltip": "下钻视图���供查看",
           "selected": "已选中 {n} 个收件人",
           "empty": "暂无收件���处置记录",
       "actionSuccess": "操作成功",
@@ -6680,7 +6686,7 @@
       },
       "rawLogs": {
         "title": "原始日志",
-        "entriesBadge": "{count} 条",
+        "entriesBadge": "{count} ���",
         "groupsBadge": "{count} 个组件分组",
         "notLoaded": "未加载",
         "loadingBadge": "加载中",
@@ -6774,7 +6780,7 @@
     "keywords": "关键字",
     "recordsCount": "共 {count} 条",
     "perPageLabel": "条/页",
-    "neverMatchWarning": "您有 {count} 条 sideline 规则因缺少前置触发规则而永不命中，请为这些规则生成配套前置触发规则。",
+    "neverMatchWarning": "您有 {count} 条 sideline 规则因缺少前置触发规则而永��命中，请为这些规则生成配套前置触发规则。",
     "healthMissingDependency": "���赖资源缺失（detection profile 或 group 未配置）",
     "healthNeverMatch": "永不命中：sideline 规则缺少前置触发规则",
     "editRuleTitle": "编辑规则: {name}",
@@ -7448,7 +7454,7 @@
       "rangeMin": "≥ {min}",
       "rangeMax": "≤ {max}",
       "mapWildcardHint": "* 表示任意对象（匹配全部键）；如需限定具体对象，请在上方选择。",
-      "mapObjectHint": "仅匹配所选对象；选择 * 可匹配任意对象。",
+      "mapObjectHint": "��匹配所选对象；选择 * 可匹配任意对象。",
       "inputType": {
         "text": "文本（���行一个值）",
         "number": "数值",
@@ -7664,7 +7670,7 @@
     "tabRecall": "召回策略设置",
     "notificationSettings": "通知设置",
     "classificationControl": "分类通知控制",
-    "categoryHint": "选择哪些类别的隔离邮件会触发用户通知",
+    "categoryHint": "选择哪些类别���隔离邮件会触发用户通知",
     "category_spam": "垃圾邮件",
     "category_advertising": "广告邮件",
     "category_suspicious": "可疑邮件",
@@ -7818,7 +7824,7 @@
     "portalBaseUrlNoPath": "外部访问地址不能包含路径、查询参数或锚点",
     "maxRecheckMinutesRange": "复检窗口需为 1-60 分钟",
     "reviewerNotifyIntervalRange": "审核人通知频率需为 1-1440 分钟",
-    "reviewerActiveStartInvalid": "请选择合法的审核通知开始时间",
+    "reviewerActiveStartInvalid": "��选择合法的审核通知开始时间",
     "reviewerActiveEndInvalid": "请选择合法的审核通知结束时间",
     "timeoutMarkPositionsRequired": "启用投递标记时，至少选择一个标记位���",
     "timeoutMarkPositionsInvalid": "投递标记位置配置无效",
@@ -8008,7 +8014,7 @@
       "topIps": "来源 IP TOP",
       "byThreat": "威胁构成",
       "specialRegionNames": {
-        "HK": "中国香港",
+        "HK": "中国香���",
         "MO": "中国澳门",
         "TW": "中国台湾"
       },
@@ -8200,6 +8206,13 @@
       "deletedTooltip": "该规则已被删除，无法前往配置页",
       "daysValue": "{days} 天",
       "dataInsufficient": "样本不足",
+      "versionBadge": "v{version}",
+      "versionResetTooltip": "该策略在观察期内被实质性修改过，观察起始时间已重新计算，历史版本的命中数据不计入当前统计，可在下方版本历史中查看",
+      "versionHistory": {
+        "title": "版本历史（仅供审计追溯，不计入当前统计）",
+        "empty": "自纳入观察以来未发生实质性变更",
+        "hits": "命中 {count} 次"
+      },
       "col": {
         "path": "策略路径",
         "observedSince": "观察起始时间",
@@ -8288,7 +8301,7 @@
         "sidelineQueue": "当前等待旁路处理的任务数（近似反垃圾队列）。",
         "outboundQueueBacklog": "基于投递中邮件估算的外发队列积压。",
         "threatRate": "检测到内部威胁的域内邮件占比。",
-        "internalThreatCount": "检测到垃圾、钓鱼或病毒的域内邮件数。"
+        "internalThreatCount": "检测到垃圾、钓���或病毒的域内邮件数。"
       }
     },
     "bounceReasons": {
@@ -9684,7 +9697,7 @@
       "pending_recall": "待召回",
       "recall_failed": "召回失败",
       "no_need": "无需召回",
-      "": "无需召回",
+      "": "无需��回",
       "recalling": "召回中",
       "handling": "处理中",
       "expanded": "等待执行",
@@ -10413,7 +10426,7 @@
       "stepNotification": "通知设置",
       "stepAdvanced": "高级降噪",
       "stepPreview": "规则预览",
-      "saveAndTest": "保存并测试",
+      "saveAndTest": "保存并测��",
       "testUnavailable": "暂未开放",
       "selectMetric": "选择指标",
       "collectorPending": "采集器待建",
@@ -10803,7 +10816,7 @@
         "no_source": "尚未配置任何通讯录数据源",
         "never_synced": "通讯录从未同步成功",
         "last_sync_failed": "最近一次通讯录同步失败",
-        "stale": "通讯录数据已超过 24 小时未更新"
+        "stale": "通讯录数据已超过 24 小时未��新"
       }
     },
     "footerNote": "收信人检���在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
@@ -11128,7 +11141,7 @@
       "access_denied": "没有权限执行该处置操作",
       "action_invalid": "处置动作无效，只能是：{allowed}",
       "description_required": "请填写说明",
-      "eml_not_on_storage_node": "在存储节点上找不到原始邮件，可能已被清理",
+      "eml_not_on_storage_node": "在存储节点上找不到原��邮件，可能已被清理",
       "eml_unavailable": "原始邮件不可用，可能已过保留期或被清理",
       "final_type_invalid": "最终邮件类型取值��效",
       "final_type_requires_release": "仅在执行「放行」时才能指定最终邮件类型",
@@ -11347,7 +11360,7 @@
       "action_unsupported": "不支持的操作",
       "start_time_invalid": "开始时间格式不正确，请使用 RFC3339 或 YYYY-MM-DD",
       "end_time_invalid": "结束时间格式不正确，请使用 RFC3339 或 YYYY-MM-DD",
-      "two_factor_required_by_policy": "系统策略要求必须开启二次认证，无法关闭",
+      "two_factor_required_by_policy": "系统策略要求必须开启��次认证，无法关闭",
       "two_factor_enable_via_endpoint": "请在二次认证设置中开启二次认证"
     },
     "threat_retro": {
@@ -11497,7 +11510,7 @@
     "rule_test_eml": {
       "file_missing": "请选择要上传的 EML 文件",
       "file_too_large": "文件过大，最多 {max_mb} MB",
-      "file_unreadable": "文件无法读取",
+      "file_unreadable": "文件无��读取",
       "condition_tree_invalid": "条件树 JSON 格式不正确",
       "condition_tree_or_rule_id_required": "请提供条件树或规则 ID",
       "rule_id_invalid": "规则 ID 必须是整数"

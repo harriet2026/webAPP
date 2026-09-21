@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级����������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全升级�����������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────────��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）────────────��──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4515,7 +4515,7 @@ const BC_IP_GROUPS: DemoNamedGroup[] = [
   { id: "ip-5", name: "可疑来源", memberCount: 200 },
 ];
 
-// 照抄 demo `generateMockRules()`��7 条手工命名规则 + 生成的 #8..#35。
+// ��抄 demo `generateMockRules()`��7 条手工命名规则 + 生成的 #8..#35。
 function generateDemoBehaviorRules(): DemoBehaviorRule[] {
   const rules: DemoBehaviorRule[] = [
     // ��站防护规��
@@ -8126,8 +8126,8 @@ function buildDefaultDisposalSettingsFixture(): DisposalSettings {
 // 复用既有的 sfGroupRule（见本文件 group-management 区）生成一个符合
 // ruleToGroup（webapp/src/lib/api/groups.ts）判型条件的 Rule：
 // stage='rcpt' → GroupType 'recipient'，且 tags 带 `grp:<name>` 前缀
-// （否则 ruleToGroup 会因找不到 tag 直接判空丢弃这条数据）。member_count
-// 用 demo 的聚合数字直接覆盖（不虚构不存在的真实成员邮箱列表）。
+// （否则 ruleToGroup 会因找不到 tag 直接判空丢弃这条��据）。member_count
+// �� demo 的聚合数字直接覆盖（不虚构不存在的真实成员邮箱列表）。
 export function mockRecipientGroupRulesList(): { items: Rule[]; total: number } {
   const groups: Array<[number, string, number]> = [
     [9101, "高管邮箱", 15],
@@ -9391,6 +9391,13 @@ interface RuleEffectivenessMockRow {
   false_positive_rate: number | null;
   attribution_status: 'attributable' | 'excluded_not_attributable' | 'module_level_only';
   config_path: string;
+  /**
+   * 当前生效的策略版本号，默认为 1（自纳入观察以来未发生实质性变更）。
+   * 大于 1 时会为 1..version_no-1 合成历史版本，演示「实质性修改重置观察期」。
+   */
+  version_no?: number;
+  /** 历史版本的变更摘要，未指定时使用通用文案。 */
+  version_change_summary?: string;
 }
 
 const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_module'], string> = {
@@ -9409,7 +9416,7 @@ const RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH: Record<'similar_email' |
 const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   // 认证协议检查下 SPF/DKIM/DMARC/PTR 四个协议在配置页各自拥有独立的观察开关
   // （spf_observe_mode/dkim_observe_mode/dmarc_observe_mode/ptr_observe_mode），
-  // 已不再共用���一个全局开关���因此拆成 4 个���立观���对象，而不是 1 个。
+  // 已不再共用一个全局开关，因此拆成 4 个独立观察对象，而不是 1 个。
   {
     id: 'auth-protocol_check_spf',
     policy_module: 'auth_spoofing',
@@ -9516,6 +9523,11 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     false_positive_rate: 0.23,
     attribution_status: 'attributable',
       config_path: RULE_EFFECTIVENESS_CONFIG_PATH.auth_spoofing,
+    // 示例：该规则在观察期内被实质性修改过一次（信封头比对范围调整），
+    // 触发观察期重置——当前 observed_days=38 只反映 v2 的观察时长，
+    // v1 的历史观察数据保留在 version_history 中，不叠加进当前统计。
+    version_no: 2,
+    version_change_summary: '信封头比对范围调整（新增 Reply-To 校验），触发观察期重置',
   },
   // 展示名仿冒检测——按方向（收/发/内部）各自独立 observe_mode，风险模型
   // 不同（内部方向样本天然更少），必须拆成 3 个独立观察对象。
@@ -9636,7 +9648,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   },
   // 相同主题检测（same_subject）——按主题标准化后判定，命中样本量通常更大，
   // 误判后果（正常批量通知邮件被打标/拦截）也更广，误判率阈值应更严格。
-  // 该策略在 mock 场景下设为 aggregate（全方向聚合为一个��察对象）。
+  // 该策略在 mock 场景下设为 aggregate（全方向聚合为一个观察对象）。
   {
     id: 'similar-same_subject-aggregate',
     policy_module: 'similar_detection',
@@ -9653,6 +9665,10 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     false_positive_rate: 0.27,
     attribution_status: 'attributable',
       config_path: RULE_EFFECTIVENESS_SIMILAR_DETECTION_CONFIG_PATH.same_subject,
+    // 示例：该策略执行动作曾从「隔离」调整为「审核」，属于实质性变更，
+    // 触发过一次观察期重置。
+    version_no: 2,
+    version_change_summary: '执行动作调整：隔离 → 审核，触发观察期重置',
   },
   {
     id: 'phishing-agent',
@@ -9736,6 +9752,40 @@ function ruleEffectivenessActionBreakdown(
   ].filter((item) => item.count > 0);
 }
 
+/**
+ * 为 version_no > 1 的行合成历史版本清单（1..version_no-1），演示「实质性
+ * 修改触发观察期重置」：当前行的 observed_since/observed_days/hits/命中构成
+ * 只反映当前版本（version_no）的数据，历史版本各自独立的命中数、生效区间
+ * 单独存放在这里，不叠加进当前版本的统计口径。
+ */
+function ruleEffectivenessVersionHistory(
+  row: RuleEffectivenessMockRow,
+  index: number,
+  observedSince: string,
+): { version_no: number; effective_at: string; superseded_at: string | null; change_type: 'substantive'; change_summary: string; hits: number }[] {
+  const versionNo = row.version_no ?? 1;
+  if (versionNo <= 1) return [];
+  const entries: { version_no: number; effective_at: string; superseded_at: string | null; change_type: 'substantive'; change_summary: string; hits: number }[] = [];
+  let supersededAt = observedSince;
+  for (let v = versionNo - 1; v >= 1; v -= 1) {
+    const spanDays = 10 + threatSeriesValue(index + v, 1, 15, 1);
+    const effectiveAt = new Date(new Date(supersededAt).getTime() - spanDays * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    const historyHits = 5 + threatSeriesValue(index + v * 3, 1, 40, 1);
+    entries.unshift({
+      version_no: v,
+      effective_at: effectiveAt,
+      superseded_at: supersededAt,
+      change_type: 'substantive' as const,
+      change_summary: row.version_change_summary ?? '匹配条件/执行动作发生实质性调整，重新开始观察',
+      hits: historyHits,
+    });
+    supersededAt = effectiveAt;
+  }
+  return entries;
+}
+
 function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number) {
   const observedSince = new Date(Date.now() - row.observed_days * 86_400_000).toISOString().slice(0, 10);
   const reviewedCount = Math.round(row.hits * row.reviewed_ratio);
@@ -9748,6 +9798,7 @@ function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number)
     sub_strategy_id: row.sub_strategy_id,
     sub_strategy_name_snapshot: row.sub_strategy_name_snapshot,
     is_deleted: row.is_deleted,
+    version_no: row.version_no ?? 1,
     observed_since: observedSince,
     observed_days: row.observed_days,
     hits: row.hits,
@@ -9757,6 +9808,7 @@ function ruleEffectivenessRowToApi(row: RuleEffectivenessMockRow, index: number)
     attribution_status: row.attribution_status,
 
     action_breakdown: ruleEffectivenessActionBreakdown(row, index),
+    version_history: ruleEffectivenessVersionHistory(row, index, observedSince),
     config_path: row.config_path,
   };
 }
