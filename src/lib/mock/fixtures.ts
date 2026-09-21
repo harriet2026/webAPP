@@ -57,6 +57,7 @@ import {
 } from "@/types/groups";
 import type {
   AuthSpoofingConfig,
+  CheckItem,
   ObserveStatPoint,
   ProbeResponse,
 } from "@/types/auth-spoofing";
@@ -1911,7 +1912,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台���全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台����全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3306,7 +3307,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）────����──��──����──��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）──��─����──��──����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4342,11 +4343,21 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
         enabled: true,
         action: "reject",
         observe_mode: false,
+        version: 1,
+        observation_started_at: "2026-09-01T09:00:00+08:00",
+        observation_days: 20,
+        hit_count: 9,
+        history: [],
       },
       envelope_header_mismatch: {
         enabled: true,
         action: "quarantine",
         observe_mode: false,
+        version: 1,
+        observation_started_at: "2026-09-01T09:00:00+08:00",
+        observation_days: 20,
+        hit_count: 6,
+        history: [],
       },
     },
     protocol_checks: {
@@ -4437,10 +4448,13 @@ export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
 export function mockPutAuthSpoofingConfig(body: AuthSpoofingConfig): AuthSpoofingConfig {
   const current = mockAuthSpoofingConfig();
   const nextVersion = (current.version ?? 0) + 1;
-  const currentEmptyRule = current.format_checks.mailfrom_empty;
-  const nextEmptyRule = body.format_checks.mailfrom_empty;
-  const emptyRuleChanged = JSON.stringify(currentEmptyRule) !== JSON.stringify(nextEmptyRule);
-  const nextRuleVersion = (currentEmptyRule.version ?? 1) + (emptyRuleChanged ? 1 : 0);
+  const versionedRuleKeys = ['mailfrom_empty', 'mailfrom_invalid', 'envelope_header_mismatch'] as const;
+  const ruleChanges = Object.fromEntries(versionedRuleKeys.map((ruleKey) => {
+    const currentRule = current.format_checks[ruleKey];
+    const nextRule = body.format_checks[ruleKey];
+    const changed = JSON.stringify(currentRule) !== JSON.stringify(nextRule);
+    return [ruleKey, { currentRule, changed, nextVersion: (currentRule.version ?? 1) + (changed ? 1 : 0) }];
+  })) as Record<(typeof versionedRuleKeys)[number], { currentRule: CheckItem; changed: boolean; nextVersion: number }>;
   const next: AuthSpoofingConfig = {
     ...structuredClone(body),
     version: nextVersion,
@@ -4449,27 +4463,30 @@ export function mockPutAuthSpoofingConfig(body: AuthSpoofingConfig): AuthSpoofin
     hit_count: 0,
     history: [...(current.history ?? []), authSpoofingVersionSnapshot(current.version ?? 1, current, '更新认证与仿冒检测条件或处置动作')],
   };
-  next.format_checks.mailfrom_empty = {
-    ...next.format_checks.mailfrom_empty,
-    version: nextRuleVersion,
-    observation_started_at: emptyRuleChanged ? '2026-09-21T09:00:00+08:00' : currentEmptyRule.observation_started_at,
-    observation_days: emptyRuleChanged ? 0 : currentEmptyRule.observation_days,
-    hit_count: emptyRuleChanged ? 0 : currentEmptyRule.hit_count,
-    history: emptyRuleChanged
-      ? [
-          ...(currentEmptyRule.history ?? []),
-          {
-            version: currentEmptyRule.version ?? 1,
-            created_at: '2026-09-21T09:00:00+08:00',
-            observation_started_at: currentEmptyRule.observation_started_at ?? '2026-08-20T09:00:00+08:00',
-            observation_days: currentEmptyRule.observation_days ?? 0,
-            hit_count: currentEmptyRule.hit_count ?? 0,
-            change_summary: '更新空 MAIL FROM 规则配置',
-            config: structuredClone(currentEmptyRule),
-          },
-        ]
-      : currentEmptyRule.history,
-  };
+  for (const ruleKey of versionedRuleKeys) {
+    const { currentRule, changed, nextVersion: ruleVersion } = ruleChanges[ruleKey];
+    next.format_checks[ruleKey] = {
+      ...next.format_checks[ruleKey],
+      version: ruleVersion,
+      observation_started_at: changed ? '2026-09-21T09:00:00+08:00' : currentRule.observation_started_at,
+      observation_days: changed ? 0 : currentRule.observation_days,
+      hit_count: changed ? 0 : currentRule.hit_count,
+      history: changed
+        ? [
+            ...(currentRule.history ?? []),
+            {
+              version: currentRule.version ?? 1,
+              created_at: '2026-09-21T09:00:00+08:00',
+              observation_started_at: currentRule.observation_started_at ?? '2026-09-01T09:00:00+08:00',
+              observation_days: currentRule.observation_days ?? 0,
+              hit_count: currentRule.hit_count ?? 0,
+              change_summary: `更新${ruleKey}规则配置`,
+              config: structuredClone(currentRule),
+            },
+          ]
+        : currentRule.history,
+    };
+  }
   authSpoofingMockState = next;
   return structuredClone(next);
 }
@@ -4522,7 +4539,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
     hits: [
       {
         rule_id: 1,
-        rule_name: "SPF 校��",
+        rule_name: "SPF 校���",
         action: "quarantine",
         observed: false,
         subfeature: "spf",
@@ -7676,7 +7693,7 @@ export function mockEmailDisposalBlacklistEntity(
     const rule: Rule = {
       id: 9000 + mockEmailDisposalSenderDomainRules.length + 1,
       name: `域名加黑 ${value}-sender-filter-mock`,
-      description: `由邮件处���中心的邮件日志 #${id} 创建发信人域名黑名单`,
+      description: `由邮件处���中心��邮件日志 #${id} 创建发信人域名黑名单`,
       tenant_id: 1,
       page: "sender_filter",
       rule_class: "action",
@@ -8539,7 +8556,7 @@ export function mockLinkClickLogById(id: number): LinkClickLog | undefined {
   return mockLinkClickLogs.find((r) => r.id === id);
 }
 
-// ─── 认证日志（logs-auth-logs html_spec）────────────────────────────────────
+// ─── 认证日志（logs-auth-logs html_spec）─���──────────────────────────────────
 // 数据逐字段照抄 demo design/origin/demo/components/auth-logs/types.ts 的
 // MOCK_AUTH_LOGS（15 行：4 成功 / 11 失败，成功率 26.7%），换算为后端
 // AuthAttempt 契约（snake_case、结构化 ip_location、数值 matched_config_id）。

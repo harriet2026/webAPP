@@ -58,8 +58,9 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
   const tDesc = useTranslations('authSpoofing.formatActionDesc');
   const [pendingEnable, setPendingEnable] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const isVersionedRule = checkKey === 'mailfrom_empty';
+  const isVersionedRule = ['mailfrom_empty', 'mailfrom_invalid', 'envelope_header_mismatch'].includes(checkKey);
   const ruleHistory = item.history ?? [];
+  const ruleLabel = t(labelKey as Parameters<typeof t>[0]);
 
   const handleEnableChange = (enabled: boolean) => {
     if (enabled && warningKey) {
@@ -109,13 +110,13 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
         <div className="flex items-center gap-2">
           {isVersionedRule && (
             <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-              <SheetTrigger render={<button type="button" className="rounded-md border px-2 py-1 text-xs text-muted-foreground hover:bg-muted" data-testid="auth-format-version-history-trigger" />}>
+              <SheetTrigger render={<button type="button" className="rounded-md border px-2 py-1 text-xs text-muted-foreground hover:bg-muted" data-testid={`auth-format-version-history-trigger-${checkKey}`} />}>
                 {t('versionSummary')} · {t('versionLabel', { version: item.version ?? 1 })}
               </SheetTrigger>
               <SheetContent className="w-full sm:max-w-xl" data-testid="auth-format-version-history">
                 <SheetHeader>
-                  <SheetTitle>{t('formatChecks.mailFromEmpty')} · {t('versionHistory')}</SheetTitle>
-                  <SheetDescription>{t('versionSummary')} · {t('formatChecks.mailFromEmpty')}</SheetDescription>
+                  <SheetTitle>{ruleLabel} · {t('versionHistory')}</SheetTitle>
+                  <SheetDescription>{t('versionSummary')} · {ruleLabel}</SheetDescription>
                 </SheetHeader>
                 <div className="flex flex-col gap-2 py-4 text-sm">
                   {ruleHistory.length === 0 ? (
