@@ -51,6 +51,22 @@ describe('useAgentManagementAccess', () => {
     });
   });
 
+  it('allows tenant administrators even when the role is not marked as a system default', () => {
+    myRole.mockReturnValue({
+      data: role({ code: 'tenant_admin', isSystemDefault: false }),
+      isSuccess: true,
+      isPending: false,
+      isError: false,
+    });
+
+    expect(renderHook(() => useAgentManagementAccess('phishing-detection')).result.current).toEqual({
+      status: 'ready',
+      canView: true,
+      canEdit: true,
+      readOnly: false,
+    });
+  });
+
   it('allows a true super administrator with a normal assigned role', () => {
     auth.mockReturnValue({ user: { role_id: 9 }, isTrueSuperAdmin: true });
     myRole.mockReturnValue({

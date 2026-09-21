@@ -32,8 +32,9 @@ function accessForRole(role: Role | null | undefined, isTrueSuperAdmin: boolean)
   // Temporary compatibility for immutable built-in templates. Delete this
   // branch once complete built-in matrices and one authoritative authorization
   // decision path replace the quick fix documented in the 2026-08-21 spec.
+  if (role.code === 'tenant_admin') return { canView: true, canEdit: true };
   if (role.isSystemDefault === true) {
-    if (role.code === 'tenant_ops' || role.code === 'tenant_admin') return { canView: true, canEdit: true };
+    if (role.code === 'tenant_ops') return { canView: true, canEdit: true };
     if (role.code === 'tenant_auditor' || role.code === 'platform_auditor') {
       return { canView: true, canEdit: false };
     }
