@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台��全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）────────��──����──��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）─────��──��──����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -5253,6 +5253,37 @@ export function getSimilarDetectionMockState(): SimilarDetectionConfig {
           config: current,
         },
       ],
+      policy_versions: {
+        similar_email: {
+          version: 5,
+          observation_started_at: current.observation_started_at,
+          observation_days: current.observation_days,
+          hit_count: current.hit_count,
+          history_by_scope: {
+            aggregate: current.history,
+            receive: current.history,
+          },
+        },
+        same_subject: {
+          version: 3,
+          observation_started_at: '2026-09-05T09:00:00+08:00',
+          observation_days: 16,
+          hit_count: 18,
+          history_by_scope: {
+            aggregate: [
+              {
+                version: 2,
+                created_at: '2026-08-20T09:00:00+08:00',
+                observation_started_at: '2026-08-20T09:00:00+08:00',
+                observation_days: 16,
+                hit_count: 31,
+                change_summary: '调整主题标准化规则',
+                config: current,
+              },
+            ],
+          },
+        },
+      },
     };
   }
   return structuredClone(similarDetectionMockState);
@@ -5469,7 +5500,7 @@ export function mockDeleteAttachmentPassword(id: number) {
   if (index >= 0) mockAttachmentPasswords.splice(index, 1);
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════���══════════════════════════════════
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
@@ -8142,7 +8173,7 @@ export function mockEmailDisposalFields() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 处置设置（email-disposal/disposal-settings，mock）
+// 处��设置（email-disposal/disposal-settings，mock）
 // ════════════════════════════════════════════════════════════════════════════════
 
 // ---- 处置设置（demo disposal-settings-page.tsx 初始 state，数据照抄 demo）----

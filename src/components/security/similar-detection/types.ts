@@ -3,6 +3,15 @@ export type SimilarDetectionMode = 'aggregate' | 'separate';
 export type SimilarDetectionType = 'similar_email' | 'same_subject';
 export type SimilarDetectionHistoryScope = 'aggregate' | SimilarDetectionDirection;
 
+export interface SimilarDetectionPolicyVersionState {
+  version: number;
+  updated_at?: string;
+  observation_started_at?: string;
+  observation_days?: number;
+  hit_count?: number;
+  history_by_scope?: Partial<Record<SimilarDetectionHistoryScope, SimilarDetectionVersionSnapshot[]>>;
+}
+
 export interface SimilarDetectionModeTransition {
   id: string;
   from_mode: SimilarDetectionMode;
@@ -68,6 +77,7 @@ export interface SimilarDetectionConfig {
   history?: SimilarDetectionVersionSnapshot[];
   history_by_scope?: Partial<Record<SimilarDetectionHistoryScope, SimilarDetectionVersionSnapshot[]>>;
   mode_transitions?: SimilarDetectionModeTransition[];
+  policy_versions?: Partial<Record<SimilarDetectionType, SimilarDetectionPolicyVersionState>>;
 }
 
 export interface SimilarDetectionPutRequest extends Omit<SimilarDetectionConfig, 'version' | 'updated_at' | 'updated_by'> {

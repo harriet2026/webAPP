@@ -55,5 +55,9 @@ export function defaultConfig(): SimilarDetectionConfig {
       similar_subject: true,
     },
     version: 0,
+    policy_versions: {
+      similar_email: { version: 0 },
+      same_subject: { version: 0 },
+    },
   };
 }
