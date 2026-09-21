@@ -31,15 +31,6 @@ describe('email disposal center mock contract', () => {
     expect(mockEmailDisposalFields()).toHaveLength(30);
   });
 
-  it('filters rule-effectiveness drill-down by policy and observation window', () => {
-    const result = mockEmailDisposalList(
-      '/mail-logs?page=1&page_size=100&source=rule_effectiveness&policy_key=CR&observe_window_from=2026-05-01',
-    );
-    expect(result.total).toBeGreaterThan(0);
-    expect(result.items.every((item) => item.received_at >= '2026-01-01')).toBe(true);
-    expect(result.items.every((item) => item.received_at >= '2026-05-01')).toBe(true);
-  });
-
   it('evaluates AND/OR advanced filters against fixture values', () => {
     const advanced = encodeURIComponent(JSON.stringify({
       operator: 'AND',

@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台��全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -1953,7 +1953,7 @@ export function mockPhishingDetectionDetail(id: string): DetectionLogDetail | nu
     summary: '邮件冒充公司 CEO 要求财务人员紧急转账，发件域名与真实域名高度相似（同形字替换），命中 BEC 诈骗特征库。',
     resultSummary: '典型 CEO 冒充诈骗，要求非常规紧急转账，建议直接拦截并提醒财务核实。',
     evidence: [
-      { type: 'sender_domain', severity: 'critical', title: '发��域名疑似仿冒', detail: 'corp-outlook-mail.com 与公司真实域名视觉高度相似' },
+      { type: 'sender_domain', severity: 'critical', title: '发件域名疑似仿冒', detail: 'corp-outlook-mail.com 与公司真实域名视觉高度相似' },
       { type: 'content', severity: 'high', title: '异常转账指令', detail: '邮件正文要求跳过正常审批流程紧急付款' },
     ],
     findings: [
@@ -3102,7 +3102,7 @@ export function mockIPFilterRulesList(query: {
   };
 }
 
-// ═════════════��══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
 // ════════════════════════════════════════════════════════════════════════════════
 
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）─────��──��──����──��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）────────��──����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -5469,7 +5469,7 @@ export function mockDeleteAttachmentPassword(id: number) {
   if (index >= 0) mockAttachmentPasswords.splice(index, 1);
 }
 
-// ═════════════════════════════════════════════���══════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════════
 // 邮件处置中心（email-handling-disposal-center，mock）
 // 25 条数据逐项来自 html_spec 对应 demo 的 LogItem fixture。这里保留 demo
 // 的业务语义，再转换成 webapp 真实 `/mail-logs` API 的字段形状，避免页面
@@ -5864,7 +5864,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "user1@company.com",
     subject: "您的账户存在异常登录，请立即验证（单投信）",
     action: "quarantine",
-    reason: "钓鱼邮件检测���能体命中",
+    reason: "钓鱼邮件检测智能体命中",
     mailType: "phishing",
     deliveryStatus: "quarantine_pending",
     sourceIp: "45.146.26.18",
@@ -7484,23 +7484,6 @@ export function mockEmailDisposalList(path: string) {
         .filter(Boolean);
       return itemKeys.some((key) => policyKeys.includes(key));
     });
-  // 规则效能统计下钻：只返回观察窗口内、命中指定策略模块的邮件。
-  // sub_strategy 当前由 basis.rule_id / policy_key 共同表达；真实后端可在此处
-  // 替换为精确的策略 ID 关联查询，mock 保持同一组 URL 契约。
-  const source = query.get("source");
-  const policyKey = query.get("policy_key");
-  const observeWindowFrom = query.get("observe_window_from");
-  if (source === "rule_effectiveness" && policyKey) {
-    items = items.filter((item) => {
-      const basisEntries = [
-        ...(item.disposal_basis?.modules ?? []),
-        ...(item.disposal_basis ? [item.disposal_basis] : []),
-      ];
-      const matchesPolicy = basisEntries.some((entry) => entry.policy_key === policyKey);
-      const matchesWindow = !observeWindowFrom || item.received_at >= observeWindowFrom;
-      return matchesPolicy && matchesWindow;
-    });
-  }
   const advanced = query.get("advanced_filters");
   if (advanced)
     items = items.filter((item) => mockAdvancedMatches(item, advanced));
@@ -8159,7 +8142,7 @@ export function mockEmailDisposalFields() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 处��设置（email-disposal/disposal-settings，mock）
+// 处置设置（email-disposal/disposal-settings，mock）
 // ════════════════════════════════════════════════════════════════════════════════
 
 // ---- 处置设置（demo disposal-settings-page.tsx 初始 state，数据照抄 demo）----
@@ -8647,7 +8630,7 @@ interface MockContactRow {
 const contactPeople: MockContactRow[] = [
   { id: 1, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 后端组', display_name: '张三', email: 'zhangsan@corp.cn', job_title: '工程师', tag: 'executive', status: 'active', email_alias: '张三.alias@corp.cn' },
   { id: 2, source_id: 3, source_name: '总部 AD', department_path: '财务部', display_name: '李四', email: 'lisi@corp.cn', job_title: '总监', tag: 'key_position', status: 'active', email_alias: '李四.alias@corp.cn' },
-  { id: 3, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 前端组', display_name: '王五', email: 'wangwu@corp.cn', job_title: '��程师', tag: 'none', status: 'active', email_alias: '王五.alias@corp.cn' },
+  { id: 3, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 前端组', display_name: '王五', email: 'wangwu@corp.cn', job_title: '工程师', tag: 'none', status: 'active', email_alias: '王五.alias@corp.cn' },
   { id: 4, source_id: 5, source_name: '邮件系统', department_path: '市场部', display_name: '赵六', email: 'zhaoliu@corp.cn', job_title: '经理', tag: 'none', status: 'active', email_alias: '赵六.alias@corp.cn' },
   { id: 5, source_id: 11, source_name: '网易企邮', department_path: '总裁办', display_name: '陈总', email: 'chenzong@corp.cn', job_title: '首席执行官', tag: 'executive', status: 'active', email_alias: '陈总.alias@corp.cn' },
   { id: 6, source_id: 11, source_name: '网易企邮', department_path: '人力资源部', display_name: '孙七', email: 'sunqi@corp.cn', job_title: 'HRBP', tag: 'none', status: 'active', email_alias: '孙七.alias@corp.cn' },
