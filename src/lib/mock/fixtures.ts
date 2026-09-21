@@ -270,7 +270,7 @@ let mockMailMarkingRules: Rule[] = [
   }),
   mailMarkingRule({
     id: 5103,
-    name: "默认外站提示",
+    name: "���认外站提示",
     direction: "receive",
     priority: 3,
     active: true,
@@ -1911,7 +1911,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安全��级������������请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3306,7 +3306,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules，mock）───────────����──��────����──����─��──����─��
+// ─── 自定义 IP 定位库（GeoIP rules，mock）────────��──����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -4385,9 +4385,49 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
   };
 }
 
+let authSpoofingMockState: AuthSpoofingConfig | null = null;
+
+function authSpoofingVersionSnapshot(version: number, config: AuthSpoofingConfig, change_summary: string) {
+  return {
+    version,
+    created_at: `2026-08-${String(20 - version).padStart(2, '0')}T09:00:00+08:00`,
+    observation_started_at: `2026-08-${String(20 - version).padStart(2, '0')}T09:00:00+08:00`,
+    observation_days: 7,
+    hit_count: version === 1 ? 31 : 18,
+    change_summary,
+    config: structuredClone(config),
+  };
+}
+
 export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
-  // 深拷贝：避免调用方就地修改返回值污染后续 GET。
-  return JSON.parse(JSON.stringify(defaultAuthSpoofingConfig()));
+  if (!authSpoofingMockState) {
+    const base = defaultAuthSpoofingConfig();
+    const previous = { ...base, version: 1, observation_started_at: '2026-08-01T09:00:00+08:00', observation_days: 7, hit_count: 31 };
+    authSpoofingMockState = {
+      ...base,
+      version: 2,
+      observation_started_at: '2026-08-20T09:00:00+08:00',
+      observation_days: 7,
+      hit_count: 18,
+      history: [authSpoofingVersionSnapshot(1, previous, '调整认证失败处置动作')],
+    };
+  }
+  return structuredClone(authSpoofingMockState);
+}
+
+export function mockPutAuthSpoofingConfig(body: AuthSpoofingConfig): AuthSpoofingConfig {
+  const current = mockAuthSpoofingConfig();
+  const nextVersion = (current.version ?? 0) + 1;
+  const next: AuthSpoofingConfig = {
+    ...structuredClone(body),
+    version: nextVersion,
+    observation_started_at: '2026-09-21T09:00:00+08:00',
+    observation_days: 0,
+    hit_count: 0,
+    history: [...(current.history ?? []), authSpoofingVersionSnapshot(current.version ?? 1, current, '更新认证与仿冒检测条件或处置动作')],
+  };
+  authSpoofingMockState = next;
+  return structuredClone(next);
 }
 
 // 观测统计：hits 总和固定为 23，对齐 demo 硬编码的
@@ -5190,13 +5230,31 @@ export function mockPutIntentEngineConfig(
 export const mockSimilarDetectionConfig: SimilarDetectionConfig = {
   ...defaultSimilarDetectionConfig(),
   version: 3,
+  observation_started_at: '2026-09-10T09:00:00+08:00',
+  observation_days: 11,
+  hit_count: 42,
 };
 
 let similarDetectionMockState: SimilarDetectionConfig | null = null;
 
 export function getSimilarDetectionMockState(): SimilarDetectionConfig {
-  if (!similarDetectionMockState)
-    similarDetectionMockState = structuredClone(mockSimilarDetectionConfig);
+  if (!similarDetectionMockState) {
+    const current = structuredClone(mockSimilarDetectionConfig);
+    similarDetectionMockState = {
+      ...current,
+      history: [
+        {
+          version: 2,
+          created_at: '2026-08-18T09:00:00+08:00',
+          observation_started_at: '2026-08-18T09:00:00+08:00',
+          observation_days: 23,
+          hit_count: 67,
+          change_summary: '调整相似度阈值和收信方向',
+          config: current,
+        },
+      ],
+    };
+  }
   return structuredClone(similarDetectionMockState);
 }
 
@@ -5210,6 +5268,22 @@ export function putSimilarDetectionMockState(
     ...current,
     ...structuredClone(body),
     version: nextVersion,
+    observation_started_at: '2026-09-21T09:00:00+08:00',
+    observation_days: 0,
+    hit_count: 0,
+    history: [
+      ...(current.history ?? []),
+      {
+        version: current.version,
+        created_at: current.updated_at ?? '2026-09-10T09:00:00+08:00',
+        observation_started_at: current.observation_started_at ?? '2026-09-10T09:00:00+08:00',
+        observation_days: current.observation_days ?? 11,
+        hit_count: current.hit_count ?? 42,
+        change_summary: '调整检测条件、方向或执行动作',
+        config: current,
+      },
+    ],
+    updated_at: '2026-09-21T09:00:00+08:00',
   };
   return structuredClone(similarDetectionMockState);
 }
@@ -6841,7 +6915,7 @@ function mockMailLog(seed: MockDisposalSeed, index: number) {
       description: seed.reason,
     },
     content: `这是 ${seed.tid} 的 mock 邮件正文。\n主题：${seed.subject}\n处置原因：${seed.reason}`,
-    html_content: `<p>这是 <strong>${seed.tid}</strong> 的 mock 邮件正文。</p><p>${seed.reason}</p>`,
+    html_content: `<p>这是 <strong>${seed.tid}</strong> 的 mock 邮件��文。</p><p>${seed.reason}</p>`,
     attachments: mockAttachments,
     // EntityURLs 是 URLs 的详情投影，两者必须同源；否则页面显示的
     // 实体无法通过真实后端的“必须存在于该邮件日志”校验。

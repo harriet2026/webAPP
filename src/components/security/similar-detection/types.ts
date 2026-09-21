@@ -31,6 +31,16 @@ export interface SubjectNormalization {
   similar_subject: boolean;
 }
 
+export interface SimilarDetectionVersionSnapshot {
+  version: number;
+  created_at: string;
+  observation_started_at: string;
+  observation_days: number;
+  hit_count: number;
+  change_summary: string;
+  config: Omit<SimilarDetectionConfig, 'history'>;
+}
+
 export interface SimilarDetectionConfig {
   mode: SimilarDetectionMode;
   enabled_directions: SimilarDetectionDirection[];
@@ -41,6 +51,10 @@ export interface SimilarDetectionConfig {
   version: number;
   updated_at?: string;
   updated_by?: string;
+  observation_started_at?: string;
+  observation_days?: number;
+  hit_count?: number;
+  history?: SimilarDetectionVersionSnapshot[];
 }
 
 export interface SimilarDetectionPutRequest extends Omit<SimilarDetectionConfig, 'version' | 'updated_at' | 'updated_by'> {

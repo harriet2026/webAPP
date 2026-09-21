@@ -31,6 +31,7 @@ import {
 } from '@/lib/api/similar-detection';
 import { useApiRequest, ApiError, isPublicationPendingResponse } from '@/lib/api/client';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -356,6 +357,29 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
 
   const content = (
     <div className="space-y-4">
+      <Card data-testid="similar-detection-version-summary">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">{t('versionSummary')} · {t('versionLabel', { version: config.version || 1 })}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+          <span><span className="font-medium text-foreground">{t('observationStartedAt')}</span> {config.observation_started_at ?? t('notAvailable')}</span>
+          <span><span className="font-medium text-foreground">{t('observationDays')}</span> {config.observation_days ?? 0} {t('daysUnit')}</span>
+          <span><span className="font-medium text-foreground">{t('hitCount')}</span> {config.hit_count ?? 0}</span>
+        </CardContent>
+      </Card>
+      <Card data-testid="similar-detection-version-history">
+        <CardHeader className="pb-3"><CardTitle className="text-base">{t('versionHistory')}</CardTitle></CardHeader>
+        <CardContent className="flex flex-col gap-2 text-sm">
+          {(config.history ?? []).length === 0 ? <span className="text-muted-foreground">{t('historyEmpty')}</span> : (config.history ?? []).map((item) => (
+            <div key={item.version} className="flex flex-wrap items-center gap-3 rounded-md border p-3">
+              <span className="font-medium">{t('versionLabel', { version: item.version })}</span>
+              <span className="text-muted-foreground">{item.created_at}</span>
+              <span><span className="font-medium">{t('historyChangeSummary')}</span> {item.change_summary}</span>
+              <span><span className="font-medium">{t('historyHits')}</span> {item.hit_count}</span>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
       {/* 观察模式全局提示 */}
       {observingDirections.length > 0 && (
         <div

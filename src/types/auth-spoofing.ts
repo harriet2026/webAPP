@@ -70,11 +70,26 @@ export interface DisplayNameSpoofConfig {
   internal_users: InternalUser[];
 }
 
+export interface AuthSpoofingVersionSnapshot {
+  version: number;
+  created_at: string;
+  observation_started_at: string;
+  observation_days: number;
+  hit_count: number;
+  change_summary: string;
+  config: AuthSpoofingConfig;
+}
+
 export interface AuthSpoofingConfig {
-  format_checks:     FormatChecksConfig;
-  protocol_checks:   ProtocolChecksConfig;
-  similar_domain:    SimilarDomainConfig;
-  display_name_spoof:DisplayNameSpoofConfig;
+  format_checks: FormatChecksConfig;
+  protocol_checks: ProtocolChecksConfig;
+  similar_domain: SimilarDomainConfig;
+  display_name_spoof: DisplayNameSpoofConfig;
+  version?: number;
+  observation_started_at?: string;
+  observation_days?: number;
+  hit_count?: number;
+  history?: AuthSpoofingVersionSnapshot[];
 }
 
 export interface ObserveStatPoint {

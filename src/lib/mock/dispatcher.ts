@@ -113,6 +113,7 @@ import {
   mockSenderFilterGroupsList,
   mockGroupsMetaByType,
   mockAuthSpoofingConfig,
+  mockPutAuthSpoofingConfig,
   mockAuthSpoofingObserveStats,
   mockAuthSpoofingProbe,
   mockBehaviorControlRulesList,
@@ -1736,7 +1737,7 @@ const routes: Route[] = [
     handler: () => ({ status: 200, data: mockRBLFilterStats(7) }),
   },
 
-  // ─── 管理员操作日志（mock）──────────────────────────────────────────────────
+  // ─── 管理员操作日志（mock）─────────────��────────────────────────────────────
   {
     method: 'GET',
     pattern: '/admin-audit',
@@ -2055,7 +2056,7 @@ const routes: Route[] = [
     handler: (req) => ({ status: 200, data: mockExecuteContentRulesImport(req.body) }),
   },
   // 邮件路由出站规则（mock id 段 5000-5999）：必须排在下面通用的无 scope
-  // DELETE 兜底之前，否则会被那条更早注册的同样匹配 \d+ 的路由吞掉，
+  // DELETE 兜底之前，否则会被那条更早注册的同样匹��� \d+ 的路由吞掉，
   // 导致状态假装删除成功但 outboundRulesState 从未真正变化。
   {
     method: 'DELETE',
@@ -2124,11 +2125,11 @@ const routes: Route[] = [
   {
     method: 'PUT',
     pattern: '/auth-spoofing/config',
-    handler: () => ({ status: 200, data: { ok: true, warnings: [] } }),
+  handler: (req) => ({ status: 200, data: mockPutAuthSpoofingConfig((req.body ?? {}) as Parameters<typeof mockPutAuthSpoofingConfig>[0]) }),
   },
   {
-    method: 'DELETE',
-    pattern: '/auth-spoofing/config',
+  method: 'DELETE',
+  pattern: '/auth-spoofing/config',
     handler: () => ({ status: 200, data: { ok: true } }),
   },
   {
@@ -2418,7 +2419,7 @@ const routes: Route[] = [
     handler: () => ({ status: 200, data: mockAuthAttemptStatsData() }),
   },
 
-  // ─── 系统状态仪表盘：举报待审 / 智能体 stats / 系统健康 ─────────────────────
+  // ─── 系统状态仪表盘：举报待�� / 智能体 stats / 系统健康 ─────────────────────
   // 举报待审待处理数（KPI，range-less → 按 currentSystemStatusRange 分支：2/6/13）。
   {
     method: 'GET',
