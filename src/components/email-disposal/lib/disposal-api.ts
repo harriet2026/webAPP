@@ -155,8 +155,12 @@ export async function getDisposalList(
     // Multi-value (spec §3.3.1 / §4.3): serialized as comma-separated
     // email_type=a,b / disposal_policy_keys=IPBL,CR query params.
     emailTypes?: string[];
-    disposalPolicyKeys?: string[];
-    sortOrder?: 'asc' | 'desc';
+  disposalPolicyKeys?: string[];
+  source?: string;
+  policyKey?: string;
+  subStrategy?: string;
+  observeWindowFrom?: string;
+  sortOrder?: 'asc' | 'desc';
   },
   requestFn: ApiRequestFn,
 ): Promise<DisposalListResponse> {
@@ -182,6 +186,10 @@ export async function getDisposalList(
   if (params.displayStatus) query.set('display_status', params.displayStatus);
   if (params.emailTypes && params.emailTypes.length > 0) query.set('email_type', params.emailTypes.join(','));
   if (params.disposalPolicyKeys && params.disposalPolicyKeys.length > 0) query.set('disposal_policy_keys', params.disposalPolicyKeys.join(','));
+  if (params.source) query.set('source', params.source);
+  if (params.policyKey) query.set('policy_key', params.policyKey);
+  if (params.subStrategy) query.set('sub_strategy', params.subStrategy);
+  if (params.observeWindowFrom) query.set('observe_window_from', params.observeWindowFrom);
   if (params.sortOrder) query.set('sort_order', params.sortOrder);
   if (params.advanced && params.advanced.groups.length > 0) {
     query.set('advanced_filters', JSON.stringify(params.advanced));

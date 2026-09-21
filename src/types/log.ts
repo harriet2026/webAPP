@@ -237,6 +237,10 @@ export interface EmailLogSearchParams {
   dkim_outbound_signed?: string;
   // 'matched' = 统一处置依据中命中 SIM 模块；其余值后端静默忽略。
   similar?: string;
+  source?: string;
+  policy_key?: string;
+  sub_strategy?: string;
+  observe_window_from?: string;
   // 邮件来源：不传/'' = 只看客户邮件（默认，自产信隐身）；'gateway' = 只看
   // 网关自产信（通知信/DSN/告警等）；'all' = 两者。
   origin?: string;

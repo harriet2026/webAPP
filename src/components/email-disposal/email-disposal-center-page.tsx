@@ -160,7 +160,17 @@ export function EmailDisposalCenterPage({
   const aiEnabled = capabilities?.ai ?? false;
   const aiInterpretEnabled = aiEnabled && features.aiInterpret;
 
-  const initialView = useSearchParams().get("view");
+  const urlSearchParams = useSearchParams();
+  const initialView = urlSearchParams.get("view");
+  const ruleEffectivenessContext = useMemo(
+    () => ({
+      source: urlSearchParams.get("source") ?? undefined,
+      policyKey: urlSearchParams.get("policy_key") ?? undefined,
+      subStrategy: urlSearchParams.get("sub_strategy") ?? undefined,
+      observeWindowFrom: urlSearchParams.get("observe_window_from") ?? undefined,
+    }),
+    [urlSearchParams],
+  );
   const [quickFilter, setQuickFilter] = useState<DisposalQuickFilter>(
     () => pendingViewQuickFilter(initialView) ?? getDefaultQuickFilter(),
   );
@@ -363,6 +373,7 @@ export function EmailDisposalCenterPage({
             appliedQuickFilter.emailStatus),
       emailTypes: appliedQuickFilter.emailTypes,
       disposalPolicyKeys: appliedQuickFilter.disposalPolicyKeys,
+      ...ruleEffectivenessContext,
       sortOrder: timeSort === "none" ? undefined : timeSort,
     }),
     [
@@ -372,6 +383,7 @@ export function EmailDisposalCenterPage({
       timeSort,
       page,
       pageSize,
+      ruleEffectivenessContext,
     ],
   );
 
