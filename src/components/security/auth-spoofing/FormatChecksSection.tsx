@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { AuthSpoofingAction, CheckItem, FormatChecksConfig } from '@/types/auth-spoofing';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { CollapsibleCardTrigger } from '@/components/ui/collapsible-section-trigger';
 import { Switch } from '@/components/ui/switch';
@@ -57,10 +56,6 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
   const t = useTranslations('authSpoofing');
   const tDesc = useTranslations('authSpoofing.formatActionDesc');
   const [pendingEnable, setPendingEnable] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const isVersionedRule = ['mailfrom_empty', 'mailfrom_invalid', 'envelope_header_mismatch'].includes(checkKey);
-  const ruleHistory = item.history ?? [];
-  const ruleLabel = t(labelKey as Parameters<typeof t>[0]);
 
   const handleEnableChange = (enabled: boolean) => {
     if (enabled && warningKey) {
@@ -108,33 +103,6 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
         </div>
 
         <div className="flex items-center gap-2">
-          {isVersionedRule && (
-            <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-              <SheetTrigger render={<button type="button" className="rounded-md border px-2 py-1 text-xs text-muted-foreground hover:bg-muted" data-testid={`auth-format-version-history-trigger-${checkKey}`} />}>
-                {t('versionSummary')} · {t('versionLabel', { version: item.version ?? 1 })}
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-xl" data-testid="auth-format-version-history">
-                <SheetHeader>
-                  <SheetTitle>{ruleLabel} · {t('versionHistory')}</SheetTitle>
-                  <SheetDescription>{t('versionSummary')} · {ruleLabel}</SheetDescription>
-                </SheetHeader>
-                <div className="flex flex-col gap-2 py-4 text-sm">
-                  {ruleHistory.length === 0 ? (
-                    <p className="text-muted-foreground">{t('historyEmpty')}</p>
-                  ) : ruleHistory.map((historyItem) => (
-                    <div key={historyItem.version} className="flex flex-col gap-1 rounded-md border p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-medium">{t('versionLabel', { version: historyItem.version })}</span>
-                        <span className="text-muted-foreground">{historyItem.created_at}</span>
-                      </div>
-                      <span><span className="font-medium">{t('historyChangeSummary')}</span> {historyItem.change_summary}</span>
-                      <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('historyHits')}</span> {historyItem.hit_count}</span>
-                    </div>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
           <Switch
             data-testid={`auth-format-observe-${checkKey}`}
             size="sm"

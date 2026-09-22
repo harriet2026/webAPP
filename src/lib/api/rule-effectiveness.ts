@@ -113,6 +113,8 @@ export interface RuleEffectivenessParams {
   similarDetectionTypes?: SimilarDetectionType[];
   durationBuckets?: ObserveDurationBucket[];
   tenantId?: number | null;
+  versionId?: string;
+  includeHistory?: boolean;
 }
 
 export interface RuleEffectivenessKpi {
@@ -197,6 +199,8 @@ export async function getRuleEffectiveness(
     similar_detection_type: params.similarDetectionTypes,
     duration_bucket: params.durationBuckets,
     tenant_id: params.tenantId ?? undefined,
+    version_id: params.versionId,
+    include_history: params.includeHistory ? 'true' : undefined,
     mode: 'observe',
   });
   return requestFn<RuleEffectivenessResponse>(`/statistics/rule-effectiveness?${query}`);

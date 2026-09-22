@@ -18,6 +18,7 @@ export function useRuleEffectiveness(params: {
   similarDetectionTypes: SimilarDetectionType[];
   durationBuckets: ObserveDurationBucket[];
   scopeTenantId: number | null;
+  versionId?: string;
 }) {
   const { scopedRequest, resolvedScopeTenant, scopeResolved } = useSecurityScope(params.scopeTenantId);
   return useQuery({
@@ -29,6 +30,7 @@ export function useRuleEffectiveness(params: {
       params.modules,
       params.similarDetectionTypes,
       params.durationBuckets,
+      params.versionId,
     ],
     queryFn: () =>
       getRuleEffectiveness(
@@ -39,6 +41,8 @@ export function useRuleEffectiveness(params: {
           similarDetectionTypes: params.similarDetectionTypes,
           durationBuckets: params.durationBuckets,
           tenantId: resolvedScopeTenant,
+          versionId: params.versionId,
+          includeHistory: Boolean(params.versionId),
         },
         scopedRequest,
       ),

@@ -34,14 +34,6 @@ import { useApiRequest, ApiError, isPublicationPendingResponse } from '@/lib/api
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -103,9 +95,6 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [showVersionResetDialog, setShowVersionResetDialog] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [historyScope, setHistoryScope] = useState<SimilarDetectionDirection | 'aggregate'>('aggregate');
 
   useEffect(() => {
     let cancelled = false;
@@ -301,13 +290,6 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       .finally(() => setLoading(false));
   }, [apiRequest]);
 
-  // 版本历史属于策略实例：先按策略 Tab 区分，再按聚合模式或方向区分。
-  const historyScopeLabel = config.mode === 'aggregate'
-    ? t('modeAggregate')
-    : historyScope === 'aggregate'
-      ? t('historySelectDirection')
-      : t(DIR_FULL_LABEL_KEY[historyScope]);
-
   // 观察集合：aggregate 模式下只看 aggregate.observe_mode；separate 模式下看当前 Tab 组内各已启用方向
   const currentGroup = config[activeTab];
   const observingDirections = useMemo(() => {
@@ -318,63 +300,6 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       .filter((dir) => currentGroup[dir].observe_mode)
       .map((dir) => t(DIR_FULL_LABEL_KEY[dir]));
   }, [config.mode, config.aggregate.observe_mode, config.enabled_directions, currentGroup, t]);
-
-  const renderVersionSection = (type: SimilarDetectionType) => {
-    const policyVersion = config.policy_versions?.[type];
-    const version = policyVersion?.version ?? config.version;
-    const history = policyVersion?.history_by_scope?.[historyScope]
-      ?? config.history_by_scope?.[historyScope]
-      ?? (historyScope === 'aggregate' ? config.history : undefined)
-      ?? [];
-    return (
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card px-4 py-3" data-testid={`similar-detection-version-summary-${type}`}>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-          <span className="font-semibold">{t('versionSummary')} · {t('versionLabel', { version })}</span>
-          <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('observationStartedAt')}</span> {policyVersion?.observation_started_at ?? config.observation_started_at ?? t('notAvailable')}</span>
-          <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('observationDays')}</span> {policyVersion?.observation_days ?? config.observation_days ?? 0} {t('daysUnit')}</span>
-          <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('hitCount')}</span> {policyVersion?.hit_count ?? config.hit_count ?? 0}</span>
-        </div>
-        <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-          <SheetTrigger render={<Button variant="outline" size="sm" data-testid={`similar-detection-version-history-trigger-${type}`} />}>
-            {t('versionHistory')} · {history.length} {t('versionCountUnit')}
-          </SheetTrigger>
-          <SheetContent className="w-full sm:max-w-xl" data-testid={`similar-detection-version-history-${type}`}>
-            <SheetHeader>
-              <SheetTitle>{t(type === 'similar_email' ? 'similarEmailTab' : 'sameSubjectTab')} · {t('versionHistory')}</SheetTitle>
-              <SheetDescription>{t('historyScopeDescription', { scope: historyScopeLabel })}</SheetDescription>
-            </SheetHeader>
-            <div className="flex flex-col gap-4 py-4">
-              {config.mode === 'separate' && (
-                <div className="flex flex-wrap gap-2" aria-label={t('historyScopeLabel')}>
-                  {DIRECTIONS.filter((dir) => config.enabled_directions.includes(dir)).map((dir) => (
-                    <Button key={dir} size="sm" variant={historyScope === dir ? 'default' : 'outline'} onClick={() => setHistoryScope(dir)}>
-                      {t(DIR_FULL_LABEL_KEY[dir])}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              {history.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('historyEmpty')}</p>
-              ) : (
-                <div className="flex flex-col gap-2 text-sm">
-                  {history.map((item) => (
-                    <div key={`${type}-${historyScope}-${item.version}`} className="flex flex-col gap-1 rounded-md border p-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-medium">{t('versionLabel', { version: item.version })}</span>
-                        <span className="text-muted-foreground">{item.created_at}</span>
-                      </div>
-                      <span><span className="font-medium">{t('historyChangeSummary')}</span> {item.change_summary}</span>
-                      <span className="text-muted-foreground"><span className="font-medium text-foreground">{t('historyHits')}</span> {item.hit_count}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    );
-  };
 
   // 方向配置块 + 卡片区（similar_email/same_subject 两个 Tab 共用）
   const renderDirectionSection = (type: SimilarDetectionType) => {
@@ -484,13 +409,11 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
         </TabsList>
 
         <TabsContent value="similar_email" className="space-y-6">
-          {renderVersionSection('similar_email')}
-          {renderDirectionSection('similar_email')}
+                  {renderDirectionSection('similar_email')}
         </TabsContent>
 
         <TabsContent value="same_subject" className="space-y-6">
-          {renderVersionSection('same_subject')}
-          {renderDirectionSection('same_subject')}
+                  {renderDirectionSection('same_subject')}
 
           {/* 主题标准化配置 */}
           <div className="p-4 bg-muted/50 rounded-lg border">
