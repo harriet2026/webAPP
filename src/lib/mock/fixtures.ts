@@ -458,14 +458,14 @@ export function mockBootstrap(): Bootstrap {
     // 的菜单语义完全一致，且不会再因为「漏登记某个功能」而失败开放。
     featureRegistry: canonicalRegistry as FeatureDef[],
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
-    // grantable）。这样切到租户视角能完整演示「智能体中心」——对��� parity_vectors
+    // grantable）。这样切到租户视角能完整演示「智能体中心」——对���� parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
     // platformHidden:true，多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
 
-// ─── 租户 ─────────������───���──────────────────────────────────────────────────────
+// ─── 租户 ─────��───������───���──────────────────────────────────────────────────────
 
 export const mockTenantStats: TenantStats = {
   total: 3,
@@ -669,7 +669,7 @@ export function mockDashboardSummaryFor(
 }
 
 // ─── 邮件安全总览（/statistics/security-overview/**）─────────────────────────
-// 与 demo 的默认口径一致，所有数据确定性生成，保证离线演示和 E2E 可复现。
+// 与 demo 的默认口径一致，所有数据确定性生成，保证离线演示和 E2E ��复现。
 const SECURITY_KPI = {
   total_filtered: 12_450,
   total_filtered_delta: 8.2,
@@ -1663,7 +1663,7 @@ export function mockMailflowConnectionFailure(direction: MailflowDirection): Mai
 // 生命周期、批量操作、规则 CRUD 和 SMTP 配置都能在 mock 模式完整走通。
 const ALERT_DATE = "2026-07-23";
 const alertSeed = [
-  [1, 101, "数据目��使用��告警", "system.data_dir_usage", "system", "node-1", "系统资源", "p0", "unconfirmed", "数据目录使用率 96%", 96, 95, 1, "10:03:25"],
+  [1, 101, "��据目��使用��告警", "system.data_dir_usage", "system", "node-1", "系统资源", "p0", "unconfirmed", "数据目录使用率 96%", 96, 95, 1, "10:03:25"],
   [2, 102, "deferred 队列堆积", "mailflow.queue_deferred", "mailflow_queue", "gateway-1", "邮件流", "p0", "processing", "deferred队列堆积 62,341", 62341, 50000, 3, "09:51:12"],
   [3, 104, "RBL 响应超时", "detection.rbl_latency", "detection", "engine-1", "检测引擎", "p3", "confirmed", "RBL响应超时 >5s", 5.8, 5, 5, "09:30:45"],
   [4, 103, "Kingbase 主从延迟", "database.kb_repl_delay", "database", "db-standby", "基础设施", "p1", "unconfirmed", "Kingbase主从延迟 45s", 45, 60, 1, "09:15:33"],
@@ -3307,7 +3307,7 @@ export function mockOverseasMailConfig(): OverseasMailConfigResponse {
   };
 }
 
-// ─── 自定义 IP 定位库（GeoIP rules��mock）──��─����──��──����──��────����──����─��──����─��
+// ─── 自定义 IP ���位库（GeoIP rules��mock）──��─����──��──����──��────����──����─��──����─��
 // 35 条数据照抄 demo `generateMockGeoIpRules()`
 // (design/origin/demo/components/filter-rules-new/connection-layer-page.tsx)，
 // 字段名做 camelCase → snake_case 映射，数值保持逐条一致，便于分页/搜索行为对齐。
@@ -5627,7 +5627,7 @@ interface MockDisposalSeed {
   // deriveDomainAge() 只在存在且 <=7 天时渲染）。缺省 undefined，即真实后端
   // 现状（暂无 whois/RDAP 数据）的优雅降级。
   domainAgeDays?: number;
-  // senderIsNewOnThisMail -- true 时该行的 sender_first_seen_at 等于自己的
+  // senderIsNewOnThisMail -- true 时���行的 sender_first_seen_at 等于自己的
   // received_at（首次出现新发信人场景），否则沿用既有的固定历史值（已知
   // 发信人场景）。
   senderIsNewOnThisMail?: boolean;
@@ -9449,7 +9449,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 6, operation_id: 'OP20260622006', admin_user_id: 6, username: 'liyang', operator_name: '李扬',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'security_config',
     status: 'success', client_ip: '10.8.0.31', ip_location: '内网',
-    details: { summary: '对蓝海物流集团强制启用二次认证' }, before_value: { text: '未强制' },
+    details: { summary: '对蓝海物流集团强制启用二次认证' }, before_value: { text: '��强制' },
     after_value: { text: '强制开启' }, created_at: '2026-06-22T09:30:45Z' },
   { id: 7, operation_id: 'OP20260622007', admin_user_id: 1, username: 'admin', operator_name: '张运维（我）',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'tenants', resource_id: 6,
@@ -9607,7 +9607,7 @@ export function mockAgentCenterOverview() {
 }
 
 // ---------------------------------------------------------------------------
-// 规则效能统计（观察模式）— mock 数据
+// 规则效能统计��观察模式）— mock 数据
 //
 // 固定覆盖需求方案中的 3 类观察态模块：身份认证与仿冒检测（按子策略）、
 // 相似邮件检测（按方向）、钓鱼邮件检测智能体（整引擎级，无子策略维度）。
@@ -9912,6 +9912,59 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     version_no: 2,
     version_change_summary: '执行动作调整：隔离 → 审核，触发观察期重置',
   },
+  // 钓鱼邮件智能体按版本归属拆分为准入规则、风险处置策略和运行时策略。
+  // 三条记录分别演示独立版本号、观察起始时间和历史版本，不使用智能体整体版本。
+  {
+    id: 'phishing-admission-rule-url',
+    policy_module: 'phishing_detection',
+    sub_strategy_id: 'admission_rule:rule-url-001',
+    sub_strategy_name_snapshot: '准入规则 · 外部链接邮件',
+    is_deleted: false,
+    observed_days: 9,
+    hits: 87,
+    would_block_ratio: 0.69,
+    reviewed_ratio: 0.34,
+    weighted_reviewed_ratio: 0.27,
+    false_positive_rate: 0.06,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
+    version_no: 2,
+    version_change_summary: '准入条件调整：增加二维码链接校验，触发观察期重置',
+  },
+  {
+    id: 'phishing-risk-policy',
+    policy_module: 'phishing_detection',
+    sub_strategy_id: 'risk_policy',
+    sub_strategy_name_snapshot: '风险处置策略',
+    is_deleted: false,
+    observed_days: 16,
+    hits: 196,
+    would_block_ratio: 0.76,
+    reviewed_ratio: 0.31,
+    weighted_reviewed_ratio: 0.25,
+    false_positive_rate: 0.04,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
+    version_no: 3,
+    version_change_summary: '高风险处置调整：审核 → 隔离，触发观察期重置',
+  },
+  {
+    id: 'phishing-runtime-policy',
+    policy_module: 'phishing_detection',
+    sub_strategy_id: 'runtime_policy',
+    sub_strategy_name_snapshot: '运行时策略',
+    is_deleted: false,
+    observed_days: 24,
+    hits: 341,
+    would_block_ratio: 0.74,
+    reviewed_ratio: 0.29,
+    weighted_reviewed_ratio: 0.24,
+    false_positive_rate: 0.05,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
+    version_no: 2,
+    version_change_summary: '观察超时配置调整：30 分钟 → 60 分钟，触发观察期重置',
+  },
   {
     id: 'phishing-agent',
     policy_module: 'phishing_detection',
@@ -9925,7 +9978,8 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.24,
     false_positive_rate: 0.05,
     attribution_status: 'attributable',
-      config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
+    version_no: 1,
   },
 ];
 
@@ -9995,7 +10049,7 @@ function ruleEffectivenessActionBreakdown(
 }
 
 /**
- * 为 version_no > 1 的行合成历史版本清单（1..version_no-1），演示「实质性
+ * 为 version_no > 1 的行合成历史版本清单��1..version_no-1），演示「实质性
  * 修改触发观察期重置」：当前行的 observed_since/observed_days/hits/命中构成
  * 只反映当前版本（version_no）的数据，历史版本各自独立的命中数、生效区间
  * 单独存放在这里，不叠加进当前版本的统计口径。
