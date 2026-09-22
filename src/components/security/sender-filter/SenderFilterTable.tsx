@@ -31,6 +31,8 @@ interface SenderFilterTableProps {
   onEdit: (rule: SenderFilterRuleView) => void;
   onDelete: (rule: SenderFilterRuleView) => void;
   onToggle: (id: number, isActive: boolean) => void;
+  onToggleRunMode: (rule: SenderFilterRuleView) => void;
+  pendingRunModeId: number | null;
   groups: SenderFilterGroups;
   isLoading: boolean;
 }
@@ -68,6 +70,8 @@ export function SenderFilterTable({
   onEdit,
   onDelete,
   onToggle,
+  onToggleRunMode,
+  pendingRunModeId,
   groups,
   isLoading: _isLoading,
 }: SenderFilterTableProps) {
@@ -151,14 +155,36 @@ export function SenderFilterTable({
     },
     {
       id: 'run_mode',
-      header: '运行模式',
-      cell: ({ row }) => row.original.list_type === 'blacklist' && row.original.resolved?.run_mode === 'observe' ? (
-        <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700">
-          <Eye className="h-3 w-3" />观察中
-        </Badge>
-      ) : row.original.list_type === 'blacklist' ? (
-        <Badge variant="secondary">实时执行</Badge>
-      ) : null,
+      header: t('senderFilter.runMode'),
+      cell: ({ row }) => {
+        if (row.original.list_type !== 'blacklist') return null;
+        const resolved = row.original.resolved;
+        const isObserve = resolved?.run_mode === 'observe';
+        const badge = isObserve ? (
+          <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700">
+            <Eye className="h-3 w-3" />{t('senderFilter.runModeValue_observe')}
+          </Badge>
+        ) : (
+          <Badge variant="secondary">{t('senderFilter.runModeValue_realtime')}</Badge>
+        );
+        // 复杂规则（resolved 为 null）无法安全还原完整 metadata 用于回写，
+        // 保持只读展示，不提供切换入口。
+        if (row.original.is_complex || !resolved) return badge;
+        const isPending = pendingRunModeId === row.original.rule.id;
+        return (
+          <button
+            type="button"
+            data-testid="sender-filter-row-run-mode-toggle"
+            className="cursor-pointer rounded-full disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isPending}
+            title={t('senderFilter.runModeToggleTooltip')}
+            aria-label={t('senderFilter.runModeToggleTooltip')}
+            onClick={() => onToggleRunMode(row.original)}
+          >
+            {badge}
+          </button>
+        );
+      },
     },
     {
       id: 'status',

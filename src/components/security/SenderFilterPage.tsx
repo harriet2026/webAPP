@@ -15,7 +15,7 @@ import { listSenderFilterGroups, listSenderFilterRules, resolveSenderFilterRule,
 import { listTenantDomains } from '@/lib/api/mail-routing';
 import type { SenderFilterStatusFilter } from '@/lib/api/sender-filter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { SenderFilterRuleView, SenderFilterFormData, ListType, SenderFilterGroups } from '@/types/sender-filter';
+import type { SenderFilterRuleView, SenderFilterFormData, ListType, SenderFilterGroups, SenderFilterRunMode } from '@/types/sender-filter';
 import type { CreateRuleRequest, UpdateRuleRequest } from '@/types/unified-rules';
 import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -42,6 +42,10 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [editingRule, setEditingRule] = useState<SenderFilterRuleView | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [importExportOpen, setImportExportOpen] = useState(false);
+  // 切换为观察模式会让规则不再真实拦截命中的邮件，属于风险方向的切换，
+  // 需先二次确认；切回实时执行则直接生效，不额外确认。
+  const [runModeConfirmTarget, setRunModeConfirmTarget] = useState<{ id: number; name: string; metadata: Record<string, unknown> } | null>(null);
+  const [pendingRunModeId, setPendingRunModeId] = useState<number | null>(null);
 
   const queryKey = ['sender-filter-rules'];
 
@@ -127,6 +131,40 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
       toast.error(apiErrorMessage(error));
     },
   });
+
+  const runModeMutation = useMutation({
+    mutationFn: ({ id, metadata }: { id: number; metadata: Record<string, unknown> }) =>
+      apiRequest(`/unified-rules/${id}`, {
+        method: 'PUT',
+        body: { metadata } as UpdateRuleRequest,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success(t('common.updateSuccess'));
+    },
+    onError: (error: Error) => {
+      toast.error(apiErrorMessage(error));
+    },
+    onSettled: () => {
+      setPendingRunModeId(null);
+    },
+  });
+
+  const handleToggleRunMode = useCallback(
+    (rule: SenderFilterRuleView) => {
+      const resolved = rule.resolved;
+      if (!resolved || rule.list_type !== 'blacklist') return;
+      const nextMode: SenderFilterRunMode = resolved.run_mode === 'observe' ? 'realtime' : 'observe';
+      const nextMetadata = { ...resolved, run_mode: nextMode };
+      if (nextMode === 'observe') {
+        setRunModeConfirmTarget({ id: rule.rule.id, name: rule.rule.name, metadata: nextMetadata });
+        return;
+      }
+      setPendingRunModeId(rule.rule.id);
+      runModeMutation.mutate({ id: rule.rule.id, metadata: nextMetadata });
+    },
+    [runModeMutation],
+  );
 
   const handleOpenDrawer = useCallback(
     (rule?: SenderFilterRuleView) => {
@@ -316,6 +354,8 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             onEdit={(rule) => handleOpenDrawer(rule)}
             onDelete={(rule) => setDeleteTarget({ id: rule.rule.id, name: rule.rule.name })}
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
+            onToggleRunMode={handleToggleRunMode}
+            pendingRunModeId={pendingRunModeId}
             groups={groupsData ?? { senderGroups: [], ipGroups: [] }}
             isLoading={isLoading}
           />
@@ -343,6 +383,23 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
           if (deleteTarget) {
             deleteMutation.mutate(deleteTarget.id);
           }
+        }}
+        variant="destructive"
+      />
+
+      <ConfirmDialog
+        open={!!runModeConfirmTarget}
+        onOpenChange={(open) => {
+          if (!open) setRunModeConfirmTarget(null);
+        }}
+        title={t('senderFilter.runModeToggleTitle')}
+        description={t('senderFilter.runModeToggleDescription', { name: runModeConfirmTarget?.name ?? '' })}
+        onConfirm={() => {
+          if (runModeConfirmTarget) {
+            setPendingRunModeId(runModeConfirmTarget.id);
+            runModeMutation.mutate({ id: runModeConfirmTarget.id, metadata: runModeConfirmTarget.metadata });
+          }
+          setRunModeConfirmTarget(null);
         }}
         variant="destructive"
       />

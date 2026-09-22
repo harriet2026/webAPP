@@ -61,6 +61,8 @@ function renderTable(data: SenderFilterRuleView[], groups: SenderFilterGroups = 
       onEdit={vi.fn()}
       onDelete={vi.fn()}
       onToggle={vi.fn()}
+      onToggleRunMode={vi.fn()}
+      pendingRunModeId={null}
       groups={groups}
       isLoading={false}
     />,

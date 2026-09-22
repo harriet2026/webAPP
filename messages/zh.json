@@ -362,7 +362,7 @@
     "mailflow": "邮件流",
     "monitorSecurity": "检测引擎状态",
     "phishingDetection": "钓鱼邮件检测智能体",
-    "agentCenter": "智能体中心",
+    "agentCenter": "智���体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
@@ -1015,7 +1015,7 @@
           "targetPort": "目的端口",
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
-          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版��为 {version}，与���证书�����验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
+          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版��为 {version}，与���证书�������验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
           "channel": "��递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
@@ -1179,7 +1179,7 @@
       "createdToast": "收信域已添加",
       "updatedToast": "收信域已更新",
       "deletedToast": "收信域已删除",
-      "deleteDialogTitle": "删��收信��「{domain}」？",
+      "deleteDialogTitle": "删����信��「{domain}」？",
       "deleteDialogDescription": "该域名可能正在被转发设置、发信认证引用，删除后相关规则的对应条件将失效。是否强制删除？",
       "deleteConfirmButton": "强制删除",
       "probeButton": "探测",
@@ -1337,7 +1337,7 @@
     "drawerSubtitle": "针对特定业务对象配置差异化检测策略",
     "namePlaceholder": "请输入便于识别的规则名称，如「研发部门外发」",
     "nameRequired": "请输入规则名称",
-    "sectionPipeline": "策略���水线配置",
+    "sectionPipeline": "策略���水线配���",
     "configDetail": "配��详情",
     "configDetailClose": "关闭配置面板",
     "policyStateLabel": "策略状态",
@@ -1821,7 +1821,7 @@
       "sender_name": "发件人显示名",
       "sender_domain": "发件人域名",
       "recipients": "收件人",
-      "to_cc_details": "收件人/抄送��",
+      "to_cc_details": "��件人/抄送��",
       "bcc": "密送",
       "subject": "主题",
       "client_ip": "客户端 IP",
@@ -2052,7 +2052,7 @@
       "suspend": "确认暂停该租户?",
       "activate": "确认启用该租户?",
       "removeDomains": "确认移除 {count} 个域名？",
-      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已��置路由��移����该域名的下一跳��出口绑定会一并��除，收信将立��中断。此操作不可撤销。"
+      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已��置路由���移����该域名的下一跳��出口绑定会一并��除，收信将立��中断。此操作不可撤销。"
     },
     "toast": {
       "created": "租户已创建",
@@ -2611,7 +2611,7 @@
     "breadcrumb": "日志审计 / 管理员操作日志",
     "moduleOther": "其他",
     "subtitlePlatform": "查看平台级管理员的操作审计记录（跨所有租户）。",
-    "subtitleTenant": "查看租户级管理员的操作审计记录（当前选中租户范��内）。",
+    "subtitleTenant": "查看租户级管理员的操作审计记录（当前选中租户范��内���。",
     "operationId": "操作 ID",
     "before": "变更前",
     "after": "变更后",
@@ -4122,7 +4122,7 @@
     "senderType_individual": "个人",
     "senderType_domain": "发信域名",
     "senderType_group": "群组",
-    "ipRange": "发信IP范围",
+    "ipRange": "发���IP范围",
     "ipType_all": "全��IP",
     "ipType_single": "单个IP",
     "ipType_range": "IP范围(CIDR)",
@@ -4175,6 +4175,9 @@
     "runModeValue_realtime": "实时执行",
     "runModeValue_observe": "观察模式",
     "runModeHint": "观察模式只记录命中和拟执行动作，不改变邮件实际处置。",
+    "runModeToggleTooltip": "点击切换运行模式",
+    "runModeToggleTitle": "切换为观察模式",
+    "runModeToggleDescription": "切换为观察模式后，规则“{name}”将不再对命中的邮件执行拦截或处置，仅记录日志，是否继续。",
     "sectionAction": "执行动作",
     "expireAt": "有效期至",
     "expireAtHint": "留空表示永久有效",
@@ -4427,7 +4430,7 @@
     "actionTagDeliver": "标记并放行",
     "actionTagDeliverHint": "添加邮件头后继续投递",
     "actionIsolate": "隔离",
-    "actionIsolateHint": "邮件进入隔离区，管理员可审阅后决定是否放行",
+    "actionIsolateHint": "邮件进入隔离区，管理员可审��后决定是否放行",
     "actionReview": "审核",
     "actionReviewHint": "邮件正常投递，同时写入审核日志供管理员事后审查",
     "actionBlock": "拒收",
@@ -4513,7 +4516,7 @@
       "cancel": "取消"
     },
     "legacyDisabled": "此项当前未启用",
-    "legacyDisabledHint": "这是旧版本遗留的关闭状态。新版本的认证仿冒检查没有「关闭」入口，一旦把此项改为其他动作，将无法再恢复为未启用。",
+    "legacyDisabledHint": "这是旧版本遗留的关闭状态。新版本的���证仿冒检查没有「关闭」入口，一旦把此项改为其他动作，将无法再恢复为未启用。",
     "notAuthorized": "无权访问此页面",
     "versionSummary": "当前策略版本",
     "versionLabel": "版本 {version}",
@@ -4656,7 +4659,7 @@
       "internalUsers": "内部用户列表",
       "exact": "精确匹配",
       "substring": "子串匹配",
-      "addUser": "添加",
+      "addUser": "添��",
       "userNamePlaceholder": "输入用户名或显示名",
       "emptyUsersWarning": "未配置内部用户，显示名仿冒检测的内部方向将无法生效"
     },
@@ -5033,7 +5036,7 @@
     },
     "examples": {
       "toggle": "查看配置示例",
-      "normalName": "正常用户场景",
+      "normalName": "正常用户场��",
       "normalDesc": "日常办公发信，不触发规则",
       "normalEffect": "正常用户日发50封邮件，使用2个IP，未触发规则",
       "stolenName": "账号被盗场景",
@@ -5369,7 +5372,7 @@
     "sandbox": {
       "placeholder": {
         "title": "URL 沙箱检测",
-        "desc": "本功能将在后续版本提供。当前版本仅支持链接保护。"
+        "desc": "本功能将在��续版本提供。当前版本仅支持链接保护。"
       },
       "toggle": "沙箱检测",
       "toggleDesc": "启用后，对邮件中的未知URL进行动态行为分析，识别钓鱼、恶意下载等威胁",
@@ -5599,7 +5602,7 @@
     },
     "resetDialog": {
       "title": "确认重置配置",
-      "description": "确定要将当前【{dir}】方向的意图引擎配置重置为系统缺省值吗？此操作不可撤销。",
+      "description": "确定要将当前【{dir}】方向的意图引擎配置重置为系统缺省值吗？此操��不可撤销。",
       "confirm": "确认重置"
     },
     "saveSuccess": "保存成功",
@@ -5942,7 +5945,7 @@
       "advanced": "更多筛选条件",
       "preciseFields": "27个精确字段",
       "tenantScope": "租户范围",
-      "sendReceiveTime": "收发时间",
+      "sendReceiveTime": "��发时间",
       "selectDate": "选择日期",
       "sendReceiveType": "收发类型",
       "sender": "发信人",
@@ -6153,7 +6156,7 @@
       "mailType": "邮件类型",
       "corrected": "已纠正",
       "correctedTooltip": "��判定：{original} → 纠正为：{current}（{source}）",
-      "action": "执行动作",
+      "action": "执行��作",
       "status": "邮件状态",
       "operations": "操作",
       "view": "查看",
@@ -7171,7 +7174,7 @@
       "desc_sender": {
         "source": "邮件头 From 字段",
         "usage": "识别用户邮箱客户端中看到的发件人",
-        "note": "钓鱼邮件常伪造此字段，建议配合信封发信人(SMTP)检测"
+        "note": "钓鱼邮���常伪造此字段，建议配合信封发信人(SMTP)检测"
       },
       "desc_recipient": {
         "source": "邮件头 To 字段",
@@ -7347,7 +7350,7 @@
         "note": "支持域名黑白名单"
       },
       "desc_spfResult": {
-        "source": "SPF验证引擎",
+        "source": "SPF验���引擎",
         "usage": "根据SPF验证结果过滤邮件",
         "note": "pass/fail/softfail/none四种结果"
       },
@@ -7759,7 +7762,7 @@
     "noDeptsHint": "组织通讯录暂未同步，请先到「组织通讯录」配置数据源",
     "invalidRef": "已失效",
     "clearAll": "清空",
-    "userPermissionSettings": "用户权限设置",
+    "userPermissionSettings": "用��权限设置",
     "permissionDescription": "配置用户在隔离区的操作权限和有效期",
     "permissionItem": "权限项",
     "status": "状态",
@@ -8538,7 +8541,7 @@
       "domain": "域名",
       "count": "检出次数",
       "blockRate": "点击拦截率",
-      "blockRateHelp": "该域名点击后进入威胁拦截页面的比例",
+      "blockRateHelp": "该域名点击后进入威胁拦截页面��比例",
       "firstSeen": "首次出现",
       "status": "封禁状态",
       "block": "封禁",
@@ -9254,7 +9257,7 @@
       "markTextPlaceholder": "例如 [可疑]",
       "markTextHint": "最长 20 字符，超出将被截断。",
       "prefixTruncated": "主题前缀超过 {max} 字，已自动截断。",
-      "prefixTruncatedHint": "主题前缀最长 {max} 字。",
+      "prefixTruncatedHint": "主题前缀最长 {max} ���。",
       "disposition": {
         "accept": "投递（白名单）",
         "quarantine": "隔离",
@@ -9495,7 +9498,7 @@
       "markSubject": "主题前缀",
       "markHeader": "邮件头注入",
       "markBanner": "正文横幅",
-      "notify": "检测到被仿冒时通知管理员",
+      "notify": "检测到被仿冒时通知���理员",
       "adminEmails": "管理员邮箱",
       "adminEmailsPlaceholder": "多个邮箱用英文逗号分隔",
       "pastePlaceholder": "每行一条：姓名,邮箱（单次最多 20 条）",
@@ -10608,7 +10611,7 @@
       "itemPendingDisposal": "待处置队列",
       "itemPendingReport": "举报待审",
       "itemAgentPending": "{agent} 待审 {n} 封",
-      "itemLicenseExpiry": "许可证将在 {n} 天后到期",
+      "itemLicenseExpiry": "许可证���在 {n} 天后到期",
       "licenseRenewHint": "请及时续期",
       "itemRuleLibLatest": "规则库已是最新版",
       "itemRuleLibOutdated": "规则库有可用更新",
@@ -11128,7 +11131,7 @@
       "action_invalid": "操作无效，只能是：{allowed}",
       "already_handled": "该告警已被其他人处理，请刷新后查看最新状态",
       "ids_required": "请至少选择一条告警",
-      "not_found": "告警不存在，可能已被处理或清理",
+      "not_found": "告警不存在，可能已���处理或清理",
       "range_invalid": "时间范围取值无效",
       "severity_invalid": "告警级别取值无效",
       "status_invalid": "告警状态取值无效"
@@ -11144,7 +11147,7 @@
       "config_empty": "数据源配置不能为空",
       "config_invalid": "数据源配置无效，请检查各项填写是否完整",
       "config_parse_failed": "数据源配置解析失败，请检查填写的内容格式是否正确",
-      "cron_expr_required": "启用自动同步时必须填写同步周期",
+      "cron_expr_required": "启用自���同步时必须填写同步周期",
       "csv_auto_sync_unsupported": "CSV 数据源不支持自动同步，请改用手动导入",
       "csv_preview_failed": "读取 CSV 预览失败，请确认文件格式正确后重试",
       "department_id_unmapped": "部门必填字段「部门ID」尚未映射，请在字段映射中指定它对应的列",
@@ -11631,7 +11634,7 @@
       "too_many_concurrent_ai_requests_please": "当前 AI 请求过多，请稍后重试"
     },
     "link_attachment_security": {
-      "ai_interpretation_disabled": "AI 解读功能未启用",
+      "ai_interpretation_disabled": "AI 解���功能未启用",
       "too_many_concurrent_ai_requests_please": "当前 AI 请求过多，请稍后重试",
       "limit_integer_between_1_50": "条数必须��� 1-50 之间的整数",
       "domain_required": "请填写域名",
@@ -11793,7 +11796,7 @@
       "quarantine_item_already_released_deleted": "该隔离邮件已放行或已删除"
     },
     "proxysvr_probe": {
-      "proxysvr_endpoint_not_found": "代理发信端点不存在"
+      "proxysvr_endpoint_not_found": "代��发信端点不存在"
     },
     "recall_admin": {
       "backend_coremail_exchange": "后端类型只能是 coremail 或 exchange",
