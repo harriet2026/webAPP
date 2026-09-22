@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { useTranslations } from 'next-intl';
-import { Pencil, Trash2, Mail, Globe, Users, AlertTriangle } from 'lucide-react';
+import { Pencil, Trash2, Mail, Globe, Users, AlertTriangle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -148,6 +148,17 @@ export function SenderFilterTable({
         <span data-testid="sender-filter-cell-priority" className="text-sm tabular-nums">{row.original.rule.priority}</span>
       ),
       size: 80,
+    },
+    {
+      id: 'run_mode',
+      header: '运行模式',
+      cell: ({ row }) => row.original.list_type === 'blacklist' && row.original.resolved?.run_mode === 'observe' ? (
+        <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700">
+          <Eye className="h-3 w-3" />观察中
+        </Badge>
+      ) : row.original.list_type === 'blacklist' ? (
+        <Badge variant="secondary">实时执行</Badge>
+      ) : null,
     },
     {
       id: 'status',

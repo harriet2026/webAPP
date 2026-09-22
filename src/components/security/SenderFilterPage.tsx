@@ -171,6 +171,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
         ip_range: data.ip_range,
         list_type: data.list_type,
         whitelist_mode: data.list_type === 'whitelist' ? data.whitelist_mode : undefined,
+        run_mode: data.list_type === 'blacklist' ? data.run_mode : 'realtime',
       };
       const tags = data.list_type === 'whitelist' && data.whitelist_mode === 'bypass_content'
         ? ['sys:nocontent']

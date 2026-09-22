@@ -4,6 +4,13 @@ export type SenderConfigType = 'individual' | 'domain' | 'group';
 export type IPRangeType = 'all' | 'single' | 'range' | 'ipGroup';
 export type ListType = 'blacklist' | 'whitelist';
 export type WhitelistMode = 'bypass_content' | 'direct_deliver';
+export type SenderFilterRunMode = 'realtime' | 'observe';
+
+export interface SenderFilterVersionState {
+  version: number;
+  observation_started_at?: string;
+  observation_ended_at?: string;
+}
 
 export type BlacklistAction = 'reject' | 'quarantine' | 'audit' | 'discard';
 export type WhitelistAction = 'accept';
@@ -25,6 +32,8 @@ export interface SenderFilterMetadata {
   ip_range: SenderFilterIPRange;
   list_type: ListType;
   whitelist_mode?: WhitelistMode;
+  run_mode?: SenderFilterRunMode;
+  version_state?: SenderFilterVersionState;
 }
 
 export interface SenderFilterRuleView {
@@ -54,6 +63,7 @@ export interface SenderFilterFormData {
   list_type: ListType;
   action: SenderFilterAction;
   whitelist_mode?: WhitelistMode;
+  run_mode?: SenderFilterRunMode;
   sender_config: SenderFilterSenderConfig;
   ip_range: SenderFilterIPRange;
   // GT-11486: 复杂规则（resolved===null）经抽屉编辑时置 true——页面据此

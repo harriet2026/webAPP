@@ -35,6 +35,7 @@ import type {
   IPRangeType,
   ListType,
   SenderFilterAction,
+  SenderFilterRunMode,
 } from '@/types/sender-filter';
 import { normalizeDomain } from '@/lib/api/sender-filter';
 import { getSenderFilterDefaultPriority } from './priority-defaults';
@@ -189,6 +190,7 @@ const ruleSchema = z.object({
   list_type: z.enum(['blacklist', 'whitelist']),
   action: z.enum(['accept', 'reject', 'quarantine', 'audit', 'discard']),
   whitelist_mode: z.enum(['bypass_content', 'direct_deliver']).optional(),
+  run_mode: z.enum(['realtime', 'observe']).optional(),
   // GT-11486: 复杂规则编辑态——条件/动作字段隐藏且不参与提交，
   // superRefine 的条件类校验对其全部跳过（只校验基础字段）。
   is_complex: z.boolean().optional(),
@@ -330,6 +332,7 @@ export function SenderFilterDrawer({
       list_type: 'blacklist',
       action: 'reject',
       whitelist_mode: undefined,
+      run_mode: 'realtime',
       sender_config: { type: 'individual', value: '' },
       ip_range: { type: 'all', value: undefined },
     },
@@ -348,6 +351,7 @@ export function SenderFilterDrawer({
           list_type: rule.resolved.list_type,
           action: (rule.rule.action || 'reject') as SenderFilterAction,
           whitelist_mode: rule.resolved.whitelist_mode,
+          run_mode: rule.resolved.list_type === 'blacklist' ? (rule.resolved.run_mode ?? 'realtime') : 'realtime',
           sender_config: { ...rule.resolved.sender_config },
           ip_range: { ...rule.resolved.ip_range },
           is_complex: false,
@@ -448,6 +452,7 @@ export function SenderFilterDrawer({
   const watchSenderType = form.watch('sender_config.type');
   const watchIpType = form.watch('ip_range.type');
   const watchAction = form.watch('action');
+  const watchRunMode = form.watch('run_mode');
   const watchSenderValue = form.watch('sender_config.value');
   const watchPriority = form.watch('priority');
   const watchValidUntil = form.watch('valid_until');
@@ -731,8 +736,28 @@ export function SenderFilterDrawer({
                       <h3 className="font-medium">{t('senderFilter.sectionAction')}</h3>
                     </div>
 
-                    <div className="space-y-4">
-                      {/* 动作 */}
+                  <div className="space-y-4">
+                    {watchListType === 'blacklist' && (
+                      <div className="flex items-center gap-3">
+                        <Label className={labelCls}>运行模式</Label>
+                        <div className="flex-1">
+                          <Select
+                            value={watchRunMode ?? 'realtime'}
+                            onValueChange={(value) => form.setValue('run_mode', value as SenderFilterRunMode, { shouldDirty: true })}
+                          >
+                            <SelectTrigger data-testid="sender-filter-run-mode" className="w-40">
+                              <SelectValue>{watchRunMode === 'observe' ? '观察模式' : '实时执行'}</SelectValue>
+                            </SelectTrigger>
+                            <SelectContent alignItemWithTrigger={false}>
+                              <SelectItem value="realtime">实时执行</SelectItem>
+                              <SelectItem value="observe">观察模式</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="mt-1 text-xs text-muted-foreground">观察模式只记录命中和拟执行动作，不改变邮件实际处置。</p>
+                        </div>
+                      </div>
+                    )}
+                    {/* 动作 */}
                       <div className="flex items-center gap-3">
                         <Label className={labelCls}>{t('senderFilter.action')}</Label>
                         <Select
