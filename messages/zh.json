@@ -1015,7 +1015,7 @@
           "targetPort": "目的端口",
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
-          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版��为 {version}，与���证书���验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
+          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版��为 {version}，与���证书�����验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
           "channel": "��递通道",
           "channelProxyPreviewTitle": "通道内代理列表",
@@ -1179,7 +1179,7 @@
       "createdToast": "收信域已添加",
       "updatedToast": "收信域已更新",
       "deletedToast": "收信域已删除",
-      "deleteDialogTitle": "删��收信域「{domain}」？",
+      "deleteDialogTitle": "删��收信��「{domain}」？",
       "deleteDialogDescription": "该域名可能正在被转发设置、发信认证引用，删除后相关规则的对应条件将失效。是否强制删除？",
       "deleteConfirmButton": "强制删除",
       "probeButton": "探测",
@@ -1464,7 +1464,7 @@
       "rbl": "按全局 RBL 列表生效",
       "overseas": "按全局海外检测策略生效",
       "senderFilter": "按全局发信人黑白名��生���",
-      "userList": "按全局���户黑白名���生效",
+      "userList": "按���局���户黑白名���生效",
       "behaviorControl": "��全局发信行为管控生效",
       "authSpoofing": "按全局身份认证与仿冒策略生效",
       "recipientCheck": "按全局收信人检���策略生效",
@@ -1647,7 +1647,7 @@
     "timeoutMinutes": "超时(分钟)",
     "booleanTrue": "是",
     "booleanFalse": "否",
-    "sidelineAsyncWarningOptIn": "⚠️ 该字段由「{label}」检查产出。默认不运行。除非有标签规则给��件人���� {tag}，否则��规则不会对任��邮件命中。",
+    "sidelineAsyncWarningOptIn": "⚠️ 该字段由「{label}」检查产出。默认不运行。除非有标签规则给��件人���� {tag}，否����规则不会对任��邮件命中。",
     "sidelineAsyncWarningOptOut": "⚠��� 该字段由「{label}」检查产出。默认运行。若所有收件人都被打上 {tag} 标签，该规则不会对那些邮件命中。",
     "pipelineEyebrow": "规则管理",
     "pipelineTitle": "规则流水线总览",
@@ -1821,7 +1821,7 @@
       "sender_name": "发件人显示名",
       "sender_domain": "发件人域名",
       "recipients": "收件人",
-      "to_cc_details": "收件人/抄送数",
+      "to_cc_details": "收件人/抄送��",
       "bcc": "密送",
       "subject": "主题",
       "client_ip": "客户端 IP",
@@ -2052,7 +2052,7 @@
       "suspend": "确认暂停该租户?",
       "activate": "确认启用该租户?",
       "removeDomains": "确认移除 {count} 个域名？",
-      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已��置路由��移��后该域名的下一跳��出口绑定会一并��除，收信将立��中断。此操作不可撤销。"
+      "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已��置路由��移����该域名的下一跳��出口绑定会一并��除，收信将立��中断。此操作不可撤销。"
     },
     "toast": {
       "created": "租户已创建",
@@ -2408,7 +2408,7 @@
       "safe": "安全"
     },
     "results": {
-      "alerted": "已告警",
+      "alerted": "已��警",
       "passed": "已放行",
       "pending": "���测中"
     },
@@ -2807,7 +2807,7 @@
     "subject": "主题",
     "from": "发件人",
     "to": "收件人",
-    "cc": "抄����",
+    "cc": "抄�����",
     "date": "日期",
     "attachments": "附件",
     "previewFile": "预览文件",
@@ -2833,7 +2833,7 @@
     "nextHopHostRequired": "请输入下一跳地址",
     "channel": "投递通道",
     "channelSmtp": "SMTP 下一跳",
-    "channelProxysvr": "代理服务器��组",
+    "channelProxysvr": "代理服务器���组",
     "proxysvrGroup": "代理服��器分组",
     "proxysvrGroupRequired": "请选择代理服务器分组",
     "proxysvrGroupPlaceholder": "选择一个活跃的代���服务器���组",
@@ -3360,7 +3360,7 @@
     "phishingAgentDesc": "阶段 4.0 实时钓鱼邮件检测",
     "spoofingAgent": "仿冒邮件检测智能体",
     "spoofingAgentDesc": "阶段 4.1 发件人与品牌仿冒检测",
-    "threatRetroAgent": "威胁回溯智能体",
+    "threatRetroAgent": "威��回溯智能体",
     "threatRetroAgentDesc": "阶段 4.8 异步历史威胁回溯",
     "intentEngine": "意图引擎",
     "intentEngineDesc": "综合意图判断引擎",
@@ -3519,7 +3519,7 @@
     "actionReject": "拒绝",
     "actionTempfail": "421 错误（临时拒绝）",
     "actionDisconnect": "断开连接",
-    "tempfailMessage": "临时拒绝消息",
+    "tempfailMessage": "临时拒绝消���",
     "tempfailPlaceholder": "自定义 421 消���",
     "connectionLimits": "连接数限制（-1 = 不限制）",
     "dailyLimit": "���日连接数限制",
@@ -3829,7 +3829,7 @@
     "importDesc": "支持文本粘贴（每行一个 IP/IP段）或上传导出格式的 JSON 文件（与「导出」一致），导入前可预览并去重。",
     "importDefaultAction": "默认动作",
     "importUploadJson": "上传 JSON",
-    "importPlaceholder": "每行一个 IP 或 IP 段，例如：\n192.168.1.1\n10.0.0.0/8\n172.16.0.1-172.16.0.99\n也可每行附加动作���备注：IP,动作,备注",
+    "importPlaceholder": "每行一个 IP 或 IP 段，例如：\n192.168.1.1\n10.0.0.0/8\n172.16.0.1-172.16.0.99\n也可每行附���动作���备注：IP,动作,备注",
     "importSummary": "共 {total} 条：有效 {valid}，非法 {error}��重�� {dup}",
     "importStatus": "状态",
     "importRowValid": "可导入",
@@ -4123,7 +4123,7 @@
     "senderType_domain": "发信域名",
     "senderType_group": "群组",
     "ipRange": "发信IP范围",
-    "ipType_all": "全部IP",
+    "ipType_all": "全��IP",
     "ipType_single": "单个IP",
     "ipType_range": "IP范围(CIDR)",
     "ipType_ipGroup": "IP组",
@@ -4170,6 +4170,11 @@
     "resetFilters": "重置",
     "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
     "sectionBasic": "基础设置",
+    "sectionRunMode": "运行模式",
+    "runMode": "运行模式",
+    "runModeValue_realtime": "实时执行",
+    "runModeValue_observe": "观察模式",
+    "runModeHint": "观察模式只记录命中和拟执行动作，不改变邮件实际处置。",
     "sectionAction": "执行动作",
     "expireAt": "有效期至",
     "expireAtHint": "留空表示永久有效",
@@ -4670,7 +4675,7 @@
       "cancel": "取消"
     },
     "envelopeMismatchWarning": {
-      "title": "信封与头部不匹配可能引发误判",
+      "title": "信封与头部不匹��可能引发误判",
       "desc": "部分邮件订阅服务、自动转发系统和邮件列表会在转发时改变信封发件人，导致信封（MAIL FROM）与邮件头（From）不一致。开启此检测可能会将这些正常邮件误判为仿冒邮件。\n\n请在充分评估影��后再决定是否启用。",
       "confirm": "我了解风险，仍要启用",
       "cancel": "取消"
@@ -4716,7 +4721,7 @@
     "wouldDropCount": "预计丢弃",
     "observingRecordOnly": "允许（仅记录）",
     "highRiskWarning": "高风险动作：建议先开启观察模式测试影响范围",
-    "spfDropAlert": "SPF 硬拒绝设为静默丢弃，可能误���合法邮件",
+    "spfDropAlert": "SPF 硬拒绝设为静默丢弃，可能误�����合法邮件",
     "exceptionBanner": "例外规则（白名单）请在【策略流水线】模块配置，本模块仅设置协议检查规则",
     "goToPipeline": "前往策略流水线",
     "exceptionEntry": {
@@ -4849,7 +4854,7 @@
         "outbound": "外发方向",
         "internal": "域内方向"
       },
-      "mergedTitle": "数量上限",
+      "mergedTitle": "数量���限",
       "limit": "数量上限",
       "scopeLabel": "统计范围",
       "scope": {
@@ -5050,7 +5055,7 @@
       "run": "执行测试",
       "hit": "命中规则",
       "miss": "未命中",
-      "missReason": "未触发阈值，当前测试数据未命中规则",
+      "missReason": "未触发阈值，当前测��数据未命中规则",
       "hitReason": "触发维度{condition}“{dimension}”，当前{count}{unit}，达到阈值{threshold}{unit}",
       "unitIp": "个",
       "unitRecipient": "人",
@@ -5224,7 +5229,7 @@
       "isolateFallback": "隔离",
       "enable": "启用",
       "ocrSection": "OCR 配置",
-      "ocrMode": "OCR 模式",
+      "ocrMode": "OCR ���式",
       "ocrMaxCount": "OCR 最大数量",
       "qrSection": "二维码检测",
       "qrMode": "二维码模式",
@@ -5410,7 +5415,7 @@
       "publicBaseUrlPlaceholder": "https://gw.your-tenant.com:8082",
       "publicBaseUrlWarning": "⚠️ 一旦保存请勿修改。修改后历史邮件中已重写的链接将失效或指向错误地址。",
       "publicBaseUrlChangeConfirmTitle": "确认修改点击主机名?",
-      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链接 (指向旧主机���) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
+      "publicBaseUrlChangeConfirmBody": "此操作会让所有历史邮件中已重写的链接 (指向旧���机���) 失效或指向错误地址。请确认旧主机名仍然解析到本网关, 或者你接受历史链接失效。",
       "publicBaseUrlChangeConfirmCta": "我已了解风险并继续",
       "policy": {
         "title": "点击时安全策略（固定）",
@@ -5723,7 +5728,7 @@
     "departments": "适用部门",
     "recipientGroups": "收件人群组",
     "senderGroups": "发件人群组",
-    "applyToDirectionHint": "接收规则按收件人匹配，外发规则按发件人匹配；部门与群组之间为“或”关系。",
+    "applyToDirectionHint": "接收规则按��件人匹配，外发规则按发件人匹配；部门与群组之间为“或”关系。",
     "applyToReceiveHint": "收信人维度",
     "applyToSendHint": "发信人维度",
     "applyToTip": "部门和群组均为空时适用于全部用户",
@@ -6470,7 +6475,7 @@
           },
           "confirmImpact": {
             "domain": "确认后将创建一条发信人域名黑名单拒绝规则；后续以该域名作为发信人域名的邮件会被拒绝，可在“发信人黑白名单”中管理。",
-            "url": "确认后将创建一条与当前邮件同方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。",
+            "url": "确认后将创建一条与当前邮件���方向的内容规则；后续命中邮件会进入隔离，可在“内容规则”中管理。",
             "attachment_hash": "确认后��创建一条与当前邮件同方向的内容规则；后��命中邮件会进入隔离，可在“内容规则”中管理。"
           },
           "confirm": "确认��黑",
@@ -6757,7 +6762,7 @@
     },
     "correctionQuality": {
       "title": "纠正质量",
-      "falsePositiveRate": "误判率",
+      "falsePositiveRate": "误��率",
       "falseNegativeRate": "漏判率",
       "countOf": "共 {total} 封已分类邮件中的 {count} 封",
       "summary": "区间内已纠正 {corrected} 封 / 已分类 {classified} 封"
@@ -7482,7 +7487,7 @@
       "descFormatLabel": "格式与示例",
       "descStepGuideLabel": "配置步骤",
       "applyRecommended": "应用推荐配置",
-      "numericOperatorsHint": "大于 / 大于等于：数值达到或超过阈值即命中；��于 / 小于等于：不超过阈值即命中；介于：数值落在指定区间内即命中。",
+      "numericOperatorsHint": "大于 / 大于等于：数值达到或超过阈值即命中；��于 / ���于等于：不超过阈值即命中；介于：数值落在指定区间内即命中。",
       "exampleTemplate": "比较方式「{mode}」，阈值「{value}」（{unit}）。",
       "recommendTemplate": "{mode} {value}（{unit}）",
       "rangeBoth": "{min} ~ {max}",
@@ -8133,7 +8138,7 @@
     "normalHiddenHint": "正常邮件默认隐藏，避免其量级压制威胁曲线，可点击图例展开",
     "deliveryResults": {
       "delivered": "已投递",
-      "success_rate": "投递成功率",
+      "success_rate": "投递成���率",
       "failed": "失败",
       "cancelled": "已取消"
     },
@@ -8542,7 +8547,7 @@
       "unknownDate": "未知",
       "blockConfirm": "确认拉黑域名 \"{domain}\" ？将为以下方向创建拒绝规则：",
       "blockDirection": {
-        "all": "全部",
+        "all": "��部",
         "receive": "入站",
         "send": "出站",
         "internal": "内部"
@@ -8597,7 +8602,7 @@
       "noAttachmentMail": "该时段无含附件邮件",
       "noClicks": "该时段无链接点击",
       "noMaliciousLink": "该时段无恶意链接",
-      "noMaliciousDomain": "该时段��恶意域名",
+      "noMaliciousDomain": "该���段��恶意域名",
       "noMaliciousAttachment": "该时段无恶意附件"
     },
     "bottomActions": {
@@ -9646,7 +9651,7 @@
     },
     "whitelist": {
       "title": "放行名单",
-      "subtitle": "命中信封发件人即整封放行、不进检测（不以 Header-From ��行）",
+      "subtitle": "命中信封发件��即整封放行、不进检测（不以 Header-From ��行）",
       "value": "邮箱 / 域名",
       "valuePlaceholder": "boss@corp.com 或 corp.com",
       "matchType": "类型",
@@ -9858,7 +9863,7 @@
     },
     "eml": {
       "title": "邮件原文",
-      "description": "查看邮件头、复检依据与原文。",
+      "description": "查看邮���头、复检依据与原文。",
       "sender": "发件人",
       "subject": "主题",
       "messageUuid": "Message-UUID",
@@ -10051,7 +10056,7 @@
       "insertVar": "插入变量",
       "preview": "预览通知内容",
       "highImmediate": "发现高危威胁时立即通知（置信度 ≥ 90%）",
-      "mediumImmediate": "发现中危威胁且置信度达到阈值时立即通知",
+      "mediumImmediate": "发现中危威胁且置信��达到阈值时立即通知",
       "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
       "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇总。",
       "lowDigest": "低危威胁每日汇总时间",
@@ -10612,7 +10617,7 @@
       "itemPendingReportDesc": "{n} 条"
     },
     "agents": {
-      "title": "智能体运行概况",
+      "title": "智能体��行概况",
       "enabled": "启用",
       "abnormal": "异常",
       "todayDetected": "今日检出 {n}",
@@ -11131,7 +11136,7 @@
     "auth_attempt": {
       "data_format_invalid": "认证记录数据格式不正确",
       "data_required": "未提供认证记录数据",
-      "request_body_read_failed": "读取请求内容失败，请重试",
+      "request_body_read_failed": "读取请求内���失败，请重试",
       "success_value_invalid": "认证结果取值无效，只能是：{allowed}"
     },
     "contact_source": {
@@ -11143,7 +11148,7 @@
       "csv_auto_sync_unsupported": "CSV 数据源不支持自动同步，请改用手动导入",
       "csv_preview_failed": "读取 CSV 预览失败，请确认文件格式正确后重试",
       "department_id_unmapped": "部门必填字段「部门ID」尚未映射，请在字段映射中指定它对应的列",
-      "email_field_unmapped": "必填字段「邮箱」尚未映射，请在字段映射中指定它对应的列",
+      "email_field_unmapped": "必填字段「邮箱」尚��映射，请在字段映射中指定它对应的列",
       "encryption_key_missing": "服务端未配置通讯录加密密钥（至少 32 字节），无法保存或测试含密码等敏感字段的配置，请联系管理员配置后重试",
       "file_store_uninitialized": "服务端未启用 CSV 文件存储，请联系管理员配置后重试",
       "multipart_parse_failed": "上传表单解析失败，请重新提交",
@@ -11925,7 +11930,7 @@
     },
     "phishing_agent": {
       "config_not_initialized": "钓鱼检测配置尚未初始化，请联系管理员",
-      "config_version_conflict": "配置已被其他人修改（冲突域：{conflict_domains}），请刷新后重试",
+      "config_version_conflict": "配��已被其他人修改（冲突域：{conflict_domains}），请刷新后重试",
       "control_revision_conflict": "开关状态已被其他人修改，请刷新后重试",
       "admission_required": "启用钓鱼检测前，至少需要一条启用中的准入规则",
       "rule_required_while_enabled": "钓鱼检测处于启用状态，不能删除或停用最后一条启用中的准入规则"

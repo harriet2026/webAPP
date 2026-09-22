@@ -728,6 +728,37 @@ export function SenderFilterDrawer({
                     </div>
                   </div>
 
+                  {/* 运行模式（仅黑名单规则支持；与执行动作是相互独立的两个维度——
+                      运行模式决定命中后是否真实处置，执行动作决定处置成什么，
+                      因此单独成卡，不放进"执行动作"卡片内） */}
+                  {!isComplexEdit && watchListType === 'blacklist' && (
+                  <div className="rounded-lg border bg-muted/30 p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="h-5 w-1 rounded-full bg-amber-500" />
+                      <h3 className="font-medium">{t('senderFilter.sectionRunMode')}</h3>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Label className={labelCls}>{t('senderFilter.runMode')}</Label>
+                      <div className="flex-1">
+                        <Select
+                          value={watchRunMode ?? 'realtime'}
+                          onValueChange={(value) => form.setValue('run_mode', value as SenderFilterRunMode, { shouldDirty: true })}
+                        >
+                          <SelectTrigger data-testid="sender-filter-run-mode" className="w-40">
+                            <SelectValue>{watchRunMode === 'observe' ? t('senderFilter.runModeValue_observe') : t('senderFilter.runModeValue_realtime')}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent alignItemWithTrigger={false}>
+                            <SelectItem value="realtime">{t('senderFilter.runModeValue_realtime')}</SelectItem>
+                            <SelectItem value="observe">{t('senderFilter.runModeValue_observe')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="mt-1 text-xs text-muted-foreground">{t('senderFilter.runModeHint')}</p>
+                      </div>
+                    </div>
+                  </div>
+                  )}
+
                   {/* 执行动作（复杂规则不可改动作，隐藏整卡） */}
                   {!isComplexEdit && (
                   <div className="rounded-lg border bg-muted/30 p-5">
@@ -737,26 +768,6 @@ export function SenderFilterDrawer({
                     </div>
 
                   <div className="space-y-4">
-                    {watchListType === 'blacklist' && (
-                      <div className="flex items-center gap-3">
-                        <Label className={labelCls}>运行模式</Label>
-                        <div className="flex-1">
-                          <Select
-                            value={watchRunMode ?? 'realtime'}
-                            onValueChange={(value) => form.setValue('run_mode', value as SenderFilterRunMode, { shouldDirty: true })}
-                          >
-                            <SelectTrigger data-testid="sender-filter-run-mode" className="w-40">
-                              <SelectValue>{watchRunMode === 'observe' ? '观察模式' : '实时执行'}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent alignItemWithTrigger={false}>
-                              <SelectItem value="realtime">实时执行</SelectItem>
-                              <SelectItem value="observe">观察模式</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <p className="mt-1 text-xs text-muted-foreground">观察模式只记录命中和拟执行动作，不改变邮件实际处置。</p>
-                        </div>
-                      </div>
-                    )}
                     {/* 动作 */}
                       <div className="flex items-center gap-3">
                         <Label className={labelCls}>{t('senderFilter.action')}</Label>
