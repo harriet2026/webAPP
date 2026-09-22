@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { AlertCircle, Gauge, RefreshCw, ShieldX } from 'lucide-react';
@@ -48,7 +47,6 @@ export function RuleEffectivenessPage() {
   const [moduleOptions, setModuleOptions] = useState<ModuleFilterOption[]>([]);
   const [durationBuckets, setDurationBuckets] = useState<ObserveDurationBucket[]>([]);
   const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
-  const [versionId, setVersionId] = useState<string>('current');
   const { scopeActive } = useSecurityScope(scopeTenantId);
 
   const { startDate, endDate } = useMemo(
@@ -69,7 +67,6 @@ export function RuleEffectivenessPage() {
     similarDetectionTypes: effectiveSimilarDetectionTypes,
     durationBuckets,
     scopeTenantId,
-    versionId: versionId === 'current' ? undefined : versionId,
   });
 
   // 携带 source=rule_effectiveness 标记，供目标配置页（策略流水线/智能体中心）
@@ -96,23 +93,6 @@ export function RuleEffectivenessPage() {
   return (
     <PageShell data-testid="rule-effectiveness-page">
       <PageHeader title={t('title')} description={t('subtitle')} icon={Gauge} />
-
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <span className="text-sm text-muted-foreground">策略效能版本</span>
-        <Select value={versionId} onValueChange={(value) => setVersionId(value ?? 'current')}>
-          <SelectTrigger className="w-[180px]" aria-label="选择策略效能版本">
-            <SelectValue placeholder="当前有效版本" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="current">当前有效版本</SelectItem>
-            {data?.rows.flatMap((row) => row.version_history.map((version) => (
-              <SelectItem key={`${row.id}-v${version.version_no}`} value={`${row.id}:v${version.version_no}`}>
-                {row.sub_strategy_name_snapshot} · v{version.version_no}
-              </SelectItem>
-            )))}
-          </SelectContent>
-        </Select>
-      </div>
 
       <FilterBar
         timeRange={timeRange}
