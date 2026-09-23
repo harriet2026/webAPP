@@ -32,6 +32,7 @@ interface SenderFilterTableProps {
   onEdit: (rule: SenderFilterRuleView) => void;
   onDelete: (rule: SenderFilterRuleView) => void;
   onToggle: (id: number, isActive: boolean) => void;
+  onToggleObserve: (id: number, observeMode: boolean) => void;
   groups: SenderFilterGroups;
   isLoading: boolean;
 }
@@ -69,6 +70,7 @@ export function SenderFilterTable({
   onEdit,
   onDelete,
   onToggle,
+  onToggleObserve,
   groups,
   isLoading: _isLoading,
 }: SenderFilterTableProps) {
@@ -159,6 +161,18 @@ export function SenderFilterTable({
           checked={row.original.rule.is_active}
           onCheckedChange={(isActive) => onToggle(row.original.rule.id, isActive)}
           aria-label={row.original.rule.is_active ? t('common.disabled') : t('common.enabled')}
+        />
+      ),
+    },
+    {
+      id: 'observe_mode',
+      header: t('senderFilter.observeMode'),
+      cell: ({ row }) => (
+        <Switch
+          data-testid="sender-filter-row-observe-mode"
+          checked={row.original.observe_mode}
+          onCheckedChange={(observeMode) => onToggleObserve(row.original.rule.id, observeMode)}
+          aria-label={row.original.observe_mode ? t('common.disabled') : t('common.enabled')}
         />
       ),
     },

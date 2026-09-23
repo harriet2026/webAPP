@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -187,6 +188,8 @@ const ruleSchema = z.object({
   // tenant_admin 收窄到 100-1000），由下面的 makeRuleSchema 覆盖。
   priority: z.number({ error: 'priorityRequired' }).int('priorityInteger'),
   is_active: z.boolean(),
+  // 观察模式（mock）：本次仅前端交付，无后端字段承载，默认关闭。
+  observe_mode: z.boolean(),
   valid_until: z.string().optional(),
   list_type: z.enum(['blacklist', 'whitelist']),
   action: z.enum(['accept', 'reject', 'quarantine', 'audit', 'discard']),
@@ -328,6 +331,7 @@ export function SenderFilterDrawer({
       description: '',
       priority: 500,
       is_active: true,
+      observe_mode: false,
       valid_until: '',
       list_type: 'blacklist',
       action: 'reject',
@@ -345,6 +349,7 @@ export function SenderFilterDrawer({
           description: rule.rule.description || '',
           priority: rule.rule.priority,
           is_active: rule.rule.is_active,
+          observe_mode: rule.observe_mode ?? false,
           // date-only field: keep the YYYY-MM-DD head of any stored timestamp.
           valid_until: rule.rule.valid_until ? rule.rule.valid_until.slice(0, 10) : '',
           list_type: rule.resolved.list_type,
@@ -362,6 +367,7 @@ export function SenderFilterDrawer({
           description: rule.rule.description || '',
           priority: rule.rule.priority,
           is_active: rule.rule.is_active,
+          observe_mode: rule.observe_mode ?? false,
           valid_until: rule.rule.valid_until ? rule.rule.valid_until.slice(0, 10) : '',
           list_type: rule.list_type,
           action: (rule.rule.action || 'reject') as SenderFilterAction,
@@ -376,6 +382,7 @@ export function SenderFilterDrawer({
           description: '',
           priority: getDefaultPriority(listTypeTab),
           is_active: true,
+          observe_mode: false,
           valid_until: '',
           list_type: listTypeTab,
           action: listTypeTab === 'whitelist' ? 'accept' : 'reject',
@@ -736,6 +743,31 @@ export function SenderFilterDrawer({
                               })}
                             </p>
                           )}
+                        </div>
+                      </div>
+
+                      {/* 观察模式 */}
+                      <div className="flex items-center gap-3">
+                        <Label htmlFor="sender-filter-observe-mode" className={labelCls}>
+                          {t('senderFilter.observeMode')}
+                          <Tooltip>
+                            <TooltipTrigger render={<HelpCircle data-testid="sender-filter-observe-mode-help" className="h-3.5 w-3.5 text-muted-foreground ml-1" />} />
+                            <TooltipContent data-testid="sender-filter-observe-mode-help-tooltip">
+                              <p>{t('senderFilter.observeModeHelp')}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </Label>
+                        <div className="flex-1 flex items-center gap-2">
+                          <Switch
+                            id="sender-filter-observe-mode"
+                            data-testid="sender-filter-observe-mode"
+                            checked={form.watch('observe_mode')}
+                            onCheckedChange={(checked) => form.setValue('observe_mode', checked, { shouldDirty: true })}
+                            aria-label={form.watch('observe_mode') ? t('common.enabled') : t('common.disabled')}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {form.watch('observe_mode') ? t('common.enabled') : t('common.disabled')}
+                          </span>
                         </div>
                       </div>
                     </div>

@@ -83,6 +83,7 @@ describe('filterSenderFilterRules (GT-11721 状态筛选)', () => {
       list_id_display: formatListId(rule, listType),
       resolved: resolveSenderFilterRule(rule),
       is_complex: false,
+      observe_mode: false,
     };
   };
 

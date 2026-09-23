@@ -16,7 +16,7 @@ import { listTenantDomains } from '@/lib/api/mail-routing';
 import type { SenderFilterStatusFilter } from '@/lib/api/sender-filter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SenderFilterRuleView, SenderFilterFormData, ListType, SenderFilterGroups } from '@/types/sender-filter';
-import type { CreateRuleRequest, UpdateRuleRequest } from '@/types/unified-rules';
+import type { CreateRuleRequest, UpdateRuleRequest, Rule } from '@/types/unified-rules';
 import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
@@ -45,6 +45,9 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [importExportTab, setImportExportTab] = useState<'export' | 'import'>('export');
+  // 观察模式：本次为纯前端交付（mock），后端尚无承载字段，先用本地态记录每条
+  // 规则的开关值，按 rule.id 索引；不参与任何 CRUD 请求体。
+  const [observeModeById, setObserveModeById] = useState<Record<number, boolean>>({});
 
   const senderFilterImportTemplate = useMemo(
     () => buildSenderFilterImportTemplate(effectiveTenantId ?? user?.tenant_id),
@@ -122,9 +125,10 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
         list_id_display: formatListId(rule, lt),
         resolved,
         is_complex: resolved === null,
+        observe_mode: observeModeById[rule.id] ?? false,
       };
     });
-  }, [rulesData]);
+  }, [rulesData, observeModeById]);
 
   const filteredRules = useMemo(
     () => filterSenderFilterRules(ruleViews, { listType: listTypeTab, search, status: statusFilter }),
@@ -163,6 +167,15 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
     },
   });
 
+  // 观察模式（mock）：仅更新本地态，无对应后端接口。
+  const handleToggleObserve = useCallback(
+    (id: number, observeMode: boolean) => {
+      setObserveModeById((prev) => ({ ...prev, [id]: observeMode }));
+      toast.success(t('common.updateSuccess'));
+    },
+    [t],
+  );
+
   const handleOpenDrawer = useCallback(
     (rule?: SenderFilterRuleView) => {
       setEditingRule(rule || null);
@@ -173,7 +186,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
 
   const handleSubmit = useCallback(
     async (data: SenderFilterFormData) => {
-      // GT-11486: 复杂规则（高级编辑器/API 创建，简易抽屉无法表达其条件）
+      // GT-11486: 复杂规则（高级编辑器/API 创建，简易抽屉��法表达其条件）
       // 只允许更新基础字段。部分更新不携带 condition_tree/metadata/action/tags，
       // 后端保留原值，避免把复杂条件覆写成简易表单拼出来的条件。
       if (editingRule && data.is_complex) {
@@ -186,6 +199,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             valid_until: toRFC3339(data.valid_until) ?? null,
           };
           await apiRequest(`/unified-rules/${editingRule.rule.id}`, { method: 'PUT', body: payload });
+          setObserveModeById((prev) => ({ ...prev, [editingRule.rule.id]: data.observe_mode ?? false }));
           queryClient.invalidateQueries({ queryKey });
           toast.success(t('common.updateSuccess'));
         } catch (err) {
@@ -226,6 +240,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             valid_until: toRFC3339(data.valid_until) ?? null,
           };
           await apiRequest(`/unified-rules/${editingRule.rule.id}`, { method: 'PUT', body: payload });
+          setObserveModeById((prev) => ({ ...prev, [editingRule.rule.id]: data.observe_mode ?? false }));
         } else {
           const payload: CreateRuleRequest = {
             name: data.name,
@@ -241,7 +256,10 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             tags,
             valid_until: toRFC3339(data.valid_until) ?? null,
           };
-          await apiRequest('/unified-rules', { method: 'POST', body: payload });
+          const created = await apiRequest<Rule>('/unified-rules', { method: 'POST', body: payload });
+          if (created?.id) {
+            setObserveModeById((prev) => ({ ...prev, [created.id]: data.observe_mode ?? false }));
+          }
         }
         queryClient.invalidateQueries({ queryKey });
         toast.success(t(editingRule ? 'common.updateSuccess' : 'common.createSuccess'));
@@ -370,6 +388,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             onEdit={(rule) => handleOpenDrawer(rule)}
             onDelete={(rule) => setDeleteTarget({ id: rule.rule.id, name: rule.rule.name })}
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
+            onToggleObserve={handleToggleObserve}
             groups={groupsData ?? { senderGroups: [], ipGroups: [] }}
             isLoading={pageLoading}
           />

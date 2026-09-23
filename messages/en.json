@@ -4169,6 +4169,8 @@
     "description": "Description",
     "priority": "Priority",
     "priorityHelp": "Higher values mean higher priority. Rules with higher priority are matched first.",
+    "observeMode": "Observe Mode",
+    "observeModeHelp": "When enabled, the rule only logs hits without taking action, useful for verifying rule behavior",
     "senderType": "Sender",
     "drawerSubtitleBlacklist": "Configure sender blacklist rules to block or handle specified senders",
     "drawerSubtitleWhitelist": "Configure sender whitelist rules, trusted senders are allowed directly",

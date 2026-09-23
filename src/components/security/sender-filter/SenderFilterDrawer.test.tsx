@@ -223,6 +223,7 @@ describe('SenderFilterDrawer (demo rewrite)', () => {
         list_type: 'blacklist',
       },
       is_complex: false,
+      observe_mode: false,
     };
     renderDrawer({ editingRule });
     expect(screen.getByDisplayValue('可疑发件人')).toBeInTheDocument();
@@ -261,6 +262,7 @@ const complexView: SenderFilterRuleView = {
   list_id_display: 'BL-20260101-003',
   resolved: null,
   is_complex: true,
+  observe_mode: false,
 };
 
 describe('SenderFilterDrawer 复杂规则编辑 (GT-11486)', () => {

@@ -44,6 +44,7 @@ function baseView(overrides: Partial<SenderFilterRuleView> = {}): SenderFilterRu
       list_type: 'blacklist',
     },
     is_complex: false,
+    observe_mode: false,
     ...overrides,
   };
 }
@@ -66,6 +67,7 @@ function renderTable(
       onEdit={vi.fn()}
       onDelete={vi.fn()}
       onToggle={vi.fn()}
+      onToggleObserve={vi.fn()}
       groups={groups}
       isLoading={false}
     />,
