@@ -91,6 +91,7 @@ export const PERM_MODULES: ModuleMeta[] = [
   {
     key: 'statistics', labelKey: 'sidebar.statistics', supportApprove: false, supportDelete: false,
     children: [
+      sub('rule-effectiveness', 'sidebar.ruleEffectiveness', false, false),
       sub('security-overview', 'sidebar.securityOverview', false, false),
       sub('delivery-traffic-analysis', 'sidebar.deliveryTraffic', false, false),
       sub('ops-top-trend', 'sidebar.opsTopTrend', false, false),
@@ -301,6 +302,7 @@ export const SUBMODULE_ROUTE_MAP: Record<string, RouteEntry> = {
   'monitor-alerts': route('/monitoring/alerts'),
 
   // ---- statistics ----
+  'rule-effectiveness': route('/statistics/rule-effectiveness', 'rule-effectiveness'),
   'security-overview': route('/statistics/security-overview', 'security-overview'),
   'delivery-traffic-analysis': route('/statistics/delivery-traffic', 'delivery-traffic-analysis'),
   'ops-top-trend': route('/statistics/ops-top-trend', 'ops-top-trend'),

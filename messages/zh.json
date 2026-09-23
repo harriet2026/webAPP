@@ -140,7 +140,11 @@
     "unsavedChangesLeaveDesc": "您在此页面有未保存的修改。离开后这些修改将丢失，请选择操作。",
     "keepEditing": "继续编辑",
     "discardAndLeave": "放弃修改并离开",
-    "saveAndLeave": "保存后离开"
+    "saveAndLeave": "保存后离开",
+    "ruleEffectivenessContext": {
+      "label": "来自规则效能统计：",
+      "back": "返回规则效能统计"
+    }
   },
   "ruleImportExport": {
     "trigger": "统一导入 / 导出",
@@ -383,7 +387,8 @@
     "emailLogs": "邮件日志",
     "investigations": "Agent 调查",
     "tenantSystemManagement": "组织与成员",
-    "monitorDashboard": "监控总览"
+    "monitorDashboard": "监控总览",
+    "ruleEffectiveness": "规则效能统计"
   },
   "agentCenterOverview": {
     "centerTitle": "智能体中心",
@@ -6379,26 +6384,26 @@
           "readOnlyTooltip": "下钻视图仅供查看",
           "selected": "已选中 {n} 个收件人",
           "empty": "暂无收件人处置记录",
-      "actionSuccess": "操作成功",
-      "actionFailed": "操作失败",
-      "mailStatusResult": "邮件状态：{status}",
-      "operationResult": "{action}结果：{result}",
-      "resultSuccess": "成功",
-      "recallUnsupportedBackend": "该收件人的邮箱系统不支持召回",
-      "recallTrackingIdMissing": "缺少邮件系统追踪标识，无法发起召回",
-      "recallNotDelivered": "该收件人尚未确认投递成功",
-      "recallDeliveryStatusUnknown": "该收件人的投递状态未知，无法安全召回",
-      "recallNoDeliveredRecipients": "没有可召回的已投递收件人",
-      "recallBackendResolutionFailed": "无法确认收件人的邮箱系统，请稍后重试",
-      "recallRequestCreateFailed": "召回任务创建失败，请稍后重试",
-      "recallNoRecallableRecipients": "当前收件人不具备召回条件",
-      "recallMailNotFound": "邮件记录不存在或已删除",
-      "recallForbidden": "无权召回这封邮件",
-      "redeliverSuccess": "重投请求已提交，投递结果稍后在状态中更新",
-      "redeliverUnavailable": {
-        "original_expired": "原文未保留或已超保留期，无法重新投递",
-        "storage_unavailable": "原文存储节点暂不可用，请稍后刷新重试"
-      },
+          "actionSuccess": "操作成功",
+          "actionFailed": "操作失败",
+          "mailStatusResult": "邮件状态：{status}",
+          "operationResult": "{action}结果：{result}",
+          "resultSuccess": "成功",
+          "recallUnsupportedBackend": "该收件人的邮箱系统不支持召回",
+          "recallTrackingIdMissing": "缺少邮件系统追踪标识，无法发起召回",
+          "recallNotDelivered": "该收件人尚未确认投递成功",
+          "recallDeliveryStatusUnknown": "该收件人的投递状态未知，无法安全召回",
+          "recallNoDeliveredRecipients": "没有可召回的已投递收件人",
+          "recallBackendResolutionFailed": "无法确认收件人的邮箱系统，请稍后重试",
+          "recallRequestCreateFailed": "召回任务创建失败，请稍后重试",
+          "recallNoRecallableRecipients": "当前收件人不具备召回条件",
+          "recallMailNotFound": "邮件记录不存在或已删除",
+          "recallForbidden": "无权召回这封邮件",
+          "redeliverSuccess": "重投请求已提交，投递结果稍后在状态中更新",
+          "redeliverUnavailable": {
+            "original_expired": "原文未保留或已超保留期，无法重新投递",
+            "storage_unavailable": "原文存储节点暂不可用，请稍后刷新重试"
+          },
           "deferredRetrying": "投递暂缓，系统自动重试中",
           "redeliverDialog": {
             "title": "重新投递",
@@ -6765,6 +6770,14 @@
       "falseNegativeRate": "漏判率",
       "countOf": "共 {total} 封已分类邮件中的 {count} 封",
       "summary": "区间内已纠正 {corrected} 封 / 已分类 {classified} 封"
+    },
+    "ruleEffectivenessContext": {
+      "label": "来自规则效能统计：",
+      "observedSince": "统计时间：{date}",
+      "back": "返回规则效能统计",
+      "counts": "命中 {hits} 份，涉及 {messages} 封邮件，其中 {missing} 封日志不可用。",
+      "matches": "查看命中收件人事实（当前页，最多 100 条）",
+      "orphans": "查看日志不可用的命中事实（当前页，最多 100 条）"
     }
   },
   "advancedRulesFeature": {
@@ -8921,10 +8934,39 @@
       "manual_hold": "人工暂扣",
       "unknown": "未知"
     },
-    "policyDisposition": { "proceed": "进行下一步", "audit": "审核", "quarantine": "隔离", "discard": "丢弃", "undecided": "未判定" },
-    "taskStatus": { "submitting": "提交中", "pending": "等待中", "processing": "检测中", "running": "运行中", "completed": "已完成", "failed": "失败", "expired": "已过期", "needs_approval": "待批准", "cancelled": "已取消", "partial": "部分完成", "unknown": "未知" },
-    "directionValue": { "inbound": "入站", "outbound": "外发", "internal": "域内", "unknown": "未知" },
-    "evidenceSeverity": { "low": "低", "medium": "中", "high": "高", "critical": "严重", "unknown": "未知" },
+    "policyDisposition": {
+      "proceed": "进行下一步",
+      "audit": "审核",
+      "quarantine": "隔离",
+      "discard": "丢弃",
+      "undecided": "未判定"
+    },
+    "taskStatus": {
+      "submitting": "提交中",
+      "pending": "等待中",
+      "processing": "检测中",
+      "running": "运行中",
+      "completed": "已完成",
+      "failed": "失败",
+      "expired": "已过期",
+      "needs_approval": "待批准",
+      "cancelled": "已取消",
+      "partial": "部分完成",
+      "unknown": "未知"
+    },
+    "directionValue": {
+      "inbound": "入站",
+      "outbound": "外发",
+      "internal": "域内",
+      "unknown": "未知"
+    },
+    "evidenceSeverity": {
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "critical": "严重",
+      "unknown": "未知"
+    },
     "detectionMode": {
       "realtime": "实时检测",
       "observe": "观察模式"
@@ -9072,7 +9114,8 @@
     },
     "navPhishingAgent": "钓鱼邮件检测智能体",
     "collapseMenu": "折叠菜单",
-    "expandMenu": "展开菜单"
+    "expandMenu": "展开菜单",
+    "urlVerdict": {}
   },
   "phishingConfig": {
     "pageTitle": "检测引擎配置",
@@ -9222,15 +9265,29 @@
       "timeoutAsyncHint": "实时等待超时后先投递，并在后台继续检测与按需召回。",
       "confidencePolicy": "置信度分级处置",
       "confidenceHint": "四档连续覆盖 0–100；只需调整三个共享分界点。",
-      "cutoff": { "low": "低风险起点", "medium": "中风险起点", "high": "高风险起点" },
+      "cutoff": {
+        "low": "低风险起点",
+        "medium": "中风险起点",
+        "high": "高风险起点"
+      },
       "invalidCutoffs": "三个分界点必须严格递增，并位于 0–100 之间。",
       "invalidTimeoutWindow": "实时等待须为 1–300 分钟，后台续测须为 1–60 分钟。",
       "range": "置信度区间",
       "risk": "风险等级",
       "dispositionLabel": "处置策略",
       "markSetting": "附加标记",
-      "riskLevel": { "suspicious": "可疑", "low": "低风险", "medium": "中风险", "high": "高风险" },
-      "disposition": { "proceed": "进行下一步", "audit": "审核", "quarantine": "隔离", "discard": "丢弃" },
+      "riskLevel": {
+        "suspicious": "可疑",
+        "low": "低风险",
+        "medium": "中风险",
+        "high": "高风险"
+      },
+      "disposition": {
+        "proceed": "进行下一步",
+        "audit": "审核",
+        "quarantine": "隔离",
+        "discard": "丢弃"
+      },
       "markText": "标记文本",
       "markTextRequired": "启用附加标记时，标记文本不能为空。",
       "markTextTooLong": "标记文本不能超过 20 个字符。",
@@ -9271,9 +9328,18 @@
       "loadFailed": "分析参数加载失败",
       "saved": "分析参数已保存",
       "saveFailed": "分析参数保存失败",
-      "netdisk_domain": { "title": "网盘域名识别", "description": "识别邮件中的网盘域名线索。" },
-      "netdisk_extract": { "title": "网盘内容提取", "description": "允许提取可访问的网盘内容用于分析。" },
-      "netdisk_spoof": { "title": "网盘仿冒识别", "description": "识别疑似仿冒网盘页面的线索。" }
+      "netdisk_domain": {
+        "title": "网盘域名识别",
+        "description": "识别邮件中的网盘域名线索。"
+      },
+      "netdisk_extract": {
+        "title": "网盘内容提取",
+        "description": "允许提取可访问的网盘内容用于分析。"
+      },
+      "netdisk_spoof": {
+        "title": "网盘仿冒识别",
+        "description": "识别疑似仿冒网盘页面的线索。"
+      }
     },
     "bands": {
       "title": "置信度分级处置",
@@ -10937,6 +11003,9 @@
         "never_synced": "通讯录从未同步成功",
         "last_sync_failed": "最近一次通讯录同步失败",
         "stale": "通讯录数据已超过 24 小时未更新"
+      },
+      "badge": {
+        "alias": "别名递归解析"
       }
     },
     "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
@@ -12024,7 +12093,6 @@
   "assessment": {
     "retainedRange": "保留来源字节范围 [{start}, {end})，已捕获来源共 {bytes} 字节",
     "retentionScope": "引用仅覆盖此处保留的内容，不包含省略的内容。",
-
     "title": "判断依据",
     "version": "报告版本 {version}",
     "subjectKinds": {
@@ -12120,7 +12188,6 @@
       "report_draft_invalid": "判断报告草稿无效，未发布报告。业务分析结果仍然有效。",
       "report_reference_invalid": "判断报告引用无效，未发布报告。业务分析结果仍然有效。",
       "report_budget_exceeded": "判断报告超出预算，未发布报告。业务分析结果仍然有效。",
-
       "legacy_result": "早期结果未包含结构化报告。",
       "compatibility_projection": "当前为临时兼容结果，此处没有完整报告。",
       "analysis_fallback": "分析使用了回退结果，未保留模型判断报告。",
@@ -12191,6 +12258,151 @@
         "check_rbl_blocklist": "RBL 黑名单查询"
       },
       "mailIdentity": "邮件身份信息"
+    }
+  },
+  "ruleEffectiveness": {
+    "title": "规则效能统计",
+    "subtitle": "统计当前观察模式策略/规则的命中情况，辅助判断是否转为正式生效",
+    "noData": "暂无数据",
+    "error": {
+      "forbiddenTitle": "无权查看规则效能统计",
+      "forbiddenDescription": "当前账号缺少统计查看权限，请联系管理员授权后重试。",
+      "loadFailedTitle": "规则效能统计加载失败",
+      "loadFailedDescription": "服务暂时不可用或网络异常，请稍后重试。",
+      "retry": "重新加载",
+      "retrying": "正在重试…"
+    },
+    "kpi": {
+      "observingCount": "观察策略数",
+      "totalHits": "观察期总命中数",
+      "avgObservedDays": "平均观察时长",
+      "pendingReviewCount": "待转正策略数",
+      "vsPrevious": "较上期",
+      "days": "天"
+    },
+    "filter": {
+      "timeRange": {
+        "today": "今天",
+        "7d": "近7天",
+        "30d": "近30天",
+        "custom": "自定义"
+      },
+      "customRange": {
+        "start": "开始日期",
+        "end": "结束日期",
+        "error": {
+          "invalid": "请选择起止日期",
+          "order": "结束日期不能早于开始日期",
+          "tooLong": "时间跨度不能超过 {max} 天"
+        }
+      },
+      "modules": {
+        "label": "策略模块",
+        "auth_spoofing": "身份认证与仿冒检测",
+        "similar_detection_similar_email": "相似邮件检测",
+        "similar_detection_same_subject": "相同主题检测",
+        "phishing_detection": "钓鱼检测智能体"
+      },
+      "durationBucket": {
+        "label": "观察时长",
+        "lt7": "小于7天",
+        "7to30": "7~30天",
+        "gt30": "超过30天"
+      }
+    },
+    "wouldBeActions": {
+      "accept": "投递",
+      "quarantine": "隔离",
+      "audit": "审核",
+      "reject": "拒收",
+      "discard": "丢弃",
+      "recall": "召回"
+    },
+    "path": {
+      "authSpoofing": "身份认证与仿冒检测",
+      "protocolCheck": "认证协议检查",
+      "protocolCheckSpf": "SPF 检查",
+      "protocolCheckDkim": "DKIM 检查",
+      "protocolCheckDmarc": "DMARC 检查",
+      "protocolCheckPtr": "PTR 检查",
+      "formatCheck": "基础格式检查",
+      "formatCheckMailfromEmpty": "无效 MAIL FROM",
+      "formatCheckMailfromInvalid": "MAIL FROM 格式错误",
+      "formatCheckEnvelopeMismatch": "信封头不一致",
+      "displayNameSpoofing": "展示名仿冒检测",
+      "similarDomain": "相似域名检测",
+      "similarDetection": "相似检测",
+      "similarEmail": "相似邮件检测",
+      "sameSubject": "相同主题检测",
+      "directionReceive": "收件方向",
+      "directionSend": "发件方向",
+      "directionInternal": "内部方向",
+      "aggregateScope": "全方向聚合",
+      "phishingDetection": "钓鱼检测智能体"
+    },
+    "timeoutAlert": {
+      "warning": "有 {count} 个策略已观察超过 {days} 天，待转正评估",
+      "viewDetails": "查看",
+      "drawerTitle": "超时观察对象清单",
+      "observedDays": "已观察 {days} 天",
+      "hits": "命中 {count} 次",
+      "goToConfig": "前往策略配置"
+    },
+    "detail": {
+      "title": "效能明细",
+      "empty": "当前筛选条件下没有处于观察模式的策略/规则",
+      "expandRow": "展开查看动作分布",
+      "deletedSuffix": "（已删除）",
+      "deletedTooltip": "该规则已被删除，无法前往配置页",
+      "daysValue": "{days} 天",
+      "dataInsufficient": "样本不足",
+      "notApplicable": "不适用",
+      "notApplicableTooltip": "该规则的配置动作不属于此风险计算口径",
+      "versionBadge": "v{version}",
+      "versionResetTooltip": "该策略在观察期内被实质性修改过，观察起始时间已重新计算，历史版本的命中数据不计入当前统计，可在下方版本历史中查看",
+      "versionHistory": {
+        "title": "版本记录（当前版本计入当前统计，历史版本仅供审计追溯）",
+        "empty": "自纳入观察以来未发生实质性变更",
+        "hits": "命中 {count} 次",
+        "loading": "正在加载…",
+        "failed": "加载失败或没有查看权限",
+        "retry": "重试",
+        "snapshot": "配置快照",
+        "changes": "变更内容",
+        "field": "配置项",
+        "before": "变更前",
+        "after": "变更后",
+        "current": "当前版本",
+        "previous": "上一页",
+        "next": "下一页",
+        "first_observation": "首次开启观察",
+        "configuration_changed": "实质性配置变更",
+        "observation_reopened": "重新开启观察",
+        "difference_unavailable": "变更内容暂不可用",
+        "incomplete": "历史数据未完整收集",
+        "change": "{field}：{before} → {after}",
+        "changeSeparator": "；",
+        "actionField": "执行动作",
+        "proceed": "进行下一步",
+        "enabled": "启用",
+        "disabled": "停用",
+        "unset": "未设置"
+      },
+      "col": {
+        "path": "策略路径",
+        "observedSince": "观察起始时间",
+        "observedDays": "观察时长",
+        "hits": "命中数",
+        "falsePositiveRisk": "误判风险",
+        "falseNegativeRisk": "漏判风险",
+        "actions": "操作"
+      },
+      "tooltip": {
+        "falsePositiveRisk": "配置动作预期拦截、实际结果为投递或召回的差异比例，仅为风险提示，不代表真实误判率。",
+        "falseNegativeRisk": "配置动作预期投递、实际结果为隔离、审核、拒收、丢弃或召回的差异比例，仅为风险提示，不代表真实漏判率。"
+      },
+      "viewHits": "查看命中详情",
+      "goToConfig": "前往策略配置"
     }
   }
 }

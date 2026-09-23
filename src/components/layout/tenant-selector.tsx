@@ -24,9 +24,10 @@ interface TenantSelectorProps {
   value?: number | null;
   onChange?: (tenantId: number | null) => void;
   className?: string;
+  disabled?: boolean;
 }
 
-export function TenantSelector({ value, onChange, className }: TenantSelectorProps = {}) {
+export function TenantSelector({ value, onChange, className, disabled }: TenantSelectorProps = {}) {
   const { isSystemAdmin, selectedTenantId, setSelectedTenant } = useAuth();
   const unsavedGuard = useOptionalUnsavedGuard();
   const t = useTranslations('header');
@@ -113,6 +114,7 @@ export function TenantSelector({ value, onChange, className }: TenantSelectorPro
 
   return (
     <Select
+      disabled={disabled}
       items={selectItems}
       value={currentTenantId?.toString() ?? 'all'}
       onValueChange={handleValueChange}

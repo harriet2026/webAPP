@@ -26,6 +26,7 @@ import { SimilarDetectionPage } from '@/components/security/similar-detection/Si
 import { MailMarkingPage } from '@/components/security/mail-marking/MailMarkingPage';
 import { AdvancedFilterRulesModule } from '@/components/security/advanced-filter-rules/AdvancedFilterRulesModule';
 import { PipelinePolicyCard, PipelineDrawerNavButton, type PipelinePolicy } from '@/components/security/pipeline-policy-card';
+import { BackToContextBanner } from '@/components/shared/back-to-context-banner';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
@@ -216,6 +217,15 @@ export function PolicyPipelinePage() {
   // GT-11636: 多租户形态 + 租户视角下，阶段1 IP策略由平台统一管控
   const lockStage1 = caps.multiTenant && effectiveViewer === 'tenant';
   const deepLinkAllowed = !!deepLink && !(deepLink.stage === 1 && lockStage1);
+  // 规则效能统计跳转来源标记——仅展示上下文提示条与返回入口，不影响 deep-link
+  // 自身的抽屉打开逻辑。目标策略名称沿用该策略在流水线左导航/卡片已有的
+  // nameKey 翻译，不新增一套重复的策略名称文案。
+  const source = searchParams.get('source');
+  const backContextNameKey = (source === 'rule_effectiveness' && deepLinkAllowed)
+    ? [...stage1NavItems, ...stage2NavItems, ...stage3NavItems, ...stage5NavItems].find(
+      (item) => item.key === deepLink.key,
+    )?.nameKey
+    : undefined;
   const [drawerOpen, setDrawerOpen] = useState(deepLinkAllowed);
   const [activeDrawerPolicy, setActiveDrawerPolicy] = useState<{ stage: 1 | 2 | 3 | 5; key: string }>(
     deepLinkAllowed ? deepLink : { stage: 1, key: 'ipFrequency' },
@@ -1017,6 +1027,26 @@ export function PolicyPipelinePage() {
             </div>
 
           </div>
+
+          {backContextNameKey
+            && activeDrawerPolicy.stage === deepLink?.stage
+            && activeDrawerPolicy.key === deepLink?.key && (
+            <div className="px-6 pt-4 flex-shrink-0">
+              <BackToContextBanner
+                label={t('common.ruleEffectivenessContext.label')}
+                contextText={t(backContextNameKey)}
+                backLabel={t('common.ruleEffectivenessContext.back')}
+                onBack={() => {
+                  if (typeof window !== 'undefined' && window.history.length > 1) {
+                    router.back();
+                    return;
+                  }
+                  router.push('/statistics/rule-effectiveness');
+                }}
+                data-testid="pipeline-rule-effectiveness-context-banner"
+              />
+            </div>
+          )}
 
           <TooltipProvider>
           <div className="flex flex-1 overflow-hidden relative">

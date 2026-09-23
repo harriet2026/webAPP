@@ -146,7 +146,11 @@
     "unsavedChangesLeaveDesc": "You have unsaved changes on this page. Leaving will discard them. Please choose an action.",
     "keepEditing": "Keep editing",
     "discardAndLeave": "Discard and leave",
-    "saveAndLeave": "Save and leave"
+    "saveAndLeave": "Save and leave",
+    "ruleEffectivenessContext": {
+      "label": "From Rule Effectiveness Statistics:",
+      "back": "Back to Rule Effectiveness Statistics"
+    }
   },
   "ruleImportExport": {
     "trigger": "Unified import / export",
@@ -373,7 +377,8 @@
     "emailLogs": "Email Logs",
     "investigations": "Investigations",
     "tenantSystemManagement": "Organization & Members",
-    "monitorDashboard": "Monitor Overview"
+    "monitorDashboard": "Monitor Overview",
+    "ruleEffectiveness": "Rule Effectiveness Statistics"
   },
   "agentCenterOverview": {
     "centerTitle": "Agent Center",
@@ -6384,26 +6389,26 @@
           "readOnlyTooltip": "Drill-down view is read-only",
           "selected": "{n} recipients selected",
           "empty": "No recipient disposal records",
-      "actionSuccess": "Action succeeded",
-      "actionFailed": "Action failed",
-      "mailStatusResult": "Mail status: {status}",
-      "operationResult": "{action} result: {result}",
-      "resultSuccess": "Succeeded",
-      "recallUnsupportedBackend": "This recipient's mail system does not support recall",
-      "recallTrackingIdMissing": "The mail-system tracking ID is missing, so recall cannot be started",
-      "recallNotDelivered": "Delivery to this recipient has not been confirmed",
-      "recallDeliveryStatusUnknown": "This recipient's delivery status is unknown, so recall cannot be performed safely",
-      "recallNoDeliveredRecipients": "There are no delivered recipients eligible for recall",
-      "recallBackendResolutionFailed": "The recipient's mail system could not be identified; try again later",
-      "recallRequestCreateFailed": "The recall request could not be created; try again later",
-      "recallNoRecallableRecipients": "No recipients currently meet the recall requirements",
-      "recallMailNotFound": "The mail record does not exist or has been deleted",
-      "recallForbidden": "You do not have permission to recall this mail",
-      "redeliverSuccess": "Redelivery submitted; the delivery result will update in the status shortly",
-      "redeliverUnavailable": {
-        "original_expired": "The original message was not retained or has expired; redelivery is unavailable",
-        "storage_unavailable": "The original-message storage node is temporarily unavailable; refresh and try again later"
-      },
+          "actionSuccess": "Action succeeded",
+          "actionFailed": "Action failed",
+          "mailStatusResult": "Mail status: {status}",
+          "operationResult": "{action} result: {result}",
+          "resultSuccess": "Succeeded",
+          "recallUnsupportedBackend": "This recipient's mail system does not support recall",
+          "recallTrackingIdMissing": "The mail-system tracking ID is missing, so recall cannot be started",
+          "recallNotDelivered": "Delivery to this recipient has not been confirmed",
+          "recallDeliveryStatusUnknown": "This recipient's delivery status is unknown, so recall cannot be performed safely",
+          "recallNoDeliveredRecipients": "There are no delivered recipients eligible for recall",
+          "recallBackendResolutionFailed": "The recipient's mail system could not be identified; try again later",
+          "recallRequestCreateFailed": "The recall request could not be created; try again later",
+          "recallNoRecallableRecipients": "No recipients currently meet the recall requirements",
+          "recallMailNotFound": "The mail record does not exist or has been deleted",
+          "recallForbidden": "You do not have permission to recall this mail",
+          "redeliverSuccess": "Redelivery submitted; the delivery result will update in the status shortly",
+          "redeliverUnavailable": {
+            "original_expired": "The original message was not retained or has expired; redelivery is unavailable",
+            "storage_unavailable": "The original-message storage node is temporarily unavailable; refresh and try again later"
+          },
           "deferredRetrying": "Delivery deferred; retrying automatically",
           "redeliverDialog": {
             "title": "Redeliver",
@@ -6770,6 +6775,14 @@
       "falseNegativeRate": "False Negative Rate",
       "countOf": "{count} of {total} classified",
       "summary": "{corrected} corrected / {classified} classified in range"
+    },
+    "ruleEffectivenessContext": {
+      "label": "From rule effectiveness statistics:",
+      "observedSince": "Reporting window: {date}",
+      "back": "Back to rule effectiveness statistics",
+      "counts": "{hits} recipient hits across {messages} messages; {missing} message logs unavailable.",
+      "matches": "View matched recipient facts (current page, up to 100)",
+      "orphans": "View hits with unavailable logs (current page, up to 100)"
     }
   },
   "advancedRulesFeature": {
@@ -8862,10 +8875,39 @@
       "manual_hold": "Manual Hold",
       "unknown": "Unknown"
     },
-    "policyDisposition": { "proceed": "Proceed", "audit": "Audit", "quarantine": "Quarantine", "discard": "Discard", "undecided": "Undecided" },
-    "taskStatus": { "submitting": "Submitting", "pending": "Pending", "processing": "Processing", "running": "Running", "completed": "Completed", "failed": "Failed", "expired": "Expired", "needs_approval": "Needs approval", "cancelled": "Cancelled", "partial": "Partially completed", "unknown": "Unknown" },
-    "directionValue": { "inbound": "Inbound", "outbound": "Outbound", "internal": "Internal", "unknown": "Unknown" },
-    "evidenceSeverity": { "low": "Low", "medium": "Medium", "high": "High", "critical": "Critical", "unknown": "Unknown" },
+    "policyDisposition": {
+      "proceed": "Proceed",
+      "audit": "Audit",
+      "quarantine": "Quarantine",
+      "discard": "Discard",
+      "undecided": "Undecided"
+    },
+    "taskStatus": {
+      "submitting": "Submitting",
+      "pending": "Pending",
+      "processing": "Processing",
+      "running": "Running",
+      "completed": "Completed",
+      "failed": "Failed",
+      "expired": "Expired",
+      "needs_approval": "Needs approval",
+      "cancelled": "Cancelled",
+      "partial": "Partially completed",
+      "unknown": "Unknown"
+    },
+    "directionValue": {
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "internal": "Internal",
+      "unknown": "Unknown"
+    },
+    "evidenceSeverity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical",
+      "unknown": "Unknown"
+    },
     "detectionMode": {
       "realtime": "Realtime",
       "observe": "Observe Mode"
@@ -9013,7 +9055,8 @@
     },
     "navPhishingAgent": "Phishing Detection Agent",
     "collapseMenu": "Collapse",
-    "expandMenu": "Expand"
+    "expandMenu": "Expand",
+    "urlVerdict": {}
   },
   "phishingConfig": {
     "pageTitle": "Detection Engine Config",
@@ -9163,15 +9206,29 @@
       "timeoutAsyncHint": "Deliver after the realtime timeout, then continue analysis and recall when needed.",
       "confidencePolicy": "Confidence disposition policy",
       "confidenceHint": "Four levels continuously cover 0–100; edit only the three shared cutoffs.",
-      "cutoff": { "low": "Low starts", "medium": "Medium starts", "high": "High starts" },
+      "cutoff": {
+        "low": "Low starts",
+        "medium": "Medium starts",
+        "high": "High starts"
+      },
       "invalidCutoffs": "Cutoffs must be strictly increasing and remain between 0 and 100.",
       "invalidTimeoutWindow": "Realtime wait must be 1–300 minutes and background recheck must be 1–60 minutes.",
       "range": "Confidence range",
       "risk": "Risk level",
       "dispositionLabel": "Disposition",
       "markSetting": "Add-on mark",
-      "riskLevel": { "suspicious": "Suspicious", "low": "Low", "medium": "Medium", "high": "High" },
-      "disposition": { "proceed": "Proceed", "audit": "Audit", "quarantine": "Quarantine", "discard": "Discard" },
+      "riskLevel": {
+        "suspicious": "Suspicious",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "disposition": {
+        "proceed": "Proceed",
+        "audit": "Audit",
+        "quarantine": "Quarantine",
+        "discard": "Discard"
+      },
       "markText": "Mark text",
       "markTextRequired": "Mark text is required when an add-on mark is enabled.",
       "markTextTooLong": "Mark text cannot exceed 20 characters.",
@@ -9212,9 +9269,18 @@
       "loadFailed": "Failed to load analysis parameters",
       "saved": "Analysis parameters saved",
       "saveFailed": "Failed to save analysis parameters",
-      "netdisk_domain": { "title": "Cloud-drive domain detection", "description": "Detect cloud-drive domain signals in messages." },
-      "netdisk_extract": { "title": "Cloud-drive content extraction", "description": "Allow accessible cloud-drive content to be extracted for analysis." },
-      "netdisk_spoof": { "title": "Cloud-drive impersonation", "description": "Detect signals from suspected fake cloud-drive pages." }
+      "netdisk_domain": {
+        "title": "Cloud-drive domain detection",
+        "description": "Detect cloud-drive domain signals in messages."
+      },
+      "netdisk_extract": {
+        "title": "Cloud-drive content extraction",
+        "description": "Allow accessible cloud-drive content to be extracted for analysis."
+      },
+      "netdisk_spoof": {
+        "title": "Cloud-drive impersonation",
+        "description": "Detect signals from suspected fake cloud-drive pages."
+      }
     },
     "bands": {
       "title": "Confidence Bands",
@@ -10878,7 +10944,8 @@
         "never_synced": "Directory has never synced successfully",
         "last_sync_failed": "Last directory sync failed",
         "stale": "Directory data has not been updated for over 24 hours"
-      }
+      },
+      "badge": {}
     },
     "footerNote": "Recipient check runs at the RCPT TO stage, forming end-to-end 'send + receive' protection together with sending behavior control. Threshold range: 1-1000; -1 means unlimited."
   },
@@ -11965,7 +12032,6 @@
   "assessment": {
     "retainedRange": "Retained byte range [{start}, {end}) of {bytes} captured source bytes",
     "retentionScope": "Citations cover only this retained content, excluding omitted content.",
-
     "title": "Assessment factors",
     "version": "Report version {version}",
     "subjectKinds": {
@@ -12061,7 +12127,6 @@
       "report_draft_invalid": "The assessment report draft was invalid and was not published. The business analysis result remains available.",
       "report_reference_invalid": "The assessment report contained invalid references and was not published. The business analysis result remains available.",
       "report_budget_exceeded": "The assessment report exceeded its budget and was not published. The business analysis result remains available.",
-
       "legacy_result": "Earlier result without a structured report.",
       "compatibility_projection": "Temporary compatibility result; no complete report is available here.",
       "analysis_fallback": "Analysis used a fallback; no model assessment report was retained.",
@@ -12132,6 +12197,177 @@
         "check_rbl_blocklist": "RBL lookup"
       },
       "mailIdentity": "Mail identity"
+    }
+  },
+  "ruleEffectiveness": {
+    "title": "Rule Effectiveness Statistics",
+    "subtitle": "Track hits for policies/rules currently in observe mode, to help decide whether to promote them to enforced",
+    "noData": "No data available",
+    "error": {
+      "forbiddenTitle": "No permission to view rule effectiveness statistics",
+      "forbiddenDescription": "Your account lacks statistics permission. Please contact an administrator.",
+      "loadFailedTitle": "Failed to load rule effectiveness statistics",
+      "loadFailedDescription": "The service is temporarily unavailable or a network error occurred. Please retry later.",
+      "retry": "Reload",
+      "retrying": "Retrying…"
+    },
+    "kpi": {
+      "observingCount": "Observing Policies",
+      "totalHits": "Total Hits During Observation",
+      "avgObservedDays": "Avg. Observed Duration",
+      "pendingReviewCount": "Policies Pending Promotion",
+      "vsPrevious": "vs previous",
+      "days": "days"
+    },
+    "filter": {
+      "timeRange": {
+        "today": "Today",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days",
+        "custom": "Custom"
+      },
+      "customRange": {
+        "start": "Start date",
+        "end": "End date",
+        "error": {
+          "invalid": "Please select a start and end date",
+          "order": "End date cannot be earlier than start date",
+          "tooLong": "Range cannot exceed {max} days"
+        }
+      },
+      "modules": {
+        "label": "Policy Module",
+        "auth_spoofing": "Auth & Spoofing Detection",
+        "similar_detection": "Similar Email Detection",
+        "phishing_detection": "Phishing Detection Agent",
+        "sender_filter": "Sender lists",
+        "similar_detection_similar_email": "Similar email detection",
+        "similar_detection_same_subject": "Same subject detection"
+      },
+      "durationBucket": {
+        "label": "Observed Duration",
+        "lt7": "Under 7 days",
+        "7to30": "7-30 days",
+        "gt30": "Over 30 days"
+      }
+    },
+    "wouldBeActions": {
+      "accept": "Deliver",
+      "quarantine": "Quarantine",
+      "audit": "Audit",
+      "reject": "Reject",
+      "discard": "Discard",
+      "recall": "Recall"
+    },
+    "path": {
+      "authSpoofing": "Auth & Impersonation Detection",
+      "protocolCheck": "Authentication Protocol Checks",
+      "protocolCheckSpf": "SPF Check",
+      "protocolCheckDkim": "DKIM Check",
+      "protocolCheckDmarc": "DMARC Check",
+      "protocolCheckPtr": "PTR Check",
+      "formatCheck": "Basic Format Checks",
+      "formatCheckMailfromEmpty": "Empty MAIL FROM",
+      "formatCheckMailfromInvalid": "Invalid MAIL FROM Format",
+      "formatCheckEnvelopeMismatch": "Envelope Header Mismatch",
+      "displayNameSpoofing": "Display Name Spoofing Detection",
+      "similarDomain": "Similar Domain Detection",
+      "similarDetection": "Similar Detection",
+      "similarEmail": "Similar Email Detection",
+      "sameSubject": "Same Subject Detection",
+      "directionReceive": "Inbound Direction",
+      "directionSend": "Outbound Direction",
+      "directionInternal": "Internal Direction",
+      "aggregateScope": "All Directions Aggregated",
+      "phishingDetection": "Phishing Detection Agent",
+      "senderFilter": "Sender lists"
+    },
+    "timeoutAlert": {
+      "warning": "{count} policies have been in observe mode for over {days} days and are pending promotion evaluation.",
+      "viewDetails": "View",
+      "drawerTitle": "Objects Exceeding Observation Timeout",
+      "observedDays": "Observed for {days} days",
+      "hits": "{count} hits",
+      "goToConfig": "Go to Policy Config",
+      "loading": "Loading…",
+      "loadFailed": "Could not load. Close and reopen to retry."
+    },
+    "detail": {
+      "title": "Effectiveness Detail",
+      "empty": "No policies/rules are currently in observe mode under the selected filters",
+      "expandRow": "Expand to view action breakdown",
+      "deletedSuffix": "(deleted)",
+      "deletedTooltip": "This rule has been deleted; cannot navigate to its config page",
+      "daysValue": "{days} days",
+      "dataInsufficient": "Insufficient samples",
+      "notApplicable": "N/A",
+      "notApplicableTooltip": "The rule's configured action does not use this risk calculation",
+      "versionBadge": "v{version}",
+      "versionResetTooltip": "This policy was substantively modified during observation; the observed-since date was recalculated, and prior-version hit data is excluded from current statistics. See version history below.",
+      "versionHistory": {
+        "title": "Version records (current version is included; prior versions are audit only)",
+        "empty": "No substantive changes since it entered observation",
+        "hits": "{count} hits",
+        "loading": "Loading…",
+        "failed": "Unable to load or access denied",
+        "retry": "Retry",
+        "snapshot": "Configuration snapshot",
+        "changes": "Changes",
+        "field": "Setting",
+        "before": "Before",
+        "after": "After",
+        "current": "Current version",
+        "previous": "Previous",
+        "next": "Next",
+        "first_observation": "Observation started",
+        "configuration_changed": "Execution configuration changed",
+        "observation_reopened": "Observation restarted",
+        "difference_unavailable": "Changes unavailable",
+        "incomplete": "Historical collection is incomplete",
+        "change": "{field}: {before} → {after}",
+        "changeSeparator": "; ",
+        "actionField": "Action",
+        "proceed": "Proceed",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "unset": "Not set"
+      },
+      "col": {
+        "module": "Policy Module",
+        "subStrategy": "Sub-strategy/Direction",
+        "observedSince": "Observed Since",
+        "observedDays": "Observed Duration",
+        "hits": "Hits",
+        "falsePositiveRisk": "False-positive risk",
+        "falseNegativeRisk": "False-negative risk",
+        "actions": "Actions",
+        "path": "Policy path"
+      },
+      "tooltip": {
+        "falsePositiveRisk": "The share configured to block but actually delivered or recalled. This is a risk indicator, not a confirmed false-positive rate.",
+        "falseNegativeRisk": "The share configured to deliver but actually quarantined, audited, rejected, discarded, or recalled. This is a risk indicator, not a confirmed false-negative rate."
+      },
+      "viewHits": "View Hit Details",
+      "goToConfig": "Go to Policy Config",
+      "unknownStart": "Start time unknown",
+      "tenantLabel": "Tenant: {name} (ID {id})",
+      "tenantUnknown": "Unknown tenant",
+      "unfinished": "Pending {pending} · Other {other} · Unknown {unknown}",
+      "riskReasons": {
+        "mixed_config": "Configured actions differ during the period",
+        "no_hits": "No hits",
+        "incomplete_outcomes": "Some outcomes are not confirmed",
+        "module_level_only": "Module-level attribution only",
+        "unsupported_configured_action": "Proceed or unknown configured action; risk unavailable",
+        "inconsistent_outcomes": "Outcome data is incomplete"
+      }
+    },
+    "modules": {
+      "sender_filter": "Sender lists"
+    },
+    "quality": {
+      "incomplete": "Data is incomplete. Collection began: {since}; {pending} pending, {excluded} unattributable events.",
+      "unavailable": "Modules unavailable in this product edition are excluded."
     }
   }
 }

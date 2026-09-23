@@ -66,6 +66,7 @@ export const sidebarNavItems: NavItem[] = [
     titleKey: 'sidebar.statistics',
     icon: PieChart,
     children: [
+      { id: 'rule-effectiveness', titleKey: 'sidebar.ruleEffectiveness', href: '/statistics/rule-effectiveness' },
       { id: 'security-overview', titleKey: 'sidebar.securityOverview', href: '/statistics/security-overview' },
       { id: 'delivery-traffic', titleKey: 'sidebar.deliveryTraffic', href: '/statistics/delivery-traffic' },
       { id: 'ops-top-trend', titleKey: 'sidebar.opsTopTrend', href: '/statistics/ops-top-trend' },

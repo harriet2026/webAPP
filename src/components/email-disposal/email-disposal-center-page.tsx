@@ -60,6 +60,7 @@ import {
 import { DetailModal } from "./detail-modal";
 import { ReclassifyDialog } from "./components/reclassify-dialog";
 import { ServerPagination } from "@/components/shared/server-pagination";
+import { RuleEffectivenessContextBanner } from "./rule-effectiveness-context-banner";
 import {
   PageShell,
   PageHeader,
@@ -105,6 +106,14 @@ export function EmailDisposalCenterPage({
   const disposalLang: DisposalLang = (["zh", "en", "th", "ru"] as const).includes(
     rawLocale as DisposalLang,
   ) ? (rawLocale as DisposalLang) : "zh";
+  const routeParams = useSearchParams();
+  const observation = useMemo(() => routeParams.get("source") === "rule_effectiveness" ? {
+    periodId: routeParams.get("observation_period_id") ?? "",
+    from: routeParams.get("observe_window_from") ?? "",
+    to: routeParams.get("observe_window_to") ?? "",
+    timeZone: routeParams.get("observe_time_zone") ?? undefined,
+  } : undefined, [routeParams]);
+  const observationTenant = observation ? Number(routeParams.get("tenant_id")) : null;
   const { effectiveTenantId } = useTenant();
   const { merge } = useFilterMerger();
   const { templates, saveTemplate, deleteTemplate, renameTemplate } = useSearchTemplates();
@@ -150,7 +159,7 @@ export function EmailDisposalCenterPage({
     useState<number | null>(null);
   const disposalScopeTenantId =
     isSystemAdmin && effectiveViewer === "platform"
-      ? appliedPlatformScopeTenantId
+      ? (observationTenant && observationTenant > 0 ? observationTenant : appliedPlatformScopeTenantId)
       : (effectiveTenantId ?? null);
   const { apiRequest } = useScopedApiRequest(disposalScopeTenantId);
   // AI 维度（相似搜索/相似度列/找相似/AI 解析/钓鱼智能体研判）的唯一事实源是产品形态
@@ -160,7 +169,7 @@ export function EmailDisposalCenterPage({
   const aiEnabled = capabilities?.ai ?? false;
   const aiInterpretEnabled = aiEnabled && features.aiInterpret;
 
-  const initialSearchParams = useSearchParams();
+  const initialSearchParams = routeParams;
   const [quickFilter, setQuickFilter] = useState<DisposalQuickFilter>(
     () => disposalDeepLinkQuickFilter(initialSearchParams) ?? getDefaultQuickFilter(),
   );
@@ -350,8 +359,9 @@ export function EmailDisposalCenterPage({
       advanced: mergedFilter,
       page,
       pageSize,
-      startDate: appliedQuickFilter.sendReceiveTime?.start,
-      endDate: appliedQuickFilter.sendReceiveTime?.end,
+      observation,
+      startDate: observation ? undefined : appliedQuickFilter.sendReceiveTime?.start,
+      endDate: observation ? undefined : appliedQuickFilter.sendReceiveTime?.end,
       recipient: appliedQuickFilter.recipient,
       // GT-11614: pass sendReceiveType to backend as direction param
       direction: appliedQuickFilter.sendReceiveType,
@@ -370,6 +380,7 @@ export function EmailDisposalCenterPage({
     [
       appliedQuickFilter,
       mergedFilter,
+      observation,
       headerFilters.statuses,
       timeSort,
       page,
@@ -888,6 +899,30 @@ export function EmailDisposalCenterPage({
         icon={InboxIcon}
       />
 
+      <RuleEffectivenessContextBanner />
+      {data?.observation && (
+        <div className="space-y-2 rounded-lg border p-4 text-sm" data-testid="observation-mail-summary">
+          <p>{t("ruleEffectivenessContext.counts", { hits: data.observation.hits, messages: data.observation.messages, missing: data.observation.missing_messages })}</p>
+          {data.observation.matches.length > 0 && <details>
+            <summary>{t("ruleEffectivenessContext.matches")}</summary>
+            <ul className="mt-2 space-y-1">
+              {data.observation.matches.map((item) => <li key={`${item.message_uuid}:${item.recipient}`} className="break-all font-mono text-xs">
+                {item.recipient} · {item.configured_action} → {item.outcome} · {item.hit_at} · {item.outcome_reason} · {item.source_ref}
+              </li>)}
+            </ul>
+          </details>}
+          {data.observation.orphans.length > 0 && <details>
+            <summary>{t("ruleEffectivenessContext.orphans")}</summary>
+            <ul className="mt-2 space-y-1">
+              {data.observation.orphans.map((item) => <li key={`${item.message_uuid}:${item.recipient}`} className="break-all font-mono text-xs">
+                {item.message_uuid} · {item.recipient} · {item.hit_at} · {item.outcome}
+              </li>)}
+            </ul>
+            <ServerPagination testId="observation-orphans-pagination" page={page} pageSize={100} total={data.observation.orphan_hits} onPageChange={setPage} />
+          </details>}
+        </div>
+      )}
+
       <SearchFilterPanel
         testId="disposal-search-workbench"
         toolbar={
@@ -936,7 +971,8 @@ export function EmailDisposalCenterPage({
               tenantSelector={
                 showTenant ? (
                   <TenantSelector
-                    value={platformScopeTenantId}
+                    value={observationTenant && observationTenant > 0 ? observationTenant : platformScopeTenantId}
+                    disabled={!!observation}
                     onChange={setPlatformScopeTenantId}
                     className="h-9 w-full"
                   />

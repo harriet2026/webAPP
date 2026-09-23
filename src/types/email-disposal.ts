@@ -198,6 +198,23 @@ export interface DisposalMailItem {
 }
 
 export interface DisposalListResponse {
+  observation?: {
+    hits: number;
+    messages: number;
+    missing_messages: number;
+    orphan_hits: number;
+    matches: {
+      message_uuid: string;
+      recipient: string;
+      hit_at: string;
+      configured_action: string;
+      outcome: string;
+      outcome_reason: string;
+      source_ref: string;
+      outcome_updated_at: string;
+    }[];
+    orphans: { message_uuid: string; recipient: string; hit_at: string; outcome: string }[];
+  };
   items: DisposalMailItem[];
   total: number;
   page: number;

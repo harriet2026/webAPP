@@ -112,6 +112,7 @@ interface MailLogListResponse {
   page: number;
   page_size: number;
   total_pages?: number;
+  observation?: DisposalListResponse["observation"];
 }
 
 export interface DisposalRuleOption {
@@ -145,6 +146,7 @@ export function localDayBound(dateOnly: string, endOfDay: boolean): string {
 
 export async function getDisposalList(
   params: {
+    observation?: { periodId: string; from: string; to: string; timeZone?: string };
     quick?: Record<string, unknown>;
     advanced?: AdvancedFilter;
     page: number;
@@ -163,6 +165,12 @@ export async function getDisposalList(
   requestFn: ApiRequestFn,
 ): Promise<DisposalListResponse> {
   const query = new URLSearchParams();
+  if (params.observation) {
+    query.set('observation_period_id', params.observation.periodId);
+    query.set('observe_window_from', params.observation.from);
+    query.set('observe_window_to', params.observation.to);
+    if (params.observation.timeZone) query.set('observe_time_zone', params.observation.timeZone);
+  }
   query.set('page', String(params.page));
   query.set('page_size', String(params.pageSize));
   // GT-12633: 日期筛选按"用户本地时区的当天"换算成带偏移的时刻再发给后端。
@@ -192,6 +200,7 @@ export async function getDisposalList(
   return {
     items: (raw.items ?? []).map(mapMailLogToDisposalItem),
     total: raw.total,
+    observation: raw.observation,
     page: raw.page,
     page_size: raw.page_size,
   };
@@ -220,6 +229,7 @@ export async function findSimilar(
   return {
     items: (raw.items ?? []).map(mapMailLogToDisposalItem),
     total: raw.total,
+    observation: raw.observation,
     page: raw.page ?? 1,
     page_size: raw.page_size ?? raw.total,
   };

@@ -2,9 +2,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextIntlClientProvider } from 'next-intl';
 import zh from '@/../messages/zh.json';
-import type { MailLogDetail } from '@/types/email-disposal-detail';
+import type { MailLogAnalysis, MailLogDetail } from '@/types/email-disposal-detail';
 import { AnalysisSection } from './analysis-section';
-import { buildDetectionStages, deriveFinalVerdict } from '../hooks/use-detection-stages';
 
 // 命中模块清单的渲染守卫：effective_for 表示动作实际作用范围；终止动作候选
 // 无人生效时隐藏，proceed/observe 则由后端写入其实际命中收件人。
@@ -176,10 +175,28 @@ describe('命中模块清单（GT-12727 §7.10）', () => {
         recipients: ['b@x.com'], effective_for: ['b@x.com'],
       }],
     };
-    const stages = buildDetectionStages(detail);
+    const analysis: MailLogAnalysis = {
+      scope: 'all',
+      final_verdict: 'safe',
+      total_elapsed_ms: 0,
+      stages: [
+        {
+          stage: 1,
+          key: 'connection',
+          status: 'pass',
+          checks: [],
+        },
+        {
+          stage: 2,
+          key: 'identity',
+          status: 'pass',
+          checks: [{ key: 'authSpoofing', status: 'pass', ruleIds: [] }],
+        },
+      ],
+    };
 
     render(wrap(<AnalysisSection detail={detail} aiEnabled events={[]}
-      analysis={{ scope: 'all', final_verdict: deriveFinalVerdict(stages), total_elapsed_ms: 0, stages }} />));
+      analysis={analysis} />));
 
     const stage = screen.getByTestId('analysis-stage-2-basis-groups');
     expect(stage).toHaveTextContent('DKIM：验证失败');

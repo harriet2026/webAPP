@@ -43,15 +43,22 @@ const DMARC_ACTIONS: AuthSpoofingAction[] = ['reject', 'discard', 'quarantine', 
 
 const TEMPLATE_NAMES: Template[] = ['loose', 'standard', 'strict', 'custom'];
 
+type ProtocolKey = 'spf' | 'dkim' | 'dmarc' | 'ptr';
+type ProtocolObserveKey = `${ProtocolKey}_observe_mode`;
+
+function observeKeyFor(protocol: ProtocolKey): ProtocolObserveKey {
+  return `${protocol}_observe_mode`;
+}
+
 interface ProtocolChecksSectionProps {
   config: ProtocolChecksConfig;
   onChange: (config: ProtocolChecksConfig) => void;
   disabled?: boolean;
-  /** Estimated count of mail that would have been dropped, shown next to the global observe switch (Task 9 wires the real value) */
-  wouldDrop?: number;
+  /** 按协议（SPF/DKIM/DMARC/PTR）分别统计的预计丢弃量，随当前激活的协议 Tab 切换展示 */
+  wouldDropByProtocol?: Record<'spf' | 'dkim' | 'dmarc' | 'ptr', number>;
 }
 
-export function ProtocolChecksSection({ config, onChange, disabled, wouldDrop = 0 }: ProtocolChecksSectionProps) {
+export function ProtocolChecksSection({ config, onChange, disabled, wouldDropByProtocol }: ProtocolChecksSectionProps) {
   const t = useTranslations('authSpoofing');
   const [open, setOpen] = useState(true);
   const [pendingTemplate, setPendingTemplate] = useState<Template | null>(null);
@@ -60,15 +67,13 @@ export function ProtocolChecksSection({ config, onChange, disabled, wouldDrop = 
   const lockNonCustom = disabled || config.template !== 'custom';
 
   const handleObserveChange = (observe_mode: boolean) => {
-    const next = { ...config, observe_mode };
-    // Saved configs carry per-item flags. The shared switch must update them
-    // too, otherwise disabling observation after a reload keeps it active.
-    for (const { key } of PROTOCOL_GROUPS) {
-      next[key] = Object.fromEntries(
-        Object.entries(config[key] ?? {}).map(([name, item]) => [name, { ...item, observe_mode }]),
-      );
-    }
-    onChange(next);
+    onChange({
+      ...config,
+      [observeKeyFor(activeTab)]: observe_mode,
+      [activeTab]: Object.fromEntries(Object.entries(config[activeTab] ?? {}).map(
+        ([name, item]) => [name, { ...item, observe_mode }],
+      )),
+    });
   };
 
   const handleTemplateSelect = (name: Template) => {
@@ -84,7 +89,17 @@ export function ProtocolChecksSection({ config, onChange, disabled, wouldDrop = 
       onChange({ ...config, template: 'custom' });
     } else {
       const applied = applyTemplate(config, pendingTemplate);
-      onChange(pendingTemplate === 'strict' ? { ...applied, observe_mode: true } : applied);
+      onChange(
+        pendingTemplate === 'strict'
+          ? {
+              ...applied,
+              spf_observe_mode: true,
+              dkim_observe_mode: true,
+              dmarc_observe_mode: true,
+              ptr_observe_mode: true,
+            }
+          : applied,
+      );
     }
     setPendingTemplate(null);
   };
@@ -106,6 +121,10 @@ export function ProtocolChecksSection({ config, onChange, disabled, wouldDrop = 
     dmarc: dominantAction(config.dmarc),
     ptr: dominantAction(config.ptr),
   };
+
+  const activeProtocolGroup = PROTOCOL_GROUPS.find((g) => g.key === activeTab) ?? PROTOCOL_GROUPS[0];
+  const activeObserveKey = observeKeyFor(activeTab);
+  const activeObserveOn = config[activeObserveKey] ?? config.observe_mode ?? false;
 
   return (
     <Card>
@@ -141,17 +160,19 @@ export function ProtocolChecksSection({ config, onChange, disabled, wouldDrop = 
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={config.observe_mode ?? false}
+                      data-testid={`protocol-observe-${activeTab}`}
+                      checked={activeObserveOn}
                       onCheckedChange={handleObserveChange}
-                      data-testid="auth-protocol-observe-switch"
                       disabled={disabled}
                     />
-                    <span className="text-sm font-medium">{t('globalObserve')}</span>
+                    <span className="text-sm font-medium">
+                      {t(activeProtocolGroup.labelKey as Parameters<typeof t>[0])} {t('globalObserve')}
+                    </span>
                   </div>
-                  {config.observe_mode && (
+                  {activeObserveOn && (
                     <div className="flex items-center gap-2 rounded bg-amber-100 px-2 py-1 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                       <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
-                      {t('wouldDropCount')}: {wouldDrop}
+                      {t('wouldDropCount')}: {wouldDropByProtocol?.[activeTab] ?? 0}
                     </div>
                   )}
                 </div>

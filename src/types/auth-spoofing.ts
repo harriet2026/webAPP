@@ -25,7 +25,17 @@ export type Template = 'loose' | 'standard' | 'strict' | 'custom';
 
 export interface ProtocolChecksConfig {
   template: Template;
-  observe_mode: boolean;
+  /**
+   * 观察开关按协议独立拆分（不再是一个全局开关同时控制 SPF/DKIM/DMARC/PTR）。
+   * SPF、DKIM、DMARC、PTR 四类协议的误判特征、可信度差异很大，需要各自独立
+   * 决定是否先观察再转正式，不能被同一个开关联动。
+   */
+  /** Compatibility with configurations saved before per-protocol switches. */
+  observe_mode?: boolean;
+  spf_observe_mode?: boolean;
+  dkim_observe_mode?: boolean;
+  dmarc_observe_mode?: boolean;
+  ptr_observe_mode?: boolean;
   spf:   Record<string, CheckItem>;
   dkim:  Record<string, CheckItem>;
   dmarc: Record<string, CheckItem>;

@@ -69,7 +69,8 @@ describe('ConfigHealthPanel', () => {
     fireEvent.click(screen.getByText('开启观察模式'));
     expect(onChange).toHaveBeenCalledTimes(1);
     const next = onChange.mock.calls[0][0] as ProtocolChecksConfig;
-    expect(next.observe_mode).toBe(true);
+    expect(next.spf_observe_mode).toBe(true);
+    expect(next.observe_mode).toBe(config.observe_mode);
     expect(next).not.toBe(config);
   });
 

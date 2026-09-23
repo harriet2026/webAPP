@@ -113,8 +113,13 @@ import {
   mockSenderFilterGroupsList,
   mockGroupsMetaByType,
   mockAuthSpoofingConfig,
+  mockPutAuthSpoofingConfig,
+  mockDeleteAuthSpoofingConfig,
   mockAuthSpoofingObserveStats,
   mockAuthSpoofingProbe,
+  mockRuleEffectiveness,
+  mockObservationVersions,
+  mockObservationSnapshot,
   mockBehaviorControlRulesList,
   mockBehaviorControlGroupsList,
   mockRecipientLimitConfig,
@@ -986,7 +991,14 @@ const routes: Route[] = [
     },
   },
 
+  { method: 'GET', pattern: '/statistics/rule-effectiveness/versions', handler: req => ({status:200,data:mockObservationVersions(req.path)}) },
+  { method: 'GET', pattern: /^\/statistics\/rule-effectiveness\/versions\/[^/]+$/, handler: req => { const data=mockObservationSnapshot(req.path); return data ? {status:200,data} : {status:404,data:{error:'not_found'}}; } },
   // ─── Dashboard / 统计 ───────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: '/statistics/rule-effectiveness',
+    handler: (req) => ({ status: 200, data: mockRuleEffectiveness(req.path) }),
+  },
   // 系统状态仪表盘（/zh/dashboard）：收信总量按 start_date/end_date 分范围 +
   // 当前期/上一期（fixtures 内部按会话见过的最新 end_date 判定）。
   {
@@ -2118,12 +2130,12 @@ const routes: Route[] = [
   {
     method: 'PUT',
     pattern: '/auth-spoofing/config',
-    handler: () => ({ status: 200, data: { ok: true, warnings: [] } }),
+    handler: (req) => ({ status: 200, data: mockPutAuthSpoofingConfig(req.body) }),
   },
   {
     method: 'DELETE',
     pattern: '/auth-spoofing/config',
-    handler: () => ({ status: 200, data: { ok: true } }),
+    handler: () => ({ status: 200, data: mockDeleteAuthSpoofingConfig() }),
   },
   {
     method: 'GET',

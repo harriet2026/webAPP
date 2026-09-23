@@ -61,6 +61,15 @@ import type {
   ProbeResponse,
 } from "@/types/auth-spoofing";
 import type {
+  ActionBreakdownItem,
+  PolicyModule,
+  RuleEffectivenessResponse,
+  RuleEffectivenessRow,
+  SimilarDetectionScope,
+  SimilarDetectionType,
+  WouldBeAction,
+} from "@/lib/api/rule-effectiveness";
+import type {
   BehaviorControlMetadata,
   BehaviorControlObjectConfig,
   BehaviorDirection,
@@ -4334,6 +4343,177 @@ export function mockContentGroupsList(): { items: Rule[] } {
 }
 
 // ════════════════════════════════════════════════════════════════════════════════
+// 规则效能统计（观察模式，mock）
+// 与真实 GET /statistics/rule-effectiveness 使用同一响应类型。每一行代表一个
+// observation period；命中数按收件人份数计，邮件数按 message_uuid 去重。
+// ════════════════════════════════════════════════════════════════════════════════
+
+type MockOutcome = WouldBeAction | "pending" | "other" | "unknown";
+
+function mockActionBreakdown(counts: Partial<Record<MockOutcome, number>>): ActionBreakdownItem[] {
+  return (["accept", "quarantine", "audit", "reject", "discard", "recall"] as WouldBeAction[])
+    .map((action) => ({ action, count: counts[action] ?? 0 }));
+}
+
+function mockEffectivenessRow(input: {
+  id: string;
+  tenantId?: number;
+  module: PolicyModule;
+  key: string;
+  name: string;
+  version?: number;
+  observedSince: string | null;
+  observedDays: number | null;
+  configuredAction: RuleEffectivenessRow["configured_action"];
+  outcomes: Partial<Record<MockOutcome, number>>;
+  messages?: number;
+  mixed?: boolean;
+  deleted?: boolean;
+  similarType?: SimilarDetectionType;
+  similarScope?: SimilarDetectionScope;
+}): RuleEffectivenessRow {
+  const hits = Object.values(input.outcomes).reduce((sum, value) => sum + (value ?? 0), 0);
+  const pending = input.outcomes.pending ?? 0;
+  const other = input.outcomes.other ?? 0;
+  const unknown = input.outcomes.unknown ?? 0;
+  let rate: number | null = null;
+  let direction = "";
+  let reason = "";
+  if (input.module === "phishing_detection") {
+    reason = "module_level_only";
+  } else if (input.mixed) {
+    reason = "mixed_config";
+  } else if (hits === 0) {
+    reason = "no_hits";
+  } else if (pending + other + unknown > 0) {
+    reason = "incomplete_outcomes";
+  } else if (["reject", "quarantine", "audit", "discard"].includes(input.configuredAction)) {
+    direction = "configured_block";
+    rate = ((input.outcomes.accept ?? 0) + (input.outcomes.recall ?? 0)) / hits;
+  } else if (input.configuredAction === "accept") {
+    direction = "configured_accept";
+    rate = (hits - (input.outcomes.accept ?? 0)) / hits;
+  } else {
+    reason = "unsupported_configured_action";
+  }
+  const configPath = input.module === "phishing_detection"
+    ? "/agent-center/overview?agent=phishing&tab=config"
+    : `/security/pipeline?module=${({
+        auth_spoofing: "authSpoofing",
+        similar_detection: "similarDetection",
+        sender_filter: "senderFilter",
+      } as Partial<Record<PolicyModule, string>>)[input.module]}`;
+  return {
+    time_zone: "Asia/Shanghai",
+    id: input.id,
+    tenant_id: input.tenantId ?? 1,
+    tenant_name: (input.tenantId ?? 1) === 2 ? "蓝海物流集团" : "晨星科技",
+    policy_module: input.module,
+    sub_strategy_id: input.key,
+    sub_strategy_name_snapshot: input.name,
+    observation_period_id: input.id,
+    version_no: input.version ?? 1, history_count: (input.version ?? 1)-1,
+    effective_at: `${input.observedSince}T00:00:00Z`, superseded_at: null, close_reason: '',
+    change_summary: (input.version ?? 1)>1 ? 'configuration_changed' : 'first_observation', snapshot_available: true,
+    observed_since: input.observedSince,
+    observed_days: input.observedDays,
+    hits,
+    distinct_message_count: input.messages ?? Math.min(hits, 3),
+    configured_action: input.configuredAction,
+    mixed_config: input.mixed ?? false,
+    pending_outcome_count: pending,
+    other_outcome_count: other,
+    unknown_outcome_count: unknown,
+    action_difference_rate: rate,
+    risk_direction: direction,
+    risk_unavailable_reason: reason,
+    attribution_status: input.module === "phishing_detection" ? "module_level_only" : "attributable",
+    action_breakdown: mockActionBreakdown(input.outcomes),
+    config_path: configPath,
+    ...(input.similarType ? { similar_detection_type: input.similarType } : {}),
+    ...(input.similarScope ? { similar_detection_scope: input.similarScope } : {}),
+  };
+}
+
+const MOCK_RULE_EFFECTIVENESS_ROWS: RuleEffectivenessRow[] = [
+  mockEffectivenessRow({ id: "mock-period-sender-1", module: "sender_filter", key: "rule:sender-finance", name: "财务仿冒发件人", observedSince: "2026-09-02", observedDays: 18, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-sender-2", module: "sender_filter", key: "rule:sender-partner", name: "合作方发件人白名单", observedSince: "2026-09-16", observedDays: 4, configuredAction: "accept", outcomes: { accept: 2 }, messages: 2 }),
+  mockEffectivenessRow({ id: "mock-period-auth-spf", module: "auth_spoofing", version: 2, key: "spf_fail", name: "SPF fail", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 12, reject: 6, pending: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-auth-dkim", module: "auth_spoofing", key: "dkim_fail", name: "DKIM fail", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 8, quarantine: 4 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-auth-dmarc", module: "auth_spoofing", key: "dmarc_reject", name: "DMARC reject", observedSince: "2026-08-31", observedDays: 20, configuredAction: "reject", outcomes: { accept: 1, quarantine: 7, reject: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-auth-ptr", module: "auth_spoofing", key: "ptr_noptr", name: "PTR noptr", observedSince: "2026-09-13", observedDays: 7, configuredAction: "proceed", outcomes: { accept: 9 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-auth-format", module: "auth_spoofing", key: "format_check_mailfrom_invalid", name: "无效 MAIL FROM", observedSince: "2026-09-18", observedDays: 2, configuredAction: "reject", outcomes: { accept: 1, reject: 5 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-auth-display", module: "auth_spoofing", key: "display_name_spoofing_inbound", name: "入站显示名仿冒", observedSince: "2026-08-09", observedDays: 42, configuredAction: "quarantine", outcomes: { accept: 4, quarantine: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-similar-email", module: "similar_detection", key: "similar_email.aggregate", name: "相似邮件检测", observedSince: "2026-09-02", observedDays: 18, configuredAction: "quarantine", outcomes: { accept: 6, quarantine: 4 }, messages: 3, similarType: "similar_email", similarScope: "aggregate" }),
+  mockEffectivenessRow({ id: "mock-period-same-subject", module: "similar_detection", key: "same_subject.aggregate", name: "相同主题检测", observedSince: "2026-08-06", observedDays: 45, configuredAction: "audit", outcomes: { accept: 7, audit: 2 }, messages: 3, similarType: "same_subject", similarScope: "aggregate" }),
+  mockEffectivenessRow({ id: "mock-period-same-subject-in", tenantId: 2, module: "similar_detection", key: "same_subject.receive", name: "相同主题检测（收信）", observedSince: "2026-08-16", observedDays: 35, configuredAction: "reject", outcomes: { accept: 3, reject: 1 }, messages: 3, similarType: "same_subject", similarScope: "receive" }),
+  mockEffectivenessRow({ id: "mock-period-similar-send", module: "similar_detection", key: "similar_email.send", name: "相似邮件检测（发信）", observedSince: "2026-09-15", observedDays: 5, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 1 }, messages: 2, similarType: "similar_email", similarScope: "send" }),
+  mockEffectivenessRow({ id: "mock-period-phish-risk", module: "phishing_detection", version: 3, key: "risk_policy", name: "风险处置策略", observedSince: "2026-09-15", observedDays: 5, configuredAction: "", outcomes: { accept: 3, quarantine: 2 } }),
+  mockEffectivenessRow({ id: "mock-period-phish-runtime", module: "phishing_detection", version: 2, key: "runtime_policy", name: "运行时策略", observedSince: "2026-09-16", observedDays: 4, configuredAction: "accept", outcomes: { accept: 5 } }),
+  mockEffectivenessRow({ id: "mock-period-phish-1", module: "phishing_detection", version: 2, key: "admission:external-link", name: "外部链接邮件", observedSince: "2026-09-10", observedDays: 10, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 8 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-phish-2", tenantId: 2, module: "phishing_detection", version: 2, key: "runtime_policy", name: "运行时策略", observedSince: "2026-08-11", observedDays: 40, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 3 }, messages: 3 }),
+];
+
+function mockDurationMatches(days: number | null, buckets: string[]): boolean {
+  if (buckets.length === 0) return true;
+  if (days == null) return false;
+  const bucket = days < 7 ? "lt7" : days > 30 ? "gt30" : "7to30";
+  return buckets.includes(bucket);
+}
+
+export function mockRuleEffectiveness(path: string): RuleEffectivenessResponse {
+  const query = new URLSearchParams(path.split("?")[1] ?? "");
+  const modules = query.getAll("module");
+  const similarTypes = query.getAll("similar_detection_type");
+  const durations = query.getAll("duration_bucket");
+  const tenant = query.get("tenant_id");
+  let rows = MOCK_RULE_EFFECTIVENESS_ROWS.filter((row) => {
+    if (modules.length > 0 && !modules.includes(row.policy_module)) return false;
+    if (tenant && row.tenant_id !== Number(tenant)) return false;
+    if (row.policy_module === "similar_detection" && similarTypes.length > 0 && !similarTypes.includes(row.similar_detection_type ?? "")) return false;
+    if (!mockDurationMatches(row.observed_days, durations)) return false;
+    if (query.get("overdue_only") === "true" && !((row.observed_days ?? 0) > 30 && row.hits > 0)) return false;
+    return true;
+  });
+  const totalHits = rows.reduce((sum, row) => sum + row.hits, 0);
+  const observedDays = rows.flatMap((row) => row.observed_days == null ? [] : [row.observed_days]);
+  const page = Math.max(1, Number(query.get("page") ?? 1) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(query.get("page_size") ?? 20) || 20));
+  const rowsTotal = rows.length;
+  const overdueCount = rows.filter((row) => (row.observed_days ?? 0) > 30 && row.hits > 0).length;
+  const unknownStartCount = rows.filter((row) => row.observed_days == null).length;
+  rows = rows.slice((page - 1) * pageSize, page * pageSize);
+  return {
+    unavailable_modules: [],
+    degraded_modules: [],
+    quality: {
+      generated_at: "2026-09-20T08:00:00Z",
+      available_from: "2026-08-01T00:00:00Z",
+      history_complete: true,
+      complete: true,
+      pending_changes: 0,
+      pending_hits: 0,
+      pending_outcomes: 0,
+      excluded_events: 0,
+    },
+    kpi: {
+      observing_count: rowsTotal,
+      observing_count_delta: rowsTotal === 0 ? 0 : 1,
+      total_hits: totalHits,
+      total_hits_delta: totalHits === 0 ? 0 : 6,
+      avg_observed_days: observedDays.length === 0 ? 0 : Math.round(observedDays.reduce((sum, days) => sum + days, 0) / observedDays.length),
+      pending_review_count: rowsTotal,
+      overdue_count: overdueCount,
+      unknown_start_count: unknownStartCount,
+    },
+    rows,
+    rows_total: rowsTotal,
+    page,
+    page_size: pageSize,
+  };
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
 // 身份认证与仿冒防护（auth-spoofing，mock）
 // 配置照抄 demo 默认值（src/components/security/AuthSpoofingPage.tsx 的
 // DEFAULT_CONFIG，已是映射到统一 action 的 demo 默认），保证 Mock 模式下页面
@@ -4358,6 +4538,10 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
     protocol_checks: {
       template: "standard",
       observe_mode: false,
+      spf_observe_mode: false,
+      dkim_observe_mode: false,
+      dmarc_observe_mode: false,
+      ptr_observe_mode: false,
       spf: {
         fail: { enabled: true, action: "reject", observe_mode: false },
         softfail: { enabled: true, action: "quarantine", observe_mode: false },
@@ -4408,9 +4592,27 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
   };
 }
 
+let mockAuthSpoofingConfigState = defaultAuthSpoofingConfig();
+
 export function mockAuthSpoofingConfig(): AuthSpoofingConfig {
   // 深拷贝：避免调用方就地修改返回值污染后续 GET。
-  return JSON.parse(JSON.stringify(defaultAuthSpoofingConfig()));
+  return JSON.parse(JSON.stringify(mockAuthSpoofingConfigState));
+}
+
+export function mockPutAuthSpoofingConfig(body: unknown): { ok: boolean; warnings: string[] } {
+  if (body && typeof body === "object") {
+    mockAuthSpoofingConfigState = JSON.parse(JSON.stringify(body)) as AuthSpoofingConfig;
+  }
+  return { ok: true, warnings: [] };
+}
+
+export function mockDeleteAuthSpoofingConfig(): { ok: boolean } {
+  mockAuthSpoofingConfigState = defaultAuthSpoofingConfig();
+  return { ok: true };
+}
+
+export function resetMockAuthSpoofingConfigForTests(): void {
+  mockAuthSpoofingConfigState = defaultAuthSpoofingConfig();
 }
 
 // 观测统计：hits 总和固定为 23，对齐 demo 硬编码的
@@ -7398,6 +7600,19 @@ function mockAdvancedMatches(
 export function mockEmailDisposalList(path: string) {
   const query = new URLSearchParams(path.split("?")[1] ?? "");
   let items = [...mockDisposalMailLogs];
+  const observationPeriodID = query.get("observation_period_id");
+  const observationRow = observationPeriodID
+    ? MOCK_RULE_EFFECTIVENESS_ROWS.find((row) => row.observation_period_id === observationPeriodID)
+    : undefined;
+  if (observationPeriodID) {
+    if (!observationRow || observationRow.hits === 0) {
+      items = [];
+    } else {
+      const visibleMessages = Math.min(2, observationRow.distinct_message_count);
+      const tids = ["MIC001", "MIC053"].slice(0, visibleMessages);
+      items = items.filter((item) => tids.includes(item.tid));
+    }
+  }
   const contains = (value: unknown, needle: string) =>
     String(value ?? "")
       .toLowerCase()
@@ -7449,6 +7664,9 @@ export function mockEmailDisposalList(path: string) {
   }
   const page = Math.max(1, Number(query.get("page") ?? 1));
   const pageSize = Math.max(1, Number(query.get("page_size") ?? 20));
+  const missingMessages = observationRow
+    ? Math.max(0, observationRow.distinct_message_count - Math.min(2, observationRow.distinct_message_count))
+    : 0;
   return {
     items: items
       .slice((page - 1) * pageSize, page * pageSize)
@@ -7457,6 +7675,30 @@ export function mockEmailDisposalList(path: string) {
     page,
     page_size: pageSize,
     total_pages: Math.max(1, Math.ceil(items.length / pageSize)),
+    ...(observationPeriodID ? {
+      observation: {
+        hits: observationRow?.hits ?? 0,
+        messages: observationRow?.distinct_message_count ?? 0,
+        missing_messages: missingMessages,
+        orphan_hits: missingMessages > 0 ? 1 : 0,
+        matches: items.slice(0, 2).map((item, index) => ({
+          message_uuid: item.tid,
+          recipient: item.recipients[0] ?? "recipient@example.test",
+          hit_at: item.received_at,
+          configured_action: observationRow?.configured_action ?? "",
+          outcome: index === 0 ? "quarantine" : "accept",
+          outcome_reason: index === 0 ? "currently_quarantined" : "delivery_confirmed",
+          source_ref: `mock-intercept:${item.tid}`,
+          outcome_updated_at: item.received_at,
+        })),
+        orphans: missingMessages > 0 ? [{
+          message_uuid: `mock-orphan-${observationPeriodID}`,
+          recipient: "missing-recipient@example.test",
+          hit_at: "2026-09-20T07:30:00Z",
+          outcome: "accept",
+        }] : [],
+      },
+    } : {}),
   };
 }
 
@@ -9414,4 +9656,36 @@ export function mockAgentCenterOverview() {
       },
     ],
   };
+}
+
+const MOCK_OBSERVATION_HISTORY = MOCK_RULE_EFFECTIVENESS_ROWS.flatMap(row =>
+  Array.from({ length: row.history_count }, (_, i): RuleEffectivenessRow => ({
+    ...row, id: `${row.id}-v${i+1}`, observation_period_id: `${row.id}-v${i+1}`, version_no: i+1,
+    observed_since: `2026-08-${String(i*7+1).padStart(2,'0')}`, observed_days: 7,
+    effective_at: `2026-08-${String(i*7+1).padStart(2,'0')}T00:00:00Z`,
+    superseded_at: `2026-08-${String((i+1)*7+1).padStart(2,'0')}T00:00:00Z`,
+    window_from: `2026-08-${String(i*7+1).padStart(2,'0')}T00:00:00Z`,
+    window_to: `2026-08-${String((i+1)*7+1).padStart(2,'0')}T00:00:00Z`,
+    close_reason: 'superseded', change_summary: i===0 ? 'first_observation' : 'configuration_changed',
+    hits: 10*(i+1), distinct_message_count: 5, action_breakdown: mockActionBreakdown({accept: 10*(i+1)}),
+    pending_outcome_count: 0, other_outcome_count: 0, unknown_outcome_count: 0,
+    configured_action: 'reject', action_difference_rate: row.policy_module==='phishing_detection' ? null : 1,
+    risk_unavailable_reason: row.policy_module==='phishing_detection' ? 'module_level_only' : '',
+  })).reverse());
+
+export function mockObservationVersions(path: string) {
+  const query = new URLSearchParams(path.split('?')[1]);
+  const page = Math.max(1,Number(query.get('page') ?? 1)); const pageSize=10;
+  const rows=MOCK_OBSERVATION_HISTORY.filter(row => row.tenant_id===Number(query.get('tenant_id')) && row.policy_module===query.get('module') && row.sub_strategy_id===query.get('sub_strategy_key'));
+  return { items: rows.slice((page-1)*pageSize,page*pageSize), total: rows.length, page, page_size: pageSize, quality: mockRuleEffectiveness(path).quality };
+}
+export function mockObservationSnapshot(path: string) {
+  const id=decodeURIComponent(path.split('?')[0].split('/').at(-1) ?? '');
+  const tenant=Number(new URLSearchParams(path.split('?')[1]).get('tenant_id'));
+  const row=[...MOCK_RULE_EFFECTIVENESS_ROWS,...MOCK_OBSERVATION_HISTORY].find(r=>r.id===id && r.tenant_id===tenant);
+  if (!row) return undefined;
+  return { observation_period_id: row.id, version_no: row.version_no, tenant_id: row.tenant_id, policy_module: row.policy_module, sub_strategy_key: row.sub_strategy_id,
+    started_at: row.effective_at, ended_at: row.superseded_at,
+    config_snapshot: { schema_version: 1, config: { [row.sub_strategy_id]: { action: row.configured_action, configuration: { threshold: row.version_no*10 } } } },
+    changed_fields: row.version_no===1 ? [] : [{field: `${row.sub_strategy_id}.configuration.threshold`,before:(row.version_no-1)*10,after:row.version_no*10}] };
 }

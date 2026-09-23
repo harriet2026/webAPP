@@ -80,6 +80,14 @@ describe('ProtocolChecksSection', () => {
     );
   });
 
+  it('supports legacy observe while explicit protocol false takes precedence', () => {
+    const config = makeConfig({ observe_mode: true, spf_observe_mode: false });
+    render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
+    expect(screen.getByTestId('protocol-observe-spf')).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(screen.getByRole('tab', { name: 'DKIM' }));
+    expect(screen.getByTestId('protocol-observe-dkim')).toHaveAttribute('aria-checked', 'true');
+  });
+
   it('shows the product-approved concise description when switching to the loose template', async () => {
     const config = makeConfig({ template: 'standard' });
     render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
@@ -90,19 +98,33 @@ describe('ProtocolChecksSection', () => {
     expect(screen.queryByText(/兼容老旧系统|丢弃动作使用极少/)).toBeNull();
   });
 
-  it('shows wouldDropCount text and a pulse badge when observe_mode is true', () => {
-    const config = makeConfig({ observe_mode: true });
+  it('shows wouldDropCount text and a pulse badge when the active protocol is observing', () => {
+    const config = makeConfig({ observe_mode: false, spf_observe_mode: true });
     const { container } = render(
-      wrap(<ProtocolChecksSection config={config} onChange={() => {}} wouldDrop={7} />),
+      wrap(
+        <ProtocolChecksSection
+          config={config}
+          onChange={() => {}}
+          wouldDropByProtocol={{ spf: 7, dkim: 0, dmarc: 0, ptr: 0 }}
+        />,
+      ),
     );
     expect(screen.getByText(/预计丢弃/)).toBeInTheDocument();
     expect(screen.getByText(/7/)).toBeInTheDocument();
     expect(container.querySelector('.animate-pulse')).not.toBeNull();
   });
 
-  it('does not show wouldDropCount text when observe_mode is false', () => {
-    const config = makeConfig({ observe_mode: false });
-    render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} wouldDrop={7} />));
+  it('does not show wouldDropCount text when the active protocol is not observing', () => {
+    const config = makeConfig({ observe_mode: true, spf_observe_mode: false });
+    render(
+      wrap(
+        <ProtocolChecksSection
+          config={config}
+          onChange={() => {}}
+          wouldDropByProtocol={{ spf: 7, dkim: 0, dmarc: 0, ptr: 0 }}
+        />,
+      ),
+    );
     expect(screen.queryByText(/预计丢弃/)).toBeNull();
   });
 
@@ -115,16 +137,16 @@ describe('ProtocolChecksSection', () => {
     expect(screen.queryByText('观察中')).toBeNull();
   });
 
-  it('calls onChange with observe_mode toggled via the global observe switch', () => {
+  it('toggles only the active protocol observation', () => {
     const config = makeConfig({ observe_mode: false });
     const onChange = vi.fn();
     render(wrap(<ProtocolChecksSection config={config} onChange={onChange} />));
     const globalSwitch = screen.getAllByRole('switch')[0];
     globalSwitch.click();
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ observe_mode: true }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ spf_observe_mode: true, observe_mode: false }));
   });
 
-  it.each([true, false])('sets every protocol item observe flag to %s without changing its action', (observe) => {
+  it.each([true, false])('sets the active protocol observe flag to %s and preserves other protocols', (observe) => {
     const config = makeConfig({ observe_mode: !observe });
     for (const key of ['spf', 'dkim', 'dmarc', 'ptr'] as const) {
       for (const item of Object.values(config[key])) item.observe_mode = !observe;
@@ -135,10 +157,11 @@ describe('ProtocolChecksSection', () => {
     fireEvent.click(screen.getAllByRole('switch')[0]);
     expect(onChange).toHaveBeenCalledTimes(1);
     const saved = onChange.mock.calls[0][0] as ProtocolChecksConfig;
-    expect(saved.observe_mode).toBe(observe);
+    expect(saved.spf_observe_mode).toBe(observe);
+    expect(saved.observe_mode).toBe(!observe);
     for (const key of ['spf', 'dkim', 'dmarc', 'ptr'] as const) {
       for (const [name, item] of Object.entries(saved[key])) {
-        expect(item).toEqual({ ...before[key][name], observe_mode: observe });
+        expect(item).toEqual({ ...before[key][name], observe_mode: key === 'spf' ? observe : !observe });
       }
     }
     expect(config).toEqual(before);
