@@ -2,13 +2,14 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { useTranslations } from 'next-intl';
-import { Pencil, Trash2, Mail, Globe, Users, AlertTriangle, Eye } from 'lucide-react';
+import { Pencil, Trash2, Mail, Globe, Users, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { DataTable } from '@/components/shared/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import type { SenderFilterRuleView, SenderFilterAction, SenderConfigType, SenderFilterGroups } from '@/types/sender-filter';
 
 // GT-12500：修改时间按本地时区展示（分钟精度）。此前刻意用 UTC（理由是与
@@ -160,29 +161,26 @@ export function SenderFilterTable({
         if (row.original.list_type !== 'blacklist') return null;
         const resolved = row.original.resolved;
         const isObserve = resolved?.run_mode === 'observe';
-        const badge = isObserve ? (
-          <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-700">
-            <Eye className="h-3 w-3" />{t('senderFilter.runModeValue_observe')}
-          </Badge>
-        ) : (
-          <Badge variant="secondary">{t('senderFilter.runModeValue_realtime')}</Badge>
-        );
+        const label = isObserve ? t('senderFilter.runModeValue_observe') : t('senderFilter.runModeValue_realtime');
         // 复杂规则（resolved 为 null）无法安全还原完整 metadata 用于回写，
-        // 保持只读展示，不提供切换入口。
-        if (row.original.is_complex || !resolved) return badge;
+        // 保持只读展示，禁用开关，避免误触后无法正确保存。
+        const readOnly = row.original.is_complex || !resolved;
         const isPending = pendingRunModeId === row.original.rule.id;
         return (
-          <button
-            type="button"
-            data-testid="sender-filter-row-run-mode-toggle"
-            className="cursor-pointer rounded-full disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={isPending}
-            title={t('senderFilter.runModeToggleTooltip')}
-            aria-label={t('senderFilter.runModeToggleTooltip')}
-            onClick={() => onToggleRunMode(row.original)}
-          >
-            {badge}
-          </button>
+          <div className="flex items-center gap-2">
+            <Switch
+              data-testid="sender-filter-row-run-mode-toggle"
+              checked={isObserve}
+              disabled={readOnly || isPending}
+              onCheckedChange={() => onToggleRunMode(row.original)}
+              className="data-checked:bg-amber-500 dark:data-checked:bg-amber-500"
+              aria-label={t('senderFilter.runModeToggleTooltip')}
+              title={readOnly ? t('senderFilter.complexCondition') : t('senderFilter.runModeToggleTooltip')}
+            />
+            <span className={cn('text-xs', isObserve ? 'text-amber-700 font-medium' : 'text-muted-foreground')}>
+              {label}
+            </span>
+          </div>
         );
       },
     },
