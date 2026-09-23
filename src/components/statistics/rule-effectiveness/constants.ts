@@ -8,7 +8,12 @@ import type {
 // 规则效能统计（观察模式）页面的共享常量。
 // 颜色沿用安全总览「威胁语义色阶」token，不新增配色。
 
-export const POLICY_MODULES: PolicyModule[] = ['auth_spoofing', 'similar_detection', 'phishing_detection'];
+export const POLICY_MODULES: PolicyModule[] = [
+  'auth_spoofing',
+  'similar_detection',
+  'phishing_detection',
+  'sender_filter',
+];
 
 export const SIMILAR_DETECTION_TYPES: SimilarDetectionType[] = ['similar_email', 'same_subject'];
 
@@ -19,13 +24,15 @@ export type ModuleFilterOption =
   | 'auth_spoofing'
   | 'similar_detection_similar_email'
   | 'similar_detection_same_subject'
-  | 'phishing_detection';
+  | 'phishing_detection'
+  | 'sender_filter';
 
 export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'auth_spoofing',
   'similar_detection_similar_email',
   'similar_detection_same_subject',
   'phishing_detection',
+  'sender_filter',
 ];
 
 /** 把筛选栏勾选项拆解为请求参数：模块集合 + （若命中相似检测）具体策略集合。 */
@@ -101,6 +108,9 @@ export function strategyPathKeys(
   if (row.policy_module === 'phishing_detection') {
     return ['phishingDetection'];
   }
+  if (row.policy_module === 'sender_filter') {
+    return ['senderFilter'];
+  }
   switch (row.sub_strategy_id) {
     case 'protocol_check_spf':
       return ['authSpoofing', 'protocolCheck', 'protocolCheckSpf'];
@@ -145,6 +155,11 @@ export function strategyPathLabels(
   if (row.policy_module === 'auth_spoofing' && !KNOWN_AUTH_SUB_STRATEGY_IDS.has(row.sub_strategy_id)) {
     labels.push(row.sub_strategy_name_snapshot);
   }
+  // 发信人黑白名单每条观察对象对应一条具体规则（rule:<id>），路径必须细化到
+  // 规则名，否则多条黑/白名单规则在报表里会全部显示为同一个模块级路径。
+  if (row.policy_module === 'sender_filter') {
+    labels.push(row.sub_strategy_name_snapshot);
+  }
   return labels;
 }
 
@@ -157,6 +172,7 @@ export const MODULE_COLORS: Record<PolicyModule, string> = {
   auth_spoofing: '#3B82F6',
   similar_detection: '#8B5CF6',
   phishing_detection: '#F59E0B',
+  sender_filter: '#10B981',
 };
 
 export function moduleColor(module: PolicyModule): string {

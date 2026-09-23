@@ -3,13 +3,14 @@ import { getRuleEffectiveness as getReportPage, getObservationVersions, getObser
 
 // 规则效能统计（观察模式）— 数据契约
 //
-// 范围固定为 3 类持续性「观察态」模块（详见需求方案）：
+// 范围固定为 4 类持续性「观察态」模块（详见需求方案）：
 //   - auth_spoofing：身份认证与仿冒检测下的各子策略
 //   - similar_detection：相似邮件检测模块下的各方向
 //   - phishing_detection：钓鱼邮件检测智能体（整引擎级，无子策略维度）
+//   - sender_filter：发信人黑白名单，按单条规则（黑名单/白名单）拆分观察对象
 // 高级规则（单条 action=observe）与仿冒品牌/人物检测不在本期范围内。
 
-export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection';
+export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter';
 
 /** 与安全总览共用的邮件方向枚举，相似检测按方向拆分观察对象时复用同一枚举。 */
 export type Direction = 'receive' | 'send' | 'internal';
@@ -214,7 +215,7 @@ export async function getRuleEffectiveness(
     const { mockRuleEffectivenessFor } = await import('../mock/rule-effectiveness-prototype');
     return mockRuleEffectivenessFor(params.startDate ?? '', params.endDate ?? '', params.modules ?? [], params.durationBuckets ?? [], params.similarDetectionTypes ?? []);
   }
-  params = { ...params, modules: params.modules ?? ['auth_spoofing', 'similar_detection', 'phishing_detection'] };
+  params = { ...params, modules: params.modules ?? ['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter'] };
   const first = await getReportPage({ ...params, page: 1, pageSize: 100 }, request);
   const backendRows = [...first.rows];
   for (let page = 2; backendRows.length < first.rows_total; page++) {
@@ -272,7 +273,7 @@ export async function getRuleEffectiveness(
       };
     })));
   }
-  return { kpi: first.kpi, rows, degraded_modules: first.degraded_modules.filter((module): module is PolicyModule => module !== 'sender_filter') };
+  return { kpi: first.kpi, rows, degraded_modules: first.degraded_modules };
 }
 
 export function buildEmailDisposalCenterQuery(row: RuleEffectivenessRow, startDate: string, endDate: string): string {

@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则总开关���关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则总开关�����关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -856,7 +856,7 @@
           "cacHint": "启用后，proxysvr 使用指定的 CAC 结果，跳过自身 CAC 查询；后续处理仍受该结果影响。",
           "cacResultInvalid": "启用时请输入非空 CAC 结果，最多 128 字节，且不能包含控制字符。",
           "license": "License",
-          "licenseHint": "私有���议交换点授权凭据，留空表示不配置",
+          "licenseHint": "���有���议交换点授权凭据，留空表示不配置",
           "licenseEditPlaceholder": "留空则保持原值不变",
           "licenseEditPresentHint": "已配置 License，留空保持不变",
           "licenseEditAbsentHint": "尚未配置 License",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选择“未检测 (0)”，不选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选择“未检测 (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -2423,7 +2423,7 @@
       "none": "未命中"
     },
     "verdicts": {
-      "malicious": "恶意",
+      "malicious": "恶���",
       "phishing": "钓鱼",
       "suspicious": "可疑",
       "safe": "安全"
@@ -3484,7 +3484,7 @@
     "negativeOneNoLimit": "-1表示不限制",
     "timeWindowFrequency": "时间窗口频率",
     "every": "每",
-    "minutesUnit": "分钟",
+    "minutesUnit": "���钟",
     "timesUnit": "次",
     "perHour": "每小时",
     "countUnit": "个",
@@ -3802,7 +3802,7 @@
     "priorityLabel": "优先级：",
     "effectBlock": "SMTP 连接被拒绝，发件方收到退信",
     "effectQuarantine": "邮件被移入隔离区，收件人暂不可见",
-    "effectQuarantineExtra": "管理员需前往「邮件隔离」模块手动处置",
+    "effectQuarantineExtra": "管理员需前往���邮件隔离」模块手动处置",
     "effectDrop": "邮件静默删除，无退信，发件方无感知",
     "effectDropWarning": "注意：丢弃后无法找回，请谨慎使用",
     "effectReview": "邮件进入审核队列，审批通过后才投递",
@@ -4065,7 +4065,7 @@
     "actionLabel": "命中动作",
     "toggleLabel": "启用/禁用",
     "directionsInfo": "收件方向：检测来自海外来源的邮件。外发方向：检测发送至海外收件人的邮件。域内方向：检测经网关路由的内部域间邮件。",
-    "effectWhenHit": "命中时执行「{action}」",
+    "effectWhenHit": "命中���执行「{action}」",
     "unsavedChangesBanner": "有未保存的更改",
     "blockAllTitle": "无法保存配置",
     "blockAllMessage": "当前配置将阻断所有海外邮件流，请至少保留一个收发方向。",
@@ -4524,7 +4524,7 @@
     },
     "observing": "观察中",
     "observe": "观察",
-    "legacyDisabled": "此项当前未启用",
+    "legacyDisabled": "此项当前未���用",
     "notAuthorized": "无权访问此页面",
     "action": {
       "accept": "投递",
@@ -5100,7 +5100,7 @@
     "masterSwitchLabel": "启用附件安全检测",
     "masterSwitch": "模块开关",
     "moduleDisabled": "模块已停用",
-    "moduleDisabledHint": "启用后可配置附件安全策略",
+    "moduleDisabledHint": "启用后可配��附件安全策略",
     "comingSoon": "即将推出",
     "comingSoonHint": "此功能正在开发中，敬请期待",
     "tabs": {
@@ -5728,7 +5728,7 @@
     "markConfig": "标记配置",
     "markText": "标记文案",
     "markTextPlaceholder": "如：【外站邮件】",
-    "markTextTip": "最多 50 个字符；点击变量标签可插入动态内容",
+    "markTextTip": "最多 50 个字符；点击变量标签���插入动态内容",
     "availableVariables": "可用变量",
     "markPosition": "标记位置",
     "posSubjectPrefix": "主题前缀",
@@ -6409,7 +6409,7 @@
           "deferredRetrying": "投递暂缓，系统自动重试中",
           "redeliverDialog": {
             "title": "重新投递",
-            "body": "将对勾选的收件人重新投递这封邮件（使用系统保留的原文）。",
+            "body": "将对勾选的收件人重新投递这封邮���（使用系统保留的原文）。",
             "duplicateWarning": "该收件人此前已投递成功，重投将使其收到重复邮件",
             "confirm": "确认重投"
           },
@@ -7478,7 +7478,7 @@
       "orgDeptSelectedCount": "已选 {n} 个",
       "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
       "orgDeptSearchPlaceholder": "搜索部门…",
-      "orgDeptEmpty": "暂无部门数据，请先在组织通讯录同步组织架构。",
+      "orgDeptEmpty": "暂��部门数据，请先在组织通讯录同步组织架构。",
       "orgDeptNoMatch": "未找到匹配的部门",
       "orgDeptClearAll": "清空",
       "qrResultValues": {
@@ -7762,7 +7762,7 @@
     "tzComputedIn": "通知时间以 {tz} 计算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用浏览器时区（{tz}）",
-    "tzKeepCurrent": "保持当前时区（{tz}）",
+    "tzKeepCurrent": "保持���前时区（{tz}）",
     "range": "通知范围",
     "recipientGroups": "收信人组",
     "departments": "部门",
@@ -10004,7 +10004,7 @@
       },
       "disposition": {
         "pending_recall": "待召回",
-        "recalled": "已召回",
+        "recalled": "���召回",
         "alert_only": "仅告警",
         "false_positive": "误报"
       },
@@ -11079,7 +11079,7 @@
     "errorTitle": "操作失败",
     "errorDesc": "请稍后重试或联系管理员。",
     "confirmTitle": "确认将发件人加入黑名单",
-    "confirmHint": "加入后，该发件人发给您的邮件将被直接拒收。",
+    "confirmHint": "加入后��该发件人发给您的邮件将被直接拒收。",
     "confirmButton": "确认加黑",
     "addedTitle": "已加入黑名单",
     "addedDesc": "该发件人已加入您的黑名单。"
@@ -11600,7 +11600,7 @@
       "access_denied": "无权访问该邮件日志",
       "export_format_unsupported": "不支持的导出格式，请使用 json 或 csv",
       "import_data_format_invalid": "邮件日志数据格式不正确",
-      "import_data_missing": "未提供邮件日志数据",
+      "import_data_missing": "未提供���件日志数据",
       "interpret_rate_limited": "请求过于频繁，请稍后重试",
       "interpret_too_many_concurrent": "当前 AI 解读任务过多，请稍后重试",
       "interpret_disabled": "AI 日志解读功能未启用"
@@ -11750,7 +11750,7 @@
       "rule_has_open_alerts": "该规则有未处理告警，无法删除，请先处理"
     },
     "alert_smtp": {
-      "alert_smtp_enc_key_missing": "未配置告警 SMTP 加密密钥，无法保存外部 SMTP 凭据",
+      "alert_smtp_enc_key_missing": "未配置告警 SMTP 加���密钥，无法保存外部 SMTP 凭据",
       "recipient_required": "收件人不能为空"
     },
     "antispam_dkim": {
@@ -12025,7 +12025,7 @@
     "unified_rules_pagespec": {
       "behavior_control_rule_have_metadata_feature": "发信行为管控规则的 metadata.feature 必须是 behavior_control",
       "content_rules_rule_have_metadata_feature": "内容规则的 metadata.feature 必须是 content_rules",
-      "sender_filter_rule_priority_between_1": "发件人过滤规则优先级必须在 1-9999 之间",
+      "sender_filter_rule_priority_between_1": "发件人过滤规则优先级必���在 1-9999 之间",
       "invalid_metadata": "元数据格式不正确"
     },
     "user_list_access": {
@@ -12065,7 +12065,7 @@
     },
     "login": {
       "rate_limited": "请求过于频繁，请稍后再试",
-      "code_already_sent": "验证码已发送，请稍后再试",
+      "code_already_sent": "���证码已发送，请稍后再试",
       "channel_disabled": "该接收方式未启用",
       "ticket_invalid_or_expired": "登录校验已失效，请重新登录",
       "verification_code_incorrect": "验证码错误",
@@ -12303,7 +12303,8 @@
         "auth_spoofing": "身份认证与仿冒检测",
         "similar_detection_similar_email": "相似邮件检测",
         "similar_detection_same_subject": "相同主题检测",
-        "phishing_detection": "钓鱼检测智能体"
+        "phishing_detection": "钓鱼检测智能体",
+        "sender_filter": "发信人黑白名单"
       },
       "durationBucket": {
         "label": "观察时长",
@@ -12340,7 +12341,8 @@
       "directionSend": "发件方向",
       "directionInternal": "内部方向",
       "aggregateScope": "全方向聚合",
-      "phishingDetection": "钓鱼检测智能体"
+      "phishingDetection": "钓鱼检测智能体",
+      "senderFilter": "发信人黑白名单"
     },
     "timeoutAlert": {
       "warning": "有 {count} 个策略已观察超过 {days} 天，待转正评估",
@@ -12364,7 +12366,7 @@
       "versionResetTooltip": "该策略在观察期内被实质性修改过，观察起始时间已重新计算，历史版本的命中数据不计入当前统计，可在下方版本历史中查看",
       "versionHistory": {
         "title": "版本记录（当前版本计入当前统计，历史版本仅供审计追溯）",
-        "empty": "自纳入观察以来未发生实质性���更",
+        "empty": "自纳入观察以来未发生实质性变更",
         "hits": "命中 {count} 次",
         "loading": "正在加载…",
         "failed": "加载失败或没有查看权限",

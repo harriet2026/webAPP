@@ -24,7 +24,7 @@ describe('rule effectiveness mock contract', () => {
     setMockEnabled(true);
 
     const mocked = await getRuleEffectiveness({ modules: ['sender_filter'] });
-    expect(mocked.rows_total).toBe(2);
+    expect(mocked.rows_total).toBe(5);
     expect(fetchMock).not.toHaveBeenCalled();
 
     setMockEnabled(false);

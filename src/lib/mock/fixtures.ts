@@ -4436,8 +4436,22 @@ function mockEffectivenessRow(input: {
 }
 
 const MOCK_RULE_EFFECTIVENESS_ROWS: RuleEffectivenessRow[] = [
-  mockEffectivenessRow({ id: "mock-period-sender-1", module: "sender_filter", key: "rule:sender-finance", name: "财务仿冒发件人", observedSince: "2026-09-02", observedDays: 18, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 2 }, messages: 3 }),
-  mockEffectivenessRow({ id: "mock-period-sender-2", module: "sender_filter", key: "rule:sender-partner", name: "合作方发件人白名单", observedSince: "2026-09-16", observedDays: 4, configuredAction: "accept", outcomes: { accept: 2 }, messages: 2 }),
+  // 与发信人黑白名单实际规则一一对应（src/lib/mock/fixtures.ts 的 mockSenderFilterRulesList，
+  // id 1-5），key 用 `rule:<实际规则id>` 直接关联，而不是笼统的模块级观察对象——每条黑/白名单
+  // 规则都各自拥有独立的命中特征与误判风险，必须按规则单独统计。
+  // 示例：该规则处置动作曾从「审核」调整为「隔离」，属于实质性变更，触发过一次
+  // 观察期重置——version=2，history_count=1（配套的 mockObservationVersions 会为其
+  // 合成 1 条历史版本记录，演示策略版本管理）。hits/messages 与既有 mail-logs 观察
+  // 联动测试保持一致（hits=5, messages=3, configured_action=quarantine）。
+  mockEffectivenessRow({ id: "mock-period-sender-1", module: "sender_filter", version: 2, key: "rule:2", name: "钓鱼域名", observedSince: "2026-09-02", observedDays: 18, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-sender-2", module: "sender_filter", key: "rule:1", name: "垃圾邮件发送者", observedSince: "2026-08-25", observedDays: 26, configuredAction: "reject", outcomes: { accept: 5, reject: 14 }, messages: 5 }),
+  // 该规则当前处于禁用状态（is_active=false），观察数据保留为禁用前最后一个观察期的
+  // 历史快照，不再产生新命中。
+  mockEffectivenessRow({ id: "mock-period-sender-3", module: "sender_filter", key: "rule:3", name: "可疑群组", observedSince: "2026-08-01", observedDays: 50, configuredAction: "audit", outcomes: { accept: 2, audit: 1 }, messages: 2 }),
+  mockEffectivenessRow({ id: "mock-period-sender-4", module: "sender_filter", key: "rule:4", name: "可信合作伙伴", observedSince: "2026-09-05", observedDays: 15, configuredAction: "accept", outcomes: { accept: 11 }, messages: 5 }),
+  // 示例：该规则的白名单成员组曾发生实质性调整（财务部门成员变更），触发过一次
+  // 观察期重置——version=2。
+  mockEffectivenessRow({ id: "mock-period-sender-5", module: "sender_filter", version: 2, key: "rule:5", name: "内部财务组", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 6 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-spf", module: "auth_spoofing", version: 2, key: "spf_fail", name: "SPF fail", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 12, reject: 6, pending: 2 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dkim", module: "auth_spoofing", key: "dkim_fail", name: "DKIM fail", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 8, quarantine: 4 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dmarc", module: "auth_spoofing", key: "dmarc_reject", name: "DMARC reject", observedSince: "2026-08-31", observedDays: 20, configuredAction: "reject", outcomes: { accept: 1, quarantine: 7, reject: 2 }, messages: 3 }),
