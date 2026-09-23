@@ -162,10 +162,16 @@ export function SenderFilterTable({
         const resolved = row.original.resolved;
         const isObserve = resolved?.run_mode === 'observe';
         const label = isObserve ? t('senderFilter.runModeValue_observe') : t('senderFilter.runModeValue_realtime');
+        const isDisabledByStatus = !row.original.rule.is_active;
         // 复杂规则（resolved 为 null）无法安全还原完整 metadata 用于回写，
-        // 保持只读展示，禁用开关，避免误触后无法正确保存。
-        const readOnly = row.original.is_complex || !resolved;
+        // 保持只读展示，禁用开关，避免误触后无法正确保存。规则本身处于停用
+        // 状态时，运行模式不会产生任何实际效果，同样禁用开关，避免用户误以
+        // 为切换已经生效。
+        const readOnly = row.original.is_complex || !resolved || isDisabledByStatus;
         const isPending = pendingRunModeId === row.original.rule.id;
+        const disabledTitle = isDisabledByStatus
+          ? t('senderFilter.runModeDisabledByStatus')
+          : t('senderFilter.complexCondition');
         return (
           <div className="flex items-center gap-2">
             <Switch
@@ -175,9 +181,18 @@ export function SenderFilterTable({
               onCheckedChange={() => onToggleRunMode(row.original)}
               className="data-checked:bg-amber-500 dark:data-checked:bg-amber-500"
               aria-label={t('senderFilter.runModeToggleTooltip')}
-              title={readOnly ? t('senderFilter.complexCondition') : t('senderFilter.runModeToggleTooltip')}
+              title={readOnly ? disabledTitle : t('senderFilter.runModeToggleTooltip')}
             />
-            <span className={cn('text-xs', isObserve ? 'text-amber-700 font-medium' : 'text-muted-foreground')}>
+            <span
+              className={cn(
+                'text-xs',
+                isDisabledByStatus
+                  ? 'text-muted-foreground'
+                  : isObserve
+                    ? 'text-amber-700 font-medium'
+                    : 'text-muted-foreground',
+              )}
+            >
               {label}
             </span>
           </div>

@@ -362,7 +362,7 @@
     "mailflow": "邮件流",
     "monitorSecurity": "检测引擎状态",
     "phishingDetection": "钓鱼邮件检测智能体",
-    "agentCenter": "智���体中心",
+    "agentCenter": "智�����体中心",
     "agentManagement": "智能体管理",
     "agentOverview": "智能体总览",
     "threatRetro": "威胁回溯智能体",
@@ -1015,9 +1015,9 @@
           "targetPort": "目的端口",
           "tlsLevel": "TLS 加密等级",
           "extRealModeHint": "该能力依赖 Mock 数据模式，真实模式下暂不可编辑",
-          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版��为 {version}，与���证书�������验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
+          "tlsConflictWarning": "当前代理 IP 允许的 TLS 最低版��为 {version}，与���证书���������验」���高�����全策略存在差距，建议提升至 TLSv1.2。",
           "tlsPlainPublicWarning": "当前规则对公网地址使用明文传输，存在���据泄�����风������建议使用「优先 TLS」。",
-          "channel": "��递通道",
+          "channel": "��递通��",
           "channelProxyPreviewTitle": "通道内代理列表",
           "channelProxyColumns": {
             "name": "代理名称",
@@ -1337,12 +1337,12 @@
     "drawerSubtitle": "针对特定业务对象配置差异化检测策略",
     "namePlaceholder": "请输入便于识别的规则名称，如「研发部门外发」",
     "nameRequired": "请输入规则名称",
-    "sectionPipeline": "策略���水线配���",
+    "sectionPipeline": "策略�����水线配���",
     "configDetail": "配��详情",
     "configDetailClose": "关闭配置面板",
     "policyStateLabel": "策略状态",
     "globalRefTitle": "全局默认配置",
-    "globalRefInheritNote": "选择「继承全局配置」时，本群组该模块将采用以上默认值；选择其它状态则���此基础上覆盖。",
+    "globalRefInheritNote": "选择「继承全局配置」时，本群组该模块将采���以上默认值；选择其它状态则���此基础上覆盖。",
     "comingSoon": "敬请期待",
     "customParams": "自定义参数",
     "customSubChecks": "自定义子检查",
@@ -1463,7 +1463,7 @@
       "ipFilter": "按全局 IP 黑白名单生效",
       "rbl": "按全局 RBL 列表生效",
       "overseas": "按全局海外检测策略生效",
-      "senderFilter": "按全局发信人黑白名��生���",
+      "senderFilter": "按全局发信人黑白名��生����",
       "userList": "按���局���户黑白名���生效",
       "behaviorControl": "��全局发信行为管控生效",
       "authSpoofing": "按全局身份认证与仿冒策略生效",
@@ -1647,7 +1647,7 @@
     "timeoutMinutes": "超时(分钟)",
     "booleanTrue": "是",
     "booleanFalse": "否",
-    "sidelineAsyncWarningOptIn": "⚠️ 该字段由「{label}」检查产出。默认不运行。除非有标签规则给��件人���� {tag}，否����规则不会对任��邮件命中。",
+    "sidelineAsyncWarningOptIn": "⚠️ 该字段由「{label}」检查产出。默认不运行。除非有标签规则给���件人���� {tag}，否����规则不会对任��邮件命中。",
     "sidelineAsyncWarningOptOut": "⚠��� 该字段由「{label}」检查产出。默认运行。若所有收件人都被打上 {tag} 标签，该规则不会对那些邮件命中。",
     "pipelineEyebrow": "规则管理",
     "pipelineTitle": "规则流水线总览",
@@ -1857,7 +1857,7 @@
       "rcpttags": "收件人标签",
       "matched_tag_rules": "命中的标签规则",
       "matched_action_rules": "命中的动作规则",
-      "matched_route_rules": "命中的路由规��",
+      "matched_route_rules": "命中的��由规��",
       "final_action_rule": "最终动作",
       "content": "正文",
       "html_content": "HTML 正文",
@@ -2611,7 +2611,7 @@
     "breadcrumb": "日志审计 / 管理员操作日志",
     "moduleOther": "其他",
     "subtitlePlatform": "查看平台级管理员的操作审计记录（跨所有租户）。",
-    "subtitleTenant": "查看租户级管理员的操作审计记录（当前选中租户范��内���。",
+    "subtitleTenant": "查看租户级管理员的操作审计记录��当前选中租户范��内���。",
     "operationId": "操作 ID",
     "before": "变更前",
     "after": "变更后",
@@ -2805,7 +2805,7 @@
   "emailPreview": {
     "title": "邮件预览",
     "subject": "主题",
-    "from": "发件人",
+    "from": "���件人",
     "to": "收件人",
     "cc": "抄�����",
     "date": "日期",
@@ -3196,7 +3196,7 @@
     "actionRecordTypes": {
       "recall_dry_run": "召回预演",
       "recall": "执行召回",
-      "notify_admin": "通知管理员",
+      "notify_admin": "通知��理员",
       "export_report": "导出报告"
     },
     "actionRecordStatuses": {
@@ -3523,7 +3523,7 @@
     "tempfailPlaceholder": "自定义 421 消���",
     "connectionLimits": "连接数限制（-1 = 不限制）",
     "dailyLimit": "���日连接数限制",
-    "concurrentLimit": "并发连接数限制",
+    "concurrentLimit": "并发连接数���制",
     "windowMinutes": "时间窗口（分钟）",
     "windowLimit": "窗口内连接数限制",
     "failureLimits": "失败次数限制（-1 = 不限制）",
@@ -3829,7 +3829,7 @@
     "importDesc": "支持文本粘贴（每行一个 IP/IP段）或上传导出格式的 JSON 文件（与「导出」一致），导入前可预览并去重。",
     "importDefaultAction": "默认动作",
     "importUploadJson": "上传 JSON",
-    "importPlaceholder": "每行一个 IP 或 IP 段，例如：\n192.168.1.1\n10.0.0.0/8\n172.16.0.1-172.16.0.99\n也可每行附���动作���备注：IP,动作,备注",
+    "importPlaceholder": "每行一个 IP 或 IP 段，例如��\n192.168.1.1\n10.0.0.0/8\n172.16.0.1-172.16.0.99\n也可每行附���动作���备注：IP,动作,备注",
     "importSummary": "共 {total} 条：有效 {valid}，非法 {error}��重�� {dup}",
     "importStatus": "状态",
     "importRowValid": "可导入",
@@ -3962,7 +3962,7 @@
     "serverRequired": "请至少添加一个 RBL 服务器",
     "saveSuccess": "RBL 过滤配��已保存",
     "serverExists": "该服务器已存在",
-    "serverReferenced": "该服务器被 {count} 条���中规则使用，无法删除",
+    "serverReferenced": "该服务器被 {count} 条���中规则使用���无法删除",
     "loadError": "���载 RBL 配置失败",
     "disposalStrategyTitle": "处置策略",
     "disposalStrategyDesc": "选择命中 RBL 后的处置方式，两种策略互斥，仅能启用其一。",
@@ -4168,7 +4168,7 @@
     "unsavedChanges": "有未保存的修改，确定要关闭吗？所有修改将丢失。",
     "groupDeleted": "群组已删除",
     "resetFilters": "重置",
-    "simGroupNotice": "群组类型规则的模拟需在生产环境验证",
+    "simGroupNotice": "群组类型规��的模拟需在生产环境验证",
     "sectionBasic": "基础设置",
     "sectionRunMode": "运行模式",
     "runMode": "运行模式",
@@ -4178,6 +4178,7 @@
     "runModeToggleTooltip": "点击切换运行模式",
     "runModeToggleTitle": "切换为观察模式",
     "runModeToggleDescription": "切换为观察模式后，规则“{name}”将不再对命中的邮件执行拦截或处置，仅记录日志，是否继续。",
+    "runModeDisabledByStatus": "规则已停用，运行模式暂不生效",
     "sectionAction": "执行动作",
     "expireAt": "有效期至",
     "expireAtHint": "留空表示永久有效",
@@ -5393,7 +5394,7 @@
       "timeoutLabel": "沙箱分析超时（超过30秒）",
       "timeoutContinue": "进行下一步检测（放行，依赖链接保护兜底）",
       "timeoutContinueTip": "超时后放行邮件，依赖链接保护在用户点击时进行实时检测",
-      "timeoutTreatMalicious": "按恶意处置（使用上述处置动作）",
+      "timeoutTreatMalicious": "按恶意处置（���用上述处置动作）",
       "timeoutTreatMaliciousTip": "超时后按照恶意URL的处置策略执行",
       "timeoutPass": "放行（仅记录日志）",
       "intelGroup": "情报库设置",
@@ -5536,7 +5537,7 @@
       "subscription": "订阅"
     },
     "intentDesc": {
-      "porn_gambling": "检测色情、赌博等违规内容邮件",
+      "porn_gambling": "检测色情、赌博等违���内容邮件",
       "political": "检测涉及政治敏感、反动内容的邮件",
       "phishing": "检测伪装身份诱骗用户信息的钓鱼邮件",
       "spam": "检测垃圾邮件、骚扰邮件、广告邮件",
@@ -5693,7 +5694,7 @@
     "atLeastOneDirection": "至少选择一个检测方向",
     "navSummary": "窗口{window}分钟 / 阈值{threshold}%",
     "tooltipObserve": "开启后仅记录日志，不执行实际拦截动作",
-    "errorTagRequired": "启用该动作时需至少启用一种标记方式",
+    "errorTagRequired": "启用该动作时需��少启用一种标记方式",
     "errorTagFieldRequired": "已启用的标记方式内容不能为空"
   },
   "mailMarking": {
@@ -5852,7 +5853,7 @@
     },
     "switchConfirm": {
       "title": "确认切换为副本（replica）？",
-      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖本地全局规则：快照之外的规则会被删除，同 uid/同名的规则会被主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）不受影响。请确认已在主节点核实规则内容后再继续。",
+      "description": "本节点当前有 {count} 条全局规则（不含租户规则）。切换为 replica 后，首次同步会用主节点的全量快照覆盖本地全局���则：快照之外的规则会被删除，同 uid/同名的规则会被主节点版本覆盖，此操作不可逆。租户规则（tenant_id 非空）不受影响。请确认已在主节点核实规则内容后再继续。",
       "confirmText": "确认切换为 replica",
       "cancelText": "取消"
     },
@@ -6342,7 +6343,7 @@
         "urgent": "紧急",
         "urgentTooltip": "邮件命中敏感/紧急关键词",
         "domainAge": "域名年龄{n}天",
-        "domainAgeTooltip": "发件人域名注册仅 {n} 天，新注册域名是钓鱼/仿冒的常见信号",
+        "domainAgeTooltip": "发件人域名注册仅 {n} 天，新注册域名是钓鱼/仿��的常见信号",
         "recipientOutcomeLabel": "��发结果",
         "multiBasisCount": "+{n} 项",
         "multiBasisPopoverTitle": "共 {count} 种处置依据",
@@ -6748,7 +6749,7 @@
           "timedOut": "已超时",
           "failed": "失败"
         },
-        "searchPlaceholder": "搜索日志内容...",
+        "searchPlaceholder": "搜索日志��容...",
         "copyAll": "复制���部",
         "downloadLog": "下载",
         "copied": "已复制",
@@ -6823,7 +6824,7 @@
     "keywords": "关键字",
     "recordsCount": "共 {count} 条",
     "perPageLabel": "条/页",
-    "neverMatchWarning": "您有 {count} 条 sideline 规则因缺少前置触发规则而永��命中，请为这些规则生成配套前置触发规则。",
+    "neverMatchWarning": "您有 {count} 条 sideline 规则因缺少前置触发规则而永��命中，���为这些规则生成配套前置触发规则。",
     "healthMissingDependency": "���赖资源缺失（detection profile 或 group 未配置）",
     "healthNeverMatch": "永不命中：sideline 规则缺少前置触发规则",
     "editRuleTitle": "编辑规则: {name}",
@@ -7082,7 +7083,7 @@
       "aiRegexComingSoon": "AI 辅助正则生成即将上线",
       "thresholdLabel": "阈值",
       "intentSelectLabel": "意图分类",
-      "intentSelectPlaceholder": "请选择意图分类",
+      "intentSelectPlaceholder": "请选择意图���类",
       "intentAddLabel": "添加意图",
       "intentRemoveLabel": "移除",
       "betweenLoLabel": "最小",
@@ -7166,7 +7167,7 @@
         "comprehensiveEngineResult": "意图引擎",
         "senderIpCount15Min": "发件 IP 数 (15分钟)",
         "senderRecipientCount15Min": "发件收件人数 (15分钟)",
-        "senderMailCount15Min": "发件邮件数 (15分钟)",
+        "senderMailCount15Min": "发件邮件�� (15分钟)",
         "senderMailCountDaily": "发件邮件数 (每天)",
         "senderRateLimit15": "发件频率限制 (15分钟)",
         "recipientCount": "收件人数"
@@ -7429,7 +7430,7 @@
         "note": "超过阈值触发规则"
       },
       "desc_recipientCount": {
-        "source": "邮件收信人解析",
+        "source": "邮件收信���解析",
         "usage": "限制单封邮件的收信人数量",
         "note": "防止大规模群发"
       },
@@ -7914,7 +7915,7 @@
     "copy": "复制",
     "copied": "已复制到剪贴板",
     "copyFailed": "复制失败",
-    "switchBeforeDelete": "请先切换到其它 selector",
+    "switchBeforeDelete": "请先��换到其它 selector",
     "generateSuccess": "密钥已生成",
     "importSuccess": "私钥已导入",
     "activateSuccess": "已设为当前密钥",
@@ -8124,7 +8125,7 @@
       "drawerTitle": "AI 分析结果",
       "loading": "正在分析...",
       "aiFailed": "AI 分析失败，请稍后重试",
-      "empty": "AI 未返回任何分析内容，请稍后重试",
+      "empty": "AI 未返回任何��析内容，请稍后重试",
       "retry": "重试",
       "truncated": "分析被中断，以下为已生成的部分内容，并非完整分析"
     },
@@ -8532,7 +8533,7 @@
       "showAllDomains": "查看全部 20",
       "attachmentTypeDistribution": "附件类型分布",
       "attachmentThreatDistribution": "附件威胁类型分布",
-      "sandboxResultDistribution": "沙箱检测结果分布",
+      "sandboxResultDistribution": "沙箱检测结��分布",
       "topMaliciousAttachments": "TOP 恶意附件",
       "showAllAttachments": "查看全部 20"
     },
@@ -8990,7 +8991,7 @@
       "title": "拦截该邮件",
       "description": "确认拦截该邮件？此操作将阻止该邮件继续投递。",
       "confirm": "确认拦截",
-      "confirming": "处理中...",
+      "confirming": "处理��...",
       "success": "已拦截",
       "alreadyBlocked": "该邮件已被拦截",
       "error": "拦截失败",
@@ -9251,7 +9252,7 @@
       "markPosition": {
         "subject_prefix": "主题前缀",
         "header": "邮件头",
-        "headerHint": "在邮件头部追加 X-OSG-Phish-Mark 字段，写入标记文本。收件人不可见，可供邮件客户端规则或下游系统读取。"
+        "headerHint": "在邮件头部追加 X-OSG-Phish-Mark 字段，写入标记文本。收件人不可见，可供邮件客���端规则或下游系统读取。"
       },
       "markTextLabel": "主题前缀文本",
       "markTextPlaceholder": "例如 [可疑]",
@@ -9607,7 +9608,7 @@
     },
     "brandForm": {
       "addTitle": "添加保护品牌",
-      "addDescription": "配置需要保护的品牌域名和相关检测参数。",
+      "addDescription": "配置需要保护的品牌域名和相���检测参数。",
       "editTitle": "编辑保护品牌",
       "sectionIdentity": "品牌身份",
       "sectionIdentityDescription": "品牌名称与受保护域名",
@@ -11124,7 +11125,7 @@
     "advanced_rule": {
       "addon_type_invalid": "附加动作类型无效",
       "delete_attachment_scope_invalid": "删除附件的适用范围无效，只能是：{allowed}",
-      "primary_action_invalid": "规则的主处置动作取值无效",
+      "primary_action_invalid": "规则的主处置动��取值无效",
       "scope_invalid": "规则的生效范围取值无效"
     },
     "alert": {
@@ -11239,7 +11240,7 @@
       "active_key_cannot_delete": "正在使用的签名密钥不能删除，请先启用另一个密钥或停用当前密钥",
       "algorithm_unsupported": "不支持的签名算法「{value}」，只能是：{allowed}",
       "cross_tenant_manage_denied": "无权管理其他租户的签名密钥",
-      "cross_tenant_read_denied": "无权查看其他租户的签名域名",
+      "cross_tenant_read_denied": "无权查看其他���户的签名域名",
       "dns_not_verified": "该密钥的 DNS 记录尚未验证通过，请先在域名服务商处添加 TXT 记录并完成验证，再启用它",
       "forbidden": "没有权限执行此操作",
       "key_not_found": "签名密钥不存在，可能已被删除",
@@ -11604,7 +11605,7 @@
       "dkim_key_not_found": "DKIM 密钥不存在"
     },
     "antispam_queue": {
-      "invalid_quarantine_notification_tracking_request": "隔离通知跟踪请求无效"
+      "invalid_quarantine_notification_tracking_request": "隔离��知跟踪请求无效"
     },
     "auth_spoofing": {
       "no_tenant_context": "请先选择租户",

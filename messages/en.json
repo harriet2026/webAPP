@@ -4173,6 +4173,7 @@
     "runModeToggleTooltip": "Click to switch run mode",
     "runModeToggleTitle": "Switch to Observe Mode",
     "runModeToggleDescription": "Switching rule \"{name}\" to Observe Mode means it will no longer block or act on matched emails, it will only log matches. Continue.",
+    "runModeDisabledByStatus": "Rule is disabled; run mode has no effect for now",
     "sectionAction": "Action",
     "expireAt": "Valid Until",
     "expireAtHint": "Leave empty for permanent",
