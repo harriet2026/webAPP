@@ -31,6 +31,8 @@ export interface Rule {
   action?: string;
   metadata?: string;
   is_active: boolean;
+  /** Present when the stored condition tree is blocked regardless of is_active. */
+  execution_blocked_reason?: string;
   valid_from?: string | null;
   valid_until?: string | null;
   email_type?: string;

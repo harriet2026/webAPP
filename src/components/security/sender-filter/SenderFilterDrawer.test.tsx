@@ -88,6 +88,16 @@ describe('SenderFilterDrawer 组织域名输入 (GT-12665)', () => {
 });
 
 describe('SenderFilterDrawer (demo rewrite)', () => {
+  it('完整展示个人发信人格式提示并与输入框建立可访问关联 (GT-13678)', () => {
+    renderDrawer();
+
+    const senderInput = screen.getByPlaceholderText('senderFilter.senderPlaceholder_individual');
+    const senderHint = screen.getByTestId('sender-filter-sender-value-hint');
+
+    expect(senderHint).toHaveTextContent('senderFilter.senderPlaceholder_individual');
+    expect(senderInput).toHaveAttribute('aria-describedby', 'sender-filter-sender-value-hint');
+  });
+
   it('黑名单抽屉仍不展示 email_type / whitelist_mode 字段', () => {
     renderDrawer({ listTypeTab: 'blacklist' });
     expect(screen.queryByTestId('sender-filter-email-type')).toBeNull();
@@ -131,6 +141,23 @@ describe('SenderFilterDrawer (demo rewrite)', () => {
     expect(screen.getByText('senderFilter.configHint1')).toBeInTheDocument();
   });
 
+  it('清空优先级后显示稳定业务错误且预览不泄露 NaN', async () => {
+    renderDrawer();
+    const input = screen.getByTestId('sender-filter-rule-priority');
+
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.click(screen.getByText('common.save'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sender-filter-rule-priority-error'))
+        .toHaveTextContent('senderFilter.errors.priorityRequired');
+    });
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAttribute('aria-describedby', 'sender-filter-rule-priority-error');
+    expect(screen.getByTestId('sender-filter-effect-priority')).toHaveTextContent('—');
+    expect(screen.queryByText(/expected number|NaN/)).toBeNull();
+  });
+
   it('本地模拟：individual 邮箱相等即命中', () => {
     renderDrawer();
     // Default sender type is individual → a plain text input is shown.
@@ -148,6 +175,11 @@ describe('SenderFilterDrawer (demo rewrite)', () => {
     // Local match (no API round-trip): equal address → hit.
     expect(screen.getByText('senderFilter.hitRule')).toBeInTheDocument();
     expect(screen.queryByText('senderFilter.notHit')).toBeNull();
+    const result = screen.getByTestId('sender-filter-simulation-result');
+    expect(result).toHaveClass('border-sky-200', 'bg-sky-50', 'text-sky-700');
+    expect(result).not.toHaveClass('border-rose-500/40', 'bg-rose-500/10');
+    expect(within(result).getByTestId('sender-filter-simulation-match-icon')).toBeInTheDocument();
+    expect(within(result).queryByTestId('sender-filter-simulation-no-match-icon')).toBeNull();
   });
 
   it('本地模拟：不相等邮箱未命中', () => {
@@ -162,6 +194,10 @@ describe('SenderFilterDrawer (demo rewrite)', () => {
 
     expect(screen.getByText('senderFilter.notHit')).toBeInTheDocument();
     expect(screen.queryByText('senderFilter.hitRule')).toBeNull();
+    const result = screen.getByTestId('sender-filter-simulation-result');
+    expect(result).toHaveClass('border-border', 'bg-muted', 'text-muted-foreground');
+    expect(within(result).getByTestId('sender-filter-simulation-no-match-icon')).toBeInTheDocument();
+    expect(within(result).queryByTestId('sender-filter-simulation-match-icon')).toBeNull();
   });
 
   it('编辑态回填名称与优先级（无 whitelist_mode 依赖）', () => {

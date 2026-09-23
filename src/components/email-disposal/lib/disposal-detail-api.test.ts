@@ -2,13 +2,114 @@ import { describe, expect, test, vi } from 'vitest';
 import {
   blacklistMailLogEntity,
   disposeByObject,
+  getMailLogDetail,
   getMailLogAnalysis,
   getMailLogEvents,
+  isDuplicateSenderFilterRuleError,
   legacyLifecycleStreamEvents,
 } from './disposal-detail-api';
-import type { ApiRequestFn } from '@/lib/api/client';
+import { ApiError, type ApiRequestFn } from '@/lib/api/client';
+
+describe('isDuplicateSenderFilterRuleError', () => {
+  test('recognizes only the stable conflict returned for the generated sender-list rule name', () => {
+    expect(isDuplicateSenderFilterRuleError(new ApiError(409, 'rule name already exists', {
+      error: { code: 'unified_rule.name_exists' },
+    }))).toBe(true);
+    expect(isDuplicateSenderFilterRuleError(new ApiError(403, 'access denied', {
+      error: { code: 'unified_rule.access_denied' },
+    }))).toBe(false);
+    expect(isDuplicateSenderFilterRuleError(new Error('rule name already exists'))).toBe(false);
+  });
+});
+
+describe('getMailLogDetail', () => {
+  test('GT-13609: normalizes out-of-domain recipient statuses from their final actions', async () => {
+    const response = {
+      recipient_dispositions: [
+        { recipient: 'audit@example.test', final_action: 'audit', status: 'completed' },
+        { recipient: 'quarantine@example.test', final_action: 'quarantine', status: ' COMPLETED ' },
+        { recipient: 'known@example.test', final_action: 'accept', status: 'delivered' },
+        { recipient: 'unknown@example.test', final_action: 'custom_action', status: 'internal_state' },
+        { recipient: 'malformed@example.test', final_action: null, status: null },
+      ],
+      release_mails: [{
+        recipient_dispositions: [
+          { recipient: 'released@example.test', final_action: 'accept', status: 'completed' },
+        ],
+      }],
+    };
+    const requestFn = vi.fn().mockResolvedValue(response) as unknown as ApiRequestFn;
+
+    const result = await getMailLogDetail(42, requestFn);
+
+    expect(requestFn).toHaveBeenCalledWith('/mail-logs/42');
+    expect(result.recipient_dispositions?.map((item) => item.status)).toEqual([
+      'pending_review',
+      'quarantined',
+      'delivered',
+      'unknown',
+      'unknown',
+    ]);
+    expect(result.release_mails?.[0].recipient_dispositions?.[0].status).toBe('delivered');
+    expect(response.recipient_dispositions[0].status).toBe('completed');
+  });
+});
 
 describe('getMailLogAnalysis', () => {
+  test('preserves projected module timeouts and recipient results without service-specific parsing', async () => {
+    const requestFn = vi.fn().mockResolvedValue({
+      scope: 'all',
+      final_verdict: 'safe',
+      total_elapsed_ms: 125,
+      stages: [
+        {
+          stage: 3, key: 'content', status: 'timeout', duration_ms: 50,
+          checks: [
+            { key: 'attachmentSecurity', status: 'timeout', rule_ids: [] },
+            { key: 'intentEngine', status: 'timeout', rule_ids: [] },
+          ],
+        },
+        {
+          stage: 4, key: 'ai', status: 'timeout', duration_ms: 75,
+          checks: [
+            { key: 'phishingAgent', status: 'timeout', rule_ids: [] },
+            { key: 'spoofingAgent', status: 'timeout', rule_ids: [] },
+          ],
+        },
+        {
+          stage: 5, key: 'comprehensive', status: 'timeout',
+          checks: [{
+            key: 'similarityDetection', status: 'timeout', rule_ids: [],
+            recipient_groups: [
+              { recipients: ['timeout@example.test'], status: 'timeout', rule_ids: [] },
+              { recipients: ['clean@example.test'], status: 'pass', rule_ids: [] },
+            ],
+          }],
+        },
+      ],
+    }) as unknown as ApiRequestFn;
+
+    const result = await getMailLogAnalysis(42, undefined, requestFn);
+
+    expect(requestFn).toHaveBeenCalledWith('/mail-logs/42/analysis');
+    expect(result.final_verdict).toBe('safe');
+    expect(result.total_elapsed_ms).toBe(125);
+    expect(result.stages.map((stage) => stage.status)).toEqual(['timeout', 'timeout', 'timeout']);
+    expect(result.stages.flatMap((stage) => stage.checks)).toEqual([
+      { key: 'attachmentSecurity', status: 'timeout', ruleIds: [] },
+      { key: 'intentEngine', status: 'timeout', ruleIds: [] },
+      { key: 'phishingAgent', status: 'timeout', ruleIds: [] },
+      { key: 'spoofingAgent', status: 'timeout', ruleIds: [] },
+      {
+        key: 'similarityDetection', status: 'timeout', ruleIds: [],
+        recipientGroups: [
+          { recipients: ['timeout@example.test'], status: 'timeout', ruleIds: [] },
+          { recipients: ['clean@example.test'], status: 'pass', ruleIds: [] },
+        ],
+      },
+    ]);
+  });
+
   test('encodes the selected recipient and normalizes snake_case stage fields', async () => {
     const requestFn = vi.fn().mockResolvedValue({
       scope: 'recipient',

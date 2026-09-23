@@ -450,9 +450,9 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
 
         <SheetFooter className="border-t px-6 py-3">
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" onClick={requestClose}>{tsd('personForm.cancel')}</Button>
+            <Button variant="outline" data-testid="spoof-person-form-cancel" onClick={requestClose}>{tsd('personForm.cancel')}</Button>
             {!isEdit && tab === 'contacts' ? (
-              <Button disabled={contactsSaveDisabled || saveMutation.isPending} onClick={() => saveMutation.mutate('contacts')}>
+              <Button data-testid="spoof-person-import-save" disabled={contactsSaveDisabled || saveMutation.isPending} onClick={() => saveMutation.mutate('contacts')}>
                 {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {tsd('personForm.saveSelected', { n: selectedContactCount })}
               </Button>
@@ -528,6 +528,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
           {sourceCards.map((card) => (
             <label
               key={card.value}
+              data-testid={`spoof-person-source-${card.value}`}
               className={cn(
                 'flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors',
                 tab === card.value
@@ -535,7 +536,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
                   : 'border-border hover:bg-accent/50',
               )}
             >
-              <RadioGroupItem value={card.value} id={`person-source-${card.value}`} className="mt-1" />
+              <RadioGroupItem value={card.value} id={`person-source-${card.value}`} className="mt-1" data-testid={`spoof-person-source-radio-${card.value}`} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{tsd(card.titleKey)}</span>
@@ -772,21 +773,21 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
             <Label>{tsd('personForm.importKeyword')}</Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={contactKeyword} onChange={(e) => { setContactKeyword(e.target.value); setContactPage(1); }}
+              <Input data-testid="spoof-person-import-keyword" value={contactKeyword} onChange={(e) => { setContactKeyword(e.target.value); setContactPage(1); }}
                 placeholder={tsd('personForm.importKeywordPlaceholder')} className="pl-9" />
             </div>
           </div>
           <div className="space-y-1.5">
             <Label>{tsd('personForm.importDept')}</Label>
-            <Input value={contactDept} onChange={(e) => { setContactDept(e.target.value); setContactPage(1); }} />
+            <Input data-testid="spoof-person-import-dept" value={contactDept} onChange={(e) => { setContactDept(e.target.value); setContactPage(1); }} />
           </div>
           <div className="space-y-1.5">
             <Label>{tsd('personForm.importJobTitle')}</Label>
-            <Input value={contactJobTitle} onChange={(e) => { setContactJobTitle(e.target.value); setContactPage(1); }} />
+            <Input data-testid="spoof-person-import-job-title" value={contactJobTitle} onChange={(e) => { setContactJobTitle(e.target.value); setContactPage(1); }} />
           </div>
           <div className="space-y-1.5">
             <Label>{tsd('personForm.importSourceId')}</Label>
-            <Input inputMode="numeric" value={contactSourceId} onChange={(e) => { setContactSourceId(e.target.value.replace(/\D/g, '')); setContactPage(1); }} />
+            <Input data-testid="spoof-person-import-source-id" inputMode="numeric" value={contactSourceId} onChange={(e) => { setContactSourceId(e.target.value.replace(/\D/g, '')); setContactPage(1); }} />
           </div>
         </div>
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -794,7 +795,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
             <div className="space-y-1.5">
               <Label>{tsd('personForm.importTag')}</Label>
               <Select value={contactTag} onValueChange={(value) => { setContactTag(value ?? 'all'); setContactPage(1); }}>
-                <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-52" data-testid="spoof-person-import-tag"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{tsd('personForm.importAllTags')}</SelectItem>
                   <SelectItem value="executive">{tsd('person.category.executive')}</SelectItem>
@@ -803,12 +804,12 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="button" variant="outline" onClick={resetContactFilters}>{tc('reset')}</Button>
+            <Button type="button" variant="outline" data-testid="spoof-person-import-reset" onClick={resetContactFilters}>{tc('reset')}</Button>
           </div>
           <span className="text-sm text-muted-foreground">{tsd('personForm.importSelected', { n: selectedContactCount })}</span>
         </div>
 
-        <div className="max-h-52 overflow-y-auto rounded-lg border border-border">
+        <div className="max-h-52 overflow-y-auto rounded-lg border border-border" data-testid="spoof-person-import-list">
           {contactsQuery.isLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
           ) : contacts.length === 0 ? (
@@ -822,12 +823,14 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
                 return (
                   <label
                     key={contact.id}
+                    data-testid={`spoof-person-import-row-${contact.id}`}
                     className={cn(
                       'flex items-start gap-3 px-3 py-2.5 text-sm transition-colors',
                       disabledReason ? 'cursor-not-allowed bg-muted/30 text-muted-foreground' : 'cursor-pointer hover:bg-accent/40',
                     )}
                   >
                     <input
+                      data-testid={`spoof-person-import-select-${contact.id}`}
                       type="checkbox"
                       checked={selected}
                       disabled={Boolean(disabledReason && !selected)}
@@ -840,7 +843,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
                         <span className="text-muted-foreground">· {contact.job_title || '—'}</span>
                         <Badge variant="outline" className="text-[10px]">{tsd(`person.category.${derivedCategory}`)}</Badge>
                         {contact.status !== 'active' ? <Badge variant="outline" className="text-[10px]">{contact.status_label || contact.status}</Badge> : null}
-                        {disabledReason ? <Badge variant="secondary" className="ml-auto text-[10px]">{disabledReason}</Badge> : null}
+                        {disabledReason ? <Badge data-testid={`spoof-person-import-disabled-${contact.id}`} variant="secondary" className="ml-auto text-[10px]">{disabledReason}</Badge> : null}
                       </div>
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span className="truncate font-mono">{contact.email || '—'}</span>
@@ -859,12 +862,14 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
             <span>{tc('total', { count: total })}</span>
             <div className="flex items-center gap-2">
               <Button type="button" variant="outline" size="icon" className="h-8 w-8"
+                data-testid="spoof-person-import-prev"
                 aria-label={tc('prev')}
                 disabled={contactPage <= 1} onClick={() => setContactPage((page) => Math.max(1, page - 1))}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span>{tc('pageOf', { current: contactPage, total: totalPages })}</span>
               <Button type="button" variant="outline" size="icon" className="h-8 w-8"
+                data-testid="spoof-person-import-next"
                 aria-label={tc('next')}
                 disabled={contactPage >= totalPages} onClick={() => setContactPage((page) => Math.min(totalPages, page + 1))}>
                 <ChevronRight className="h-4 w-4" />
@@ -876,7 +881,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
         {selectedContactItems.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {selectedContactItems.map((contact) => (
-              <button key={contact.id} type="button" onClick={() => toggleContact(contact, false)}
+              <button key={contact.id} type="button" data-testid={`spoof-person-import-selected-${contact.id}`} onClick={() => toggleContact(contact, false)}
                 className="inline-flex max-w-full items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950/30"
                 title={tsd('personForm.importRemoveSelected')}>
                 <span className="max-w-40 truncate font-medium">{displayNameFromContact(contact)}</span>
@@ -1008,7 +1013,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
     return (
       <SectionCard index={index} title={tsd('personForm.sectionNotify')}>
         <label className="flex cursor-pointer items-center gap-2 text-sm">
-          <Switch checked={notify} onCheckedChange={setNotify} />
+          <Switch data-testid="spoof-person-notify" checked={notify} onCheckedChange={setNotify} />
           {tsd('personForm.notify')}
         </label>
         {notify ? (
@@ -1023,7 +1028,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
               />
               <p className="text-xs text-muted-foreground">{tsd('personForm.adminEmailsHint')}</p>
             </div>
-            <Button type="button" variant="outline" size="sm"
+            <Button type="button" variant="outline" size="sm" data-testid="spoof-person-preview-notify"
               disabled={previewDisabled || previewMutation.isPending}
               onClick={() => previewMutation.mutate()}>
               {previewMutation.isPending

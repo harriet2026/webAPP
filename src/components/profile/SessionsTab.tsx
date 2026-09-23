@@ -86,7 +86,7 @@ export function SessionsTab() {
     <Card className="p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-medium">{t('tabs.sessions')}</h3>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground" data-testid="profile-sessions-online-count">
           {t('devices.onlineCount', { n: onlineDevices.length })}
         </span>
       </div>
@@ -117,10 +117,11 @@ export function SessionsTab() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  devices.map((d) => (
+                  devices.map((d, index) => (
                     <TableRow
                       key={d.session_id}
                       className={cn(d.current && 'bg-primary/5')}
+                      data-testid={d.current ? 'profile-session-current' : `profile-session-other-${index}`}
                     >
                       <TableCell className="font-medium text-foreground">{d.device}</TableCell>
                       <TableCell className="text-muted-foreground">{d.browser}</TableCell>
@@ -129,11 +130,11 @@ export function SessionsTab() {
                       <TableCell className="text-muted-foreground">{formatTimestamp(d.login_time) || '—'}</TableCell>
                       <TableCell>
                         {d.current ? (
-                          <Badge variant="outline" className="border-green-200 bg-green-50 font-normal text-green-600 dark:border-green-900 dark:bg-green-950 dark:text-green-400">
+                          <Badge data-testid="profile-session-current-status" variant="outline" className="border-green-200 bg-green-50 font-normal text-green-600 dark:border-green-900 dark:bg-green-950 dark:text-green-400">
                             {t('devices.current')}
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="border-blue-200 bg-blue-50 font-normal text-blue-600 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-400">
+                          <Badge data-testid={`profile-session-other-status-${index}`} variant="outline" className="border-blue-200 bg-blue-50 font-normal text-blue-600 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-400">
                             {t('devices.online')}
                           </Badge>
                         )}
@@ -145,7 +146,7 @@ export function SessionsTab() {
                           className="h-7 px-2 text-destructive hover:bg-destructive/5"
                           disabled={logoutDevice.isPending}
                           onClick={() => setSingle(d)}
-                          data-testid={`profile-device-logout-${d.session_id}`}
+                          data-testid={d.current ? 'profile-device-logout-current' : `profile-device-logout-other-${index}`}
                         >
                           {t('devices.logout')}
                         </Button>

@@ -172,6 +172,7 @@ export interface SystemHealthSummary {
   rule_latest: boolean;
   av_vendor: string | null;
   av_expire: string | null;
+  antivirus?: import('@/types/attachment-security').AVStatusResponse | null;
 }
 
 // Agent stats fields are FIXED per the plan's Global Constraints — the three
@@ -390,7 +391,8 @@ export async function fetchSystemStatusData(args: FetchArgs): Promise<SystemStat
     }
 
     // GT-12553: 许可证/规则库平台待办，数据源为健康聚合接口（GT-12346）。
-    // 接口未上线（404）时按"无该类待办"处理，其余错误如实抛出（不吞 500）。
+    // 字段无权威来源时接口返回 null，按"无该类待办"处理；兼容滚动升级中旧
+    // apiserver 的 404，其余错误如实抛出（不吞 500）。
     let health: SystemHealthSummary | null = null;
     try {
       health = await apiRequest<SystemHealthSummary>('/system/health-summary');

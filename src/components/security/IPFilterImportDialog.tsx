@@ -238,7 +238,7 @@ export function IPFilterImportDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl" showCloseButton={false}>
+      <DialogContent className="max-w-3xl" showCloseButton={false} data-testid="ip-filter-import-dialog">
         <DialogHeader>
           <DialogTitle>{t('ipFilter.importTitle')}</DialogTitle>
           <DialogDescription>{t('ipFilter.importDesc')}</DialogDescription>
@@ -249,7 +249,7 @@ export function IPFilterImportDialog({
             <div className="flex flex-col gap-1">
               <Label className="text-xs text-muted-foreground">{t('ipFilter.importDefaultAction')}</Label>
               <Select value={defaultAction} onValueChange={(v) => setDefaultAction(v as DemoAction)}>
-                <SelectTrigger className="w-40" size="sm">
+              <SelectTrigger className="w-40" size="sm" data-testid="ip-filter-import-default-action">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -261,6 +261,7 @@ export function IPFilterImportDialog({
               {listType === 'whitelist' && (
                 <label className="flex items-center gap-2 text-xs">
                   <Checkbox
+                    data-testid="ip-filter-import-default-whitelist-tag"
                     checked={defaultAddWhitelistTag}
                     onCheckedChange={(checked) => setDefaultAddWhitelistTag(checked === true)}
                   />
@@ -291,13 +292,14 @@ export function IPFilterImportDialog({
               className="hidden"
               onChange={handleFile}
             />
-            <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+            <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()} data-testid="ip-filter-import-upload">
               <FileUp className="h-4 w-4 mr-1" />
               {t('ipFilter.importUploadJson')}
             </Button>
           </div>
 
-          <Textarea
+            <Textarea
+            data-testid="ip-filter-import-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={t('ipFilter.importPlaceholder')}
@@ -308,7 +310,7 @@ export function IPFilterImportDialog({
           {parsed.total > 0 && (
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span>{t('ipFilter.importSummary', {
+                <span data-testid="ip-filter-import-summary">{t('ipFilter.importSummary', {
                   total: parsed.total,
                   valid: parsed.validCount,
                   error: parsed.errorCount,
@@ -321,7 +323,7 @@ export function IPFilterImportDialog({
                 )}
               </div>
 
-              <ScrollArea className="h-56 rounded-md border">
+              <ScrollArea className="h-56 rounded-md border" data-testid="ip-filter-import-preview">
                 <Table>
                   <TableHeader className="sticky top-0 bg-background">
                     <TableRow>
@@ -334,7 +336,7 @@ export function IPFilterImportDialog({
                   </TableHeader>
                   <TableBody>
                     {parsed.rows.map((row) => (
-                      <TableRow key={row.lineNo} className={row.error ? 'opacity-70' : ''}>
+                      <TableRow key={row.lineNo} className={row.error ? 'opacity-70' : ''} data-testid={`ip-filter-import-row-${row.lineNo}`}>
                         <TableCell className="text-xs text-muted-foreground">{row.lineNo}</TableCell>
                         {/* 超长原始行（异常粘贴/坏文件）截断显示，防止撑爆弹窗 grid 宽度 */}
                         <TableCell className="font-mono text-xs max-w-[280px] truncate" title={row.ipValue || row.raw}>
@@ -355,16 +357,17 @@ export function IPFilterImportDialog({
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">{t('ipFilter.importDupStrategy')}</Label>
                   <RadioGroup
+                    data-testid="ip-filter-import-duplicate-strategy"
                     value={strategy}
                     onValueChange={(v) => setStrategy(v as ExistingDuplicateStrategy)}
                     className="flex gap-4"
                   >
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="skip" id="dup-skip" />
+                      <RadioGroupItem value="skip" id="dup-skip" data-testid="ip-filter-import-duplicate-skip" />
                       <Label htmlFor="dup-skip" className="text-xs font-normal">{t('ipFilter.importDupSkip')}</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="overwrite" id="dup-overwrite" />
+                      <RadioGroupItem value="overwrite" id="dup-overwrite" data-testid="ip-filter-import-duplicate-overwrite" />
                       <Label htmlFor="dup-overwrite" className="text-xs font-normal">{t('ipFilter.importDupOverwrite')}</Label>
                     </div>
                   </RadioGroup>
@@ -375,10 +378,11 @@ export function IPFilterImportDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleClose(false)} disabled={submitting}>
+          <Button variant="outline" onClick={() => handleClose(false)} disabled={submitting} data-testid="ip-filter-import-cancel">
             {t('common.cancel')}
           </Button>
           <Button
+            data-testid="ip-filter-import-submit"
             onClick={handleSubmit}
             disabled={submitting || plan.length === 0 || parsed.exceededLimit}
           >

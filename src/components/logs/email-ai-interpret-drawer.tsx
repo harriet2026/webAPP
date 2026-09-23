@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { fetchSSE, buildAIInterpretURL, type SSEEvent } from '@/lib/api/logs';
+import { fetchSSE, buildAIInterpretURL } from '@/lib/api/logs';
 import { Copy, RefreshCw, ChevronDown, ChevronRight, Loader2, Sparkles, Brain } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Switch } from '@/components/ui/switch';
@@ -192,7 +192,7 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[480px] sm:max-w-[480px] flex flex-col p-0">
+      <SheetContent className="w-[480px] sm:max-w-[480px] flex flex-col p-0" data-testid="email-ai-interpret-drawer">
         <SheetHeader className="shrink-0 border-b border-border/70 px-6 py-4">
           <SheetTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
@@ -228,7 +228,10 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
           )}
 
           {phase === 'error' && errorMsg && (
-            <div className="shrink-0 px-6 py-3 border-b border-border/40">
+            <div
+              className="shrink-0 px-6 py-3 border-b border-border/40"
+              data-testid="email-ai-interpret-error"
+            >
               <p className="text-sm text-destructive">{errorMsg}</p>
             </div>
           )}
@@ -239,6 +242,7 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
                 type="button"
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                 onClick={() => setToolsExpanded(!toolsExpanded)}
+                data-testid="email-ai-interpret-tool-calls-toggle"
               >
                 {toolsExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                 {t('logs.email.aiInterpret.toolCalls', { count: toolCalls.length })}
@@ -246,7 +250,12 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
               {toolsExpanded && (
                 <div className="mt-2 space-y-1">
                   {toolCalls.map((tc, i) => (
-                    <div key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <div
+                      key={i}
+                      className="text-xs text-muted-foreground flex items-center gap-1.5"
+                      data-testid={`email-ai-interpret-tool-call-${tc.name}-${i}`}
+                      data-state={tc.ok === undefined ? 'pending' : tc.ok ? 'success' : 'failure'}
+                    >
                       <span>{tc.ok !== undefined ? (tc.ok ? '✓' : '✗') : '⋯'}</span>
                       <span>
                         {tc.ruleName
@@ -285,7 +294,7 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
 
           <ScrollArea className="flex-1 px-6 py-4">
             {markdown && (
-              <div className="prose prose-sm dark:prose-invert max-w-none">
+              <div className="prose prose-sm dark:prose-invert max-w-none" data-testid="email-ai-interpret-markdown">
                 <ReactMarkdown>{markdown}</ReactMarkdown>
               </div>
             )}
@@ -312,6 +321,7 @@ export function EmailAIInterpretDrawer({ open, onOpenChange, emailId }: EmailAII
             size="sm"
             onClick={handleRegenerate}
             disabled={phase !== 'done' && phase !== 'error'}
+            data-testid="email-ai-interpret-regenerate"
           >
             <RefreshCw className="mr-1 h-4 w-4" />
             {t('logs.email.aiInterpret.regenerate')}

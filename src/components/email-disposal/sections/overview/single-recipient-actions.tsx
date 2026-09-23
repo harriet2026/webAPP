@@ -8,11 +8,9 @@
 // machinery as the multi-recipient matrix via useRecipientDisposition --
 // see hooks/use-recipient-disposition.tsx.
 //
-// RA-5 (demo parity): a 待审核 recipient additionally exposes 隔离/阻断,
-// matching the demo's single-recipient drawer (投递·隔离·阻断·丢弃). These
-// are DEMO-PARITY, MOCK-mode-functional buttons -- see detail-helpers.ts's
-// recipientActionsForStatus doc comment and use-recipient-disposition.tsx's
-// dispatchQuarantineOrBlock for the real-backend-unsupported degrade path.
+// GT-13650: the action list comes from recipientActionsForStatus and only
+// exposes operations supported by the real API; mock-only actions must not
+// appear in this production surface.
 
 import { useTranslations } from 'next-intl';
 import {
@@ -59,10 +57,13 @@ interface SingleRecipientActionsProps {
   apiRequest: ApiRequestFn;
   onDisposed: () => void;
   readOnly: boolean;
+  redeliverAvailable?: boolean;
+  redeliverUnavailableReason?: 'original_expired' | 'storage_unavailable';
 }
 
 export function SingleRecipientActions({
   recipient_dispositions, mailLogId, sender, apiRequest, onDisposed, readOnly,
+  redeliverAvailable = true, redeliverUnavailableReason = 'original_expired',
 }: SingleRecipientActionsProps) {
   const t = useTranslations('emailDisposal.detail.overview');
 
@@ -72,6 +73,8 @@ export function SingleRecipientActions({
     sender,
     apiRequest,
     onDisposed,
+    redeliverAvailable,
+    redeliverUnavailableReason,
   });
 
   // Only meaningful for a genuinely single-recipient message -- a caller
@@ -89,12 +92,13 @@ export function SingleRecipientActions({
       <div className="flex flex-wrap items-center gap-1.5" data-testid="email-disposal-overview-recipient-actions">
         {group.actions.map((action) => {
           const Icon = ACTION_ICONS[action];
+          const redeliverUnavailable = action === 'redeliver' && !redeliverAvailable;
           const btn = (
             <Button
               key={action}
               size="sm"
               variant="outline"
-              disabled={readOnly}
+              disabled={readOnly || redeliverUnavailable}
               className={cn(ACTION_FILL_CLASS[action])}
               data-testid={`email-disposal-overview-recipient-action-${action}`}
               onClick={() => openAction(action, [group.key])}
@@ -103,10 +107,14 @@ export function SingleRecipientActions({
               {t(`recipientStatus.action.${action}`)}
             </Button>
           );
-          return readOnly ? (
+          return readOnly || redeliverUnavailable ? (
             <Tooltip key={action}>
               <TooltipTrigger render={<span />}>{btn}</TooltipTrigger>
-              <TooltipContent>{t('recipientStatus.readOnlyTooltip')}</TooltipContent>
+              <TooltipContent data-testid={redeliverUnavailable ? 'email-disposal-redeliver-unavailable-tooltip' : undefined}>
+                {redeliverUnavailable
+                  ? t(`recipientStatus.redeliverUnavailable.${redeliverUnavailableReason}`)
+                  : t('recipientStatus.readOnlyTooltip')}
+              </TooltipContent>
             </Tooltip>
           ) : btn;
         })}

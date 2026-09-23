@@ -1,6 +1,5 @@
 import { toast } from 'sonner';
-import type { ApiRequestFn } from '@/lib/api/client';
-import { API_BASE } from '@/lib/api/client';
+import { API_BASE, ApiError, type ApiRequestFn } from '@/lib/api/client';
 import { fetchSSE, getTenantHeader } from '@/lib/api/logs';
 import { createUnifiedRule } from '@/lib/api/unified-rules';
 import { bulkDispose } from './disposal-api';
@@ -14,12 +13,83 @@ import type {
   MailLifecycleLogsResponse,
   MailLifecycleModuleResult,
   ObjectDisposeResult,
+  RecipientDisposition,
 } from '@/types/email-disposal-detail';
 import type { BulkDisposeResponse } from '@/types/email-disposal';
 import type { EmailPreviewResponse } from '@/types/email-preview';
 
+const RECIPIENT_STATUS_VALUES = new Set([
+  'delivered',
+  'marked_delivered',
+  'quarantined',
+  'pending_review',
+  'sidelined',
+  'blocked',
+  'rejected',
+  'discarded',
+  'audited',
+  'delivering',
+  'delivery_failed',
+  'deferred',
+  'bounced',
+  'delivery_cancelled',
+]);
+
+const RECIPIENT_STATUS_ALIASES: Record<string, string> = {
+  quarantine_pending: 'quarantined',
+  sideline_pending: 'sidelined',
+  audit_pending: 'pending_review',
+  cancelled: 'delivery_cancelled',
+};
+
+const RECIPIENT_STATUS_BY_FINAL_ACTION: Record<string, string> = {
+  accept: 'delivered',
+  quarantine: 'quarantined',
+  sideline: 'sidelined',
+  audit: 'pending_review',
+  reject: 'rejected',
+  bounce: 'bounced',
+  discard: 'discarded',
+  block: 'blocked',
+  tempfail: 'deferred',
+  disconnect: 'deferred',
+};
+
+// RecipientDisposition.status and asynchronous task status are independent
+// domains. Legacy/imported rows can contain task values such as "completed";
+// resolve those from the durable final action instead of exposing an i18n key
+// or accidentally granting actions based on an unknown status. This mirrors
+// models.DisplayStatusForRecipient's status-first/action-fallback contract.
+function normalizeRecipientDisposition(disposition: RecipientDisposition): RecipientDisposition {
+  const rawStatus = typeof disposition.status === 'string'
+    ? disposition.status.trim().toLowerCase()
+    : '';
+  const finalAction = typeof disposition.final_action === 'string'
+    ? disposition.final_action.trim().toLowerCase()
+    : '';
+  const alias = RECIPIENT_STATUS_ALIASES[rawStatus];
+  const status = RECIPIENT_STATUS_VALUES.has(rawStatus)
+    ? rawStatus
+    : alias ?? RECIPIENT_STATUS_BY_FINAL_ACTION[finalAction] ?? 'unknown';
+  return status === disposition.status ? disposition : { ...disposition, status };
+}
+
+function normalizeRecipientDispositions(
+  dispositions: RecipientDisposition[] | undefined,
+): RecipientDisposition[] | undefined {
+  return dispositions?.map(normalizeRecipientDisposition);
+}
+
 export async function getMailLogDetail(id: number, requestFn: ApiRequestFn): Promise<MailLogDetail> {
-  return requestFn<MailLogDetail>(`/mail-logs/${id}`);
+  const detail = await requestFn<MailLogDetail>(`/mail-logs/${id}`);
+  return {
+    ...detail,
+    recipient_dispositions: normalizeRecipientDispositions(detail.recipient_dispositions),
+    release_mails: detail.release_mails?.map((release) => ({
+      ...release,
+      recipient_dispositions: normalizeRecipientDispositions(release.recipient_dispositions),
+    })),
+  };
 }
 
 export async function getMailLogAnalysis(id: number, recipient: string | undefined, requestFn: ApiRequestFn): Promise<MailLogAnalysis> {
@@ -398,6 +468,15 @@ export interface AddSenderFilterRuleOptions {
   // "notdomain.com".endsWith("domain.com")) -- chosen to match the dialog's
   // literal Chinese copy ("该域名下所有地址") exactly.
   includeSubdomains?: boolean;
+}
+
+// 邮件详情的一键加黑/加白使用稳定、不可编辑的规则名，因而这里收到
+// unified_rule.name_exists 时不是“请换一个名称”的表单错误，而是同一发信人名单项
+// 已经存在。保留这层场景判定，两个入口（直接加名单、投递并加白）才能给出一致反馈。
+export function isDuplicateSenderFilterRuleError(error: unknown): boolean {
+  return error instanceof ApiError
+    && error.status === 409
+    && error.code === 'unified_rule.name_exists';
 }
 
 // GT-12628 真实数据验证发现：此处硬编码 priority 5000 会让租户管理员创建

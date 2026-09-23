@@ -39,6 +39,7 @@ export function KpiCards({ data, isLoading, onCardClick }: KpiCardsProps) {
       trendIcon: TrendingUp,
       onClick: () => onCardClick?.('link'),
       colorFn: (v: number) => SEVERITY_TEXT_CLASS[linkDetectionRateLevel(v)],
+      levelFn: linkDetectionRateLevel,
     },
     {
       key: 'totalAttachmentMail',
@@ -57,6 +58,7 @@ export function KpiCards({ data, isLoading, onCardClick }: KpiCardsProps) {
       trendIcon: TrendingDown,
       onClick: () => onCardClick?.('attachment'),
       colorFn: (v: number) => SEVERITY_TEXT_CLASS[attachmentDetectionRateLevel(v)],
+      levelFn: attachmentDetectionRateLevel,
     },
   ];
 
@@ -67,6 +69,7 @@ export function KpiCards({ data, isLoading, onCardClick }: KpiCardsProps) {
         const TrendIcon = card.trendIcon;
         const displayValue = data ? card.format(card.value ?? 0) : null;
         const valueColorClass = data && card.colorFn ? card.colorFn(card.value ?? 0) : '';
+        const valueLevel = data && card.levelFn ? card.levelFn(card.value ?? 0) : undefined;
 
         return (
           <Card
@@ -81,10 +84,14 @@ export function KpiCards({ data, isLoading, onCardClick }: KpiCardsProps) {
                   {t(`kpi.${card.key}`)}
                 </CardTitle>
                 {isLoading ? (
-                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-20" data-testid={`kpi-${card.key}-loading`} />
                 ) : (
                   <div className="mt-1 flex items-center gap-2">
-                    <span className={`text-2xl font-bold tracking-tight ${valueColorClass}`}>
+                    <span
+                      className={`text-2xl font-bold tracking-tight ${valueColorClass}`}
+                      data-testid={`kpi-${card.key}-value`}
+                      data-level={valueLevel}
+                    >
                     {displayValue}
                     </span>
                     {TrendIcon && <TrendIcon className={`h-4 w-4 ${card.key === 'linkDetectionRate' ? 'text-danger' : 'text-success'}`} />}

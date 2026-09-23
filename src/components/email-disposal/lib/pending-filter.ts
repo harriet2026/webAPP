@@ -30,3 +30,37 @@ export const PENDING_DISPOSAL_QUICK_FILTER: DisposalQuickFilter = {
 export function pendingViewQuickFilter(view: string | null): DisposalQuickFilter | null {
   return view === 'pending' ? PENDING_DISPOSAL_QUICK_FILTER : null;
 }
+
+interface SearchParamReader {
+  get(name: string): string | null;
+}
+
+const DIRECTION_QUICK_FILTER: Record<string, string> = {
+  receive: 'incoming',
+  send: 'outgoing',
+  internal: 'internal',
+};
+
+// GT-14263：相似检测观察日志入口直接进入邮件处置中心。URL 保留检测命中
+// 标记和收发方向，落地页把它们转换成现有 quick-filter 模型，因此筛选标签、
+// 列表请求和刷新后的首载状态使用同一套逻辑。
+export function disposalDeepLinkQuickFilter(
+  searchParams: SearchParamReader,
+): DisposalQuickFilter | null {
+  const filter: DisposalQuickFilter = {
+    ...(pendingViewQuickFilter(searchParams.get('view')) ?? {}),
+  };
+  const direction = searchParams.get('direction');
+  const sendReceiveType = direction
+    ? DIRECTION_QUICK_FILTER[direction]
+    : undefined;
+
+  if (sendReceiveType) {
+    filter.sendReceiveType = sendReceiveType;
+  }
+  if (searchParams.get('similar') === 'matched') {
+    filter.disposalPolicyKeys = ['SIM'];
+  }
+
+  return Object.keys(filter).length > 0 ? filter : null;
+}

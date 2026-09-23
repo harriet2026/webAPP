@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { SenderFilterTable } from './SenderFilterTable';
 import type { SenderFilterRuleView, SenderFilterGroups } from '@/types/sender-filter';
@@ -49,14 +50,18 @@ function baseView(overrides: Partial<SenderFilterRuleView> = {}): SenderFilterRu
 
 const emptyGroups: SenderFilterGroups = { senderGroups: [], ipGroups: [] };
 
-function renderTable(data: SenderFilterRuleView[], groups: SenderFilterGroups = emptyGroups) {
+function renderTable(
+  data: SenderFilterRuleView[],
+  groups: SenderFilterGroups = emptyGroups,
+  pagination: { pageIndex?: number; pageSize?: number; totalCount?: number; onPageChange?: (pageIndex: number) => void } = {},
+) {
   return render(
     <SenderFilterTable
       data={data}
-      pageCount={1}
-      pageIndex={0}
-      pageSize={10}
-      onPageChange={vi.fn()}
+      pageIndex={pagination.pageIndex ?? 0}
+      pageSize={pagination.pageSize ?? 10}
+      totalCount={pagination.totalCount ?? data.length}
+      onPageChange={pagination.onPageChange ?? vi.fn()}
       onPageSizeChange={vi.fn()}
       onEdit={vi.fn()}
       onDelete={vi.fn()}
@@ -99,6 +104,42 @@ describe('SenderFilterTable demo columns', () => {
     expect(screen.getByText('测试规则')).toBeInTheDocument();
     expect(screen.getByText('attacker@example.org')).toBeInTheDocument();
     expect(screen.getByText('senderFilter.action_reject')).toBeInTheDocument();
+  });
+});
+
+describe('GT-13672 SenderFilterTable pagination', () => {
+  it('does not apply a second hidden ten-row limit to externally paged data', () => {
+    const data = Array.from({ length: 11 }, (_, index) => baseView({
+      rule: baseRule({ id: index + 1, name: `测试规则-${index + 1}` }),
+    }));
+
+    const { container } = renderTable(data, emptyGroups, { pageSize: 20, totalCount: 11 });
+
+    expect(container.querySelectorAll('tr[data-testid^="sender-filter-row-"]')).toHaveLength(11);
+  });
+
+  it('matches the full rule-list pagination controls and page-size wording', async () => {
+    const user = userEvent.setup();
+    const onPageChange = vi.fn();
+    renderTable([baseView()], emptyGroups, {
+      pageIndex: 0,
+      pageSize: 20,
+      totalCount: 512,
+      onPageChange,
+    });
+
+    expect(screen.getByTestId('sender-filter-total')).toHaveTextContent('common.total:{"count":512}');
+    expect(screen.getByTestId('sender-filter-page-1')).toBeVisible();
+    expect(screen.getByTestId('sender-filter-page-2')).toBeVisible();
+    expect(screen.getByTestId('sender-filter-page-26')).toBeVisible();
+    expect(screen.getByTestId('sender-filter-jump-input')).toBeVisible();
+    expect(screen.getByTestId('sender-filter-page-size')).toHaveTextContent('behaviorControl.pagination.perPage20');
+
+    await user.click(screen.getByTestId('sender-filter-page-2'));
+    expect(onPageChange).toHaveBeenCalledWith(1);
+
+    await user.type(screen.getByTestId('sender-filter-jump-input'), '7{Enter}');
+    expect(onPageChange).toHaveBeenLastCalledWith(6);
   });
 });
 

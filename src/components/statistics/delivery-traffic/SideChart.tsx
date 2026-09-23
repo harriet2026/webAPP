@@ -137,7 +137,7 @@ export function SideChart({ distribution, direction, isLoading }: SideChartProps
       </CardHeader>
       <CardContent ref={chartContentRef} className="min-w-0 overflow-hidden">
         {isLoading ? (
-          <Skeleton className="h-64 w-full rounded-lg" />
+          <Skeleton data-testid="delivery-side-chart-loading" className="h-64 w-full rounded-lg" />
         ) : !option ? (
           <div data-testid="delivery-side-chart-empty" className="flex h-64 items-center justify-center text-muted-foreground">
             {t('noData') as string}

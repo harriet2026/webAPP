@@ -14,6 +14,7 @@ import { useApiRequest } from '@/lib/api/client';
 import { spoofingQueryKeys } from './spoofing-query-keys';
 import { formatDate } from '@/lib/utils';
 import { getSpoofingLogDetail } from '@/lib/api/spoofing-detection';
+import { AssessmentReportView } from '@/components/agent-center/assessment-report';
 
 interface Props {
   open: boolean;
@@ -39,16 +40,15 @@ export function SpoofingDetailSheet({ open, onOpenChange, detailId, canEdit, onB
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const [signalsOpen, setSignalsOpen] = useState(true);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: spoofingQueryKeys.detail(effectiveTenantId, detailId),
     queryFn: () => getSpoofingLogDetail(detailId!, apiRequest),
     enabled: open && !!detailId,
   });
   const summary = data?.summary;
-  const inv = (data?.investigation ?? null) as Record<string, unknown> | null;
-  const result = (inv?.result ?? {}) as Record<string, unknown>;
-  const aiSummary = (inv?.summary as string) ?? (result.summary as string) ?? '';
-  const evidence = (result.evidence as Array<{ severity?: string; title?: string; detail?: string }>) ?? [];
+  const inv = data?.investigation;
+  const aiSummary = inv?.summary ?? inv?.result?.summary ?? '';
+  const evidence = inv?.result?.evidence ?? [];
   const actionable = summary?.actionable ?? false;
 
   return (
@@ -56,10 +56,10 @@ export function SpoofingDetailSheet({ open, onOpenChange, detailId, canEdit, onB
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-[680px]" data-testid="spoof-detail-sheet">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>{tsd('detail.title')}</SheetTitle>
-          <SheetDescription>{summary ? summary.subject || tsd('detail.noSubject') : t('common.loading')}</SheetDescription>
+          <SheetDescription>{summary?.subject || (isLoading ? t('common.loading') : tsd('detail.noSubject'))}</SheetDescription>
         </SheetHeader>
         <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
-          {isLoading || !summary ? (
+          {isError ? <AssessmentReportView error /> : isLoading || !summary ? (
             <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
           ) : (
             <>
@@ -88,6 +88,8 @@ export function SpoofingDetailSheet({ open, onOpenChange, detailId, canEdit, onB
                 {aiSummary ? <p className="text-sm leading-relaxed" data-testid="spoof-detail-ai-summary">{aiSummary}</p> : null}
               </section>
 
+              <AssessmentReportView result={inv?.result} />
+
               {/* ③ 最终处置 + 二次处置 */}
               <section className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4" data-testid="spoof-detail-section-final">
                 <h3 className="text-sm font-semibold" data-testid="spoof-detail-section-title-final">{tsd('detail.finalDisposition')}</h3>
@@ -112,6 +114,7 @@ export function SpoofingDetailSheet({ open, onOpenChange, detailId, canEdit, onB
                   <ChevronDown className={`h-4 w-4 transition-transform ${signalsOpen ? 'rotate-180' : ''}`} />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-2 pt-2">
+                  {evidence.length ? <p className="text-sm text-muted-foreground">{t('assessment.legacyEvidence')}</p> : null}
                   {evidence.length > 0 ? evidence.map((ev, i) => (
                     <div key={i} className="rounded-xl border border-border/50 bg-background/70 p-3" data-testid="spoof-detail-evidence">
                       <div className="flex flex-wrap items-center gap-2">

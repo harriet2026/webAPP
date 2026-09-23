@@ -93,7 +93,7 @@ export function KpiCards({ data, direction, isLoading }: KpiCardsProps) {
                 <div>
                   <p className="mb-1 text-sm text-muted-foreground">{t(card.labelKey ?? card.key)}</p>
                   {isLoading ? (
-                    <Skeleton className="h-8 w-20" />
+                    <Skeleton data-testid={`delivery-kpi-${card.key}-loading`} className="h-8 w-20" />
                   ) : (
                     <p className="text-2xl font-bold tabular-nums" style={{ color: card.color }}>
                       {displayValue}

@@ -112,6 +112,7 @@ describe('Playwright-facing business testid contract', () => {
     expect(drawer).toContain(dynamicTestid('behavior-control-sender-subtype-${st}'));
     expect(drawer).toContain(staticTestid('behavior-control-ip-subtype'));
     expect(drawer).toContain(staticTestid('behavior-control-ip-address'));
+    expect(page).toContain('importTemplate={behaviorControlImportTemplate}');
   });
 
   test('recipient-check subfeatures expose stable switch and conditional-panel identities', () => {
@@ -121,12 +122,14 @@ describe('Playwright-facing business testid contract', () => {
     expect(page).toContain(staticTestid('recipient-existence-switch'));
     expect(page).toContain(staticTestid('recipient-existence-config'));
     expect(page).toContain(dynamicTestid('recipient-limit-card-${direction}'));
-    expect(page).toContain(dynamicTestid('recipient-limit-value-${direction}'));
-    expect(page).toContain(staticTestid('recipient-limit-scope-inbound'));
+    // RecipientLimitInput owns the actual data-testid; the page passes the
+    // stable dynamic identity through its testId prop.
+    expect(page).toContain('testId={`recipient-limit-value-${direction}`}');
+    expect(page).not.toContain('data-testid={`recipient-limit-scope-${direction}`}');
     expect(page).toContain(staticTestid('recipient-limit-mode-detailed'));
     expect(page).toContain(staticTestid('recipient-limit-mode-merged'));
     expect(page).toContain(staticTestid('recipient-limit-card-merged'));
-    expect(page).toContain(staticTestid('recipient-limit-value-merged'));
+    expect(page).toContain('testId="recipient-limit-value-merged"');
     expect(page).toContain(staticTestid('recipient-limit-merged-note'));
   });
 
@@ -336,5 +339,6 @@ describe('Playwright-facing business testid contract', () => {
       expect(drawer).toContain(staticTestid(`sender-filter-ip-type-${type}`));
     }
     expect(drawer).toContain(staticTestid('sender-filter-ip-group'));
+    expect(page).toContain('importTemplate={senderFilterImportTemplate}');
   });
 });

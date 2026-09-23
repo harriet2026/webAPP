@@ -12,7 +12,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { cn } from '@/lib/utils';
+import { RuleListPagination, RULE_LIST_DEFAULT_PAGE_SIZE } from '@/components/shared/rule-list-pagination';
 import { BehaviorControlTable } from './behavior-control/BehaviorControlTable';
 import { BehaviorControlDrawer } from './behavior-control/BehaviorControlDrawer';
 import {
@@ -27,23 +27,21 @@ import { useAuth } from '@/contexts/auth-context';
 import { RuleImportExportDialog } from '@/components/rules/RuleImportExportDialog';
 import { executeUnifiedRulesImport, exportUnifiedRules, previewUnifiedRulesImport } from '@/lib/api/unified-rules';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
-import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { buildBehaviorControlImportTemplate } from '@/lib/security-rule-import-templates';
+import { isBehaviorControlRuleExpired } from './behavior-control/validity';
 
 interface Props {
   embedded?: boolean;
 }
 
-const PAGE_SIZES = [10, 20, 50, 100];
-
 export function BehaviorControlPage({ embedded = false }: Props) {
   const t = useTranslations();
   const qc = useQueryClient();
-  const apiErrorMessage = useApiErrorMessage();
-  const { apiRequest } = useApiRequest();
-  const { isSystemAdmin } = useAuth();
+  const { apiRequest, effectiveTenantId } = useApiRequest();
+  const { isSystemAdmin, user } = useAuth();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(RULE_LIST_DEFAULT_PAGE_SIZE);
   const [search, setSearch] = useState('');
   const [dirFilter, setDirFilter] = useState<string>('all');
   const [objFilter, setObjFilter] = useState<string>('all');
@@ -53,22 +51,16 @@ export function BehaviorControlPage({ embedded = false }: Props) {
   const [drawerDefaults, setDrawerDefaults] = useState<Partial<import('@/types/behavior-control').BehaviorControlFormData> | undefined>(undefined);
   const [deleteTarget, setDeleteTarget] = useState<BehaviorControlRuleView | null>(null);
   const [importExportOpen, setImportExportOpen] = useState(false);
+  const [importExportTab, setImportExportTab] = useState<'export' | 'import'>('export');
+
+  const behaviorControlImportTemplate = useMemo(
+    () => buildBehaviorControlImportTemplate(effectiveTenantId ?? user?.tenant_id),
+    [effectiveTenantId, user?.tenant_id],
+  );
 
   const { data, isLoading } = useQuery({
     queryKey: ['behavior-control-rules'],
     queryFn: () => listBehaviorControlRules(apiRequest),
-  });
-
-  const toggleMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
-      toggleBehaviorControlRule(id, isActive, apiRequest),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['behavior-control-rules'] });
-      toast.success(t('common.updateSuccess'));
-    },
-    onError: (error: Error) => {
-      toast.error(apiErrorMessage(error));
-    },
   });
 
   const { data: tenantOptions = [] } = useQuery({
@@ -102,20 +94,19 @@ export function BehaviorControlPage({ embedded = false }: Props) {
       result = result.filter((v) => v.meta?.object_config.type === objFilter);
     }
     if (statusFilter === 'enabled') {
-      result = result.filter((v) => v.rule.is_active);
+      result = result.filter((v) => v.rule.is_active && !isBehaviorControlRuleExpired(v.rule.valid_until));
     } else if (statusFilter === 'disabled') {
-      result = result.filter((v) => !v.rule.is_active);
+      result = result.filter((v) => !v.rule.is_active && !isBehaviorControlRuleExpired(v.rule.valid_until));
+    } else if (statusFilter === 'expired') {
+      result = result.filter((v) => isBehaviorControlRuleExpired(v.rule.valid_until));
     }
-    // demo default sort: ascending by priority (design/origin/demo .../utils.ts sortRulesByPriority, sortAscending=true)
-    return [...result].sort((a, b) => a.rule.priority - b.rule.priority);
+    return [...result].sort((a, b) => a.rule.id - b.rule.id);
   }, [views, search, dirFilter, objFilter, statusFilter]);
 
   const paged = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
   }, [filtered, page, pageSize]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
 
   const handleEdit = (view: BehaviorControlRuleView) => {
     setEditing(view);
@@ -137,12 +128,24 @@ export function BehaviorControlPage({ embedded = false }: Props) {
     setPage(1);
   };
 
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
+      toggleBehaviorControlRule(id, isActive, apiRequest),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ['behavior-control-rules'] });
+      toast.success(t('common.updateSuccess'));
+    },
+    onError: (e: unknown) => {
+      toast.error((e as Error)?.message ?? t('common.error'));
+    },
+  });
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
       await deleteBehaviorControlRule(deleteTarget.rule.id, apiRequest);
       qc.invalidateQueries({ queryKey: ['behavior-control-rules'] });
-      toast.success(t('behaviorControl.toast.saveOk'));
+      toast.success(t('behaviorControl.toast.deleteOk'));
     } catch (e: unknown) {
       toast.error((e as Error)?.message ?? t('common.error'));
     }
@@ -200,6 +203,7 @@ export function BehaviorControlPage({ embedded = false }: Props) {
               <SelectItem data-testid="behavior-control-filter-status-all" value="all">{t('behaviorControl.filter.allStatus')}</SelectItem>
               <SelectItem data-testid="behavior-control-filter-status-enabled" value="enabled">{t('behaviorControl.filter.enabled')}</SelectItem>
               <SelectItem data-testid="behavior-control-filter-status-disabled" value="disabled">{t('behaviorControl.filter.disabled')}</SelectItem>
+              <SelectItem data-testid="behavior-control-filter-status-expired" value="expired">{t('behaviorControl.filter.expired')}</SelectItem>
             </SelectContent>
           </Select>
           <Button data-testid="behavior-control-filter-reset" variant="outline" size="sm" onClick={handleResetFilters}>
@@ -208,8 +212,8 @@ export function BehaviorControlPage({ embedded = false }: Props) {
         </div>
         <div className="flex items-center gap-2">
           <Button data-testid="behavior-control-create" size="sm" onClick={handleCreate}><Plus className="mr-1 h-4 w-4" />{t('behaviorControl.addRule')}</Button>
-          <Button data-testid="behavior-control-import" variant="outline" size="sm" onClick={() => setImportExportOpen(true)}><Upload className="h-4 w-4" /></Button>
-          <Button data-testid="behavior-control-export" variant="outline" size="sm" onClick={() => setImportExportOpen(true)}><Download className="h-4 w-4" /></Button>
+          <Button data-testid="behavior-control-import" variant="outline" size="sm" onClick={() => { setImportExportTab('import'); setImportExportOpen(true); }}><Upload className="h-4 w-4" /></Button>
+          <Button data-testid="behavior-control-export" variant="outline" size="sm" onClick={() => { setImportExportTab('export'); setImportExportOpen(true); }}><Download className="h-4 w-4" /></Button>
         </div>
       </div>
 
@@ -222,103 +226,20 @@ export function BehaviorControlPage({ embedded = false }: Props) {
             onEdit={handleEdit}
             onDelete={(v) => setDeleteTarget(v)}
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
+            togglePending={toggleMutation.isPending}
           />
-          {totalPages <= 1 ? (
-            <div className="flex items-center justify-start px-4 py-3 border-t">
-              <div data-testid="behavior-control-total" className="text-sm text-muted-foreground">
-                {t('behaviorControl.pagination.total')} {filtered.length} {t('behaviorControl.pagination.rules')}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between px-4 py-3 border-t">
-              <div data-testid="behavior-control-total" className="text-sm text-muted-foreground">
-                {t('behaviorControl.pagination.total')} {filtered.length} {t('behaviorControl.pagination.rules')}
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <Button
-                    data-testid="behavior-control-prev-page"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setPage(page - 1)}
-                    disabled={page === 1}
-                  >
-                    &lt;
-                  </Button>
-                  {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                    let pageNum: number;
-                    if (totalPages <= 7) {
-                      pageNum = i + 1;
-                    } else if (page <= 4) {
-                      pageNum = i + 1;
-                      if (i === 6) pageNum = totalPages;
-                      if (i === 5) return <span key={i} className="px-1 text-muted-foreground">...</span>;
-                    } else if (page >= totalPages - 3) {
-                      pageNum = totalPages - 6 + i;
-                      if (i === 0) pageNum = 1;
-                      if (i === 1) return <span key={i} className="px-1 text-muted-foreground">...</span>;
-                    } else {
-                      if (i === 0) pageNum = 1;
-                      else if (i === 1) return <span key={i} className="px-1 text-muted-foreground">...</span>;
-                      else if (i === 5) return <span key={i} className="px-1 text-muted-foreground">...</span>;
-                      else if (i === 6) pageNum = totalPages;
-                      else pageNum = page - 2 + i;
-                    }
-                    return (
-                      <Button
-                        data-testid={`behavior-control-page-${pageNum}`}
-                        key={i}
-                        variant={page === pageNum ? 'default' : 'outline'}
-                        size="sm"
-                        className={cn('h-8 w-8 p-0', page === pageNum && 'bg-primary text-primary-foreground')}
-                        onClick={() => setPage(pageNum)}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                  <Button
-                    data-testid="behavior-control-next-page"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setPage(page + 1)}
-                    disabled={page === totalPages}
-                  >
-                    &gt;
-                  </Button>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">{t('behaviorControl.pagination.goToPage')}</span>
-                  <input
-                    data-testid="behavior-control-jump-input"
-                    type="number"
-                    min={1}
-                    max={totalPages}
-                    placeholder={String(page)}
-                    className="h-8 w-14 px-2 border rounded-md text-sm text-center bg-background"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        const value = parseInt((e.target as HTMLInputElement).value, 10);
-                        if (value >= 1 && value <= totalPages) setPage(value);
-                        (e.target as HTMLInputElement).value = '';
-                      }
-                    }}
-                  />
-                  <span className="text-muted-foreground">{t('behaviorControl.pagination.page')}</span>
-                </div>
-                <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v ?? '20')); setPage(1); }}>
-                  <SelectTrigger data-testid="behavior-control-page-size" className="w-[110px] h-8"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {PAGE_SIZES.map((s) => (
-                      <SelectItem data-testid={`behavior-control-page-size-${s}`} key={s} value={String(s)}>{t(`behaviorControl.pagination.perPage${s}`)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
+          <RuleListPagination
+            page={page}
+            pageSize={pageSize}
+            total={filtered.length}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+            goToPageLabel={t('behaviorControl.pagination.goToPage')}
+            pageLabel={t('behaviorControl.pagination.page')}
+            testIdPrefix="behavior-control"
+            totalText={`${t('behaviorControl.pagination.total')} ${filtered.length} ${t('behaviorControl.pagination.rules')}`}
+            pageSizeLabel={(size) => t(`behaviorControl.pagination.perPage${size}`)}
+          />
         </>
       )}
 
@@ -342,11 +263,19 @@ export function BehaviorControlPage({ embedded = false }: Props) {
       <RuleImportExportDialog
         open={importExportOpen}
         onOpenChange={setImportExportOpen}
+        initialTab={importExportTab}
         scopeLabel={t('behaviorControl.title')}
         variant="unified-rules"
         adminContext={isSystemAdmin ? 'system-admin' : 'tenant-admin'}
         tenantOptions={tenantOptions}
-        onExport={(selection) => exportUnifiedRules(selection, apiRequest, 'behavior_control')}
+        rulesOnly
+        importTemplate={behaviorControlImportTemplate}
+        onExport={(selection) => exportUnifiedRules(
+          selection,
+          apiRequest,
+          'behavior_control',
+          new Set(filtered.map((view) => view.rule.id)),
+        )}
         onPreviewImport={(payload) => previewUnifiedRulesImport(payload, apiRequest, 'behavior_control')}
         onExecuteImport={async (payload) => {
           const response = await executeUnifiedRulesImport(payload, apiRequest, 'behavior_control');

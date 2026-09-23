@@ -147,6 +147,7 @@ export function EmailDetailModal({ open, onOpenChange, emailId }: EmailDetailMod
                             variant="outline"
                             onClick={() => setAiOpen(true)}
                             disabled={isLoading || !email}
+                            data-testid="email-log-detail-ai-interpret"
                             className="w-full sm:w-auto"
                           >
                             <Sparkles className="mr-2 h-4 w-4" />

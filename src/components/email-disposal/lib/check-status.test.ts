@@ -7,7 +7,12 @@ describe('aggregateCheckStatus', () => {
   it.each([
     [['skipped'], 'skipped'],
     [['skipped', 'pass'], 'pass'],
+    [['pass', 'observed'], 'observed'],
+    [['observed', 'processing'], 'processing'],
+    [['observed', 'suspicious'], 'suspicious'],
     [['pass', 'processing'], 'processing'],
+    [['processing', 'timeout'], 'timeout'],
+    [['timeout', 'suspicious'], 'suspicious'],
     [['processing', 'suspicious'], 'suspicious'],
     [['suspicious', 'threat'], 'threat'],
   ] as const)('returns the highest-priority status from %j', (statuses, expected) => {

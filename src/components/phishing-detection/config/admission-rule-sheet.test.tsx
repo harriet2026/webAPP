@@ -3,10 +3,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import zh from '@/../messages/zh.json';
+import type { PhishAdmissionRule } from '@/types/phishing-config';
 import { ApiError } from '@/lib/api/client';
 
 const toastError = vi.fn();
 const createAdmissionRuleMock = vi.fn();
+const updateAdmissionRuleMock = vi.fn();
 const apiRequestMock = vi.fn();
 
 vi.mock('sonner', () => ({
@@ -23,12 +25,12 @@ vi.mock('@/lib/api/client', async (importOriginal) => {
 
 vi.mock('@/lib/api/phishing-admission-rules', () => ({
   createAdmissionRule: (...args: unknown[]) => createAdmissionRuleMock(...args),
-  updateAdmissionRule: vi.fn(),
+  updateAdmissionRule: (...args: unknown[]) => updateAdmissionRuleMock(...args),
 }));
 
 import { AdmissionRuleSheet } from './admission-rule-sheet';
 
-function renderSheet(onOpenChange = vi.fn(), onSaved = vi.fn()) {
+function renderSheet(onOpenChange = vi.fn(), onSaved = vi.fn(), rule: PhishAdmissionRule | null = null) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <NextIntlClientProvider locale="zh" messages={zh as never}>
@@ -36,7 +38,7 @@ function renderSheet(onOpenChange = vi.fn(), onSaved = vi.fn()) {
         <AdmissionRuleSheet
           open
           onOpenChange={onOpenChange}
-          rule={null}
+          rule={rule}
           onSaved={onSaved}
         />
       </QueryClientProvider>
@@ -86,6 +88,19 @@ describe('AdmissionRuleSheet duplicate-name conflict (GT-12513)', () => {
 });
 
 describe('AdmissionRuleSheet directional scopes', () => {
+  it('saves URL as the only signal without requiring another risk feature', async () => {
+    createAdmissionRuleMock.mockResolvedValue({});
+    renderSheet();
+    fireEvent.change(screen.getByTestId('rule-name-input'), { target: { value: '普通链接准入' } });
+    fireEvent.click(screen.getByTestId('rule-sender-first-seen'));
+    expect(screen.getByTestId('rule-save')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('rule-save'));
+    await waitFor(() => expect(createAdmissionRuleMock).toHaveBeenCalledWith(
+      expect.objectContaining({ require_url: true, sender_first_seen: false, require_qrcode: false, require_executable: false }),
+      expect.any(Function),
+    ));
+  });
+
   it('switches outbound rules to sender scope while mixed directions expose both sides', async () => {
     renderSheet();
     fireEvent.click(screen.getByTestId('rule-recipient-filter'));
@@ -104,6 +119,7 @@ describe('AdmissionRuleSheet directional scopes', () => {
     createAdmissionRuleMock.mockResolvedValue({});
     renderSheet();
     fireEvent.change(screen.getByTestId('rule-name-input'), { target: { value: '可执行文件准入' } });
+    fireEvent.click(screen.getByTestId('rule-require-url'));
     fireEvent.click(screen.getByTestId('rule-sender-first-seen'));
     expect(screen.getByTestId('rule-save')).toBeDisabled();
     fireEvent.click(screen.getByTestId('rule-require-executable'));
@@ -117,6 +133,22 @@ describe('AdmissionRuleSheet directional scopes', () => {
         require_executable: true,
       }),
       expect.any(Function),
+    ));
+  });
+
+  it('saves an integer KB limit and rejects fractions instead of silently removing the limit', async () => {
+    createAdmissionRuleMock.mockResolvedValue({});
+    renderSheet();
+    fireEvent.change(screen.getByTestId('rule-name-input'), { target: { value: '小邮件' } });
+    const size = screen.getByTestId('rule-max-size-input');
+    fireEvent.change(size, { target: { value: '0.5' } });
+    expect(screen.getByTestId('rule-save')).toBeDisabled();
+    fireEvent.change(size, { target: { value: '128' } });
+    expect(screen.getByText('KB')).toBeInTheDocument();
+    expect(screen.getByText('基础筛选')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('rule-save'));
+    await waitFor(() => expect(createAdmissionRuleMock).toHaveBeenCalledWith(
+      expect.objectContaining({ max_size_kb: 128 }), expect.any(Function),
     ));
   });
 
@@ -174,4 +206,42 @@ describe('AdmissionRuleSheet directional scopes', () => {
       expect.any(Function),
     ));
   });
+});
+
+  it('keeps migrated legacy scope and KB when editing another field', async () => {
+    updateAdmissionRuleMock.mockResolvedValue(undefined);
+    const rule = {
+      id: 15, rule_uid: 'migrated-rule', revision: 'current-revision', name: '迁移规则',
+      enabled: true, directions: ['inbound'] as PhishAdmissionRule['directions'],
+      filter_on: true, recipient_tags: ['grp:历史保护范围'], max_size_kb: 5120,
+      require_url: true, sender_first_seen: false, require_qrcode: false,
+    };
+    renderSheet(undefined, undefined, rule);
+    expect(screen.getByTestId('rule-max-size-input')).toHaveValue('5120');
+    fireEvent.change(screen.getByTestId('rule-name-input'), { target: { value: '迁移规则改名' } });
+    expect(screen.getByTestId('rule-save')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('rule-save'));
+    await waitFor(() => expect(updateAdmissionRuleMock).toHaveBeenCalledWith(15,
+      expect.objectContaining({ recipient_tags: ['grp:历史保护范围'], max_size_kb: 5120, expected_revision: 'current-revision' }),
+      expect.any(Function),
+    ));
+  });
+
+it.each(['-1', 'invalid', '102400001'])('does not save an invalid KB input: %s', (value) => {
+  renderSheet();
+  fireEvent.change(screen.getByTestId('rule-name-input'), { target: { value: '大小校验' } });
+  fireEvent.change(screen.getByTestId('rule-max-size-input'), { target: { value } });
+  expect(screen.getByTestId('rule-save')).toBeDisabled();
+});
+
+it.each(['', '0'])('saves unlimited size from %j in the two-section form', async (value) => {
+  createAdmissionRuleMock.mockResolvedValue({});
+  renderSheet();
+  fireEvent.change(screen.getByTestId('rule-name-input'), { target: { value: '不限大小' } });
+  fireEvent.change(screen.getByTestId('rule-max-size-input'), { target: { value } });
+  expect(screen.getByRole('region', { name: '基础筛选' })).toContainElement(screen.getByTestId('rule-max-size-input'));
+  expect(screen.getByRole('region', { name: '风险信号' })).toContainElement(screen.getByTestId('rule-require-url'));
+  expect(screen.queryByText('匹配条件预览')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByTestId('rule-save'));
+  await waitFor(() => expect(createAdmissionRuleMock).toHaveBeenCalledWith(expect.objectContaining({ max_size_kb: 0 }), expect.any(Function)));
 });

@@ -31,9 +31,6 @@ vi.mock('../../lib/disposal-detail-api', async () => {
     ...actual,
     addSenderFilterRule: vi.fn(),
     disposeByObject: vi.fn(),
-    // RA-5: 隔离/阻断's own dispatch path (dispatchQuarantineOrBlock in
-    // use-recipient-disposition.tsx) calls this instead of disposeByObject.
-    disposeObjectAction: vi.fn(),
     notifyRecipient: vi.fn(),
   };
 });
@@ -48,11 +45,10 @@ vi.mock('../../lib/disposal-api', async () => {
   };
 });
 
-import { disposeByObject, disposeObjectAction, notifyRecipient } from '../../lib/disposal-detail-api';
+import { disposeByObject, notifyRecipient } from '../../lib/disposal-detail-api';
 import { recallMails } from '../../lib/disposal-api';
 
 const mockDisposeByObject = disposeByObject as unknown as ReturnType<typeof vi.fn>;
-const mockDisposeObjectAction = disposeObjectAction as unknown as ReturnType<typeof vi.fn>;
 const mockNotifyRecipient = notifyRecipient as unknown as ReturnType<typeof vi.fn>;
 const mockRecallMails = recallMails as unknown as ReturnType<typeof vi.fn>;
 
@@ -177,6 +173,30 @@ describe('ThreatSummaryCard', () => {
     expect(hitFeaturesLabel.parentElement).toContainElement(spfBadge);
   });
 
+  it('GT-13649: formats the first-seen tooltip in the current timezone', async () => {
+    const user = userEvent.setup();
+    const rawFirstSeenAt = '2026-09-10T05:49:52.531243Z';
+    renderCard(baseDetail({
+      received_at: rawFirstSeenAt,
+      sender_first_seen_at: rawFirstSeenAt,
+    }));
+
+    await user.hover(screen.getByTestId('email-disposal-overview-hit-firstseen'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('该发信人最早出现于：2026-09-10 13:49:52');
+    expect(tooltip).not.toHaveTextContent(rawFirstSeenAt);
+  });
+
+  it('GT-13649: replaces an invalid first-seen timestamp with the shared placeholder', async () => {
+    const user = userEvent.setup();
+    renderCard(baseDetail({ sender_first_seen_at: 'invalid-first-seen-time' }));
+
+    await user.hover(screen.getByTestId('email-disposal-overview-hit-firstseen'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('该发信人最早出现于：—');
+    expect(tooltip).not.toHaveTextContent('invalid-first-seen-time');
+  });
+
   it('does NOT render a 域名年龄 (domain age) badge when domain_age_days is absent', () => {
     renderCard(baseDetail());
     expect(screen.queryByText(/域名年龄/)).not.toBeInTheDocument();
@@ -278,6 +298,21 @@ describe('ThreatSummaryCard', () => {
     expect(basisEl.textContent).toContain('隔离');
   });
 
+  it('GT-13709：意图引擎处置依据显示友好名称且隐藏内部标识', () => {
+    renderCard(baseDetail({
+      disposal_basis: {
+        policy_key: 'INTENT',
+        rule_name: 'sysrule:intent_engine:spam:receive',
+        rule_id: 'config:antispam:tenant:1:intent.spam.receive:615acc3a5021',
+        action: 'quarantine',
+      },
+    }));
+    const basisEl = screen.getByTestId('email-disposal-overview-disposal-basis');
+    expect(basisEl).toHaveTextContent('意图引擎「垃圾（接收）」');
+    expect(basisEl).not.toHaveTextContent('sysrule:intent_engine');
+    expect(basisEl).not.toHaveTextContent('config:antispam:tenant');
+  });
+
   it('matches the origin bulk outcome row and multi-basis popover', async () => {
     const user = userEvent.setup();
     renderCard(baseDetail({
@@ -337,7 +372,6 @@ describe('ThreatSummaryCard', () => {
 describe('ThreatSummaryCard single-recipient dispose buttons (Task 11b)', () => {
   beforeEach(() => {
     mockDisposeByObject.mockReset();
-    mockDisposeObjectAction.mockReset();
     mockNotifyRecipient.mockReset();
     mockRecallMails.mockReset();
   });
@@ -360,72 +394,21 @@ describe('ThreatSummaryCard single-recipient dispose buttons (Task 11b)', () => 
     }];
   }
 
-  // RA-5 (demo parity): 待审核(pending_review) now renders all FOUR dispose
-  // buttons -- 投递·隔离·阻断·丢弃 -- matching the demo's single-recipient
-  // drawer, not just deliver/discard.
-  it('an operable (pending_review, object_id) single recipient renders deliver/quarantine/block/discard buttons, not recall/notify', () => {
+  it('GT-13650: pending_review only renders backend-supported deliver/discard actions', () => {
     renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
     expect(screen.getByTestId('email-disposal-overview-recipient-action-deliver')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-recipient-action-quarantine')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-overview-recipient-action-block')).toBeInTheDocument();
     expect(screen.getByTestId('email-disposal-overview-recipient-action-discard')).toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-overview-recipient-action-quarantine')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-overview-recipient-action-block')).not.toBeInTheDocument();
     expect(screen.queryByTestId('email-disposal-overview-recipient-action-recall')).not.toBeInTheDocument();
     expect(screen.queryByTestId('email-disposal-overview-recipient-action-notify')).not.toBeInTheDocument();
   });
 
-  // RA-5: buttons render in demo order 投递·隔离·阻断·丢弃.
-  it('renders 投递·隔离·阻断·丢弃 in that DOM order (RA-5)', () => {
+  it('renders 投递 before 丢弃', () => {
     renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
-    const order = ['deliver', 'quarantine', 'block', 'discard'].map(
-      (a) => screen.getByTestId(`email-disposal-overview-recipient-action-${a}`),
-    );
-    for (let i = 0; i < order.length - 1; i += 1) {
-      expect(order[i].compareDocumentPosition(order[i + 1]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    }
-  });
-
-  // RA-5: 隔离/阻断 fire IMMEDIATELY on click, no confirm/reclassify dialog
-  // (unlike deliver/recall which open ReclassifyDialog, and discard which
-  // opens an AlertDialog).
-  it('clicking 隔离 dispatches disposeObjectAction(quarantine) immediately with no dialog', async () => {
-    const user = userEvent.setup();
-    mockDisposeObjectAction.mockResolvedValue({ results: [{ mail_log_id: 1, object_id: 'obj-1', status: 'succeeded' }] });
-    renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
-
-    await user.click(screen.getByTestId('email-disposal-overview-recipient-action-quarantine'));
-
-    await waitFor(() => expect(mockDisposeObjectAction).toHaveBeenCalledWith(
-      1, 'obj-1', 'quarantine', expect.anything(),
-    ));
-    expect(screen.queryByTestId('disposal-reclassify-dialog')).not.toBeInTheDocument();
-    expect(screen.queryByText('确认丢弃邮件')).not.toBeInTheDocument();
-  });
-
-  it('clicking 阻断 dispatches disposeObjectAction(block) immediately with no dialog', async () => {
-    const user = userEvent.setup();
-    mockDisposeObjectAction.mockResolvedValue({ results: [{ mail_log_id: 1, object_id: 'obj-1', status: 'succeeded' }] });
-    renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
-
-    await user.click(screen.getByTestId('email-disposal-overview-recipient-action-block'));
-
-    await waitFor(() => expect(mockDisposeObjectAction).toHaveBeenCalledWith(
-      1, 'obj-1', 'block', expect.anything(),
-    ));
-    expect(screen.queryByTestId('disposal-reclassify-dialog')).not.toBeInTheDocument();
-  });
-
-  // REAL-mode degrade: the real backend's bulk-dispose handler rejects any
-  // action other than release/delete -- disposeObjectAction throwing must
-  // surface the explicit "unsupported" toast, not silently corrupt state.
-  it('shows the unsupported toast when disposeObjectAction rejects (real-mode degrade)', async () => {
-    const user = userEvent.setup();
-    const { toast } = await import('sonner');
-    mockDisposeObjectAction.mockRejectedValue(new Error('action must be release or delete'));
-    renderCard(baseDetail({ recipient_dispositions: pendingReviewDisposition() }));
-
-    await user.click(screen.getByTestId('email-disposal-overview-recipient-action-quarantine'));
-
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('隔离/阻断 操作后端暂未支持'));
+    const deliver = screen.getByTestId('email-disposal-overview-recipient-action-deliver');
+    const discard = screen.getByTestId('email-disposal-overview-recipient-action-discard');
+    expect(deliver.compareDocumentPosition(discard) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   // G1 (v2 html_spec §②): header order is dispose-actions FIRST, then

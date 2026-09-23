@@ -30,7 +30,7 @@ import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, Download, Link as LinkIcon, Paperclip, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, escapeHtml, escapeRegExp } from '@/lib/utils';
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { AttachmentInfo, MailLogDetail, URLEntity } from '@/types/email-disposal-detail';
 import type { EmailPreviewResponse } from '@/types/email-preview';
@@ -48,19 +48,6 @@ const BLOCKED_STATUSES = new Set(['blocked', 'rejected', 'discarded']);
 
 function isBlockedStatus(status?: string): boolean {
   return !!status && BLOCKED_STATUSES.has(status);
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 const SENSITIVE_WORDS = ['紧急', '财务', '审批'];

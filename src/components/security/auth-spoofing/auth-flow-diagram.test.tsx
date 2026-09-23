@@ -12,6 +12,8 @@ describe('AuthFlowDiagram', () => {
   it('renders 6 nodes incl. pipeline & next endpoints', () => {
     render(wrap(<AuthFlowDiagram failActions={base} activeTab="spf" onNodeClick={()=>{}} />));
     expect(screen.getByText('策略流水线')).toBeTruthy();
+    expect(screen.queryByTestId('auth-flow-node-sub-pipeline')).toBeNull();
+    expect(screen.queryByText('例外检查')).toBeNull();
     expect(screen.getByText('下一模块')).toBeTruthy();
     ['SPF','DKIM','DMARC','PTR'].forEach(l => expect(screen.getByText(l)).toBeTruthy());
   });

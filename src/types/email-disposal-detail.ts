@@ -195,6 +195,9 @@ export interface MailLogDetail {
   storage_size?: number;
   /** Detail-only EML retention signal; undefined means the server could not resolve it. */
   eml_available?: boolean;
+  /** Live storage probe from the detail API; false also covers expired EMLs whose DB reference is stale. */
+  redeliver_available?: boolean;
+  redeliver_unavailable_reason?: 'original_expired' | 'storage_unavailable';
 
   received_at: string;
   processed_at?: string;
@@ -315,7 +318,7 @@ export type {
   MailLifecycleNodeStatus,
 };
 
-export type CheckStatus = 'pass' | 'suspicious' | 'threat' | 'processing' | 'skipped';
+export type CheckStatus = 'pass' | 'observed' | 'suspicious' | 'threat' | 'timeout' | 'processing' | 'skipped';
 export type CheckReason = 'module_disabled';
 
 export interface DetectionRecipientGroup {

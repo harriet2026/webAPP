@@ -30,6 +30,7 @@ export function defaultConfig(): SimilarDetectionConfig {
     enabled_directions: ['receive', 'send', 'internal'],
     aggregate,
     similar_email: {
+      aggregate: { ...aggregate },
       receive: { observe_mode: true, window_minutes: 30, similarity_pct: 80, min_count: 10, action: 'quarantine' },
       send: { observe_mode: false, window_minutes: 30, similarity_pct: 80, min_count: 10, action: 'quarantine' },
       internal: {
@@ -44,6 +45,7 @@ export function defaultConfig(): SimilarDetectionConfig {
       },
     },
     same_subject: {
+      aggregate: { ...aggregate },
       receive: { observe_mode: true, window_minutes: 60, similarity_pct: 90, min_count: 50, action: 'quarantine' },
       send: { observe_mode: true, window_minutes: 60, similarity_pct: 90, min_count: 50, action: 'audit' },
       internal: { observe_mode: false, window_minutes: 60, similarity_pct: 90, min_count: 50, action: 'quarantine' },

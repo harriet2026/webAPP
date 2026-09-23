@@ -124,7 +124,7 @@ export function TrendChart({ trend, direction, isLoading }: TrendChartProps) {
       </CardHeader>
       <CardContent ref={chartContentRef} className="min-w-0 overflow-hidden">
         {isLoading ? (
-          <Skeleton className="h-[296px] w-full rounded-lg" />
+          <Skeleton data-testid="delivery-trend-chart-loading" className="h-[296px] w-full rounded-lg" />
         ) : !option ? (
           <div className="flex h-[296px] items-center justify-center text-muted-foreground">
             {t('noData') as string}

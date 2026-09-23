@@ -1827,15 +1827,17 @@ export const mockAlertTemplates = (): { items: AlertTemplate[] } => ({
 let smtpState: SmtpConfig = {
   use_internal_postfix: false, server: "smtp.example.com", port: 587,
   encryption: "starttls", auth_method: "login", username: "alert@example.com",
-  password_configured: true, password_masked: "••••••••", sender_email: "alert@example.com",
+  password_configured: true, password_masked: "••••••••", sender_email: "emailgateway@cacter.com",
   sender_name: "AI邮件安全网关", connect_timeout_seconds: 10, send_timeout_seconds: 30,
   enc_key_ready: true,
 };
 
 export const mockAlertSmtpConfig = (): SmtpConfig => ({ ...smtpState });
 export function mockPutAlertSmtpConfig(payload: SmtpConfigPayload): SmtpConfig {
+  const writable = { ...payload };
+  delete writable.sender_email;
   smtpState = {
-    ...smtpState, ...payload,
+    ...smtpState, ...writable,
     password_configured: smtpState.password_configured || !!payload.password,
     password_masked: smtpState.password_masked || (payload.password ? "••••••••" : ""),
   };
@@ -4166,7 +4168,7 @@ export function mockBulkContentRules(body: unknown): number[] {
 
 function evaluateContentNode(
   node: RuleNode,
-  attrs: Record<string, string>,
+  attrs: Record<string, unknown>,
 ): boolean {
   if (node.type === "AND")
     return (node.children ?? []).every((child) =>
@@ -4181,17 +4183,25 @@ function evaluateContentNode(
       evaluateContentNode(child, attrs),
     );
   const actual = attrs[node.field ?? ""] ?? "";
-  if (node.operator === "eq") return actual === String(node.value ?? "");
+  if (node.map_key) {
+    const map = readObject(actual);
+    if (node.operator === "eq") {
+      return Boolean(map[node.map_key]) === (String(node.value ?? "") === "true");
+    }
+    return false;
+  }
+  const actualText = String(actual);
+  if (node.operator === "eq") return actualText === String(node.value ?? "");
   if (node.operator === "contain")
-    return actual.includes(String(node.value ?? ""));
+    return actualText.includes(String(node.value ?? ""));
   if (node.operator === "hasTag")
-    return actual
+    return actualText
       .split(",")
       .map((item) => item.trim())
       .includes(String(node.value ?? ""));
   if (node.operator === "match") {
     try {
-      return new RegExp(String(node.value ?? "")).test(actual);
+      return new RegExp(String(node.value ?? "")).test(actualText);
     } catch {
       return false;
     }
@@ -4205,7 +4215,36 @@ export function mockTestContentRule(body: unknown): {
 } {
   const source = readObject(body);
   const tree = source.condition_tree as RuleNode;
-  const attrs = readObject(source.test_attributes) as Record<string, string>;
+  const attrs = readObject(source.test_attributes);
+  return {
+    matched: evaluateContentNode(tree, attrs),
+    evaluated_conditions: [],
+  };
+}
+
+const mockMailMarkingMemberships: Record<string, string[]> = {
+  "executive@example.test": ["dept-1", "grp-1"],
+  "finance@example.test": ["dept-2", "grp-1"],
+  "sales@example.test": ["dept-3", "grp-1"],
+  "developer@example.test": ["dept-4", "grp-1"],
+  "legal@example.test": ["dept-6", "grp-1"],
+};
+
+export function mockTestMailMarkingRule(body: unknown): {
+  matched: boolean;
+  evaluated_conditions: unknown[];
+} {
+  const source = readObject(body);
+  const tree = source.condition_tree as RuleNode;
+  const attrs = readObject(source.test_attributes);
+  const outbound = String(attrs.is_outbound) === "true";
+  const email = String(attrs[outbound ? "sender" : "recipients"] ?? "")
+    .trim()
+    .toLowerCase();
+  const groupField = outbound ? "sender_group" : "recipient_group";
+  attrs[groupField] = Object.fromEntries(
+    (mockMailMarkingMemberships[email] ?? []).map((key) => [`grp:${key}`, true]),
+  );
   return {
     matched: evaluateContentNode(tree, attrs),
     evaluated_conditions: [],
@@ -4330,6 +4369,7 @@ function defaultAuthSpoofingConfig(): AuthSpoofingConfig {
         neutral: { enabled: true, action: "quarantine", observe_mode: false },
         partial: { enabled: false, action: "proceed", observe_mode: false },
         none: { enabled: true, action: "audit", observe_mode: false },
+        permerror: { enabled: true, action: "proceed", observe_mode: false },
       },
       dmarc: {
         reject: { enabled: true, action: "reject", observe_mode: false },
@@ -4436,8 +4476,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 // 发信行为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
-// demo 中的 organization 发件人对象尚未被后端支持，因此 mock 也只生成 individual/group，
-// 避免展示出无法保存的规则（GT-12170）。
+// organization 使用组织通讯录 department_path，与真实 API/运行时一致（GT-12170）。
 // 系统 `Rule`：metadata 携带 `BehaviorControlMetadata`（feature/direction/object_config/
 // time_window/dim_a/threshold_a/or_enabled/dim_b/threshold_b），action 经
 // `PRODUCT_TO_BACKEND` 转换，is_active=demo.enabled，priority=demo.priority，
@@ -4460,6 +4499,7 @@ interface DemoBehaviorRule {
   senderEmail?: string;
   senderGroupId?: string;
   senderGroupName?: string;
+  organizationPath?: string;
   ipSubType?: BehaviorIPSubType;
   ipAddress?: string;
   ipGroupId?: string;
@@ -4661,10 +4701,11 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
             : i % 4 === 2
               ? "senderIp"
               : "senderDomain",
-      senderSubType: i % 3 === 0 ? "individual" : "group",
+      senderSubType: i % 8 === 5 ? "organization" : i % 3 === 0 ? "individual" : "group",
       senderEmail: i % 3 === 0 ? `user${i}@company.com` : undefined,
       senderGroupId: i % 3 !== 0 ? `sg-${(i % 5) + 1}` : undefined,
       senderGroupName: i % 3 !== 0 ? BC_SENDER_GROUPS[i % 5].name : undefined,
+      organizationPath: i % 8 === 5 ? BC_ORGANIZATIONS[i % BC_ORGANIZATIONS.length].name : undefined,
       ipSubType: i % 4 === 2 ? (i % 2 === 0 ? "single" : "ipGroup") : undefined,
       ipAddress: i % 4 === 2 && i % 2 === 0 ? `192.168.${i}.0/24` : undefined,
       ipGroupId: i % 4 === 2 && i % 2 !== 0 ? `ip-${(i % 5) + 1}` : undefined,
@@ -4712,6 +4753,9 @@ function behaviorObjectConfig(
     case "sender":
       if (d.senderSubType === "individual") {
         return { type: "sender", sub_type: "individual", value: d.senderEmail };
+      }
+      if (d.senderSubType === "organization") {
+        return { type: "sender", sub_type: "organization", value: d.organizationPath };
       }
       return { type: "sender", sub_type: "group", value: d.senderGroupName };
     case "senderIp":
@@ -7441,7 +7485,18 @@ export function mockEmailDisposalRuleOptions(path: string) {
 
 export function mockEmailDisposalDetail(id: number) {
   const item = mockDisposalMailLogs.find((entry) => entry.id === id);
-  return item ? withDisplayStatuses(item) : null;
+  if (!item) return null;
+  // MIC007 (id=8) is the retained-original-expired scenario used to verify
+  // the redelivery preflight UX. Other mock detail rows model an available
+  // retained copy.
+  const originalExpired = item.tid === "MIC007";
+  return {
+    ...withDisplayStatuses(item),
+    redeliver_available: !originalExpired,
+    redeliver_unavailable_reason: originalExpired
+      ? "original_expired"
+      : undefined,
+  };
 }
 
 export function mockEmailDisposalBlacklistEntity(

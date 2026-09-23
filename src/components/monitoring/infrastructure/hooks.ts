@@ -47,11 +47,11 @@ export function useProcesses(node: string) {
   });
 }
 
-export function useDatabase(node: string, range: TimeRange) {
+export function useDatabase(node: string, range: TimeRange, source: 'db' | 'redis' = 'db', metric: string = 'connections') {
   const { apiRequest } = useApiRequest();
   return useQuery({
-    queryKey: ['monitoring', 'database', node, range],
-    queryFn: () => fetchDatabase(node, range, 'db', 'connections', apiRequest),
+    queryKey: ['monitoring', 'database', node, range, source, metric],
+    queryFn: () => fetchDatabase(node, range, source, metric, apiRequest),
     staleTime: 30_000,
     enabled: !!node,
     refetchOnWindowFocus: false,

@@ -1,0 +1,492 @@
+{
+  "config_snapshot": {
+    "version": 4,
+    "sideline_id": "510e65b2-62a0-44f3-a133-9bae0f11b769",
+    "message_uuid": "01a08438-d376-79ae-8a46-e7c567d844f6",
+    "tenant_id": 1,
+    "routed_recipients": [
+      "o365@fresh-dev.test"
+    ],
+    "admission": {
+      "candidates_by_recipient": {
+        "o365@fresh-dev.test": [
+          "candidate:phishagent:admission"
+        ]
+      },
+      "matched_rule_ids_by_recipient": {
+        "o365@fresh-dev.test": [
+          3
+        ]
+      },
+      "matched_rule_revisions": {
+        "01a08436-0112-7be8-8e7e-d70384849d3f": "3a9b2ceafbed7406a0b5f1909cb24a8e2bf79477ce860bd3d13429c504590985"
+      },
+      "matched_rules": [
+        {
+          "numeric_id": 3,
+          "rule_uid": "01a08436-0112-7be8-8e7e-d70384849d3f",
+          "stage": "sideline",
+          "revision": "3a9b2ceafbed7406a0b5f1909cb24a8e2bf79477ce860bd3d13429c504590985",
+          "content_hash": "3a9b2ceafbed7406a0b5f1909cb24a8e2bf79477ce860bd3d13429c504590985",
+          "canonical_rule": {
+            "directions": [
+              "inbound"
+            ],
+            "enabled": true,
+            "filter_on": false,
+            "name": "Dev URL acceptance",
+            "require_executable": false,
+            "require_qrcode": false,
+            "require_url": true,
+            "sender_first_seen": true
+          },
+          "recipient_scope": [
+            "o365@fresh-dev.test"
+          ],
+          "attribution_evidence": {
+            "evaluation": "condition_tree_matched",
+            "candidate_tags": [
+              "candidate:phishagent:admission"
+            ]
+          }
+        }
+      ],
+      "notes": []
+    },
+    "llm_gate": {
+      "routes_by_recipient": {
+        "o365@fresh-dev.test": [
+          "sys:phishagent"
+        ]
+      },
+      "decisions": [
+        {
+          "recipient": "o365@fresh-dev.test",
+          "agent": "phishagent",
+          "decision": "allow",
+          "reason": "indicator_disabled",
+          "control_tag": "sys:phishagent",
+          "candidate_tags": [
+            "candidate:phishagent:admission"
+          ]
+        }
+      ],
+      "config_hash": "26b3426b2593763c96d0890b4a77a0bbf66d13fc512b0c6b138a23c290f30a2a"
+    },
+    "indicator_light": {
+      "status": "completed",
+      "checked": false,
+      "skipped": true,
+      "reason": "disabled",
+      "fail_open": false,
+      "config_hash": "92813eddcefb4abb50075ffcac5f1ff8708c5b2001642bfe3c761ea36158b652"
+    },
+    "engine_config": {
+      "analysis": {
+        "config": {
+          "id": 0,
+          "tenant_id": 1,
+          "investigation_type": "phish_analysis",
+          "params": "{\"netdisk_domain\":true,\"netdisk_extract\":true,\"netdisk_spoof\":true}",
+          "default_profile_id": 2,
+          "version": 1
+        },
+        "runtime_limits": {
+          "profile": {
+            "max_track_level": 5,
+            "url_fetch_budget": 10,
+            "max_llm_ranked_urls": 10
+          },
+          "tool_call_budget": 20,
+          "trace_steps_budget_bytes": 24000,
+          "result_json_budget_bytes": 28000,
+          "observe_deadline_minutes": 720
+        },
+        "runtime_limits_hash": "9eb9269df8c7274a10e516abaad3ff85478bdb65f022613e7a4eacd87cddc4fb",
+        "execution": {
+          "provider": "http://192.168.170.107:3000/v1",
+          "provider_version": "db3f8bda9b61c347f67441270e845b14c027f587902e5574113dbd7865fba55a",
+          "model": "glm-5.3",
+          "timeout_seconds": 8403,
+          "max_iterations": 20,
+          "model_call_timeout_seconds": 300,
+          "config_snapshot_version": "9b00798cac986ef801f474dc2c75cc902a7b28a523e4e637b3024a05eb0e17bf",
+          "config_platform_version": 1,
+          "config_effective_hash": "60f3890aa13ec9226f89fbe073e7ebcbff94b191209bbdd34ea22e8e56fd38ed",
+          "url_scope_policy": 1
+        }
+      },
+      "risk_policy": {
+        "id": 0,
+        "tenant_id": 1,
+        "investigation_type": "phish_risk_policy",
+        "params": "{\"cutoffs\":{\"high\":90,\"low\":40,\"medium\":70},\"policies\":{\"high\":{\"base_disposition\":\"quarantine\"},\"low\":{\"base_disposition\":\"proceed\",\"mark_positions\":[\"subject_prefix\"],\"mark_text\":\"[可疑]\"},\"medium\":{\"base_disposition\":\"quarantine\"},\"suspicious\":{\"base_disposition\":\"proceed\"}}}",
+        "default_profile_id": null,
+        "version": 1
+      },
+      "runtime_policy": {
+        "config": {
+          "id": 0,
+          "tenant_id": 1,
+          "investigation_type": "phish_runtime_policy",
+          "params": "{\"max_recheck_minutes\":30,\"observe_action\":\"accept\",\"observe_mark_enabled\":false,\"run_mode\":\"realtime\",\"timeout_async_enabled\":true,\"timeout_minutes\":15}",
+          "default_profile_id": null,
+          "version": 1
+        },
+        "ai_detection_recall": {
+          "read_policy": "notify",
+          "unread_policy": "recall"
+        },
+        "observe_deadline_at": "2026-09-09T15:31:51Z",
+        "timeout_temp_disposal": "accept",
+        "timeout_mark_enabled": false,
+        "timeout_mark_positions": null
+      }
+    }
+  },
+  "investigation": {
+    "id": "4581c028-af11-4721-90ad-b066c5aea784",
+    "tenant_id": 1,
+    "type": "phish_analysis",
+    "status": "completed",
+    "trigger_type": "finding",
+    "source_type": "sideline_item",
+    "source_id": "510e65b2-62a0-44f3-a133-9bae0f11b769",
+    "target_type": "mail_recipient",
+    "target_ids": [
+      "o365@fresh-dev.test"
+    ],
+    "summary": "Email from cs@core.cn impersonates Microsoft 365 support, urging login within 24 hours to complete account verification or lose Outlook/Teams/OneDrive access. The sole link, https://sakura-cat3.com/, is unrelated to Microsoft and serves a SakuraCat VPN login page collecting Email/Password credentials — a clear brand conflict with the email narrative. Two earlier identical messages from the same sender (mail_log_id 3 and 6) form a small campaign; the sender first appeared today and SPF/DKIM/DMARC are all absent. Threat intel and RBL show no hits and the domain is 615 days old, which slightly tempers certainty, but the impersonation, credential-collection landing page, and campaign pattern support phishing.",
+    "risk_level": "high",
+    "confidence": 0.88,
+    "result": {
+      "assessment_report_status": "not_recorded",
+      "assessment_report_reason": "report_budget_exceeded",
+      "assessment_failure": {
+        "schema_version": 2,
+        "origin": {
+          "kind": "worker",
+          "task_id": "4581c028-af11-4721-90ad-b066c5aea784",
+          "task_attempt_id": "ba5ba260-5ef9-463e-99e5-043c4ad6f626",
+          "analysis_run_id": "1c7408a5-0745-45b6-b36c-060cf41e4cde",
+          "invocation_id": "69295118-0429-433a-b264-06c18d7ce004",
+          "plan_revision": "phish.baseline@6"
+        },
+        "reason": 3
+      },
+      "verdict": "phishing_suspected",
+      "summary": "Email from cs@core.cn impersonates Microsoft 365 support, urging login within 24 hours to complete account verification or lose Outlook/Teams/OneDrive access. The sole link, https://sakura-cat3.com/, is unrelated to Microsoft and serves a SakuraCat VPN login page collecting Email/Password credentials — a clear brand conflict with the email narrative. Two earlier identical messages from the same sender (mail_log_id 3 and 6) form a small campaign; the sender first appeared today and SPF/DKIM/DMARC are all absent. Threat intel and RBL show no hits and the domain is 615 days old, which slightly tempers certainty, but the impersonation, credential-collection landing page, and campaign pattern support phishing.",
+      "related_objects": {
+        "urls": [
+          "https://sakura-cat3.com/"
+        ]
+      },
+      "recommended_actions": [
+        {
+          "type": "quarantine_message",
+          "scope": "mail",
+          "target_count": 3,
+          "reason": "Microsoft 365 impersonation with a credential-harvesting login link; two related delivered messages should be pulled as well.",
+          "data": {
+            "mail_log_ids": [
+              7,
+              6,
+              3
+            ]
+          }
+        },
+        {
+          "type": "block_url",
+          "scope": "url",
+          "target_count": 1,
+          "reason": "URL serves as the credential-collection destination for a Microsoft 365 phishing lure.",
+          "data": {
+            "urls": [
+              "https://sakura-cat3.com/"
+            ]
+          }
+        },
+        {
+          "type": "notify_recipient",
+          "scope": "user",
+          "target_count": 1,
+          "reason": "Recipient should be warned not to enter credentials and to reset credentials and review MFA if they already did.",
+          "data": {
+            "recipient": "o365@fresh-dev.test"
+          }
+        },
+        {
+          "type": "block_sender",
+          "scope": "sender",
+          "target_count": 1,
+          "reason": "Sender cs@core.cn first seen today and already delivered three identical phishing lures.",
+          "data": {
+            "sender": "cs@core.cn"
+          }
+        }
+      ],
+      "details": {
+        "analysis_status": "complete",
+        "model_call_count": 2,
+        "not_applicable_reason": "",
+        "url_findings": [
+          {
+            "agent": {
+              "risk_level": "high",
+              "verdict": "phishing_suspected"
+            },
+            "host": "sakura-cat3.com",
+            "provenance": "evidence",
+            "signals": [
+              "Domain age 615 days, no RBL listing, and threat intel returned SAFE, limiting certainty",
+              "Email narrative impersonates Microsoft 365 account verification while sender is cs@core.cn",
+              "Landing page presents an Email/Password credential login form branded SakuraCat (VPN service), conflicting with the Microsoft 365 lure",
+              "No redirect chain; page served directly at site root",
+              "Resolves to 185.254.74.196 via Cloudflare nameservers",
+              "TLS certificate issued 8 days before observation (issuer YE2), chain-trusted with matching SAN"
+            ],
+            "url": "https://sakura-cat3.com/"
+          }
+        ],
+        "verdict_source": "llm"
+      }
+    },
+    "steps": [
+      {
+        "name": "analyze_url",
+        "status": "ok",
+        "message": "URL triage found no structural evasion indicators; host sakura-cat3.com, no trusted-domain match, risk level minimal.",
+        "data": {
+          "host": "sakura-cat3.com",
+          "trusted_domain_match": false,
+          "url": "https://sakura-cat3.com/",
+          "url_risk_level": "minimal"
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "check_url_threat_intel",
+        "status": "ok",
+        "message": "Reputation service returned SAFE (no threat match) for the URL.",
+        "data": {
+          "threat_type": "SAFE",
+          "url": "https://sakura-cat3.com/"
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "lookup_domain_age",
+        "status": "ok",
+        "message": "Domain registered 2025-01-01, age 615 days; not newly registered.",
+        "data": {
+          "age_days": 615,
+          "domain": "sakura-cat3.com",
+          "registration_date": "2025-01-01T05:47:43Z"
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "dig",
+        "status": "ok",
+        "message": "A record resolves to 185.254.74.196; nameservers are Cloudflare (algin, jean).",
+        "data": {
+          "addresses": [
+            "185.254.74.196"
+          ],
+          "domain": "sakura-cat3.com",
+          "record_type": "A"
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "check_rbl_blocklist",
+        "status": "ok",
+        "message": "Domain not listed on any checked blocklist zones.",
+        "data": {
+          "domain": "sakura-cat3.com",
+          "listed": false
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "inspect_tls_cert",
+        "status": "ok",
+        "message": "Certificate issued 8 days ago, chain-trusted, SAN matches host, not self-signed; issuer YE2.",
+        "data": {
+          "cert_age_days": 8,
+          "chain_trusted": true,
+          "host": "sakura-cat3.com",
+          "issuer": "YE2",
+          "self_signed": false
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "web_fetch",
+        "status": "ok",
+        "message": "Landing page is a SakuraCat VPN login collecting Email/Password with forgot-password and register links; no redirects; screenshot unavailable (no storage node).",
+        "data": {
+          "credential_fields": [
+            "Email",
+            "Password"
+          ],
+          "final_url": "https://sakura-cat3.com/",
+          "title": "SakuraCat"
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "get_sender_history",
+        "status": "ok",
+        "message": "Sender cs@core.cn first seen 2026-09-09 (age 0 days) with 3 total messages.",
+        "data": {
+          "age_days": 0,
+          "sender": "cs@core.cn",
+          "total_count": 3
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "get_attachment_findings",
+        "status": "ok",
+        "message": "Two attachment scan records returned with scan IDs only; no verdict details available.",
+        "data": {
+          "scan_ids": [
+            "7091bebf-b188-56e4-b794-04a02cfb0dd6",
+            "b66e8cc2-f46e-58dc-9cd8-d96e6cc6fd05"
+          ]
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      },
+      {
+        "name": "search_similar_messages",
+        "status": "ok",
+        "message": "Two prior delivered messages (mail_log_id 6 and 3) share sender, subject, and URL host sakura-cat3.com, indicating a small campaign.",
+        "data": {
+          "mail_log_ids": [
+            6,
+            3
+          ],
+          "match_count": 2,
+          "shared_url_hosts": [
+            "sakura-cat3.com"
+          ]
+        },
+        "started_at": "2026-09-09T03:31:57.046892043Z",
+        "finished_at": "2026-09-09T03:35:52.680314531Z"
+      }
+    ],
+    "recommended_actions": [
+      {
+        "type": "quarantine_message",
+        "scope": "mail",
+        "target_count": 3,
+        "reason": "Microsoft 365 impersonation with a credential-harvesting login link; two related delivered messages should be pulled as well.",
+        "data": {
+          "mail_log_ids": [
+            7,
+            6,
+            3
+          ]
+        }
+      },
+      {
+        "type": "block_url",
+        "scope": "url",
+        "target_count": 1,
+        "reason": "URL serves as the credential-collection destination for a Microsoft 365 phishing lure.",
+        "data": {
+          "urls": [
+            "https://sakura-cat3.com/"
+          ]
+        }
+      },
+      {
+        "type": "notify_recipient",
+        "scope": "user",
+        "target_count": 1,
+        "reason": "Recipient should be warned not to enter credentials and to reset credentials and review MFA if they already did.",
+        "data": {
+          "recipient": "o365@fresh-dev.test"
+        }
+      },
+      {
+        "type": "block_sender",
+        "scope": "sender",
+        "target_count": 1,
+        "reason": "Sender cs@core.cn first seen today and already delivered three identical phishing lures.",
+        "data": {
+          "sender": "cs@core.cn"
+        }
+      }
+    ],
+    "created_by": "sideline",
+    "created_at": "2026-09-09T03:31:56.583579Z",
+    "updated_at": "2026-09-09T03:35:52.682116Z"
+  },
+  "summary": {
+    "sideline_id": "510e65b2-62a0-44f3-a133-9bae0f11b769",
+    "message_id": "<o365-fresh-03-c503d00a-35fe-4019-b40d-84a0ec838579@fresh-dev.test>",
+    "message_uuid": "01a08438-d376-79ae-8a46-e7c567d844f6",
+    "sender": "cs@core.cn",
+    "subject": "Microsoft 365：请登录完成账户访问验证",
+    "recipients": [
+      "o365@fresh-dev.test"
+    ],
+    "direction": "receive",
+    "status": "success",
+    "sidelined_at": "2026-09-09T03:31:51Z",
+    "investigation_id": "4581c028-af11-4721-90ad-b066c5aea784",
+    "verdict": "phishing_suspected",
+    "confidence": 0.88,
+    "disposition_actions": [
+      "quarantine"
+    ],
+    "recipient_dispositions": [
+      {
+        "recipient": "o365@fresh-dev.test",
+        "original_action": "sideline",
+        "final_action": "quarantine",
+        "status": "quarantined",
+        "object_kind": "quarantine",
+        "object_id": "5f69cb47-b1e6-523d-863b-4e9f630fabad",
+        "degraded_checks": {
+          "recipient_existence": "fail_open"
+        },
+        "tenant_id": 1,
+        "direction": "inbound"
+      }
+    ],
+    "risk_level": "medium",
+    "policy_disposition": "quarantine",
+    "task_status": "completed",
+    "failure_reason": null,
+    "mail_log_id": 7,
+    "display_statuses": [
+      {
+        "status": "quarantine_pending",
+        "count": 1
+      }
+    ],
+    "disposition": "quarantine",
+    "detection_mode": "realtime",
+    "recall_status": "none",
+    "agent_rounds": 2,
+    "url_summary": {
+      "total": 1,
+      "phishing": 0,
+      "suspicious": 0,
+      "normal": 0
+    },
+    "result_truncated": false
+  }
+}

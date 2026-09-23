@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -138,6 +138,24 @@ export function MailListTable({
   }, [t]);
 
   const allSelected = items.length > 0 && items.every((item) => selectedIds.has(item.id));
+  // RCPT-stage per-recipient rejections and the later accepted-recipient result
+  // are intentionally stored as separate rows. message_uuid is the stable mail
+  // identity that lets the list explain that these rows belong to one SMTP
+  // transaction instead of looking like duplicate messages (GT-14076).
+  const linkedMailRows = useMemo(() => {
+    const groups = new Map<string, number[]>();
+    for (const item of items) {
+      const messageUuid = item.messageUuid?.trim();
+      if (!messageUuid || /^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(messageUuid)) continue;
+      groups.set(messageUuid, [...(groups.get(messageUuid) ?? []), item.id]);
+    }
+    const linked = new Map<number, { current: number; total: number; messageUuid: string }>();
+    for (const [messageUuid, ids] of groups) {
+      if (ids.length < 2) continue;
+      ids.forEach((id, index) => linked.set(id, { current: index + 1, total: ids.length, messageUuid }));
+    }
+    return linked;
+  }, [items]);
   const hasSelection = selectedIds.size > 0;
   const selectedItems = items.filter((item) => selectedIds.has(item.id));
   // GT-12782 Task 4：门禁改读后端下发的展示状态列表——「列表包含待处置/已投递
@@ -614,8 +632,8 @@ export function MailListTable({
 
       {/* GT-12423: min-w 使 1024px 视口下产生横向滚动（原型行为，配合
           sticky 操作列），800px 在 ≥1280 视口（容器 ≥868px）不触发滚动 */}
-      <div className="rounded-lg border" data-testid="disposal-mail-table">
-        <Table className="min-w-[800px]">
+      <div className="overflow-x-auto rounded-lg border" data-testid="disposal-mail-table">
+        <Table className="min-w-[800px]" containerTestId="disposal-mail-table-scroll">
           <TableHeader>
             <TableRow>
               <TableHead
@@ -694,8 +712,31 @@ export function MailListTable({
                 </TableCell>
                 )}
                 {isColVisible('subject') && (
-                <TableCell className={cn('text-xs max-w-[300px] truncate', cellDensityClass)} data-testid={`disposal-cell-${item.id}-subject`}>
-                  {item.subject}
+                <TableCell className={cn('text-xs max-w-[300px]', cellDensityClass)} data-testid={`disposal-cell-${item.id}-subject`}>
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <span className="min-w-0 truncate">{item.subject}</span>
+                    {linkedMailRows.get(item.id) && (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Badge
+                              data-testid={`disposal-mail-link-${item.id}`}
+                              variant="outline"
+                              className="h-5 shrink-0 border-blue-200 bg-blue-50 px-1.5 py-0 text-[10px] font-normal text-blue-700 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300"
+                            />
+                          }
+                        >
+                          {t('table.sameMailResult', {
+                            current: linkedMailRows.get(item.id)!.current,
+                            total: linkedMailRows.get(item.id)!.total,
+                          })}
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-sm text-xs">
+                          {t('table.sameMailResultTooltip', linkedMailRows.get(item.id)!)}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 </TableCell>
                 )}
                 {isColVisible('senderIp') && (

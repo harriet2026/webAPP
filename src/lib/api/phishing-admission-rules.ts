@@ -1,15 +1,21 @@
 import { apiRequest, type ApiRequestFn } from './client';
 import type {
   PhishAdmissionRule,
+  PhishAdmissionRuleListItem,
   PhishAdmissionRuleUpdate,
   PhishAdmissionRuleWrite,
 } from '@/types/phishing-config';
 
 export async function listAdmissionRules(
   requestFn: ApiRequestFn = apiRequest,
-): Promise<PhishAdmissionRule[]> {
-  const response = await requestFn<{ items: PhishAdmissionRule[] }>('/phishing-agent/admission-rules');
+): Promise<PhishAdmissionRuleListItem[]> {
+  const response = await requestFn<{ items: PhishAdmissionRuleListItem[] }>('/phishing-agent/admission-rules');
   return response.items ?? [];
+}
+
+export function admissionRulesReady(rules: PhishAdmissionRuleListItem[] | undefined, tenantId: number | null): boolean {
+  const applicable = rules?.filter((rule) => rule.tenant_id === null || rule.tenant_id === tenantId);
+  return Boolean(applicable?.every((rule) => rule.status === 'ready') && applicable.some((rule) => rule.effective));
 }
 
 export function createAdmissionRule(

@@ -16,7 +16,15 @@ import { RuleImportExportDialog } from '@/components/rules/RuleImportExportDialo
 import { buildContentRuleImportTemplate } from '@/lib/content-rule-import-template';
 
 vi.mock('next-intl', () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => (key: string, params?: Record<string, string | number>) => {
+    if (key === 'ruleImportExport.dialog.duplicateWillBeSkipped') {
+      return `${key}:${params?.itemNumber}`;
+    }
+    if (key === 'ruleImportExport.dialog.invalidReason.scopeMismatch') {
+      return `${key}:${params?.scopeLabel}`;
+    }
+    return key;
+  },
 }));
 
 vi.mock('sonner', () => ({
@@ -74,7 +82,7 @@ const mixedEnvelope: RuleExportEnvelope = {
 
 const duplicatePreview: RuleImportPreviewResponse = {
   summary: {
-    rules: { parsed: 1, importable: 0, duplicates: 1, invalid: 0 },
+    rules: { parsed: 2, importable: 0, duplicates: 2, invalid: 0 },
     detection_profiles: { parsed: 0, importable: 0, duplicates: 0, invalid: 0 },
   },
   tenant_mapping: {
@@ -89,6 +97,12 @@ const duplicatePreview: RuleImportPreviewResponse = {
       source: sampleEnvelope.data.rules?.[0],
       existing: sampleEnvelope.data.rules?.[0],
       default_action: 'skip',
+    }, {
+      preview_item_id: 'rules:1',
+      reason: 'exact_match',
+      source: { ...sampleEnvelope.data.rules?.[0], id: 2, name: 'Second rule' },
+      existing: { ...sampleEnvelope.data.rules?.[0], id: 2, name: 'Second rule' },
+      default_action: 'skip',
     }],
     detection_profiles: [],
   },
@@ -101,7 +115,33 @@ const duplicatePreview: RuleImportPreviewResponse = {
 const duplicateImportResult: RuleImportExecuteResponse = {
   ...duplicatePreview,
   imported: { rules: 0, detection_profiles: 0 },
-  skipped_duplicates: { rules: 1, detection_profiles: 0 },
+  skipped_duplicates: { rules: 2, detection_profiles: 0 },
+};
+
+const scopeMismatchPreview: RuleImportPreviewResponse = {
+  summary: {
+    rules: { parsed: 1, importable: 0, duplicates: 0, invalid: 1 },
+    detection_profiles: { parsed: 0, importable: 0, duplicates: 0, invalid: 0 },
+  },
+  tenant_mapping: {
+    mode: 'restore_original_tenants',
+    resolved: 1,
+    failed: 0,
+  },
+  duplicates: {
+    rules: [],
+    detection_profiles: [],
+  },
+  invalid_items: {
+    rules: [{
+      preview_item_id: 'rules:0',
+      reason: 'invalid',
+      source: sampleEnvelope.data.rules?.[0],
+      default_action: 'skip',
+      error: 'rule does not match scope=sender_filter',
+    }],
+    detection_profiles: [],
+  },
 };
 
 function createImportFile(envelope: Partial<RuleExportEnvelope> | Record<string, unknown>): File {
@@ -306,6 +346,93 @@ describe('RuleImportExportDialog actions', () => {
     expect(screen.getByTestId('rule-import-export-actions')).toHaveClass('shrink-0');
   });
 
+  it('GT-13670 hides unsupported detection profiles for rule-only scopes', async () => {
+    const onExport = vi.fn().mockResolvedValue(sampleEnvelope);
+    render(
+      <RuleImportExportDialog
+        open
+        onOpenChange={vi.fn()}
+        scopeLabel="发信人黑白名单"
+        variant="unified-rules"
+        adminContext="tenant-admin"
+        tenantOptions={[]}
+        initialTab="export"
+        rulesOnly
+        onExport={onExport}
+        onPreviewImport={vi.fn().mockResolvedValue(duplicatePreview)}
+      />,
+    );
+
+    expect(screen.getByTestId('export-rules')).toBeVisible();
+    expect(screen.queryByTestId('export-detection_profiles')).toBeNull();
+
+    await userEvent.click(screen.getByTestId('rule-export-execute'));
+    expect(onExport).toHaveBeenCalledWith({
+      include_rules: true,
+      include_detection_profiles: false,
+    });
+
+    await userEvent.click(screen.getByRole('tab', { name: 'ruleImportExport.dialog.tabs.import' }));
+    await userEvent.upload(
+      screen.getByLabelText('ruleImportExport.dialog.importFileLabel'),
+      createImportFile(mixedEnvelope),
+    );
+    expect(await screen.findByTestId('import-rules')).toBeVisible();
+    expect(screen.queryByTestId('import-detection_profiles')).toBeNull();
+  });
+
+  it('GT-13674 keeps the selected file visible after a successful preview', async () => {
+    const onPreviewImport = vi.fn().mockResolvedValue(duplicatePreview);
+    render(
+      <RuleImportExportDialog
+        open
+        onOpenChange={vi.fn()}
+        scopeLabel="发信人黑白名单"
+        variant="unified-rules"
+        adminContext="tenant-admin"
+        tenantOptions={[]}
+        initialTab="import"
+        rulesOnly
+        onPreviewImport={onPreviewImport}
+      />,
+    );
+
+    const fileInput = screen.getByLabelText(
+      'ruleImportExport.dialog.importFileLabel',
+    ) as HTMLInputElement;
+    await userEvent.upload(fileInput, createImportFile(sampleEnvelope));
+    await waitFor(() => expect(onPreviewImport).toHaveBeenCalledOnce());
+
+    expect(fileInput.files?.[0]?.name).toBe('test.json');
+    expect(fileInput).toHaveValue('C:\\fakepath\\test.json');
+  });
+
+  it('GT-13674 clears the selected file when parsing fails', async () => {
+    render(
+      <RuleImportExportDialog
+        open
+        onOpenChange={vi.fn()}
+        scopeLabel="发信人黑白名单"
+        variant="unified-rules"
+        adminContext="tenant-admin"
+        tenantOptions={[]}
+        initialTab="import"
+        rulesOnly
+      />,
+    );
+
+    const fileInput = screen.getByLabelText(
+      'ruleImportExport.dialog.importFileLabel',
+    ) as HTMLInputElement;
+    await userEvent.upload(
+      fileInput,
+      new File(['not json'], 'invalid.json', { type: 'application/json' }),
+    );
+
+    await waitFor(() => expect(fileInput.files).toHaveLength(0));
+    expect(fileInput).toHaveValue('');
+  });
+
   it('shows duplicates as forced skips and always submits the skip policy', async () => {
     const onPreviewImport = vi.fn().mockResolvedValue(duplicatePreview);
     const onExecuteImport = vi.fn().mockResolvedValue(duplicateImportResult);
@@ -338,13 +465,44 @@ describe('RuleImportExportDialog actions', () => {
       'ruleImportExport.dialog.duplicatesWillBeSkipped',
     )).toBeVisible();
     expect(within(duplicatePolicy).queryByRole('checkbox')).toBeNull();
-    expect(screen.getByText('ruleImportExport.dialog.duplicateWillBeSkipped')).toBeVisible();
+    expect(screen.getByText('ruleImportExport.dialog.duplicateWillBeSkipped:1')).toBeVisible();
+    expect(screen.getByText('ruleImportExport.dialog.duplicateWillBeSkipped:2')).toBeVisible();
+    expect(screen.queryByText(/rules:0/)).toBeNull();
+    expect(screen.getAllByText('ruleImportExport.dialog.duplicateReason.exactMatch')).toHaveLength(2);
+    expect(screen.queryByText('exact_match')).toBeNull();
 
     await userEvent.click(screen.getByTestId('rule-import-execute'));
 
     expect(onExecuteImport).toHaveBeenCalledWith(expect.objectContaining({
       duplicate_resolutions: { apply_to_remaining: 'skip' },
     }));
+  });
+
+  it('renders a localized module mismatch instead of the backend scope error', async () => {
+    const onPreviewImport = vi.fn().mockResolvedValue(scopeMismatchPreview);
+
+    render(
+      <RuleImportExportDialog
+        open
+        onOpenChange={vi.fn()}
+        scopeLabel="Sender Filter"
+        variant="unified-rules"
+        adminContext="tenant-admin"
+        onPreviewImport={onPreviewImport}
+        initialTab="import"
+        rulesOnly
+      />,
+    );
+
+    await userEvent.upload(
+      screen.getByLabelText('ruleImportExport.dialog.importFileLabel'),
+      createImportFile(sampleEnvelope),
+    );
+
+    expect(await screen.findByTestId('rule-import-invalid-item-1')).toHaveTextContent(
+      'ruleImportExport.dialog.invalidReason.scopeMismatch:Sender Filter',
+    );
+    expect(screen.queryByText('rule does not match scope=sender_filter')).toBeNull();
   });
 
   it('automatically refreshes the preview when import types change', async () => {

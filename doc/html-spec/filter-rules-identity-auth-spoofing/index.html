@@ -416,7 +416,7 @@ authEnabled: boolean = true    // 模块启用开关</code></pre>
   <table class="spec-table">
 <thead><tr><th>模板</th><th>spec 语义</th><th>Dialog 内说明文案（demo）</th></tr></thead>
 <tbody>
-<tr><td>宽松</td><td>大部分检查项设为「允许」，适合新部署测试</td><td>仅拦截明确伪造，兼容老旧系统，丢弃动作使用极少</td></tr>
+<tr><td>宽松</td><td>大部分检查项设为「允许」，适合新部署测试</td><td>仅拦截明确伪造</td></tr>
 <tr><td>标准</td><td>关键检查项设为「隔离」，平衡安全与可用性（推荐）</td><td>平衡安全与业务，明确伪造使用阻断/丢弃，疑似伪造使用隔离</td></tr>
 <tr><td>严格</td><td>大部分检查项设为「阻断」，最高安全级别</td><td>零信任策略，大量使用丢弃动作，适用于金融/政务等高安全场景</td></tr>
 <tr><td>自定义</td><td>用户自行配置各检查项动作</td><td>完全手动控制，脱离模板保护，需自行评估风险</td></tr>

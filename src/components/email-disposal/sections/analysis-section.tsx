@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 // GT-12583：必须用 next-intl 的 locale-aware router——本项目 localePrefix 为
 // 默认 always，next/navigation 的裸 push 会丢 /zh 前缀导致 404。
 import { useRouter } from '@/i18n/navigation';
-import { CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown, Clock, ShieldAlert, ExternalLink, User, RotateCcw, Loader2, Layers, Users } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, MinusCircle, ChevronDown, Clock, Eye, ShieldAlert, ExternalLink, User, RotateCcw, Loader2, Layers, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +18,7 @@ import { mailTypeConfig, stripDetailPrefix } from '../lib/detail-helpers';
 import { aggregateCheckStatus } from '../lib/check-status';
 import {
   formatHitDetail,
+  formatRuleLabel,
   getModuleName,
   getActionLabel,
   getActionColor,
@@ -28,6 +29,7 @@ import {
   getStageColor,
   isStage1Policy,
   resolveHitModules,
+  shouldHideInternalRuleIdentity,
   type DisposalLang,
 } from '../lib/disposal-basis-config';
 import { beatsInCollapsedRow } from '../lib/recall-timeline';
@@ -72,8 +74,10 @@ interface AnalysisSectionProps {
 
 const STATUS_ICON: Record<CheckStatus, React.ReactElement> = {
   pass: <CheckCircle2 className="h-4 w-4 text-emerald-500" />,
+  observed: <Eye className="h-4 w-4 text-indigo-500" />,
   suspicious: <AlertTriangle className="h-4 w-4 text-amber-500" />,
   threat: <XCircle className="h-4 w-4 text-red-500" />,
+  timeout: <Clock className="h-4 w-4 text-amber-500" />,
   processing: <Clock className="h-4 w-4 text-blue-500 animate-pulse" />,
   skipped: <MinusCircle className="h-4 w-4 text-gray-400" />,
 };
@@ -81,16 +85,20 @@ const STATUS_ICON: Record<CheckStatus, React.ReactElement> = {
 // Larger variant for the stage-card centered icon (v2 spec: w-5 h-5).
 const STATUS_ICON_LG: Record<CheckStatus, React.ReactElement> = {
   pass: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
+  observed: <Eye className="h-5 w-5 text-indigo-500" />,
   suspicious: <AlertTriangle className="h-5 w-5 text-amber-500" />,
   threat: <XCircle className="h-5 w-5 text-red-500" />,
+  timeout: <Clock className="h-5 w-5 text-amber-500" />,
   processing: <Clock className="h-5 w-5 text-blue-500 animate-pulse" />,
   skipped: <MinusCircle className="h-5 w-5 text-gray-400" />,
 };
 
 const STAGE_CARD_STYLE: Record<CheckStatus, string> = {
   pass: 'border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/20',
+  observed: 'border-indigo-300 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/20',
   suspicious: 'border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20',
   threat: 'border-red-300 bg-red-50 ring-1 ring-red-400 dark:border-red-800 dark:bg-red-950/20',
+  timeout: 'border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20',
   processing: 'border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20',
   skipped: 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50',
 };
@@ -98,8 +106,10 @@ const STAGE_CARD_STYLE: Record<CheckStatus, string> = {
 // 状态徽标（通过/威胁/…）配色。
 const STAGE_BADGE_STYLE: Record<CheckStatus, string> = {
   pass: 'text-emerald-600 border-emerald-300',
+  observed: 'text-indigo-600 border-indigo-300',
   suspicious: 'text-amber-600 border-amber-300',
   threat: 'text-red-600 border-red-300',
+  timeout: 'text-amber-600 border-amber-300',
   processing: 'text-blue-600 border-blue-300',
   skipped: 'text-gray-500 border-gray-300',
 };
@@ -107,8 +117,10 @@ const STAGE_BADGE_STYLE: Record<CheckStatus, string> = {
 // 命中策略行 · 结果文案配色。
 const CHECK_RESULT_COLOR: Record<CheckStatus, string> = {
   pass: 'text-emerald-600',
+  observed: 'text-indigo-600',
   suspicious: 'text-amber-600',
   threat: 'text-red-600',
+  timeout: 'text-amber-600',
   processing: 'text-blue-600',
   skipped: 'text-muted-foreground',
 };
@@ -142,6 +154,7 @@ function connectorArrowClass(i: number, hitIndex: number): string {
 
 const ALL_STAGE_NUMBERS = [1, 2, 3, 4, 5];
 const ALL_RECIPIENTS_SCOPE = '__all_recipients__';
+const HIDDEN_DISPOSAL_ANALYSIS_CHECKS = new Set(['advancedRules']);
 const PIPELINE_CHECK_LABEL_KEYS = {
   authSpoofing: 'authSpoofing',
   attachmentSecurity: 'attachment',
@@ -289,8 +302,11 @@ export function AnalysisSection({
   const t = useTranslations('emailDisposal.detail.analysis');
   const tDetail = useTranslations('emailDisposal.detail');
   const tFeatures = useTranslations('emailDisposal.detail.features');
+  const tAuth = useTranslations('authSpoofing');
+  const tIntent = useTranslations('intentEngine');
+  const tRecipient = useTranslations('recipientCheck');
   const tPipeline = useTranslations('pipeline');
-  const { viewer, capabilities } = useProductForm();
+  const { viewer, capabilities, switcherEnabled } = useProductForm();
   // Reuses §9-A's existing "暂未实现" copy (send-receive-context-card.tsx)
   // rather than adding a fourth duplicate translation of the same string.
   const tSenderActions = useTranslations('emailDisposal.detail.overview.senderActions');
@@ -350,9 +366,19 @@ export function AnalysisSection({
   const stages = useMemo(() => {
     const allStages = analysis?.stages ?? [];
     const base = allStages.flatMap((stage) => {
-      if (stage.key !== 'ai') return [stage];
+      // The disposal detail keeps the backend projection intact for audit, but
+      // its pipeline intentionally exposes only the product-approved checks.
+      // Recompute the stage status when a check is hidden so its badge and
+      // policy count describe the same visible set.
+      const displayChecks = switcherEnabled
+        ? stage.checks
+        : stage.checks.filter((check) => !HIDDEN_DISPOSAL_ANALYSIS_CHECKS.has(check.key));
+      if (stage.key !== 'ai') {
+        if (displayChecks.length === stage.checks.length) return [stage];
+        return [{ ...stage, checks: displayChecks, status: aggregateCheckStatus(displayChecks) }];
+      }
       if (!aiEnabled || !visibleAgentAccess) return [];
-      const checks = stage.checks.flatMap((check) => {
+      const checks = displayChecks.flatMap((check) => {
         const access = visibleAgentAccess[check.key as AgentPipelineKey];
         if (!access) return [];
         if (access === 'locked') {
@@ -370,7 +396,7 @@ export function AnalysisSection({
       return [{ ...stage, checks, status: aggregateCheckStatus(checks) }];
     });
     return base.map((s, i) => ({ ...s, stage: i + 1 }));
-  }, [analysis?.stages, aiEnabled, visibleAgentAccess]);
+  }, [analysis?.stages, aiEnabled, switcherEnabled, visibleAgentAccess]);
   // v2 spec gap 2.1: all 5 stage cards default EXPANDED (inline hit-strategy
   // detail rendered inside each card); clicking a card toggles its own
   // detail only. Initialize with every possible stage number -- harmless for
@@ -542,9 +568,11 @@ export function AnalysisSection({
   ) => {
     const masked = maskModule(entry.policy_key);
     const meta = entry.policy_key ? getPolicyMeta(entry.policy_key) : undefined;
-    const route = entry.policy_key ? getPolicyRoute(entry.policy_key, entry.rule_id) : undefined;
+    const route = entry.policy_key
+      ? getPolicyRoute(entry.policy_key, shouldHideInternalRuleIdentity(entry) ? undefined : entry.rule_id)
+      : undefined;
     const hasRuleName = !!entry.rule_name && entry.rule_name !== '—';
-    const ruleLabel = hasRuleName ? (entry.rule_id ? `${entry.rule_name}（${entry.rule_id}）` : entry.rule_name!) : entry.rule_id || '—';
+    const ruleLabel = formatRuleLabel(entry, tAuth, disposalLang, { translateIntent: tIntent, translateRecipient: tRecipient });
     const suffix = options?.idSuffix ? `-${options.idSuffix}` : '';
     return (
       <>
@@ -893,7 +921,7 @@ export function AnalysisSection({
                                       <div key={`${group.policyKey}-${group.entry.rule_id ?? groupIndex}`} className="flex items-start justify-between gap-2 text-xs">
                                         <span className="min-w-0 break-all text-muted-foreground">
                                           {t('recipientGroupLine', { recipients: group.recipients.join('、'), count: group.recipients.length })}
-                                          {group.entry.rule_name && group.entry.rule_name !== '—' && <span className="ml-1 text-foreground">「{group.entry.rule_name}」</span>}
+                                          {group.entry.rule_name && group.entry.rule_name !== '—' && <span className="ml-1 text-foreground">「{formatRuleLabel(group.entry, tAuth, disposalLang, { includeRuleId: false, translateIntent: tIntent, translateRecipient: tRecipient })}」</span>}
                                         </span>
                                         {group.entry.action && (
                                           <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium', getActionColor(group.entry.action))}>
@@ -989,7 +1017,6 @@ export function AnalysisSection({
                 const expanded = expandedBasisRows.has(groupIndex);
                 const masked = maskModule(group.entry.policy_key);
                 const meta = group.entry.policy_key ? getPolicyMeta(group.entry.policy_key) : undefined;
-                const hasRuleName = !!group.entry.rule_name && group.entry.rule_name !== '—';
                 const moduleLabel = masked
                   ? tFeatures('platformPolicyModule')
                   : group.entry.policy_key
@@ -997,9 +1024,7 @@ export function AnalysisSection({
                     : '—';
                 const ruleLabel = masked
                   ? tFeatures('platformPolicyRuleName')
-                  : hasRuleName
-                    ? group.entry.rule_name!
-                    : group.entry.rule_id || '—';
+                  : formatRuleLabel(group.entry, tAuth, disposalLang, { includeRuleId: false, translateIntent: tIntent, translateRecipient: tRecipient });
                 const detailId = `analysis-disposal-basis-${groupIndex}`;
                 return (
                   <div key={`${group.policyKey}-${group.entry.rule_id ?? groupIndex}-${group.entry.action ?? ''}`}>
@@ -1064,7 +1089,7 @@ export function AnalysisSection({
             {displayHitModules.map((m, i) => {
               const masked = maskModule(m.policy_key);
               const meta = m.policy_key ? getPolicyMeta(m.policy_key) : undefined;
-              const ruleLabel = m.rule_name ? (m.rule_id ? `${m.rule_name}（${m.rule_id}）` : m.rule_name) : m.rule_id || '—';
+              const ruleLabel = formatRuleLabel(m, tAuth, disposalLang, { translateIntent: tIntent, translateRecipient: tRecipient });
               // §7.10.3：字段缺席/null = 无归属信息（连接/MAIL 阶段或老数据）→ 不打徽标；
               // [] = 确知未生效。两者不可混为一谈。用 Array.isArray 判定，
               // 后端把三态编码成「缺席 / [] / [...]」（*[]string + omitempty）。
@@ -1078,7 +1103,7 @@ export function AnalysisSection({
                         —— 与主基据块不展示色点的口径一致。 */}
                     {!masked && <span data-testid="analysis-hit-module-stage-dot" className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getStageColor(meta?.stage ?? 0))} />}
                     <span className="font-medium">{masked ? tFeatures('platformPolicyModule') : m.policy_key ? getModuleName(m.policy_key, disposalLang) || '—' : '—'}</span>
-                    <span className="min-w-0 truncate text-muted-foreground">{masked ? tFeatures('platformPolicyRuleName') : ruleLabel}</span>
+                    <span data-testid="analysis-hit-module-rule-label" className="min-w-0 truncate text-muted-foreground">{masked ? tFeatures('platformPolicyRuleName') : ruleLabel}</span>
                     {m.action && <span className={cn('ml-auto rounded px-2 py-0.5 font-medium', getActionColor(m.action))}>{getActionLabel(m.action, disposalLang)}</span>}
                   </div>
                   <p className="mt-1.5 whitespace-pre-line leading-relaxed text-muted-foreground">{masked ? tFeatures('platformPolicyHitDetail') : formatHitDetail(m, disposalLang) || '—'}</p>
@@ -1130,26 +1155,61 @@ export function AnalysisSection({
               {t('noEvents')}
             </p>
           ) : (
-            <div className="relative pl-6 border-l-2 border-gray-200 dark:border-gray-700 space-y-4" data-testid="analysis-timeline-body">
-              <div className="relative -ml-[25px]">
-                <div className="absolute left-0 flex h-4 w-4 items-center justify-center rounded-full bg-green-500">
-                  <CheckCircle2 className="h-3 w-3 text-white" />
+            <div className="space-y-3" data-testid="analysis-timeline-body">
+              <div className="relative grid grid-cols-[1.75rem_minmax(0,1fr)] gap-3">
+                <div className="relative flex justify-center">
+                  <span
+                    aria-hidden="true"
+                    data-testid="analysis-timeline-start-connector"
+                    className="absolute left-1/2 top-3 -bottom-3 w-px -translate-x-1/2 bg-border"
+                  />
+                  <div
+                    data-testid="analysis-timeline-start-node"
+                    className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-emerald-500 bg-background text-emerald-600 shadow-sm dark:text-emerald-400"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                  </div>
                 </div>
-                <div className="ml-6 text-xs text-muted-foreground">
-                  {t('detectionComplete')} {formatTimestamp(detail.processed_at || detail.received_at) || detail.processed_at || detail.received_at}
+                <div
+                  data-testid="analysis-timeline-start-card"
+                  className="min-w-0 rounded-lg border border-emerald-200 bg-emerald-50/50 px-3 py-2 dark:border-emerald-900 dark:bg-emerald-950/20"
+                >
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <span className="text-sm font-medium text-emerald-800 dark:text-emerald-300">{t('detectionComplete')}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatTimestamp(detail.processed_at || detail.received_at) || detail.processed_at || detail.received_at}
+                    </span>
+                  </div>
                 </div>
               </div>
-              {sortedEvents.map((ev) => {
+              {sortedEvents.map((ev, eventIndex) => {
                 const eventIdentity = ev.projection_event_id ?? String(ev.id);
                 const isOpen = expandedEvents.has(eventIdentity);
                 // 优化三：语义化圆点 — 颜色和图标根据 event_type/event_result 派生。
                 const { bg: dotBg, Icon: DotIcon } = getEventDotInfo(ev);
                 return (
-                  <div key={eventIdentity} className="relative -ml-[25px]">
-                    <div className={cn('absolute left-0 flex h-4 w-4 items-center justify-center rounded-full', dotBg)}>
-                      <DotIcon className="h-2.5 w-2.5 text-white" />
+                  <div key={eventIdentity} className="relative grid grid-cols-[1.75rem_minmax(0,1fr)] gap-3">
+                    <div className="relative flex justify-center pt-3">
+                      <span
+                        aria-hidden="true"
+                        data-testid={`analysis-timeline-event-${eventIdentity}-connector-in`}
+                        className="absolute -top-3 left-1/2 h-8 w-px -translate-x-1/2 bg-border"
+                      />
+                      {eventIndex < sortedEvents.length - 1 && (
+                        <span
+                          aria-hidden="true"
+                          data-testid={`analysis-timeline-event-${eventIdentity}-connector-out`}
+                          className="absolute left-1/2 top-5 -bottom-3 w-px -translate-x-1/2 bg-border"
+                        />
+                      )}
+                      <div
+                        data-testid={`analysis-timeline-event-${eventIdentity}-node`}
+                        className={cn('relative z-10 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-background', dotBg)}
+                      >
+                        <DotIcon className="h-2.5 w-2.5 text-white" />
+                      </div>
                     </div>
-                    <InteractiveSurface asChild variant="row" className="ml-6 rounded-lg border bg-muted/30 p-3 data-[hovered=true]:border-foreground/20 data-[hovered=true]:bg-muted/50">
+                    <InteractiveSurface asChild variant="row" className="min-w-0 rounded-lg border bg-card p-3 shadow-sm data-[hovered=true]:border-foreground/20 data-[hovered=true]:bg-muted/50">
                       <div
                         role="button"
                         tabIndex={0}
@@ -1163,17 +1223,17 @@ export function AnalysisSection({
                           }
                         }}
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span className="shrink-0 text-xs text-muted-foreground">{formatTimestamp(ev.event_time) || ev.event_time}</span>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0 space-y-1">
                             {/* 一行摘要 = 操作类型（由 event_source 决定），与详情区
                                 「操作类型」栏同一函数，口径一致。 */}
-                            <span className="truncate text-sm font-medium">
-                              {getOperationTypeLabel(ev.event_source, ev.event_type, t)}
-                              {ev.recipient ? ` (${ev.recipient})` : ''}
-                            </span>
+                            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                              <span className="text-sm font-medium">{getOperationTypeLabel(ev.event_source, ev.event_type, t)}</span>
+                              <span className="text-xs text-muted-foreground">{formatTimestamp(ev.event_time) || ev.event_time}</span>
+                            </div>
+                            {ev.recipient && <span className="block break-all text-xs text-muted-foreground">{ev.recipient}</span>}
                           </div>
-                          <div className="flex shrink-0 items-center gap-2">
+                          <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto">
                             {/* R3：行头 Badge 与详情「执行结果」栏必须同一函数 */}
                             <Badge variant="outline" className="text-xs">
                               {getEventResultLabel(ev.event_result || ev.correlation_status, ev.event_source, t)}

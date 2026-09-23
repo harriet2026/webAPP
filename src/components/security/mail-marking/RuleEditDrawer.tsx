@@ -303,7 +303,7 @@ export function RuleEditDrawer({ open, onOpenChange, direction, rule, nextPriori
               <RadioOption id="mark-style-blue" value="blue_tag" label={t('styleBlueTag')} />
               <RadioOption id="mark-style-orange" value="orange_warning" label={t('styleOrangeWarning')} />
               <RadioOption id="mark-style-plain" value="plain_text" label={t('stylePlainText')} />
-              <RadioOption id="mark-style-custom" value="custom" label={t('styleCustom')} />
+              <RadioOption id="mark-style-custom" value="custom" label={t('styleCustom')} testId="mail-marking-mark-style-custom" />
             </RadioGroup>
 
             {mark.style === 'custom' && (
@@ -463,8 +463,8 @@ function FieldLabel({ label, tip, required, top }: { label: string; tip?: string
   )
 }
 
-function RadioOption({ id, value, label }: { id: string; value: string; label: string }) {
-  return <label htmlFor={id} className="flex cursor-pointer items-center gap-2 text-sm"><RadioGroupItem id={id} value={value} />{label}</label>
+function RadioOption({ id, value, label, testId }: { id: string; value: string; label: string; testId?: string }) {
+  return <label htmlFor={id} className="flex cursor-pointer items-center gap-2 text-sm" data-testid={testId}><RadioGroupItem id={id} value={value} />{label}</label>
 }
 
 function ScopePicker({ placeholder, options, selected, onChange, testId }: {

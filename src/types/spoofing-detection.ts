@@ -2,6 +2,7 @@
 // confidence_threshold is 0-100 (UI scale); detection-log confidence is 0-1.
 
 import type { PolicyAction } from '@/types/policy-action';
+import type { InvestigationTask } from '@/types/investigation';
 
 export type SpoofMatchType = 'exact' | 'wildcard' | 'regex';
 export type SpoofDispositionMode = 'observe' | 'standard' | 'strict' | 'custom';
@@ -141,7 +142,7 @@ export interface SpoofingLogListResponse {
 
 export interface SpoofingLogDetail {
   summary: SpoofingLogItem;
-  investigation: Record<string, unknown> | null;
+  investigation: Partial<InvestigationTask> | null;
   config_snapshot?: Record<string, unknown> | null;
 }
 

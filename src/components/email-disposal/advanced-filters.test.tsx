@@ -110,4 +110,38 @@ describe("AdvancedFilters progressive interaction", () => {
 
     expect(screen.getByTestId("disposal-advanced-add-group")).toBeDisabled();
   });
+
+  it("only offers exact and presence operators for similarity clusters", () => {
+    const value: AdvancedFilter = {
+      operator: "AND",
+      groups: [
+        {
+          operator: "AND",
+          conditions: [
+            { field: "similar_cluster", op: "eq", value: "default:42" },
+          ],
+        },
+      ],
+    };
+    render(<AdvancedFilters value={value} onChange={vi.fn()} />);
+    fireEvent.click(screen.getByTestId("disposal-advanced-filter-trigger"));
+    fireEvent.click(screen.getByTestId("disposal-advanced-operator-0-0"));
+
+    for (const op of ["eq", "neq", "is_null", "is_not_null", "in", "not_in"]) {
+      expect(
+        screen.getByTestId(`disposal-advanced-operator-option-${op}`),
+      ).toBeInTheDocument();
+    }
+    for (const op of [
+      "contains",
+      "not_contains",
+      "starts_with",
+      "ends_with",
+      "regex",
+    ]) {
+      expect(
+        screen.queryByTestId(`disposal-advanced-operator-option-${op}`),
+      ).not.toBeInTheDocument();
+    }
+  });
 });

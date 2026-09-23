@@ -81,6 +81,7 @@ export function LinkAttachmentSecurityPage() {
   return (
     <PageShell
       className="min-h-full bg-[#F8F9FB] shadow-[0_0_0_32px_#F8F9FB] dark:bg-background dark:shadow-[0_0_0_32px_var(--background)]"
+      data-testid="link-attachment-page"
     >
       <PageHeader
         icon={Link2}
@@ -146,8 +147,8 @@ export function LinkAttachmentSecurityPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-              <div className="xl:col-span-3">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-5" data-testid="link-attachment-analysis-grid">
+              <div className="xl:col-span-3" data-testid="link-attachment-trend-pane">
                 <div className="sticky top-4">
                   <TrendChartCard
                     trendLink={data?.trend?.link}
@@ -159,7 +160,7 @@ export function LinkAttachmentSecurityPage() {
                   />
                 </div>
               </div>
-              <div className="xl:col-span-2">
+              <div className="xl:col-span-2" data-testid="link-attachment-side-pane">
                 {viewTab === 'link' ? (
                   <LinkSidePanel
                     typeDistribution={data?.link_distributions?.type}

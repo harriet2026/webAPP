@@ -20,7 +20,7 @@ import {
   type DetailTableData,
   type ViewBy,
 } from '@/lib/api/security-overview';
-import { seriesColor, blockRateBgClass } from './constants';
+import { seriesColor, blockRateBgClass, blockRateTier } from './constants';
 
 interface DetailTableProps {
   data?: DetailTableData;
@@ -57,6 +57,17 @@ export const DETAIL_SERIES_ORDER: Partial<Record<ViewBy, readonly string[]>> = {
 // advanced_review（灰名单）/ sideline / greylist / mark_deliver 已从执行动作枚举中移除，安全总览同步过滤。
 const EXCLUDED_ACTION_KEYS = new Set(['advanced_review', 'sideline', 'greylist', 'mark_deliver']);
 const DELIVERY_RESULT_KEY_SET = new Set<string>(DELIVERY_RESULT_KEYS);
+
+function blockRateLevel(rate: number): 'normal' | 'warning' | 'danger' {
+  const tier = blockRateTier(rate);
+  return tier === 'good' ? 'normal' : tier === 'warn' ? 'warning' : 'danger';
+}
+
+function changeLevel(change: number): 'normal' | 'danger' | 'neutral' {
+  if (change > 0) return 'danger';
+  if (change < 0) return 'normal';
+  return 'neutral';
+}
 
 function orderedSeriesKeys(row: Record<string, unknown>, viewBy: ViewBy): string[] {
   const available = Object.keys(row).filter((key) => {
@@ -138,8 +149,8 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
         ) : rows.length === 0 ? (
           <div className="h-[200px] flex items-center justify-center text-muted-foreground">—</div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="overflow-x-auto" data-testid="security-overview-detail-scroll">
+            <Table containerTestId="security-overview-detail-scroll-inner">
               <TableHeader>
                 <TableRow>
                   {/* expand toggle column */}
@@ -150,7 +161,7 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
                     <TableHead data-testid="security-overview-detail-header-total" className="text-right min-w-[90px]">{t('table.total')}</TableHead>
                   )}
                   {dynamicKeys.map((k) => (
-                    <TableHead key={k} data-testid={`security-overview-detail-header-${k}`} title={seriesLabel(k)} className={`text-right cursor-help ${allZeroKeys.has(k) ? 'text-muted-foreground/50' : ''}`}>
+                    <TableHead key={k} data-testid={`security-overview-detail-header-${k}`} title={seriesLabel(k)} data-align="right" data-level={allZeroKeys.has(k) ? 'muted' : 'normal'} className={`text-right cursor-help ${allZeroKeys.has(k) ? 'text-muted-foreground/50' : ''}`}>
                       {seriesLabel(k)}{allZeroKeys.has(k) ? ` (${t('table.allZero')})` : ''}
                     </TableHead>
                   ))}
@@ -180,7 +191,7 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
 
                   return (
                     <React.Fragment key={rowDate}>
-                      <TableRow>
+                      <TableRow data-testid={`security-overview-detail-row-${rowIdx}`}>
                         {/* expand toggle */}
                         <TableCell className="sticky left-0 bg-card z-10 w-8 p-1">
                           <button
@@ -204,17 +215,17 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
                           const val = row[k];
                           const isZero = val === 0 || val === '0';
                           return (
-                            <TableCell key={k} className={`text-right tabular-nums ${isZero ? 'text-muted-foreground/40' : ''}`}>
+                            <TableCell key={k} data-testid={`security-overview-detail-cell-${rowIdx}-${k}`} data-align="right" data-level={isZero ? 'muted' : 'normal'} className={`text-right tabular-nums ${isZero ? 'text-muted-foreground/40' : ''}`}>
                               {typeof val === 'number' ? val.toLocaleString() : val}
                             </TableCell>
                           );
                         })}
                         {/* summary cells (GT-11934) */}
                         {hasBlockRateColumn && (
-                          <TableCell className="text-right tabular-nums">
+                          <TableCell data-testid={`security-overview-detail-block-rate-${rowIdx}`} data-align="right" className="text-right tabular-nums">
                             {blockRate !== undefined ? (
                               <span className="inline-flex items-center gap-1.5 justify-end">
-                                <span className={`inline-block h-2 w-2 rounded-full ${blockRateBgClass(blockRate)}`} />
+                                <span className={`inline-block h-2 w-2 rounded-full ${blockRateBgClass(blockRate)}`} data-level={blockRateLevel(blockRate)} />
                                 {blockRate.toFixed(1)}%
                               </span>
                             ) : (
@@ -223,9 +234,9 @@ export function DetailTable({ data, isLoading, viewBy }: DetailTableProps) {
                           </TableCell>
                         )}
                         {hasChangeColumn && (
-                          <TableCell className="text-right tabular-nums sticky right-0 bg-card z-10">
+                          <TableCell data-testid={`security-overview-detail-change-${rowIdx}`} data-align="right" className="text-right tabular-nums sticky right-0 bg-card z-10">
                             {changePct !== undefined ? (
-                              <span className={changePct > 0 ? 'text-destructive' : changePct < 0 ? 'text-emerald-600' : 'text-muted-foreground'}>
+                              <span className={changePct > 0 ? 'text-destructive' : changePct < 0 ? 'text-emerald-600' : 'text-muted-foreground'} data-level={changeLevel(changePct)}>
                                 {changePct > 0 ? '+' : ''}{changePct.toFixed(1)}%
                               </span>
                             ) : (

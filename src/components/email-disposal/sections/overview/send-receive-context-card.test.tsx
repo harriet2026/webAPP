@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { NextIntlClientProvider } from 'next-intl';
 import zh from '@/../messages/zh.json';
-import type { MailLogDetail } from '@/types/email-disposal-detail';
+import type { MailChildEvent, MailLogDetail } from '@/types/email-disposal-detail';
 import { SendReceiveContextCard } from './send-receive-context-card';
 
 // Real zh messages (not an identity mock) -- assertions read actual rendered
@@ -98,6 +98,20 @@ function renderCard(detail: MailLogDetail, overrides: Partial<React.ComponentPro
   ));
 }
 
+function deliveryEvent(overrides: Partial<MailChildEvent> = {}): MailChildEvent {
+  return {
+    id: 1,
+    event_source: 'postfix',
+    event_type: 'delivery',
+    event_result: 'bounced',
+    queue_id: 'QUEUE-1',
+    recipient: 'victim@company.com',
+    event_time: '2026-09-08T02:03:04Z',
+    correlation_status: 'matched',
+    ...overrides,
+  };
+}
+
 describe('SendReceiveContextCard', () => {
   it('GT-12954: shows immutable original and recipient delivery-copy subjects separately', () => {
     renderCard(baseDetail({
@@ -136,6 +150,18 @@ describe('SendReceiveContextCard', () => {
     expect(senderRow.textContent).toContain('上海');
   });
 
+  it('GT-13610: localizes a canonical GeoIP country name for the active locale', () => {
+    renderCard(baseDetail({ geo_region: 'DE', geo_region_name: 'Germany', geo_city: '' }));
+    const senderRow = screen.getByTestId('email-disposal-overview-context-sender');
+    expect(senderRow).toHaveTextContent('德国');
+    expect(senderRow).not.toHaveTextContent('Germany');
+  });
+
+  it('GT-13610: preserves a custom GeoIP region label instead of replacing it with the country', () => {
+    renderCard(baseDetail({ geo_region: 'CN', geo_region_name: '总部机房', geo_city: '' }));
+    expect(screen.getByTestId('email-disposal-overview-context-sender')).toHaveTextContent('总部机房');
+  });
+
   // 状态文案取自组件实际使用的那棵 i18n 子树（emailDisposal.detail.overview.
   // recipientStatus.status.*，与 RecipientStatus 表格共用同一套 key）。早先这里
   // 硬编码了 '已投递'/'已隔离'——那是 investigations.*/logs.* 命名空间的措辞，
@@ -148,6 +174,63 @@ describe('SendReceiveContextCard', () => {
     const row = screen.getByTestId('email-disposal-overview-context-recipient');
     expect(row.textContent).toContain('victim@company.com');
     expect(row.textContent).toContain(STATUS.quarantined);
+  });
+
+  it('GT-13113: does not recommend redelivery when the live original probe says it is unavailable', () => {
+    renderCard(baseDetail({
+      redeliver_available: false,
+      redeliver_unavailable_reason: 'original_expired',
+      recipient_dispositions: [
+        { recipient: 'victim@company.com', final_action: 'accept', status: 'delivery_failed' },
+      ],
+    }));
+
+    const warning = screen.getByTestId('email-disposal-overview-context-delivery-failed');
+    expect(warning).toHaveTextContent('原文未保留或已超保留期，无法重新投递');
+    expect(warning).not.toHaveTextContent('可使用「重新投递」操作恢复投递');
+  });
+
+  it('GT-13113: keeps the recovery guidance when the retained original is readable', () => {
+    renderCard(baseDetail({
+      redeliver_available: true,
+      recipient_dispositions: [
+        { recipient: 'victim@company.com', final_action: 'accept', status: 'delivery_failed' },
+      ],
+    }));
+
+    expect(screen.getByTestId('email-disposal-overview-context-delivery-failed'))
+      .toHaveTextContent('可使用「重新投递」操作恢复投递');
+  });
+
+  it('GT-13623: shows the latest downstream failure detail for a single recipient', () => {
+    renderCard(baseDetail({
+      recipient_dispositions: [
+        { recipient: 'victim@company.com', final_action: 'accept', status: 'delivery_failed' },
+      ],
+    }), {
+      events: [
+        deliveryEvent({ id: 1, event_result: 'deferred', dsn: '4.2.0 mailbox busy', event_time: '2026-09-08T02:00:00Z' }),
+        deliveryEvent({ id: 2, event_result: 'bounced', dsn: '5.2.2 mailbox full', event_time: '2026-09-08T02:03:04Z' }),
+      ],
+    });
+
+    const detail = screen.getByTestId('email-disposal-delivery-detail-victim@company.com');
+    expect(detail).toHaveTextContent('投递时间');
+    expect(detail).toHaveTextContent('2026-09-08T02:03:04Z');
+    expect(detail).toHaveTextContent('错误信息');
+    expect(detail).toHaveTextContent('5.2.2 mailbox full');
+    expect(detail).not.toHaveTextContent('4.2.0 mailbox busy');
+  });
+
+  it('GT-13623: explains when no per-recipient delivery event was collected', () => {
+    renderCard(baseDetail({
+      recipient_dispositions: [
+        { recipient: 'victim@company.com', final_action: 'accept', status: 'delivery_failed' },
+      ],
+    }), { events: [] });
+
+    expect(screen.getByTestId('email-disposal-delivery-detail-victim@company.com'))
+      .toHaveTextContent('暂无投递明细：网关尚未采集到该收件人的下游投递事件');
   });
 
   it('renders multi-recipient status distribution and RecipientStatus table (B2/B3)', () => {

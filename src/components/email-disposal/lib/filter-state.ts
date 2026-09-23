@@ -1,5 +1,6 @@
 import type { AICondition, DisposalQuickFilter } from "@/types/email-disposal";
 import type { AdvancedFilter } from "@/types/log";
+import { groupSelectedDisposalModules } from "./disposal-basis-config";
 
 const VALUELESS_OPERATORS = new Set(["is_null", "is_not_null"]);
 
@@ -82,10 +83,19 @@ export function countQuickFilterConditions(quick: DisposalQuickFilter): number {
   count += statuses.filter(Boolean).length;
   count += resolveExecutionActions(quick).filter(Boolean).length;
   count += (quick.emailTypes ?? []).filter(Boolean).length;
-  count += (quick.disposalPolicyKeys ?? []).filter(Boolean).length;
+  count += groupSelectedDisposalModules(quick.disposalPolicyKeys ?? []).length;
   count += (quick.disposalRuleIds ?? []).filter(Boolean).length;
 
   return count;
+}
+
+export function removeQuickFilterArraySelection(
+  current: readonly string[],
+  encodedValues: string,
+): string[] | undefined {
+  const valuesToRemove = new Set(encodedValues.split(",").filter(Boolean));
+  const next = current.filter((value) => !valuesToRemove.has(value));
+  return next.length > 0 ? next : undefined;
 }
 
 export function countAdvancedFilterConditions(

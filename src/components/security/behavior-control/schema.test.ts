@@ -44,6 +44,28 @@ describe('behaviorControlSchema', () => {
     expect(systemSchema.safeParse({ ...base, priority: 9999 }).success).toBe(true);
     expect(systemSchema.safeParse({ ...base, priority: 10000 }).success).toBe(false);
   });
+  it('returns a stable business error when priority is cleared', () => {
+    const result = behaviorControlSchema.safeParse({ ...base, priority: Number.NaN });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toContainEqual(expect.objectContaining({
+        path: ['priority'],
+        message: 'priorityRequired',
+      }));
+    }
+  });
+  it('returns a stable business error when priority is not an integer', () => {
+    const result = behaviorControlSchema.safeParse({ ...base, priority: 1.5 });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toContainEqual(expect.objectContaining({
+        path: ['priority'],
+        message: 'priorityInteger',
+      }));
+    }
+  });
   it('rejects a condition threshold <= 0', () => {
     expect(behaviorControlSchema.safeParse({ ...base, conditions: [{ dim: 'ip_count', threshold: 0 }] }).success).toBe(false);
   });
@@ -55,10 +77,37 @@ describe('behaviorControlSchema', () => {
   });
   it('senderIp single accepts ip and cidr', () => {
     expect(behaviorControlSchema.safeParse({ ...base, object_config: { type: 'senderIp', sub_type: 'single', value: '1.2.3.0/24' } }).success).toBe(true);
+    expect(behaviorControlSchema.safeParse({ ...base, object_config: { type: 'senderIp', sub_type: 'single', value: '0.0.0.0/0' } }).success).toBe(true);
+    expect(behaviorControlSchema.safeParse({ ...base, object_config: { type: 'senderIp', sub_type: 'single', value: '255.255.255.255/32' } }).success).toBe(true);
     expect(behaviorControlSchema.safeParse({ ...base, object_config: { type: 'senderIp', sub_type: 'single', value: 'x' } }).success).toBe(false);
   });
-  it('rejects the unsupported organization sender subtype', () => {
-    expect(behaviorControlSchema.safeParse({ ...base, object_config: { type: 'sender', sub_type: 'organization', value: 'engineering' } }).success).toBe(false);
+  it('organization requires a stable department path', () => {
+    expect(behaviorControlSchema.safeParse({ ...base, object_config: { type: 'sender', sub_type: 'organization', value: '总部 / 研发部' } }).success).toBe(true);
+    const empty = behaviorControlSchema.safeParse({ ...base, object_config: { type: 'sender', sub_type: 'organization', value: '' } });
+    expect(empty.success).toBe(false);
+    if (!empty.success) expect(empty.error.issues.some((i) => i.message === 'orgRequired')).toBe(true);
+  });
+  it.each([
+    '10.0.0.999',
+    '10.0.0.999/24',
+    '10.0.0.1/33',
+    '10.0.0.1/64',
+    '999.999.999.999',
+    '01.2.3.4',
+    '1.2.3.04/24',
+  ])('rejects invalid IPv4/CIDR value %s with invalidIp', (value) => {
+    const result = behaviorControlSchema.safeParse({
+      ...base,
+      object_config: { type: 'senderIp', sub_type: 'single', value },
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toContainEqual(expect.objectContaining({
+        path: ['object_config', 'value'],
+        message: 'invalidIp',
+      }));
+    }
   });
   it('requires between 1 and 4 conditions', () => {
     const mk = (n: number) => Array.from({ length: n }, () => ({ dim: 'mail_count' as const, threshold: 10 }));

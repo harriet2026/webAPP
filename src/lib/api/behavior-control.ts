@@ -14,6 +14,34 @@ import { toRFC3339 } from '@/lib/format-time';
 import { fetchAllPages } from './pagination';
 
 export const BEHAVIOR_CONTROL_PAGE = 'behavior_control';
+const BEIJING_UTC_OFFSET_HOURS = 8;
+
+// The behavior-control expiry control is date-only. Product semantics define
+// that date as inclusive in the business timezone (Asia/Shanghai), so a chosen
+// day must remain effective through 23:59:59.999 UTC+8. Non-date values retain
+// the generic RFC3339 conversion for compatibility with programmatic callers.
+export function toBehaviorControlValidUntilRFC3339(
+  value: string | null | undefined,
+): string | undefined {
+  if (!value) return undefined;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return toRFC3339(value);
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const calendarDay = new Date(Date.UTC(year, month - 1, day));
+  if (
+    calendarDay.getUTCFullYear() !== year
+    || calendarDay.getUTCMonth() !== month - 1
+    || calendarDay.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+
+  const nextBusinessDayStart = Date.UTC(year, month - 1, day + 1) - BEIJING_UTC_OFFSET_HOURS * 60 * 60 * 1000;
+  return new Date(nextBusinessDayStart - 1).toISOString();
+}
 
 // PostgreSQL JSONB fields are decoded by the unified-rules list endpoint.
 // Older API snapshots and mocks still return their serialized representation.
@@ -77,11 +105,13 @@ export function buildConditionTreeFromForm(
     case 'sender':
       if (o.sub_type === 'individual')
         return { type: 'condition', field: 'sender', operator: 'eq', value: o.value! };
-      return { type: 'condition', field: 'rcpttags', operator: 'hasTag', value: `grp:${o.value!}` };
+      if (o.sub_type === 'organization')
+        return { type: 'condition', field: 'sender_dept_path', operator: 'within', value: o.value! };
+      return { type: 'condition', field: 'sender_group', map_key: `grp:${o.value!}`, operator: 'eq', value: 'true' };
     case 'senderIp':
       if (o.sub_type === 'single')
         return { type: 'condition', field: 'client_ip', operator: 'eq', value: o.value! };
-      return { type: 'condition', field: 'rcpttags', operator: 'hasTag', value: `grp:${o.value!}` };
+      return { type: 'condition', field: 'sender_ip_group', map_key: `grp:${o.value!}`, operator: 'eq', value: 'true' };
     case 'senderDomain':
       return { type: 'condition', field: 'senderdomain', operator: 'eq', value: o.value!.toLowerCase() };
   }
@@ -116,9 +146,9 @@ export function formToCreateBody(form: BehaviorControlFormData) {
     priority: form.priority,
     is_active: form.is_active,
     valid_from: toRFC3339(form.valid_from) ?? null,
-    valid_until: toRFC3339(form.valid_until) ?? null,
+    valid_until: toBehaviorControlValidUntilRFC3339(form.valid_until) ?? null,
     page: BEHAVIOR_CONTROL_PAGE,
-    stage: 'rcpt',
+    stage: 'data',
     rule_class: 'action',
     action: PRODUCT_TO_BACKEND[form.action],
     tags: [],
@@ -163,8 +193,9 @@ export function resolveBehaviorControlRule(rawRule: BehaviorControlRuleWire): Be
 export async function listBehaviorControlRules(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<{ items: BehaviorControlRuleWire[] }> {
+  // List legacy RCPT and current DATA rules together during upgrades.
   const items = await fetchAllPages<BehaviorControlRuleWire>(
-    '/unified-rules?rule_page=behavior_control&rule_class=action&stage=rcpt',
+    '/unified-rules?rule_page=behavior_control&rule_class=action',
     requestFn,
   );
   return { items };
@@ -282,13 +313,11 @@ export async function deleteRecipientCheckConfig(
 
 export { BACKEND_TO_PRODUCT };
 
-// GT-12157：收信人检测的目录可用性。
-// 注意语义：存在性验证查的是本地通讯录（contact_book），不是实时打 LDAP，
-// 所以这里的「可用」指**同步是否健康、数据是否新鲜**——同步一直失败时通讯录
-// 会越来越偏离上游，存在性结论随之不可信。
+// 收信人存在性验证使用本地通讯录；有有效联系人即可校验。
+// 同步时间和状态仅作展示，不影响已有通讯录的可用性。
 export interface RecipientDirectoryStatus {
   available: boolean;
-  /** available=false 时的原因：no_source | never_synced | last_sync_failed | stale */
+  /** available=false 时的原因：empty_directory（没有有效联系人） */
   reason?: string;
   source_count: number;
   contact_count: number;

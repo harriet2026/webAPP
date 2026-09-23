@@ -32,7 +32,7 @@ import { cn } from '@/lib/utils';
 // TestProtocolCheckSubkeysMatchFrontend（它直接解析本文件的 keys）。
 const PROTOCOL_GROUPS: { key: 'spf' | 'dkim' | 'dmarc' | 'ptr'; labelKey: string; keys: string[] }[] = [
   { key: 'spf', labelKey: 'protocolChecks.spf', keys: ['fail', 'softfail', 'none', 'temperror', 'permerror'] },
-  { key: 'dkim', labelKey: 'protocolChecks.dkim', keys: ['fail', 'neutral', 'partial', 'none', 'temperror'] },
+  { key: 'dkim', labelKey: 'protocolChecks.dkim', keys: ['fail', 'neutral', 'partial', 'none', 'temperror', 'permerror'] },
   { key: 'dmarc', labelKey: 'protocolChecks.dmarc', keys: ['reject', 'quarantine', 'none', 'no_record', 'query_fail'] },
   { key: 'ptr', labelKey: 'protocolChecks.ptr', keys: ['noptr', 'nomatch', 'ehlo_mismatch'] },
 ];
@@ -47,18 +47,29 @@ interface ProtocolChecksSectionProps {
   config: ProtocolChecksConfig;
   onChange: (config: ProtocolChecksConfig) => void;
   disabled?: boolean;
-  ptrReadonly?: boolean;
   /** Estimated count of mail that would have been dropped, shown next to the global observe switch (Task 9 wires the real value) */
   wouldDrop?: number;
 }
 
-export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly, wouldDrop = 0 }: ProtocolChecksSectionProps) {
+export function ProtocolChecksSection({ config, onChange, disabled, wouldDrop = 0 }: ProtocolChecksSectionProps) {
   const t = useTranslations('authSpoofing');
   const [open, setOpen] = useState(true);
   const [pendingTemplate, setPendingTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState<'spf' | 'dkim' | 'dmarc' | 'ptr'>('spf');
 
   const lockNonCustom = disabled || config.template !== 'custom';
+
+  const handleObserveChange = (observe_mode: boolean) => {
+    const next = { ...config, observe_mode };
+    // Saved configs carry per-item flags. The shared switch must update them
+    // too, otherwise disabling observation after a reload keeps it active.
+    for (const { key } of PROTOCOL_GROUPS) {
+      next[key] = Object.fromEntries(
+        Object.entries(config[key] ?? {}).map(([name, item]) => [name, { ...item, observe_mode }]),
+      );
+    }
+    onChange(next);
+  };
 
   const handleTemplateSelect = (name: Template) => {
     if (name === config.template) return;
@@ -131,7 +142,8 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={config.observe_mode ?? false}
-                      onCheckedChange={(observe_mode) => onChange({ ...config, observe_mode })}
+                      onCheckedChange={handleObserveChange}
+                      data-testid="auth-protocol-observe-switch"
                       disabled={disabled}
                     />
                     <span className="text-sm font-medium">{t('globalObserve')}</span>
@@ -151,7 +163,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
               <TabsList>
                 {PROTOCOL_GROUPS.map((g) => (
-                  <TabsTrigger key={g.key} value={g.key}>
+                  <TabsTrigger key={g.key} value={g.key} data-testid={`auth-protocol-tab-${g.key}`}>
                     {t(g.labelKey as Parameters<typeof t>[0])}
                   </TabsTrigger>
                 ))}
@@ -166,11 +178,6 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                         {t('spfDropAlert')}
                       </div>
                     )}
-                    {g.key === 'ptr' && ptrReadonly && (
-                      <div className="text-xs text-muted-foreground bg-muted/50 rounded p-2">
-                        {t('protocolChecks.ptrReadonlyNotice')}
-                      </div>
-                    )}
                     {g.keys.map((subkey) => {
                       // Always render every defined subkey row; if the loaded config
                       // omits it (e.g. an older backend payload), fall back to a default
@@ -178,7 +185,7 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                       const item: CheckItem = config[g.key]?.[subkey] ?? { enabled: true, action: 'proceed', observe_mode: false };
                       const label = t(`protocolChecks.${g.key}_${subkey}` as Parameters<typeof t>[0]);
                       const desc = t(`protocolChecks.${g.key}_${subkey}Desc` as Parameters<typeof t>[0]);
-                      const isDisabled = lockNonCustom || (g.key === 'ptr' && ptrReadonly);
+                      const isDisabled = lockNonCustom;
                       const actions = g.key === 'dmarc' ? DMARC_ACTIONS : PROTOCOL_ACTIONS;
                       const showTagPanel = item.enabled && item.action === 'proceed';
                       return (
@@ -237,12 +244,6 @@ export function ProtocolChecksSection({ config, onChange, disabled, ptrReadonly,
                               </SelectContent>
                             </Select>
                           </div>
-                          {/* 存量配置提示：库里 {enabled:false, action:"accept"} 的行含义是
-                              「这项检查关着」。新模型没有关闭入口，所以只标注、不自动转换
-                              （后端 GET 也原样返回），并提醒改动动作后无法恢复。 */}
-                          {!item.enabled && (
-                            <p className="text-xs text-muted-foreground">{t('legacyDisabledHint')}</p>
-                          )}
                           {showTagPanel && (
                             <AuthSpoofingTagPanel
                               value={item}

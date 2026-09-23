@@ -115,12 +115,6 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
         </div>
       </div>
 
-      {/* 存量配置提示：库里 {enabled:false, action:"accept"} 的行含义是「这项检查
-          关着」。新模型没有关闭入口，所以只标注、不自动转换（后端 GET 也原样返回）。 */}
-      {!item.enabled && (
-        <p className="pl-12 text-xs text-muted-foreground">{t('legacyDisabledHint')}</p>
-      )}
-
       {item.enabled && (
         <>
           <div className="flex items-center gap-3 pl-12">

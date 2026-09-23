@@ -18,36 +18,25 @@ import { phishingQueryKeys } from './phishing-query-keys';
 import { DisplayStatusBadges } from '@/components/email-disposal/components/recipient-status-badges';
 import type { DetectionLogItem } from '@/types/phishing-detection';
 import { formatDate } from '@/lib/utils';
+import { urlVerdictClass } from '@/lib/url-verdict';
 
 function UrlSummaryCell({ item }: { item: DetectionLogItem }) {
   const t = useTranslations('phishingDetection');
   const summary = item.url_summary;
-  if (!summary || summary.total === 0) return <span className="text-muted-foreground">—</span>;
-  return (
-    <div className="flex items-center gap-1.5 whitespace-nowrap">
-      <span className="tabular-nums text-sm font-medium">
-        {summary.total} {t('table.urlLinks')}
-      </span>
-      {summary.phishing > 0 ? (
-        <span className="flex items-center gap-1 text-destructive" title={t('table.urlPhishing')}>
-          <span className="inline-block size-1.5 rounded-full bg-destructive" />
-          <span className="tabular-nums text-sm">{summary.phishing}</span>
-        </span>
-      ) : null}
-      {summary.suspicious > 0 ? (
-        <span className="flex items-center gap-1 text-warning-foreground dark:text-warning" title={t('table.urlSuspicious')}>
-          <span className="inline-block size-1.5 rounded-full bg-warning" />
-          <span className="tabular-nums text-sm">{summary.suspicious}</span>
-        </span>
-      ) : null}
-      {summary.phishing === 0 && summary.suspicious === 0 && summary.normal > 0 ? (
-        <span className="flex items-center gap-1 text-success-foreground dark:text-success" title={t('table.urlNormal')}>
-          <span className="inline-block size-1.5 rounded-full bg-success" />
-          <span className="tabular-nums text-sm">{summary.normal}</span>
-        </span>
-      ) : null}
+  if (!summary || summary.total === 0) return <span className="text-muted-foreground">{item.result_truncated ? t('urlValidation.truncated') : '—'}</span>;
+  const buckets = ['phishing', 'malicious', 'suspicious', 'safe', 'needs_review', 'invalid', 'unvalidated'] as const;
+  const complete = summary.version === 2 && !summary.legacy && buckets.every((key) => Number.isInteger(summary[key]) && summary[key]! >= 0)
+    && buckets.reduce((total, key) => total + (summary[key] ?? 0), 0) === summary.total;
+  return <div className="space-y-1">
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="tabular-nums text-sm font-medium">{summary.total} {t('table.urlLinks')}</span>
+      {complete ? buckets.filter((key) => summary[key]! > 0).map((key) => <span key={key} className={`flex items-center gap-1 ${urlVerdictClass[key]}`} title={t(`urlValidation.labels.${key}`)}>
+        <span className="inline-block size-1.5 rounded-full bg-current" />
+        <span className="tabular-nums text-sm">{summary[key]}</span>
+      </span>) : <span className="text-xs text-muted-foreground">{t('urlValidation.legacy')}</span>}
     </div>
-  );
+    {item.result_truncated ? <p className="text-xs text-muted-foreground">{t('urlValidation.truncated')}</p> : null}
+  </div>;
 }
 
 function ExpandedDetail({ id }: { id: string }) {

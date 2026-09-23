@@ -22,6 +22,13 @@ import type { SmtpConfigPayload, SmtpAuthMethod, SmtpEncryption } from '@/types/
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PW_MASK = '••••••••••••';
 
+export function smtpConfigRequestPayload(form: SmtpConfigPayload): SmtpConfigPayload {
+  const payload = { ...form };
+  delete payload.sender_email;
+  if (!form.password) delete payload.password;
+  return payload;
+}
+
 export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const t = useTranslations('alertCenter');
   const { apiRequest } = useApiRequest();
@@ -59,7 +66,7 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
     if (!form || !cfg) return false;
     return form.server !== cfg.server || form.port !== cfg.port || form.encryption !== cfg.encryption
       || form.auth_method !== cfg.auth_method || form.username !== cfg.username
-      || form.sender_email !== cfg.sender_email || form.sender_name !== cfg.sender_name
+      || form.sender_name !== cfg.sender_name
       || form.use_internal_postfix !== cfg.use_internal_postfix
       || form.connect_timeout_seconds !== cfg.connect_timeout_seconds
       || form.send_timeout_seconds !== cfg.send_timeout_seconds
@@ -79,7 +86,6 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
     if (form && !form.use_internal_postfix) {
       if (!form.server.trim()) e.server = t('smtp.err.server');
       if (form.port < 1 || form.port > 65535) e.port = t('smtp.err.port');
-      if (!EMAIL_RE.test(form.sender_email)) e.sender = t('smtp.err.sender');
       if (form.auth_method !== 'none' && !form.username.trim()) e.username = t('smtp.err.username');
       // A password is required only when none is stored server-side AND none is
       // typed. Use the persisted cfg.password_configured (not the transient
@@ -94,8 +100,7 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
 
   const onSave = async (closeAfter: boolean) => {
     if (!form || !validate()) return;
-    const payload: SmtpConfigPayload = { ...form };
-    if (!form.password) delete payload.password;
+    const payload = smtpConfigRequestPayload(form);
     try {
       await put.mutateAsync(payload);
       toast.success(t('smtp.saved'));
@@ -113,8 +118,7 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
       // Test the CURRENT form values (unsaved), not the last-saved config —
       // otherwise editing server/port/auth then clicking Test silently probes
       // the old config (review M7). A blank password is reused server-side.
-      const payload: SmtpConfigPayload = { ...form };
-      if (!form.password) delete payload.password;
+      const payload = smtpConfigRequestPayload(form);
       const r = await testSmtpConfig(testEmail, payload, apiRequest);
       setTestMsg({ ok: r.success, text: r.message });
     } catch (err) {
@@ -201,8 +205,9 @@ export function SmtpConfigDrawer({ open, onOpenChange }: { open: boolean; onOpen
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>{t('smtp.senderEmail')} *</Label>
-                    <Input data-testid="smtp-sender-email-input" value={form.sender_email} onChange={(e) => set('sender_email', e.target.value)} className={errors.sender ? 'border-red-500' : ''} />
+                    <Label>{t('smtp.senderEmail')}</Label>
+                    <Input data-testid="smtp-sender-email-input" value={form.sender_email ?? ''} readOnly disabled />
+                    <p className="text-xs text-muted-foreground">{t('smtp.senderUnifiedHint')}</p>
                   </div>
                   <div className="space-y-2">
                     <Label>{t('smtp.senderName')}</Label>

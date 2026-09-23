@@ -137,7 +137,7 @@ export function ManualScanDialog({ open, onOpenChange, onScanned }: Props) {
               </SelectTrigger>
               <SelectContent>
                 {strategies.map((s) => (
-                  <SelectItem key={s.id} value={String(s.id)}>
+                  <SelectItem key={s.id} value={String(s.id)} data-testid={`manual-scan-strategy-option-${s.id}`}>
                     {s.name}
                   </SelectItem>
                 ))}

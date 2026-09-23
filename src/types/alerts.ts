@@ -136,7 +136,9 @@ export interface SmtpConfig {
   enc_key_ready: boolean;
 }
 
-export interface SmtpConfigPayload extends Omit<SmtpConfig, 'password_configured' | 'password_masked' | 'enc_key_ready'> {
+export interface SmtpConfigPayload extends Omit<SmtpConfig, 'password_configured' | 'password_masked' | 'enc_key_ready' | 'sender_email'> {
+  /** Read-only compatibility field returned by GET; write requests omit it. */
+  sender_email?: string;
   password?: string;
 }
 

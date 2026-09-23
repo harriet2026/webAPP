@@ -611,7 +611,7 @@ export function IPFilterPage({ embedded }: { embedded?: boolean } = {}) {
                 <Plus className="h-4 w-4 mr-1" />
                 {t('ipFilter.createRule')}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} data-testid="ip-filter-import-open">
                 <Upload className="h-4 w-4 mr-1" />
                 {t('ipFilter.import')}
               </Button>

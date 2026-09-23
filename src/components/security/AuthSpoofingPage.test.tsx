@@ -13,6 +13,13 @@ const mocks = vi.hoisted(() => ({
   toastError: vi.fn(),
   apiRequest: vi.fn(),
   effectiveTenantId: 101 as number | null,
+  canSeeRoute: vi.fn(),
+  roleAccess: {
+    status: 'ready' as const,
+    canView: true,
+    canEdit: true,
+    readOnly: false,
+  },
 }));
 
 vi.mock('@/lib/api/auth-spoofing', () => ({
@@ -29,11 +36,19 @@ vi.mock('@/lib/api/client', () => ({
 }));
 
 vi.mock('@/contexts/auth-context', () => ({
-  useAuth: () => ({ isSystemAdmin: true, user: { role: 'system_admin' } }),
+  useAuth: () => ({
+    isSystemAdmin: true,
+    user: { role: 'system_admin' },
+    canSeeRoute: mocks.canSeeRoute,
+  }),
 }));
 
 vi.mock('@/contexts/product-form-context', () => ({
   useProductForm: () => ({ capabilities: { ai: true } }),
+}));
+
+vi.mock('./auth-spoofing/use-auth-spoofing-access', () => ({
+  useAuthSpoofingAccess: () => mocks.roleAccess,
 }));
 
 vi.mock('sonner', () => ({
@@ -52,15 +67,18 @@ vi.mock('./auth-spoofing/FormatChecksSection', () => ({
   FormatChecksSection: ({
     config,
     onChange,
+    disabled,
   }: {
     config: FormatChecksConfig;
     onChange: (config: FormatChecksConfig) => void;
+    disabled?: boolean;
   }) => (
     <div>
       <span data-testid="server-mailfrom-invalid-action">{config.mailfrom_invalid.action}</span>
       <button
         type="button"
         data-testid="make-subject-tag-empty"
+        disabled={disabled}
         onClick={() =>
           onChange({
             ...config,
@@ -78,6 +96,7 @@ vi.mock('./auth-spoofing/FormatChecksSection', () => ({
       <button
         type="button"
         data-testid="make-valid-change"
+        disabled={disabled}
         onClick={() =>
           onChange({
             ...config,
@@ -86,6 +105,25 @@ vi.mock('./auth-spoofing/FormatChecksSection', () => ({
         }
       >
         make valid change
+      </button>
+      <button
+        type="button"
+        data-testid="make-header-name-invalid"
+        disabled={disabled}
+        onClick={() =>
+          onChange({
+            ...config,
+            envelope_header_mismatch: {
+              ...config.envelope_header_mismatch,
+              action: 'proceed',
+              tag_header_enabled: true,
+              tag_header_name: '测试信头Key',
+              tag_header_value: '中文值允许保存',
+            },
+          })
+        }
+      >
+        make header invalid
       </button>
     </div>
   ),
@@ -143,6 +181,54 @@ describe('AuthSpoofingPage save validation', () => {
     mocks.getConfig.mockResolvedValue(initialConfig());
     mocks.getObserveStats.mockResolvedValue({ days: 7, points: [] });
     mocks.putConfig.mockResolvedValue({ ok: true });
+    mocks.canSeeRoute.mockReturnValue(true);
+    Object.assign(mocks.roleAccess, {
+      status: 'ready',
+      canView: true,
+      canEdit: true,
+      readOnly: false,
+    });
+  });
+
+  it('does not request or render configuration without strategy-pipeline view permission', () => {
+    mocks.canSeeRoute.mockReturnValue(false);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh}>
+          <AuthSpoofingPage embedded />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText('无权访问此页面')).toBeInTheDocument();
+    expect(screen.queryByTestId('auth-spoofing-config-content')).not.toBeInTheDocument();
+    expect(mocks.getConfig).not.toHaveBeenCalled();
+  });
+
+  it('keeps an auditor configuration view read-only without attempting a PUT', async () => {
+    Object.assign(mocks.roleAccess, { canView: true, canEdit: false, readOnly: true });
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh}>
+          <AuthSpoofingPage embedded />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByTestId('auth-spoofing-config-content')).toBeInTheDocument();
+    expect(screen.getByTestId('make-valid-change')).toBeDisabled();
+    expect(screen.getByTestId('auth-spoofing-save')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('make-valid-change'));
+    fireEvent.click(screen.getByTestId('auth-spoofing-save'));
+    expect(mocks.putConfig).not.toHaveBeenCalled();
   });
 
   it('shows a frontend error and does not call PUT when an enabled subject tag is empty', async () => {
@@ -163,6 +249,29 @@ describe('AuthSpoofingPage save validation', () => {
     fireEvent.click(save);
 
     expect(mocks.toastError).toHaveBeenCalledWith('已启用的标记方式内容不能为空');
+    expect(mocks.putConfig).not.toHaveBeenCalled();
+  });
+
+  it('explains the header-name constraint and does not call PUT for a Chinese header name', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh}>
+          <AuthSpoofingPage embedded />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(await screen.findByTestId('make-header-name-invalid'));
+    const save = screen.getByTestId('auth-spoofing-save');
+    await waitFor(() => expect(save).not.toBeDisabled());
+    fireEvent.click(save);
+
+    expect(mocks.toastError).toHaveBeenCalledWith(
+      '信头名称仅支持英文字母、数字和连字符，长度不超过64个字符',
+    );
     expect(mocks.putConfig).not.toHaveBeenCalled();
   });
 

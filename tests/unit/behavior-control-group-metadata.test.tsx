@@ -15,12 +15,13 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
 
-const { mockApiRequest } = vi.hoisted(() => ({
+const { mockApiRequest, tenantScope } = vi.hoisted(() => ({
   mockApiRequest: vi.fn(),
+  tenantScope: { id: 17 as number | null },
 }));
 
 vi.mock('@/lib/api/client', () => ({
-  useApiRequest: () => ({ apiRequest: mockApiRequest }),
+  useApiRequest: () => ({ apiRequest: mockApiRequest, effectiveTenantId: tenantScope.id }),
   apiRequest: mockApiRequest,
   ApiError: class ApiError extends Error {},
 }));
@@ -34,6 +35,10 @@ vi.mock('next-intl', () => ({
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+  Link: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => createElement('a', props),
 }));
 
 vi.mock('@/contexts/auth-context', () => ({
@@ -96,7 +101,10 @@ function renderDrawer(
     object_config: { type: 'sender', sub_type: 'group', value: '' },
   },
 ) {
-  mockApiRequest.mockResolvedValue({ items });
+  mockApiRequest.mockImplementation(async (path: string) => {
+    if (path === '/contacts/_departments') return { items: [] };
+    return { items };
+  });
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     createElement(
@@ -165,6 +173,76 @@ describe('BehaviorControlDrawer 群组下拉（GT-12717）', () => {
     expect(screen.getByText('behaviorControl.groupPreview.typeSender')).toBeInTheDocument();
     expect(screen.getByText('a@probe.test')).toBeInTheDocument();
     expect(screen.getByText('b@probe.test')).toBeInTheDocument();
+
+    const footer = screen.getByTestId('behavior-control-group-preview-footer');
+    expect(footer).toHaveClass('mx-0', 'mb-0');
+    expect(footer).not.toHaveClass('-mx-6', '-mb-6');
+    expect(screen.getByTestId('behavior-control-group-preview-close')).toBeVisible();
+  });
+});
+
+describe('BehaviorControlDrawer 组织部门（GT-12170）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    tenantScope.id = 17;
+  });
+
+  it('从当前租户通讯录加载部门，选择后保留稳定完整路径', async () => {
+    mockApiRequest.mockImplementation(async (path: string) => {
+      if (path === '/contacts/_departments') {
+        return { items: [{ path: '总部 / 研发部', name: '研发部', parent_path: '总部', member_count: 2, source_names: ['LDAP'] }] };
+      }
+      return { items: [] };
+    });
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      createElement(
+        QueryClientProvider,
+        { client: qc },
+        createElement(BehaviorControlDrawer, {
+          open: true,
+          onOpenChange: vi.fn(),
+          editing: null,
+          defaults: { object_config: { type: 'sender', sub_type: 'organization', value: '' } },
+        }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    const trigger = await screen.findByTestId('behavior-control-organization');
+    expect(screen.getByTestId('behavior-control-manage-organization')).toHaveAttribute('href', '/organization-contacts');
+    expect(screen.getByTestId('behavior-control-manage-organization')).toHaveAttribute('target', '_blank');
+    await user.click(trigger);
+    await user.click(await screen.findByRole('option', { name: /总部 \/ 研发部/ }));
+
+    expect(trigger).toHaveTextContent('总部 / 研发部');
+    expect(mockApiRequest).toHaveBeenCalledWith('/contacts/_departments');
+  });
+
+  it('切换租户后使用独立缓存并重新加载组织部门', async () => {
+    const loadedTenantScopes: Array<number | null> = [];
+    mockApiRequest.mockImplementation(async (path: string) => {
+      if (path === '/contacts/_departments') {
+        loadedTenantScopes.push(tenantScope.id);
+        return { items: [] };
+      }
+      return { items: [] };
+    });
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const drawer = createElement(BehaviorControlDrawer, {
+      open: true,
+      onOpenChange: vi.fn(),
+      editing: null,
+      defaults: { object_config: { type: 'sender', sub_type: 'organization', value: '' } } as Partial<BehaviorControlFormData>,
+    });
+    const view = render(createElement(QueryClientProvider, { client: qc }, drawer));
+
+    await waitFor(() => expect(loadedTenantScopes).toEqual([17]));
+
+    tenantScope.id = 18;
+    view.rerender(createElement(QueryClientProvider, { client: qc }, drawer));
+
+    await waitFor(() => expect(loadedTenantScopes).toEqual([17, 18]));
   });
 });
 

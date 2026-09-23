@@ -5,7 +5,13 @@ export type ProxysvrCipherProfile = 'default' | 'high' | 'compatible' | '';
 /** 最近一次探测结果，仅探测 API（POST /proxysvr-endpoints/:id/probe）写入。 */
 export type ProxysvrProbeStatus = 'normal' | 'abnormal' | 'unchecked';
 
+export interface ProxysvrCACOverride {
+  enabled: boolean;
+  result: string;
+}
+
 export interface ProxysvrEndpoint {
+  cac_override?: ProxysvrCACOverride;
   id: number;
   name: string;
   host: string;
@@ -32,6 +38,7 @@ export interface ProxysvrEndpoint {
 }
 
 export interface ProxysvrEndpointRequest {
+  cac_override?: ProxysvrCACOverride;
   name: string;
   host: string;
   port: number;

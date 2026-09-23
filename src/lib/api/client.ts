@@ -185,7 +185,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     isMockEnabled() &&
     isMockable(method, path)
   ) {
-    const { status, data } = mockDispatch({
+    const preview = process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_PHISH_ASSESSMENT_PREVIEW === '1' && isDemoSessionEnabled()
+      ? (await import('../../../tests/fixtures/phish-ui-real-data/dispatch')).dispatchPhishAssessmentPreview(method, path)
+      : undefined;
+    const { status, data } = preview ?? mockDispatch({
       method,
       path,
       body: options.body,

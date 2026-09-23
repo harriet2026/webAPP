@@ -1,3 +1,6 @@
+import type { AssessmentResultFields } from './agent-assessment';
+
+// Creation remains restricted to the existing generic-agent capability set.
 export type InvestigationType =
   | 'phish_analysis'
   | 'similarity_search'
@@ -50,7 +53,7 @@ export interface InvestigationRecommendedAction {
   data?: Record<string, unknown>;
 }
 
-export interface InvestigationResult {
+export interface InvestigationResult extends AssessmentResultFields {
   verdict?: string;
   summary?: string;
   evidence?: InvestigationEvidence[];
@@ -61,13 +64,13 @@ export interface InvestigationResult {
 
 export interface InvestigationTask {
   id: string;
-  type: InvestigationType;
+  type: InvestigationType | 'spoof_analysis';
   status: InvestigationStatus;
   trigger_type: string;
   source_type?: string;
   source_id?: string;
   target_type: InvestigationTargetType;
-  target_ids: string[];
+  target_ids: string[] | null;
   prompt?: string;
   summary: string;
   risk_level: InvestigationRiskLevel;

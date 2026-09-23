@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { apiRequest, useApiRequest, type ApiRequestFn, API_BASE } from '@/lib/api/client';
 
 import type {
@@ -98,8 +99,8 @@ export async function testContactSourceNew(
   return requestFn<ContactTestResult>('/contact-sources/_test', { method: 'POST', body: data });
 }
 
-export async function testContactSource(id: number, requestFn: ApiRequestFn = apiRequest): Promise<ContactTestResult> {
-  return requestFn<ContactTestResult>(`/contact-sources/${id}/test`, { method: 'POST' });
+export async function testContactSource(id: number, requestFn: ApiRequestFn = apiRequest, config?: Record<string, unknown>): Promise<ContactTestResult> {
+  return requestFn<ContactTestResult>(`/contact-sources/${id}/test`, { method: 'POST', ...(config ? { body: { config } } : {}) });
 }
 
 // === CSV upload / preview ===
@@ -295,11 +296,21 @@ export function useContacts(params: ContactListParams = {}, enabled = true) {
 
 export function useContactSyncLogs(params: ContactSyncLogListParams = {}, enabled = true) {
   const { apiRequest } = useApiRequest();
-  return useQuery({
+  const queryClient = useQueryClient();
+  const query = useQuery({
     queryKey: syncLogsQueryKey(params),
     queryFn: () => getContactSyncLogs(params, apiRequest),
     enabled,
+    refetchInterval: q => q.state.data?.items.some(log => log.status === 'running') ? 1000 : false,
   });
+  // Tabs stay mounted. A completed asynchronous sync must refresh contacts
+  // and organization selectors, even when the source table missed running.
+  useEffect(() => {
+    if (query.data?.items.some(log => log.status === 'success' || log.status === 'partial')) {
+      void queryClient.invalidateQueries({ queryKey: ['contacts'] });
+    }
+  }, [query.data, queryClient]);
+  return query;
 }
 
 export function useContactSourceMutations() {
@@ -309,6 +320,7 @@ export function useContactSourceMutations() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['contact-sources'] });
     queryClient.invalidateQueries({ queryKey: ['contacts'] });
+    queryClient.invalidateQueries({ queryKey: ['contact-sync-logs'] });
   };
 
   const create = useMutation({

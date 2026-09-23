@@ -29,16 +29,11 @@ import type { AddonsState } from './validation';
 // so the two addon param key naming conventions never fork.
 
 // ─── Canonical serialize/parse/empty (rule-form.ts delegates to these) ────
-// AddonsState.params is stored ALREADY in the exact snake_case shape written
-// to metadata.addons[].params (see per-addon default/field keys below) — so
-// serialize/parse here are pure structural moves with zero per-type
-// transformation, matching rule-form.ts's original (now-removed) private
-// serializeAddonsState + the addons-parsing block inside ruleToForm. This is
-// deliberate: F4's rule-form.ts already documented "per-addon key shape is
-// owned by the (future) addon-editor component, not F4" — this file is that
-// component, and it keeps serialize/parse trivial by writing backend-ready
-// keys directly instead of adding a second camelCase UI layer that would
-// need translating.
+// Params normally stay in the exact snake_case shape persisted in metadata.
+// modifyHeader is the one compatibility boundary: the pre-rewrite editor used
+// header_name/header_value/header_action, while the current editor owns the
+// target_field/operation/new_value contract. Parse migrates the historical
+// shape into the current form and serialize emits only current keys.
 export interface AdvancedRulesAddon {
   type: AddonKey;
   params: Record<string, unknown>;
@@ -48,11 +43,59 @@ export function emptyAddonsState(): AddonsState {
   return {};
 }
 
+function normalizeModifyHeaderParams(params: Record<string, unknown>): Record<string, unknown> {
+  const legacyName = typeof params.header_name === 'string' ? params.header_name : '';
+  const target = typeof params.target_field === 'string'
+    ? params.target_field
+    : legacyName && ['From', 'To', 'Subject', 'Reply-To'].includes(legacyName)
+      ? legacyName
+      : legacyName
+        ? 'custom'
+        : 'Subject';
+  const legacyAction = typeof params.header_action === 'string' ? params.header_action : '';
+  const operation = typeof params.operation === 'string'
+    ? params.operation
+    : legacyAction === 'remove'
+      ? 'delete'
+      : ['replace', 'prefix', 'suffix'].includes(legacyAction)
+        ? legacyAction
+        : 'replace';
+  return {
+    target_field: target,
+    custom_field_name: typeof params.custom_field_name === 'string'
+      ? params.custom_field_name
+      : target === 'custom'
+        ? legacyName
+        : '',
+    operation,
+    match_pattern: typeof params.match_pattern === 'string' ? params.match_pattern : '',
+    new_value: typeof params.new_value === 'string'
+      ? params.new_value
+      : typeof params.header_value === 'string'
+        ? params.header_value
+        : '',
+  };
+}
+
+function serializeModifyHeaderParams(params: Record<string, unknown>): Record<string, unknown> {
+  const normalized = normalizeModifyHeaderParams(params);
+  const target = String(normalized.target_field);
+  const operation = String(normalized.operation);
+  const out: Record<string, unknown> = { target_field: target, operation };
+  if (target === 'custom') out.custom_field_name = normalized.custom_field_name;
+  if (operation === 'regex_replace') out.match_pattern = normalized.match_pattern;
+  if (operation !== 'delete') out.new_value = normalized.new_value;
+  return out;
+}
+
 export function serializeAddons(v: AddonsState): AdvancedRulesAddon[] {
   const out: AdvancedRulesAddon[] = [];
   for (const key of Object.keys(v) as AddonKey[]) {
     const entry = v[key];
-    if (entry?.enabled) out.push({ type: key, params: entry.params ?? {} });
+    if (entry?.enabled) {
+      const params = entry.params ?? {};
+      out.push({ type: key, params: key === 'modifyHeader' ? serializeModifyHeaderParams(params) : params });
+    }
   }
   return out;
 }
@@ -65,7 +108,8 @@ export function parseAddons(meta: unknown): AddonsState {
     if (!item || typeof item !== 'object') continue;
     const a = item as { type?: unknown; params?: unknown };
     if (typeof a.type !== 'string') continue;
-    const params = a.params && typeof a.params === 'object' ? (a.params as Record<string, unknown>) : {};
+    const rawParams = a.params && typeof a.params === 'object' ? (a.params as Record<string, unknown>) : {};
+    const params = a.type === 'modifyHeader' ? normalizeModifyHeaderParams(rawParams) : rawParams;
     state[a.type as AddonKey] = { enabled: true, params };
   }
   return state;
@@ -108,7 +152,7 @@ export function defaultAddonParams(key: AddonKey): Record<string, unknown> {
         preserve_envelope: false,
       };
     case 'modifyHeader':
-      return { target_field: 'Subject', custom_field_name: '', operation: 'replace', new_value: '' };
+      return { target_field: 'Subject', custom_field_name: '', operation: 'replace', match_pattern: '', new_value: '' };
     case 'detailedLog':
     default:
       return {};
@@ -543,6 +587,7 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
 
     case 'modifyHeader': {
       const targetField = tv<string>(params, 'target_field', 'Subject');
+      const operation = tv<string>(params, 'operation', 'replace');
       return (
         <div className="space-y-3" data-testid="addon-params-modifyHeader">
           <SelectField
@@ -569,7 +614,7 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
           <SelectField
             label={t('addons.modifyHeaderOperation')}
             required
-            value={tv(params, 'operation', 'replace')}
+            value={operation}
             onChange={(v) => onPatch({ operation: v })}
             options={[
               { value: 'replace', label: t('addons.modifyHeaderOperationReplace') },
@@ -579,13 +624,24 @@ export function AddonParamsForm({ addonKey, params, onPatch, autoFocus }: AddonP
               { value: 'delete', label: t('addons.modifyHeaderOperationDelete') },
             ]}
           />
-          <TextField
-            label={t('addons.modifyHeaderNewValue')}
-            required
-            testId="addon-modifyHeader-new-value"
-            value={tv(params, 'new_value', '')}
-            onChange={(v) => onPatch({ new_value: v })}
-          />
+          {operation === 'regex_replace' && (
+            <TextField
+              label={t('addons.modifyHeaderMatchPattern')}
+              required
+              testId="addon-modifyHeader-match-pattern"
+              value={tv(params, 'match_pattern', '')}
+              onChange={(v) => onPatch({ match_pattern: v })}
+            />
+          )}
+          {operation !== 'delete' && (
+            <TextField
+              label={t('addons.modifyHeaderNewValue')}
+              required
+              testId="addon-modifyHeader-new-value"
+              value={tv(params, 'new_value', '')}
+              onChange={(v) => onPatch({ new_value: v })}
+            />
+          )}
           <p className="text-xs text-muted-foreground">
             {t('addons.modifyHeaderVariableHint', {
               sender: '{sender}',

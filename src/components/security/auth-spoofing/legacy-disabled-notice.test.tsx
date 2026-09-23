@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { ProtocolChecksSection } from './ProtocolChecksSection';
 import { FormatChecksSection } from './FormatChecksSection';
@@ -50,12 +51,12 @@ function formatConfig(overrides: Partial<FormatChecksConfig> = {}): FormatChecks
   };
 }
 
-describe('存量 {enabled:false} 检查项的未启用提示', () => {
-  it('协议检查：未启用的行标出「此项当前未启用」并给出无法恢复的提示', () => {
+describe('未启用检查项仅显示客观状态（GT-13989）', () => {
+  it('协议检查：未启用的行不推断为历史配置或宣称不可恢复', () => {
     render(wrap(<ProtocolChecksSection config={protocolConfig()} onChange={() => {}} />));
-    // spf 是默认选中的 tab，spf.none 就是那条存量行
+    // A disabled value alone carries no version or migration provenance.
     expect(screen.getByTestId('legacy-disabled-spf-none')).toHaveTextContent('此项当前未启用');
-    expect(screen.getByText(/一旦把此项改为其他动作，将无法再恢复为未启用/)).toBeInTheDocument();
+    expect(screen.queryByText(/旧版本|关闭入口|无法恢复/)).toBeNull();
   });
 
   it('协议检查：全部启用时不出现未启用提示', () => {
@@ -63,15 +64,31 @@ describe('存量 {enabled:false} 检查项的未启用提示', () => {
     cfg.spf.none = item('proceed');
     render(wrap(<ProtocolChecksSection config={cfg} onChange={() => {}} />));
     expect(screen.queryByTestId('legacy-disabled-spf-none')).toBeNull();
-    expect(screen.queryByText(/一旦把此项改为其他动作/)).toBeNull();
+    expect(screen.queryByText(/修改动作并保存后将启用此项/)).toBeNull();
   });
 
-  it('格式检查：未启用的行同样标出提示', () => {
-    render(wrap(<FormatChecksSection config={formatConfig()} onChange={() => {}} />));
+  it('格式检查：全新安装的默认关闭项仅显示未启用状态', () => {
+    render(wrap(<FormatChecksSection config={formatConfig({ mailfrom_empty: item('proceed'), envelope_header_mismatch: item('quarantine', false) })} onChange={() => {}} />));
     expect(
-      screen.getByTestId('legacy-disabled-formatChecks.mailFromEmpty'),
+      screen.getByTestId('legacy-disabled-formatChecks.envelopeHeaderMismatch'),
     ).toHaveTextContent('此项当前未启用');
-    expect(screen.getAllByText(/一旦把此项改为其他动作，将无法再恢复为未启用/).length).toBe(1);
+    expect(screen.queryByText(/旧版本|关闭入口|无法恢复/)).toBeNull();
+  });
+
+  it('格式检查：手动关闭和重新启用只切换状态标识', () => {
+    function EditableFormatChecks() {
+      const [config, setConfig] = useState(formatConfig({ mailfrom_empty: item('proceed') }));
+      return <FormatChecksSection config={config} onChange={setConfig} />;
+    }
+    render(wrap(<EditableFormatChecks />));
+    const toggle = screen.getByTestId('auth-format-enabled-mailfrom_invalid');
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('legacy-disabled-formatChecks.mailFromInvalid')).toHaveTextContent('此项当前未启用');
+    expect(screen.queryByText(/旧版本|关闭入口|无法恢复/)).toBeNull();
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
+    expect(screen.queryByTestId('legacy-disabled-formatChecks.mailFromInvalid')).toBeNull();
   });
 
   it('四种语言都有文案，不会漏出原始 key', () => {
@@ -87,6 +104,7 @@ describe('存量 {enabled:false} 检查项的未启用提示', () => {
       const badge = screen.getByTestId('legacy-disabled-formatChecks.mailFromEmpty');
       expect(badge.textContent, locale).toBeTruthy();
       expect(badge.textContent, locale).not.toContain('authSpoofing.legacyDisabled');
+      expect(screen.queryByText('authSpoofing.legacyDisabledHint')).toBeNull();
       unmount();
     }
   });

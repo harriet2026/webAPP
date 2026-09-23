@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
 
 const mockApiRequest = vi.fn();
+let capturedOnExport: ((selection: { include_rules: boolean; include_detection_profiles: boolean }) => Promise<{
+  data: { rules?: Array<{ id: number }> };
+}>) | undefined;
 
 vi.mock('@/lib/api/client', () => ({
   useApiRequest: () => ({ apiRequest: mockApiRequest }),
@@ -33,7 +36,14 @@ vi.mock('@/components/shared/confirm-dialog', () => ({
 }));
 
 vi.mock('@/components/rules/RuleImportExportDialog', () => ({
-  RuleImportExportDialog: () => null,
+  RuleImportExportDialog: ({ open, initialTab, onExport }: {
+    open: boolean;
+    initialTab?: string;
+    onExport?: typeof capturedOnExport;
+  }) => {
+    capturedOnExport = onExport;
+    return open ? <div data-testid="sender-filter-import-export-active-tab">{initialTab ?? 'export'}</div> : null;
+  },
 }));
 
 import { SenderFilterPage } from '@/components/security/SenderFilterPage';
@@ -95,6 +105,7 @@ function renderPage(ui: ReturnType<typeof createElement>) {
 describe('SenderFilterPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedOnExport = undefined;
   });
 
   it('renders blacklist rules by default', async () => {
@@ -149,6 +160,40 @@ describe('SenderFilterPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
+  });
+
+  it('opens the import and export entries on their matching tabs', async () => {
+    mockApiRequest.mockResolvedValue({ items: [] });
+    renderPage(createElement(SenderFilterPage));
+
+    await waitFor(() => expect(screen.getByTestId('sender-filter-import')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('sender-filter-import'));
+    expect(screen.getByTestId('sender-filter-import-export-active-tab')).toHaveTextContent('import');
+
+    fireEvent.click(screen.getByTestId('sender-filter-export'));
+    expect(screen.getByTestId('sender-filter-import-export-active-tab')).toHaveTextContent('export');
+  });
+
+  it('GT-13671 exports only rules in the current search and tab result', async () => {
+    const otherBlacklistRule = { ...blacklistRule, id: 4, name: 'Unrelated sender rule' };
+    mockApiRequest.mockResolvedValue({ items: [blacklistRule, otherBlacklistRule, whitelistRule] });
+    renderPage(createElement(SenderFilterPage));
+
+    await waitFor(() => expect(screen.getByText('Block bad sender')).toBeInTheDocument());
+    fireEvent.change(screen.getByTestId('sender-filter-search'), { target: { value: 'Block bad' } });
+    await waitFor(() => expect(screen.queryByText('Unrelated sender rule')).not.toBeInTheDocument());
+
+    expect(capturedOnExport).toBeTypeOf('function');
+    mockApiRequest.mockResolvedValueOnce({
+      version: 'rule-settings/v1',
+      exported_at: '2026-09-11T00:00:00Z',
+      scope: 'sender_filter',
+      tenant_context: { mode: 'current_tenant' },
+      data: { rules: [blacklistRule, otherBlacklistRule, whitelistRule] },
+    });
+    const file = await capturedOnExport!({ include_rules: true, include_detection_profiles: false });
+
+    expect(file.data.rules?.map((rule) => rule.id)).toEqual([blacklistRule.id]);
   });
 
   it('creates whitelist rules with whitelist_mode metadata', async () => {

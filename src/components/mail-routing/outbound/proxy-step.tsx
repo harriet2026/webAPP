@@ -153,6 +153,8 @@ export function ProxyStep({ tenantId }: ProxyStepProps) {
   const openEdit = (row: OutboundProxyRow) => {
     setDraft({
       id: row.id,
+      cacEnabled: row.cacEnabled,
+      cacResult: row.cacResult,
       name: row.name,
       proxyIp: row.proxyIp,
       proxyPort: row.proxyPort,
@@ -196,7 +198,10 @@ export function ProxyStep({ tenantId }: ProxyStepProps) {
   const heloTrimmed = draft.heloHostname.trim();
   const heloErr = heloTrimmed !== '' && !isDomain(heloTrimmed) ? t('fields.heloInvalid') : '';
   const showRdnsWarning = heloTrimmed !== '' && !heloErr && heloTrimmed !== MOCK_PTR_HOSTNAME;
-  const hasError = !!(nameErr || proxyIpErr || proxyPortErr || lidErr || egressIpErr || heloErr);
+  const cacResult = draft.cacResult.trim();
+  const cacErr = (draft.cacEnabled && !cacResult) || new TextEncoder().encode(cacResult).length > 128 || /[\p{Cc}]/u.test(cacResult)
+    ? t('fields.cacResultInvalid') : '';
+  const hasError = !!(nameErr || proxyIpErr || proxyPortErr || lidErr || egressIpErr || heloErr || cacErr);
 
   const saveMutation = useMutation({
     mutationFn: () => {
@@ -521,6 +526,24 @@ export function ProxyStep({ tenantId }: ProxyStepProps) {
                     data-testid="mr-ob-proxy-presend-code-input"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch id="proxy-cac-enabled" checked={draft.cacEnabled}
+                    onCheckedChange={(enabled) => setDraft((d) => ({ ...d, cacEnabled: enabled }))}
+                    data-testid="mr-ob-proxy-cac-switch" />
+                  <Label htmlFor="proxy-cac-enabled">{t('fields.cacEnabled')}</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">{t('fields.cacHint')}</p>
+                {draft.cacEnabled && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="proxy-cac-result">{t('fields.cacResult')}<span className="ml-0.5 text-destructive">*</span></Label>
+                    <Input id="proxy-cac-result" value={draft.cacResult} placeholder="Non-Spam"
+                      onChange={(e) => setDraft((d) => ({ ...d, cacResult: e.target.value }))}
+                      aria-invalid={!!cacErr} data-testid="mr-ob-proxy-cac-result-input" />
+                    {cacErr && <p className="text-xs text-destructive" data-testid="mr-ob-proxy-cac-error">{cacErr}</p>}
+                  </div>
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label>{t('fields.license')}</Label>

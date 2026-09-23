@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn, escapeHtml, escapeRegExp } from '@/lib/utils';
 import type {
   MailLifecycleLog,
   MailLifecycleNodeProgress,
@@ -48,14 +48,6 @@ interface RawLogsSectionProps {
   onRetryNode?: (node: string) => void;
   // 节点/组件进度面板（原始日志顶部按服务聚合的完成情况）对租户管理员隐藏。
   isTenantAdmin?: boolean;
-}
-
-function escapeRe(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // Keep the existing 10,000-line guard and dependency-free virtualization.
@@ -226,7 +218,7 @@ async function writeTextToClipboard(text: string): Promise<void> {
 function HighlightedJsonText({ text, query }: { text: string; query: string }) {
   const normalizedQuery = query.trim();
   if (!normalizedQuery) return text;
-  const parts = text.split(new RegExp(`(${escapeRe(normalizedQuery)})`, 'gi'));
+  const parts = text.split(new RegExp(`(${escapeRegExp(normalizedQuery)})`, 'gi'));
   return parts.map((part, index) =>
     part.toLowerCase() === normalizedQuery.toLowerCase() ? (
       <mark key={`${part}-${index}`} className="rounded bg-yellow-300 px-0.5 text-gray-900">
@@ -541,7 +533,7 @@ export function RawLogsSection({
         html: escapeHtml(line.text),
       }));
     }
-    const re = new RegExp(`(${escapeRe(escapeHtml(normalizedQuery))})`, 'gi');
+    const re = new RegExp(`(${escapeRegExp(escapeHtml(normalizedQuery))})`, 'gi');
     return filteredLines.map((line, index) => ({
       ...line,
       no: index + 1,

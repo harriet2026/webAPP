@@ -2,7 +2,8 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toast } from 'sonner';
-import type { RecipientDisposition } from '@/types/email-disposal-detail';
+import { ApiError } from '@/lib/api/client';
+import type { MailChildEvent, RecipientDisposition } from '@/types/email-disposal-detail';
 import { RecipientStatus } from './recipient-status';
 
 // Identity translator that keeps params visible in the rendered/returned
@@ -19,9 +20,14 @@ vi.mock('@/contexts/auth-context', () => ({
 }));
 
 vi.mock('next-intl', () => ({
-  useTranslations: (namespace: string) => (key: string, params?: Record<string, unknown>) => (
-    params ? `${namespace}.${key}:${JSON.stringify(params)}` : `${namespace}.${key}`
-  ),
+  useTranslations: (namespace?: string) => {
+    const translate = (key: string, params?: Record<string, unknown>) => {
+      const fullKey = namespace ? `${namespace}.${key}` : key;
+      return params ? `${fullKey}:${JSON.stringify(params)}` : fullKey;
+    };
+    translate.has = () => true;
+    return translate;
+  },
 }));
 
 vi.mock('sonner', () => ({
@@ -32,11 +38,10 @@ vi.mock('../lib/disposal-detail-api', () => ({
   // 真实实现（GT-12601/GT-12628）：按角色给 5000/1000，mock 同语义。
   disposalRulePriority: (isSystemAdmin: boolean) => (isSystemAdmin ? 5000 : 1000),
   addSenderFilterRule: vi.fn(),
+  isDuplicateSenderFilterRuleError: (error: { status?: number; code?: string }) => (
+    error?.status === 409 && error?.code === 'unified_rule.name_exists'
+  ),
   disposeByObject: vi.fn(),
-  // RA-5: 隔离/阻断's own dispatch path (dispatchQuarantineOrBlock in
-  // hooks/use-recipient-disposition.tsx) calls this instead of
-  // disposeByObject.
-  disposeObjectAction: vi.fn(),
   disposeOne: vi.fn(),
   notifyRecipient: vi.fn(),
 }));
@@ -52,17 +57,25 @@ vi.mock('../lib/disposal-api', () => ({
 // calls fire, in what shape, and how success/failure is aggregated into
 // toasts + the failures panel.
 vi.mock('./reclassify-dialog', () => ({
-  ReclassifyDialog: ({ open, onConfirm }: { open: boolean; onConfirm: (finalType: string | undefined) => void }) => (
-    open ? <button type="button" onClick={() => onConfirm(undefined)}>mock-reclassify-confirm</button> : null
+  ReclassifyDialog: ({ open, onConfirm }: {
+    open: boolean;
+    onConfirm: (finalType: string | undefined, whitelistSender?: boolean) => void;
+  }) => (
+    open ? (
+      <div>
+        <button type="button" onClick={() => onConfirm(undefined)}>mock-reclassify-confirm</button>
+        <button type="button" onClick={() => onConfirm(undefined, true)}>mock-reclassify-confirm-whitelist</button>
+      </div>
+    ) : null
   ),
 }));
 
-import { disposeByObject, disposeObjectAction, notifyRecipient } from '../lib/disposal-detail-api';
+import { addSenderFilterRule, disposeByObject, notifyRecipient } from '../lib/disposal-detail-api';
 import { recallMails } from '../lib/disposal-api';
 
 const mockDisposeByObject = disposeByObject as unknown as ReturnType<typeof vi.fn>;
-const mockDisposeObjectAction = disposeObjectAction as unknown as ReturnType<typeof vi.fn>;
 const mockNotifyRecipient = notifyRecipient as unknown as ReturnType<typeof vi.fn>;
+const mockAddSenderFilterRule = addSenderFilterRule as unknown as ReturnType<typeof vi.fn>;
 const mockRecallMails = recallMails as unknown as ReturnType<typeof vi.fn>;
 
 function baseProps(dispositions: RecipientDisposition[]) {
@@ -76,15 +89,52 @@ function baseProps(dispositions: RecipientDisposition[]) {
   };
 }
 
+function deliveryEvent(recipient: string, dsn: string, id: number): MailChildEvent {
+  return {
+    id,
+    event_source: 'postfix',
+    event_type: 'delivery',
+    event_result: 'bounced',
+    queue_id: 'QUEUE-1',
+    recipient,
+    dsn,
+    event_time: `2026-09-08T02:03:0${id}Z`,
+    correlation_status: 'matched',
+  };
+}
+
 describe('RecipientStatus dispatch flow', () => {
   beforeEach(() => {
     mockDisposeByObject.mockReset();
-    mockDisposeObjectAction.mockReset();
     mockNotifyRecipient.mockReset();
+    mockAddSenderFilterRule.mockReset();
+    mockAddSenderFilterRule.mockResolvedValue(undefined);
     mockRecallMails.mockReset();
     (toast.success as ReturnType<typeof vi.fn>).mockReset();
     (toast.error as ReturnType<typeof vi.fn>).mockReset();
     (toast.warning as ReturnType<typeof vi.fn>).mockReset();
+  });
+
+  it('GT-13623: keeps multi-recipient delivery failures and reasons distinct', () => {
+    const dispositions: RecipientDisposition[] = [
+      { recipient: 'full@test.local', final_action: 'accept', status: 'delivery_failed' },
+      { recipient: 'unknown@test.local', final_action: 'accept', status: 'delivery_failed' },
+    ];
+
+    render(<RecipientStatus
+      {...baseProps(dispositions)}
+      events={[
+        deliveryEvent('full@test.local', '5.2.2 mailbox full', 1),
+        deliveryEvent('unknown@test.local', '5.1.1 user unknown', 2),
+      ]}
+    />);
+
+    const full = screen.getByTestId('email-disposal-delivery-detail-full@test.local');
+    const unknown = screen.getByTestId('email-disposal-delivery-detail-unknown@test.local');
+    expect(full).toHaveTextContent('5.2.2 mailbox full');
+    expect(full).not.toHaveTextContent('5.1.1 user unknown');
+    expect(unknown).toHaveTextContent('5.1.1 user unknown');
+    expect(unknown).not.toHaveTextContent('5.2.2 mailbox full');
   });
 
   it('GT-13038: renders handling, success, and failed recall states per recipient', () => {
@@ -106,6 +156,22 @@ describe('RecipientStatus dispatch flow', () => {
       expect(cell).toHaveTextContent(`emailDisposal.detail.overview.recipientStatus.recall.${state}`);
       expect(cell).toHaveAttribute('data-recall-at', at);
     }
+  });
+
+  it('GT-13624: redelivery dialog wraps a long recipient instead of truncating it', async () => {
+    const user = userEvent.setup();
+    const longRecipient = 'qc-p-validpass-1788761052790-32cb@qctest01.cn';
+    const dispositions: RecipientDisposition[] = [
+      { recipient: longRecipient, final_action: 'deliver', status: 'delivery_failed' },
+    ];
+
+    render(<RecipientStatus {...baseProps(dispositions)} />);
+    await user.click(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.redeliver'));
+
+    const dialog = await screen.findByTestId('email-disposal-redeliver-dialog');
+    const address = within(dialog).getByText(longRecipient);
+    expect(address).toHaveClass('break-all');
+    expect(address).not.toHaveClass('truncate');
   });
 
   it('multi-object batch deliver: partial failure aggregates into "N succeeded / M failed" and lists the failed recipient', async () => {
@@ -241,7 +307,7 @@ describe('RecipientStatus dispatch flow', () => {
     const modal = await screen.findByTestId('email-disposal-recipient-batch-result');
     expect(within(modal).getByText('recalled@test.local')).toBeInTheDocument();
     expect(within(modal).getByText('pending-id@test.local')).toBeInTheDocument();
-    expect(modal).toHaveTextContent('emailDisposal.detail.overview.recipientStatus.actionSuccess');
+    expect(modal).toHaveTextContent('emailDisposal.detail.overview.recipientStatus.resultSuccess');
     expect(modal).toHaveTextContent('emailDisposal.detail.overview.recipientStatus.recallTrackingIdMissing');
     expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('recipientStatus.bulkResult'));
   });
@@ -265,6 +331,31 @@ describe('RecipientStatus dispatch flow', () => {
     expect(toast.success).not.toHaveBeenCalled();
   });
 
+  it('GT-13651: keeps disposal success distinct and explains a duplicate whitelist failure', async () => {
+    const user = userEvent.setup();
+    const dispositions: RecipientDisposition[] = [
+      { recipient: 'rcpt@test.local', final_action: 'audit', status: 'pending_review', object_kind: 'inbound_audit', object_id: 'obj-1' },
+    ];
+    mockDisposeByObject.mockResolvedValue({
+      results: [{ mail_log_id: 42, object_id: 'obj-1', status: 'succeeded' }],
+    });
+    mockAddSenderFilterRule.mockRejectedValueOnce(new ApiError(409, 'rule name already exists', {
+      error: { code: 'unified_rule.name_exists', message: 'rule name already exists' },
+    }));
+
+    render(<RecipientStatus {...baseProps(dispositions)} />);
+    await user.click(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.deliver'));
+    await user.click(await screen.findByText('mock-reclassify-confirm-whitelist'));
+
+    await waitFor(() => expect(mockDisposeByObject).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(toast.warning).toHaveBeenCalledWith(
+      'emailDisposal.detail.overview.rulePartialFailWithReason:{"reason":"emailDisposal.detail.overview.senderActions.whitelistDialog.alreadyExists"}',
+    ));
+    expect(toast.error).not.toHaveBeenCalledWith(
+      'emailDisposal.detail.overview.recipientStatus.actionFailed',
+    );
+  });
+
   it('notify: dispatches notifyRecipient per recipient in the group and reports success', async () => {
     const user = userEvent.setup();
     const dispositions: RecipientDisposition[] = [
@@ -279,6 +370,12 @@ describe('RecipientStatus dispatch flow', () => {
 
     await waitFor(() => expect(mockNotifyRecipient).toHaveBeenCalledWith(42, 'notify-me@test.local', expect.anything()));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('emailDisposal.detail.overview.recipientStatus.actionSuccess'));
+
+    const modal = await screen.findByTestId('email-disposal-recipient-batch-result');
+    expect(within(modal).getByTestId('email-disposal-recipient-result-mail-status')).toHaveTextContent('recipientStatus.status.delivered');
+    expect(within(modal).getByTestId('email-disposal-recipient-result-operation')).toHaveTextContent('recipientStatus.action.notify');
+    expect(within(modal).getByTestId('email-disposal-recipient-result-operation')).toHaveTextContent('recipientStatus.resultSuccess');
+    expect(modal).not.toHaveTextContent('→');
   });
 
   // review High-2: a quarantined/sidelined recipient with no object_id (the
@@ -323,47 +420,17 @@ describe('RecipientStatus dispatch flow', () => {
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('emailDisposal.detail.overview.recipientStatus.actionSuccess'));
   });
 
-  // RA-5 (demo parity): a pending_review group's inline row action set
-  // additionally exposes 隔离/阻断, and clicking either fires
-  // dispatchQuarantineOrBlock IMMEDIATELY -- no ReclassifyDialog
-  // ("mock-reclassify-confirm" mock) is ever shown for these two actions.
-  it('RA-5: pending_review row renders 隔离/阻断 and clicking 隔离 dispatches disposeObjectAction(quarantine) immediately with no dialog', async () => {
-    const user = userEvent.setup();
+  it('GT-13650: pending_review row hides unsupported quarantine/block actions', () => {
     const dispositions: RecipientDisposition[] = [
       { recipient: 'pending@test.local', final_action: 'sideline', status: 'pending_review', object_kind: 'quarantine', object_id: 'obj-pending' },
     ];
-    mockDisposeObjectAction.mockResolvedValue({ results: [{ mail_log_id: 42, object_id: 'obj-pending', status: 'succeeded' }] });
 
     render(<RecipientStatus {...baseProps(dispositions)} />);
 
-    expect(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.quarantine')).toBeInTheDocument();
-    expect(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.block')).toBeInTheDocument();
-
-    await user.click(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.quarantine'));
-
-    await waitFor(() => expect(mockDisposeObjectAction).toHaveBeenCalledWith(
-      42, 'obj-pending', 'quarantine', expect.anything(),
-    ));
-    expect(screen.queryByText('mock-reclassify-confirm')).not.toBeInTheDocument();
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('emailDisposal.detail.overview.recipientStatus.actionSuccess'));
-  });
-
-  // Real-mode degrade: disposeObjectAction rejecting (the real backend's 400
-  // for any non release/delete action) must never be silently swallowed --
-  // it surfaces the explicit unsupported-action toast.
-  it('RA-5: 阻断 surfaces the unsupported toast when disposeObjectAction rejects', async () => {
-    const user = userEvent.setup();
-    const dispositions: RecipientDisposition[] = [
-      { recipient: 'pending@test.local', final_action: 'sideline', status: 'pending_review', object_kind: 'quarantine', object_id: 'obj-pending' },
-    ];
-    mockDisposeObjectAction.mockRejectedValue(new Error('action must be release or delete'));
-
-    render(<RecipientStatus {...baseProps(dispositions)} />);
-    await user.click(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.block'));
-
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(
-      'emailDisposal.detail.overview.recipientStatus.quarantineBlockUnsupported',
-    ));
+    expect(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.deliver')).toBeInTheDocument();
+    expect(screen.getByText('emailDisposal.detail.overview.recipientStatus.action.discard')).toBeInTheDocument();
+    expect(screen.queryByText('emailDisposal.detail.overview.recipientStatus.action.quarantine')).not.toBeInTheDocument();
+    expect(screen.queryByText('emailDisposal.detail.overview.recipientStatus.action.block')).not.toBeInTheDocument();
   });
 
   // G6 / GT-13273: a batch action that partially succeeds must open the
@@ -463,6 +530,39 @@ describe('RecipientStatus matrix presentation (D1/D3/D4)', () => {
     expect(header.textContent).toContain('status.delivered');
   });
 
+  it('GT-13655: exposes every grouped recipient on hover and keyboard focus', async () => {
+    const user = userEvent.setup();
+    const recipients = Array.from(
+      { length: 12 },
+      (_, index) => `very-long-recipient-${index + 1}@customer-example.test`,
+    );
+    const dispositions: RecipientDisposition[] = recipients.map((recipient) => ({
+      recipient,
+      final_action: 'audit',
+      status: 'pending_review',
+      object_kind: 'audit',
+      object_id: 'shared-audit-object',
+    }));
+
+    render(<RecipientStatus {...baseProps(dispositions)} />);
+
+    const trigger = screen.getByTestId('email-disposal-recipient-address-shared-audit-object');
+    expect(trigger).toHaveClass('truncate');
+    expect(trigger).toHaveAttribute('tabindex', '0');
+    expect(trigger).toHaveAttribute('aria-label', recipients.join(', '));
+
+    await user.hover(trigger);
+    const tooltip = await screen.findByTestId('email-disposal-recipient-address-tooltip-shared-audit-object');
+    for (const recipient of recipients) {
+      expect(within(tooltip).getByText(recipient)).toBeInTheDocument();
+    }
+
+    await user.unhover(trigger);
+    await waitFor(() => expect(screen.queryByTestId('email-disposal-recipient-address-tooltip-shared-audit-object')).not.toBeInTheDocument());
+    trigger.focus();
+    expect(await screen.findByTestId('email-disposal-recipient-address-tooltip-shared-audit-object')).toBeInTheDocument();
+  });
+
   it('D3: >5 groups renders only the first 5 by default with an expand control that reveals the rest', async () => {
     const user = userEvent.setup();
     render(<RecipientStatus {...baseProps(dispositionsOf(7))} />);
@@ -505,11 +605,7 @@ describe('RecipientStatus matrix presentation (D1/D3/D4)', () => {
     }
   });
 
-  // RA-5 (demo parity): the batch bar always renders 批量隔离/批量阻断
-  // buttons too (they're notApplicable-and-skipped for groups whose status
-  // doesn't support them, same as any other batch action mixed into a
-  // multi-status selection).
-  it('RA-5: batch bar includes 批量隔离/批量阻断 buttons', async () => {
+  it('GT-13650: batch bar hides unsupported quarantine/block actions', async () => {
     const user = userEvent.setup();
     render(<RecipientStatus {...baseProps(dispositionsOf(3))} />);
     const groupCheckboxes = screen.getAllByRole('checkbox').filter(
@@ -517,37 +613,8 @@ describe('RecipientStatus matrix presentation (D1/D3/D4)', () => {
     );
     await user.click(groupCheckboxes[0]);
 
-    expect(screen.getByTestId('email-disposal-recipient-batch-quarantine')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-recipient-batch-block')).toBeInTheDocument();
-  });
-
-  // RA-5: clicking 批量隔离 dispatches disposeObjectAction(quarantine) for
-  // every selected pending_review group, immediately (no dialog).
-  it('RA-5: 批量隔离 dispatches disposeObjectAction(quarantine) for each selected pending_review group', async () => {
-    const user = userEvent.setup();
-    const dispositions: RecipientDisposition[] = [
-      { recipient: 'p0@test.local', final_action: 'sideline', status: 'pending_review', object_kind: 'quarantine', object_id: 'obj-p0' },
-      { recipient: 'p1@test.local', final_action: 'sideline', status: 'pending_review', object_kind: 'quarantine', object_id: 'obj-p1' },
-    ];
-    mockDisposeObjectAction.mockImplementation(async (_id: number, objectId: string) => ({
-      results: [{ mail_log_id: 42, object_id: objectId, status: 'succeeded' }],
-    }));
-
-    render(<RecipientStatus {...baseProps(dispositions)} />);
-    const groupCheckboxes = screen.getAllByRole('checkbox').filter(
-      (c) => (c.getAttribute('aria-label') || '').startsWith('Select group'),
-    );
-    await user.click(groupCheckboxes[0]);
-    await user.click(groupCheckboxes[1]);
-    await user.click(screen.getByTestId('email-disposal-recipient-batch-quarantine'));
-
-    await waitFor(() => expect(mockDisposeObjectAction).toHaveBeenCalledTimes(2));
-    expect(mockDisposeObjectAction).toHaveBeenCalledWith(42, 'obj-p0', 'quarantine', expect.anything());
-    expect(mockDisposeObjectAction).toHaveBeenCalledWith(42, 'obj-p1', 'quarantine', expect.anything());
-    // No reclassify dialog for quarantine/block.
-    expect(screen.queryByText('mock-reclassify-confirm')).not.toBeInTheDocument();
-    // onSettled clears the selection, same as every other batch action.
-    await waitFor(() => expect(screen.queryByTestId('email-disposal-recipient-batch-bar')).not.toBeInTheDocument());
+    expect(screen.queryByTestId('email-disposal-recipient-batch-quarantine')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-recipient-batch-block')).not.toBeInTheDocument();
   });
 
   // G8: the batch bar's threshold is >=1 selected (previously >1) --

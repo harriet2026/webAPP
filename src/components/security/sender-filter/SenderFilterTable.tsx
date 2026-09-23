@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { DataTable } from '@/components/shared/data-table';
+import { RuleListPagination } from '@/components/shared/rule-list-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { SenderFilterRuleView, SenderFilterAction, SenderConfigType, SenderFilterGroups } from '@/types/sender-filter';
@@ -23,9 +24,9 @@ function formatLocalMinute(iso: string): string {
 
 interface SenderFilterTableProps {
   data: SenderFilterRuleView[];
-  pageCount: number;
   pageIndex: number;
   pageSize: number;
+  totalCount: number;
   onPageChange: (pageIndex: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onEdit: (rule: SenderFilterRuleView) => void;
@@ -60,9 +61,9 @@ function actionVariant(action: string): 'success' | 'error' | 'warning' | 'defau
 
 export function SenderFilterTable({
   data,
-  pageCount,
   pageIndex,
   pageSize,
+  totalCount,
   onPageChange,
   onPageSizeChange,
   onEdit,
@@ -217,11 +218,19 @@ export function SenderFilterTable({
         rowTestId={(row) => `sender-filter-row-${row.rule.id}`}
         columnTestId={(id) => `sender-filter-col-${id}`}
         testId="sender-filter-table"
-        pageCount={Math.max(1, pageCount)}
-        pageIndex={pageIndex}
-        onPageChange={onPageChange}
+        hidePagination
+      />
+      <RuleListPagination
+        page={pageIndex + 1}
         pageSize={pageSize}
+        total={totalCount}
+        onPageChange={(nextPage) => onPageChange(nextPage - 1)}
         onPageSizeChange={onPageSizeChange}
+        goToPageLabel={t('behaviorControl.pagination.goToPage')}
+        pageLabel={t('behaviorControl.pagination.page')}
+        testIdPrefix="sender-filter"
+        totalText={t('common.total', { count: totalCount })}
+        pageSizeLabel={(size) => t(`behaviorControl.pagination.perPage${size}`)}
       />
     </TooltipProvider>
   );

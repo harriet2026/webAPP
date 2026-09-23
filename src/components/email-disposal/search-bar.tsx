@@ -62,6 +62,7 @@ interface SearchBarProps {
   hasActiveFilters?: boolean;
   canSaveTemplate?: boolean;
   hasPendingFilters?: boolean;
+  searching?: boolean;
 }
 
 export function SearchBar({
@@ -82,6 +83,7 @@ export function SearchBar({
   hasActiveFilters = false,
   canSaveTemplate = false,
   hasPendingFilters = false,
+  searching = false,
 }: SearchBarProps) {
   const t = useTranslations("emailDisposal.search");
   const { apiRequest } = useApiRequest();
@@ -194,6 +196,7 @@ export function SearchBar({
   }, [onAiParsed, onReset]);
 
   const resetDisabled = !value.trim() && !hasActiveFilters && sampleCount === 0;
+  const busy = parsing || searching;
   // The template menu is always accessible so users can browse and manage
   // existing templates. Only the "Save current" item inside is gated by canSaveTemplate.
   const templateMenuDisabled = false;
@@ -214,8 +217,8 @@ export function SearchBar({
             onChange={handleChange}
             placeholder={t("placeholder")}
             className="h-9 pr-11"
-            disabled={sampleCount > 0 || parsing}
-            aria-busy={parsing}
+            disabled={sampleCount > 0 || busy}
+            aria-busy={busy}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                 e.preventDefault();
@@ -259,15 +262,15 @@ export function SearchBar({
             data-testid="disposal-search-submit"
             className="h-9 min-w-[5.25rem] gap-1.5 px-4 disabled:border-border disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 disabled:shadow-none"
             onClick={() => void executeSearch(value)}
-            disabled={parsing || sampleCount > 0}
-            aria-busy={parsing}
+            disabled={busy || sampleCount > 0}
+            aria-busy={busy}
           >
-            {parsing ? (
+            {busy ? (
               <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
             ) : (
               <Search className="h-4 w-4" />
             )}
-            {t("search")}
+            {busy ? t("searching") : t("search")}
           </Button>
           <Button
             data-testid="disposal-search-reset"

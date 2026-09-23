@@ -6,9 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Resolver } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { toast } from 'sonner';
 import {
-  HelpCircle, Lightbulb, Play, Check, X, Zap,
+  HelpCircle, Lightbulb, Play, Target, MinusCircle, Zap,
   Shield, Clock, Ban, Users, Globe, ExternalLink, AlertTriangle,
   Plus, Trash2,
 } from 'lucide-react';
@@ -18,7 +19,8 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,13 +49,19 @@ import { BACKEND_TO_PRODUCT } from '@/types/behavior-control';
 import { useApiRequest } from '@/lib/api/client';
 import { useAuth } from '@/contexts/auth-context';
 import { cn } from '@/lib/utils';
-import { simulateBehaviorControl } from '@/lib/behavior-control-simulator';
+import {
+  matchBehaviorControlObject,
+  simulateBehaviorControl,
+} from '@/lib/behavior-control-simulator';
 import { createBehaviorControlSchema, getBehaviorControlPriorityRange } from './schema';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { parseMembers } from '@/lib/api/groups';
 import { parseRuleJson } from '@/lib/api/rule-json';
+import { listContactDepartments } from '@/lib/api/contacts';
+import { buildDepartmentTree, flattenDepartmentTree } from '@/lib/org-departments';
 import type { GroupType } from '@/types/groups';
 import type { RuleNode } from '@/types/unified-rules';
+import { isBehaviorControlRuleExpired } from './validity';
 
 const BEHAVIOR_DIMENSIONS: BehaviorDimension[] = [
   'ip_count',
@@ -113,7 +121,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const t = useTranslations();
   const apiErrorMessage = useApiErrorMessage();
   const qc = useQueryClient();
-  const { apiRequest } = useApiRequest();
+  const { apiRequest, effectiveTenantId } = useApiRequest();
   const { isSystemAdmin } = useAuth();
   const priorityRange = useMemo(() => getBehaviorControlPriorityRange(isSystemAdmin), [isSystemAdmin]);
   const schema = useMemo(() => createBehaviorControlSchema(priorityRange), [priorityRange]);
@@ -126,10 +134,11 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const [simUniqueSenderIPCount, setSimUniqueSenderIPCount] = useState(1);
   const [simMailCount, setSimMailCount] = useState(50);
   const [simRecipientCount, setSimRecipientCount] = useState(30);
+  const [simAttachmentSizeMiB, setSimAttachmentSizeMiB] = useState(10);
   const [simResult, setSimResult] = useState<{ hit: boolean; reason: string } | null>(null);
 
   const groupsQuery = useQuery({
-    queryKey: ['groups', 'behavior-control'],
+    queryKey: ['groups', 'behavior-control', effectiveTenantId],
     // condition_tree 一并取回：群组成员预览要按它解析出真实成员名单。
     queryFn: () => listBehaviorControlGroups(apiRequest),
     staleTime: 30_000,
@@ -154,6 +163,17 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
   const senderGroups = useMemo(() => groupTypeOptions('sender'), [groupTypeOptions]);
   const ipGroups = useMemo(() => groupTypeOptions('ip'), [groupTypeOptions]);
+
+  const departmentsQuery = useQuery({
+    queryKey: ['contacts', 'departments', 'behavior-control', effectiveTenantId],
+    queryFn: async () => (await listContactDepartments(apiRequest)).items,
+    staleTime: 30_000,
+    enabled: open && effectiveTenantId != null,
+  });
+  const organizationDepartments = useMemo(
+    () => flattenDepartmentTree(buildDepartmentTree(departmentsQuery.data ?? [])),
+    [departmentsQuery.data],
+  );
 
   // 预览数据：根据 previewGroupName 从 groupsQuery.data 中找到对应条目，生成成员列表
   const previewGroupData = useMemo<{ name: string; groupType: string; members: string[]; totalCount: number } | null>(() => {
@@ -199,7 +219,9 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       priority: editing.rule.priority,
       is_active: editing.rule.is_active,
       valid_from: editing.rule.valid_from ?? '',
-      valid_until: editing.rule.valid_until ?? '',
+      // input[type=date] only accepts YYYY-MM-DD. The API returns RFC3339, so
+      // feeding the complete timestamp makes the browser render an empty field.
+      valid_until: editing.rule.valid_until ? editing.rule.valid_until.slice(0, 10) : '',
       direction: m.direction,
       object_config: m.object_config as BehaviorControlFormData['object_config'],
       time_window: m.time_window,
@@ -227,6 +249,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
     handleSubmit, formState, reset, register, setValue, watch, getValues, control,
   } = methods;
   const watchAll = useWatch({ control }) as BehaviorControlFormData;
+  const previewExpired = isBehaviorControlRuleExpired(watchAll.valid_until);
   const objectConfigError = (
     formState.errors.object_config as { value?: { message?: string } } | undefined
   )?.value?.message;
@@ -240,7 +263,9 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
 
   const saveMutation = useMutation({
     mutationFn: async (form: BehaviorControlFormData) =>
-      (editing ? updateBehaviorControlRule(editing.rule.id, form) : createBehaviorControlRule(form)),
+      (editing
+        ? updateBehaviorControlRule(editing.rule.id, form, apiRequest)
+        : createBehaviorControlRule(form, apiRequest)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['behavior-control-rules'] });
       toast.success(t('behaviorControl.toast.saveOk'));
@@ -265,6 +290,64 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const conditions = watch('conditions');
 
   const runSimulation = useCallback(() => {
+    const objectConfig = getValues('object_config');
+    let groupMembers: string[] | null | undefined;
+    if ((objectConfig.type === 'sender' && objectConfig.sub_type === 'group')
+      || (objectConfig.type === 'senderIp' && objectConfig.sub_type === 'ipGroup')) {
+      groupMembers = null;
+      const groupType: GroupType = objectConfig.type === 'sender' ? 'sender' : 'ip';
+      const groupRule = groupsQuery.data?.find((rule) => {
+        const metadata = parseRuleJson(rule.metadata);
+        return rule.name === objectConfig.value && metadata?.group_type === groupType;
+      });
+      if (groupRule) {
+        try {
+          const tree = typeof groupRule.condition_tree === 'string'
+            ? (JSON.parse(groupRule.condition_tree) as RuleNode)
+            : (groupRule.condition_tree ?? null);
+          groupMembers = parseMembers(tree, groupType);
+        } catch {
+          groupMembers = null;
+        }
+      }
+    }
+
+    const objectMatch = matchBehaviorControlObject({
+      objectConfig,
+      sender: simSender,
+      senderIp: simIp,
+      groupMembers,
+    });
+    if (!objectMatch.matched) {
+      const target = 'value' in objectConfig ? objectConfig.value : '';
+      switch (objectMatch.reason) {
+        case 'sender_mismatch':
+          setSimResult({
+            hit: false,
+            reason: t('behaviorControl.simulator.senderMismatchReason', { sender: simSender || '-', target }),
+          });
+          return;
+        case 'ip_mismatch':
+          setSimResult({
+            hit: false,
+            reason: t('behaviorControl.simulator.ipMismatchReason', { ip: simIp || '-', target }),
+          });
+          return;
+        case 'group_unavailable':
+          setSimResult({
+            hit: false,
+            reason: t('behaviorControl.simulator.groupUnavailableReason', { target }),
+          });
+          return;
+        case 'organization_unavailable':
+          setSimResult({
+            hit: false,
+            reason: t('behaviorControl.simulator.organizationUnavailableReason'),
+          });
+          return;
+      }
+    }
+
     const currentConditions = getValues('conditions');
     const hit = simulateBehaviorControl({
       conditions: currentConditions,
@@ -273,6 +356,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
         uniqueSenderIPCount: simUniqueSenderIPCount,
         mailCount: simMailCount,
         recipientCount: simRecipientCount,
+        attachmentSizeMiB: simAttachmentSizeMiB,
       },
     });
     if (!hit) {
@@ -295,10 +379,16 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
         threshold: hit.threshold,
         unit: t(`behaviorControl.simulator.${unitKey}`),
       }),
-    });
-  }, [getValues, simMailCount, simRecipientCount, simUniqueSenderIPCount, t]);
+  });
+  }, [
+    getValues, groupsQuery.data, simAttachmentSizeMiB, simIp, simMailCount,
+    simRecipientCount, simSender, simUniqueSenderIPCount, t,
+  ]);
 
   const needsUniqueSenderIPCount = (conditions ?? []).some((c) => c?.dim === 'ip_count');
+  const needsMailCount = (conditions ?? []).some((c) => c?.dim === 'mail_count');
+  const needsRecipientCount = (conditions ?? []).some((c) => c?.dim === 'recipient_count');
+  const needsAttachmentSize = (conditions ?? []).some((c) => c?.dim === 'attachment_size');
 
   const isIncomplete = !watchAll.name
     || !(watchAll.conditions?.length > 0)
@@ -344,13 +434,42 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 data-testid="behavior-control-rule-name"
                                 placeholder={t('behaviorControl.form.namePlaceholder')}
                                 {...register('name')}
+                                maxLength={50}
+                                aria-describedby="behavior-control-rule-name-count"
                                 className={cn(formState.errors.name && 'border-red-500')}
                               />
-                              {formState.errors.name && (
-                                <p className="text-xs text-red-500 mt-1">
-                                  {t(`behaviorControl.errors.${formState.errors.name.message}`)}
+                              <div className="mt-1 flex items-start justify-between gap-2">
+                                {formState.errors.name && (
+                                  <p className="text-xs text-red-500">
+                                    {t(`behaviorControl.errors.${formState.errors.name.message}`)}
+                                  </p>
+                                )}
+                                <p
+                                  id="behavior-control-rule-name-count"
+                                  data-testid="behavior-control-rule-name-count"
+                                  className="ml-auto text-xs text-muted-foreground"
+                                >
+                                  {(watchAll.name?.length ?? 0)}/50
                                 </p>
-                              )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <Label htmlFor="behavior-control-rule-active" className="min-w-[100px] text-right">
+                              {t('behaviorControl.form.isActive')}
+                            </Label>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                id="behavior-control-rule-active"
+                                data-testid="behavior-control-rule-active"
+                                checked={watchAll.is_active}
+                                onCheckedChange={(isActive) => setValue('is_active', isActive, { shouldDirty: true })}
+                                aria-label={t('behaviorControl.form.isActive')}
+                              />
+                              <span className="text-sm text-muted-foreground">
+                                {t(watchAll.is_active ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
+                              </span>
                             </div>
                           </div>
 
@@ -402,12 +521,12 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 <Select
                                   value={senderSubType}
                                   onValueChange={(v) => {
-                                    setValue('object_config', { type: 'sender', sub_type: v as 'individual' | 'group', value: '' }, { shouldDirty: true });
+                                    setValue('object_config', { type: 'sender', sub_type: v as 'individual' | 'group' | 'organization', value: '' }, { shouldDirty: true });
                                   }}
                                 >
                                   <SelectTrigger data-testid="behavior-control-sender-subtype" className="w-48"><SelectValue /></SelectTrigger>
                                   <SelectContent>
-                                    {(['individual', 'group'] as const).map((st) => (
+                                    {(['individual', 'group', 'organization'] as const).map((st) => (
                                       <SelectItem data-testid={`behavior-control-sender-subtype-${st}`} key={st} value={st}>{t(`behaviorControl.subType.${st}`)}</SelectItem>
                                     ))}
                                   </SelectContent>
@@ -421,6 +540,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                   </Label>
                                   <div className="flex-1">
                                     <Input
+                                      data-testid="behavior-control-sender-email"
                                       placeholder={t('behaviorControl.form.emailPlaceholder')}
                                       value={watchAll.object_config.type === 'sender' ? (watchAll.object_config.value ?? '') : ''}
                                       onChange={(e) => setValue('object_config', { type: 'sender', sub_type: 'individual', value: e.target.value }, { shouldDirty: true })}
@@ -471,6 +591,45 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                       >
                                         {t('behaviorControl.form.manageGroup')} <ExternalLink className="h-3 w-3 ml-1" />
                                       </Button>
+                                    </div>
+                                    {objectConfigError && (
+                                      <p className="text-xs text-red-500 mt-1">
+                                        {t(`behaviorControl.errors.${objectConfigError}`)}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {senderSubType === 'organization' && (
+                                <div className="flex items-center gap-3">
+                                  <Label className="min-w-[100px] text-right">
+                                    <span className="text-red-500">*</span> {t('behaviorControl.form.orgLabel')}
+                                  </Label>
+                                  <div className="flex-1">
+                                    <Select
+                                      value={watchAll.object_config.type === 'sender' ? (watchAll.object_config.value ?? '') : ''}
+                                      onValueChange={(v) => setValue('object_config', { type: 'sender', sub_type: 'organization', value: v ?? '' }, { shouldDirty: true })}
+                                    >
+                                      <SelectTrigger
+                                        data-testid="behavior-control-organization"
+                                        className={cn('w-full', objectConfigError && 'border-red-500')}
+                                      >
+                                        <SelectValue placeholder={t('behaviorControl.form.orgPlaceholder')} />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {organizationDepartments.map((department) => (
+                                          <SelectItem key={department.path} value={department.path}>
+                                            {department.path}{department.memberCount > 0 ? ` (${department.memberCount})` : ''}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-xs text-muted-foreground">{t('behaviorControl.form.orgSource')}</span>
+                                      <Link href="/organization-contacts" target="_blank" rel="noopener noreferrer" data-testid="behavior-control-manage-organization" className={cn(buttonVariants({ variant: 'link', size: 'sm' }), 'h-auto p-0 text-xs text-blue-600')}>
+                                        {t('behaviorControl.form.manageOrg')} <ExternalLink className="h-3 w-3 ml-1" />
+                                      </Link>
                                     </div>
                                     {objectConfigError && (
                                       <p className="text-xs text-red-500 mt-1">
@@ -608,7 +767,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               </Tooltip>
                             </Label>
                             <div className="flex-1 flex items-center gap-2">
-                              <Input type="date" {...register('valid_until')} className="w-40" />
+                              <Input data-testid="behavior-control-valid-until" type="date" {...register('valid_until')} className="w-40" />
                               <span className="text-xs text-muted-foreground">{t('behaviorControl.form.expireHint')}</span>
                             </div>
                           </div>
@@ -635,6 +794,9 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                 type="number"
                                 {...register('priority', { valueAsNumber: true })}
                                 className={cn('w-24', formState.errors.priority && 'border-red-500')}
+                                data-testid="behavior-control-priority"
+                                aria-invalid={formState.errors.priority ? true : undefined}
+                                aria-describedby={formState.errors.priority ? 'behavior-control-priority-error' : undefined}
                               />
                               <span className="text-xs text-muted-foreground">{t('behaviorControl.form.priorityHint', priorityRange)}</span>
                             </div>
@@ -642,7 +804,13 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                           {formState.errors.priority && (
                             <div className="flex gap-3">
                               <div className="min-w-[100px]" />
-                              <p className="text-xs text-red-500">{t(`behaviorControl.errors.${formState.errors.priority.message}`, priorityRange)}</p>
+                              <p
+                                id="behavior-control-priority-error"
+                                data-testid="behavior-control-priority-error"
+                                className="text-xs text-red-500"
+                              >
+                                {t(`behaviorControl.errors.${formState.errors.priority.message}`, priorityRange)}
+                              </p>
                             </div>
                           )}
                         </div>
@@ -711,6 +879,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                       const next = [...(watchAll.conditions ?? [])];
                                       next[idx] = { ...next[idx], dim: v as BehaviorDimension };
                                       setValue('conditions', next, { shouldDirty: true });
+                                      setSimResult(null);
                                     }}
                                   >
                                     <SelectTrigger data-testid={`behavior-control-dimension-${idx}`} className="flex-1"><SelectValue /></SelectTrigger>
@@ -941,7 +1110,9 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                       {sep && (
                                         <span className="text-muted-foreground mx-1 font-medium">{sep}</span>
                                       )}
-                                      <span className="text-muted-foreground">{dimLabel}{t('behaviorControl.preview.exceed')}</span>
+                                      <span className="text-muted-foreground">
+                                        {t('behaviorControl.preview.reach', { dimension: dimLabel })}
+                                      </span>
                                       <Badge variant="outline" className="mx-1.5 font-mono">{cond.threshold > 0 ? cond.threshold : '—'}</Badge>
                                     </span>
                                   );
@@ -962,11 +1133,18 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             <div className="flex items-center gap-2">
                               <span className="text-muted-foreground">{t('behaviorControl.preview.expirePrefix')}</span>
                               <span>{watchAll.valid_until || t('behaviorControl.preview.permanent')}</span>
+                              {previewExpired && (
+                                <Badge data-testid="behavior-control-preview-expired" variant="destructive">
+                                  {t('behaviorControl.preview.expired')}
+                                </Badge>
+                              )}
                             </div>
 
                             <div className="flex items-center gap-2">
                               <span className="text-muted-foreground">{t('behaviorControl.preview.priorityPrefix')}</span>
-                              <Badge variant="outline" className="font-mono">{watchAll.priority}</Badge>
+                              <Badge variant="outline" className="font-mono">
+                                {Number.isFinite(watchAll.priority) ? watchAll.priority : '—'}
+                              </Badge>
                             </div>
                           </div>
                         )}
@@ -1085,57 +1263,81 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                                   />
                                 </div>
                               )}
-                              <div>
-                                <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.mailCount')}</Label>
-                                <Input
-                                  data-testid="behavior-control-sim-mail-count"
-                                  type="number"
-                                  value={simMailCount}
-                                  onChange={(e) => setSimMailCount(parseInt(e.target.value, 10) || 0)}
-                                  className="h-8 text-sm"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.recipientCount')}</Label>
-                                <Input
-                                  data-testid="behavior-control-sim-recipient-count"
-                                  type="number"
-                                  value={simRecipientCount}
-                                  onChange={(e) => setSimRecipientCount(parseInt(e.target.value, 10) || 0)}
-                                  className="h-8 text-sm"
-                                />
-                              </div>
+                              {needsMailCount && (
+                                <div>
+                                  <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.mailCount')}</Label>
+                                  <Input
+                                    data-testid="behavior-control-sim-mail-count"
+                                    type="number"
+                                    min={0}
+                                    value={simMailCount}
+                                    onChange={(e) => setSimMailCount(parseInt(e.target.value, 10) || 0)}
+                                    className="h-8 text-sm"
+                                  />
+                                </div>
+                              )}
+                              {needsRecipientCount && (
+                                <div>
+                                  <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.recipientCount')}</Label>
+                                  <Input
+                                    data-testid="behavior-control-sim-recipient-count"
+                                    type="number"
+                                    min={0}
+                                    value={simRecipientCount}
+                                    onChange={(e) => setSimRecipientCount(parseInt(e.target.value, 10) || 0)}
+                                    className="h-8 text-sm"
+                                  />
+                                </div>
+                              )}
+                              {needsAttachmentSize && (
+                                <div>
+                                  <Label className="text-xs mb-1.5 block">{t('behaviorControl.simulator.attachmentSize')}</Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      data-testid="behavior-control-sim-attachment-size"
+                                      type="number"
+                                      min={0}
+                                      step="0.1"
+                                      value={simAttachmentSizeMiB}
+                                      onChange={(e) => setSimAttachmentSizeMiB(Number(e.target.value) || 0)}
+                                      className="h-8 text-sm"
+                                    />
+                                    <span className="text-xs text-muted-foreground">MB</span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                             <Button data-testid="behavior-control-sim-run" type="button" size="sm" className="w-full" onClick={runSimulation}>
                               {t('behaviorControl.simulator.run')}
                             </Button>
 
                             {simResult && (
-                              <div className={cn(
-                                'rounded-lg p-3 text-sm',
-                                simResult.hit
-                                  ? 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800'
-                                  : 'bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800',
-                              )}
+                              <div
+                                role="status"
+                                aria-live="polite"
+                                data-testid="behavior-control-simulation-result"
+                                data-level={simResult.hit ? 'info' : 'neutral'}
+                                className={cn(
+                                  'rounded-lg border p-3 text-sm',
+                                  simResult.hit
+                                    ? 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300'
+                                    : 'border-border bg-muted text-muted-foreground',
+                                )}
                               >
                                 <div className="flex items-center gap-2 mb-1">
                                   {simResult.hit ? (
                                     <>
-                                      <X className="h-4 w-4 text-red-600" />
-                                      <span data-testid="behavior-control-sim-hit" className="font-medium text-red-700 dark:text-red-400">{t('behaviorControl.simulator.hit')}</span>
+                                      <Target data-testid="behavior-control-simulation-hit-icon" className="h-4 w-4" />
+                                      <span data-testid="behavior-control-sim-hit" className="font-medium">{t('behaviorControl.simulator.hit')}</span>
                                     </>
                                   ) : (
                                     <>
-                                      <Check className="h-4 w-4 text-green-600" />
-                                      <span data-testid="behavior-control-sim-miss" className="font-medium text-green-700 dark:text-green-400">{t('behaviorControl.simulator.miss')}</span>
+                                      <MinusCircle data-testid="behavior-control-simulation-miss-icon" className="h-4 w-4" />
+                                      <span data-testid="behavior-control-sim-miss" className="font-medium">{t('behaviorControl.simulator.miss')}</span>
                                     </>
                                   )}
                                 </div>
-                                <p className={cn(
-                                  'text-xs',
-                                  simResult.hit ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400',
-                                )}
-                                >
+                                <p className="text-xs">
                                   {simResult.reason}
                                 </p>
                               </div>
@@ -1299,8 +1501,17 @@ function GroupPreviewDialog({ open, onClose, data, t }: GroupPreviewDialogProps)
         </div>
 
         {/* 底部按钮 */}
-        <DialogFooter className="px-6 py-4 border-t shrink-0">
-          <Button type="button" variant="outline" size="sm" onClick={handleClose}>
+        <DialogFooter
+          data-testid="behavior-control-group-preview-footer"
+          className="mx-0 mb-0 mt-0 px-6 py-4 border-t shrink-0"
+        >
+          <Button
+            data-testid="behavior-control-group-preview-close"
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClose}
+          >
             {t('behaviorControl.groupPreview.close')}
           </Button>
         </DialogFooter>

@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { cn } from '@/lib/utils';
 import { phishingQueryKeys } from '../phishing-query-keys';
 import { useUnsavedDraftRegistration } from './use-unsaved-draft-registration';
@@ -108,6 +109,7 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<PhishAgentConfig | null>(null);
   const [conflict, setConflict] = useState<PhishAgentConfig | null>(null);
+  const [confirmTimeoutDisable, setConfirmTimeoutDisable] = useState(false);
 
   const dirty = Boolean(open && draft && configQuery.data && JSON.stringify(draft) !== JSON.stringify(configQuery.data));
   useUnsavedDraftRegistration(open, dirty);
@@ -169,6 +171,7 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
     if (!configQuery.data || readOnly) return;
     setDraft(cloneConfig(configQuery.data));
     setConflict(null);
+    setConfirmTimeoutDisable(false);
     setOpen(true);
   };
 
@@ -255,7 +258,13 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
                 <div className="min-w-0 space-y-2"><Label htmlFor="recheck-minutes" className="text-sm text-muted-foreground">{t('maxRecheckMinutes')}</Label><Input id="recheck-minutes" data-testid="recheck-minutes" type="number" min={1} max={60} value={draft.runtime_policy.max_recheck_minutes} onChange={(event) => patchRuntime({ max_recheck_minutes: Number(event.target.value) })} /></div>
               </div>
               {!validRuntimeDeadlines ? <p className="text-sm text-destructive">{t('invalidTimeoutWindow')}</p> : null}
-              {draft.runtime_policy.run_mode === 'realtime' ? <div className="flex items-center justify-between rounded-lg border border-border p-3"><div><Label>{t('timeoutAsync')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('timeoutAsyncHint')}</p></div><Switch checked={draft.runtime_policy.timeout_async_enabled} onCheckedChange={(timeout_async_enabled) => patchRuntime({ timeout_async_enabled })} data-testid="timeout-async-enabled" /></div> : null}
+              {draft.runtime_policy.run_mode === 'realtime' ? <div className="flex items-center justify-between rounded-lg border border-border p-3"><div><Label>{t('timeoutAsync')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('timeoutAsyncHint')}</p></div><Switch checked={draft.runtime_policy.timeout_async_enabled} onCheckedChange={(timeoutAsyncEnabled) => {
+                if (timeoutAsyncEnabled) {
+                  patchRuntime({ timeout_async_enabled: true });
+                  return;
+                }
+                setConfirmTimeoutDisable(true);
+              }} data-testid="timeout-async-enabled" /></div> : null}
             </section>
             <section className="space-y-3">
               <div><Label>{t('confidencePolicy')}</Label><p className="mt-1 text-sm text-muted-foreground">{t('confidenceHint')}</p></div>
@@ -285,6 +294,19 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
           <SheetFooter className="shrink-0 flex-row justify-end gap-2 border-t border-border px-5 py-3"><Button variant="outline" onClick={() => setOpen(false)} disabled={saveMutation.isPending} data-testid="runtime-cancel">{t('cancel')}</Button><Button onClick={() => draft && saveMutation.mutate(draft)} disabled={!draft || !validCutoffs || !validRuntimeDeadlines || invalidMarkText || saveMutation.isPending || readOnly} data-testid="runtime-save">{saveMutation.isPending ? t('saving') : t('save')}</Button></SheetFooter>
         </SheetContent>
       </Sheet>
+      <ConfirmDialog
+        open={confirmTimeoutDisable}
+        onOpenChange={setConfirmTimeoutDisable}
+        title={t('timeoutCloseConfirmTitle')}
+        description={t('timeoutCloseConfirmDesc')}
+        confirmText={t('confirmClose')}
+        cancelText={t('cancel')}
+        onConfirm={() => {
+          patchRuntime({ timeout_async_enabled: false });
+          setConfirmTimeoutDisable(false);
+        }}
+        variant="destructive"
+      />
     </Card>
   );
 }

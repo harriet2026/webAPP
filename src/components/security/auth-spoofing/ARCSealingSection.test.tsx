@@ -27,8 +27,12 @@ vi.mock('@/lib/api/use-api-error-message', () => ({ useApiErrorMessage: () => ()
 vi.mock('@/contexts/auth-context', () => ({ AuthContext: StubAuthContext }));
 vi.mock('@/hooks/use-tenant', () => ({ useTenant: () => ({ effectiveTenantId: 7, isSystemAdmin: false }) }));
 vi.mock('@/hooks/use-permission', () => ({ usePermission: () => ({ isTenantAdmin: true }) }));
+const productFormState = {
+  capabilities: { ai: true, multiTenant: true, saas: false },
+  switcherEnabled: true,
+};
 vi.mock('@/contexts/product-form-context', () => ({
-  useProductForm: () => ({ capabilities: { ai: true, multiTenant: true, saas: false } }),
+  useProductForm: () => productFormState,
 }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
@@ -48,8 +52,19 @@ function renderSection() {
 describe('ARCSealingSection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    productFormState.switcherEnabled = true;
     mockGetARCSettings.mockResolvedValue({ tenant_id: 7, enabled: false, signing_domain: '' });
     mockPutARCSettings.mockImplementation(async (patch) => ({ tenant_id: 7, enabled: false, signing_domain: '', ...patch }));
+  });
+
+  it('does not render or query ARC when the product-form switcher is disabled', () => {
+    productFormState.switcherEnabled = false;
+
+    renderSection();
+
+    expect(screen.queryByTestId('arc-sealing-section')).not.toBeInTheDocument();
+    expect(mockGetARCSettings).not.toHaveBeenCalled();
+    expect(mockListAllDkimKeys).not.toHaveBeenCalled();
   });
 
   it('enables ARC only with an active DNS-verified tenant DKIM domain', async () => {

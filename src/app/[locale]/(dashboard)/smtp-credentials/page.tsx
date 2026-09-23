@@ -33,6 +33,8 @@ import { PageHeader, PageShell, PageSurface } from '@/components/shared/page-she
 import { PageFilters } from '@/components/shared/page-filters';
 import { Search, X } from 'lucide-react';
 import { useProductForm } from '@/contexts/product-form-context';
+import { useTenant } from '@/hooks/use-tenant';
+import { getRoutingScope } from '@/lib/api/mail-routing';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 // GT-12368: 本地账号库禁用时（OSG_LOCAL_AUTH_ENABLED=false），创建/编辑凭证的
@@ -45,7 +47,7 @@ export function backendOptions(localAuthEnabled: boolean): ('local' | 'smtp_rela
 const credentialSchema = z.object({
   username: z.string().min(1, 'usernameRequired'),
   password: z.union([z.string().min(6, 'passwordMinLength'), z.literal('')]).optional(),
-  tenant_id: z.number().min(1, 'tenantRequired'),
+  tenant_id: z.number().int().positive(),
   auth_backend: z.enum(['local', 'smtp_relay', 'ldap']),
   backend_config: z.string().optional(),
   is_active: z.boolean(),
@@ -58,7 +60,18 @@ export default function SMTPCredentialsPage() {
   const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
   const { apiRequest } = useApiRequest();
-  const { localAuthEnabled } = useProductForm();
+  const { localAuthEnabled, capabilities, registryReady } = useProductForm();
+  const { effectiveTenantId, isSystemAdmin } = useTenant();
+  const needsDefaultTenant = registryReady && !capabilities?.multiTenant && isSystemAdmin;
+  const { data: routingScope, error: scopeError } = useQuery({
+    queryKey: ['smtp-credential-default-tenant'],
+    queryFn: () => getRoutingScope(apiRequest),
+    enabled: needsDefaultTenant,
+  });
+  const targetTenant = needsDefaultTenant ? routingScope?.tenant_id : effectiveTenantId;
+  const createTenantId = typeof targetTenant === 'number' && Number.isInteger(targetTenant) && targetTenant > 0
+    ? targetTenant : undefined;
+  const canCreate = registryReady && (!needsDefaultTenant || createTenantId !== undefined);
   const opts = backendOptions(localAuthEnabled);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCred, setEditingCred] = useState<SMTPCredential | null>(null);
@@ -121,7 +134,7 @@ export default function SMTPCredentialsPage() {
     defaultValues: {
       username: '',
       password: '',
-      tenant_id: 1,
+      tenant_id: createTenantId,
       auth_backend: opts[0],
       backend_config: '',
       is_active: true,
@@ -144,7 +157,7 @@ export default function SMTPCredentialsPage() {
       form.reset({
         username: '',
         password: '',
-        tenant_id: 1,
+        tenant_id: createTenantId,
         auth_backend: opts[0],
         backend_config: '',
         is_active: true,
@@ -255,12 +268,13 @@ export default function SMTPCredentialsPage() {
         eyebrow={t('smtpCredentials.eyebrow')}
         title={t('smtpCredentials.title')}
         description={t('smtpCredentials.subtitle')}
-        actions={<Button onClick={() => handleOpenDialog()} data-testid="smtp-credentials-create">
+        actions={<Button disabled={!canCreate} onClick={() => handleOpenDialog()} data-testid="smtp-credentials-create">
           <Plus className="h-4 w-4 mr-2" />
           {t('smtpCredentials.create')}
         </Button>}
       />
 
+      {scopeError && <p role="alert" className="text-sm text-destructive">{apiErrorMessage(scopeError)}</p>}
       {isLoading ? (
         <PageSurface>
           <div className="flex items-center justify-center py-12">
@@ -323,8 +337,9 @@ export default function SMTPCredentialsPage() {
             )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>{t('smtpCredentials.tenant')} *</Label>
-                <Input type="number" data-testid="smtp-credential-tenant-id" {...form.register('tenant_id', { valueAsNumber: true })} />
+                <Label htmlFor="smtp-credential-tenant-id">{t('smtpCredentials.tenant')} *</Label>
+                <Input id="smtp-credential-tenant-id" type="number" min={1} step={1} readOnly={!!editingCred} aria-invalid={!!form.formState.errors.tenant_id} data-testid="smtp-credential-tenant-id" {...form.register('tenant_id', { valueAsNumber: true })} />
+                {form.formState.errors.tenant_id && <p role="alert" className="text-sm text-destructive">{t('common.validation.tenantRequired')}</p>}
               </div>
               <div className="space-y-2">
                 <Label>{t('smtpCredentials.authBackend')} *</Label>

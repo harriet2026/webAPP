@@ -27,8 +27,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import type { ApiRequestFn } from '@/lib/api/client';
-import { addSenderFilterRule, disposalRulePriority } from '../../lib/disposal-detail-api';
+import {
+  addSenderFilterRule,
+  disposalRulePriority,
+  isDuplicateSenderFilterRuleError,
+} from '../../lib/disposal-detail-api';
 import { useAuth } from '@/contexts/auth-context';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface SenderActionsProps {
   sender: string;
@@ -57,6 +62,7 @@ export function SenderActions({
   // recipient-status.tsx's own confirm dialogs -- pull from there instead of
   // duplicating the strings under senderActions.*.
   const tOverview = useTranslations('emailDisposal.detail.overview');
+  const apiErrorMessage = useApiErrorMessage();
 
   const [blacklistOpen, setBlacklistOpen] = useState(false);
   const [whitelistOpen, setWhitelistOpen] = useState(false);
@@ -82,8 +88,10 @@ export function SenderActions({
       toast.success(t('blacklistDialog.success'));
       setBlacklistOpen(false);
       onDisposed?.();
-    } catch {
-      toast.error(t('blacklistDialog.failed'));
+    } catch (error) {
+      toast.error(isDuplicateSenderFilterRuleError(error)
+        ? t('blacklistDialog.alreadyExists')
+        : apiErrorMessage(error, t('blacklistDialog.failed')));
     } finally {
       setBusy(false);
     }
@@ -98,8 +106,10 @@ export function SenderActions({
       toast.success(t('whitelistDialog.success'));
       setWhitelistOpen(false);
       onDisposed?.();
-    } catch {
-      toast.error(t('whitelistDialog.failed'));
+    } catch (error) {
+      toast.error(isDuplicateSenderFilterRuleError(error)
+        ? t('whitelistDialog.alreadyExists')
+        : apiErrorMessage(error, t('whitelistDialog.failed')));
     } finally {
       setBusy(false);
     }

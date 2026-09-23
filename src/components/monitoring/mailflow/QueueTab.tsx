@@ -10,7 +10,7 @@ import { EmptyState, DegradedBanner, TimeoutBanner } from './StateBanners';
 import { useMailflowQueue, useMailflowQueueTrend } from './hooks';
 import { isTimeoutError } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
-import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
+import { createTimeAxisFormatter, createTimeTooltipFormatter } from '@/lib/monitoring/chart-time';
 import type { MailflowDirection, TimeRange } from '@/types/monitoring';
 
 interface QueueTabProps {
@@ -35,6 +35,12 @@ const AGE_COLORS: Record<string, string> = {
   '30min-4h': '#f59e0b',
   gt4h: '#ef4444',
 };
+
+function formatQueueTooltipValue(value: number) {
+  if (!Number.isFinite(value)) return String(value);
+  const rounded = Number(value.toFixed(2));
+  return String(Object.is(rounded, -0) ? 0 : rounded);
+}
 
 function StatusBadge({ status, label }: { status: string; label: string }) {
   if (status === 'critical') {
@@ -80,6 +86,8 @@ export function QueueTab({ node, range, direction }: QueueTabProps) {
     }
     const timestamps = Array.from(tsSet).sort();
     if (timestamps.length === 0) return null;
+    const formatAxisTime = createTimeAxisFormatter(locale, range === '7d');
+    const displayTimestamps = timestamps.map(createTimeTooltipFormatter(locale));
 
     const valueMaps: Record<string, Map<string, number>> = {};
     for (const key of QUEUE_KEYS) {
@@ -88,15 +96,18 @@ export function QueueTab({ node, range, direction }: QueueTabProps) {
     }
 
     return {
-      tooltip: { trigger: 'axis' as const },
+      tooltip: {
+        trigger: 'axis' as const,
+        valueFormatter: formatQueueTooltipValue,
+      },
       legend: { data: QUEUE_KEYS.map((k) => t(`queues.${k}`)), top: 0 },
       grid: { left: 48, right: 16, top: 36, bottom: 32 },
       xAxis: {
         type: 'category' as const,
-        data: timestamps,
+        data: displayTimestamps,
         axisLabel: {
           showMaxLabel: true,
-          formatter: createTimeAxisFormatter(locale, range === '7d'),
+          formatter: (value: string, index: number) => formatAxisTime(timestamps[index] ?? value),
         },
       },
       yAxis: { type: 'value' as const, min: 0 },

@@ -10,12 +10,15 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { BehaviorControlRuleView, BehaviorObjectType, BehaviorDirection, BehaviorProductAction } from '@/types/behavior-control';
 import { BACKEND_TO_PRODUCT } from '@/types/behavior-control';
+import { cn } from '@/lib/utils';
+import { isBehaviorControlRuleExpired } from './validity';
 
 interface Props {
   views: BehaviorControlRuleView[];
   onEdit: (view: BehaviorControlRuleView) => void;
   onDelete: (view: BehaviorControlRuleView) => void;
   onToggle: (id: number, isActive: boolean) => void;
+  togglePending?: boolean;
 }
 
 const DIR_BADGE: Record<BehaviorDirection, string> = {
@@ -55,7 +58,7 @@ function ObjectCell({ type, subType, value }: { type: BehaviorObjectType; subTyp
   );
 }
 
-export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Props) {
+export function BehaviorControlTable({ views, onEdit, onDelete, onToggle, togglePending = false }: Props) {
   const t = useTranslations();
 
   return (
@@ -69,7 +72,7 @@ export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Prop
             <TableHead className="min-w-[220px]" data-testid="behavior-control-col-object">{t('behaviorControl.col.object')}</TableHead>
             <TableHead className="w-[90px]" data-testid="behavior-control-col-action">{t('behaviorControl.col.action')}</TableHead>
             <TableHead className="w-[80px]" data-testid="behavior-control-col-priority">{t('behaviorControl.col.priority')}</TableHead>
-            <TableHead className="w-[80px]" data-testid="behavior-control-col-status">{t('behaviorControl.col.status')}</TableHead>
+            <TableHead className="w-[110px]" data-testid="behavior-control-col-status">{t('behaviorControl.col.status')}</TableHead>
             <TableHead className="w-[130px]" data-testid="behavior-control-col-modified">{t('behaviorControl.col.modified')}</TableHead>
             <TableHead className="w-[100px]" data-testid="behavior-control-col-operations">{t('behaviorControl.col.operations')}</TableHead>
           </TableRow>
@@ -79,13 +82,20 @@ export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Prop
             <TableRow>
               <TableCell colSpan={9} className="h-32 text-center" data-testid="behavior-control-empty">
                 <div className="text-muted-foreground">{t('behaviorControl.empty')}</div>
-                <p className="text-sm text-muted-foreground">{t('behaviorControl.emptyHint')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('behaviorControl.emptyHint', { action: t('behaviorControl.addRule') })}
+                </p>
               </TableCell>
             </TableRow>
           ) : views.map((v) => {
             const productAction = BACKEND_TO_PRODUCT[v.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? v.rule.action;
+            const expired = isBehaviorControlRuleExpired(v.rule.valid_until);
             return (
-              <TableRow key={v.rule.id} data-testid={`behavior-control-row-${v.rule.id}`}>
+              <TableRow
+                key={v.rule.id}
+                data-testid={`behavior-control-row-${v.rule.id}`}
+                className={cn(expired && 'opacity-60')}
+              >
                 <TableCell className="font-mono text-xs text-muted-foreground">{v.list_id_display}</TableCell>
                 <TableCell className="font-medium">
                   {v.is_complex && (
@@ -111,12 +121,24 @@ export function BehaviorControlTable({ views, onEdit, onDelete, onToggle }: Prop
                 </TableCell>
                 <TableCell className="font-mono text-xs">{v.rule.priority}</TableCell>
                 <TableCell>
-                  <Switch
-                    data-testid={`behavior-control-toggle-${v.rule.id}`}
-                    checked={v.rule.is_active}
-                    onCheckedChange={(isActive) => onToggle(v.rule.id, isActive)}
-                    aria-label={t(v.rule.is_active ? 'common.disabled' : 'common.enabled')}
-                  />
+                  {expired ? (
+                    <Badge
+                      data-testid={`behavior-control-status-${v.rule.id}`}
+                      variant="destructive"
+                    >
+                      {t('behaviorControl.filter.expired')}
+                    </Badge>
+                  ) : (
+                    <div className="flex items-center" data-testid={`behavior-control-status-${v.rule.id}`}>
+                      <Switch
+                        data-testid={`behavior-control-toggle-${v.rule.id}`}
+                        checked={v.rule.is_active}
+                        disabled={togglePending}
+                        onCheckedChange={(isActive) => onToggle(v.rule.id, isActive)}
+                        aria-label={t('behaviorControl.toggleRule', { name: v.rule.name })}
+                      />
+                    </div>
+                  )}
                 </TableCell>
                 {/* GT-12500：本地时区分钟精度，不再裸渲染 UTC ISO 串 */}
                 <TableCell className="text-sm text-muted-foreground">{formatTimestamp(v.rule.updated_at)}</TableCell>

@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { isValidAuthSpoofingHeaderName } from '@/lib/auth-spoofing-validation';
 
 export interface TagPanelValue {
   tag_subject_enabled?: boolean;
@@ -30,6 +31,9 @@ interface AuthSpoofingTagPanelProps {
 export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofingTagPanelProps) {
   const t = useTranslations('authSpoofing.tagPanel');
   const uid = useId();
+  const headerName = value.tag_header_name || '';
+  const headerNameInvalid = headerName.length > 0 && !isValidAuthSpoofingHeaderName(headerName);
+  const headerNameErrorId = `${uid}-header-name-error`;
 
   return (
     <div
@@ -60,13 +64,21 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
               className="flex items-center gap-4"
             >
               <div className="flex items-center gap-1.5">
-                <RadioGroupItem value="prefix" id={`${uid}-prefix`} />
+                <RadioGroupItem
+                  value="prefix"
+                  id={`${uid}-prefix`}
+                  data-testid="auth-spoofing-tag-subject-position-prefix"
+                />
                 <Label htmlFor={`${uid}-prefix`} className="text-sm font-normal">
                   {t('subjectPositionPrefix')}
                 </Label>
               </div>
               <div className="flex items-center gap-1.5">
-                <RadioGroupItem value="suffix" id={`${uid}-suffix`} />
+                <RadioGroupItem
+                  value="suffix"
+                  id={`${uid}-suffix`}
+                  data-testid="auth-spoofing-tag-subject-position-suffix"
+                />
                 <Label htmlFor={`${uid}-suffix`} className="text-sm font-normal">
                   {t('subjectPositionSuffix')}
                 </Label>
@@ -95,15 +107,29 @@ export function AuthSpoofingTagPanel({ value, onChange, disabled }: AuthSpoofing
           <Label className="text-sm">{t('headerLabel')}</Label>
         </div>
         {value.tag_header_enabled && (
-          <div className="flex flex-wrap items-center gap-2 pl-10">
-            <Input
-              value={value.tag_header_name || ''}
-              disabled={disabled}
-              data-testid="auth-spoofing-tag-header-name"
-              placeholder={t('headerNamePlaceholder')}
-              onChange={(e) => onChange({ tag_header_name: e.target.value })}
-              className="w-[220px] h-8"
-            />
+          <div className="flex flex-wrap items-start gap-2 pl-10">
+            <div className="w-[220px] space-y-1">
+              <Input
+                value={headerName}
+                disabled={disabled}
+                data-testid="auth-spoofing-tag-header-name"
+                placeholder={t('headerNamePlaceholder')}
+                onChange={(e) => onChange({ tag_header_name: e.target.value })}
+                className="h-8 w-full"
+                aria-invalid={headerNameInvalid}
+                aria-describedby={headerNameInvalid ? headerNameErrorId : undefined}
+              />
+              {headerNameInvalid ? (
+                <p
+                  id={headerNameErrorId}
+                  role="alert"
+                  className="text-xs text-destructive"
+                  data-testid="auth-spoofing-tag-header-name-error"
+                >
+                  {t('errorHeaderNameInvalid')}
+                </p>
+              ) : null}
+            </div>
             <Input
               value={value.tag_header_value || ''}
               disabled={disabled}

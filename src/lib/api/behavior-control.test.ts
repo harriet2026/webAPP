@@ -46,21 +46,25 @@ describe('toggleBehaviorControlRule (GT-11771 double-encode)', () => {
 });
 
 describe('buildConditionTreeFromForm — demo-aligned object mapping', () => {
-  it('group → rcpttags hasTag grp:<value>', () => {
+  it('group → sender_group map membership', () => {
     expect(buildConditionTreeFromForm({ object_config: { type: 'sender', sub_type: 'group', value: 'sg-1' } }))
-      .toEqual({ type: 'condition', field: 'rcpttags', operator: 'hasTag', value: 'grp:sg-1' });
+      .toEqual({ type: 'condition', field: 'sender_group', map_key: 'grp:sg-1', operator: 'eq', value: 'true' });
   });
   it('individual → sender eq', () => {
     expect(buildConditionTreeFromForm({ object_config: { type: 'sender', sub_type: 'individual', value: 'a@b.com' } }))
       .toEqual({ type: 'condition', field: 'sender', operator: 'eq', value: 'a@b.com' });
   });
+  it('organization → sender_dept_path within stable department path', () => {
+    expect(buildConditionTreeFromForm({ object_config: { type: 'sender', sub_type: 'organization', value: '总部 / 研发部' } }))
+      .toEqual({ type: 'condition', field: 'sender_dept_path', operator: 'within', value: '总部 / 研发部' });
+  });
   it('senderIp single → client_ip eq', () => {
     expect(buildConditionTreeFromForm({ object_config: { type: 'senderIp', sub_type: 'single', value: '1.2.3.4' } }))
       .toEqual({ type: 'condition', field: 'client_ip', operator: 'eq', value: '1.2.3.4' });
   });
-  it('senderIp ipGroup → rcpttags hasTag grp:', () => {
+  it('senderIp ipGroup → sender_ip_group map membership', () => {
     expect(buildConditionTreeFromForm({ object_config: { type: 'senderIp', sub_type: 'ipGroup', value: 'ip-1' } }))
-      .toEqual({ type: 'condition', field: 'rcpttags', operator: 'hasTag', value: 'grp:ip-1' });
+      .toEqual({ type: 'condition', field: 'sender_ip_group', map_key: 'grp:ip-1', operator: 'eq', value: 'true' });
   });
   it('senderDomain → senderdomain eq (lowercased)', () => {
     expect(buildConditionTreeFromForm({ object_config: { type: 'senderDomain', value: 'Example.COM' } }))

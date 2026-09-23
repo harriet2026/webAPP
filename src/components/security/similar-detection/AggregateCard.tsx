@@ -32,6 +32,7 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
   return (
     <div
       data-testid="similar-detection-card-aggregate"
+      data-detection-type={detectionType}
       className={cn(
         'border rounded-lg p-4 transition-[background-color,border-color] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
         value.observe_mode
@@ -94,6 +95,7 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
           </div>
           <div className="flex items-center gap-2">
             <Input
+              data-testid={`similar-detection-window-aggregate-${detectionType}`}
               type="number"
               value={value.window_minutes}
               onChange={(e) => onChange({ window_minutes: clampInt(e.target.value) })}
@@ -118,6 +120,7 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
             </div>
             <div className="flex items-center gap-2">
               <Slider
+                data-testid="similar-detection-threshold-aggregate-similar_email"
                 value={[value.similarity_pct]}
                 onValueChange={([v]) => onChange({ similarity_pct: v })}
                 min={50}
@@ -144,6 +147,7 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
           </div>
           <div className="flex items-center gap-2">
             <Input
+              data-testid={`similar-detection-min-count-aggregate-${detectionType}`}
               type="number"
               value={value.min_count}
               onChange={(e) => onChange({ min_count: clampInt(e.target.value) })}

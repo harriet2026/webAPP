@@ -313,14 +313,12 @@ export function recipientActionsForStatus(status: string, hasObjectId: boolean):
     // already implement the same release/delete object-mode contract as
     // quarantine/sideline, so it belongs in the same operable bucket.
     //
-    // 待审核(pending_review/audited) additionally exposes 隔离/阻断
-    // (demo-parity, task RA-5): DEMO-PARITY buttons -- functional in MOCK
-    // mode (immediate state change), gracefully degrading to a toast in
-    // REAL mode since the backend action enum is only release|delete|recall
-    // (see hooks/use-recipient-disposition.tsx's dispatchQuarantineOrBlock).
+    // GT-13650: 待审核件只能暴露真实后端支持的投递/丢弃。原型中的
+    // 隔离/阻断会向 bulk-dispose 发送后端不接受的 action，真实环境必然 400；
+    // 在完整生命周期迁移能力落地前，不展示无法完成的操作。
     case 'pending_review':
     case 'audited':
-      return hasObjectId ? ['deliver', 'quarantine', 'block', 'discard'] : [];
+      return hasObjectId ? ['deliver', 'discard'] : [];
     case 'deferred':
       // GT-12880 review F10：暂缓（milter tempfail，上游在自动重试）≠ 拦截族，
       // 不提供动作但展示层不得落"未保留原文"文案（recipient-status 单独分支）。

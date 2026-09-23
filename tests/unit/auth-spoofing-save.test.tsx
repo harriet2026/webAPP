@@ -22,7 +22,20 @@ vi.mock('sonner', () => ({
 }));
 
 vi.mock('@/contexts/auth-context', () => ({
-  useAuth: () => ({ isSystemAdmin: true, user: { role: 'system_admin' } }),
+  useAuth: () => ({
+    isSystemAdmin: true,
+    user: { role: 'system_admin' },
+    canSeeRoute: () => true,
+  }),
+}));
+
+vi.mock('@/components/security/auth-spoofing/use-auth-spoofing-access', () => ({
+  useAuthSpoofingAccess: () => ({
+    status: 'ready',
+    canView: true,
+    canEdit: true,
+    readOnly: false,
+  }),
 }));
 
 vi.mock('@/contexts/product-form-context', () => ({

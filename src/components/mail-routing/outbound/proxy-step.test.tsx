@@ -25,6 +25,7 @@ vi.mock('@/lib/api/client', () => ({
 const TENANT_ID = 1;
 
 interface ProxyFixture {
+  cac_override?: { enabled: boolean; result: string };
   id: number;
   name: string;
   host: string;
@@ -171,6 +172,31 @@ describe('StepBar', () => {
 });
 
 describe('ProxyStep', () => {
+  it('requires a fixed CAC result only when enabled and preserves it on edit', async () => {
+    routeApi([{ ...FIXTURES[0], cac_override: { enabled: false, result: '' } }]);
+    const user = userEvent.setup();
+    render(wrap(<ProxyStep tenantId={TENANT_ID} />));
+    await user.click(await screen.findByTestId('mr-ob-proxy-edit-3001'));
+    expect(screen.getByTestId('mr-ob-proxy-cac-switch')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.queryByTestId('mr-ob-proxy-cac-result-input')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('mr-ob-proxy-cac-switch'));
+    expect(screen.getByTestId('mr-ob-proxy-cac-error')).toBeInTheDocument();
+    await user.type(screen.getByTestId('mr-ob-proxy-cac-result-input'), 'Non-Spam');
+    expect(screen.queryByTestId('mr-ob-proxy-cac-error')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('mr-ob-proxy-save'));
+    await waitFor(() => expect(mockApiRequest).toHaveBeenCalledWith('/proxysvr-endpoints/3001', expect.objectContaining({
+      method: 'PUT', body: expect.objectContaining({ cac_override: { enabled: true, result: 'Non-Spam' } }),
+    })));
+    await waitFor(() => expect(screen.queryByTestId('mr-ob-proxy-cac-switch')).not.toBeInTheDocument());
+    await user.click(screen.getByTestId('mr-ob-proxy-edit-3001'));
+    expect(screen.getByTestId('mr-ob-proxy-cac-switch')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('mr-ob-proxy-cac-result-input')).toHaveValue('Non-Spam');
+    await user.click(screen.getByTestId('mr-ob-proxy-cac-switch'));
+    await user.click(screen.getByTestId('mr-ob-proxy-save'));
+    await waitFor(() => expect(mockApiRequest).toHaveBeenLastCalledWith('/proxysvr-endpoints?page=1&page_size=100'));
+    expect(mockApiRequest.mock.calls.some(([, options]) => options?.body?.cac_override?.enabled === false && options?.body?.cac_override?.result === 'Non-Spam')).toBe(true);
+  });
+
   beforeEach(() => {
     mockApiRequest.mockReset();
     (toast.success as ReturnType<typeof vi.fn>).mockReset();

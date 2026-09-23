@@ -3,11 +3,9 @@
 // 新增/编辑数据源抽屉 —— 逐字段对齐 demo data-source-tab.tsx 的 Sheet：
 // 三个 SectionCard（基础信息 / 连接参数 / 同步策略）+ 4 种同步方式表单联动 +
 // 实时行内校验 + 测试连接状态机 + 「确定」点击式闸门（toast 阻断，不禁用按钮）。
-// 有意偏离（spec E1/E2/E3）：LDAP 保留 TLS 两开关（产品安全规则强制）；
-// user_filter/attr_map 不在 UI，保存时下发默认值；coremail/neteml 为后端 stub，
-// 保存闸门按后端契约仅对 LDAP/CSV 生效。
+// 所有数据源必须验证实际待保存配置；LDAP 编辑保留未修改映射及已存密钥。
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Sheet,
@@ -24,36 +22,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { isMockEnabled } from '@/lib/mock/storage';
 import { useScopedApiRequest } from '@/lib/api/client';
+import { useProductForm } from '@/contexts/product-form-context';
 import {
   useContactSourceMutations,
   testContactSourceNew,
   testContactSource,
-  uploadContactCSV,
-  previewContactCSV,
 } from './api';
+import { CSVImportFields } from './CSVImportFields';
 import { Field, SectionCard, TestResultTag, type TestState } from './shared';
 import type { ContactSource, SourceType } from './types';
 
 const DEFAULT_USER_FILTER = '(objectClass=person)';
 const DEFAULT_ATTR_MAP = { email: 'mail', display_name: 'cn', dept: 'department', job_title: 'title' };
 const DEFAULT_CRON = '0 0 * * *';
-
-// CSV 自动列映射（demo 无列映射 UI，Q2 拍板严格对齐 —— 按常见表头名自动映射）
-const CSV_HEADER_ALIASES: Record<string, string[]> = {
-  email: ['email', 'e-mail', 'mail', '邮箱', '邮箱地址', '电子邮箱'],
-  display_name: ['name', 'display_name', 'username', '姓名', '用户名', '显示名'],
-  dept: ['dept', 'department', 'dept_path', '部门', '部门路径'],
-  job_title: ['job_title', 'title', 'position', '职务', '职位', '岗位'],
-};
-
-function autoColumnMap(headers: string[]): Record<string, string> {
-  const map: Record<string, string> = {};
-  for (const [field, aliases] of Object.entries(CSV_HEADER_ALIASES)) {
-    const hit = headers.find((h) => aliases.includes(h.trim().toLowerCase()) || aliases.includes(h.trim()));
-    if (hit) map[field] = hit;
-  }
-  return map;
-}
 
 interface DraftState {
   name: string;
@@ -64,6 +45,9 @@ interface DraftState {
   port: string;
   useTls: boolean;
   skipVerify: boolean;
+  allowLegacyTls: boolean;
+  userFilter: string;
+  attrMap: Record<string, string>;
   baseDn: string;
   bindDn: string;
   bindPassword: string;
@@ -75,11 +59,9 @@ interface DraftState {
   appId: string;
   authCode: string;
   openId: string;
-  // csv（组织 ID/名称仅 UI 对齐 demo，不入 config —— 后端 CSV config 形状固定 4 键）
-  orgId: string;
-  orgName: string;
+  // CSV 的组织层级来自部门文件；不会显示不落库的组织字段。
   csvConfig: Record<string, unknown> | null;
-  csvFileName: string;
+  csvDirty: boolean;
   autoSync: boolean;
 }
 
@@ -91,6 +73,9 @@ const emptyDraft = (): DraftState => ({
   port: '389',
   useTls: false,
   skipVerify: false,
+  allowLegacyTls: false,
+  userFilter: DEFAULT_USER_FILTER,
+  attrMap: DEFAULT_ATTR_MAP,
   baseDn: '',
   bindDn: '',
   bindPassword: '',
@@ -101,10 +86,8 @@ const emptyDraft = (): DraftState => ({
   appId: '',
   authCode: '',
   openId: '',
-  orgId: '',
-  orgName: '',
   csvConfig: null,
-  csvFileName: '',
+  csvDirty: false,
   autoSync: false,
 });
 
@@ -121,6 +104,7 @@ interface DataSourceFormSheetProps {
 export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, existingNames }: DataSourceFormSheetProps) {
   const t = useTranslations('organizationContacts');
   const tc = useTranslations('common');
+  const { switcherEnabled } = useProductForm();
   const mutations = useContactSourceMutations();
   // GT-12039：连接测试端点是租户作用域的（requireSelectedTenantID），模块级
   // apiRequest 不带 X-Tenant-ID，system_admin 测已存数据源会 400。
@@ -132,8 +116,10 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
   const [testFailReason, setTestFailReason] = useState('');
   const [testToken, setTestToken] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const testGeneration = useRef(0);
 
   useEffect(() => {
+    testGeneration.current++;
     if (!open) return;
     setTest('idle');
     setTestToken('');
@@ -148,6 +134,9 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
         port: String(cfg.port ?? '389'),
         useTls: Boolean(cfg.use_tls),
         skipVerify: Boolean(cfg.skip_verify),
+        allowLegacyTls: Boolean(cfg.allow_legacy_tls),
+        userFilter: String(cfg.user_filter ?? DEFAULT_USER_FILTER),
+        attrMap: { ...DEFAULT_ATTR_MAP, ...(cfg.attr_map as Record<string, string> ?? {}) },
         baseDn: String(cfg.base_dn ?? ''),
         bindDn: String(cfg.bind_dn ?? ''),
         bindPassword: '',
@@ -158,18 +147,17 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
         appId: String(cfg.app_id ?? ''),
         authCode: '',
         openId: String(cfg.open_id ?? ''),
-        orgId: String(cfg.org_id ?? ''),
-        orgName: String(cfg.org_name ?? ''),
         csvConfig: null,
-        csvFileName: '',
+        csvDirty: false,
         autoSync: editing.auto_sync_enabled,
       });
     } else {
       setDraft(emptyDraft());
     }
-  }, [open, editing]);
+  }, [open, editing, tenantId]);
 
   const patch = (p: Partial<DraftState>) => {
+    testGeneration.current++;
     setDraft((d) => ({ ...d, ...p }));
     setTest('idle');
     setTestToken('');
@@ -220,15 +208,17 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
       switch (draft.syncType) {
         case 'ldap':
           return {
+            ...(isEdit && editing?.source_type === 'ldap' ? editing.config : {}),
             server: draft.server.trim(),
             port: Number(draft.port),
             use_tls: draft.useTls,
             skip_verify: draft.skipVerify,
+            allow_legacy_tls: draft.allowLegacyTls,
             base_dn: draft.baseDn.trim(),
             bind_dn: draft.bindDn.trim(),
             bind_password: draft.bindPassword,
-            user_filter: DEFAULT_USER_FILTER,
-            attr_map: DEFAULT_ATTR_MAP,
+            user_filter: draft.userFilter,
+            attr_map: draft.attrMap,
           };
         case 'coremail':
           return { server_url: draft.apiUrl.trim(), account: draft.account.trim(), password: draft.accountPassword };
@@ -244,21 +234,22 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
           return draft.csvConfig ?? ((editing?.config as Record<string, unknown>) || {});
       }
     };
-  }, [draft, editing]);
+  }, [draft, editing, isEdit]);
 
   const runTest = async () => {
     if (!canTest || test === 'loading') return;
     setTest('loading');
     setTestFailReason('');
+    const generation = testGeneration.current;
     try {
       // Mock 模式补一个 demo 同款的 1.2s loading 期（mock dispatch 是同步的，
       // 否则「测试中…」状态一帧即逝，无法与 demo 对齐复核）。
       if (isMockEnabled()) await new Promise((r) => setTimeout(r, 1200));
-      // 编辑态且密码未重填 → 测已存配置；否则测当前输入。
-      const useStored = isEdit && editing && draft.syncType === 'ldap' && !draft.bindPassword;
-      const result = useStored
-        ? await testContactSource(editing!.id, scopedRequest)
+      // Existing-source endpoint merges only blank secrets, not stale fields.
+      const result = isEdit && editing
+        ? await testContactSource(editing.id, scopedRequest, buildConfig())
         : await testContactSourceNew({ source_type: draft.syncType, config: buildConfig() }, scopedRequest);
+      if (generation !== testGeneration.current) return;
       if (result.ok && result.test_token) {
         setTestToken(result.test_token);
         setTest('ok');
@@ -268,45 +259,10 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
         setTest('fail');
       }
     } catch (e) {
+      if (generation !== testGeneration.current) return;
       setTestToken('');
       setTestFailReason((e as Error).message || '');
       setTest('fail');
-    }
-  };
-
-  // CSV：选择文件即 上传 → 自动列映射 → 预览校验拿 test_token（demo 无列映射 UI）
-  const handleCsvFile = async (file: File | null) => {
-    if (!file) return;
-    patch({ csvFileName: file.name, csvConfig: null });
-    try {
-      if (isMockEnabled()) {
-        setDraft((d) => ({ ...d, csvConfig: { user_file_ref: 'mock-user.csv', dept_file_ref: '', uid_column: '', user_column_map: { email: '邮箱' } } }));
-        setTestToken('mock-csv-test-token');
-        return;
-      }
-      const up = await uploadContactCSV(file, { tenantId });
-      const columnMap = autoColumnMap(up.headers || []);
-      if (!columnMap.email) {
-        toast.error(t('csvUploadFailed', { reason: t('csvEmailColMissing') }));
-        return;
-      }
-      const preview = await previewContactCSV({
-        user_file_ref: up.user_file_ref || '',
-        user_column_map: columnMap,
-        upload_token: up.upload_token,
-      });
-      setDraft((d) => ({
-        ...d,
-        csvConfig: {
-          user_file_ref: up.user_file_ref || '',
-          dept_file_ref: '',
-          uid_column: '',
-          user_column_map: columnMap,
-        },
-      }));
-      setTestToken(preview.test_token);
-    } catch (e) {
-      toast.error(t('csvUploadFailed', { reason: (e as Error).message || '' }));
     }
   };
 
@@ -315,10 +271,8 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
       toast.error(t('toastFixErrors'));
       return;
     }
-    // 保存闸门：LDAP/CSV 必须持有效 test_token（后端契约）；demo 口径是全部非
-    // CSV 类型测试通过 —— coremail/neteml 为 stub 放行（spec E3）。
-    const requiresToken = draft.syncType === 'ldap' || draft.syncType === 'csv';
-    if (requiresToken && !testToken) {
+    const unchangedCSV = isEdit && editing?.source_type === 'csv' && draft.syncType === 'csv' && !draft.csvDirty;
+    if (!testToken && !unchangedCSV) {
       toast.error(t('toastTestFirst'));
       return;
     }
@@ -327,7 +281,7 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
       name: draft.name.trim(),
       source_type: draft.syncType,
       config: buildConfig(),
-      priority: Number(draft.priority) || 50,
+      priority: Number(draft.priority),
       auto_sync_enabled: draft.syncType === 'csv' ? false : draft.autoSync,
       cron_expr: draft.syncType === 'csv' ? '' : draft.autoSync ? editing?.cron_expr || DEFAULT_CRON : editing?.cron_expr || '',
       sync_mode: editing?.sync_mode || 'full',
@@ -377,7 +331,7 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
                   value={draft.syncType}
                   onValueChange={(v) => {
                     if (!v) return;
-                    patch({ syncType: v as SourceType, csvConfig: null, csvFileName: '' });
+                    patch({ syncType: v as SourceType, csvConfig: null, csvDirty: false });
                   }}
                 >
                   <SelectTrigger className="w-full" data-testid="contacts-source-form-type">
@@ -386,8 +340,9 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
                   <SelectContent>
                     <SelectItem value="ldap">{t('typeLdap')}</SelectItem>
                     <SelectItem value="coremail">{t('typeCoremail')}</SelectItem>
-                    <SelectItem value="neteml">{t('typeNeteml')}</SelectItem>
-                    <SelectItem value="csv">{t('typeCsv')}</SelectItem>
+                    {/* GT-12170: 网易完整联调暂缓，仅在显式开启产品形态切换器时展示入口。 */}
+                    {switcherEnabled && <SelectItem value="neteml">{t('typeNeteml')}</SelectItem>}
+                    <SelectItem value="csv" data-testid="contacts-source-form-type-option-csv">{t('typeCsv')}</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -461,7 +416,6 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
                     onCheckedChange={(v) => patch({ useTls: v })}
                   />
                 </div>
-                {draft.useTls && (
                   <div className="flex items-center justify-between gap-4">
                     <div className="space-y-0.5">
                       <Label htmlFor="ldap-skip-verify" className="font-normal">{t('fieldSkipVerify')}</Label>
@@ -474,7 +428,14 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
                       onCheckedChange={(v) => patch({ skipVerify: v })}
                     />
                   </div>
-                )}
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-0.5"><Label htmlFor="ldap-legacy-tls">{t('fieldLegacyTls')}</Label><p className="text-xs text-muted-foreground">{t('fieldLegacyTlsHint')}</p></div>
+                  <Switch id="ldap-legacy-tls" data-testid="ldap-legacy-tls" checked={draft.allowLegacyTls} onCheckedChange={v => patch({ allowLegacyTls: v })} />
+                </div>
+                <Field label={t('fieldUserFilter')} required><Input className="w-full" value={draft.userFilter} onChange={e => patch({ userFilter: e.target.value })} data-testid="contacts-ldap-filter" /></Field>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {(['email', 'display_name', 'dept', 'job_title'] as const).map(field => <Field key={field} label={t(`csvFields.${field}`)} required={field === 'email'}><Input className="w-full" value={draft.attrMap[field] ?? ''} onChange={e => patch({ attrMap: { ...draft.attrMap, [field]: e.target.value } })} data-testid={`contacts-ldap-attr-${field}`} /></Field>)}
+                </div>
               </>
             )}
             {draft.syncType === 'coremail' && (
@@ -556,35 +517,7 @@ export function DataSourceFormSheet({ open, onOpenChange, editing, tenantId, exi
               </>
             )}
             {draft.syncType === 'csv' && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label={t('fieldOrgId')} required>
-                    <Input
-                      value={draft.orgId}
-                      onChange={(e) => setDraft((d) => ({ ...d, orgId: e.target.value }))}
-                      placeholder={t('orgIdPlaceholder')}
-                      data-testid="contacts-source-form-org-id"
-                    />
-                  </Field>
-                  <Field label={t('fieldOrgName')} required>
-                    <Input
-                      value={draft.orgName}
-                      onChange={(e) => setDraft((d) => ({ ...d, orgName: e.target.value }))}
-                      placeholder={t('orgNamePlaceholder')}
-                      data-testid="contacts-source-form-org-name"
-                    />
-                  </Field>
-                </div>
-                <Field label={t('fieldUpload')} hint={t('uploadHint')}>
-                  <Input
-                    type="file"
-                    accept=".csv"
-                    className="cursor-pointer file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1 file:text-sm dark:file:bg-gray-800"
-                    onChange={(e) => handleCsvFile(e.target.files?.[0] ?? null)}
-                    data-testid="contacts-source-form-csv-file"
-                  />
-                </Field>
-              </>
+              <CSVImportFields key={`${open}-${editing?.id ?? 'new'}-${tenantId}`} tenantId={tenantId} onChange={(config, token) => { setDraft(d => ({ ...d, csvConfig: config, csvDirty: true })); setTestToken(token); }} />
             )}
             {draft.syncType !== 'csv' && (
               <div className="flex items-center gap-3 pt-1">

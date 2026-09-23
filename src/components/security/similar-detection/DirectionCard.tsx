@@ -105,11 +105,12 @@ export function DirectionCard({ direction, detectionType, value, onChange, onSyn
           />
           {value.observe_mode && (
             <Button
+              data-testid={`similar-detection-observe-logs-${direction}`}
               variant="link"
               size="sm"
               className="text-xs text-blue-600 p-0 h-auto"
               nativeButton={false}
-              render={<Link href={`/logs/email?similar=matched&direction=${direction}`} />}
+              render={<Link href={`/email-disposal/center?similar=matched&direction=${direction}`} />}
             >
               {t('viewObserveLogs')}
               <ExternalLink className="h-3 w-3 ml-1" />

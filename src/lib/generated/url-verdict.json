@@ -1,0 +1,50 @@
+{
+  "version": "url-verdict.v1",
+  "definitions": [
+    {
+      "value": "phishing",
+      "meaning": "Concrete URL-specific evidence supports impersonation, credential theft or fraudulent inducement. Prefer phishing when both phishing and other malicious activity apply; retain other observations in signals.",
+      "risks": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    {
+      "value": "malicious",
+      "meaning": "Concrete evidence supports other malicious activity, such as malware delivery or exploitation; infrastructure anomalies alone are insufficient.",
+      "risks": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    {
+      "value": "suspicious",
+      "meaning": "Actual observed risk signals exist but do not establish phishing or other malicious activity. High/critical requires concrete high-risk observations.",
+      "risks": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    {
+      "value": "safe",
+      "meaning": "Sufficient evidence supports a legitimate purpose with no unresolved material threat signal within the investigation scope.",
+      "risks": [
+        "low"
+      ]
+    },
+    {
+      "value": "needs_review",
+      "meaning": "Essential evidence is missing, conflicting or unverifiable, preventing a reliable judgment.",
+      "risks": [
+        "low",
+        "medium"
+      ]
+    }
+  ]
+}

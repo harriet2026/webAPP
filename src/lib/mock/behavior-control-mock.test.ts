@@ -14,11 +14,11 @@ describe('behavior-control mock fixtures', () => {
     expect(v.meta?.object_config).toMatchObject({ type: 'sender', sub_type: 'group', value: '销售团队' });
     expect(v.meta?.or_enabled).toBe(true);
   });
-  it('does not expose the unsupported organization sender subtype', () => {
+  it('exposes supported organization rules with a department path', () => {
     const subTypes = mockBehaviorControlRulesList().items.map(
       (rule) => resolveBehaviorControlRule(rule).meta?.object_config.sub_type,
     );
-    expect(subTypes).not.toContain('organization');
+    expect(subTypes).toContain('organization');
   });
   it('rule-10 (generated, i%5===0) is disabled', () => {
     const r = mockBehaviorControlRulesList().items.find((x) => x.id === 10)!;

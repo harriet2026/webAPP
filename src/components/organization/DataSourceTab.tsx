@@ -27,6 +27,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { PageSurface } from '@/components/shared/page-shell';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/auth-context';
+import { useProductForm } from '@/contexts/product-form-context';
 import { useApiRequest } from '@/lib/api/client';
 import { useContactSources, useContactSourceMutations, getContactSourceImpact } from './api';
 import { DataSourceFormSheet } from './DataSourceFormSheet';
@@ -67,6 +68,7 @@ export function sourceTypeShort(t: (k: string) => string, type: SourceType): str
 export function DataSourceTab() {
   const t = useTranslations('organizationContacts');
   const tc = useTranslations('common');
+  const { switcherEnabled } = useProductForm();
   const { isSystemAdmin, isTenantAdmin, selectedTenantId, user } = useAuth();
   const tenantId = isSystemAdmin ? selectedTenantId : user?.tenant_id ?? null;
   // GT-12030：数据源增删改/同步对本租户的 tenant_admin 同样开放，与后端
@@ -212,7 +214,7 @@ export function DataSourceTab() {
                 { value: 'all', label: t('filterAll') },
                 { value: 'ldap', label: t('typeLdap') },
                 { value: 'coremail', label: t('typeCoremail') },
-                { value: 'neteml', label: t('typeNeteml') },
+                ...(switcherEnabled ? [{ value: 'neteml', label: t('typeNeteml') }] : []),
                 { value: 'csv', label: t('typeCsv') },
               ]}
             />

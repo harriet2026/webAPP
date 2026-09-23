@@ -444,7 +444,7 @@ export function IPFrequencyPage({
           priority: rule.Rule.priority,
           scope_type: rule.ScopeType as IPFrequencyScopeType,
           scope_value: rule.ScopeValue || '',
-          action: rule.Rule.action as IPFrequencyAction,
+          action: rule.RejectMode === 'temporary' ? 'tempfail' : rule.Rule.action as IPFrequencyAction,
           daily_connection_limit: rule.DailyConnectionLimit,
           concurrent_connection_limit: rule.ConcurrentConnectionLimit,
           window_minutes: rule.WindowMinutes,
@@ -494,6 +494,8 @@ export function IPFrequencyPage({
     try {
       const payload: IPFrequencyRulePayload = {
         ...data,
+        action: data.action === 'tempfail' ? 'reject' : data.action,
+        reject_mode: data.action === 'tempfail' ? 'temporary' : data.action === 'reject' ? 'permanent' : undefined,
         valid_from: toRFC3339(data.valid_from),
         valid_until: toRFC3339(data.valid_until),
         tempfail_message: data.tempfail_message || undefined,
@@ -554,7 +556,8 @@ export function IPFrequencyPage({
             priority: r.Rule.priority,
             scope_type: r.ScopeType as IPFrequencyScopeType,
             scope_value: r.ScopeValue,
-            action: r.Rule.action as IPFrequencyAction,
+            action: r.Rule.action === 'tempfail' ? 'reject' : r.Rule.action as IPFrequencyAction,
+            reject_mode: r.Rule.action === 'tempfail' ? 'temporary' : r.RejectMode,
             daily_connection_limit: r.DailyConnectionLimit,
             concurrent_connection_limit: r.ConcurrentConnectionLimit,
             window_minutes: r.WindowMinutes,
@@ -595,7 +598,8 @@ export function IPFrequencyPage({
           priority: values.priority,
           scope_type: values.scope_type,
           scope_value: values.scope_value,
-          action: values.action,
+          action: values.action === 'tempfail' ? 'reject' : values.action,
+          reject_mode: values.action === 'tempfail' ? 'temporary' : values.action === 'reject' ? 'permanent' : undefined,
           daily_connection_limit: values.daily_connection_limit,
           concurrent_connection_limit: values.concurrent_connection_limit,
           window_minutes: values.window_minutes,
@@ -1168,7 +1172,7 @@ export function IPFrequencyPage({
                                       <div className="flex justify-between">
                                         <span className="text-muted-foreground">{t('ipFrequency.blockActionLabel')}:</span>
                                         <span>
-                                          {rule.Rule.action === 'reject' ? t('ipFrequency.blockReject') : rule.Rule.action === 'tempfail' ? t('ipFrequency.blockError421') : t('ipFrequency.blockDisconnect')}
+                                          {rule.RejectMode === 'temporary' || rule.Rule.action === 'tempfail' ? t('ipFrequency.blockError421') : rule.Rule.action === 'reject' ? t('ipFrequency.blockReject') : t('ipFrequency.blockDisconnect')}
                                         </span>
                                       </div>
                                       <div className="flex justify-between">

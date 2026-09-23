@@ -22,7 +22,13 @@ vi.mock('./hooks/use-lifecycle-log-stream', () => ({
 }));
 
 vi.mock('./sections/overview-section', () => ({
-  OverviewSection: ({ onViewBasis }: { onViewBasis?: () => void }) => <div data-testid="overview-section-stub" data-has-view-basis={onViewBasis ? 'true' : 'false'} />,
+  OverviewSection: ({ detail, onViewBasis }: { detail: MailLogDetail; onViewBasis?: () => void }) => (
+    <div
+      data-testid="overview-section-stub"
+      data-has-view-basis={onViewBasis ? 'true' : 'false'}
+      data-recipient-statuses={detail.recipient_dispositions?.map((item) => item.status).join(',') ?? ''}
+    />
+  ),
 }));
 
 vi.mock('./sections/analysis-section', () => ({
@@ -217,6 +223,51 @@ describe('DetailModal raw lifecycle logs', () => {
     await waitFor(() => {
       expect(screen.getByTestId('raw-logs-count-badge')).toHaveTextContent('0 条');
     });
+  });
+
+  it('GT-12789: refetches recipient delivery outcomes when reopening within the global stale window', async () => {
+    detailResponse = {
+      ...detail(),
+      recipient_dispositions: [
+        { recipient: 'ok@example.test', final_action: 'accept', status: 'delivering' },
+        { recipient: 'failed@example.test', final_action: 'accept', status: 'delivering' },
+      ],
+    };
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: 60_000 } },
+    });
+    const view = (open: boolean) => (
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="zh" messages={zh as never}>
+          <DetailModal open={open} mailLogId={1} onOpenChange={vi.fn()} />
+        </NextIntlClientProvider>
+      </QueryClientProvider>
+    );
+
+    const { rerender } = render(view(true));
+    await waitFor(() => {
+      expect(screen.getByTestId('overview-section-stub')).toHaveAttribute(
+        'data-recipient-statuses',
+        'delivering,delivering',
+      );
+    });
+    rerender(view(false));
+    detailResponse = {
+      ...detailResponse,
+      recipient_dispositions: [
+        { recipient: 'ok@example.test', final_action: 'accept', status: 'delivered' },
+        { recipient: 'failed@example.test', final_action: 'accept', status: 'delivery_failed' },
+      ],
+    };
+    rerender(view(true));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('overview-section-stub')).toHaveAttribute(
+        'data-recipient-statuses',
+        'delivered,delivery_failed',
+      );
+    });
+    expect(apiRequestMock.mock.calls.filter(([path]) => path === '/mail-logs/1')).toHaveLength(2);
   });
 
   it('always shows security analysis and its jump entry', async () => {

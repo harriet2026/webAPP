@@ -73,6 +73,31 @@ describe('RuntimeRiskSection atomic draft', () => {
     }), expect.any(Function));
   });
 
+  it('requires confirmation before disabling timeout auto delivery', async () => {
+    const user = userEvent.setup();
+    await openEditor();
+    const timeoutSwitch = screen.getByTestId('timeout-async-enabled');
+
+    await user.click(timeoutSwitch);
+    const dialog = await screen.findByTestId('confirm-dialog');
+    expect(dialog).toHaveTextContent('确认关闭超时自动投递？');
+    expect(dialog).toHaveTextContent('关闭后超时邮件将不会自动投递，可能延误正常邮件投递。');
+    expect(timeoutSwitch).toBeChecked();
+
+    await user.click(screen.getByTestId('confirm-dialog-cancel'));
+    await waitFor(() => expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument());
+    expect(timeoutSwitch).toBeChecked();
+
+    await user.click(timeoutSwitch);
+    await user.click(await screen.findByTestId('confirm-dialog-confirm'));
+    expect(timeoutSwitch).not.toBeChecked();
+
+    await user.click(screen.getByTestId('runtime-save'));
+    await waitFor(() => expect(putConfig).toHaveBeenCalledWith(expect.objectContaining({
+      runtime_policy: expect.objectContaining({ timeout_async_enabled: false }),
+    }), expect.any(Function)));
+  });
+
   it('keeps inferred next CAS versions when publication is pending and GET is still stale', async () => {
     putConfig.mockResolvedValue({
       committed: true,

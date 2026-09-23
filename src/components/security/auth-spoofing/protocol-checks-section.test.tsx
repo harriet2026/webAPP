@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { ProtocolChecksSection } from './ProtocolChecksSection';
 import type { ProtocolChecksConfig, CheckItem } from '@/types/auth-spoofing';
@@ -32,6 +32,7 @@ function makeConfig(overrides: Partial<ProtocolChecksConfig> = {}): ProtocolChec
       neutral: item('quarantine'),
       partial: item('proceed', false),
       none: item('audit'),
+      permerror: item('proceed'),
     },
     dmarc: {
       reject: item('reject'),
@@ -79,6 +80,16 @@ describe('ProtocolChecksSection', () => {
     );
   });
 
+  it('shows the product-approved concise description when switching to the loose template', async () => {
+    const config = makeConfig({ template: 'standard' });
+    render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
+
+    fireEvent.click(screen.getByRole('button', { name: '宽松' }));
+
+    expect(await screen.findByText('仅拦截明确伪造')).toBeInTheDocument();
+    expect(screen.queryByText(/兼容老旧系统|丢弃动作使用极少/)).toBeNull();
+  });
+
   it('shows wouldDropCount text and a pulse badge when observe_mode is true', () => {
     const config = makeConfig({ observe_mode: true });
     const { container } = render(
@@ -113,6 +124,36 @@ describe('ProtocolChecksSection', () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ observe_mode: true }));
   });
 
+  it.each([true, false])('sets every protocol item observe flag to %s without changing its action', (observe) => {
+    const config = makeConfig({ observe_mode: !observe });
+    for (const key of ['spf', 'dkim', 'dmarc', 'ptr'] as const) {
+      for (const item of Object.values(config[key])) item.observe_mode = !observe;
+    }
+    const before = structuredClone(config);
+    const onChange = vi.fn();
+    render(wrap(<ProtocolChecksSection config={config} onChange={onChange} />));
+    fireEvent.click(screen.getAllByRole('switch')[0]);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const saved = onChange.mock.calls[0][0] as ProtocolChecksConfig;
+    expect(saved.observe_mode).toBe(observe);
+    for (const key of ['spf', 'dkim', 'dmarc', 'ptr'] as const) {
+      for (const [name, item] of Object.entries(saved[key])) {
+        expect(item).toEqual({ ...before[key][name], observe_mode: observe });
+      }
+    }
+    expect(config).toEqual(before);
+  });
+
+  it('keeps tenant PTR actions editable with the shared observe switch enabled', () => {
+    const config = makeConfig({ template: 'custom', observe_mode: true });
+    render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
+    fireEvent.click(screen.getByRole('tab', { name: 'PTR' }));
+    for (const key of ['noptr', 'nomatch', 'ehlo_mismatch']) {
+      expect(screen.getByTestId(`protocol-check-action-ptr-${key}`)).not.toBeDisabled();
+    }
+    expect(screen.queryByText(/不受租户观察模式影响|联系系统管理员/)).toBeNull();
+  });
+
   it('shows the SPF drop alert when spf.fail.action is discard', () => {
     const config = makeConfig({
       spf: {
@@ -130,5 +171,37 @@ describe('ProtocolChecksSection', () => {
     const config = makeConfig();
     render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
     expect(screen.queryByText('SPF 硬拒绝设为静默丢弃，可能误删合法邮件')).toBeNull();
+  });
+
+  it('shows DKIM permerror as proceed with optional marking controls', () => {
+    const config = makeConfig({ template: 'custom' });
+    render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'DKIM' }));
+    const row = screen.getByTestId('protocol-check-dkim-permerror');
+    expect(within(row).getByText('DKIM 校验永久失败')).toBeInTheDocument();
+    expect(within(row).getByTestId('protocol-check-action-dkim-permerror')).toHaveTextContent('进行下一步');
+    expect(within(row).getByTestId('auth-spoofing-tag-panel')).toBeInTheDocument();
+  });
+
+  it('summarizes enabled actions and keeps the PTR action name visible', () => {
+    const config = makeConfig({
+      spf: {
+        fail: item('discard', false),
+        softfail: item('proceed'),
+      },
+      ptr: {
+        noptr: item('quarantine'),
+        nomatch: item('discard', false),
+      },
+    });
+
+    render(wrap(<ProtocolChecksSection config={config} onChange={() => {}} />));
+    expect(screen.getByTestId('auth-flow-summary-hint')).toHaveTextContent(
+      '节点显示已启用规则中的最严格处置',
+    );
+
+    expect(screen.getByTestId('auth-flow-node-sub-spf')).toHaveTextContent('进行下一步');
+    expect(screen.getByTestId('auth-flow-node-sub-ptr')).toHaveTextContent('隔离');
   });
 });

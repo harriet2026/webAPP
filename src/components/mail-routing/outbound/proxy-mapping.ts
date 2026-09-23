@@ -11,6 +11,8 @@ const DEFAULT_CIPHER_PROFILE: CipherProfile = 'default';
 export function proxysvrEndpointToRow(e: ProxysvrEndpoint): OutboundProxyRow {
   return {
     id: String(e.id),
+    cacEnabled: e.cac_override?.enabled ?? false,
+    cacResult: e.cac_override?.result ?? '',
     name: e.name,
     proxyIp: e.host,
     proxyPort: e.port,
@@ -36,6 +38,8 @@ export type OutboundProxyDraft = Omit<OutboundProxyRow, 'licensePresent' | 'prob
 export function emptyProxyDraft(): OutboundProxyDraft {
   return {
     id: '',
+    cacEnabled: false,
+    cacResult: '',
     name: '',
     proxyIp: '',
     proxyPort: 6620,
@@ -55,6 +59,7 @@ export function emptyProxyDraft(): OutboundProxyDraft {
 export function proxyDraftToRequest(d: OutboundProxyDraft): ProxysvrEndpointRequest {
   return {
     name: d.name,
+    cac_override: { enabled: d.cacEnabled, result: d.cacResult.trim() },
     host: d.proxyIp,
     port: d.proxyPort,
     presend_code: d.presendCode,

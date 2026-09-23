@@ -52,12 +52,14 @@ import type {
   DialogImportModeState,
 } from '@/lib/rule-import-export-helpers';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { duplicateReasonMessageKey } from '@/lib/rule-import-duplicate-reason';
 import {
   parseImportFile,
   getAvailableImportGroups,
   buildPreviewPayload,
   buildExecutePayload,
 } from '@/lib/rule-import-export-helpers';
+import { classifyImportInvalidError } from '@/lib/rule-import-invalid-error';
 
 export interface TenantOption {
   id: number;
@@ -72,6 +74,7 @@ export interface RuleImportExportDialogProps {
   adminContext: 'system-admin' | 'tenant-admin';
   tenantOptions?: TenantOption[];
   initialTab?: 'export' | 'import';
+  rulesOnly?: boolean;
   importTemplate?: RuleExportEnvelope;
   onExport?: (selection: RuleExportSelection) => Promise<RuleExportEnvelope>;
   onPreviewImport?: (payload: RuleImportPreviewRequest) => Promise<RuleImportPreviewResponse>;
@@ -82,6 +85,12 @@ const EMPTY_SELECTION: ImportSelectionState = {
   rules: false,
   detection_profiles: false,
 };
+
+const ALL_GROUP_KEYS: ImportGroupKey[] = ['rules', 'detection_profiles'];
+
+function restrictToRuleGroup(selection: ImportSelectionState, rulesOnly: boolean): ImportSelectionState {
+  return rulesOnly ? { ...selection, detection_profiles: false } : selection;
+}
 
 function downloadJSON(file: RuleExportEnvelope, fileName: string) {
   const blob = new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' });
@@ -103,6 +112,7 @@ export function RuleImportExportDialog({
   adminContext,
   tenantOptions = [],
   initialTab = 'export',
+  rulesOnly = false,
   importTemplate,
   onExport,
   onPreviewImport,
@@ -117,7 +127,7 @@ export function RuleImportExportDialog({
   const [fileName, setFileName] = useState<string>('');
   const [exportSelection, setExportSelection] = useState<ImportSelectionState>({
     rules: true,
-    detection_profiles: true,
+    detection_profiles: !rulesOnly,
   });
   const [importFile, setImportFile] = useState<RuleExportEnvelope | null>(null);
   const [selection, setSelection] = useState<ImportSelectionState>(EMPTY_SELECTION);
@@ -128,9 +138,10 @@ export function RuleImportExportDialog({
   const [preview, setPreview] = useState<RuleImportPreviewResponse | null>(null);
   const previewRequestId = useRef(0);
 
+  const visibleGroupKeys = rulesOnly ? ALL_GROUP_KEYS.slice(0, 1) : ALL_GROUP_KEYS;
   const availableGroups = useMemo(
-    () => (importFile ? getAvailableImportGroups(importFile) : EMPTY_SELECTION),
-    [importFile],
+    () => restrictToRuleGroup(importFile ? getAvailableImportGroups(importFile) : EMPTY_SELECTION, rulesOnly),
+    [importFile, rulesOnly],
   );
 
   const groupLabels: Record<ImportGroupKey, string> = {
@@ -205,14 +216,14 @@ export function RuleImportExportDialog({
       setFileName('');
       setExportSelection({
         rules: true,
-        detection_profiles: true,
+        detection_profiles: !rulesOnly,
       });
       setImportFile(null);
       setSelection(EMPTY_SELECTION);
       setImportMode({ mode: 'restore_original_tenants', targetTenantId: null });
       clearPreviewState();
     }
-  }, [clearPreviewState, initialTab, open]);
+  }, [clearPreviewState, initialTab, open, rulesOnly]);
 
   useEffect(() => {
     if (adminContext === 'tenant-admin') {
@@ -248,17 +259,37 @@ export function RuleImportExportDialog({
     () => (Object.entries(preview?.duplicates ?? {}) as Array<[
       string,
       NonNullable<RuleImportPreviewResponse['duplicates'][string]>,
-    ]>).filter(([, items]) => items.length > 0),
-    [preview],
+    ]>).filter(([group, items]) => (!rulesOnly || group === 'rules') && items.length > 0),
+    [preview, rulesOnly],
   );
 
   const invalidEntries = useMemo(
     () => (Object.entries(preview?.invalid_items ?? {}) as Array<[
       string,
       NonNullable<RuleImportPreviewResponse['invalid_items'][string]>,
-    ]>).filter(([, items]) => items.length > 0),
-    [preview],
+    ]>).filter(([group, items]) => (!rulesOnly || group === 'rules') && items.length > 0),
+    [preview, rulesOnly],
   );
+
+  const formatInvalidItemError = (error: string | undefined): string => {
+    const classified = classifyImportInvalidError(error);
+    switch (classified.kind) {
+      case 'scope-mismatch':
+        return t('ruleImportExport.dialog.invalidReason.scopeMismatch', { scopeLabel });
+      case 'invalid-ip':
+        return t('ruleImportExport.dialog.invalidReason.invalidIp', { value: classified.value });
+      case 'invalid-cidr':
+        return t('ruleImportExport.dialog.invalidReason.invalidCidr', { value: classified.value });
+      case 'duplicate-in-file':
+        return t('ruleImportExport.dialog.invalidReason.duplicateInFile');
+      case 'tenant-missing':
+        return t('ruleImportExport.dialog.invalidReason.tenantMissing');
+      case 'permission-denied':
+        return t('ruleImportExport.dialog.invalidReason.permissionDenied');
+      default:
+        return t('ruleImportExport.dialog.invalidReason.invalidRule');
+    }
+  };
 
   const hasSelection = Object.values(selection).some(Boolean);
 
@@ -280,7 +311,9 @@ export function RuleImportExportDialog({
 			});
 			const safeScope = scopeLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 			downloadJSON(file, `${safeScope || 'rule-settings'}-export.json`);
-      toast.success(t('ruleImportExport.dialog.toast.exportDownloaded'));
+      toast.success(t('ruleImportExport.dialog.toast.exportReady'), {
+        testId: 'rule-export-success',
+      });
     } catch (error) {
       toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.exportFailed')));
     } finally {
@@ -303,7 +336,7 @@ export function RuleImportExportDialog({
 
     try {
       const parsedFile = await parseImportFile(file);
-      const nextSelection = getAvailableImportGroups(parsedFile);
+      const nextSelection = restrictToRuleGroup(getAvailableImportGroups(parsedFile), rulesOnly);
       const nextImportMode =
         adminContext === 'system-admin'
         && importMode.mode === 'import_to_selected_tenant'
@@ -319,13 +352,12 @@ export function RuleImportExportDialog({
       setActiveTab('import');
       await requestPreview(parsedFile, nextSelection, nextImportMode);
     } catch (error) {
+      input.value = '';
       setFileName('');
       setImportFile(null);
       setSelection(EMPTY_SELECTION);
       clearPreviewState();
       toast.error(apiErrorMessage(error, t('ruleImportExport.dialog.toast.parseFailed')));
-    } finally {
-      input.value = '';
     }
   }
 
@@ -401,7 +433,7 @@ export function RuleImportExportDialog({
         <DialogHeader>
           <DialogTitle>{t('ruleImportExport.dialog.title', { scopeLabel })}</DialogTitle>
           <DialogDescription>
-            {t('ruleImportExport.dialog.description')}
+            {t('ruleImportExport.dialog.description', { scopeLabel })}
           </DialogDescription>
         </DialogHeader>
 
@@ -430,7 +462,7 @@ export function RuleImportExportDialog({
 			    <p className="text-sm text-muted-foreground">{t('ruleImportExport.dialog.exportTypesDescription')}</p>
 			  </div>
 			  <div className="grid gap-3 sm:grid-cols-2">
-			    {(Object.keys(groupLabels) as ImportGroupKey[]).map((group) => (
+			    {visibleGroupKeys.map((group) => (
 			      <label key={group} className="flex items-center gap-3 rounded-md border p-3 text-sm" data-testid={`export-${group}`}>
 			        <Checkbox
 			          checked={exportSelection[group]}
@@ -517,7 +549,7 @@ export function RuleImportExportDialog({
                     <p className="text-sm text-muted-foreground">{t('ruleImportExport.dialog.importTypesDescription')}</p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {(Object.keys(groupLabels) as ImportGroupKey[]).map((group) => (
+                    {visibleGroupKeys.map((group) => (
                       <label key={group} className="flex items-center gap-3 rounded-md border p-3 text-sm" data-testid={`import-${group}`}>
                         <Checkbox
                           checked={selection[group]}
@@ -547,7 +579,9 @@ export function RuleImportExportDialog({
                 <div className="space-y-2">
                   <h3 className="font-medium">{t('ruleImportExport.dialog.previewSummaryTitle')}</h3>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {(Object.entries(preview.summary) as Array<[ImportGroupKey, RuleImportPreviewResponse['summary'][ImportGroupKey]]>).map(([group, summary]) => (
+                    {visibleGroupKeys.map((group) => {
+                      const summary = preview.summary[group];
+                      return (
                       <div key={group} className="rounded-md border p-3 text-sm">
                         <div className="font-medium">{groupLabels[group]}</div>
                         <div className="mt-1 text-muted-foreground">
@@ -559,7 +593,8 @@ export function RuleImportExportDialog({
                           })}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -574,33 +609,44 @@ export function RuleImportExportDialog({
                     {duplicateEntries.map(([group, items]) => (
                       <div key={group} className="space-y-2 rounded-md border p-3">
                         <div className="text-sm font-medium">{groupLabels[group as ImportGroupKey]}</div>
-                        {items.map((item) => (
-                          <div key={item.preview_item_id} className="space-y-2 rounded-md border p-3">
-                            <div className="text-sm">
-                              <span className="font-medium">
-                                {t('ruleImportExport.dialog.duplicateWillBeSkipped', {
-                                  previewItemId: item.preview_item_id,
-                                })}
-                              </span>
-                              {item.reason ? <span className="block text-muted-foreground">{item.reason}</span> : null}
-                            </div>
-                            <details className="rounded-md border bg-muted/30 p-3 text-xs">
-                              <summary className="cursor-pointer font-medium">{t('ruleImportExport.dialog.showDetails')}</summary>
-                              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                                <div>
-                                  <div className="mb-1 font-medium">{t('ruleImportExport.dialog.sourcePayload')}</div>
-                                  <pre className="overflow-x-auto whitespace-pre-wrap break-all">{JSON.stringify(item.source, null, 2)}</pre>
-                                </div>
-                                {item.existing ? (
-                                  <div>
-                                    <div className="mb-1 font-medium">{t('ruleImportExport.dialog.existingItem')}</div>
-                                    <pre className="overflow-x-auto whitespace-pre-wrap break-all">{JSON.stringify(item.existing, null, 2)}</pre>
-                                  </div>
+                        {items.map((item, itemIndex) => {
+                          const itemNumber = itemIndex + 1;
+                          return (
+                            <div
+                              key={item.preview_item_id}
+                              className="space-y-2 rounded-md border p-3"
+                              data-testid={`rule-import-duplicate-item-${itemNumber}`}
+                            >
+                              <div className="text-sm">
+                                <span className="font-medium">
+                                  {t('ruleImportExport.dialog.duplicateWillBeSkipped', {
+                                    itemNumber,
+                                  })}
+                                </span>
+                                {item.reason ? (
+                                  <span className="block text-muted-foreground" data-testid="rule-import-duplicate-reason">
+                                    {t(`ruleImportExport.dialog.duplicateReason.${duplicateReasonMessageKey(item.reason)}`)}
+                                  </span>
                                 ) : null}
                               </div>
-                            </details>
-                          </div>
-                        ))}
+                              <details className="rounded-md border bg-muted/30 p-3 text-xs">
+                                <summary className="cursor-pointer font-medium">{t('ruleImportExport.dialog.showDetails')}</summary>
+                                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                  <div>
+                                    <div className="mb-1 font-medium">{t('ruleImportExport.dialog.sourcePayload')}</div>
+                                    <pre className="overflow-x-auto whitespace-pre-wrap break-all">{JSON.stringify(item.source, null, 2)}</pre>
+                                  </div>
+                                  {item.existing ? (
+                                    <div>
+                                      <div className="mb-1 font-medium">{t('ruleImportExport.dialog.existingItem')}</div>
+                                      <pre className="overflow-x-auto whitespace-pre-wrap break-all">{JSON.stringify(item.existing, null, 2)}</pre>
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </details>
+                            </div>
+                          );
+                        })}
                       </div>
                     ))}
                   </div>
@@ -613,8 +659,13 @@ export function RuleImportExportDialog({
                       <div key={group} className="rounded-md border p-3 text-sm">
                         <div className="font-medium">{groupLabels[group as ImportGroupKey]}</div>
                         <ul className="mt-2 space-y-1 text-muted-foreground">
-                          {items.map((item) => (
-                            <li key={item.preview_item_id}>{item.error || item.reason || item.preview_item_id}</li>
+                          {items.map((item, itemIndex) => (
+                            <li
+                              key={item.preview_item_id}
+                              data-testid={`rule-import-invalid-item-${itemIndex + 1}`}
+                            >
+                              {formatInvalidItemError(item.error)}
+                            </li>
                           ))}
                         </ul>
                       </div>

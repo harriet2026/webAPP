@@ -44,17 +44,15 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
     {
       id: 'pipeline',
       label: t('flowNode.pipeline'),
-      sub: t('flowNode.pipelineSub'),
       color: STATIC_COLOR,
       clickable: false,
     },
     ...PROTOCOL_ORDER.map((key) => {
       const action = failActions[key];
-      const isPtr = key === 'ptr';
       return {
         id: key,
         label: key.toUpperCase(),
-        sub: t(flowSubKey(action, isPtr) as Parameters<typeof t>[0]),
+        sub: t(flowSubKey(action) as Parameters<typeof t>[0]),
         color: action === 'discard' ? DISCARD_COLOR : PROTOCOL_BASE_COLOR[key],
         clickable: true,
       } satisfies Node;
@@ -69,7 +67,12 @@ export function AuthFlowDiagram({ failActions, activeTab, onNodeClick }: AuthFlo
 
   return (
     <div className="rounded-lg border bg-muted/30 p-4">
-      <div className="mb-3 text-xs text-muted-foreground">{t('flowTitle')}</div>
+      <div className="mb-3 text-xs text-muted-foreground">
+        {t('flowTitle')}
+        <span data-testid="auth-flow-summary-hint" className="ml-2">
+          {t('flowSummaryHint')}
+        </span>
+      </div>
       <div className="flex items-center gap-2 overflow-x-auto py-1">
         {nodes.map((node, idx) => (
           <div key={node.id} className="flex items-center gap-2">

@@ -82,7 +82,7 @@ function formatTargetType(type: InvestigationTargetType, t: ReturnType<typeof us
 }
 
 function summarizeTarget(task: InvestigationTask, t: ReturnType<typeof useTranslations>) {
-  const targetIDs = task.target_ids.filter(Boolean);
+  const targetIDs = (task.target_ids ?? []).filter(Boolean);
   switch (task.target_type) {
     case 'mail':
       return targetIDs[0] || '-';

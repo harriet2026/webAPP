@@ -90,6 +90,8 @@ export interface PhishAdmissionRule {
   revision?: string;
   name: string;
   directions: Array<'inbound' | 'outbound' | 'internal'>;
+  /** Existing tag scopes are retained when editing or copying migrated rules. */
+  recipient_tags?: string[];
   recipient_groups?: string[];
   recipient_depts?: string[];
   recipient_emails?: string[];
@@ -98,7 +100,7 @@ export interface PhishAdmissionRule {
   sender_emails?: string[];
   filter_on?: boolean;
   require_url: boolean;
-  max_size_mb?: number;
+  max_size_kb?: number;
   sender_first_seen: boolean;
   require_qrcode: boolean;
   require_executable?: boolean;
@@ -107,3 +109,15 @@ export interface PhishAdmissionRule {
 
 export type PhishAdmissionRuleWrite = Omit<PhishAdmissionRule, 'id' | 'rule_uid' | 'revision'>;
 export type PhishAdmissionRuleUpdate = PhishAdmissionRuleWrite & { expected_revision: string };
+
+interface PhishAdmissionManagement {
+  tenant_id: number | null;
+  tenant_name?: string;
+  read_only: boolean;
+  effective: boolean;
+}
+
+export type PhishAdmissionRuleListItem = PhishAdmissionManagement & (
+  | (PhishAdmissionRule & { status: 'ready' })
+  | (Pick<PhishAdmissionRule, 'id' | 'rule_uid' | 'name' | 'enabled'> & { status: 'rebuild_required' | 'integrity_error' })
+);

@@ -1,4 +1,5 @@
 export type IPFrequencyScopeType = 'all' | 'single' | 'range' | 'group';
+// Reply options; temporary refusal is serialized as reject + reject_mode.
 export type IPFrequencyAction = 'reject' | 'tempfail' | 'disconnect';
 
 export interface IPFrequencyRulePayload {
@@ -8,6 +9,7 @@ export interface IPFrequencyRulePayload {
   scope_type: IPFrequencyScopeType;
   scope_value?: string;
   action: IPFrequencyAction;
+  reject_mode?: 'temporary' | 'permanent';
   daily_connection_limit: number;
   concurrent_connection_limit: number;
   window_minutes: number;
@@ -23,6 +25,7 @@ export interface IPFrequencyRulePayload {
 }
 
 export interface IPFrequencyRuleView {
+  RejectMode?: 'temporary' | 'permanent';
   Rule: {
     id: number;
     name: string;
@@ -65,6 +68,7 @@ export interface IPFrequencyTestRequest {
   scope_type: IPFrequencyScopeType;
   scope_value?: string;
   action: IPFrequencyAction;
+  reject_mode?: 'temporary' | 'permanent';
   daily_connection_limit: number;
   concurrent_connection_limit: number;
   window_minutes: number;

@@ -39,6 +39,32 @@ describe('serializeAddons', () => {
   it('returns [] for an empty state', () => {
     expect(serializeAddons({})).toEqual([]);
   });
+
+  it('serializes modifyHeader in the current contract and strips historical keys', () => {
+    expect(serializeAddons({
+      modifyHeader: {
+        enabled: true,
+        params: {
+          target_field: 'custom',
+          custom_field_name: 'X-Policy',
+          operation: 'regex_replace',
+          match_pattern: '^old$',
+          new_value: 'new',
+          header_name: 'stale',
+          header_value: 'stale',
+        },
+      },
+    })).toEqual([{
+      type: 'modifyHeader',
+      params: {
+        target_field: 'custom',
+        custom_field_name: 'X-Policy',
+        operation: 'regex_replace',
+        match_pattern: '^old$',
+        new_value: 'new',
+      },
+    }]);
+  });
 });
 
 describe('parseAddons', () => {
@@ -62,6 +88,23 @@ describe('parseAddons', () => {
   it('defaults params to {} when a matched entry has no params object', () => {
     const state = parseAddons({ addons: [{ type: 'detailedLog' }] });
     expect(state).toEqual({ detailedLog: { enabled: true, params: {} } });
+  });
+
+  it('normalizes historical modifyHeader params for the current editor', () => {
+    const state = parseAddons({ addons: [{
+      type: 'modifyHeader',
+      params: { header_name: 'X-Legacy', header_value: 'yes', header_action: 'remove' },
+    }] });
+    expect(state.modifyHeader).toEqual({
+      enabled: true,
+      params: {
+        target_field: 'custom',
+        custom_field_name: 'X-Legacy',
+        operation: 'delete',
+        match_pattern: '',
+        new_value: 'yes',
+      },
+    });
   });
 });
 
@@ -88,6 +131,10 @@ describe('defaultAddonParams', () => {
     for (const k of keys) {
       expect(typeof defaultAddonParams(k)).toBe('object');
     }
+  });
+
+  it('includes the regex match field for modifyHeader', () => {
+    expect(defaultAddonParams('modifyHeader')).toMatchObject({ match_pattern: '' });
   });
 });
 

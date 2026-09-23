@@ -22,7 +22,7 @@ export function summarizeAddon(key: AddonKey, v: AddonsState): string {
     case 'emailTag':
       return [params.tag_position, params.tag_style, params.tag_content].filter(Boolean).join(' / ') || '—'
     case 'modifyHeader':
-      return params.target_field ? `${params.target_field}: ${params.target_value ?? ''}` : '—'
+      return params.target_field ? `${params.target_field}: ${params.new_value ?? ''}` : '—'
     case 'adminNotify':
       return [params.recipients, `${params.merge_window_minutes ?? 5}min`].filter(Boolean).join(' / ')
     case 'deleteAttachment':

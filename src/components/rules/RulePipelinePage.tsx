@@ -1,5 +1,6 @@
 'use client';
 
+import { RuleExecutionWarning } from '@/components/rules/RuleExecutionWarning';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useState, useMemo } from 'react';
@@ -275,6 +276,7 @@ function TagRuleRow({ rule, onSelect }: { rule: Rule; onSelect: (r: Rule) => voi
           {!rule.is_active && <Badge variant="outline" className="text-[10px] px-1 py-0 opacity-60 shrink-0">禁用</Badge>}
         </div>
         <RuleSummary rule={rule} />
+        <RuleExecutionWarning reason={rule.execution_blocked_reason} />
       </div>
     </button>
   );
@@ -299,6 +301,7 @@ function ActionRuleRow({ rule, onSelect }: { rule: Rule; onSelect: (r: Rule) => 
           {!rule.is_active && <Badge variant="outline" className="text-[10px] px-1 py-0 opacity-60 shrink-0">禁用</Badge>}
         </div>
         <RuleSummary rule={rule} />
+        <RuleExecutionWarning reason={rule.execution_blocked_reason} />
       </div>
       <FlowExitBadge action={rule.action} />
     </button>
@@ -759,6 +762,7 @@ function RuleDetailSheet({ rule, onClose, onToggle }: {
               />
             </div>
           )}
+          <RuleExecutionWarning reason={rule?.execution_blocked_reason} />
         </SheetHeader>
 
         {rule && (

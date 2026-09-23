@@ -27,6 +27,8 @@ describe('SenderFilterDrawer validation messages', () => {
     // exported list, the parity assertions below would silently skip it.
     const emitted = new Set<string>();
     for (const [, key] of SOURCE.matchAll(/message: '([A-Za-z][A-Za-z0-9]*)'/g)) emitted.add(key);
+    for (const [, key] of SOURCE.matchAll(/error: '([A-Za-z][A-Za-z0-9]*)'/g)) emitted.add(key);
+    for (const [, key] of SOURCE.matchAll(/\.int\('([A-Za-z][A-Za-z0-9]*)'\)/g)) emitted.add(key);
     for (const [, key] of SOURCE.matchAll(/\.(?:min|max)\([^,]+, '([A-Za-z][A-Za-z0-9]*)'\)/g)) emitted.add(key);
 
     expect(emitted.size).toBeGreaterThan(10);
@@ -74,5 +76,6 @@ describe('SenderFilterDrawer validation messages', () => {
     const errors = zh.senderFilter.errors as Record<string, string>;
     expect(errors.nameRequired).toContain('规则名称');
     expect(errors.senderValueRequired).toContain('发信人');
+    expect(errors.priorityRequired).toBe('优先级不能为空');
   });
 });

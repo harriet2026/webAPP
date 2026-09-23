@@ -62,3 +62,8 @@ export function screenshotUrl(storageNode: string, key: string): string {
   params.set('key', key);
   return `${API_BASE}/phishing-agent/screenshot?${params.toString()}`;
 }
+
+export async function getScreenshot(key: string, requestFn: ApiRequestFn = apiRequest, signal?: AbortSignal): Promise<Blob> {
+  const params = new URLSearchParams({ key });
+  return requestFn<Blob>(`/phishing-agent/screenshot?${params}`, { responseType: 'blob', signal });
+}

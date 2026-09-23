@@ -37,6 +37,7 @@ import {
   getApplicableAiConditions,
   getDisposalFilterSignature,
   hasSavableDisposalFilters,
+  removeQuickFilterArraySelection,
   resolvePositiveEnumFilterValues,
 } from "./lib/filter-state";
 import { resolveDisplayStatusHighlightKeys } from "@/lib/display-status";
@@ -82,7 +83,7 @@ import type {
   DisposalMailItem,
 } from "@/types/email-disposal";
 import type { AdvancedFilter } from "@/types/log";
-import { pendingViewQuickFilter } from "./lib/pending-filter";
+import { disposalDeepLinkQuickFilter } from "./lib/pending-filter";
 import { toast } from "sonner";
 
 function getDefaultQuickFilter(): DisposalQuickFilter {
@@ -159,9 +160,9 @@ export function EmailDisposalCenterPage({
   const aiEnabled = capabilities?.ai ?? false;
   const aiInterpretEnabled = aiEnabled && features.aiInterpret;
 
-  const initialView = useSearchParams().get("view");
+  const initialSearchParams = useSearchParams();
   const [quickFilter, setQuickFilter] = useState<DisposalQuickFilter>(
-    () => pendingViewQuickFilter(initialView) ?? getDefaultQuickFilter(),
+    () => disposalDeepLinkQuickFilter(initialSearchParams) ?? getDefaultQuickFilter(),
   );
   // GT-12423: html_spec（index「按 demo（默认展开）落地」）要求高级筛选默认
   // 展开；「更多筛选条件」(AdvancedFilters) 仍默认折叠（PRD 口径）。
@@ -175,9 +176,11 @@ export function EmailDisposalCenterPage({
   // GT-12608/GT-12818/GT-13248：?view=pending 的 draft/applied 状态都从
   // 邮件状态 quick-filter 初始化。列表首载保持「隔离中 + 待审核」口径，同时
   // 标签与用户手动多选状态走完全相同的逐项展示模型。
+  // GT-14263 的观察日志深链同样同时初始化 draft/applied，确保首载查询与
+  // 页面标签都带上相似检测命中模块和收发方向。
   const [appliedQuickFilter, setAppliedQuickFilter] =
     useState<DisposalQuickFilter>(
-      () => pendingViewQuickFilter(initialView) ?? getDefaultQuickFilter(),
+      () => disposalDeepLinkQuickFilter(initialSearchParams) ?? getDefaultQuickFilter(),
     );
   const [appliedAdvancedFilter, setAppliedAdvancedFilter] =
     useState<AdvancedFilter>(DEFAULT_ADVANCED);
@@ -374,7 +377,12 @@ export function EmailDisposalCenterPage({
     ],
   );
 
-  const { data, isLoading, refetch: refreshDisposalList } = useQuery({
+  const {
+    data,
+    isLoading,
+    isFetching,
+    refetch: refreshDisposalList,
+  } = useQuery({
     queryKey: ["email-disposal", searchParams, disposalScopeTenantId],
     queryFn: () => getDisposalList(searchParams, apiRequest),
   });
@@ -607,8 +615,8 @@ export function EmailDisposalCenterPage({
         setQuickFilter((prev) => {
           const current = (prev as Record<string, unknown>)[arrayField];
           if (!Array.isArray(current)) return prev;
-          const next = current.filter((v) => v !== arrayValue);
-          return { ...prev, [arrayField]: next.length > 0 ? next : undefined };
+          const next = removeQuickFilterArraySelection(current, arrayValue);
+          return { ...prev, [arrayField]: next };
         });
       } else {
         setQuickFilter((prev) => {
@@ -912,6 +920,7 @@ export function EmailDisposalCenterPage({
             hasActiveFilters={hasActiveFilters}
             canSaveTemplate={canSaveTemplate}
             hasPendingFilters={hasPendingFilters}
+            searching={isFetching}
           />
         }
         showConditions={!quickFilterCollapsed}

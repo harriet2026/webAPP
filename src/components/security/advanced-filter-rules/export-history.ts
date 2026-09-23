@@ -11,6 +11,8 @@
 // from the OS print dialog. System fonts render all four locales (zh/en/
 // th/ru) correctly for free, and there is zero new dependency.
 
+import { escapeHtml } from '@/lib/utils';
+
 export interface HistoryRow {
   versionNo: number;
   changedAt: string;
@@ -79,14 +81,6 @@ export interface PrintableWindow {
   document: { write: (html: string) => void; close: () => void };
   focus: () => void;
   print: () => void;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }
 
 // openPrintView opens a new window/tab containing a minimal, self-contained

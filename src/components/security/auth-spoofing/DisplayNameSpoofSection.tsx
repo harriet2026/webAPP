@@ -120,7 +120,11 @@ export function DisplayNameSpoofSection({ config, onChange, disabled }: DisplayN
                   disabled={disabled}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddUser(); } }}
                 />
-                <Select value={newUserMode} onValueChange={(v) => setNewUserMode(v as 'exact' | 'substring')}>
+                <Select
+                  value={newUserMode}
+                  onValueChange={(v) => setNewUserMode(v as 'exact' | 'substring')}
+                  disabled={disabled}
+                >
                   <SelectTrigger className="w-[120px]">
                     <SelectValue>{{ exact: t('displayNameSpoof.exact'), substring: t('displayNameSpoof.substring') }[newUserMode]}</SelectValue>
                   </SelectTrigger>
@@ -141,4 +145,3 @@ export function DisplayNameSpoofSection({ config, onChange, disabled }: DisplayN
     </Card>
   );
 }
-

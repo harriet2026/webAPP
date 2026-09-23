@@ -217,12 +217,10 @@ export async function testMailMarkingRule(
   const direction = rule.metadata.direction
   const scopes = [...rule.departments, ...rule.groups]
   const condition_tree = metaToCondition(direction, scopes)
-  const mapField = direction === 'receive' ? 'recipient_group' : 'sender_group'
   const test_attributes = {
     sender: direction === 'send' ? testEmail : 'someone@external.example',
     recipients: direction === 'send' ? 'someone@external.example' : testEmail,
     is_outbound: direction === 'send' ? 'true' : 'false',
-    [mapField]: Object.fromEntries(scopes.map((g) => [`${GROUP_TAG_PREFIX}${g}`, true])),
   }
   const r = await requestFn<{ matched: boolean }>(`/unified-rules/test?scope=${PAGE}`, {
     method: 'POST',

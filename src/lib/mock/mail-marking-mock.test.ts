@@ -45,4 +45,29 @@ describe('mail_marking mock', () => {
     expect(dispatch({ method: 'PUT', path: `/unified-rules/${id}?scope=mail_marking`, body: { name: '已更新' } })?.status).toBe(200);
     expect(dispatch({ method: 'DELETE', path: `/unified-rules/${id}?scope=mail_marking` })?.status).toBe(200);
   });
+
+  it('tests real mock membership instead of trusting client-supplied rule scopes', () => {
+    const condition_tree = {
+      type: 'AND',
+      children: [
+        { type: 'condition', field: 'is_outbound', operator: 'eq', value: 'false' },
+        { type: 'condition', field: 'recipient_group', map_key: 'grp:dept-2', operator: 'eq', value: 'true' },
+      ],
+    };
+    const test = (email: string) => dispatch({
+      method: 'POST',
+      path: '/unified-rules/test?scope=mail_marking',
+      body: {
+        condition_tree,
+        test_attributes: {
+          is_outbound: 'false',
+          recipients: email,
+          recipient_group: { 'grp:dept-2': true },
+        },
+      },
+    }).data as { matched: boolean };
+
+    expect(test('finance@example.test').matched).toBe(true);
+    expect(test('outsider@example.test').matched).toBe(false);
+  });
 });

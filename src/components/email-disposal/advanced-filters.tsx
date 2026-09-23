@@ -126,7 +126,12 @@ const FIELD_GROUPS: Record<string, FieldEntry[]> = {
     { key: "client_ip", i18nKey: "senderIp", type: "text" },
     { key: "recipient_domain", i18nKey: "recipientDomain", type: "text" },
     { key: "tid", i18nKey: "tid", type: "text" },
-    { key: "similar_cluster", i18nKey: "cluster", type: "text" },
+    {
+      key: "similar_cluster",
+      i18nKey: "cluster",
+      type: "text",
+      operators: ["eq", "neq", "is_null", "is_not_null", "in", "not_in"],
+    },
   ],
   attachment: [
     { key: "attachment_count", i18nKey: "attachmentCount", type: "number" },

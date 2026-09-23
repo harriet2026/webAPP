@@ -11,15 +11,7 @@ export const protocolActionKey = (a: AuthSpoofingAction) => `protocolActionLabel
 export const protocolActionShortKey = (a: AuthSpoofingAction) => `protocolActionShort.${toMessageKeySegment(a)}`;
 export const protocolActionDescKey = (a: AuthSpoofingAction) => `protocolActionDesc.${toMessageKeySegment(a)}`;
 
-export function flowSubKey(a: AuthSpoofingAction, isPtr: boolean): string {
-  if (a === 'discard') return 'flowSub.drop';
-  if (isPtr) return 'flowSub.check';
-  if (a === 'reject') return 'flowSub.block';
-  if (a === 'quarantine') return 'flowSub.quarantine';
-  if (a === 'audit') return 'flowSub.review';
-  if (a === 'proceed') return 'flowSub.tag';
-  return 'flowSub.pass';
-}
+export const flowSubKey = protocolActionShortKey;
 
 /** Severity order for computing the dominant action across a group of rules. */
 const ACTION_SEVERITY: Record<AuthSpoofingAction, number> = {
@@ -36,11 +28,13 @@ const ACTION_SEVERITY: Record<AuthSpoofingAction, number> = {
  * outcome rather than a single hard-coded sub-key.
  */
 export function dominantAction(
-  group: Record<string, { action: AuthSpoofingAction }> | undefined,
+  group: Record<string, { enabled: boolean; action: AuthSpoofingAction }> | undefined,
   fallback: AuthSpoofingAction = 'proceed',
 ): AuthSpoofingAction {
   if (!group) return fallback;
-  const actions = Object.values(group).map((item) => item.action);
+  const actions = Object.values(group)
+    .filter((item) => item.enabled)
+    .map((item) => item.action);
   if (actions.length === 0) return fallback;
   return actions.reduce((worst, cur) =>
     (ACTION_SEVERITY[cur] ?? 0) > (ACTION_SEVERITY[worst] ?? 0) ? cur : worst,

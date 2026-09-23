@@ -5,7 +5,11 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { DisposalQuickFilter, AICondition } from "@/types/email-disposal";
 import type { AdvancedFilter } from "@/types/log";
-import { getModuleName, type DisposalLang } from "./lib/disposal-basis-config";
+import {
+  getModuleName,
+  groupSelectedDisposalModules,
+  type DisposalLang,
+} from "./lib/disposal-basis-config";
 import { intentLabelI18nKey } from "./intent-label-options";
 import { isCompleteFilterCondition } from "./lib/filter-state";
 
@@ -318,10 +322,13 @@ export function SelectedConditions({
       isAi: false,
     });
   }
-  for (const pk of quick.disposalPolicyKeys ?? []) {
+  for (const group of groupSelectedDisposalModules(
+    quick.disposalPolicyKeys ?? [],
+    disposalLang,
+  )) {
     chips.push({
-      key: `q-disposalPolicyKeys:${pk}`,
-      label: `${ft("disposalPolicyKeys")}: ${getModuleName(pk, disposalLang)}`,
+      key: `q-disposalPolicyKeys:${group.keys.join(",")}`,
+      label: `${ft("disposalPolicyKeys")}: ${group.moduleName}`,
       isAi: false,
     });
   }

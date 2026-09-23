@@ -28,7 +28,21 @@ export interface AntivirusConfig {
   port: string;
 }
 
+export interface AVEngineInfo {
+  server: string;
+  engine_type: number;
+  engine?: string;
+  version?: string;
+  database_version?: string;
+  engine_status: string;
+  version_status: string;
+  database_version_status: string;
+  queried_at?: string;
+}
+
 export interface AVStatusResponse {
+  metadata_status?: string;
+  engines?: AVEngineInfo[];
   configured: boolean;
 }
 

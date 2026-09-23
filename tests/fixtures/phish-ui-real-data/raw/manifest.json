@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "purpose": "Private real-data fixtures for phishing detail UI design",
+  "files": {
+    "service-mail7-budget-exceeded.detail.json": {
+      "source_path": "/mnt/storage/osgateway_services/dev0907-deploy-20260909/o365-budget-diagnosis/detection-detail.json",
+      "sha256": "075f5c418ffb2789009d92f2816aecacce0e5b94ca020b9144add97a5189fb01",
+      "transformation": "none",
+      "scope": "DetectionLogDetail API snapshot"
+    },
+    "service-mail8-reference-invalid.detail.json": {
+      "source_path": "/mnt/storage/osgateway_services/dev0907-deploy-20260909/o365-resend-04-20260909/detection-detail-latest.json",
+      "sha256": "fd693dc9328ceea6d71b9e2e2fe47045fb44ed8a3db7fac83683e72c6ac926f7",
+      "transformation": "none",
+      "scope": "DetectionLogDetail API snapshot"
+    },
+    "cli-mail8-success.analysis.json": {
+      "source_path": "/mnt/storage/osgateway_services/dev0907-deploy-20260909/deploy/tmp/phish-capture-mail8/reproduce-mail8-01/run-02/analysis.json",
+      "sha256": "1839ec06484e2d83e45ec1fe25e59578be6020274dcbf0192f51301726024acc",
+      "transformation": "none",
+      "scope": "Native CLI Phish analysis from a new local execution"
+    },
+    "cli-mail8-success.report-props.json": {
+      "source_path": "cli-mail8-success.analysis.json",
+      "transformation": "Extract assessment_report unchanged and derive assessment_report_status=available from successful validated CLI report",
+      "scope": "Props for AssessmentReportView only, not a server DetectionLogDetail response"
+    }
+  },
+  "thread_reference": "01a08423-1beb-7fc2-b469-c1000a719be5",
+  "scope": "Data preparation only; no frontend changes or service writes",
+  "real_coverage": {
+    "factor_directions": {
+      "supports_threat": 6,
+      "limits_certainty": 5
+    },
+    "sources": 16,
+    "factors": 11,
+    "gaps": 8,
+    "omitted_sources": 7,
+    "omitted_gaps": 2,
+    "server_policy_cases": [
+      {
+        "mail_log_id": 7,
+        "confidence": 0.88,
+        "risk_level": "medium",
+        "policy_disposition": "quarantine",
+        "report_reason": "report_budget_exceeded"
+      },
+      {
+        "mail_log_id": 8,
+        "confidence": 0.85,
+        "risk_level": "medium",
+        "policy_disposition": "quarantine",
+        "report_reason": "report_reference_invalid"
+      }
+    ]
+  },
+  "missing_real_coverage": [
+    "successful service API response with a complete assessment report",
+    "supports_legitimate factors",
+    "source truncation/extraction branches",
+    "other tenant risk bands, observe mode, mixed-recipient outcomes"
+  ],
+  "execution_limits": {
+    "cli_report_budget_bytes": 21000,
+    "server_report_budget_bytes_prior_mail7": 16363
+  }
+}

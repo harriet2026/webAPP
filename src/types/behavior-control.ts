@@ -2,7 +2,7 @@ import type { Rule } from './unified-rules';
 
 export type BehaviorDirection = 'inbound' | 'outbound' | 'internal' | 'bidirectional';
 export type BehaviorObjectType = 'global' | 'sender' | 'senderIp' | 'senderDomain';
-export type BehaviorSenderSubType = 'individual' | 'group';
+export type BehaviorSenderSubType = 'individual' | 'group' | 'organization';
 export type BehaviorIPSubType = 'single' | 'ipGroup';
 export type BehaviorTimeWindow = '1min' | '5min' | '15min' | '1hour' | '6hour' | '24hour' | 'day';
 export type BehaviorDimension =
@@ -24,7 +24,7 @@ export interface BehaviorControlObjectConfig {
 
 export type BehaviorControlFormObjectConfig =
   | { type: 'global' }
-  | { type: 'sender'; sub_type: 'individual' | 'group'; value: string }
+  | { type: 'sender'; sub_type: 'individual' | 'group' | 'organization'; value: string }
   | { type: 'senderIp'; sub_type: 'single' | 'ipGroup'; value: string }
   | { type: 'senderDomain'; value: string };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { RuleExecutionWarning } from '@/components/rules/RuleExecutionWarning';
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -232,6 +233,7 @@ export function RuleEditorDrawer({
             {rule ? t("editRuleTitle", { name: rule.name }) : t("newRule")}
           </SheetTitle>
           <SheetDescription>{t("editorSubtitle")}</SheetDescription>
+          <RuleExecutionWarning reason={rule?.execution_blocked_reason} />
         </SheetHeader>
 
         <Tabs

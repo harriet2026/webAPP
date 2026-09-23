@@ -153,6 +153,12 @@ describe('email disposal center mock contract', () => {
 
   it('provides stable detail, preview, and event endpoints', () => {
     expect(mockEmailDisposalDetail(1)?.recipient_dispositions).toHaveLength(5);
+    expect(mockEmailDisposalDetail(1)?.redeliver_available).toBe(true);
+    expect(mockEmailDisposalDetail(8)).toMatchObject({
+      tid: 'MIC007',
+      redeliver_available: false,
+      redeliver_unavailable_reason: 'original_expired',
+    });
     expect(mockEmailDisposalPreview(1)?.headers['X-Mock-TID']).toBe('MIC001');
     // 4 个通用事件（connected/message_received/policy_decided/最终状态）+ 5
     // 个逐收件人投递事件（Task 12 item 7）+ 4 个投递后处置事件（workflow 族：

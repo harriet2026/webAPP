@@ -7,18 +7,10 @@
 // (sections/overview/single-recipient-actions.tsx) drive the SAME
 // deliver/discard/recall/notify dispatch logic instead of forking it.
 //
-// Backend supports only deliver/discard/recall/notify (spec §9-D) as
-// genuine, durable dispose actions -- the `dispatch()` function below (and
-// everything it guards: pending/reclassify/discard-confirm dialog state) is
-// untouched by task RA-5 and stays exactly that.
-//
-// RA-5 (demo parity): 隔离/阻断 are ADDITIVE, DEMO-PARITY-ONLY actions with
-// their own lightweight immediate-dispatch path (dispatchQuarantineOrBlock,
-// below) that does not go through `pending`/dispatch() at all -- they fire
-// on click with no confirm dialog (matching the demo), succeed and mutate
-// state only against the mock backend, and degrade to an explicit
-// "operation unsupported" toast against the real backend (which rejects any
-// bulk-dispose action other than release/delete with a 400).
+// Backend-supported durable actions are deliver/discard/recall/notify and
+// redeliver. GT-13650 removed mock-only quarantine/block actions from the
+// real console because bulk-dispose rejects them and no lifecycle migration
+// exists for those operations.
 
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -35,10 +27,12 @@ import { localizeApiError } from '@/lib/api/error-message';
 import type { EmailType, ObjectDisposeResult, RecipientDisposition } from '@/types/email-disposal-detail';
 import { recipientActionsForStatus } from '../lib/detail-helpers';
 import {
-  addSenderFilterRule, disposalRulePriority, disposeByObject, disposeObjectAction, notifyRecipient, redeliverMail,
+  addSenderFilterRule, disposalRulePriority, disposeByObject, disposeObjectAction,
+  isDuplicateSenderFilterRuleError, notifyRecipient, redeliverMail,
 } from '../lib/disposal-detail-api';
 import { recallMails } from '../lib/disposal-api';
 import { ReclassifyDialog } from '../components/reclassify-dialog';
+import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 export type ActionKey = 'deliver' | 'discard' | 'recall' | 'notify' | 'quarantine' | 'block' | 'redeliver';
 
@@ -59,18 +53,20 @@ interface FailureRow {
 
 // G6: one row per affected recipient in the batch-result "操作完成" modal --
 // prevStatus/newStatus are raw status keys (rendered via
-// recipientStatus.status.<key>); reason is an already-i18n-resolved string
-// (or a literal API-supplied reason, e.g. object-dispose's `reason` field)
-// shown in place of newStatus when ok is false, or as a generic fallback
-// when ok is true but there is no concrete newStatus (recall/notify, which
-// don't map to a recipient-visible status per spec §9-D).
+// recipientStatus.status.<key>); action keeps side-channel outcomes such as
+// notify/recall distinguishable from actual mail-status transitions. reason
+// is an already-i18n-resolved string (or a literal API-supplied reason, e.g.
+// object-dispose's `reason` field).
 export interface RecipientResultRow {
   recipient: string;
   prevStatus: string;
+  action: ActionKey;
   ok: boolean;
   newStatus?: string;
   reason?: string;
 }
+
+type RecipientResultDraft = Omit<RecipientResultRow, 'action'>;
 
 interface PendingAction {
   action: ActionKey;
@@ -142,6 +138,8 @@ interface UseRecipientDispositionArgs {
   sender: string;
   apiRequest: ApiRequestFn;
   onDisposed: () => void;
+  redeliverAvailable?: boolean;
+  redeliverUnavailableReason?: 'original_expired' | 'storage_unavailable';
   // Called once per dispatch (success or failure) after busy/pending/dialog
   // state has settled -- lets a caller with its own selection state (e.g.
   // RecipientStatus's checkbox matrix) clear it without this hook knowing
@@ -150,11 +148,13 @@ interface UseRecipientDispositionArgs {
 }
 
 export function useRecipientDisposition({
-  recipient_dispositions, mailLogId, sender, apiRequest, onDisposed, onSettled,
+  recipient_dispositions, mailLogId, sender, apiRequest, onDisposed,
+  redeliverAvailable = true, redeliverUnavailableReason = 'original_expired', onSettled,
 }: UseRecipientDispositionArgs) {
   const t = useTranslations('emailDisposal.detail.overview');
   // 根命名空间实例：localizeApiError 需要完整 key（apiErrors.<code>）。
   const tRoot = useTranslations();
+  const apiErrorMessage = useApiErrorMessage();
   const { isSystemAdmin } = useAuth();
 
   const groups = useMemo(
@@ -175,8 +175,8 @@ export function useRecipientDisposition({
   const [lastResults, setLastResults] = useState<RecipientResultRow[]>([]);
   const [resultDialogOpen, setResultDialogOpen] = useState(false);
 
-  function finishResults(rows: RecipientResultRow[]) {
-    setLastResults(rows);
+  function finishResults(action: ActionKey, rows: RecipientResultDraft[]) {
+    setLastResults(rows.map((row) => ({ ...row, action })));
     setResultDialogOpen(rows.length > 0);
   }
 
@@ -185,6 +185,10 @@ export function useRecipientDisposition({
     // deliver/discard/recall/notify 的改判状态机——它不改处置状态，只发起
     // 一次新的投递（结果经 delivery_facts 回写自然刷新）。
     if (action === 'redeliver') {
+      if (!redeliverAvailable) {
+        toast.info(t(`recipientStatus.redeliverUnavailable.${redeliverUnavailableReason}`));
+        return;
+      }
       const targets = groups.filter((g) => groupKeys.includes(g.key));
       const failed = new Set(
         targets.flatMap((g) => g.dispositions.filter((d) => d.status === 'delivery_failed').map((d) => d.recipient)),
@@ -243,7 +247,7 @@ export function useRecipientDisposition({
         recipients: g.dispositions.map((d) => d.recipient).join(', '),
         reason: t('recipientStatus.notApplicable'),
       }));
-      const resultRows: RecipientResultRow[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
+      const resultRows: RecipientResultDraft[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
         recipient: d.recipient,
         prevStatus: g.status,
         ok: false,
@@ -294,7 +298,7 @@ export function useRecipientDisposition({
         }
       }
 
-      finishResults(resultRows);
+      finishResults(action, resultRows);
       if (failures.length === 0) {
         toast.success(t('recipientStatus.actionSuccess'));
       } else if (succeeded > 0) {
@@ -373,7 +377,7 @@ export function useRecipientDisposition({
           recipients: g.dispositions.map((d) => d.recipient).join(', '),
           reason: t('recipientStatus.notApplicable'),
         }));
-        const resultRows: RecipientResultRow[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
+        const resultRows: RecipientResultDraft[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
           recipient: d.recipient,
           prevStatus: g.status,
           ok: false,
@@ -396,7 +400,7 @@ export function useRecipientDisposition({
           }
         }
 
-        finishResults(resultRows);
+        finishResults('notify', resultRows);
         if (failures.length === 0) {
           toast.success(t('recipientStatus.actionSuccess'));
         } else if (succeeded > 0) {
@@ -416,7 +420,7 @@ export function useRecipientDisposition({
         const targetGroups = groups.filter((g) => pending.groupKeys.includes(g.key));
         const applicable = targetGroups.filter((g) => g.actions.includes('recall'));
         const notApplicable = targetGroups.filter((g) => !g.actions.includes('recall'));
-        const notApplicableRows: RecipientResultRow[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
+        const notApplicableRows: RecipientResultDraft[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
           recipient: d.recipient,
           prevStatus: g.status,
           ok: false,
@@ -424,14 +428,14 @@ export function useRecipientDisposition({
         })));
 
         if (applicable.length === 0) {
-          finishResults(notApplicableRows);
+          finishResults('recall', notApplicableRows);
           toast.error(t('recipientStatus.actionFailed'));
         } else {
           try {
             const resp = await recallMails({ mail_log_ids: [mailLogId], final_type: finalType }, apiRequest);
             const messageFailure = resp.failed?.find((f) => f.id === mailLogId);
             const recipientResults = (resp.recipient_results ?? []).filter((r) => r.mail_log_id === mailLogId);
-            const applicableRows: RecipientResultRow[] = applicable.flatMap((g) => g.dispositions.map((d) => {
+            const applicableRows: RecipientResultDraft[] = applicable.flatMap((g) => g.dispositions.map((d) => {
               const normalizedRecipient = d.recipient.trim().toLowerCase();
               const recipientResult = recipientResults.find((r) => r.recipients.some(
                 (recipient) => recipient.trim().toLowerCase() === normalizedRecipient,
@@ -452,7 +456,7 @@ export function useRecipientDisposition({
             const failedRows = resultRows.filter((row) => !row.ok);
             const succeeded = applicableRows.filter((row) => row.ok).length;
 
-            finishResults(resultRows);
+            finishResults('recall', resultRows);
             if (failedRows.length > 0 && succeeded > 0) {
               toast.error(t('recipientStatus.bulkResult', { success: succeeded, failed: failedRows.length }));
             } else if (failedRows.length > 0) {
@@ -464,10 +468,10 @@ export function useRecipientDisposition({
             }
             if (succeeded > 0) onDisposed();
           } catch {
-            const applicableFailRows: RecipientResultRow[] = applicable.flatMap((g) => g.dispositions.map((d) => ({
+            const applicableFailRows: RecipientResultDraft[] = applicable.flatMap((g) => g.dispositions.map((d) => ({
               recipient: d.recipient, prevStatus: g.status, ok: false, reason: t('recipientStatus.actionFailed'),
             })));
-            finishResults([...notApplicableRows, ...applicableFailRows]);
+            finishResults('recall', [...notApplicableRows, ...applicableFailRows]);
             toast.error(t('recipientStatus.actionFailed'));
           }
         }
@@ -481,7 +485,7 @@ export function useRecipientDisposition({
           recipients: g.dispositions.map((d) => d.recipient).join(', '),
           reason: t('recipientStatus.notApplicable'),
         }));
-        const resultRows: RecipientResultRow[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
+        const resultRows: RecipientResultDraft[] = notApplicable.flatMap((g) => g.dispositions.map((d) => ({
           recipient: d.recipient,
           prevStatus: g.status,
           ok: false,
@@ -542,7 +546,7 @@ export function useRecipientDisposition({
           }
         }
 
-        finishResults(resultRows);
+        finishResults(action, resultRows);
         // Restore old overview-tab.tsx's "放行并加白" two-step, partial-
         // failure-tolerant shape (spec §6.1): the whitelist rule is only
         // attempted once (the sender is fixed for the whole message,
@@ -553,9 +557,12 @@ export function useRecipientDisposition({
         if (action === 'deliver' && whitelistSender && succeeded > 0) {
           try {
             await addSenderFilterRule(sender, 'whitelist', apiRequest, disposalRulePriority(isSystemAdmin));
-          } catch {
+          } catch (error) {
             ruleOk = false;
-            toast.warning(t('rulePartialFail'));
+            const reason = isDuplicateSenderFilterRuleError(error)
+              ? t('senderActions.whitelistDialog.alreadyExists')
+              : apiErrorMessage(error, t('senderActions.whitelistDialog.failed'));
+            toast.warning(t('rulePartialFailWithReason', { reason }));
           }
         }
         if (reclassifyFailedAny) toast.warning(t('reclassifyPartialFail'));
@@ -607,6 +614,7 @@ export function useRecipientDisposition({
   // GT-12880：重新投递提交。错误经 apiErrors.redeliver.* 本地化（error-message
   // 管道），成功 toast + onDisposed 刷新（重投后状态由 delivery_facts 回写驱动）。
   async function confirmRedeliver() {
+    if (!redeliverAvailable) return;
     const recipients = [...redeliverSelected];
     if (recipients.length === 0) return;
     setBusy(true);
@@ -640,6 +648,15 @@ export function useRecipientDisposition({
             <AlertDialogTitle>{t('recipientStatus.redeliverDialog.title')}</AlertDialogTitle>
             <AlertDialogDescription>{t('recipientStatus.redeliverDialog.body')}</AlertDialogDescription>
           </AlertDialogHeader>
+          {!redeliverAvailable && (
+            <div
+              className="flex items-center gap-2 rounded border border-amber-200 bg-amber-50 p-2 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
+              data-testid="email-disposal-redeliver-unavailable"
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              {t(`recipientStatus.redeliverUnavailable.${redeliverUnavailableReason}`)}
+            </div>
+          )}
           <div className="max-h-64 space-y-1.5 overflow-y-auto">
             {allRecipientRows.map((r) => {
               const checked = redeliverSelected.has(r.recipient);
@@ -655,6 +672,7 @@ export function useRecipientDisposition({
                 >
                   <Checkbox
                     checked={checked}
+                    disabled={!redeliverAvailable}
                     onCheckedChange={(v) => {
                       setRedeliverSelected((prev) => {
                         const next = new Set(prev);
@@ -664,7 +682,7 @@ export function useRecipientDisposition({
                     }}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate">{r.recipient}</span>
+                    <span className="block break-all">{r.recipient}</span>
                     {duplicateRisk && (
                       <span
                         className="mt-0.5 flex items-center gap-1 text-xs text-amber-600"
@@ -682,7 +700,7 @@ export function useRecipientDisposition({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busy}>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              disabled={busy || redeliverSelected.size === 0}
+              disabled={busy || !redeliverAvailable || redeliverSelected.size === 0}
               data-testid="email-disposal-redeliver-confirm"
               onClick={(e) => { e.preventDefault(); void confirmRedeliver(); }}
             >

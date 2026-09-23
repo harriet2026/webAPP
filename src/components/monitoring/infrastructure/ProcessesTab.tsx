@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, type KeyboardEvent } from 'react';
+import { useState, useMemo, useCallback, type KeyboardEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
@@ -40,6 +40,17 @@ interface ProcessesTabProps {
 
 type DockerFilterState = 'running' | 'stopped' | 'restarting' | null;
 const STOPPED_CONTAINER_STATES = new Set(['exited', 'stopped', 'created', 'dead']);
+
+// Display labels only: preserve raw names for API series, selection and test IDs.
+function useServiceLabel() {
+  const t = useTranslations('infrastructure.processes.serviceNames');
+  return useCallback((name: string) => {
+    const family = name.replace(/-\d+$/, '');
+    const aliases: Record<string, string> = { 'fluent-bit': 'fluentbit', gaussdb: 'opengauss', 'redis-server': 'redis' };
+    const key = aliases[family] ?? family;
+    return t.has(key) ? `${t(key)} (${name})` : name;
+  }, [t]);
+}
 
 // Process status only expresses whether a monitored process exists. Resource
 // anomalies belong to their dedicated metrics and alerting rules, so this
@@ -153,6 +164,7 @@ function buildChartOption(
   yLabel: string,
   locale: string,
   range: TimeRange,
+  serviceLabel: (name: string) => string,
 ) {
   const services = selectedServices.filter((s) => seriesMap[s]);
   if (services.length === 0) return null;
@@ -165,8 +177,8 @@ function buildChartOption(
 
   return {
     tooltip: { trigger: 'axis' as const },
-    legend: { data: services, top: 0 },
-    grid: { left: 56, right: 16, top: 36, bottom: 32 },
+    legend: { data: services.map(serviceLabel), show: false },
+    grid: { left: 56, right: 16, top: 12, bottom: 32 },
     xAxis: {
       type: 'category' as const,
       data: tsArr,
@@ -176,19 +188,56 @@ function buildChartOption(
       },
     },
     yAxis: { type: 'value' as const, min: 0, axisLabel: { formatter: `{value} ${yLabel}` } },
-    series: services.map((svc, i) => {
+    series: services.map((svc) => {
       const ptMap = new Map((seriesMap[svc] ?? []).map((p) => [p.ts, p.value]));
       return {
-        name: svc,
+        id: svc,
+        name: serviceLabel(svc),
         type: 'line' as const,
         data: tsArr.map((t) => ptMap.get(t) ?? null),
         smooth: true,
         lineStyle: { width: 2 },
-        itemStyle: { color: SERVICE_COLORS[i % SERVICE_COLORS.length] },
+        itemStyle: { color: SERVICE_COLORS[selectedServices.indexOf(svc) % SERVICE_COLORS.length] },
         connectNulls: false,
       };
     }),
   };
+}
+
+// Normal document flow reserves the actual wrapped legend height, including
+// narrow screens and translated labels; the plot retains its full height.
+function RuntimeChart({ option }: { option: NonNullable<ReturnType<typeof buildChartOption>> }) {
+  const names = useTranslations('infrastructure.processes.serviceNames');
+  const shortNames = useTranslations('infrastructure.processes.shortServiceNames');
+  const [hidden, setHidden] = useState<string[]>([]);
+  const selected = Object.fromEntries(option.series.map((series) => [series.name, !hidden.includes(series.id)]));
+  function shortLabel(raw: string) {
+    const family = raw.replace(/-\d+$/, '');
+    const suffix = raw.slice(family.length).replace(/^-/, '');
+    const label = shortNames.has(family) ? shortNames(family) : names.has(family) ? names(family) : raw;
+    return suffix && label !== raw ? `${label} · ${suffix}` : label;
+  }
+  return (
+    <>
+      <div className="mb-2 flex flex-wrap justify-center gap-x-4 gap-y-2">
+        {option.series.map((series) => (
+          <button
+            key={series.id}
+            type="button"
+            title={series.name}
+            aria-label={series.name}
+            aria-pressed={selected[series.name]}
+            className="inline-flex max-w-full items-center gap-1.5 rounded px-1 py-0.5 text-xs focus-visible:outline-2 focus-visible:outline-ring"
+            onClick={() => setHidden((previous) => previous.includes(series.id) ? previous.filter((name) => name !== series.id) : [...previous, series.id])}
+          >
+            <span className="h-2 w-3 shrink-0 rounded-sm" style={{ backgroundColor: selected[series.name] ? series.itemStyle.color : '#9ca3af' }} />
+            <span className={selected[series.name] ? 'break-words' : 'break-words text-muted-foreground line-through'}>{shortLabel(series.id)}</span>
+          </button>
+        ))}
+      </div>
+      <ReactECharts option={{ ...option, legend: { ...option.legend, selected } }} notMerge style={{ height: 240 }} />
+    </>
+  );
 }
 
 function ServiceMultiSelect({
@@ -200,6 +249,8 @@ function ServiceMultiSelect({
   selected: string[];
   onChange: (v: string[]) => void;
 }) {
+  const serviceLabel = useServiceLabel();
+  const t = useTranslations('infrastructure.processes');
   const allSelected = selected.length === allServices.length;
 
   function toggle(svc: string) {
@@ -213,17 +264,17 @@ function ServiceMultiSelect({
   return (
     <Popover>
       <PopoverTrigger className="inline-flex h-7 items-center gap-1 rounded-md border border-input bg-background px-2.5 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
-        {allSelected ? '全部服务' : `${selected.length} 个服务`}
+        {allSelected ? t('allServices') : t('selectedServiceCount', { count: selected.length })}
         <span className="opacity-50">▾</span>
       </PopoverTrigger>
-      <PopoverContent className="w-44 p-2" align="end">
+      <PopoverContent className="w-80 max-w-[calc(100vw-2rem)] p-2" align="end">
         <div className="space-y-1">
           <label className="flex items-center gap-2 px-1 py-0.5 text-xs cursor-pointer select-none">
             <Checkbox
               checked={allSelected}
               onCheckedChange={(v) => onChange(v ? [...allServices] : [])}
             />
-            全部
+            {t('allServices')}
           </label>
           <div className="border-t my-1" />
           {allServices.map((svc) => (
@@ -232,7 +283,7 @@ function ServiceMultiSelect({
               className="flex items-center gap-2 px-1 py-0.5 text-xs cursor-pointer select-none"
             >
               <Checkbox checked={selected.includes(svc)} onCheckedChange={() => toggle(svc)} />
-              {svc}
+              <span>{serviceLabel(svc)}</span>
             </label>
           ))}
         </div>
@@ -243,6 +294,7 @@ function ServiceMultiSelect({
 
 export function ProcessesTab({ node, range }: ProcessesTabProps) {
   const t = useTranslations('infrastructure');
+  const serviceLabel = useServiceLabel();
   const locale = useLocale();
   const procStatusBadge = useProcStatusBadge();
   const containerStateBadge = useContainerStateBadge();
@@ -286,13 +338,13 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
   }, [trendData]);
 
   const gorOption = useMemo(
-    () => buildChartOption(goroutineMap, effectiveSelected, '', locale, range),
-    [goroutineMap, effectiveSelected, locale, range],
+    () => buildChartOption(goroutineMap, effectiveSelected, '', locale, range, serviceLabel),
+    [goroutineMap, effectiveSelected, locale, range, serviceLabel],
   );
 
   const heapOption = useMemo(
-    () => buildChartOption(heapMap, effectiveSelected, 'MB', locale, range),
-    [heapMap, effectiveSelected, locale, range],
+    () => buildChartOption(heapMap, effectiveSelected, 'MB', locale, range, serviceLabel),
+    [heapMap, effectiveSelected, locale, range, serviceLabel],
   );
 
   if (procLoading) {
@@ -533,7 +585,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
               <TableBody>
                 {processes.map((p) => (
                   <TableRow key={p.name} data-testid={`monitor-infrastructure-process-row-${p.name.toLowerCase()}`}>
-                    <TableCell className="font-mono">{p.name}</TableCell>
+                    <TableCell>{serviceLabel(p.name)}</TableCell>
                     <TableCell>
                       <Badge className={procStatusBadge(p.status).className}>
                         {procStatusBadge(p.status).label}
@@ -575,7 +627,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
               <TableBody>
                 {services.map((s) => (
                   <TableRow key={s.name} data-testid={`monitor-infrastructure-runtime-row-${s.name}`}>
-                    <TableCell className="font-mono">{s.name}</TableCell>
+                    <TableCell>{serviceLabel(s.name)}</TableCell>
                     <TableCell className="text-right">{s.goroutine}</TableCell>
                     <TableCell>{(s.heap_alloc / 1024 / 1024).toFixed(1)} MB</TableCell>
                     <TableCell>{s.uptime}</TableCell>
@@ -605,7 +657,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
           ) : !gorOption ? (
             <EmptyState message={t('noData')} />
           ) : (
-            <ReactECharts option={gorOption} style={{ height: 240 }} />
+            <RuntimeChart option={gorOption} />
           )}
         </CardContent>
       </Card>
@@ -628,7 +680,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
           ) : !heapOption ? (
             <EmptyState message={t('noData')} />
           ) : (
-            <ReactECharts option={heapOption} style={{ height: 240 }} />
+            <RuntimeChart option={heapOption} />
           )}
         </CardContent>
       </Card>

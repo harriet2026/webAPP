@@ -24,6 +24,7 @@ import { InteractiveSurface } from '@/components/ui/interactive-surface';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { formatTimestamp } from '@/lib/format-time';
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
 import {
@@ -35,6 +36,8 @@ import {
   groupEffectiveRecipientBasisByRule, groupRecipientBasisByPolicy, isStage1Policy, pickPrimaryBasisGroup,
   hasStructuredBasisFacts,
   recipientBasisState, recipientsOfBasisEntry, sortBasisGroupsForTooltip,
+  formatRuleLabel,
+  shouldHideInternalRuleIdentity,
   type DisposalLang,
 } from '../../lib/disposal-basis-config';
 import { useProductForm } from '@/contexts/product-form-context';
@@ -128,6 +131,7 @@ function FirstSeenBadge({ receivedAt, firstSeenAt, t }: {
 }) {
   if (!firstSeenAt) return null;
   const isNew = isNewSender(receivedAt, firstSeenAt);
+  const formattedFirstSeenAt = formatTimestamp(firstSeenAt) || '—';
   const Icon = isNew ? Info : CheckCircle;
   return (
     <Tooltip>
@@ -141,7 +145,7 @@ function FirstSeenBadge({ receivedAt, firstSeenAt, t }: {
           {isNew ? t('firstSeenNew') : t('firstSeenEstablished')}
         </Badge>
       </TooltipTrigger>
-      <TooltipContent>{t('firstSeenTooltip', { date: firstSeenAt })}</TooltipContent>
+      <TooltipContent>{t('firstSeenTooltip', { date: formattedFirstSeenAt })}</TooltipContent>
     </Tooltip>
   );
 }
@@ -204,6 +208,9 @@ export function ThreatSummaryCard({
   const tDetail = useTranslations('emailDisposal.detail'); // mailTypeConfig / correctionSourceLabelKey keys
   const tFeatures = useTranslations('emailDisposal.detail.features'); // shared disposal-basis strings (same source as analysis-section)
   const tTable = useTranslations('emailDisposal.table');
+  const tAuth = useTranslations('authSpoofing');
+  const tIntent = useTranslations('intentEngine');
+  const tRecipient = useTranslations('recipientCheck');
   const locale = useLocale();
   const { viewer, capabilities } = useProductForm();
   const isTenantPlatformViewer = viewer === 'tenant' && capabilities?.multiTenant === true;
@@ -240,6 +247,9 @@ export function ThreatSummaryCard({
 			detail.disposal_basis.rule_name || detail.disposal_basis.rule_id || detail.disposal_basis.action
 		) ? detail.disposal_basis : undefined
 	);
+  const primaryBasisRuleLabel = primaryBasisEntry
+    ? formatRuleLabel(primaryBasisEntry, tAuth, disposalLang, { includeRuleId: false, translateIntent: tIntent, translateRecipient: tRecipient })
+    : '—';
   const isMultiBasis = basisGroups.length > 1;
   const orderedBasisGroups = isMultiBasis ? sortBasisGroupsForTooltip(basisGroups) : [];
   const isPlatformPolicyContext = isTenantPlatformViewer && isStage1Policy(primaryBasisEntry?.policy_key);
@@ -307,6 +317,8 @@ export function ThreatSummaryCard({
               apiRequest={apiRequest}
               onDisposed={onDisposed ?? (() => {})}
               readOnly={readOnly}
+              redeliverAvailable={detail.redeliver_available === true}
+              redeliverUnavailableReason={detail.redeliver_unavailable_reason}
             />
           )}
           <SenderActions
@@ -374,9 +386,9 @@ export function ThreatSummaryCard({
 			<span className="font-medium text-foreground">
 			  {primaryBasisEntry.policy_key
 				? (getModuleName(primaryBasisEntry.policy_key, disposalLang) || primaryBasisEntry.policy_key)
-				: (primaryBasisEntry.rule_name || primaryBasisEntry.rule_id || '—')}
+				: primaryBasisRuleLabel}
 			  {primaryBasisEntry.policy_key && primaryBasisEntry.rule_name && primaryBasisEntry.rule_name !== '—' && (
-				<span className="font-normal text-muted-foreground">「{primaryBasisEntry.rule_name}」</span>
+				<span className="font-normal text-muted-foreground">「{primaryBasisRuleLabel}」</span>
 			  )}
 			</span>
           )}
@@ -419,6 +431,12 @@ export function ThreatSummaryCard({
                           {group.entries.flatMap((entry, entryIndex) => {
                             const recipients = recipientsOfBasisEntry(entry);
                             const visibleRecipients = recipients.length > 0 ? recipients : ['—'];
+                            const ruleName = formatRuleLabel(entry, tAuth, disposalLang, {
+                              includeRuleId: false,
+                              translateIntent: tIntent,
+                              translateRecipient: tRecipient,
+                            });
+                            const hideInternalId = shouldHideInternalRuleIdentity(entry);
                             return visibleRecipients.map((recipient, recipientIndex) => {
                               const state = recipient === '—' ? 'unknown' : recipientBasisState(entry, recipient);
                               const stateLabel = tTable(`disposalBasisState.${state}`);
@@ -432,8 +450,8 @@ export function ThreatSummaryCard({
                                       })
                                     : tTable('disposalBasisRuleLine', {
                                         recipient,
-                                        ruleName: entry.rule_name || '—',
-                                        ruleId: entry.rule_id || '—',
+                                        ruleName,
+                                        ruleId: hideInternalId ? '—' : (entry.rule_id || '—'),
                                         state: stateLabel,
                                       })}
                                 </li>

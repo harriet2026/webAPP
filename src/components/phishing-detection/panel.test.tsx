@@ -27,7 +27,8 @@ vi.mock('@/lib/api/phishing-control', () => ({
   getPhishingControl: (...args: unknown[]) => getControl(...args),
   putPhishingControl: vi.fn(),
 }));
-vi.mock('@/lib/api/phishing-admission-rules', () => ({
+vi.mock('@/lib/api/phishing-admission-rules', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/api/phishing-admission-rules')>(),
   listAdmissionRules: (...args: unknown[]) => listRules(...args),
   createAdmissionRule: vi.fn(),
   updateAdmissionRule: vi.fn(),

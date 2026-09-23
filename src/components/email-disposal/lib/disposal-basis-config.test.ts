@@ -1,9 +1,15 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
+import { createTranslator } from 'next-intl';
+import zh from '@/../messages/zh.json';
+import en from '@/../messages/en.json';
+import th from '@/../messages/th.json';
+import ru from '@/../messages/ru.json';
 import {
   formatListReason,
   formatHitDetail,
+  formatRuleLabel,
   getModuleName,
   getActionLabel,
   getPolicyRoute,
@@ -16,9 +22,211 @@ import {
   pickPrimaryBasisGroup,
   recipientBasisState,
   sortBasisGroupsForTooltip,
+  shouldHideInternalRuleIdentity,
   DISPOSAL_POLICY_MAP,
 } from './disposal-basis-config';
 import type { DisposalBasis } from '@/types/email-disposal';
+
+describe('GT-13660 auth-spoofing rule labels', () => {
+  const backendRuleNames = [...readFileSync(
+    join(process.cwd(), '../internal/authspoofconfig/policy.go'), 'utf8',
+  ).matchAll(/"(sysrule:auth_spoofing_[a-z_]+)"/g)].map((match) => match[1]);
+
+  it.each(Object.entries({ zh, en, th, ru }))('reuses configuration copy for every backend rule in %s', (locale, messages) => {
+    const config = messages.authSpoofing;
+    const separator = locale === 'zh' ? '：' : ': ';
+    const expected = new Map<string, string>();
+    // The configuration messages enumerate protocol outcomes; the backend
+    // definitions enumerate rules. Comparing them catches a new unmapped rule.
+    for (const [key, label] of Object.entries(config.protocolChecks)) {
+      const protocol = /^(spf|dkim|dmarc|ptr)_[a-z_]+$/.exec(key)?.[1];
+      if (protocol && typeof label === 'string') {
+        expected.set(`sysrule:auth_spoofing_${key}`, `${protocol.toUpperCase()}${separator}${label}`);
+      }
+    }
+    for (const [suffix, label] of [
+      ['format_mailfrom_empty', config.formatChecks.mailFromEmpty],
+      ['format_mailfrom_invalid', config.formatChecks.mailFromInvalid],
+      ['format_envelope_header_mismatch', config.formatChecks.envelopeHeaderMismatch],
+    ]) {
+      expected.set(`sysrule:auth_spoofing_${suffix}`, `${config.formatChecks.title}${separator}${label}`);
+    }
+    for (const direction of ['inbound', 'outbound', 'internal'] as const) {
+      expected.set(`sysrule:auth_spoofing_display_name_${direction}`, `${config.displayNameSpoof.title}${separator}${config.displayNameSpoof[direction]}`);
+    }
+    expected.set('sysrule:auth_spoofing_similar_domain', config.similarDomain.title);
+    const translate = createTranslator({ locale, messages, namespace: 'authSpoofing' });
+
+    expect(backendRuleNames).toHaveLength(26);
+    expect([...expected.keys()].sort()).toEqual([...backendRuleNames].sort());
+    for (const name of backendRuleNames) {
+      const basis = { policy_key: 'AUTH', rule_name: name, rule_id: 'config:antispam:tenant:1:rule:615acc3a5021' };
+      const translateKey = (key: string) => translate(key as Parameters<typeof translate>[0]);
+      expect(formatRuleLabel(basis, translateKey, locale as 'zh' | 'en' | 'th' | 'ru')).toBe(expected.get(name));
+      expect(formatRuleLabel({ ...basis, rule_id: 'AUTH-22' }, translateKey, locale as 'zh' | 'en' | 'th' | 'ru')).toBe(expected.get(name));
+    }
+  });
+
+  const translate = createTranslator({ locale: 'zh', messages: zh, namespace: 'authSpoofing' });
+  const translateKey = (key: string) => translate(key as Parameters<typeof translate>[0]);
+  it.each([
+    [{ policy_key: 'AUTH', rule_name: '自定义 SPF 策略', rule_id: 'AUTH-9' }, '自定义 SPF 策略（AUTH-9）', '自定义 SPF 策略'],
+    [{ policy_key: 'CR', rule_name: 'sysrule:auth_spoofing_spf_none', rule_id: 'CR-9' }, 'sysrule:auth_spoofing_spf_none（CR-9）', 'sysrule:auth_spoofing_spf_none'],
+    [{ policy_key: 'AUTH', rule_name: 'sysrule:auth_spoofing_future_check', rule_id: 'AUTH-9' }, 'sysrule:auth_spoofing_future_check（AUTH-9）', 'sysrule:auth_spoofing_future_check'],
+    [{ policy_key: 'AUTH', rule_name: 'sysrule:auth_spoofing_toString', rule_id: 'AUTH-9' }, 'sysrule:auth_spoofing_toString（AUTH-9）', 'sysrule:auth_spoofing_toString'],
+    [{ policy_key: 'AUTH', rule_name: 'prefix sysrule:auth_spoofing_spf_none' }, 'prefix sysrule:auth_spoofing_spf_none', 'prefix sysrule:auth_spoofing_spf_none'],
+    [{ policy_key: 'AUTH', rule_name: 'sysrule:auth_spoofing_spf_none_custom' }, 'sysrule:auth_spoofing_spf_none_custom', 'sysrule:auth_spoofing_spf_none_custom'],
+    [{ rule_name: '普通规则', rule_id: '42' }, '普通规则（42）', '普通规则'],
+    [{ policy_key: 'AUTH', rule_id: 'config:antispam:tenant:1:spf_none:615acc3a5021' }, 'config:antispam:tenant:1:spf_none:615acc3a5021', 'config:antispam:tenant:1:spf_none:615acc3a5021'],
+    [{ rule_name: '—', rule_id: 'AUTH-9' }, 'AUTH-9', 'AUTH-9'],
+    [{ rule_name: '', rule_id: '' }, '—', '—'],
+    [{}, '—', '—'],
+  ] as const)('preserves unknown/custom and missing-field fallbacks: %j', (basis, full, compact) => {
+    expect(formatRuleLabel(basis, translateKey)).toBe(full);
+    expect(formatRuleLabel(basis, translateKey, 'zh', { includeRuleId: false })).toBe(compact);
+  });
+});
+
+describe('GT-13709 intent-engine rule labels', () => {
+  const intents = ['porn_gambling', 'political', 'phishing', 'spam', 'subscription'] as const;
+  const directions = ['receive', 'send', 'internal'] as const;
+  const translateAuth = (key: string) => key;
+
+  it.each(Object.entries({ zh, en, th, ru }))('reuses intent-engine configuration copy for every built-in rule in %s', (locale, messages) => {
+    const translateIntent = createTranslator({ locale, messages, namespace: 'intentEngine' });
+    for (const intent of intents) {
+      for (const direction of directions) {
+        const basis = {
+          policy_key: 'INTENT',
+          rule_name: `sysrule:intent_engine:${intent}:${direction}`,
+          rule_id: `config:antispam:tenant:1:intent.${intent}.${direction}:615acc3a5021`,
+        };
+        const intentLabel = messages.intentEngine.intent[intent];
+        const directionLabel = messages.intentEngine.dirShort[direction];
+        const [open, close] = locale === 'zh' ? ['（', '）'] : [' (', ')'];
+        const expected = `${intentLabel}${open}${directionLabel}${close}`;
+        expect(formatRuleLabel(basis, translateAuth, locale as 'zh' | 'en' | 'th' | 'ru', {
+          translateIntent: (key) => translateIntent(key as Parameters<typeof translateIntent>[0]),
+        })).toBe(expected);
+      }
+    }
+  });
+
+  it('preserves custom and malformed intent rule names instead of guessing a label', () => {
+    const translateIntent = (key: string) => key;
+    expect(formatRuleLabel({
+      policy_key: 'INTENT',
+      rule_name: 'tenant custom intent',
+      rule_id: 'INTENT-9',
+    }, translateAuth, 'zh', { translateIntent })).toBe('tenant custom intent（INTENT-9）');
+    expect(formatRuleLabel({
+      policy_key: 'INTENT',
+      rule_name: 'sysrule:intent_engine:future:receive',
+      rule_id: 'INTENT-10',
+    }, translateAuth, 'zh', { translateIntent })).toBe('sysrule:intent_engine:future:receive（INTENT-10）');
+  });
+});
+
+describe('GT-13981 built-in recipient-check rule labels', () => {
+  const basis: DisposalBasis = {
+    policy_key: 'RCPT',
+    rule_name: 'sysrule:recipient_check_existence',
+    rule_id: 'config:antispam:tenant:2:existence:615acc3a5021',
+    action: 'reject',
+  };
+
+  it.each(Object.entries({ zh, en, th, ru }))('reuses recipient-check configuration copy in %s', (locale, messages) => {
+    const translateRecipient = createTranslator({ locale, messages, namespace: 'recipientCheck' });
+    const lang = locale as 'zh' | 'en' | 'th' | 'ru';
+    const label = messages.recipientCheck.existence.title;
+    expect(formatRuleLabel(basis, (key) => key, lang, {
+      translateRecipient: (key) => translateRecipient(key as Parameters<typeof translateRecipient>[0]),
+    })).toBe(label);
+    expect(formatListReason(basis, lang)).toContain(`「${label}」`);
+    expect(formatListReason(basis, lang)).not.toContain('sysrule:');
+    expect(formatHitDetail(basis, lang)).not.toContain('sysrule:');
+    expect(shouldHideInternalRuleIdentity(basis)).toBe(true);
+  });
+
+  it('keeps unknown recipient rules unchanged', () => {
+    const custom = { ...basis, rule_name: 'tenant recipient rule', rule_id: 'RCPT-9' };
+    expect(formatRuleLabel(custom, (key) => key)).toBe('tenant recipient rule（RCPT-9）');
+    expect(shouldHideInternalRuleIdentity(custom)).toBe(false);
+  });
+
+  it.each(Object.entries({ zh, en, th, ru }))('maps every recipient-limit direction and hides its config identity in %s', (locale, messages) => {
+    const translateRecipient = createTranslator({ locale, messages, namespace: 'recipientCheck' });
+    const lang = locale as 'zh' | 'en' | 'th' | 'ru';
+    const directions = {
+      inbound: messages.recipientCheck.limit.direction.inbound,
+      outbound: messages.recipientCheck.limit.direction.outbound,
+      internal: messages.recipientCheck.limit.direction.internal,
+      merged: messages.recipientCheck.limit.mergedTitle,
+    };
+    for (const [direction, directionLabel] of Object.entries(directions)) {
+      const limitBasis: DisposalBasis = {
+        policy_key: 'RCPT',
+        rule_name: `sysrule:recipient_check_limit_${direction}`,
+        rule_id: `config:antispam:tenant:2:limit.${direction}:615acc3a5021`,
+        action: 'reject',
+      };
+      const [open, close] = lang === 'zh' ? ['（', '）'] : [' (', ')'];
+      const label = `${messages.recipientCheck.limit.title}${open}${directionLabel}${close}`;
+      expect(formatRuleLabel(limitBasis, (key) => key, lang, {
+        translateRecipient: (key) => translateRecipient(key as Parameters<typeof translateRecipient>[0]),
+      })).toBe(label);
+      expect(formatListReason(limitBasis, lang)).toContain(`「${label}」`);
+      expect(formatListReason(limitBasis, lang)).not.toContain('sysrule:');
+      expect(formatHitDetail(limitBasis, lang)).not.toContain('sysrule:');
+      expect(shouldHideInternalRuleIdentity(limitBasis)).toBe(true);
+    }
+  });
+
+  it('does not guess future recipient-limit rule names', () => {
+    const future = { ...basis, rule_name: 'sysrule:recipient_check_limit_future', rule_id: 'RCPT-10' };
+    expect(formatRuleLabel(future, (key) => key)).toBe('sysrule:recipient_check_limit_future（RCPT-10）');
+    expect(shouldHideInternalRuleIdentity(future)).toBe(false);
+  });
+});
+
+describe('GT-14105 attachment-virus rule labels', () => {
+  const basis: DisposalBasis = {
+    policy_key: 'ATT-BASIC',
+    rule_name: 'attachment virus disposition',
+    rule_id: 'config:attachd:platform:0:disposition.virus:89a569b163b4',
+    action: 'quarantine',
+    hit_values: { virus_name: 'EICAR-Test-File' },
+  };
+
+  it.each([
+    ['zh', '附件病毒处置规则'],
+    ['en', 'Attachment Virus Disposition Rule'],
+    ['th', 'กฎการจัดการไวรัสในไฟล์แนบ'],
+    ['ru', 'Правило обработки вирусов во вложениях'],
+  ] as const)('shows a localized business label and hides the config identity in %s', (lang, label) => {
+    expect(formatRuleLabel(basis, (key) => key, lang)).toBe(label);
+    expect(formatRuleLabel(basis, (key) => key, lang, { includeRuleId: false })).toBe(label);
+    expect(formatListReason(basis, lang)).toContain(`「${label}」`);
+    expect(formatListReason(basis, lang)).not.toContain('attachment virus disposition');
+    expect(formatListReason(basis, lang)).not.toContain('config:attachd:');
+    expect(shouldHideInternalRuleIdentity(basis)).toBe(true);
+  });
+
+  it('does not rewrite custom attachment-antivirus rule names', () => {
+    const custom = { ...basis, rule_name: 'Tenant AV Policy', rule_id: 'ATT-AV-9' };
+    expect(formatRuleLabel(custom, (key) => key)).toBe('Tenant AV Policy（ATT-AV-9）');
+    expect(shouldHideInternalRuleIdentity(custom)).toBe(false);
+  });
+
+  it('formats the backend attachment owner and its virus evidence without changing identity', () => {
+    expect(formatListReason(basis, 'zh')).toBe('附件安全检测「附件病毒处置规则」· 检出 EICAR-Test-File');
+    expect(formatHitDetail(basis, 'zh')).toContain('EICAR-Test-File');
+    expect(formatRuleLabel({ ...basis, policy_key: 'ATT-AV' }, (key) => key)).toBe('附件病毒处置规则');
+    const custom = { ...basis, rule_id: 'ATT-BASIC-9' };
+    expect(formatRuleLabel(custom, (key) => key)).toBe('attachment virus disposition（ATT-BASIC-9）');
+    expect(shouldHideInternalRuleIdentity(custom)).toBe(false);
+  });
+});
 
 describe('disposal-basis-config', () => {
   const basis: DisposalBasis = {
@@ -44,6 +252,78 @@ describe('disposal-basis-config', () => {
     expect(detail).toBeTruthy();
     expect(detail).toContain('203.0.113.5');
     expect(detail).toContain('spamhaus-X');
+  });
+
+  it('renders ATT-AV engine and version trace evidence without dash placeholders', () => {
+    const antivirus: DisposalBasis = {
+      policy_key: 'ATT-AV',
+      rule_name: '反病毒引擎',
+      rule_id: 'ATT-AV-1',
+      hit_values: {
+        virus_name: 'EICAR-Test-File',
+        engine: 'ClamAV',
+        version: '1.4.3/20260831',
+        engine_status: 'collected',
+        version_status: 'collected',
+      },
+    };
+
+    expect(formatHitDetail(antivirus, 'zh')).toBe(
+      '反病毒引擎检出 EICAR-Test-File（引擎：ClamAV，引擎版本：1.4.3/20260831，病毒库版本：历史记录未采集）',
+    );
+  });
+
+  it('distinguishes unsupported and legacy ATT-AV trace collection', () => {
+    const unsupported: DisposalBasis = {
+      policy_key: 'ATT-AV',
+      rule_name: '反病毒引擎',
+      rule_id: 'ATT-AV-2',
+      hit_values: {
+        virus_name: 'EICAR',
+        engine: 'engtype=9',
+        engine_status: 'collected',
+        version_status: 'unsupported',
+      },
+    };
+    const legacy: DisposalBasis = {
+      policy_key: 'ATT-AV',
+      rule_name: '反病毒引擎',
+      rule_id: 'ATT-AV-legacy',
+      hit_values: { virus_name: 'EICAR' },
+    };
+
+    expect(formatHitDetail(unsupported, 'zh')).toContain('版本：不支持采集');
+    expect(formatHitDetail(legacy, 'zh')).toContain('引擎：历史记录未采集，引擎版本：历史记录未采集');
+    expect(formatHitDetail(unsupported, 'zh')).not.toContain('：-');
+  });
+
+  it.each([
+    ['zh', '病毒库版本：27800', '版本查询时间：', '非扫描时版本快照'],
+    ['en', 'virus database version: 27800', 'version query time:', 'not a scan-time snapshot'],
+    ['th', 'เวอร์ชันฐานข้อมูลไวรัส: 27800', 'เวลาที่สอบถามเวอร์ชัน:', 'ไม่ใช่ข้อมูล ณ เวลาสแกน'],
+    ['ru', 'версия вирусной базы: 27800', 'время запроса версии:', 'не снимок на момент сканирования'],
+  ] as const)('renders separate queried versions and provenance in %s', (lang, database, queried, snapshot) => {
+    const detail = formatHitDetail({ ...basis, policy_key: 'ATT-AV', hit_values: {
+      virus_name: 'EICAR', engine: 'ClamAV', version: '1.4.3', database_version: '27800',
+      engine_status: 'collected', version_status: 'collected', database_version_status: 'collected',
+      engine_info_queried_at: '2026-09-08T08:00:00Z',
+    } }, lang);
+    expect(detail).toContain(database);
+    expect(detail).toContain(queried);
+    expect(detail).toContain(snapshot);
+    expect(detail).toContain('2026-09-08T08:00:00Z');
+    expect(detail).toContain('1.4.3');
+  });
+
+  it('distinguishes absent engine data, query errors and legacy records', () => {
+    const detail = formatHitDetail({ ...basis, policy_key: 'ATT-AV', hit_values: {
+      engine: 'engtype=7', engine_status: 'unavailable', version_status: 'collection_error', database_version_status: 'unavailable',
+    } }, 'zh');
+    expect(detail).toContain('engtype=7 (引擎未提供)');
+    expect(detail).toContain('引擎版本：采集异常');
+    expect(detail).toContain('病毒库版本：引擎未提供');
+    expect(detail).not.toContain('历史记录未采集');
+    expect(detail).not.toContain('不支持采集');
   });
 
   it('list vs detail copy differ', () => {
@@ -249,30 +529,68 @@ describe('disposal-basis-config', () => {
     expect(formatHitDetail(legacy, 'zh')).not.toContain('%');
   });
 
-	it('renders unified SIM runtime evidence for similar mail and same subject', () => {
-		const similar: DisposalBasis = {
-			policy_key: 'SIM',
-			rule_name: '相似邮件-收信',
-			action: 'observe',
-			hit_values: {
-				detection_type: 'similar_email',
-				direction: 'receive',
-				counter: '12',
-				similarity_pct: '91',
-				cluster_id: 'sim_1_receive:7',
-			},
-		};
-		expect(formatHitDetail(similar, 'zh')).toContain('相似邮件');
-		expect(formatHitDetail(similar, 'zh')).toContain('similarity: 91%');
-		expect(formatHitDetail(similar, 'zh')).toContain('cluster: sim_1_receive:7');
+  it('localizes managed SIM identity and runtime evidence without exposing internal parameters (GT-14241)', () => {
+    const similar: DisposalBasis = {
+      policy_key: 'SIM',
+      rule_name: 'similar_detection_similar_email_receive',
+      rule_id: 'config:textsim:platform:0:similar_email.receive:a3061f05cfdd',
+      action: 'quarantine',
+      hit_values: {
+        detection_type: 'similar_email',
+        direction: 'receive',
+        counter: '3',
+        similarity_pct: '97',
+        cluster_id: 'sim_1_receive:1',
+      },
+    };
 
-		const sameSubject: DisposalBasis = {
-			policy_key: 'SIM',
-			hit_values: { detection_type: 'same_subject', direction: 'send', counter: '50' },
-		};
-		expect(formatListReason(sameSubject, 'zh')).toContain('相同主题');
-		expect(formatHitDetail(sameSubject, 'zh')).toContain('count: 50');
-	});
+    expect(formatRuleLabel(similar, (key) => key, 'zh')).toBe('相似邮件检测（接收）');
+    expect(formatListReason(similar, 'zh')).toBe(
+      '相似邮件检测「相似邮件检测（接收）」· 接收方向命中相似邮件检测',
+    );
+    expect(formatHitDetail(similar, 'zh')).toBe(
+      '接收方向命中相似邮件检测，当前计数：3，相似度：97%',
+    );
+    expect(shouldHideInternalRuleIdentity(similar)).toBe(true);
+
+    const rendered = [
+      formatRuleLabel(similar, (key) => key, 'zh'),
+      formatListReason(similar, 'zh'),
+      formatHitDetail(similar, 'zh'),
+    ].join('\n');
+    expect(rendered).not.toMatch(/similar_detection_|config:textsim|direction:|count:|similarity:|cluster:|sim_1_receive/);
+    expect(rendered).not.toContain('阈值');
+  });
+
+  it.each([
+    ['receive', '接收方向命中相同主题检测，当前计数：50'],
+    ['send', '外发方向命中相同主题检测，当前计数：50'],
+    ['internal', '域内方向命中相同主题检测，当前计数：50'],
+  ])('maps SIM direction %s to readable Chinese', (direction, expected) => {
+    const basis: DisposalBasis = {
+      policy_key: 'SIM',
+      hit_values: { detection_type: 'same_subject', direction, counter: '50' },
+    };
+    expect(formatHitDetail(basis, 'zh')).toBe(expected);
+  });
+
+  it('localizes managed aggregate SIM labels while keeping custom SIM identities intact', () => {
+    const managed: DisposalBasis = {
+      policy_key: 'SIM',
+      rule_name: 'similar_detection_same_subject_aggregate',
+      rule_id: 'config:textsim:tenant:42:same_subject.aggregate:0123456789ab',
+    };
+    expect(formatRuleLabel(managed, (key) => key, 'zh')).toBe('相同主题检测（全部方向）');
+    expect(shouldHideInternalRuleIdentity(managed)).toBe(true);
+
+    const custom: DisposalBasis = {
+      policy_key: 'SIM',
+      rule_name: '客户自定义相似邮件规则',
+      rule_id: 'SIM-99',
+    };
+    expect(formatRuleLabel(custom, (key) => key, 'zh')).toBe('客户自定义相似邮件规则（SIM-99）');
+    expect(shouldHideInternalRuleIdentity(custom)).toBe(false);
+  });
 
   it('reads ACF detection tags from the top-level field', () => {
     const acf: DisposalBasis = {

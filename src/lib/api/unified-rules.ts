@@ -171,6 +171,7 @@ export async function exportUnifiedRules(
   selection?: RuleExportSelection,
   requestFn: ApiRequestFn = apiRequest,
   scope?: string,
+  ruleIds?: ReadonlySet<number>,
 ): Promise<RuleExportEnvelope> {
   const searchParams = new URLSearchParams();
   if (scope) {
@@ -181,7 +182,16 @@ export async function exportUnifiedRules(
     searchParams.set('include_detection_profiles', String(selection.include_detection_profiles));
   }
   const qs = searchParams.toString();
-  return requestFn<RuleExportEnvelope>(`${API_BASE}/unified-rules/export${qs ? `?${qs}` : ''}`);
+  const envelope = await requestFn<RuleExportEnvelope>(`${API_BASE}/unified-rules/export${qs ? `?${qs}` : ''}`);
+  if (!ruleIds || !envelope.data.rules) return envelope;
+
+  return {
+    ...envelope,
+    data: {
+      ...envelope.data,
+      rules: envelope.data.rules.filter((rule) => ruleIds.has(rule.id)),
+    },
+  };
 }
 
 export async function previewUnifiedRulesImport(

@@ -339,9 +339,9 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full" data-testid="disposal-settings-notify-frequency"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="daily">{t('freq_daily')}</SelectItem>
-                    <SelectItem value="never">{t('freq_never')}</SelectItem>
-                    <SelectItem value="custom">{t('freq_custom')}</SelectItem>
+                  <SelectItem value="daily" data-testid="disposal-settings-notify-frequency-daily">{t('freq_daily')}</SelectItem>
+                  <SelectItem value="never" data-testid="disposal-settings-notify-frequency-never">{t('freq_never')}</SelectItem>
+                  <SelectItem value="custom" data-testid="disposal-settings-notify-frequency-custom">{t('freq_custom')}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -529,7 +529,11 @@ export function QuarantineSettingsTab({ control, watch, setValue, serverTz }: Pr
                   className={fieldState.error ? 'border-destructive focus-visible:ring-destructive' : ''}
                 />
                 {fieldState.error ? (
-                  <p className="text-sm text-destructive" role="alert">
+                  <p
+                    className="text-sm text-destructive"
+                    role="alert"
+                    data-testid="disposal-settings-portal-base-url-error"
+                  >
                     {validationText(firstValidationMessage(fieldState.error), 'portalBaseUrlRequired')}
                   </p>
                 ) : portalUrl ? null : (

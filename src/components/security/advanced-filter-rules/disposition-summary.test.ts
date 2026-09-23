@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { effectiveAddons, TERMINAL_ACTIONS } from './DispositionSummary'
+import { effectiveAddons, summarizeAddon, TERMINAL_ACTIONS } from './DispositionSummary'
 import type { AddonsState } from './validation'
 import type { AddonKey } from './conflict-matrix'
 
@@ -27,5 +27,12 @@ describe('effectiveAddons', () => {
   it('marks discard as terminal', () => {
     expect(TERMINAL_ACTIONS.has('discard')).toBe(true)
     expect(TERMINAL_ACTIONS.has('quarantine')).toBe(false)
+  })
+
+  it('summarizes modifyHeader using the persisted new_value key', () => {
+    const state: AddonsState = {
+      modifyHeader: { enabled: true, params: { target_field: 'Subject', new_value: '[SEC]' } },
+    }
+    expect(summarizeAddon('modifyHeader', state)).toBe('Subject: [SEC]')
   })
 })

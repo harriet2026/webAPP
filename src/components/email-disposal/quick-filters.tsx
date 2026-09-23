@@ -35,6 +35,7 @@ import type { DisposalQuickFilter } from "@/types/email-disposal";
 import { MultiSelectFilter } from "./lib/multi-select-filter";
 import {
   groupDisposalModulesByStage,
+  groupSelectedDisposalModules,
   type DisposalLang,
 } from "./lib/disposal-basis-config";
 import { useLocale } from "next-intl";
@@ -90,6 +91,14 @@ export function QuickFilters({
         .map((g) => ({ moduleName: g.moduleName, keys: g.keys })),
     }));
   }, [disposalLang]);
+  const selectedPolicyModuleCount = useMemo(
+    () =>
+      groupSelectedDisposalModules(
+        value.disposalPolicyKeys ?? [],
+        disposalLang,
+      ).length,
+    [disposalLang, value.disposalPolicyKeys],
+  );
   const visibleRuleOptions = useMemo(() => {
     const needle = ruleSearch.trim().toLowerCase();
     return disposalRuleOptions
@@ -386,11 +395,11 @@ export function QuickFilters({
                 }
               >
                 <span className="truncate">
-                  {(value.disposalPolicyKeys?.length ?? 0) +
+                  {selectedPolicyModuleCount +
                     (value.disposalRuleIds?.length ?? 0) ===
                   0
                     ? t("all")
-                    : `${(value.disposalPolicyKeys?.length ?? 0) + (value.disposalRuleIds?.length ?? 0)} ${tCommon("selected")}`}
+                    : `${selectedPolicyModuleCount + (value.disposalRuleIds?.length ?? 0)} ${tCommon("selected")}`}
                 </span>
                 <ChevronDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-60" />
               </PopoverTrigger>

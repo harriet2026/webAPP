@@ -49,6 +49,7 @@ describe('GT-13342 规则列表不能把超大 page_size 当成全量', () => {
     const requestFn = cappedPaginationRequest(rules);
 
     const result = await listBehaviorControlRules(requestFn);
+    expect(requestFn.paths[0]).not.toContain("stage=");
 
     expect(result.items).toHaveLength(201);
     expect(requestFn).toHaveBeenCalledTimes(3);

@@ -102,7 +102,7 @@ export function AuthProbeDialog({ open, onOpenChange }: AuthProbeDialogProps) {
           <div className="grid grid-cols-2 gap-3">
             {([
               { label: 'SPF', value: spfResult, set: setSpfResult, options: ['pass', 'fail', 'neutral', 'none', 'softfail', 'temperror', 'permerror'] },
-              { label: 'DKIM', value: dkimResult, set: setDkimResult, options: ['pass', 'fail', 'neutral', 'none', 'temperror'] },
+              { label: 'DKIM', value: dkimResult, set: setDkimResult, options: ['pass', 'fail', 'neutral', 'none', 'temperror', 'permerror'] },
               { label: 'DMARC', value: dmarcResult, set: setDmarcResult, options: ['pass', 'fail', 'none'] },
               { label: 'PTR', value: ptrResult, set: setPtrResult, options: ['match', 'nomatch', 'noptr', 'ehlo_mismatch'] },
             ] as const).map((field) => (

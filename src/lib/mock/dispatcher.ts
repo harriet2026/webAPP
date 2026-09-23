@@ -145,6 +145,7 @@ import {
   mockCreateMailMarkingRule,
   mockUpdateMailMarkingRule,
   mockDeleteMailMarkingRule,
+  mockTestMailMarkingRule,
   mockAttachmentConfigList,
   mockCreateAttachmentConfig,
   mockUpdateAttachmentConfig,
@@ -249,6 +250,17 @@ type MockPhishingAdmissionUpdateRequest = PhishAdmissionRuleUpdate;
 
 function bodyAs<T>(body: unknown): T | undefined {
   return body && typeof body === 'object' ? body as T : undefined;
+}
+
+function admissionRequestError(body: unknown): MockResponse | null {
+  const value = bodyAs<Record<string, unknown>>(body);
+  const size = value?.max_size_kb;
+  if (!value || 'max_size_mb' in value ||
+      (size !== undefined && (typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 || size > 102400000)) ||
+      !['require_url', 'sender_first_seen', 'require_qrcode', 'require_executable'].some((field) => value[field] === true)) {
+    return { status: 400, data: { error: { code: 'invalid_request', message: '请选择至少一个风险信号，并使用 0–102400000 的整数 KB 上限' } } };
+  }
+  return null;
 }
 
 function admissionCreateRequest(body: unknown): PhishAdmissionRuleWrite {
@@ -1928,7 +1940,7 @@ const routes: Route[] = [
     method: 'POST',
     pattern: '/unified-rules/test',
     matchQuery: (q) => new URLSearchParams(q).get('scope') === 'mail_marking',
-    handler: () => ({ status: 200, data: { matched: true } }),
+    handler: (req) => ({ status: 200, data: mockTestMailMarkingRule(req.body) }),
   },
   {
     method: 'POST',
@@ -2455,16 +2467,16 @@ const routes: Route[] = [
     method: 'PUT', pattern: '/phishing-agent/analysis-config', handler: (req) => ({ status: 200, data: mockPutPhishingAnalysisConfig(analysisRequest(req.body)) }),
   },
   {
-    method: 'GET', pattern: '/phishing-agent/admission-rules', handler: () => ({ status: 200, data: { items: mockPhishingAdmissionRules() } }),
+    method: 'GET', pattern: '/phishing-agent/admission-rules', handler: () => ({ status: 200, data: { items: mockPhishingAdmissionRules().map(rule => ({ ...rule, status: 'ready', tenant_id: null, read_only: false, effective: rule.enabled })) } }),
   },
   {
-    method: 'POST', pattern: '/phishing-agent/admission-rules', handler: (req) => ({ status: 201, data: mockCreatePhishingAdmissionRule(admissionCreateRequest(req.body)) }),
+    method: 'POST', pattern: '/phishing-agent/admission-rules', handler: (req) => admissionRequestError(req.body) ?? ({ status: 201, data: mockCreatePhishingAdmissionRule(admissionCreateRequest(req.body)) }),
   },
   {
     method: 'PUT', pattern: /^\/phishing-agent\/admission-rules\/\d+\/status$/, handler: (req) => { const id = Number(req.path.split('/').at(-2)); const body = bodyAs<{ enabled?: boolean }>(req.body); return mockSetPhishingAdmissionRuleStatus(id, body?.enabled === true) ? { status: 204, data: null } : { status: 404, data: { error: { code: 'not_found', message: 'admission rule not found' } } }; },
   },
   {
-    method: 'PUT', pattern: /^\/phishing-agent\/admission-rules\/\d+$/, handler: (req) => { const id = Number(req.path.split('/').at(-1)); return mockUpdatePhishingAdmissionRule(id, admissionUpdateRequest(req.body)) ? { status: 204, data: null } : { status: 404, data: { error: { code: 'not_found', message: 'admission rule not found' } } }; },
+    method: 'PUT', pattern: /^\/phishing-agent\/admission-rules\/\d+$/, handler: (req) => { const invalid = admissionRequestError(req.body); if (invalid) return invalid; const id = Number(req.path.split('/').at(-1)); return mockUpdatePhishingAdmissionRule(id, admissionUpdateRequest(req.body)) ? { status: 204, data: null } : { status: 404, data: { error: { code: 'not_found', message: 'admission rule not found' } } }; },
   },
   {
     method: 'DELETE', pattern: /^\/phishing-agent\/admission-rules\/\d+$/, handler: (req) => mockDeletePhishingAdmissionRule(Number(req.path.split('/').at(-1))) ? { status: 204, data: null } : { status: 404, data: { error: { code: 'not_found', message: 'admission rule not found' } } },

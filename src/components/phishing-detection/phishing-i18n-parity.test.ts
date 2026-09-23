@@ -10,7 +10,7 @@ function leafKeys(value: unknown, prefix = ''): string[] {
 }
 
 describe('phishing deep-module i18n parity', () => {
-  for (const scope of ['phishingDetection', 'phishingConfig'] as const) {
+  for (const scope of ['phishingDetection', 'phishingConfig', 'assessment'] as const) {
     it(`${scope} has the same recursive key set in all four locales`, () => {
       const expected = leafKeys(zh[scope]).sort();
       for (const locale of [en, ru, th]) expect(leafKeys(locale[scope]).sort()).toEqual(expected);

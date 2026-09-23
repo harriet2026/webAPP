@@ -42,6 +42,16 @@ describe('mapMailLogToDisposalItem - multi-recipient (GT-11619)', () => {
   });
 });
 
+describe('mapMailLogToDisposalItem - SMTP transaction correlation (GT-14076)', () => {
+  it('preserves message_uuid so rows from one SMTP transaction can be associated', () => {
+    const item = mapMailLogToDisposalItem(baseItem({
+      message_uuid: '019feb00-1111-7222-8333-444444444444',
+    } as Partial<MailLogAPIItem>));
+
+    expect(item.messageUuid).toBe('019feb00-1111-7222-8333-444444444444');
+  });
+});
+
 describe('mapMailLogToDisposalItem - direction (GT-12254)', () => {
   it.each([
     ['receive', 'incoming'],

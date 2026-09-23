@@ -69,6 +69,31 @@ describe("SearchBar actions", () => {
     expect(props.onSearch).toHaveBeenCalledWith("");
   });
 
+  it("shows list refresh feedback until the request completes (GT-14257)", () => {
+    const { props, rerender } = renderSearchBar({ searching: true });
+    const submit = screen.getByTestId("disposal-search-submit");
+    const input = screen.getByTestId("disposal-natural-language-input");
+
+    expect(submit).toBeDisabled();
+    expect(submit).toHaveAttribute("aria-busy", "true");
+    expect(submit).toHaveTextContent("emailDisposal.search.searching");
+    expect(submit.querySelector("svg")).toHaveClass("animate-spin");
+    expect(input).toBeDisabled();
+    expect(input).toHaveAttribute("aria-busy", "true");
+
+    rerender(<SearchBar {...props} searching={false} />);
+
+    expect(screen.getByTestId("disposal-search-submit")).toBeEnabled();
+    expect(screen.getByTestId("disposal-search-submit")).toHaveAttribute(
+      "aria-busy",
+      "false",
+    );
+    expect(screen.getByTestId("disposal-search-submit")).toHaveTextContent(
+      "emailDisposal.search.search",
+    );
+    expect(screen.getByTestId("disposal-natural-language-input")).toBeEnabled();
+  });
+
   it("uses one compact visual rhythm for the search action group", () => {
     renderSearchBar();
 

@@ -1,0 +1,3 @@
+external_id,dept_name,parent_external_id
+root,Headquarters,
+dev,Engineering,root

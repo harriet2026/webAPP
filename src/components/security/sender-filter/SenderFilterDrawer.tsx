@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Loader2, ChevronDown, ChevronUp, HelpCircle, Zap, Shield, Ban, Clock, Lightbulb, Play, Check, X } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, HelpCircle, Zap, Shield, Ban, Clock, Lightbulb, Play, MinusCircle, Target } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -167,6 +167,8 @@ export const senderFilterErrorKeys = [
   // GT-12693：优先级校验改为按角色范围构造，统一发 priorityRange 一个键（带
   // {min}/{max} 参数），旧的 priorityMin/priorityMax 已不再被 schema 发出，
   // 四语文案也随之替换 —— 声明必须跟着改，否则 i18n 守卫会一直红。
+  'priorityRequired',
+  'priorityInteger',
   'priorityRange',
   'invalidEmail',
   'invalidDomain',
@@ -183,7 +185,7 @@ const ruleSchema = z.object({
   description: z.string().max(200, 'descriptionMaxLength').optional(),
   // GT-12693：占位。真实上下界依赖登录角色（后端 validatePriority 对
   // tenant_admin 收窄到 100-1000），由下面的 makeRuleSchema 覆盖。
-  priority: z.number().int(),
+  priority: z.number({ error: 'priorityRequired' }).int('priorityInteger'),
   is_active: z.boolean(),
   valid_until: z.string().optional(),
   list_type: z.enum(['blacklist', 'whitelist']),
@@ -261,8 +263,8 @@ function makeRuleSchema(range: { min: number; max: number }) {
   // ruleSchema 带 superRefine，zod v4 要求用 safeExtend 覆盖字段。
   return ruleSchema.safeExtend({
     priority: z
-      .number()
-      .int()
+      .number({ error: 'priorityRequired' })
+      .int('priorityInteger')
       .min(range.min, 'priorityRange')
       .max(range.max, 'priorityRange'),
   });
@@ -605,10 +607,20 @@ export function SenderFilterDrawer({
                                 className="flex-1"
                                 placeholder={t('senderFilter.senderPlaceholder_individual')}
                                 {...form.register('sender_config.value')}
+                                aria-describedby="sender-filter-sender-value-hint"
                                 aria-invalid={!!form.formState.errors.sender_config?.value}
                               />
                             )}
                           </div>
+                          {watchSenderType === 'individual' && (
+                            <p
+                              id="sender-filter-sender-value-hint"
+                              data-testid="sender-filter-sender-value-hint"
+                              className="mt-1 text-xs leading-5 text-muted-foreground break-words"
+                            >
+                              {t('senderFilter.senderPlaceholder_individual')}
+                            </p>
+                          )}
                           {form.formState.errors.sender_config?.value && (
                             <p data-testid="sender-filter-sender-value-error" className="text-xs text-destructive mt-1">{t(`senderFilter.errors.${form.formState.errors.sender_config.value.message}`)}</p>
                           )}
@@ -706,12 +718,18 @@ export function SenderFilterDrawer({
                             className="w-24"
                             min={priorityRange.min}
                             max={priorityRange.max}
+                            aria-invalid={form.formState.errors.priority ? true : undefined}
+                            aria-describedby={form.formState.errors.priority ? 'sender-filter-rule-priority-error' : undefined}
                           />
                           <span data-testid="sender-filter-rule-priority-range" className="text-xs text-muted-foreground">
                             {priorityRange.min}-{priorityRange.max}
                           </span>
                           {form.formState.errors.priority && (
-                            <p data-testid="sender-filter-rule-priority-error" className="text-xs text-destructive">
+                            <p
+                              id="sender-filter-rule-priority-error"
+                              data-testid="sender-filter-rule-priority-error"
+                              className="text-xs text-destructive"
+                            >
                               {t(`senderFilter.errors.${form.formState.errors.priority.message}`, {
                                 min: priorityRange.min,
                                 max: priorityRange.max,
@@ -843,7 +861,9 @@ export function SenderFilterDrawer({
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">{t('senderFilter.effectPriorityLabel')}:</span>
-                    <Badge data-testid="sender-filter-effect-priority" variant="outline" className="font-mono">{watchPriority}</Badge>
+                    <Badge data-testid="sender-filter-effect-priority" variant="outline" className="font-mono">
+                      {Number.isFinite(watchPriority) ? watchPriority : '—'}
+                    </Badge>
                   </div>
                 </div>
               </div>
@@ -1001,29 +1021,31 @@ export function SenderFilterDrawer({
                           {t('senderFilter.simGroupNotice')}
                         </div>
                       ) : (
-                        <div className={cn(
-                          'rounded-lg border p-3 text-sm',
-                          simMatch
-                            ? 'border-rose-500/40 bg-rose-500/10'
-                            : 'border-emerald-500/40 bg-emerald-500/10',
-                        )}>
+                        <div
+                          role="status"
+                          aria-live="polite"
+                          data-testid="sender-filter-simulation-result"
+                          className={cn(
+                            'rounded-lg border p-3 text-sm',
+                            simMatch
+                              ? 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-sky-300'
+                              : 'border-border bg-muted text-muted-foreground',
+                          )}
+                        >
                           <div className="flex items-center gap-2 mb-1">
                             {simMatch ? (
                               <>
-                                <X className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-                                <span className="font-medium text-rose-700 dark:text-rose-300">{t('senderFilter.hitRule')}</span>
+                                <Target data-testid="sender-filter-simulation-match-icon" className="h-4 w-4" />
+                                <span className="font-medium">{t('senderFilter.hitRule')}</span>
                               </>
                             ) : (
                               <>
-                                <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                                <span className="font-medium text-emerald-700 dark:text-emerald-300">{t('senderFilter.notHit')}</span>
+                                <MinusCircle data-testid="sender-filter-simulation-no-match-icon" className="h-4 w-4" />
+                                <span className="font-medium">{t('senderFilter.notHit')}</span>
                               </>
                             )}
                           </div>
-                          <p className={cn(
-                            'text-xs',
-                            simMatch ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400',
-                          )}>
+                          <p className="text-xs">
                             {simMatch ? t('senderFilter.simMatch') : t('senderFilter.simNoMatch')}
                           </p>
                         </div>

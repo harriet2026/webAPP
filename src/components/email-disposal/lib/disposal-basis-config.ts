@@ -84,6 +84,98 @@ const optionalVal = (v: HitValues | undefined, k: string): string | undefined =>
   return x !== undefined && x !== null && x !== '' ? String(x) : undefined;
 };
 
+type SimilarDetectionType = 'similar_email' | 'same_subject';
+type SimilarDetectionDirection = 'aggregate' | 'receive' | 'send' | 'internal';
+
+const SIMILAR_DETECTION_LABELS: Record<DisposalLang, {
+  detectionTypes: Record<SimilarDetectionType, string>;
+  directions: Record<SimilarDetectionDirection, string>;
+}> = {
+  zh: {
+    detectionTypes: { similar_email: '相似邮件检测', same_subject: '相同主题检测' },
+    directions: { aggregate: '全部方向', receive: '接收', send: '外发', internal: '域内' },
+  },
+  en: {
+    detectionTypes: { similar_email: 'Similar Mail Detection', same_subject: 'Same Subject Detection' },
+    directions: { aggregate: 'All Directions', receive: 'Inbound', send: 'Outbound', internal: 'Intra-domain' },
+  },
+  th: {
+    detectionTypes: { similar_email: 'การตรวจจับอีเมลที่คล้ายกัน', same_subject: 'การตรวจจับหัวเรื่องเดียวกัน' },
+    directions: { aggregate: 'ทุกทิศทาง', receive: 'รับเข้า', send: 'ส่งออก', internal: 'ภายในโดเมน' },
+  },
+  ru: {
+    detectionTypes: { similar_email: 'Обнаружение похожих писем', same_subject: 'Обнаружение одинаковых тем' },
+    directions: { aggregate: 'Все направления', receive: 'Входящие', send: 'Исходящие', internal: 'Внутридоменные' },
+  },
+};
+
+function similarDetectionType(v: HitValues): SimilarDetectionType {
+  return optionalVal(v, 'detection_type') === 'same_subject' ? 'same_subject' : 'similar_email';
+}
+
+function similarDetectionDirection(v: HitValues): Exclude<SimilarDetectionDirection, 'aggregate'> | undefined {
+  const direction = optionalVal(v, 'direction');
+  return direction === 'receive' || direction === 'send' || direction === 'internal' ? direction : undefined;
+}
+
+function similarDetectionSummary(v: HitValues, lang: DisposalLang): string {
+  const labels = SIMILAR_DETECTION_LABELS[lang];
+  const detection = labels.detectionTypes[similarDetectionType(v)];
+  const direction = similarDetectionDirection(v);
+  if (!direction) {
+    switch (lang) {
+      case 'en': return `${detection} matched`;
+      case 'th': return `ตรงกับ${detection}`;
+      case 'ru': return `Сработало: ${detection}`;
+      default: return `命中${detection}`;
+    }
+  }
+  const directionLabel = labels.directions[direction];
+  switch (lang) {
+    case 'en': return `${directionLabel} ${detection.toLowerCase()} matched`;
+    case 'th': return `${directionLabel}ตรงกับ${detection}`;
+    case 'ru': return `Сработало: ${detection}, ${directionLabel.toLowerCase()} направление`;
+    default: return `${directionLabel}方向命中${detection}`;
+  }
+}
+
+function similarDetectionHitDetail(v: HitValues, lang: DisposalLang): string {
+  const summary = similarDetectionSummary(v, lang);
+  const sameSubject = similarDetectionType(v) === 'same_subject';
+  const counter = optionalVal(v, 'counter');
+  const similarity = optionalVal(v, 'similarity_pct');
+  switch (lang) {
+    case 'en': {
+      const facts = [
+        counter ? `current count: ${counter}` : undefined,
+        !sameSubject && similarity ? `similarity: ${similarity}%` : undefined,
+      ].filter(Boolean);
+      return `${summary}${facts.length ? `, ${facts.join(', ')}` : ''}`;
+    }
+    case 'th': {
+      const facts = [
+        counter ? `จำนวนปัจจุบัน: ${counter}` : undefined,
+        !sameSubject && similarity ? `ความคล้ายคลึง: ${similarity}%` : undefined,
+      ].filter(Boolean);
+      return `${summary}${facts.length ? `, ${facts.join(', ')}` : ''}`;
+    }
+    case 'ru': {
+      const facts = [
+        counter ? `текущее количество: ${counter}` : undefined,
+        !sameSubject && similarity ? `сходство: ${similarity}%` : undefined,
+      ].filter(Boolean);
+      return `${summary}${facts.length ? `, ${facts.join(', ')}` : ''}`;
+    }
+    default: {
+      const facts = [
+        counter ? `当前计数：${counter}` : undefined,
+        !sameSubject && similarity ? `相似度：${similarity}%` : undefined,
+      ].filter(Boolean);
+      return `${summary}${facts.length ? `，${facts.join('，')}` : ''}`;
+    }
+  }
+}
+
 function ipFrequencyTriggerLabel(
   token: string | undefined,
   lang: DisposalLang,
@@ -741,15 +833,38 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     },
     hitDetail: (v, lang) => {
       const vn = optionalVal(v, 'virus_name');
+      const copy = {
+        en: { unsupported: 'collection unsupported', unavailable: 'not provided by engine', error: 'collection failed', legacy: 'not collected for legacy record', engine: 'engine', version: 'engine version', database: 'virus database version', queried: 'version query time', snapshot: 'not a scan-time snapshot' },
+        th: { unsupported: 'ไม่รองรับการเก็บข้อมูล', unavailable: 'เอนจินไม่ได้ให้ข้อมูล', error: 'เก็บข้อมูลล้มเหลว', legacy: 'ระเบียนเดิมไม่ได้เก็บข้อมูล', engine: 'เอนจิน', version: 'เวอร์ชันเอนจิน', database: 'เวอร์ชันฐานข้อมูลไวรัส', queried: 'เวลาที่สอบถามเวอร์ชัน', snapshot: 'ไม่ใช่ข้อมูล ณ เวลาสแกน' },
+        ru: { unsupported: 'сбор не поддерживается', unavailable: 'движок не предоставил данные', error: 'ошибка сбора', legacy: 'не собрано в старой записи', engine: 'движок', version: 'версия движка', database: 'версия вирусной базы', queried: 'время запроса версии', snapshot: 'не снимок на момент сканирования' },
+        zh: { unsupported: '不支持采集', unavailable: '引擎未提供', error: '采集异常', legacy: '历史记录未采集', engine: '引擎', version: '引擎版本', database: '病毒库版本', queried: '版本查询时间', snapshot: '非扫描时版本快照' },
+      };
+      const labels = copy[lang as keyof typeof copy] ?? copy.zh;
+      const traceValue = (key: string, statusKey: string) => {
+        const value = optionalVal(v, key);
+        const status = optionalVal(v, statusKey);
+        const reason = status === 'unsupported' ? labels.unsupported
+          : status === 'unavailable' ? labels.unavailable
+            : status ? labels.error : labels.legacy;
+        // A fallback engtype can be present even when the name query failed.
+        if (value) return status && status !== 'collected' ? `${value} (${reason})` : value;
+        return reason;
+      };
+      const engine = traceValue('engine', 'engine_status');
+      const version = traceValue('version', 'version_status');
+      const database = traceValue('database_version', 'database_version_status');
+      const queriedAt = optionalVal(v, 'engine_info_queried_at');
+      const info = `${labels.engine}: ${engine}, ${labels.version}: ${version}, ${labels.database}: ${database}`;
+      const queried = queriedAt ? `; ${labels.queried}: ${queriedAt} (${labels.snapshot})` : '';
       switch (lang) {
         case 'en':
-          return vn ? `Antivirus engine detected ${vn}` : 'Antivirus detection hit';
+          return `${vn ? `Antivirus engine detected ${vn}` : 'Antivirus detection hit'} (${info}${queried})`;
         case 'th':
-          return vn ? `เอนจินป้องกันไวรัสตรวจพบ ${vn}` : 'ตรงกับการตรวจจับไวรัส';
+          return `${vn ? `เอนจินป้องกันไวรัสตรวจพบ ${vn}` : 'ตรงกับการตรวจจับไวรัส'} (${info}${queried})`;
         case 'ru':
-          return vn ? `Антивирус обнаружил ${vn}` : 'Сработало антивирусное обнаружение';
+          return `${vn ? `Антивирус обнаружил ${vn}` : 'Сработало антивирусное обнаружение'} (${info}${queried})`;
         default:
-          return vn ? `反病毒引擎检出 ${vn}` : '反病毒检测命中';
+          return `${vn ? `反病毒引擎检出 ${vn}` : '反病毒检测命中'}（引擎：${engine}，引擎版本：${version}，病毒库版本：${database}${queriedAt ? `；版本查询时间：${queriedAt}（${labels.snapshot}）` : ''}）`;
       }
     },
   },
@@ -1134,42 +1249,8 @@ export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
     moduleTh: 'การตรวจจับอีเมลที่คล้ายกัน',
     moduleRu: 'Похожие письма',
     idPrefix: 'SIM-',
-	listSummary: (v, lang) => {
-		const sameSubject = optionalVal(v, 'detection_type') === 'same_subject';
-      switch (lang) {
-        case 'en':
-			return sameSubject ? 'Matched a repeated subject' : 'Highly similar to known mail';
-        case 'th':
-			return sameSubject ? 'ตรงกับหัวเรื่องที่ซ้ำกัน' : 'คล้ายกับอีเมลที่รู้จักอย่างมาก';
-        case 'ru':
-			return sameSubject ? 'Совпала повторяющаяся тема' : 'Очень похоже на известное письмо';
-        default:
-			return sameSubject ? '命中相同主题检测' : '与已知邮件高度相似';
-      }
-    },
-	hitDetail: (v, lang) => {
-		const sameSubject = optionalVal(v, 'detection_type') === 'same_subject';
-		const direction = optionalVal(v, 'direction');
-		const counter = optionalVal(v, 'counter');
-		const similarity = optionalVal(v, 'similarity_pct');
-		const cluster = optionalVal(v, 'cluster_id');
-		const details = [
-			direction ? `direction: ${direction}` : undefined,
-			counter ? `count: ${counter}` : undefined,
-			!sameSubject && similarity ? `similarity: ${similarity}%` : undefined,
-			!sameSubject && cluster ? `cluster: ${cluster}` : undefined,
-		].filter(Boolean).join(', ');
-      switch (lang) {
-        case 'en':
-			return `${sameSubject ? 'Repeated-subject' : 'Similar-mail'} rule matched${details ? ` (${details})` : ''}`;
-        case 'th':
-			return `ตรงกับกฎ${sameSubject ? 'หัวเรื่องซ้ำ' : 'อีเมลที่คล้ายกัน'}${details ? ` (${details})` : ''}`;
-        case 'ru':
-			return `Сработало правило ${sameSubject ? 'повторяющейся темы' : 'похожих писем'}${details ? ` (${details})` : ''}`;
-        default:
-			return `命中${sameSubject ? '相同主题' : '相似邮件'}检测规则${details ? `（${details}）` : ''}`;
-      }
-    },
+    listSummary: similarDetectionSummary,
+    hitDetail: similarDetectionHitDetail,
   },
   ACF: {
     stage: 5,
@@ -1319,6 +1400,193 @@ export function getPolicyRoute(policyKey: string, ruleRef?: string): string | un
   return buildPolicyConfigRoute(policyKey, ruleRef);
 }
 
+// Built-in rule names are stable backend identities, not administrator-facing
+// copy. Reuse the configuration page's authSpoofing messages for all 26 rules
+// defined in internal/authspoofconfig/policy.go; unknown/custom names fall back.
+const AUTH_RULE_LABEL_KEYS: Record<string, readonly string[]> = {
+  spf_fail: ['protocolChecks.spf', 'protocolChecks.spf_fail'],
+  spf_softfail: ['protocolChecks.spf', 'protocolChecks.spf_softfail'],
+  spf_permerror: ['protocolChecks.spf', 'protocolChecks.spf_permerror'],
+  spf_none: ['protocolChecks.spf', 'protocolChecks.spf_none'],
+  spf_temperror: ['protocolChecks.spf', 'protocolChecks.spf_temperror'],
+  dkim_fail: ['protocolChecks.dkim', 'protocolChecks.dkim_fail'],
+  dkim_neutral: ['protocolChecks.dkim', 'protocolChecks.dkim_neutral'],
+  dkim_none: ['protocolChecks.dkim', 'protocolChecks.dkim_none'],
+  dkim_temperror: ['protocolChecks.dkim', 'protocolChecks.dkim_temperror'],
+  dkim_permerror: ['protocolChecks.dkim', 'protocolChecks.dkim_permerror'],
+  dkim_partial: ['protocolChecks.dkim', 'protocolChecks.dkim_partial'],
+  dmarc_reject: ['protocolChecks.dmarc', 'protocolChecks.dmarc_reject'],
+  dmarc_quarantine: ['protocolChecks.dmarc', 'protocolChecks.dmarc_quarantine'],
+  dmarc_none: ['protocolChecks.dmarc', 'protocolChecks.dmarc_none'],
+  dmarc_no_record: ['protocolChecks.dmarc', 'protocolChecks.dmarc_no_record'],
+  dmarc_query_fail: ['protocolChecks.dmarc', 'protocolChecks.dmarc_query_fail'],
+  ptr_nomatch: ['protocolChecks.ptr', 'protocolChecks.ptr_nomatch'],
+  ptr_noptr: ['protocolChecks.ptr', 'protocolChecks.ptr_noptr'],
+  ptr_ehlo_mismatch: ['protocolChecks.ptr', 'protocolChecks.ptr_ehlo_mismatch'],
+  format_mailfrom_empty: ['formatChecks.title', 'formatChecks.mailFromEmpty'],
+  format_mailfrom_invalid: ['formatChecks.title', 'formatChecks.mailFromInvalid'],
+  format_envelope_header_mismatch: ['formatChecks.title', 'formatChecks.envelopeHeaderMismatch'],
+  display_name_inbound: ['displayNameSpoof.title', 'displayNameSpoof.inbound'],
+  display_name_outbound: ['displayNameSpoof.title', 'displayNameSpoof.outbound'],
+  display_name_internal: ['displayNameSpoof.title', 'displayNameSpoof.internal'],
+  similar_domain: ['similarDomain.title'],
+};
+
+const RECIPIENT_EXISTENCE_RULE_NAME = 'sysrule:recipient_check_existence';
+const RECIPIENT_LIMIT_RULE_PREFIX = 'sysrule:recipient_check_limit_';
+type RecipientLimitDirection = 'inbound' | 'outbound' | 'internal' | 'merged';
+
+// Attachd persists its generated configuration identity in disposal_basis so
+// operators can trace the policy snapshot. That identity is not a user-facing
+// rule name, however: rendering it leaks both the internal English stable name
+// and the config instance ID into the mail-disposal UI (GT-14105).
+const ATTACHMENT_VIRUS_RULE_NAME = 'attachment virus disposition';
+
+const ATTACHMENT_VIRUS_RULE_LABELS: Record<DisposalLang, string> = {
+  zh: '附件病毒处置规则',
+  en: 'Attachment Virus Disposition Rule',
+  th: 'กฎการจัดการไวรัสในไฟล์แนบ',
+  ru: 'Правило обработки вирусов во вложениях',
+};
+
+function isBuiltinAttachmentVirusRule(basis: DisposalBasis): boolean {
+  return (basis.policy_key === 'ATT-BASIC' || basis.policy_key === 'ATT-AV')
+    && /^config:attachd:(platform|tenant):\d+:disposition\.virus:[^:]+$/.test(basis.rule_id ?? '')
+    && basis.rule_name === ATTACHMENT_VIRUS_RULE_NAME;
+}
+
+function builtinSimilarDetectionRule(
+  basis: DisposalBasis,
+): { detectionType: SimilarDetectionType; direction: SimilarDetectionDirection } | undefined {
+  if (basis.policy_key !== 'SIM') return undefined;
+  const nameMatch = /^similar_detection_(similar_email|same_subject)_(aggregate|receive|send|internal)$/.exec(
+    basis.rule_name ?? '',
+  );
+  const idMatch = /^config:textsim:(platform|tenant):\d+:(similar_email|same_subject)\.(aggregate|receive|send|internal):[^:]+$/.exec(
+    basis.rule_id ?? '',
+  );
+  if (!nameMatch || !idMatch || nameMatch[1] !== idMatch[2] || nameMatch[2] !== idMatch[3]) return undefined;
+  return {
+    detectionType: nameMatch[1] as SimilarDetectionType,
+    direction: nameMatch[2] as SimilarDetectionDirection,
+  };
+}
+
+function builtinSimilarDetectionRuleLabel(basis: DisposalBasis, lang: DisposalLang): string | undefined {
+  const rule = builtinSimilarDetectionRule(basis);
+  if (!rule) return undefined;
+  const labels = SIMILAR_DETECTION_LABELS[lang];
+  const [open, close] = lang === 'zh' ? ['（', '）'] : [' (', ')'];
+  return `${labels.detectionTypes[rule.detectionType]}${open}${labels.directions[rule.direction]}${close}`;
+}
+
+function displayRuleName(basis: DisposalBasis, lang: DisposalLang): string {
+  if (isBuiltinAttachmentVirusRule(basis)) return ATTACHMENT_VIRUS_RULE_LABELS[lang];
+  const similarDetectionLabel = builtinSimilarDetectionRuleLabel(basis, lang);
+  if (similarDetectionLabel) return similarDetectionLabel;
+  return basis.rule_name ?? '';
+}
+
+const RECIPIENT_EXISTENCE_RULE_LABELS: Record<DisposalLang, string> = {
+  zh: '存在性验证策略',
+  en: 'Existence Verification Policy',
+  th: 'นโยบายตรวจสอบการมีอยู่จริง',
+  ru: 'Политика проверки существования',
+};
+
+const RECIPIENT_EXISTENCE_HIT_DETAILS: Record<DisposalLang, string> = {
+  zh: '命中收件人存在性验证规则',
+  en: 'Hit the recipient existence verification rule',
+  th: 'ตรงกับกฎการตรวจสอบการมีอยู่ของผู้รับ',
+  ru: 'Сработало правило проверки существования получателя',
+};
+
+const RECIPIENT_LIMIT_RULE_LABELS: Record<DisposalLang, {
+  title: string;
+  directions: Record<RecipientLimitDirection, string>;
+}> = {
+  zh: { title: '数量限制策略', directions: { inbound: '接收方向', outbound: '外发方向', internal: '域内方向', merged: '内部发信' } },
+  en: { title: 'Count Limit Policy', directions: { inbound: 'Inbound', outbound: 'Outbound', internal: 'Intra-domain', merged: 'Internal sending' } },
+  th: { title: 'นโยบายจำกัดจำนวน', directions: { inbound: 'ทิศทางรับเข้า', outbound: 'ทิศทางส่งออก', internal: 'ทิศทางภายในโดเมน', merged: 'การส่งภายใน' } },
+  ru: { title: 'Политика ограничения количества', directions: { inbound: 'Входящее направление', outbound: 'Исходящее направление', internal: 'Внутридоменное направление', merged: 'Внутренняя отправка' } },
+};
+
+function recipientLimitDirection(basis: DisposalBasis): RecipientLimitDirection | undefined {
+  if (basis.policy_key !== 'RCPT' || !basis.rule_name?.startsWith(RECIPIENT_LIMIT_RULE_PREFIX)) return undefined;
+  const direction = basis.rule_name.slice(RECIPIENT_LIMIT_RULE_PREFIX.length);
+  return direction === 'inbound' || direction === 'outbound' || direction === 'internal' || direction === 'merged'
+    ? direction
+    : undefined;
+}
+
+function recipientRuleLabel(
+  basis: DisposalBasis,
+  lang: DisposalLang,
+  translateRecipient?: (key: string) => string,
+): string | undefined {
+  if (basis.policy_key !== 'RCPT') return undefined;
+  if (basis.rule_name === RECIPIENT_EXISTENCE_RULE_NAME) {
+    return translateRecipient?.('existence.title') ?? RECIPIENT_EXISTENCE_RULE_LABELS[lang];
+  }
+  const direction = recipientLimitDirection(basis);
+  if (!direction) return undefined;
+  const fallback = RECIPIENT_LIMIT_RULE_LABELS[lang];
+  const title = translateRecipient?.('limit.title') ?? fallback.title;
+  const directionKey = direction === 'merged' ? 'limit.mergedTitle' : `limit.direction.${direction}`;
+  const directionLabel = translateRecipient?.(directionKey) ?? fallback.directions[direction];
+  const [open, close] = lang === 'zh' ? ['（', '）'] : [' (', ')'];
+  return `${title}${open}${directionLabel}${close}`;
+}
+
+export function shouldHideInternalRuleIdentity(basis: DisposalBasis): boolean {
+  if (isBuiltinAttachmentVirusRule(basis)) return true;
+  if (builtinSimilarDetectionRule(basis)) return true;
+  if (recipientRuleLabel(basis, 'zh')) return true;
+  return basis.policy_key === 'INTENT'
+    && /^sysrule:intent_engine:/.test(basis.rule_name ?? '');
+}
+
+export function formatRuleLabel(
+  basis: DisposalBasis,
+  translateAuth: (key: string) => string,
+  lang: DisposalLang = 'zh',
+  {
+    includeRuleId = true,
+    translateIntent,
+    translateRecipient,
+  }: {
+    includeRuleId?: boolean;
+    translateIntent?: (key: string) => string;
+    translateRecipient?: (key: string) => string;
+  } = {},
+): string {
+  const name = basis.rule_name;
+  if (isBuiltinAttachmentVirusRule(basis)) return ATTACHMENT_VIRUS_RULE_LABELS[lang];
+  const similarDetectionLabel = builtinSimilarDetectionRuleLabel(basis, lang);
+  if (similarDetectionLabel) return similarDetectionLabel;
+  const prefix = 'sysrule:auth_spoofing_';
+  if (basis.policy_key === 'AUTH' && name?.startsWith(prefix)) {
+    const key = name.slice(prefix.length);
+    if (Object.hasOwn(AUTH_RULE_LABEL_KEYS, key)) {
+      return AUTH_RULE_LABEL_KEYS[key].map((messageKey) => translateAuth(messageKey)).join(lang === 'zh' ? '：' : ': ');
+    }
+  }
+  const intentMatch = basis.policy_key === 'INTENT'
+    ? /^sysrule:intent_engine:(porn_gambling|political|phishing|spam|subscription):(receive|send|internal)$/.exec(name ?? '')
+    : null;
+  if (intentMatch && translateIntent) {
+    const [, intent, direction] = intentMatch;
+    const [open, close] = lang === 'zh' ? ['（', '）'] : [' (', ')'];
+    return `${translateIntent(`intent.${intent}`)}${open}${translateIntent(`dirShort.${direction}`)}${close}`;
+  }
+  const recipientLabel = recipientRuleLabel(basis, lang, translateRecipient);
+  if (recipientLabel) return recipientLabel;
+  if (name && name !== '—') {
+    return includeRuleId && basis.rule_id ? `${name}（${basis.rule_id}）` : name;
+  }
+  return basis.rule_id || '—';
+}
+
 // 将后端返回的 hit_values (Record<string, string>) 转换为模板使用的 HitValues。
 function toHitValues(v?: Record<string, string>): HitValues | undefined {
   if (!v) return undefined;
@@ -1332,8 +1600,8 @@ export function formatListReason(basis: DisposalBasis, lang: DisposalLang = 'zh'
   if (!meta) return '';
   const moduleName = moduleOf(meta, lang);
   const hv = toHitValues(basis.hit_values) ?? {};
-  const summary = meta.listSummary(hv, lang);
-  const ruleName = basis.rule_name ?? '';
+  const summary = (isBuiltinAttachmentVirusRule(basis) ? DISPOSAL_POLICY_MAP['ATT-AV'] : meta).listSummary(hv, lang);
+  const ruleName = recipientRuleLabel(basis, lang) ?? displayRuleName(basis, lang);
   return `${moduleName}「${ruleName}」· ${summary}`;
 }
 
@@ -1343,7 +1611,10 @@ export function formatHitDetail(basis: DisposalBasis, lang: DisposalLang = 'zh')
   const meta = DISPOSAL_POLICY_MAP[basis.policy_key];
   if (!meta) return '';
   const hv = toHitValues(basis.hit_values) ?? {};
-  const detail = meta.hitDetail(hv, lang);
+  if (basis.policy_key === 'RCPT' && basis.rule_name === RECIPIENT_EXISTENCE_RULE_NAME) {
+    return RECIPIENT_EXISTENCE_HIT_DETAILS[lang];
+  }
+  const detail = (isBuiltinAttachmentVirusRule(basis) ? DISPOSAL_POLICY_MAP['ATT-AV'] : meta).hitDetail(hv, lang);
   // ACF tags are a top-level Basis field, not hit_values. Keep that schema
   // boundary explicit so a missing hit_values.detection_tags can never render
   // as a fabricated "-" value.
@@ -1432,6 +1703,33 @@ export function groupDisposalModulesByStage(lang: DisposalLang = 'zh'): Disposal
     }
   }
   return groups;
+}
+
+// A module selected in the UI may expand to several backend policy keys. Keep
+// the expanded keys as the API source of truth, while exposing one group for
+// display/count/removal. Unknown historical keys remain independently visible
+// instead of being dropped from an imported or saved filter.
+export function groupSelectedDisposalModules(
+  policyKeys: readonly string[],
+  lang: DisposalLang = 'zh',
+): DisposalModuleGroup[] {
+  const remaining = new Set(policyKeys.filter(Boolean));
+  const selectedGroups: DisposalModuleGroup[] = [];
+
+  for (const group of groupDisposalModulesByStage(lang)) {
+    const keys = group.keys.filter((key) => remaining.delete(key));
+    if (keys.length > 0) selectedGroups.push({ ...group, keys });
+  }
+
+  for (const key of remaining) {
+    selectedGroups.push({
+      stage: DISPOSAL_POLICY_MAP[key]?.stage ?? 0,
+      moduleName: getModuleName(key, lang) || key,
+      keys: [key],
+    });
+  }
+
+  return selectedGroups;
 }
 
 // ============================================================================

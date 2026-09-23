@@ -155,6 +155,8 @@ export interface DisposalBasisGroupSummary {
 
 export interface DisposalMailItem {
   id: number;
+  /** Stable mail identity shared by per-recipient records from one SMTP transaction. */
+  messageUuid?: string;
   timestamp: string;
   direction: string;
   sender: string;

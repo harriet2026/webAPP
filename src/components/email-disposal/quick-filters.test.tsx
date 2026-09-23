@@ -73,4 +73,19 @@ describe("QuickFilters grid layout", () => {
     });
     expect(onDisposalRuleSearchChange).toHaveBeenLastCalledWith("CR-77");
   });
+
+  it("counts a multi-key logical policy module as one selected condition", () => {
+    render(
+      <QuickFilters
+        value={{
+          disposalPolicyKeys: ["ATT-BASIC", "ATT-QR", "ATT-ENC"],
+        }}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByTestId("disposal-policy-filter-trigger"),
+    ).toHaveTextContent("1 common.selected");
+  });
 });

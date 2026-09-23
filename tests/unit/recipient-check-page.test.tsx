@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
@@ -98,13 +98,16 @@ describe('RecipientCheckPage', () => {
     expect(screen.getByText('recipientCheck.limit.actionDesc.quarantine')).toBeInTheDocument();
   });
 
-  it('渲染存在性验证块：严格模式 + 3 Badge + 失败动作说明', async () => {
+  it('存在性验证块准确说明使用同步通讯录且不展示未支持的实时能力', async () => {
     setupApi();
     renderPage();
-    await waitFor(() => expect(screen.getByText('recipientCheck.existence.strictMode')).toBeInTheDocument());
-    expect(screen.getByText('recipientCheck.existence.badge.ldap')).toBeInTheDocument();
-    expect(screen.getByText('recipientCheck.existence.badge.api')).toBeInTheDocument();
-    expect(screen.getByText('recipientCheck.existence.badge.alias')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('recipientCheck.existence.methodTitle')).toBeInTheDocument());
+    expect(screen.getByTestId('recipient-existence-method-note')).toHaveTextContent(
+      'recipientCheck.existence.methodDesc',
+    );
+    expect(screen.queryByText('recipientCheck.existence.badge.ldap')).toBeNull();
+    expect(screen.queryByText('recipientCheck.existence.badge.api')).toBeNull();
+    expect(screen.queryByText('recipientCheck.existence.badge.alias')).toBeNull();
     expect(screen.getByText('recipientCheck.existence.directionNote')).toBeInTheDocument();
   });
 
@@ -188,14 +191,14 @@ describe('RecipientCheckPage', () => {
     );
   });
 
-  it('数量限制关闭 → 配置模式卸载；存在性关闭 → 严格模式卸载', async () => {
+  it('数量限制关闭 → 配置模式卸载；存在性关闭 → 验证方式卸载', async () => {
     setupApi({ is_active: false }, { existence_enabled: false });
     renderPage();
     // 先等两份配置都成功读取并渲染；加载占位期本来就没有配置区块，不能
     // 把那个瞬间误判成“服务端关闭值已生效”。
     await screen.findByTestId('recipient-check-config-content');
     expect(screen.queryByText('recipientCheck.limit.modeLabel')).toBeNull();
-    expect(screen.queryByText('recipientCheck.existence.strictMode')).toBeNull();
+    expect(screen.queryByTestId('recipient-existence-method-note')).toBeNull();
     expect(screen.getByText('recipientCheck.limit.title')).toBeInTheDocument();
   });
 
@@ -230,5 +233,96 @@ describe('RecipientCheckPage', () => {
     expect(screen.queryByText('recipientCheck.limit.direction.internal')).toBeNull();
     // 接收方向仍在
     expect(screen.getByText('recipientCheck.limit.direction.inbound')).toBeInTheDocument();
+  });
+
+  it.each(['inbound', 'outbound', 'internal'] as const)(
+    '详细模式的 %s 方向输入 0 时立即提示并阻止保存',
+    async (direction) => {
+      setupApi();
+      renderPage();
+      const input = await screen.findByTestId(`recipient-limit-value-${direction}`);
+      const save = screen.getByTestId('recipient-check-save');
+      mockApiRequest.mockClear();
+
+      fireEvent.change(input, { target: { value: '0' } });
+
+      expect(screen.getByTestId(`recipient-limit-error-${direction}`)).toHaveTextContent(
+        'recipientCheck.limit.rangeError',
+      );
+      expect(input).toHaveAttribute('aria-invalid', 'true');
+      expect(save).toBeDisabled();
+      await userEvent.click(save);
+      expect(mockApiRequest).not.toHaveBeenCalledWith(
+        '/behavior-control/recipient-policy',
+        expect.objectContaining({ method: 'PUT' }),
+      );
+    },
+  );
+
+  it.each([-1, 1, 1000])('合法边界 %i 保持可保存', async (value) => {
+    setupApi();
+    renderPage();
+    const input = await screen.findByTestId('recipient-limit-value-inbound');
+
+    fireEvent.change(input, { target: { value: String(value) } });
+
+    expect(screen.queryByTestId('recipient-limit-error-inbound')).toBeNull();
+    expect(input).toHaveAttribute('aria-invalid', 'false');
+    expect(screen.getByTestId('recipient-check-save')).toBeEnabled();
+  });
+
+  it.each(['inbound', 'outbound', 'internal'] as const)(
+    '详细模式的 %s 方向允许逐键输入 -1',
+    async (direction) => {
+      setupApi();
+      renderPage();
+      const user = userEvent.setup();
+      const input = await screen.findByTestId(`recipient-limit-value-${direction}`) as HTMLInputElement;
+
+      await user.clear(input);
+      await user.type(input, '-1');
+
+      expect(input.value).toBe('-1');
+      expect(screen.queryByTestId(`recipient-limit-error-${direction}`)).toBeNull();
+      expect(screen.getByTestId('recipient-check-save')).toBeEnabled();
+    },
+  );
+
+  it('合并模式允许逐键输入 -1', async () => {
+    setupApi();
+    renderPage();
+    const user = userEvent.setup();
+    await user.click(await screen.findByTestId('recipient-limit-mode-merged'));
+    const input = await screen.findByTestId('recipient-limit-value-merged') as HTMLInputElement;
+
+    await user.clear(input);
+    await user.type(input, '-1');
+
+    expect(input.value).toBe('-1');
+    expect(screen.queryByTestId('recipient-limit-error-merged')).toBeNull();
+    expect(screen.getByTestId('recipient-check-save')).toBeEnabled();
+  });
+
+  it('合并模式输入 0 时立即提示并阻止保存', async () => {
+    setupApi();
+    renderPage();
+    await screen.findByTestId('recipient-limit-mode-merged');
+    await userEvent.click(screen.getByTestId('recipient-limit-mode-merged'));
+    const input = await screen.findByTestId('recipient-limit-value-merged');
+    const save = screen.getByTestId('recipient-check-save');
+    mockApiRequest.mockClear();
+
+    fireEvent.change(input, { target: { value: '0' } });
+
+    expect(screen.getByTestId('recipient-limit-error-merged')).toHaveTextContent(
+      'recipientCheck.limit.rangeError',
+    );
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(save).toBeDisabled();
+    await userEvent.click(save);
+    expect(mockApiRequest).not.toHaveBeenCalledWith(
+      '/behavior-control/recipient-policy',
+      expect.objectContaining({ method: 'PUT' }),
+    );
   });
 });

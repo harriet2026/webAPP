@@ -98,19 +98,20 @@ export function DetailTable({ data, direction, isLoading }: DetailTableProps) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="space-y-2">
+          <div className="space-y-2" data-testid="delivery-detail-table-loading">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-10 w-full rounded-lg" />
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table className="text-sm">
+          <div className="overflow-x-auto" data-testid="delivery-detail-scroll">
+            <Table className="text-sm" containerTestId="delivery-detail-scroll-inner">
               <TableHeader>
                 <TableRow>
                   {columns.map((col) => (
                     <TableHead
                       key={col.key}
+                      data-testid={col.key === 'date' ? 'delivery-detail-header-date' : col.key === 'change' ? 'delivery-detail-header-change' : undefined}
                       className={`h-auto px-2 py-3 ${col.key !== 'date' ? 'text-right' : 'sticky left-0 z-10 bg-card text-left'} ${col.key === 'change' ? 'sticky right-0 z-10 bg-card' : ''}`}
                     >
                       {t(col.labelKey)}
@@ -136,6 +137,7 @@ export function DetailTable({ data, direction, isLoading }: DetailTableProps) {
                     return (
                       <TableCell
                         key={col.key}
+                        data-testid={rowIdx === 0 && col.key === 'date' ? 'delivery-detail-cell-date-0' : rowIdx === 0 && col.key === 'change' ? 'delivery-detail-cell-change-0' : undefined}
                         className={`px-2 py-3 ${col.key !== 'date' ? 'text-right tabular-nums' : 'sticky left-0 z-10 bg-card'} ${col.key === 'change' ? 'sticky right-0 z-10 bg-card' : ''} ${isZero ? 'text-muted-foreground/40' : ''} ${colorClass}`}
                       >
                         {col.key === 'date' ? raw : display}

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Plus, Download, Upload, Loader2, RotateCcw } from 'lucide-react';
+import { Plus, Download, Upload, Loader2, RotateCcw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -25,6 +25,8 @@ import { exportUnifiedRules, previewUnifiedRulesImport, executeUnifiedRulesImpor
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
 import { toRFC3339 } from '@/lib/format-time';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
+import { buildSenderFilterImportTemplate } from '@/lib/security-rule-import-templates';
+import { RULE_LIST_DEFAULT_PAGE_SIZE } from '@/components/shared/rule-list-pagination';
 
 export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const t = useTranslations();
@@ -37,25 +39,60 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<SenderFilterStatusFilter>('all');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(RULE_LIST_DEFAULT_PAGE_SIZE);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<SenderFilterRuleView | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [importExportOpen, setImportExportOpen] = useState(false);
+  const [importExportTab, setImportExportTab] = useState<'export' | 'import'>('export');
 
-  const queryKey = ['sender-filter-rules'];
+  const senderFilterImportTemplate = useMemo(
+    () => buildSenderFilterImportTemplate(effectiveTenantId ?? user?.tenant_id),
+    [effectiveTenantId, user?.tenant_id],
+  );
 
-  const { data: rulesData, isLoading } = useQuery({
+  // Rules and group projections are tenant-scoped. Keeping a global query key
+  // lets a platform administrator switch tenants while React Query continues
+  // to treat the previous tenant's cache as current, exposing stale rules and
+  // making mutations appear to target the wrong scope.
+  const queryKey = useMemo(
+    () => ['sender-filter-rules', effectiveTenantId] as const,
+    [effectiveTenantId],
+  );
+  const groupsQueryKey = useMemo(
+    () => ['sender-filter-groups', effectiveTenantId] as const,
+    [effectiveTenantId],
+  );
+
+  const { data: rulesData, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey,
     queryFn: () => listSenderFilterRules(apiRequest),
     enabled: embedded || isSystemAdmin || user?.role === 'tenant_admin',
+    // Do not keep the page in a loading state through the global retry window.
+    // Administrators need a truthful failure state and an explicit retry path.
+    retry: false,
   });
 
-  const { data: groupsData } = useQuery<SenderFilterGroups>({
-    queryKey: ['sender-filter-groups'],
+  const {
+    data: groupsData,
+    isLoading: groupsLoading,
+    isError: groupsError,
+    isFetching: groupsFetching,
+    refetch: refetchGroups,
+  } = useQuery<SenderFilterGroups>({
+    queryKey: groupsQueryKey,
     queryFn: () => listSenderFilterGroups(apiRequest),
     enabled: embedded || isSystemAdmin || user?.role === 'tenant_admin',
+    retry: false,
   });
+
+  // Group data is part of the page's trusted read model, not optional
+  // decoration: it drives group names, deleted-reference warnings and editor
+  // choices. If it fails, rendering with [] would falsely mark every group as
+  // deleted and leave the editor with an empty selector.
+  const pageLoading = isLoading || groupsLoading;
+  const pageError = isError || groupsError;
+  const pageFetching = isFetching || groupsFetching;
 
   // GT-12117: 组织域名下拉的选项来源——当前 effective 租户的接收域名列表。
   // 平台管理员未选租户时 effectiveTenantId 为 null，查询禁用，下拉显示空态。
@@ -99,8 +136,6 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
     const start = (page - 1) * pageSize;
     return filteredRules.slice(start, start + pageSize);
   }, [filteredRules, page, pageSize]);
-  const totalPages = Math.max(1, Math.ceil(totalFiltered / pageSize));
-
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest(`/unified-rules/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
@@ -225,11 +260,13 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
     [apiRequest, editingRule, queryClient, queryKey, t],
   );
 
-  const handleExport = async () => {
+  const handleExport = () => {
+    setImportExportTab('export');
     setImportExportOpen(true);
   };
 
-  const handleImport = async () => {
+  const handleImport = () => {
+    setImportExportTab('import');
     setImportExportOpen(true);
   };
 
@@ -300,23 +337,41 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
           {actionButtons}
         </div>
 
-        {isLoading ? (
+        {pageLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : pageError ? (
+          <div
+            className="flex flex-col items-center justify-center gap-3 py-12"
+            data-testid="sender-filter-load-error"
+          >
+            <AlertCircle className="h-8 w-8 text-destructive" />
+            <p className="text-sm text-muted-foreground">{t('senderFilter.loadFailed')}</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => { void Promise.all([refetch(), refetchGroups()]); }}
+              disabled={pageFetching}
+              data-testid="sender-filter-load-retry"
+            >
+              {t('common.retry')}
+            </Button>
           </div>
         ) : (
           <SenderFilterTable
             data={pagedRules}
-            pageCount={totalPages}
             pageIndex={page - 1}
             pageSize={pageSize}
+            totalCount={totalFiltered}
             onPageChange={(idx) => setPage(idx + 1)}
             onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
             onEdit={(rule) => handleOpenDrawer(rule)}
             onDelete={(rule) => setDeleteTarget({ id: rule.rule.id, name: rule.rule.name })}
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
             groups={groupsData ?? { senderGroups: [], ipGroups: [] }}
-            isLoading={isLoading}
+            isLoading={pageLoading}
           />
         )}
       </div>
@@ -349,11 +404,19 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
       <RuleImportExportDialog
         open={importExportOpen}
         onOpenChange={setImportExportOpen}
+        initialTab={importExportTab}
         scopeLabel={t('senderFilter.title')}
         variant="unified-rules"
         adminContext={isSystemAdmin ? 'system-admin' : 'tenant-admin'}
         tenantOptions={tenantOptions}
-        onExport={(selection) => exportUnifiedRules(selection, apiRequest, 'sender_filter')}
+        rulesOnly
+        importTemplate={senderFilterImportTemplate}
+        onExport={(selection) => exportUnifiedRules(
+          selection,
+          apiRequest,
+          'sender_filter',
+          new Set(filteredRules.map((view) => view.rule.id)),
+        )}
         onPreviewImport={(payload) => previewUnifiedRulesImport(payload, apiRequest, 'sender_filter')}
         onExecuteImport={async (payload) => {
           const response = await executeUnifiedRulesImport(payload, apiRequest, 'sender_filter');

@@ -141,7 +141,7 @@ export interface ContactCSVUploadResult {
 
 export interface ContactCSVPreviewResult {
   headers: string[];
-  rows: Record<string, unknown>[];
+  rows: string[][];
   test_token: string;
   valid: boolean;
 }
@@ -193,4 +193,3 @@ export interface ContactSyncLogListParams {
   page?: number;
   page_size?: number;
 }
-

@@ -5,10 +5,16 @@ import * as React from "react"
 import { usePointerHover } from "@/hooks/use-pointer-hover"
 import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+interface TableProps extends React.ComponentProps<"table"> {
+  /** Stable hook for the element that owns horizontal scrolling. */
+  containerTestId?: string
+}
+
+function Table({ className, containerTestId, ...props }: TableProps) {
   return (
     <div
       data-slot="table-container"
+      data-testid={containerTestId}
       className="relative w-full overflow-x-auto"
     >
       <table

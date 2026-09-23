@@ -69,6 +69,7 @@ import type {
   ContentRuleRuleView,
   ContentRuleScope,
   ContentRuleUiAction,
+  MarkConfig,
 } from '@/types/content-rules';
 import type { Group } from '@/types/groups';
 
@@ -93,6 +94,17 @@ const ACTIONS: ContentRuleUiAction[] = [
 
 const DEFAULT_HEADER_NAME = 'X-OSG-Content-Tag';
 const DEFAULT_HEADER_VALUE = '[可疑]';
+const HEADER_NAME_RE = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+
+function mergeEditableMarkHeader(existing: MarkConfig | undefined, name: string, value: string): MarkConfig {
+  // 抽屉只编辑第一个邮件头，不能覆盖导入或历史配置中的其他标记选项。
+  return {
+    ...existing,
+    add_headers: [{ name, value }, ...(existing?.add_headers?.slice(1) ?? [])],
+    notify_admin: existing?.notify_admin ?? false,
+    notify_sender: existing?.notify_sender ?? false,
+  };
+}
 
 function defaultDraft(): ContentRuleFormData {
   return {
@@ -316,8 +328,12 @@ export function ContentRuleDrawer({
     }
     if (!draft.match_content.trim()) next.match_content = t('contentRules.matchContentRequired');
     if (!draft.scopes.length) next.scope = t('contentRules.atLeastOneScope');
-    if (uiAction === 'accept' && markEnabled && (!headerName.trim() || !headerValue.trim())) {
-      next.header = t('contentRules.headerRequired');
+    if (uiAction === 'accept' && markEnabled) {
+      if (/[\r\n]/.test(headerName) || /[\r\n]/.test(headerValue) || (headerName.trim() && !HEADER_NAME_RE.test(headerName.trim()))) {
+        next.header = t('contentRules.headerInvalid');
+      } else if (!headerName.trim() || !headerValue.trim()) {
+        next.header = t('contentRules.headerRequired');
+      }
     }
     if (draft.valid_until && Number.isNaN(new Date(draft.valid_until).getTime())) {
       next.valid_until = t('contentRules.invalidDate');
@@ -348,12 +364,10 @@ export function ContentRuleDrawer({
         match_content: draft.match_content.trim(),
         directions,
         mark_config: uiAction === 'accept' && markEnabled
-          ? {
-              add_headers: [{ name: headerName.trim(), value: headerValue.trim() }],
-              notify_admin: false,
-              notify_sender: false,
-            }
-          : undefined,
+          ? mergeEditableMarkHeader(draft.mark_config, headerName.trim(), headerValue.trim())
+          : actionTouched || (!!draft.mark_config?.add_headers?.length && !markEnabled)
+            ? undefined
+            : draft.mark_config,
         block_alert_config: actionTouched ? undefined : draft.block_alert_config,
       });
       initialState.current = serializeState(draft, uiAction, headerName, headerValue, markEnabled);
@@ -635,7 +649,9 @@ export function ContentRuleDrawer({
                       <span />
                       <div className="space-y-3 rounded-md border border-dashed border-cyan-300 bg-cyan-50/40 p-4 dark:border-cyan-800 dark:bg-cyan-950/20">
                         <label className="flex items-center gap-2 text-sm">
-                          <Checkbox checked={markEnabled} onCheckedChange={(checked) => setMarkEnabled(checked === true)} />
+                          <Checkbox data-testid="content-rule-mark-enabled" checked={markEnabled} onCheckedChange={(checked) => {
+                            setMarkEnabled(checked === true);
+                          }} />
                           {t('contentRules.actionTagDeliver')}
                         </label>
                         {markEnabled && <>
@@ -643,11 +659,11 @@ export function ContentRuleDrawer({
                         <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
                           <div className="space-y-1">
                             <Label>{t('contentRules.headerName')}</Label>
-                            <Input value={headerName} onChange={(event) => setHeaderName(event.target.value)} />
+                            <Input data-testid="content-rule-mark-header-name" value={headerName} onChange={(event) => setHeaderName(event.target.value)} />
                           </div>
                           <div className="space-y-1">
                             <Label>{t('contentRules.headerValue')}</Label>
-                            <Input value={headerValue} onChange={(event) => setHeaderValue(event.target.value)} />
+                            <Input data-testid="content-rule-mark-header-value" value={headerValue} onChange={(event) => setHeaderValue(event.target.value)} />
                           </div>
                         </div>
                         {errors.header && <p className="text-xs text-destructive">{errors.header}</p>}

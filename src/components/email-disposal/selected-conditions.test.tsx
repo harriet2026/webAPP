@@ -170,6 +170,35 @@ describe("SelectedConditions - multi-value quick filter chips (review finding 3/
     expect(screen.getByText(/内容规则/)).toBeInTheDocument();
   });
 
+  it("renders one removable chip for a logical module backed by multiple policy keys", async () => {
+    const onRemoveChip = vi.fn();
+    render(
+      <SelectedConditions
+        quick={baseQuick({
+          disposalPolicyKeys: ["ATT-BASIC", "ATT-QR", "ATT-ENC"],
+        })}
+        advanced={emptyAdvanced}
+        aiConditions={[]}
+        onClearAll={vi.fn()}
+        onRemoveChip={onRemoveChip}
+      />,
+    );
+
+    expect(
+      screen.getByText(/selectedConditions.*\(1 .*items.*\)/),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/附件安全检测/)).toHaveLength(1);
+
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: /emailDisposal\.search\.clearAll:.*附件安全检测/,
+      }),
+    );
+    expect(onRemoveChip).toHaveBeenCalledWith(
+      "q-disposalPolicyKeys:ATT-BASIC,ATT-QR,ATT-ENC",
+    );
+  });
+
   it("removing one mail-type chip calls onRemoveChip with a per-value key, leaving the other value alone", async () => {
     const onRemoveChip = vi.fn();
     render(

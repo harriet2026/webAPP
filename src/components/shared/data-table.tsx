@@ -91,7 +91,9 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    ...(isServerPagination ? {} : { getPaginationRowModel: getPaginationRowModel() }),
+    ...(!hidePagination && !isServerPagination
+      ? { getPaginationRowModel: getPaginationRowModel() }
+      : {}),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,

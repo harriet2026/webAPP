@@ -71,7 +71,11 @@ const NORMALIZATION_FIELDS: ReadonlyArray<{ field: keyof SubjectNormalization; l
   { field: 'similar_subject', labelKey: 'similarSubject' },
 ];
 
-export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: boolean; onDirtyChange?: (dirty: boolean) => void } = {}) {
+export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange }: {
+  embedded?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
+  onEnabledChange?: (enabled: boolean) => void;
+} = {}) {
   const t = useTranslations('similarDetection');
   const apiErrorMessage = useApiErrorMessage();
   const tc = useTranslations('common');
@@ -118,8 +122,16 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
     setDirty(true);
   }, []);
 
-  const updateAggregate = useCallback((patch: Partial<SimilarDetectionDirectionConfig>) => {
-    setConfig((prev) => ({ ...prev, aggregate: { ...prev.aggregate, ...patch } }));
+  const updateAggregate = useCallback((type: SimilarDetectionType, patch: Partial<SimilarDetectionDirectionConfig>) => {
+    setConfig((prev) => {
+      const aggregate = { ...prev[type].aggregate, ...patch };
+      return {
+        ...prev,
+        // Keep the v2 compatibility field aligned with similar_email.aggregate.
+        ...(type === 'similar_email' ? { aggregate } : {}),
+        [type]: { ...prev[type], aggregate },
+      };
+    });
     setDirty(true);
   }, []);
 
@@ -158,7 +170,6 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
     }
     if (c.min_count < MIN_COUNT_MIN || c.min_count > MIN_COUNT_MAX) return t('errorMinCountRange');
     if (c.action === 'accept' && !c.observe_mode) {
-      if (!c.tag_subject_enabled && !c.tag_header_enabled && !c.tag_body_enabled) return t('errorTagRequired');
       if (c.tag_subject_enabled && !c.tag_subject_content?.trim()) return t('errorTagFieldRequired');
       if (c.tag_header_enabled && (!c.tag_header_name?.trim() || !c.tag_header_value?.trim())) return t('errorTagFieldRequired');
       if (c.tag_body_enabled && !c.tag_body_content?.trim()) return t('errorTagFieldRequired');
@@ -170,8 +181,10 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
     if (config.enabled_directions.length === 0) {
       return t('atLeastOneDirection');
     }
-    // aggregate 恒校验（两个检测类型 Tab 共享同一份聚合配置）
-    let err = validateCard(config.aggregate, true);
+    let err = validateCard(config.similar_email.aggregate, true);
+    if (err) return err;
+    // same_subject 不展示相似度阈值，因此其聚合配置也不校验 similarity_pct。
+    err = validateCard(config.same_subject.aggregate, false);
     if (err) return err;
     for (const dir of config.enabled_directions) {
       err = validateCard(config.similar_email[dir], true);
@@ -194,7 +207,9 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       const req = {
         mode: config.mode,
         enabled_directions: config.enabled_directions,
-        aggregate: config.aggregate,
+        // Keep the v2 field for mixed-version readers; v3 behavior comes from
+        // each group's own aggregate entry.
+        aggregate: config.similar_email.aggregate,
         similar_email: config.similar_email,
         same_subject: config.same_subject,
         subject_normalization: config.subject_normalization,
@@ -219,7 +234,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
         setConfig(updated);
       }
       setDirty(false);
-      toast.success(t('title') + ' ✓');
+      toast.success(tc('saveSuccess'));
     } catch (e: unknown) {
       if (e instanceof ApiError && e.status === 409) {
         toast.error(t('errorVersionConflict'));
@@ -234,7 +249,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
     } finally {
       setSaving(false);
     }
-  }, [config, apiRequest, t, validate]);
+  }, [config, apiRequest, t, tc, validate]);
 
   const handleCancel = useCallback(() => {
     setLoading(true);
@@ -247,16 +262,16 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
       .finally(() => setLoading(false));
   }, [apiRequest]);
 
-  // 观察集合：aggregate 模式下只看 aggregate.observe_mode；separate 模式下看当前 Tab 组内各已启用方向
+  // 观察集合：aggregate 模式下看当前检测类型自己的 aggregate；separate 模式下看当前 Tab 组内各已启用方向
   const currentGroup = config[activeTab];
   const observingDirections = useMemo(() => {
     if (config.mode === 'aggregate') {
-      return config.aggregate.observe_mode ? [t('modeAggregate')] : [];
+      return currentGroup.aggregate.observe_mode ? [t('modeAggregate')] : [];
     }
     return config.enabled_directions
       .filter((dir) => currentGroup[dir].observe_mode)
       .map((dir) => t(DIR_FULL_LABEL_KEY[dir]));
-  }, [config.mode, config.aggregate.observe_mode, config.enabled_directions, currentGroup, t]);
+  }, [config.mode, config.enabled_directions, currentGroup, t]);
 
   // 方向配置块 + 卡片区（similar_email/same_subject 两个 Tab 共用）
   const renderDirectionSection = (type: SimilarDetectionType) => {
@@ -319,7 +334,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
             </div>
           )
         ) : (
-          <AggregateCard detectionType={type} value={config.aggregate} onChange={updateAggregate} />
+          <AggregateCard detectionType={type} value={group.aggregate} onChange={(patch) => updateAggregate(type, patch)} />
         )}
       </>
     );
@@ -428,10 +443,18 @@ export function SimilarDetectionPage({ embedded, onDirtyChange }: { embedded?: b
     </div>
   );
 
-  if (embedded) return <ModuleMasterSwitch page="similar_detection">{content}</ModuleMasterSwitch>;
+  if (embedded) {
+    return (
+      <ModuleMasterSwitch page="similar_detection" onEnabledChange={onEnabledChange}>
+        {content}
+      </ModuleMasterSwitch>
+    );
+  }
   return (
     <div className="p-6">
-      <ModuleMasterSwitch page="similar_detection">{content}</ModuleMasterSwitch>
+      <ModuleMasterSwitch page="similar_detection" onEnabledChange={onEnabledChange}>
+        {content}
+      </ModuleMasterSwitch>
     </div>
   );
 }

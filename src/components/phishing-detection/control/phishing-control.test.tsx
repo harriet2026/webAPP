@@ -10,9 +10,12 @@ vi.mock('@/lib/api/phishing-control', () => ({
   getPhishingControl: vi.fn(),
   putPhishingControl: vi.fn(),
 }));
-vi.mock('@/lib/api/phishing-admission-rules', () => ({ listAdmissionRules: vi.fn() }));
+vi.mock('@/lib/api/phishing-admission-rules', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/api/phishing-admission-rules')>(), listAdmissionRules: vi.fn(),
+}));
+const scope = vi.hoisted(() => ({ tenantId: 11 as number | null }));
 vi.mock('@/lib/api/client', () => ({
-  useApiRequest: () => ({ apiRequest: vi.fn(), effectiveTenantId: 11 }),
+  useApiRequest: () => ({ apiRequest: vi.fn(), effectiveTenantId: scope.tenantId }),
 }));
 vi.mock('../access', () => ({ usePhishingAccess: () => ({ canEdit: true, readOnly: false }) }));
 
@@ -50,6 +53,7 @@ function renderControl(onGoToConfig = vi.fn()) {
 describe('phishing control', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    scope.tenantId = 11;
     vi.mocked(putPhishingControl).mockResolvedValue({
       enabled: true,
       desired_state: 'enabled',
@@ -86,6 +90,7 @@ describe('phishing control', () => {
       revision: 7,
     });
     vi.mocked(listAdmissionRules).mockResolvedValue([{
+      status: 'ready', tenant_id: 11, read_only: false, effective: true,
       id: 1,
       name: '默认准入',
       enabled: true,
@@ -106,6 +111,52 @@ describe('phishing control', () => {
       expect.objectContaining({ enabled: true, expected_revision: 7 }),
       expect.any(Function),
     ));
+  });
+
+  it('requires removal of an unsupported rule even when a replacement is enabled', async () => {
+    vi.mocked(getPhishingControl).mockResolvedValue({ enabled: false, desired_state: 'disabled', runtime_state: 'stopped', revision: 7 });
+    vi.mocked(listAdmissionRules).mockResolvedValue([
+      { id: 1, name: '旧规则', enabled: false, status: 'rebuild_required', tenant_id: 11, read_only: false, effective: false },
+      { id: 2, name: '新规则', enabled: true, status: 'ready', tenant_id: 11, read_only: false, effective: true, directions: ['inbound'], require_url: true, sender_first_seen: false, require_qrcode: false },
+    ]);
+    renderControl();
+    const toggle = await screen.findByRole('switch', { name: '钓鱼智能体总开关' });
+    await waitFor(() => expect(toggle).not.toBeDisabled());
+    fireEvent.click(toggle);
+    expect(await screen.findByText('需要先配置准入规则')).toBeInTheDocument();
+    expect(putPhishingControl).not.toHaveBeenCalled();
+  });
+
+  it('enables global control despite unsupported rules belonging only to another tenant', async () => {
+    scope.tenantId = null;
+    vi.mocked(getPhishingControl).mockResolvedValue({ enabled: false, desired_state: 'disabled', runtime_state: 'stopped', revision: 7 });
+    vi.mocked(listAdmissionRules).mockResolvedValue([
+      { id: 1, name: '其他租户旧规则', enabled: false, status: 'rebuild_required', tenant_id: 11, read_only: false, effective: false },
+      { id: 2, name: '全局规则', enabled: true, status: 'ready', tenant_id: null, read_only: false, effective: true, directions: ['inbound'], require_url: true, sender_first_seen: false, require_qrcode: false },
+    ]);
+    renderControl();
+    const toggle = await screen.findByRole('switch', { name: '钓鱼智能体总开关' });
+    await waitFor(() => expect(toggle).not.toBeDisabled());
+    fireEvent.click(toggle);
+    expect(await screen.findByText('确认开启钓鱼检测智能体？')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '确认' }));
+    await waitFor(() => expect(putPhishingControl).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: true, expected_revision: 7 }), expect.any(Function),
+    ));
+  });
+
+  it('blocks tenant enable while an inherited global rule still requires rebuilding', async () => {
+    vi.mocked(getPhishingControl).mockResolvedValue({ enabled: false, desired_state: 'disabled', runtime_state: 'stopped', revision: 7 });
+    vi.mocked(listAdmissionRules).mockResolvedValue([
+      { id: 1, name: '全局旧规则', enabled: false, status: 'rebuild_required', tenant_id: null, read_only: true, effective: false },
+      { id: 2, name: '租户规则', enabled: true, status: 'ready', tenant_id: 11, read_only: false, effective: true, directions: ['inbound'], require_url: true, sender_first_seen: false, require_qrcode: false },
+    ]);
+    renderControl();
+    const toggle = await screen.findByRole('switch', { name: '钓鱼智能体总开关' });
+    await waitFor(() => expect(toggle).not.toBeDisabled());
+    fireEvent.click(toggle);
+    expect(await screen.findByText('需要先配置准入规则')).toBeInTheDocument();
+    expect(putPhishingControl).not.toHaveBeenCalled();
   });
 
   it('requires confirmation before disabling', async () => {

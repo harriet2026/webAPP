@@ -12,6 +12,7 @@ import { useApiRequest } from '@/lib/api/client';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
 import { cn } from '@/lib/utils';
+import type { MailLogDetail } from '@/types/email-disposal-detail';
 import { getMailLogAnalysis, getMailLogDetail, getMailLogEvents } from './lib/disposal-detail-api';
 import { mailTypeConfig, stripDetailPrefix } from './lib/detail-helpers';
 import { useLifecycleLogStream } from './hooks/use-lifecycle-log-stream';
@@ -42,6 +43,14 @@ type SectionKey = 'overview' | 'analysis' | 'rawlogs';
 // otherwise spin the loading state forever instead of switching to the
 // inline error+retry UI spec §6.1 requires after >5s.
 const DETAIL_FETCH_TIMEOUT_MS = 5000;
+const DETAIL_DELIVERY_REFRESH_MS = 3000;
+
+function hasDeliveringRecipients(detail: MailLogDetail | undefined): boolean {
+  return detail?.recipient_dispositions?.some((item) => {
+    const status = item.status?.trim().toLowerCase();
+    return status === 'delivering' || status === 'in_delivery';
+  }) ?? false;
+}
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -114,6 +123,15 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     queryKey: ['mail-log-detail', mailLogId],
     queryFn: () => withTimeout(getMailLogDetail(mailLogId!, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
     enabled: open && mailLogId != null,
+    // Delivery facts arrive asynchronously after an accept/release action.
+    // The global 60s stale window must not keep a reopened drawer on the old
+    // "delivering" snapshot while the list already shows terminal outcomes.
+    staleTime: 0,
+    refetchInterval: (query) => (
+      open && hasDeliveringRecipients(query.state.data)
+        ? DETAIL_DELIVERY_REFRESH_MS
+        : false
+    ),
   });
   const eventsQ = useQuery({
     queryKey: ['mail-log-events', mailLogId],

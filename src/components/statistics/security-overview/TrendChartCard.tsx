@@ -231,6 +231,9 @@ export function TrendChartCard({
                   <button
                     key={k}
                     type="button"
+                    data-testid={`security-overview-trend-legend-${k}`}
+                    data-state={hiddenSeries.has(k) ? 'hidden' : 'visible'}
+                    data-color={seriesColor(k)}
                     onClick={() => onToggleSeries(k)}
                     onDoubleClick={() => isolateSeries(k)}
                     className="flex items-center gap-1.5 rounded-md px-1 py-0.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

@@ -50,9 +50,19 @@ interface Props {
   deferred?: boolean;
   /** 向父级（策略流水线左导航）回传当前启用态，用于圆点/摘要联动。 */
   onEnabledChange?: (enabled: boolean) => void;
+  /** 页面级细粒度权限闸；false 只能进一步收紧默认角色/产品形态判定。 */
+  editable?: boolean;
 }
 
-export function ModuleMasterSwitch({ page, children, title, actions, deferred = false, onEnabledChange }: Props) {
+export function ModuleMasterSwitch({
+  page,
+  children,
+  title,
+  actions,
+  deferred = false,
+  onEnabledChange,
+  editable: editableGate = true,
+}: Props) {
   const t = useTranslations('securityModules');
   const pipelineT = useTranslations('pipeline');
   const common = useTranslations('common');
@@ -60,7 +70,7 @@ export function ModuleMasterSwitch({ page, children, title, actions, deferred = 
   const { isSystemAdmin, selectedTenantId, user } = useAuth();
   const { capabilities, viewer } = useProductForm();
 
-  const editable = canEditSecurityModule({
+  const editable = editableGate && canEditSecurityModule({
     page,
     role: user?.role,
     viewer,
@@ -84,8 +94,11 @@ export function ModuleMasterSwitch({ page, children, title, actions, deferred = 
   const [userInteracted, setUserInteracted] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setLoaded(false);
     getSecurityModules(apiRequest)
       .then((m) => {
+        if (cancelled) return;
         const next = m[page] ?? true;
         setEnabled(next);
         setPersistedEnabled(next);
@@ -94,6 +107,9 @@ export function ModuleMasterSwitch({ page, children, title, actions, deferred = 
       // 加载失败：保持 loaded=false，不上报乐观默认值 true，
       // 让父级继续以 securityModulesMap 兜底真值为准。
       .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, [apiRequest, page]);
 
   // 启用态回传给父级，使策略流水线左导航圆点/摘要与本面板总开关联动。
@@ -104,6 +120,9 @@ export function ModuleMasterSwitch({ page, children, title, actions, deferred = 
   }, [loaded, userInteracted, enabled, onEnabledChange]);
 
   const handleToggle = async (next: boolean) => {
+    // The optimistic initial value is only a rendering fallback. Do not let a
+    // fast click persist its inverse before the tenant's real value arrives.
+    if (!loaded) return;
     setUserInteracted(true);
     if (deferred) {
       setEnabled(next);
@@ -144,7 +163,7 @@ export function ModuleMasterSwitch({ page, children, title, actions, deferred = 
         title={title ?? pipelineT(MODULE_TITLE_KEY[page])}
         enabled={enabled}
         onToggle={handleToggle}
-        disabled={!editable || saving}
+        disabled={!editable || !loaded || saving}
         enabledLabel={t('enabled')}
         disabledLabel={t('disabled')}
         actions={actions}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dispatch, isMockable } from '@/lib/mock/dispatcher';
-import type { AlertEvent, AlertStats } from '@/types/alerts';
+import type { AlertEvent, AlertStats, SmtpConfig } from '@/types/alerts';
 
 describe('alert-center mock contract', () => {
   it('covers list, stats, detail, lifecycle, rules and SMTP routes', () => {
@@ -34,6 +34,17 @@ describe('alert-center mock contract', () => {
 
     const missing = dispatch({ method: 'GET', path: '/monitor/alerts/999999' });
     expect(missing.status).toBe(404);
+  });
+
+  it('keeps the unified SMTP sender read-only', () => {
+    const before = dispatch({ method: 'GET', path: '/monitor/alert-smtp-config' }).data as SmtpConfig;
+    const updated = dispatch({
+      method: 'PUT',
+      path: '/monitor/alert-smtp-config',
+      body: { ...before, sender_email: 'legacy@example.com' },
+    }).data as SmtpConfig;
+
+    expect(updated.sender_email).toBe('emailgateway@cacter.com');
   });
 
   it('enforces lifecycle preconditions and keeps stat buckets coherent', () => {

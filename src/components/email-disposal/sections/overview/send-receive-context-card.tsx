@@ -20,23 +20,25 @@
 // 回落。详见该函数的注释。
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { AlertTriangle, ChevronDown, Mail, MapPin, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { MailChildEvent, MailLogDetail, RecipientDisposition } from '@/types/email-disposal-detail';
 import { formatTimestamp } from '@/lib/format-time';
+import { localizedGeoRegionName } from '@/lib/geo-region-name';
 import { deriveDomainName, formatBytes, recipientActionsForStatus } from '../../lib/detail-helpers';
 import { RecipientStatus } from '../../components/recipient-status';
+import { RecipientDeliveryDetail } from '../../components/recipient-delivery-detail';
 
 interface SendReceiveContextCardProps {
   detail: MailLogDetail;
   apiRequest: ApiRequestFn;
   onDisposed: () => void;
   readOnly: boolean;
-  // Per-recipient delivery events, threaded straight through to
-  // RecipientStatus (delivered-status detail line, DD-11 part 2).
+  // Per-recipient delivery events used by both the single-recipient summary
+  // and RecipientStatus's multi-recipient matrix.
   events?: MailChildEvent[];
   // GT-12596：B4「查看策略命中详情」只在存在真实跳转目标时展示。
   // 目标由父层按产品开关选择安全分析区或概览处置依据。
@@ -136,6 +138,7 @@ function deliverySubjectCopies(detail: MailLogDetail): DeliverySubjectCopy[] {
 
 export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnly, events, onViewPolicyDetail }: SendReceiveContextCardProps) {
   const t = useTranslations('emailDisposal.detail.overview');
+  const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
 
   // GT-12758：处置记录为空时回落到信封收件人（见 fallbackDispositions）。
@@ -147,6 +150,7 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
   // GT-12880/GT-13193：投递族（投递中/成功/失败/暂缓）与拦截族语义
   // 相反。即使当前没有人工操作，也绝不能共用"已被阻断/丢弃"文案。
   const singleDeliveryFailed = !!single && single.status === 'delivery_failed';
+  const redeliverUnavailableReason = detail.redeliver_unavailable_reason ?? 'storage_unavailable';
   const singleInDeliveryFlow = !!single && [
     'delivering', 'delivered', 'marked_delivered', 'delivery_failed', 'deferred',
   ].includes(single.status);
@@ -156,6 +160,10 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
   const statusCounts: Record<string, number> = {};
   for (const d of dispositions) statusCounts[d.status] = (statusCounts[d.status] ?? 0) + 1;
   const deliveredSubjectCopies = deliverySubjectCopies(detail);
+  const geoLocation = localizedGeoRegionName(locale, detail.geo_region, detail.geo_region_name)
+    || detail.geo_city
+    || detail.geo_isp
+    || '—';
 
   return (
     <div className="rounded-lg border bg-muted/30 p-4 space-y-3" data-testid="email-disposal-overview-context-card">
@@ -203,7 +211,7 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
           <span className="text-muted-foreground">IP: {detail.client_ip || '—'}</span>
           <Badge variant="outline" className="gap-1 text-xs">
             <MapPin className="h-3 w-3" />
-            {detail.geo_region_name || detail.geo_city || detail.geo_isp || '—'}
+            {geoLocation}
           </Badge>
         </div>
 
@@ -244,17 +252,28 @@ export function SendReceiveContextCard({ detail, apiRequest, onDisposed, readOnl
             onDisposed={onDisposed}
             readOnly={readOnly}
             events={events}
+            redeliverAvailable={detail.redeliver_available === true}
+            redeliverUnavailableReason={detail.redeliver_unavailable_reason}
           />
         )}
 
         {/* GT-12880 投递失败提示：已放行投递、下游接收失败——不是阻断/丢弃 */}
         {isSingle && singleDeliveryFailed && (
           <div
-            className="mt-1 flex flex-wrap items-center gap-2 rounded border border-red-200 bg-red-50 p-3 text-sm dark:border-red-900/50 dark:bg-red-950/20"
+            className="mt-1 flex items-start gap-2 rounded border border-red-200 bg-red-50 p-3 text-sm dark:border-red-900/50 dark:bg-red-950/20"
             data-testid="email-disposal-overview-context-delivery-failed"
           >
-            <AlertTriangle className="h-4 w-4 shrink-0 text-red-600" />
-            <span>{t('context.deliveryFailedWarning')}</span>
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+            <div className="min-w-0 space-y-1">
+              <div>
+                {detail.redeliver_available === false
+                  ? t('context.deliveryFailedUnavailableWarning', {
+                    reason: t(`recipientStatus.redeliverUnavailable.${redeliverUnavailableReason}`),
+                  })
+                  : t('context.deliveryFailedWarning')}
+              </div>
+              <RecipientDeliveryDetail disposition={single} events={events} />
+            </div>
           </div>
         )}
 

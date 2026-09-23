@@ -30,6 +30,13 @@ const RANK_BADGE: Record<number, string> = {
   3: 'bg-orange-400 text-orange-900',
 };
 
+function rankTier(rank: number): 'gold' | 'silver' | 'bronze' | 'plain' {
+  if (rank === 1) return 'gold';
+  if (rank === 2) return 'silver';
+  if (rank === 3) return 'bronze';
+  return 'plain';
+}
+
 // Threat taxonomy per spec §5.7: {normal, spam, suspicious, high_risk_spam,
 // phishing, virus}. The backend never emits malware/bec/impersonation.
 const THREAT_TYPE_COLOR: Record<string, string> = {
@@ -107,6 +114,19 @@ function progressColors(
           ? 'text-yellow-600'
           : 'text-green-600',
   };
+}
+
+// 进度颜色是面向用户的风险语义，不让测试依赖 Tailwind class 或内联色值。
+// 与 progressColors 保持同一阈值：normal / warning / danger 可被辅助技术和 QC
+// 稳定读取，也方便其它统计组件复用这套三档约定。
+function progressLevel(key: string, percent: number): 'normal' | 'warning' | 'danger' {
+  if (key === 'failureRate' || key === 'deliveryRate') {
+    return percent > 50 ? 'danger' : percent > 30 ? 'warning' : 'normal';
+  }
+  if (key === 'blockRate') {
+    return percent > 70 ? 'normal' : percent > 50 ? 'warning' : 'danger';
+  }
+  return percent > 10 ? 'danger' : percent > 5 ? 'warning' : 'normal';
 }
 
 function alignClass(align: 'left' | 'right' | 'center'): string {
@@ -353,11 +373,13 @@ function CellContent({
     case 'progress': {
       const percent = Number(value) || 0;
       const { bar, text } = progressColors(col.key, percent);
+      const level = progressLevel(col.key, percent);
       return (
         <div className="flex items-center gap-1" data-testid={`ops-top-progress-${row.rank}-${col.key}`}>
           <div className="h-1.5 w-12 overflow-hidden rounded-full bg-muted">
             <div
               data-testid={`ops-top-progress-bar-${row.rank}-${col.key}`}
+              data-level={level}
               className="h-full rounded-full transition-all"
               style={{
                 width: `${Math.min(percent, 100)}%`,
@@ -504,6 +526,7 @@ export function TopTable({
                         <div className="flex items-center gap-1">
                           <span
                             data-testid={`ops-top-rank-${row.rank}`}
+                            data-rank-tier={rankTier(row.rank)}
                             className={`inline-flex h-5 w-5 items-center justify-center rounded text-xs font-medium ${RANK_BADGE[row.rank] ?? 'bg-muted text-muted-foreground'}`}
                           >
                             {row.rank}

@@ -124,7 +124,7 @@ export function SystemStatusDashboard() {
         isError={data.isError}
       />
 
-      <div className={`grid grid-cols-1 gap-6 ${overviewGrid}`}>
+      <div className={`grid grid-cols-1 gap-6 ${overviewGrid}`} data-testid="system-status-overview-grid">
         {showAgents && <AgentOverview agents={data.agents} isLoading={data.agentsLoading} />}
         <ThreatTop5 top5={data.top5} isLoading={data.isLoading} range={range} />
         {showInfra && (

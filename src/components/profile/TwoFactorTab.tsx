@@ -140,12 +140,12 @@ export function TwoFactorTab() {
         <div className="flex items-center gap-3">
           <span className="text-sm text-foreground">{t('twoFactor.statusLabel')}</span>
           {config.enabled ? (
-            <Badge variant="outline" className="border-green-200 bg-green-50 font-normal text-green-600 dark:border-green-900 dark:bg-green-950 dark:text-green-400">
+            <Badge data-testid="profile-2fa-status" data-state={required ? 'forced' : 'enabled'} variant="outline" className="border-green-200 bg-green-50 font-normal text-green-600 dark:border-green-900 dark:bg-green-950 dark:text-green-400">
               <ShieldCheck className="mr-1 h-3 w-3" />
               {required ? t('twoFactor.forced') : t('twoFactor.enabled')}
             </Badge>
           ) : (
-            <Badge variant="outline" className="font-normal text-muted-foreground">
+            <Badge data-testid="profile-2fa-status" data-state="disabled" variant="outline" className="font-normal text-muted-foreground">
               {t('twoFactor.disabled')}
             </Badge>
           )}
@@ -190,7 +190,7 @@ export function TwoFactorTab() {
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value={m} id={`tf-${m}`} disabled={disabled} />
+                      <RadioGroupItem data-testid={`profile-2fa-method-${m}`} value={m} id={`tf-${m}`} disabled={disabled} />
                       <label htmlFor={`tf-${m}`} className="text-sm text-foreground">
                         {m === 'sms' ? t('twoFactor.sms') : t('twoFactor.email')}
                       </label>
@@ -208,25 +208,27 @@ export function TwoFactorTab() {
             <div className="space-y-2">
               <div className="flex max-w-2xl flex-wrap items-center gap-2">
                 <Input
+                  data-testid="profile-2fa-target-input"
                   value={target}
                   onChange={(e) => setTarget(e.target.value)}
                   className="w-56"
                   placeholder={method === 'sms' ? t('twoFactor.phonePlaceholder') : t('twoFactor.emailPlaceholder')}
                 />
                 <Input
+                  data-testid="profile-2fa-code-input"
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                   className="w-32"
                   placeholder={t('twoFactor.codePlaceholder')}
                 />
-                <Button variant="outline" disabled={cd > 0 || sendCode.isPending} onClick={handleSendCode}>
+                <Button data-testid="profile-2fa-send-code" variant="outline" disabled={cd > 0 || sendCode.isPending} onClick={handleSendCode}>
                   {cd > 0 ? t('twoFactor.resendIn', { n: cd }) : t('twoFactor.getCode')}
                 </Button>
-                <Button disabled={code.length !== 6 || enable2FA.isPending} onClick={handleEnable}>
+                <Button data-testid="profile-2fa-enable" disabled={code.length !== 6 || enable2FA.isPending} onClick={handleEnable}>
                   {t('twoFactor.enable')}
                 </Button>
               </div>
-              {err ? <p className="text-xs text-destructive">{err}</p> : null}
+              {err ? <p data-testid="profile-2fa-error" className="text-xs text-destructive">{err}</p> : null}
             </div>
           </div>
         )}
@@ -237,7 +239,7 @@ export function TwoFactorTab() {
             {required ? (
               <Tooltip>
                 <TooltipTrigger render={<span className="inline-block" />}>
-                  <Button variant="outline" size="sm" disabled className="text-destructive">
+                  <Button data-testid="profile-2fa-disable" variant="outline" size="sm" disabled className="text-destructive">
                     {t('twoFactor.disable')}
                   </Button>
                 </TooltipTrigger>
@@ -245,6 +247,7 @@ export function TwoFactorTab() {
               </Tooltip>
             ) : (
               <Button
+                data-testid="profile-2fa-disable"
                 variant="outline"
                 size="sm"
                 className="border-destructive/30 text-destructive hover:bg-destructive/5"
@@ -262,26 +265,28 @@ export function TwoFactorTab() {
       </div>
 
       <Dialog open={disableOpen} onOpenChange={setDisableOpen}>
-        <DialogContent className="max-w-[400px]">
+        <DialogContent data-testid="profile-2fa-disable-dialog" className="max-w-[400px]">
           <DialogHeader>
             <DialogTitle>{t('twoFactor.disableTitle')}</DialogTitle>
             <DialogDescription>{t('twoFactor.disableConfirm')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5 py-2">
             <Input
+              data-testid="profile-2fa-disable-password"
               type="password"
               value={verifyPwd}
               onChange={(e) => setVerifyPwd(e.target.value)}
               placeholder={t('twoFactor.passwordPlaceholder')}
               className={verifyErr ? 'border-destructive' : ''}
             />
-            {verifyErr ? <p className="text-xs text-destructive">{verifyErr}</p> : null}
+            {verifyErr ? <p data-testid="profile-2fa-disable-error" className="text-xs text-destructive">{verifyErr}</p> : null}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDisableOpen(false)}>
+            <Button data-testid="profile-2fa-disable-cancel" variant="outline" onClick={() => setDisableOpen(false)}>
               {tc('cancel')}
             </Button>
             <Button
+              data-testid="profile-2fa-disable-confirm"
               variant="destructive"
               disabled={disable2FA.isPending}
               onClick={confirmDisable}

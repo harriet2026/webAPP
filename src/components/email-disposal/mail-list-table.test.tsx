@@ -170,6 +170,32 @@ describe("MailListTable toolbar (GT-11580)", () => {
     );
   });
 
+  it("associates separate recipient-result rows from the same SMTP transaction", () => {
+    const messageUuid = "019feb00-1111-7222-8333-444444444444";
+    const items = [
+      { ...makeItem(1), messageUuid, recipient: "accepted@example.com" },
+      {
+        ...makeItem(2),
+        messageUuid,
+        recipient: "overflow@example.com",
+        action: "reject",
+        status: "rejected",
+        displayStatuses: [{ status: "rejected" as const, count: 1 }],
+      },
+      { ...makeItem(3), messageUuid: "019feb00-aaaa-7bbb-8ccc-dddddddddddd" },
+    ];
+
+    renderTable({ items, total: items.length });
+
+    expect(screen.getByTestId("disposal-mail-link-1")).toHaveTextContent(
+      'emailDisposal.table.sameMailResult:{"current":1,"total":2}',
+    );
+    expect(screen.getByTestId("disposal-mail-link-2")).toHaveTextContent(
+      'emailDisposal.table.sameMailResult:{"current":2,"total":2}',
+    );
+    expect(screen.queryByTestId("disposal-mail-link-3")).not.toBeInTheDocument();
+  });
+
   it("applies distinct direction colors and a compact neutral fallback", () => {
     const items = [
       { ...makeItem(1), direction: "incoming" },

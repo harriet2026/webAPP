@@ -68,7 +68,7 @@ vi.mock('./PipelinePanelHeader', () => ({
         data-enabled={enabled}
         disabled={disabled}
         title={switchTitle}
-        onClick={() => onToggle(false)}
+        onClick={() => onToggle(!enabled)}
       >
         toggle
       </button>
@@ -94,6 +94,33 @@ beforeEach(() => {
 });
 
 describe('ModuleMasterSwitch mixed scope permissions', () => {
+  it('keeps a tenant switch locked until its persisted state has loaded', async () => {
+    Object.assign(mocks.authState, {
+      isSystemAdmin: false,
+      selectedTenantId: 7,
+      user: { role: 'tenant_admin' },
+    });
+    let resolveModules!: (value: { behavior_control: boolean }) => void;
+    mocks.getSecurityModules.mockReturnValueOnce(new Promise((resolve) => {
+      resolveModules = resolve;
+    }));
+
+    render(<ModuleMasterSwitch page="behavior_control"><div>content</div></ModuleMasterSwitch>);
+
+    const toggle = screen.getByTestId('master-switch-toggle');
+    expect(toggle).toBeDisabled();
+    fireEvent.click(toggle);
+    expect(mocks.setSecurityModuleEnabled).not.toHaveBeenCalled();
+
+    resolveModules({ behavior_control: false });
+    await waitFor(() => expect(toggle).toBeEnabled());
+    expect(toggle).toHaveAttribute('data-enabled', 'false');
+    fireEvent.click(toggle);
+    await waitFor(() => {
+      expect(mocks.setSecurityModuleEnabled).toHaveBeenCalledWith('behavior_control', true, mocks.apiRequest);
+    });
+  });
+
   it('keeps stage-1 global controls locked for tenant_admin', () => {
     Object.assign(mocks.authState, {
       isSystemAdmin: false,
@@ -122,10 +149,31 @@ describe('ModuleMasterSwitch mixed scope permissions', () => {
     });
     render(<ModuleMasterSwitch page="user_list"><div>content</div></ModuleMasterSwitch>);
 
-    fireEvent.click(screen.getByTestId('master-switch-toggle'));
+    const toggle = screen.getByTestId('master-switch-toggle');
+    await waitFor(() => expect(toggle).toBeEnabled());
+    fireEvent.click(toggle);
     await waitFor(() => {
       expect(mocks.setSecurityModuleEnabled).toHaveBeenCalledWith('user_list', false, mocks.apiRequest);
     });
+  });
+
+  it('honors a stricter page-level edit gate for a read-only role', async () => {
+    Object.assign(mocks.authState, {
+      isSystemAdmin: false,
+      selectedTenantId: 7,
+      user: { role: 'tenant_admin' },
+    });
+    render(
+      <ModuleMasterSwitch page="auth_spoofing" editable={false}>
+        <div>content</div>
+      </ModuleMasterSwitch>,
+    );
+
+    const toggle = screen.getByTestId('master-switch-toggle');
+    await waitFor(() => expect(mocks.getSecurityModules).toHaveBeenCalled());
+    expect(toggle).toBeDisabled();
+    fireEvent.click(toggle);
+    expect(mocks.setSecurityModuleEnabled).not.toHaveBeenCalled();
   });
 
   it('rolls back an immediate toggle and reports a save failure', async () => {
@@ -138,6 +186,7 @@ describe('ModuleMasterSwitch mixed scope permissions', () => {
     render(<ModuleMasterSwitch page="user_list"><div>content</div></ModuleMasterSwitch>);
 
     const toggle = screen.getByTestId('master-switch-toggle');
+    await waitFor(() => expect(toggle).toBeEnabled());
     expect(toggle).toHaveAttribute('data-enabled', 'true');
     fireEvent.click(toggle);
 
@@ -152,6 +201,7 @@ describe('ModuleMasterSwitch mixed scope permissions', () => {
     render(<ModuleMasterSwitch page="content_rules" deferred><div>content</div></ModuleMasterSwitch>);
 
     const toggle = screen.getByTestId('master-switch-toggle');
+    await waitFor(() => expect(toggle).toBeEnabled());
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('data-enabled', 'false');
     fireEvent.click(screen.getByTestId('master-switch-save'));
@@ -170,11 +220,11 @@ describe('ModuleMasterSwitch mixed scope permissions', () => {
     expect(screen.getByTestId('master-switch-toggle')).toHaveAttribute('title', 'selectTenantFirst');
   });
 
-  it('uses the default tenant in a single-tenant product form', () => {
+  it('uses the default tenant in a single-tenant product form', async () => {
     mocks.authState.selectedTenantId = null;
     mocks.multiTenant = false;
     render(<ModuleMasterSwitch page="user_list"><div>content</div></ModuleMasterSwitch>);
 
-    expect(screen.getByTestId('master-switch-toggle')).toBeEnabled();
+    await waitFor(() => expect(screen.getByTestId('master-switch-toggle')).toBeEnabled());
   });
 });

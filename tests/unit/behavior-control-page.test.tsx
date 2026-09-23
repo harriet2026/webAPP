@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement } from 'react';
+import userEvent from '@testing-library/user-event';
 
-const { mockApiRequest } = vi.hoisted(() => ({
+const { mockApiRequest, mockToastSuccess } = vi.hoisted(() => ({
   mockApiRequest: vi.fn(),
+  mockToastSuccess: vi.fn(),
 }));
 
 vi.mock('@/lib/api/client', () => ({
@@ -20,7 +22,7 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('sonner', () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+  toast: { success: mockToastSuccess, error: vi.fn() },
 }));
 
 vi.mock('next/navigation', () => ({
@@ -106,6 +108,112 @@ describe('BehaviorControlPage', () => {
     expect(screen.queryByText('behaviorControl.complexRule')).not.toBeInTheDocument();
   });
 
+  it('sorts rules by ID ascending regardless of priority', async () => {
+    mockApiRequest.mockResolvedValue({
+      items: [
+        { ...bcRule, id: 44, name: 'Rule 44', priority: 100 },
+        { ...bcRule, id: 42, name: 'Rule 42', priority: 900 },
+        { ...bcRule, id: 43, name: 'Rule 43', priority: 500 },
+      ],
+    });
+    renderPage(createElement(BehaviorControlPage));
+
+    const rows = await screen.findAllByTestId(/^behavior-control-row-/);
+    expect(rows.map((row) => row.dataset.testid)).toEqual([
+      'behavior-control-row-42',
+      'behavior-control-row-43',
+      'behavior-control-row-44',
+    ]);
+  });
+
+  it('GT-12168 renders only the switch in the status column and toggles a rule', async () => {
+    const user = userEvent.setup();
+    mockApiRequest.mockResolvedValue({
+      items: [bcRule, { ...bcRule, id: 43, name: 'Disabled BC Rule', is_active: false }],
+    });
+    renderPage(createElement(BehaviorControlPage));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('behavior-control-toggle-42')).toBeChecked();
+    });
+    expect(screen.getByTestId('behavior-control-toggle-43')).not.toBeChecked();
+    expect(screen.getByTestId('behavior-control-status-42')).toHaveTextContent('');
+    expect(screen.getByTestId('behavior-control-status-43')).toHaveTextContent('');
+    expect(screen.getByTestId('behavior-control-status-42').querySelectorAll('[role="switch"]')).toHaveLength(1);
+    expect(screen.getByTestId('behavior-control-status-43').querySelectorAll('[role="switch"]')).toHaveLength(1);
+
+    await user.click(screen.getByTestId('behavior-control-toggle-42'));
+
+    await waitFor(() => expect(mockApiRequest).toHaveBeenCalledWith('/unified-rules/42', {
+      method: 'PUT',
+      body: { is_active: false },
+    }));
+    expect(mockToastSuccess).toHaveBeenCalledWith('common.updateSuccess');
+  });
+
+  it('GT-13690 edits the rule enabled state in the rule drawer', async () => {
+    const user = userEvent.setup();
+    mockApiRequest.mockResolvedValue({
+      items: [{ ...bcRule, is_active: false }],
+    });
+    renderPage(createElement(BehaviorControlPage));
+
+    await user.click(await screen.findByTestId('behavior-control-edit-42'));
+    const activeSwitch = await screen.findByTestId('behavior-control-rule-active');
+    expect(activeSwitch).not.toBeChecked();
+
+    await user.click(activeSwitch);
+    expect(activeSwitch).toBeChecked();
+    await user.click(screen.getByTestId('behavior-control-save'));
+
+    await waitFor(() => expect(mockApiRequest).toHaveBeenCalledWith('/unified-rules/42', expect.objectContaining({
+      method: 'PUT',
+      body: expect.objectContaining({ is_active: true }),
+    })));
+  });
+
+  it('prefills the date input from a saved RFC3339 valid-until value', async () => {
+    const user = userEvent.setup();
+    mockApiRequest.mockResolvedValue({
+      items: [{ ...bcRule, valid_until: '2026-12-31T00:00:00Z' }],
+    });
+    renderPage(createElement(BehaviorControlPage));
+
+    await user.click(await screen.findByTestId('behavior-control-edit-42'));
+    expect(await screen.findByDisplayValue('2026-12-31')).toHaveAttribute('type', 'date');
+  });
+
+  it('marks an expired rule in the list and editing preview', async () => {
+    const user = userEvent.setup();
+    const expiredRule = { ...bcRule, valid_until: '2000-01-01T00:00:00Z' };
+    const activeRule = { ...bcRule, id: 43, name: 'Active BC Rule', valid_until: '2999-01-01T00:00:00Z' };
+    mockApiRequest.mockResolvedValue({ items: [expiredRule, activeRule] });
+    renderPage(createElement(BehaviorControlPage));
+
+    const status = await screen.findByTestId('behavior-control-status-42');
+    expect(status).toHaveTextContent('behaviorControl.filter.expired');
+    expect(status).toHaveAttribute('data-slot', 'badge');
+    expect(status).toHaveClass('text-destructive');
+    expect(screen.queryByTestId('behavior-control-toggle-42')).not.toBeInTheDocument();
+    expect(screen.getByTestId('behavior-control-toggle-43')).toBeChecked();
+    expect(screen.getByTestId('behavior-control-row-42')).toHaveClass('opacity-60');
+
+    await user.click(screen.getByTestId('behavior-control-filter-status'));
+    await user.click(await screen.findByRole('option', { name: 'behaviorControl.filter.enabled' }));
+    await waitFor(() => expect(screen.queryByTestId('behavior-control-row-42')).not.toBeInTheDocument());
+    expect(screen.getByTestId('behavior-control-row-43')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('behavior-control-filter-status'));
+    await user.click(await screen.findByRole('option', { name: 'behaviorControl.filter.expired' }));
+    await waitFor(() => expect(screen.queryByTestId('behavior-control-row-43')).not.toBeInTheDocument());
+    expect(screen.getByTestId('behavior-control-row-42')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('behavior-control-edit-42'));
+    expect(await screen.findByTestId('behavior-control-preview-expired')).toHaveTextContent(
+      'behaviorControl.preview.expired',
+    );
+  });
+
   it('marks complex rules with amber badge', async () => {
     mockApiRequest.mockResolvedValue({ items: [bcRuleComplex] });
     renderPage(createElement(BehaviorControlPage));
@@ -122,6 +230,40 @@ describe('BehaviorControlPage', () => {
     await waitFor(() => {
       expect(screen.getByText('behaviorControl.empty')).toBeInTheDocument();
     });
+  });
+
+  it('uses the delete-success toast after deleting a rule', async () => {
+    const user = userEvent.setup();
+    mockApiRequest.mockResolvedValue({ items: [bcRule] });
+    renderPage(createElement(BehaviorControlPage));
+
+    const ruleName = await screen.findByText('Test BC Rule');
+    const row = ruleName.closest('tr');
+    expect(row).not.toBeNull();
+    const rowButtons = within(row as HTMLTableRowElement).getAllByRole('button');
+    await user.click(rowButtons[rowButtons.length - 1]);
+    await user.click(screen.getByRole('button', { name: 'common.delete' }));
+
+    await waitFor(() => {
+      expect(mockToastSuccess).toHaveBeenCalledWith('behaviorControl.toast.deleteOk');
+    });
+  });
+
+  it('opens the import and export entries on their matching tabs', async () => {
+    mockApiRequest.mockResolvedValue({ items: [] });
+    renderPage(createElement(BehaviorControlPage));
+
+    await waitFor(() => expect(screen.getByTestId('behavior-control-import')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('behavior-control-import'));
+    await waitFor(() => expect(screen.getByTestId('rule-import-file')).toBeVisible());
+    expect(screen.queryByTestId('rule-export-execute')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('rule-import-export-close'));
+    await waitFor(() => expect(screen.queryByTestId('rule-import-export-dialog')).toBeNull());
+
+    fireEvent.click(screen.getByTestId('behavior-control-export'));
+    await waitFor(() => expect(screen.getByTestId('rule-export-execute')).toBeVisible());
+    expect(screen.queryByTestId('rule-import-file')).toBeNull();
   });
 
   // NOTE: the former "renders recipient-limit configuration section" and

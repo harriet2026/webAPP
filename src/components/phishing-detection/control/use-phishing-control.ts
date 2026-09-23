@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useApiRequest } from '@/lib/api/client';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { getPhishingControl, putPhishingControl } from '@/lib/api/phishing-control';
-import { listAdmissionRules } from '@/lib/api/phishing-admission-rules';
+import { admissionRulesReady, listAdmissionRules } from '@/lib/api/phishing-admission-rules';
 import { usePhishingAccess } from '../access';
 import { phishingQueryKeys } from '../phishing-query-keys';
 
@@ -41,7 +41,7 @@ export function usePhishingControl() {
   });
 
   const enabled = controlQuery.data?.enabled ?? false;
-  const admissionReady = admissionQuery.data?.some((rule) => rule.enabled) ?? false;
+  const admissionReady = admissionRulesReady(admissionQuery.data, effectiveTenantId);
   const readinessUnknown = !controlQuery.data
     || (!enabled && (admissionQuery.isLoading || admissionQuery.isError));
   const errorMessage = controlQuery.isError
@@ -60,7 +60,7 @@ export function usePhishingControl() {
     isPending: mutation.isPending,
     checkAdmissionReady: async () => {
       const latest = await admissionQuery.refetch();
-      return latest.data?.some((rule) => rule.enabled) ?? false;
+      return !latest.isError && admissionRulesReady(latest.data, effectiveTenantId);
     },
     update: (next: boolean) => mutation.mutate(next),
   };

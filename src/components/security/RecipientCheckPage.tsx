@@ -146,7 +146,53 @@ function reconcileRecipientPolicyView(
 
 type DirCfg = { limit: number; action: RecipientLimitAction; scope?: RecipientLimitScope };
 
-// 方向卡：彩色 Badge + 最大收信人 + （仅接收）计数范围 radio + 执行动作 Select + 动作说明。
+function isValidRecipientLimit(value: number): boolean {
+  return Number.isInteger(value) && (value === -1 || (value >= 1 && value <= 1000));
+}
+
+function parseRecipientLimit(value: string): number {
+  return value === '' || value === '-' ? Number.NaN : Number(value);
+}
+
+function RecipientLimitInput({
+  testId,
+  value,
+  onValueChange,
+  valid,
+  errorId,
+}: {
+  testId: string;
+  value: number;
+  onValueChange: (value: number) => void;
+  valid: boolean;
+  errorId: string;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+
+  return (
+    <Input
+      data-testid={testId}
+      type="text"
+      inputMode="numeric"
+      role="spinbutton"
+      value={draft ?? (Number.isFinite(value) ? String(value) : '')}
+      onFocus={() => setDraft((current) => current ?? (Number.isFinite(value) ? String(value) : ''))}
+      onChange={(event) => {
+        const next = event.target.value;
+        setDraft(next);
+        onValueChange(parseRecipientLimit(next));
+      }}
+      onBlur={() => setDraft(null)}
+      className="w-20"
+      aria-valuemin={-1}
+      aria-valuemax={1000}
+      aria-invalid={!valid}
+      aria-describedby={valid ? undefined : errorId}
+    />
+  );
+}
+
+// 方向卡：彩色 Badge + 最大收信人 + 执行动作 Select + 动作说明。
 function DirectionCard({
   direction,
   badgeLabel,
@@ -154,7 +200,6 @@ function DirectionCard({
   hint,
   config,
   onChange,
-  showScope = false,
   t,
 }: {
   direction: 'inbound' | 'outbound' | 'internal';
@@ -163,54 +208,35 @@ function DirectionCard({
   hint: string;
   config: DirCfg;
   onChange: (next: DirCfg) => void;
-  showScope?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const limitValid = isValidRecipientLimit(config.limit);
+  const errorId = `recipient-limit-error-${direction}`;
   return (
     <div data-testid={`recipient-limit-card-${direction}`} className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
       <div className="flex items-center gap-2">
         <Badge variant="outline" className={badgeClass}>{badgeLabel}</Badge>
         <span className="text-xs text-muted-foreground">{hint}</span>
       </div>
-      <div className={cn('grid grid-cols-1 gap-4', showScope ? 'min-[1366px]:grid-cols-3' : 'min-[1366px]:grid-cols-2')}>
+      <div className="grid grid-cols-1 gap-4 min-[1366px]:grid-cols-2">
         <div className="space-y-2">
           <Label className="text-xs">{t('recipientCheck.limit.maxRecipients')}</Label>
           <div className="flex items-center gap-2">
-            <Input
-              data-testid={`recipient-limit-value-${direction}`}
-              type="number"
+            <RecipientLimitInput
+              testId={`recipient-limit-value-${direction}`}
               value={config.limit}
-              onChange={(e) => onChange({ ...config, limit: parseInt(e.target.value) || 0 })}
-              className="w-20"
-              min={-1}
-              max={1000}
+              onValueChange={(value) => onChange({ ...config, limit: value })}
+              valid={limitValid}
+              errorId={errorId}
             />
             <span className="text-sm text-muted-foreground">{t('recipientCheck.limit.unit')}</span>
           </div>
+          {!limitValid && (
+            <p id={errorId} role="alert" className="text-xs text-destructive" data-testid={errorId}>
+              {t('recipientCheck.limit.rangeError')}
+            </p>
+          )}
         </div>
-        {showScope && (
-          <div className="space-y-2" data-testid="recipient-limit-scope-inbound">
-            <Label className="text-xs">{t('recipientCheck.limit.countScope')}</Label>
-            <RadioGroup
-              value={config.scope ?? 'local'}
-              onValueChange={(v) => onChange({ ...config, scope: v as RecipientLimitScope })}
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-1">
-                <RadioGroupItem value="local" id={`scope-local-${badgeLabel}`} data-testid={`recipient-limit-scope-${direction}-local`} />
-                <Label htmlFor={`scope-local-${badgeLabel}`} className="cursor-pointer text-xs">
-                  {t('recipientCheck.limit.scope.local')}
-                </Label>
-              </div>
-              <div className="flex items-center space-x-1">
-                <RadioGroupItem value="all" id={`scope-all-${badgeLabel}`} data-testid={`recipient-limit-scope-${direction}-all`} />
-                <Label htmlFor={`scope-all-${badgeLabel}`} className="cursor-pointer text-xs">
-                  {t('recipientCheck.limit.scope.all')}
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-        )}
         <div className="space-y-2">
           <Label className="text-xs">{t('recipientCheck.limit.actionLabel')}</Label>
           <Select value={config.action} onValueChange={(v) => onChange({ ...config, action: v as RecipientLimitAction })}>
@@ -225,7 +251,12 @@ function DirectionCard({
           </Select>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{t(`recipientCheck.limit.actionDesc.${config.action}`)}</p>
+      <p
+        className="text-xs text-muted-foreground"
+        data-testid={`recipient-limit-action-description-${direction}`}
+      >
+        {t(`recipientCheck.limit.actionDesc.${config.action}`)}
+      </p>
     </div>
   );
 }
@@ -250,7 +281,7 @@ export function RecipientCheckPage({ embedded = false }: Props) {
   // （写死导致下方的离线告警面板永远不可达，成了死代码）。
   //
   // 语义：存在性验证查的是本地通讯录（contact_book），不是实时打 LDAP，因此
-  // 「可用」= 同步健康且数据新鲜；同步失败或数据陈旧时结论不可信，应提示运维。
+  // 「可用」= 当前租户本地有有效联系人；同步时间和同步失败不影响已有数据。
   const directoryQueryKey = ['recipient-directory-status', effectiveTenantId] as const;
   const limitQueryKey = ['recipient-limit-config', effectiveTenantId] as const;
   const checkQueryKey = ['recipient-check-config', effectiveTenantId] as const;
@@ -264,7 +295,7 @@ export function RecipientCheckPage({ embedded = false }: Props) {
     refetchInterval: 60_000,
   });
   // 查询未回来之前不渲染告警，避免加载态闪一下"目录离线"。
-  const ldapConnected = directoryQuery.data ? directoryQuery.data.available : true;
+  const directoryAvailable = directoryQuery.data ? directoryQuery.data.available : true;
   const directoryReason = directoryQuery.data?.reason ?? '';
 
   const limitQuery = useQuery({
@@ -280,6 +311,12 @@ export function RecipientCheckPage({ embedded = false }: Props) {
 
   const configLoadFailed = limitQuery.isError || checkQuery.isError;
   const configReady = limitQuery.isSuccess && checkQuery.isSuccess && !configLoadFailed;
+  // 后端会校验 payload 中的全部四个阈值，而不只校验当前模式可见的字段；
+  // 因此任一方向存在非法草稿时都不能提交，避免切换模式后把隐藏的非法值送到后端。
+  const limitValid = isValidRecipientLimit(limit.inbound_limit!.limit)
+    && isValidRecipientLimit(limit.outbound_limit!.limit)
+    && isValidRecipientLimit(limit.internal_limit!.limit)
+    && isValidRecipientLimit(limit.merged_limit!.limit);
 
   useEffect(() => {
     if (limitQuery.data) setLimit(limitQuery.data);
@@ -319,7 +356,7 @@ export function RecipientCheckPage({ embedded = false }: Props) {
   };
 
   const handleSave = async () => {
-    if (!configReady) return;
+    if (!configReady || !limitValid) return;
     setSaving(true);
     try {
       const result = await setRecipientPolicy(limit, check, apiRequest);
@@ -442,7 +479,6 @@ export function RecipientCheckPage({ embedded = false }: Props) {
                     hint={t('recipientCheck.limit.hint.inbound')}
                     config={limit.inbound_limit!}
                     onChange={(n) => setLimit((l) => ({ ...l, inbound_limit: n }))}
-                    showScope
                     t={t}
                   />
                   <DirectionCard
@@ -473,7 +509,6 @@ export function RecipientCheckPage({ embedded = false }: Props) {
                     hint={t('recipientCheck.limit.hint.inbound')}
                     config={limit.inbound_limit!}
                     onChange={(n) => setLimit((l) => ({ ...l, inbound_limit: n }))}
-                    showScope
                     t={t}
                   />
                   <div data-testid="recipient-limit-card-merged" className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
@@ -485,17 +520,25 @@ export function RecipientCheckPage({ embedded = false }: Props) {
                       <div className="space-y-2">
                         <Label className="text-xs">{t('recipientCheck.limit.maxRecipients')}</Label>
                         <div className="flex items-center gap-2">
-                          <Input
-                            data-testid="recipient-limit-value-merged"
-                            type="number"
+                          <RecipientLimitInput
+                            testId="recipient-limit-value-merged"
                             value={limit.merged_limit!.limit}
-                            onChange={(e) => setLimit((l) => ({ ...l, merged_limit: { ...l.merged_limit!, limit: parseInt(e.target.value) || 0 } }))}
-                            className="w-20"
-                            min={-1}
-                            max={1000}
+                            onValueChange={(value) => setLimit((l) => ({ ...l, merged_limit: { ...l.merged_limit!, limit: value } }))}
+                            valid={isValidRecipientLimit(limit.merged_limit!.limit)}
+                            errorId="recipient-limit-error-merged"
                           />
                           <span className="text-sm text-muted-foreground">{t('recipientCheck.limit.unit')}</span>
                         </div>
+                        {!isValidRecipientLimit(limit.merged_limit!.limit) && (
+                          <p
+                            id="recipient-limit-error-merged"
+                            role="alert"
+                            className="text-xs text-destructive"
+                            data-testid="recipient-limit-error-merged"
+                          >
+                            {t('recipientCheck.limit.rangeError')}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label className="text-xs">{t('recipientCheck.limit.actionLabel')}</Label>
@@ -514,7 +557,12 @@ export function RecipientCheckPage({ embedded = false }: Props) {
                         </Select>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">{t(`recipientCheck.limit.actionDesc.${limit.merged_limit!.action}`)}</p>
+                    <p
+                      className="text-xs text-muted-foreground"
+                      data-testid="recipient-limit-action-description-merged"
+                    >
+                      {t(`recipientCheck.limit.actionDesc.${limit.merged_limit!.action}`)}
+                    </p>
                     <div data-testid="recipient-limit-merged-note" className="flex items-start gap-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950/30">
                       <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
                       <p className="text-xs text-amber-700 dark:text-amber-300">{t('recipientCheck.limit.mergedNote')}</p>
@@ -545,7 +593,7 @@ export function RecipientCheckPage({ embedded = false }: Props) {
 
           {check.existence_enabled && (
             <div className="space-y-4 p-4" data-testid="recipient-existence-config">
-              {!ldapConnected && (
+              {!directoryAvailable && (
                 <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
                   <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
                   <div>
@@ -567,12 +615,13 @@ export function RecipientCheckPage({ embedded = false }: Props) {
               </div>
 
               <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
-                <h5 className="text-sm font-medium">{t('recipientCheck.existence.strictMode')}</h5>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="text-xs">{t('recipientCheck.existence.badge.ldap')}</Badge>
-                  <Badge variant="secondary" className="text-xs">{t('recipientCheck.existence.badge.api')}</Badge>
-                  <Badge variant="secondary" className="text-xs">{t('recipientCheck.existence.badge.alias')}</Badge>
-                </div>
+                <h5 className="text-sm font-medium">{t('recipientCheck.existence.methodTitle')}</h5>
+                <p
+                  className="text-xs leading-relaxed text-muted-foreground"
+                  data-testid="recipient-existence-method-note"
+                >
+                  {t('recipientCheck.existence.methodDesc')}
+                </p>
                 <div className="space-y-2">
                   <Label className="text-xs">{t('recipientCheck.existence.failActionLabel')}</Label>
                   <Select value={check.existence_action} onValueChange={(v) => setCheck((c) => ({ ...c, existence_action: v as RecipientLimitAction }))}>
@@ -585,7 +634,12 @@ export function RecipientCheckPage({ embedded = false }: Props) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">{t(`recipientCheck.limit.actionDesc.${check.existence_action}`)}</p>
+                  <p
+                    className="text-xs text-muted-foreground"
+                    data-testid="recipient-existence-action-description"
+                  >
+                    {t(`recipientCheck.existence.actionDesc.${check.existence_action}`)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -611,7 +665,7 @@ export function RecipientCheckPage({ embedded = false }: Props) {
         <Button type="button" variant="outline" onClick={handleReset} disabled={!configReady || resetting} data-testid="recipient-check-reset">
           {t('behaviorControl.recipientLimit.reset')}
         </Button>
-        <Button type="button" onClick={handleSave} disabled={!configReady || saving} data-testid="recipient-check-save">
+        <Button type="button" onClick={handleSave} disabled={!configReady || !limitValid || saving} data-testid="recipient-check-save">
           {t('common.save')}
         </Button>
       </div>

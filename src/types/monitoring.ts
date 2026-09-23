@@ -70,20 +70,93 @@ export interface SlowQuery {
   exec_count: number;
   avg_ms: number;
   total_ms: number;
+  query_id?: string;
+  node_name?: string;
+  node_id?: string;
+  user_name?: string;
+  user_id?: string;
+  database_name?: string;
+  database_id?: string;
+  top_level?: boolean;
+  statistics_updated_at?: string;
 }
 
 export interface LockWait {
   wait_type: string;
   wait_object: string;
-  wait_ms: number;
+  /** Legacy alias for statement age, not elapsed lock-wait time. */
+  wait_ms?: number | null;
+  statement_elapsed_ms?: number | null;
+  pid?: string;
+  session_id?: string;
+  database_name?: string;
+  database_id?: string;
+  user_name?: string;
+  mode?: string;
+  query?: string;
+  query_started_at?: string;
 }
 
 export interface DBStatus {
+  replication?: DatabaseReplication;
   status: string;
-  latency_ms: number;
+  latency_ms?: number | null;
+  conn_pct?: number | null;
+}
+
+export type DatabaseQueryState = 'ok' | 'unsupported' | 'error';
+export type DatabaseMetricState = 'ok' | 'missing' | 'stale' | 'error' | 'unsupported' | 'down';
+
+export interface DatabaseReplication {
+  node?: string;
+  observed_at?: string;
+  state: 'streaming' | 'syncing' | 'replicas_connected' | 'no_replicas' | 'no_receiver' | 'unknown' | 'missing' | 'stale' | 'error' | 'unsupported' | 'down';
+  role?: 'primary' | 'replica';
+  scope: 'monitor_database' | 'selected_node' | 'redis_receive_to_apply' | 'db_receive_to_apply';
+  peers?: number;
+  lag_bytes?: number;
+  lag_ms?: number;
+  lag_state: 'ok' | 'missing' | 'unsupported';
+}
+
+export interface DatabaseSummary {
+  connection_scope: 'monitor_database' | 'selected_node';
+  latency_scope: 'app_db_calls' | 'redis_ping_native';
+  connections_used?: number;
+  connections_max?: number;
+  p50_ms?: number;
+  p95_ms?: number;
+  p99_ms?: number;
+  states: Partial<Record<'connections_used' | 'connections_max' | 'p50' | 'p95' | 'p99', DatabaseMetricState>>;
 }
 
 export interface DatabaseResp extends DegradeInfo {
+  lock_wait_info?: {
+    scope: 'monitor_connection_visible_requests';
+    time_basis: 'statement_start';
+    limit: number;
+    total?: number;
+    truncated?: boolean;
+  };
+  sql_ranking?: {
+    order_by: 'total_ms_desc';
+    period: 'retained_cumulative';
+    scope: 'monitor_connection_visible_entries';
+    node_filter_applied: boolean;
+    range_filter_applied: boolean;
+    slow_threshold_applied: boolean;
+    last_execution_time: 'unsupported';
+  };
+  summary?: DatabaseSummary;
+  latency_scope?: 'app_db_calls' | 'redis_ping' | 'redis_ping_native';
+  latency_metric?: 'avg_latency' | 'p50' | 'p95' | 'p99';
+  metric_states?: Partial<Record<'active_conns' | 'cache_hit_ratio' | 'db_size_bytes' | 'redis_latency' | 'conn_trend' | 'latency_trend' | 'dml_rate', DatabaseMetricState>>;
+  diagnostics?: {
+    slow_queries: DatabaseQueryState;
+    lock_waits: DatabaseQueryState;
+    connections: DatabaseQueryState;
+  };
+  metric_unavailable?: boolean;
   conn_trend: TrendSeries;
   latency_trend: TrendSeries;
   slow_queries: SlowQuery[];

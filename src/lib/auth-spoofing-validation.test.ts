@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { AuthSpoofingConfig, CheckItem } from '@/types/auth-spoofing';
-import { hasEmptyAuthSpoofingTag } from './auth-spoofing-validation';
+import {
+  hasEmptyAuthSpoofingTag,
+  hasInvalidAuthSpoofingHeaderName,
+} from './auth-spoofing-validation';
 
 const item = (overrides: Partial<CheckItem> = {}): CheckItem => ({
   enabled: true,
@@ -114,5 +117,45 @@ describe('hasEmptyAuthSpoofingTag', () => {
     });
 
     expect(hasEmptyAuthSpoofingTag(cfg)).toBe(false);
+  });
+});
+
+describe('hasInvalidAuthSpoofingHeaderName', () => {
+  it('rejects a non-ASCII header name used by an enabled proceed tag', () => {
+    const cfg = config();
+    cfg.format_checks.envelope_header_mismatch = item({
+      action: 'proceed',
+      tag_header_enabled: true,
+      tag_header_name: '测试信头Key',
+      tag_header_value: '中文信头值允许保存',
+    });
+
+    expect(hasInvalidAuthSpoofingHeaderName(cfg)).toBe(true);
+  });
+
+  it('accepts an ASCII header name up to 64 characters and does not validate the value as a name', () => {
+    const cfg = config();
+    cfg.protocol_checks.dkim.fail = item({
+      action: 'proceed',
+      tag_header_enabled: true,
+      tag_header_name: `X-${'A'.repeat(62)}`,
+      tag_header_value: '中文值',
+    });
+
+    expect(hasInvalidAuthSpoofingHeaderName(cfg)).toBe(false);
+  });
+
+  it('ignores header fields when the check, proceed action, or header tag is inactive', () => {
+    const cfg = config();
+    cfg.similar_domain = {
+      ...cfg.similar_domain,
+      enabled: false,
+      action: 'proceed',
+      tag_header_enabled: true,
+      tag_header_name: '测试信头Key',
+      tag_header_value: 'value',
+    };
+
+    expect(hasInvalidAuthSpoofingHeaderName(cfg)).toBe(false);
   });
 });

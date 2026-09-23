@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import type { KpiData } from '@/lib/api/security-overview';
 import { Shield, ShieldAlert, ShieldCheck, Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { blockRateBadgeVariant, blockRateTextClass } from './constants';
+import { blockRateBadgeVariant, blockRateTextClass, blockRateTier } from './constants';
 
 interface KpiCardsProps {
   data?: KpiData;
@@ -23,6 +23,32 @@ function pendingReviewColor(count: number): string {
   if (count <= 30) return 'text-success';
   if (count <= 50) return 'text-warning';
   return 'text-danger';
+}
+
+type KpiLevel = 'normal' | 'warning' | 'danger';
+
+function recallRateLevel(rate: number): KpiLevel {
+  if (rate >= 95) return 'normal';
+  if (rate >= 80) return 'warning';
+  return 'danger';
+}
+
+function pendingReviewLevel(count: number): KpiLevel {
+  if (count <= 30) return 'normal';
+  if (count <= 50) return 'warning';
+  return 'danger';
+}
+
+function blockRateLevel(rate: number): KpiLevel {
+  const tier = blockRateTier(rate);
+  return tier === 'good' ? 'normal' : tier === 'warn' ? 'warning' : 'danger';
+}
+
+function trendState(delta: number | null | undefined, positiveIsGood: boolean | null): 'up' | 'down' | 'flat' | undefined {
+  if (delta == null || positiveIsGood == null) return undefined;
+  if (delta > 0) return 'up';
+  if (delta < 0) return 'down';
+  return 'flat';
 }
 
 function formatDelta(delta: number | null): string {
@@ -72,6 +98,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
       iconColor: 'text-danger',
       positiveIsGood: true as boolean | null,
       colorFn: blockRateTextClass,
+      levelFn: blockRateLevel,
       badgeFn: blockRateBadgeVariant,
     },
     {
@@ -85,6 +112,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
       iconColor: 'text-success',
       positiveIsGood: true as boolean | null,
       colorFn: recallRateColor,
+      levelFn: recallRateLevel,
     },
     {
       key: 'pendingReview',
@@ -97,6 +125,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
       iconColor: 'text-warning',
       positiveIsGood: false as boolean | null,
       colorFn: pendingReviewColor,
+      levelFn: pendingReviewLevel,
     },
   ];
 
@@ -107,6 +136,8 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
         const displayValue = data ? card.format(card.value ?? 0) : null;
         const deltaStr = data ? formatDelta(card.delta ?? null) : null;
         const valueColorClass = data && card.colorFn ? card.colorFn(card.value ?? 0) : '';
+        const level = data && card.levelFn ? card.levelFn(card.value ?? 0) : undefined;
+        const trend = trendState(card.delta, card.positiveIsGood);
 
         return (
           <Card key={card.key} data-testid={`security-overview-kpi-card-${card.key}`} className="gap-4 overflow-hidden">
@@ -118,7 +149,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
                 {isLoading ? (
                   <Skeleton className="h-8 w-20" />
                 ) : (
-                  <div className={`text-2xl font-bold tracking-tight ${valueColorClass}`} data-testid={card.testid}>
+                  <div className={`text-2xl font-bold tracking-tight ${valueColorClass}`} data-testid={card.testid} data-level={level} data-trend={trend}>
                     {displayValue}
                   </div>
                 )}

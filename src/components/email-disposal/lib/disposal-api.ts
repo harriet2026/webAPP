@@ -13,6 +13,7 @@ import type { RecipientDisposition } from '@/types/phishing-detection';
 
 export interface MailLogAPIItem {
   id: number;
+  message_uuid?: string;
   sender: string;
   recipients: string[];
   subject: string;
@@ -71,6 +72,7 @@ export function mapMailLogToDisposalItem(item: MailLogAPIItem): DisposalMailItem
     ?? (item.authenticated || !!item.smtp_user ? 'outgoing' : 'incoming');
   return {
     id: item.id,
+    messageUuid: item.message_uuid,
     timestamp: item.received_at || item.timestamp || '',
     // Values must match the emailDisposal.filters.* i18n keys the table badge
     // resolves against (incoming/outgoing/internal), not the backend's

@@ -1,16 +1,25 @@
 // recipient-status-badges.test.tsx — 方案 C（Badge 化）单测。
-import { describe, it, expect } from 'vitest';
+import { createElement } from 'react';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import {
   bucketRecipients,
   bucketRecipientsByAction,
   actionCategory,
   statusCategory,
   isBucketHighlighted,
+  formatRecipientDispositionReason,
   pickPrimaryBucket,
   pickPrimaryDisplayStatus,
+  RecipientTooltipBody,
   sortBucketsByHighlight,
 } from './recipient-status-badges';
 import type { RecipientDisposition } from '@/types/phishing-detection';
+
+vi.mock('next-intl', () => ({
+  useLocale: () => 'zh',
+  useTranslations: () => (key: string) => key,
+}));
 
 describe('actionCategory', () => {
   it('maps known actions', () => {
@@ -213,5 +222,58 @@ describe('authoritative display-status primary badge', () => {
   it('prioritizes the active canonical status filter', () => {
     expect(pickPrimaryDisplayStatus(entries, ['delivered']).status).toBe('delivered');
     expect(pickPrimaryDisplayStatus(entries, ['delivery_failed']).status).toBe('delivery_failed');
+  });
+});
+
+describe('RecipientTooltipBody reason localization (GT-13682)', () => {
+  it('中文界面把逐收件人规则命中原因转换为中文，同时保留规则名和阶段', () => {
+    const reason = 'rule user382@ysluo.cn matched at rcpt stage';
+    const detail: RecipientDisposition = {
+      recipient: 'ysluo@coremail.cn',
+      final_action: 'audit',
+      status: 'pending_review',
+      reason,
+    };
+
+    render(createElement(RecipientTooltipBody, {
+      buckets: [{ key: 'audit', recipients: [detail.recipient], details: [detail] }],
+      toCat: actionCategory,
+      dimension: 'action',
+    }));
+
+    expect(screen.getByText(/规则 user382@ysluo\.cn 在收件人阶段命中/)).toBeInTheDocument();
+    expect(screen.queryByText(/matched at rcpt stage/)).not.toBeInTheDocument();
+  });
+
+  it('覆盖后端全部已知阶段并保留包含空格的规则名', () => {
+    expect(formatRecipientDispositionReason(
+      'rule VIP sender policy matched at onconnect stage',
+      'zh',
+    )).toBe('规则 VIP sender policy 在连接阶段命中');
+    expect(formatRecipientDispositionReason('rule r matched at mail stage', 'zh'))
+      .toBe('规则 r 在发件人阶段命中');
+    expect(formatRecipientDispositionReason('rule r matched at header stage', 'zh'))
+      .toBe('规则 r 在邮件头阶段命中');
+    expect(formatRecipientDispositionReason('rule r matched at data stage', 'zh'))
+      .toBe('规则 r 在邮件内容阶段命中');
+    expect(formatRecipientDispositionReason('rule r matched at sideline stage', 'zh'))
+      .toBe('命中规则 r');
+    expect(formatRecipientDispositionReason('rule r matched at sideline stage', 'en'))
+      .toBe('Rule r matched');
+    expect(formatRecipientDispositionReason('rule r matched at sideline stage', 'th'))
+      .toBe('กฎ r ตรงกัน');
+    expect(formatRecipientDispositionReason('rule r matched at sideline stage', 'ru'))
+      .toBe('Правило r сработало');
+  });
+
+  it('其他原因和未知阶段保持原文，避免误译自由文本', () => {
+    expect(formatRecipientDispositionReason('policy_block', 'zh')).toBe('policy_block');
+    expect(formatRecipientDispositionReason('rule r matched at future stage', 'zh'))
+      .toBe('rule r matched at future stage');
+  });
+
+  it('英语界面也把阶段代码转为用户可读文案', () => {
+    expect(formatRecipientDispositionReason('rule r matched at rcpt stage', 'en'))
+      .toBe('Rule r matched at the recipient stage');
   });
 });

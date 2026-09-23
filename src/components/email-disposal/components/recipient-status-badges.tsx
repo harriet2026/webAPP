@@ -11,7 +11,7 @@
 import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import {
   normalizeRawActionToExecutionAction,
@@ -19,6 +19,7 @@ import {
 } from '@/lib/email-log-action';
 import type { DisplayStatusEntry } from '@/types/email-disposal';
 import type { RecipientDisposition } from '@/types/email-disposal-detail';
+import type { DisposalLang } from '../lib/disposal-basis-config';
 
 export type Dimension = 'action' | 'status';
 // GT-12835：状态维度新增 delivering / failed 两类——accept 收件人 milter 时点
@@ -31,6 +32,77 @@ export interface RcptStatusBucket {
   key: string;
   recipients: string[];
   details: RecipientDisposition[];
+}
+
+const RECIPIENT_REASON_STAGE_LABELS: Record<DisposalLang, Record<string, string>> = {
+  zh: {
+    onconnect: '连接阶段',
+    mail: '发件人阶段',
+    rcpt: '收件人阶段',
+    header: '邮件头阶段',
+    data: '邮件内容阶段',
+  },
+  en: {
+    onconnect: 'connection',
+    mail: 'sender',
+    rcpt: 'recipient',
+    header: 'message header',
+    data: 'message content',
+  },
+  th: {
+    onconnect: 'ขั้นตอนการเชื่อมต่อ',
+    mail: 'ขั้นตอนผู้ส่ง',
+    rcpt: 'ขั้นตอนผู้รับ',
+    header: 'ขั้นตอนส่วนหัวของอีเมล',
+    data: 'ขั้นตอนเนื้อหาอีเมล',
+  },
+  ru: {
+    onconnect: 'подключения',
+    mail: 'отправителя',
+    rcpt: 'получателя',
+    header: 'заголовка письма',
+    data: 'содержимого письма',
+  },
+};
+
+/**
+ * decision.go 为逐收件人处置原因生成稳定的机器文案：
+ * `rule <name> matched at <stage> stage`。这里只翻译已确认的协议格式，
+ * 旁路是内部处理路径，用户文案仅显示命中规则；其他自由文本保持原样。
+ */
+export function formatRecipientDispositionReason(
+  reason: string,
+  lang: DisposalLang,
+): string {
+  const match = /^rule (.+) matched at (onconnect|mail|rcpt|header|data|sideline) stage$/i.exec(reason);
+  if (!match) return reason;
+
+  const [, ruleName, rawStage] = match;
+  if (rawStage.toLowerCase() === 'sideline') {
+    switch (lang) {
+      case 'zh':
+        return `命中规则 ${ruleName}`;
+      case 'th':
+        return `กฎ ${ruleName} ตรงกัน`;
+      case 'ru':
+        return `Правило ${ruleName} сработало`;
+      default:
+        return `Rule ${ruleName} matched`;
+    }
+  }
+  const stage = RECIPIENT_REASON_STAGE_LABELS[lang][rawStage.toLowerCase()];
+  if (!stage) return reason;
+
+  switch (lang) {
+    case 'zh':
+      return `规则 ${ruleName} 在${stage}命中`;
+    case 'th':
+      return `กฎ ${ruleName} ตรงกันใน${stage}`;
+    case 'ru':
+      return `Правило ${ruleName} сработало на этапе «${stage}»`;
+    default:
+      return `Rule ${ruleName} matched at the ${stage} stage`;
+  }
 }
 
 // ── 维度：action（执行动作列）─────────────────────────────────────
@@ -319,13 +391,24 @@ export function RecipientStatusBadges({
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger render={<span className="inline-flex" />}>
+          <TooltipTrigger
+            render={(
+              <span
+                className="inline-flex"
+                data-testid="email-disposal-recipient-outcomes-trigger"
+              />
+            )}
+          >
             <Badge variant={CATEGORY_VARIANT[cat]} className="gap-1 border-current/30">
               <span className={cn('inline-block h-1.5 w-1.5 rounded-full', CATEGORY_DOT[cat])} />
               <span className={CATEGORY_TEXT[cat]}>{t(labelKeyFor(dimension, cat))}</span>
             </Badge>
           </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-md">
+          <TooltipContent
+            side="top"
+            className="max-w-md"
+            data-testid="email-disposal-recipient-outcomes-tooltip"
+          >
             <RecipientTooltipBody buckets={buckets} toCat={toCat} dimension={dimension} />
           </TooltipContent>
         </Tooltip>
@@ -340,7 +423,14 @@ export function RecipientStatusBadges({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger render={<span className="inline-flex" />}>
+        <TooltipTrigger
+          render={(
+            <span
+              className="inline-flex"
+              data-testid="email-disposal-recipient-outcomes-trigger"
+            />
+          )}
+        >
           <Badge variant={CATEGORY_VARIANT[primaryCategory]} className="gap-1 border-current/30">
             <span className={cn('inline-block h-1.5 w-1.5 rounded-full', CATEGORY_DOT[primaryCategory])} />
             <span className={CATEGORY_TEXT[primaryCategory]}>
@@ -349,7 +439,11 @@ export function RecipientStatusBadges({
             <span className="font-normal text-muted-foreground/70">+{buckets.length - 1}</span>
           </Badge>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-md">
+        <TooltipContent
+          side="top"
+          className="max-w-md"
+          data-testid="email-disposal-recipient-outcomes-tooltip"
+        >
           <RecipientTooltipBody buckets={buckets} toCat={toCat} dimension={dimension} primaryKey={primary.key} />
         </TooltipContent>
       </Tooltip>
@@ -443,7 +537,7 @@ export function DisplayStatusBadges({
   );
 }
 
-function RecipientTooltipBody({
+export function RecipientTooltipBody({
   buckets,
   toCat,
   dimension,
@@ -455,6 +549,10 @@ function RecipientTooltipBody({
   primaryKey?: string;
 }) {
   const t = useTranslations('emailDisposal');
+  const rawLocale = useLocale().split('-')[0];
+  const lang: DisposalLang = (['zh', 'en', 'th', 'ru'] as const).includes(rawLocale as DisposalLang)
+    ? (rawLocale as DisposalLang)
+    : 'zh';
   return (
     <div className="space-y-1.5">
       {buckets.map((b) => {
@@ -478,7 +576,9 @@ function RecipientTooltipBody({
                 <div key={r} className="text-xs text-muted-foreground break-all">
                   {r}
                   {b.details[i]?.reason ? (
-                    <span className="ml-1 text-muted-foreground/60">({b.details[i].reason})</span>
+                    <span className="ml-1 text-muted-foreground/60">
+                      ({formatRecipientDispositionReason(b.details[i].reason!, lang)})
+                    </span>
                   ) : null}
                 </div>
               ))}

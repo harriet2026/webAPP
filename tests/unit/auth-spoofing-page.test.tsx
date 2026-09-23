@@ -38,7 +38,22 @@ vi.mock('@/i18n/navigation', () => ({
 
 vi.mock('@/contexts/auth-context', () => ({
   AuthContext: StubAuthContext,
-  useAuth: () => ({ isSystemAdmin: true, hasPermission: () => true, showAdvancedRules: false, user: { role: 'system_admin' } }),
+  useAuth: () => ({
+    isSystemAdmin: true,
+    hasPermission: () => true,
+    showAdvancedRules: false,
+    user: { role: 'system_admin' },
+    canSeeRoute: () => true,
+  }),
+}));
+
+vi.mock('@/components/security/auth-spoofing/use-auth-spoofing-access', () => ({
+  useAuthSpoofingAccess: () => ({
+    status: 'ready',
+    canView: true,
+    canEdit: true,
+    readOnly: false,
+  }),
 }));
 
 const useProductFormMock = vi.fn();

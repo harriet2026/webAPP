@@ -17,6 +17,7 @@
 // of the concatenated `incomingoutgoinginternal` string), D-12 (pagination is
 // real front-end slicing, not permanently-disabled placeholder buttons).
 
+import { RuleExecutionWarning } from '@/components/rules/RuleExecutionWarning';
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -326,7 +327,7 @@ export function AdvancedFilterRulesModule({
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/20">
-                <TableHead className="w-[70px]">{tc('id')}</TableHead>
+                <TableHead className="w-[70px]">{t('ruleId')}</TableHead>
                 <TableHead className="min-w-[160px]">{t('name')}</TableHead>
                 <TableHead className="min-w-[180px]">{t('keywords')}</TableHead>
                 <TableHead className="w-[140px]">{t('scope')}</TableHead>
@@ -359,7 +360,10 @@ export function AdvancedFilterRulesModule({
                   return (
                       <TableRow key={rule.id} data-testid={`rule-row-${rule.id}`}>
                         <TableCell className="font-mono text-sm">{rule.id}</TableCell>
-                        <TableCell className="font-medium">{rule.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {rule.name}
+                          <RuleExecutionWarning reason={rule.execution_blocked_reason} />
+                        </TableCell>
                       <TableCell>
                         {visible.length === 0 && more === 0 ? (
                           <span className="text-xs text-muted-foreground">-</span>

@@ -11,6 +11,8 @@ export type TlsMinVersion = '1.0' | '1.1' | '1.2' | '1.3';
 export type CipherProfile = 'default' | 'high' | 'compatible';
 
 export interface OutboundProxyRow {
+  cacEnabled: boolean;
+  cacResult: string;
   id: string;
   name: string;
   proxyIp: string;

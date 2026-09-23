@@ -9,6 +9,7 @@ import {
   hasSavableDisposalFilters,
   isCompleteFilterCondition,
   resolvePositiveEnumFilterValues,
+  removeQuickFilterArraySelection,
 } from "./filter-state";
 
 describe("email disposal filter state", () => {
@@ -43,6 +44,17 @@ describe("email disposal filter state", () => {
         sendReceiveTime: { start: "2026-07-01", end: "" },
       }),
     ).toBe(6);
+  });
+
+  it("counts and removes a selected logical policy module as one condition", () => {
+    const selected = ["ATT-BASIC", "ATT-QR", "ATT-ENC"];
+
+    expect(
+      countQuickFilterConditions({ disposalPolicyKeys: selected }),
+    ).toBe(1);
+    expect(
+      removeQuickFilterArraySelection(selected, selected.join(",")),
+    ).toBeUndefined();
   });
 
   it("separates resettable AI conditions from filters that templates can persist", () => {

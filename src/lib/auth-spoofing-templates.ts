@@ -10,7 +10,7 @@ type TemplateActions = {
 export const TEMPLATES: Record<'loose'|'standard'|'strict', TemplateActions> = {
   loose: {
     spf:  { fail:'quarantine', softfail:'proceed', none:'proceed', temperror:'proceed', permerror:'proceed' },
-    dkim: { fail:'quarantine', neutral:'proceed', partial:'proceed', none:'proceed', temperror:'proceed' },
+    dkim: { fail:'quarantine', neutral:'proceed', partial:'proceed', none:'proceed', temperror:'proceed', permerror:'proceed' },
     dmarc:{ reject:'quarantine', quarantine:'proceed', none:'proceed', no_record:'proceed', query_fail:'proceed' },
     // PTR 三项见下方 strict 处的产品裁决说明：所有档位一律不拦截。
     ptr:  { noptr:'proceed', nomatch:'proceed', ehlo_mismatch:'proceed' },
@@ -21,7 +21,8 @@ export const TEMPLATES: Record<'loose'|'standard'|'strict', TemplateActions> = {
     // 记录，以及邮件经中间服务器转发（转发天然让 SPF 失效，非常常见）。隔离至少让管理
     // 员看得到、捞得回来。strict 的 spf.fail 仍是 reject（严格档定位就是激进）。
     spf:  { fail:'quarantine', softfail:'quarantine', none:'proceed', temperror:'proceed', permerror:'proceed' },
-    dkim: { fail:'quarantine', neutral:'quarantine', partial:'proceed', none:'proceed', temperror:'proceed' },
+    // GT-14095 产品裁决：标准模板的永久错误默认进行下一步，并允许附加标记。
+    dkim: { fail:'quarantine', neutral:'quarantine', partial:'proceed', none:'proceed', temperror:'proceed', permerror:'proceed' },
     // no_record（对方没发布 DMARC）在标准档由「隔离」降为「标记放行」（2026-08-11）。
     // 原值与同档的两个对照项自相矛盾：对方**没发布 SPF**(spf.none) 是标记放行，
     // DMARC**查不到**(query_fail) 也是标记放行，唯独"没发布 DMARC"被隔离。而 DMARC
@@ -44,7 +45,7 @@ export const TEMPLATES: Record<'loose'|'standard'|'strict', TemplateActions> = {
     // partial（多签名里部分通过）三档一律标记放行：它意味着**至少有一个签名验通过
     // 了**，真实性证据严格多于 none，不该与 none 同罚；典型成因还是邮件列表加自己的
     // 签名把原签名改坏，与上面同源。守卫 TestDKIMPartialNeverHarsherThanNone。
-    dkim: { fail:'quarantine', neutral:'quarantine', partial:'proceed', none:'quarantine', temperror:'quarantine' },
+    dkim: { fail:'quarantine', neutral:'quarantine', partial:'proceed', none:'quarantine', temperror:'quarantine', permerror:'quarantine' },
     dmarc:{ reject:'reject', quarantine:'quarantine', none:'quarantine', no_record:'quarantine', query_fail:'quarantine' },
     // 产品裁决：PTR 的 noptr / nomatch / ehlo_mismatch 三项在 loose / standard /
     // strict **所有档位**下都只「标记放行」，一律不拦截。它们都是"缺少证据"而非

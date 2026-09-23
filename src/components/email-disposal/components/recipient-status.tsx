@@ -19,20 +19,7 @@ import { cn } from '@/lib/utils';
 import type { ApiRequestFn } from '@/lib/api/client';
 import type { MailChildEvent, RecipientDisposition } from '@/types/email-disposal-detail';
 import { useRecipientDisposition, type ActionKey } from '../hooks/use-recipient-disposition';
-
-// Ported from tabs/delivery-tab.tsx (DD-11 part 2 -- restores its content,
-// which had no home in the new 3-module drawer, as an additive per-recipient
-// detail line on delivered groups rather than a wholesale second table).
-type DeliveryStatus = 'success' | 'failed' | 'delivering' | 'pending';
-
-function deliveryStatusOf(_finalAction: string, status: string): DeliveryStatus {
-  const s = (status || '').toLowerCase();
-  if (s.includes('deliver') && s.includes('fail')) return 'failed';
-  if (s === 'delivered' || s === 'success') return 'success';
-  if (s === 'failed' || s === 'bounced') return 'failed';
-  if (s === 'in_delivery' || s === 'delivering') return 'delivering';
-  return 'pending';
-}
+import { RecipientDeliveryDetail } from './recipient-delivery-detail';
 
 const STATUS_STYLES: Record<string, string> = {
   delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -104,6 +91,43 @@ const ACTION_BATCH_CLASS: Record<ActionKey, string> = {
 // "展开全部 N 个收件人" toggle (spec §75-83 D3).
 const DISPLAY_LIMIT = 5;
 
+function RecipientAddressTooltip({
+  recipients,
+  testId,
+}: {
+  recipients: string[];
+  testId: string;
+}) {
+  const summary = recipients.join(', ');
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={(
+          <span
+            tabIndex={0}
+            aria-label={summary}
+            data-testid={`email-disposal-recipient-address-${testId}`}
+            className="block max-w-full truncate rounded-sm text-left cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          />
+        )}
+      >
+        {summary}
+      </TooltipTrigger>
+      <TooltipContent
+        data-testid={`email-disposal-recipient-address-tooltip-${testId}`}
+        className="max-w-[360px]"
+      >
+        <div className="max-h-60 space-y-1 overflow-y-auto text-left">
+          {recipients.map((recipient) => (
+            <div key={recipient} className="break-all">{recipient}</div>
+          ))}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 interface RecipientStatusProps {
   recipient_dispositions: RecipientDisposition[] | undefined;
   mailLogId: number;
@@ -114,20 +138,19 @@ interface RecipientStatusProps {
   apiRequest: ApiRequestFn;
   onDisposed: () => void;
   readOnly: boolean;
-  // Delivery events (mail_child_events) for the per-recipient delivery-detail
-  // line rendered on delivered groups only -- see tDelivery below (DD-11 part 2).
+  // Delivery events for the per-recipient delivery-detail line.
   events?: MailChildEvent[];
   /** Render the same live disposition actions in the detail-sheet header. */
   showHeaderActions?: boolean;
+  redeliverAvailable?: boolean;
+  redeliverUnavailableReason?: 'original_expired' | 'storage_unavailable';
 }
 
 export function RecipientStatus({
   recipient_dispositions, mailLogId, sender, apiRequest, onDisposed, readOnly, events, showHeaderActions = false,
+  redeliverAvailable = true, redeliverUnavailableReason = 'original_expired',
 }: RecipientStatusProps) {
   const t = useTranslations('emailDisposal.detail.overview');
-  // Separate scope reusing tabs/delivery-tab.tsx's existing, already-translated
-  // i18n keys (established multi-scope-per-source pattern from DD-9/DD-10).
-  const tDelivery = useTranslations('emailDisposal.detail.delivery');
 
   // D1: matrix header -- total recipient count (across all groups, not
   // group count) + a per-status distribution, mirroring
@@ -154,6 +177,8 @@ export function RecipientStatus({
     sender,
     apiRequest,
     onDisposed,
+    redeliverAvailable,
+    redeliverUnavailableReason,
     onSettled: () => setSelected(new Set()),
   });
   const multiGroup = groups.length > 1;
@@ -193,7 +218,14 @@ export function RecipientStatus({
         <div className="flex flex-wrap gap-2" data-testid="email-disposal-recipient-header-actions">
           {headerActions.map((action) => {
             const Icon = ACTION_ICONS[action];
-            return <Button key={action} data-testid={`email-disposal-recipient-header-action-${action}`} size="sm" variant={action === 'discard' ? 'destructive' : 'outline'} disabled={readOnly} onClick={() => openAction(action, operableGroups.map((group) => group.key))} className={cn(action === 'deliver' && 'border-transparent bg-emerald-600 text-white data-[hovered=true]:bg-emerald-700')}><Icon className="mr-1.5 size-3.5" />{t(`recipientStatus.action.${action}`)}</Button>;
+            const redeliverUnavailable = action === 'redeliver' && !redeliverAvailable;
+            const btn = <Button key={action} data-testid={`email-disposal-recipient-header-action-${action}`} size="sm" variant={action === 'discard' ? 'destructive' : 'outline'} disabled={readOnly || redeliverUnavailable} onClick={() => openAction(action, operableGroups.map((group) => group.key))} className={cn(action === 'deliver' && 'border-transparent bg-emerald-600 text-white data-[hovered=true]:bg-emerald-700')}><Icon className="mr-1.5 size-3.5" />{t(`recipientStatus.action.${action}`)}</Button>;
+            return readOnly || redeliverUnavailable ? (
+              <Tooltip key={action}>
+                <TooltipTrigger render={<span />}>{btn}</TooltipTrigger>
+                <TooltipContent>{redeliverUnavailable ? t(`recipientStatus.redeliverUnavailable.${redeliverUnavailableReason}`) : t('recipientStatus.readOnlyTooltip')}</TooltipContent>
+              </Tooltip>
+            ) : btn;
           })}
         </div>
       ) : null}
@@ -241,11 +273,12 @@ export function RecipientStatus({
             // dispose instead of reading it as a generic blocked/discarded row.
             const missingObjectId = !g.objectId
               && (g.status === 'quarantined' || g.status === 'pending_review' || g.status === 'sidelined' || g.status === 'audited');
-            // recipientActionsForStatus('delivered'|'marked_delivered') is the
-            // only case returning ['recall'] -- the same "actually delivered"
-            // case tabs/delivery-tab.tsx covered. Only these groups get the
-            // restored per-recipient delivery-detail line.
-            const isDeliveredGroup = g.actions.length === 1 && g.actions[0] === 'recall';
+            // GT-13623: delivery evidence belongs to every delivery-flow
+            // status, especially failure. Tying it to actions=['recall'] hid
+            // the very detail referenced by the delivery-failed warning.
+            const showsDeliveryDetail = [
+              'delivering', 'delivered', 'marked_delivered', 'delivery_failed', 'deferred', 'bounced',
+            ].includes(g.status);
             // G7: a group with no available actions (blocked/discarded, or
             // the missing-object-id edge case) is not operable -- no
             // checkbox, the whole row reads as muted, and (outside the
@@ -274,26 +307,23 @@ export function RecipientStatus({
                   </TableCell>
                 )}
                 <TableCell className="text-xs max-w-[220px]">
-                  {isDeliveredGroup ? (
+                  {showsDeliveryDetail ? (
                     <div className="space-y-1.5">
-                      {g.dispositions.map((d) => {
-                        const ev = events?.find((e) => e.recipient === d.recipient);
-                        const dStatus = deliveryStatusOf(d.final_action, ev?.event_result || d.status);
-                        const time = ev?.event_time || '—';
-                        const error = ev?.dsn || d.reason || '—';
-                        return (
-                          <div key={d.recipient} className="min-w-0">
-                            <div className="truncate">{d.recipient}</div>
-                            <div className="truncate text-[11px] text-muted-foreground">
-                              {tDelivery('time')}: {time}
-                              {dStatus === 'failed' && ` · ${tDelivery('errorMessage')}: ${error}`}
-                            </div>
-                          </div>
-                        );
-                      })}
+                      {g.dispositions.map((d, index) => (
+                        <div key={d.recipient} className="min-w-0">
+                          <RecipientAddressTooltip
+                            recipients={[d.recipient]}
+                            testId={`${g.key}-${index}`}
+                          />
+                          <RecipientDeliveryDetail disposition={d} events={events} />
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <div className="truncate">{g.dispositions.map((d) => d.recipient).join(', ')}</div>
+                    <RecipientAddressTooltip
+                      recipients={g.dispositions.map((d) => d.recipient)}
+                      testId={g.key}
+                    />
                   )}
                 </TableCell>
                 <TableCell className="text-xs">
@@ -351,6 +381,7 @@ export function RecipientStatus({
                     <div className="flex gap-1.5">
                       {g.actions.map((action) => {
                         const Icon = ACTION_ICONS[action];
+                        const redeliverUnavailable = action === 'redeliver' && !redeliverAvailable;
                         const btn = (
                           <Button
                             key={action}
@@ -358,17 +389,19 @@ export function RecipientStatus({
                             size="sm"
                             variant="ghost"
                             className={cn('h-7 text-xs', ACTION_ROW_CLASS[action])}
-                            disabled={readOnly}
+                            disabled={readOnly || redeliverUnavailable}
                             onClick={() => openAction(action, [g.key])}
                           >
                             <Icon className="mr-1 h-3 w-3" />
                             {t(`recipientStatus.action.${action}`)}
                           </Button>
                         );
-                        return readOnly ? (
+                        return readOnly || redeliverUnavailable ? (
                           <Tooltip key={action}>
                             <TooltipTrigger render={<span />}>{btn}</TooltipTrigger>
-                            <TooltipContent data-testid="email-disposal-recipient-readonly-tooltip">{t('recipientStatus.readOnlyTooltip')}</TooltipContent>
+                            <TooltipContent data-testid={redeliverUnavailable ? 'email-disposal-redeliver-unavailable-tooltip' : 'email-disposal-recipient-readonly-tooltip'}>
+                              {redeliverUnavailable ? t(`recipientStatus.redeliverUnavailable.${redeliverUnavailableReason}`) : t('recipientStatus.readOnlyTooltip')}
+                            </TooltipContent>
                           </Tooltip>
                         ) : btn;
                       })}
@@ -405,17 +438,17 @@ export function RecipientStatus({
         >
           <span className="text-sm font-medium">{t('recipientStatus.selected', { n: selectedCount })}</span>
           <div className="flex items-center gap-2 ml-auto">
-            {/* RA-5: 批量隔离/批量阻断 added between deliver and discard,
-                matching the single-recipient header's action order. */}
-            {(['deliver', 'quarantine', 'block', 'discard', 'recall', 'notify', 'redeliver'] as ActionKey[]).map((action) => {
+            {/* GT-13650: only render actions backed by the real API. */}
+            {(['deliver', 'discard', 'recall', 'notify', 'redeliver'] as ActionKey[]).map((action) => {
               const Icon = ACTION_ICONS[action];
+              const redeliverUnavailable = action === 'redeliver' && !redeliverAvailable;
               const btn = (
                 <Button
                   key={action}
                   variant="outline"
                   size="sm"
                   className={cn('h-7 text-xs', ACTION_BATCH_CLASS[action])}
-                  disabled={readOnly}
+                  disabled={readOnly || redeliverUnavailable}
                   data-testid={`email-disposal-recipient-batch-${action}`}
                   onClick={() => openAction(action, [...selected])}
                 >
@@ -423,10 +456,10 @@ export function RecipientStatus({
                   {t(`recipientStatus.action.${action}`)}
                 </Button>
               );
-              return readOnly ? (
+              return readOnly || redeliverUnavailable ? (
                 <Tooltip key={action}>
                   <TooltipTrigger render={<span />}>{btn}</TooltipTrigger>
-                  <TooltipContent>{t('recipientStatus.readOnlyTooltip')}</TooltipContent>
+                  <TooltipContent>{redeliverUnavailable ? t(`recipientStatus.redeliverUnavailable.${redeliverUnavailableReason}`) : t('recipientStatus.readOnlyTooltip')}</TooltipContent>
                 </Tooltip>
               ) : btn;
             })}
@@ -444,10 +477,11 @@ export function RecipientStatus({
         </div>
       )}
 
-      {/* G6: batch-result "操作完成" modal -- one row per affected recipient,
-          success rows green ({prevStatus} → {newStatus}), failure rows red
-          ({prevStatus} → {reason}). Replaces the old inline
-          lastFailures/resultSuccessCount blocks. */}
+      {/* G6: batch-result "操作完成" modal -- one row per affected recipient.
+          A real status mutation keeps the {prevStatus} → {newStatus} shape;
+          side-channel operations and failures show current mail status and
+          operation result separately, so "notify succeeded" can never look
+          like a new mail status. */}
       <Dialog open={resultDialogOpen} onOpenChange={(o) => { if (!o) closeResultDialog(); }}>
         <DialogContent className="max-w-md" data-testid="email-disposal-recipient-batch-result">
           <DialogHeader>
@@ -465,19 +499,39 @@ export function RecipientStatus({
                 )}
               >
                 <span className="truncate">{r.recipient}</span>
-                <div className="flex shrink-0 items-center gap-2 text-xs">
-                  <span className="text-muted-foreground">
-                    {t(`recipientStatus.status.${r.prevStatus}`, { default: r.prevStatus })}
-                  </span>
-                  <span>→</span>
-                  <span className={r.ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}>
-                    {r.ok
-                      ? (r.newStatus
-                        ? t(`recipientStatus.status.${r.newStatus}`, { default: r.newStatus })
-                        : t('recipientStatus.actionSuccess'))
-                      : (r.reason || t('recipientStatus.actionFailed'))}
-                  </span>
-                </div>
+                {r.ok && r.newStatus ? (
+                  <div className="flex shrink-0 items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">
+                      {t(`recipientStatus.status.${r.prevStatus}`, { default: r.prevStatus })}
+                    </span>
+                    <span>→</span>
+                    <span className="text-emerald-700 dark:text-emerald-400">
+                      {t(`recipientStatus.status.${r.newStatus}`, { default: r.newStatus })}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex shrink-0 flex-col items-end gap-0.5 text-xs">
+                    <span
+                      className="text-muted-foreground"
+                      data-testid="email-disposal-recipient-result-mail-status"
+                    >
+                      {t('recipientStatus.mailStatusResult', {
+                        status: t(`recipientStatus.status.${r.prevStatus}`, { default: r.prevStatus }),
+                      })}
+                    </span>
+                    <span
+                      className={r.ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}
+                      data-testid="email-disposal-recipient-result-operation"
+                    >
+                      {t('recipientStatus.operationResult', {
+                        action: t(`recipientStatus.action.${r.action}`),
+                        result: r.ok
+                          ? t('recipientStatus.resultSuccess')
+                          : (r.reason || t('recipientStatus.actionFailed')),
+                      })}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

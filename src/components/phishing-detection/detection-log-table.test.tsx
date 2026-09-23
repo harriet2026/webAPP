@@ -69,11 +69,19 @@ describe('DetectionLogTable policy read model', () => {
     expect(screen.getAllByText('未判定')).toHaveLength(2);
   });
 
-  it('renders URL totals and risk counts from the URL summary DTO', () => {
+  it('marks a historical aggregate without claiming validated categories', () => {
     renderTable({ ...base, url_summary: { total: 4, phishing: 3, suspicious: 1, normal: 0 } });
     expect(screen.getByText('4 链接')).toBeInTheDocument();
-    expect(screen.getByTitle('钓鱼')).toHaveTextContent('3');
-    expect(screen.getByTitle('可疑')).toHaveTextContent('1');
+    expect(screen.getByText('历史摘要（分类未校验）')).toBeInTheDocument();
+    expect(screen.queryByTitle('钓鱼')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('可疑')).not.toBeInTheDocument();
     expect(screen.queryByTitle('正常')).not.toBeInTheDocument();
   });
+});
+
+it('shows all five categories and both quality buckets, including safe alongside threats', () => {
+ renderTable({...base,url_summary:{version:2,legacy:false,total:7,phishing:1,malicious:1,suspicious:1,safe:1,normal:1,needs_review:1,invalid:1,unvalidated:1},result_truncated:true});
+ for (const label of ['钓鱼','恶意','可疑','安全','需要复核','结果异常','未校验']) expect(screen.getByTitle(label)).toHaveTextContent('1');
+ expect(screen.getByText('7 链接')).toBeInTheDocument();
+ expect(screen.getByText('仅统计已保留的 URL 结果')).toBeInTheDocument();
 });

@@ -1,10 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-vi.mock('@/i18n/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
-
-import { canAccessPolicyPipeline } from '@/components/security/PolicyPipelinePage';
+import { canAccessPolicyPipeline } from '@/components/security/policy-pipeline-access';
 
 describe('canAccessPolicyPipeline', () => {
   it('allows a tenant administrator in a multi-tenant deployment', () => {
@@ -13,6 +9,7 @@ describe('canAccessPolicyPipeline', () => {
       effectiveViewer: 'tenant',
       isSystemAdmin: false,
       isTenantAdmin: true,
+      hasViewPermission: true,
     })).toBe(true);
   });
 
@@ -22,6 +19,7 @@ describe('canAccessPolicyPipeline', () => {
       effectiveViewer: 'tenant',
       isSystemAdmin: true,
       isTenantAdmin: false,
+      hasViewPermission: true,
     })).toBe(true);
   });
 
@@ -31,6 +29,17 @@ describe('canAccessPolicyPipeline', () => {
       effectiveViewer: 'platform',
       isSystemAdmin: true,
       isTenantAdmin: false,
+      hasViewPermission: true,
+    })).toBe(false);
+  });
+
+  it('denies a custom tenant role without strategy-pipeline view permission', () => {
+    expect(canAccessPolicyPipeline({
+      multiTenant: true,
+      effectiveViewer: 'tenant',
+      isSystemAdmin: false,
+      isTenantAdmin: true,
+      hasViewPermission: false,
     })).toBe(false);
   });
 });

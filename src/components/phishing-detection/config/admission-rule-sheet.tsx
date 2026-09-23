@@ -36,7 +36,7 @@ function emptyDraft(): PhishAdmissionRuleWrite {
     name: '', enabled: true, directions: ['inbound'], filter_on: false,
     recipient_groups: [], recipient_depts: [], recipient_emails: [],
     sender_groups: [], sender_depts: [], sender_emails: [],
-    require_url: true, max_size_mb: 0, sender_first_seen: true,
+    require_url: true, max_size_kb: 0, sender_first_seen: true,
     require_qrcode: false, require_executable: false,
   };
 }
@@ -48,6 +48,7 @@ function draftFromRule(rule: PhishAdmissionRule | null): PhishAdmissionRuleWrite
     enabled: rule.enabled,
     directions: [...rule.directions],
     filter_on: rule.filter_on ?? false,
+    recipient_tags: [...(rule.recipient_tags ?? [])],
     recipient_groups: [...(rule.recipient_groups ?? [])],
     recipient_depts: [...(rule.recipient_depts ?? [])],
     recipient_emails: [...(rule.recipient_emails ?? [])],
@@ -55,7 +56,7 @@ function draftFromRule(rule: PhishAdmissionRule | null): PhishAdmissionRuleWrite
     sender_depts: [...(rule.sender_depts ?? [])],
     sender_emails: [...(rule.sender_emails ?? [])],
     require_url: rule.require_url,
-    max_size_mb: rule.max_size_mb ?? 0,
+    max_size_kb: rule.max_size_kb ?? 0,
     sender_first_seen: rule.sender_first_seen,
     require_qrcode: rule.require_qrcode,
     require_executable: rule.require_executable ?? false,
@@ -69,6 +70,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
   const apiErrorMessage = useApiErrorMessage();
   const baseline = useMemo(() => draftFromRule(rule), [rule]);
   const [draft, setDraft] = useState<PhishAdmissionRuleWrite>(baseline);
+  const [maxSizeInput, setMaxSizeInput] = useState(String(baseline.max_size_kb ?? 0));
   const [lastLoadKey, setLastLoadKey] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -76,11 +78,12 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
   if (open && loadKey !== lastLoadKey) {
     setLastLoadKey(loadKey);
     setDraft(draftFromRule(rule));
+    setMaxSizeInput(String(rule?.max_size_kb ?? 0));
   } else if (!open && lastLoadKey) {
     setLastLoadKey('');
   }
 
-  const dirty = open && JSON.stringify(draft) !== JSON.stringify(baseline);
+  const dirty = open && (JSON.stringify(draft) !== JSON.stringify(baseline) || maxSizeInput !== String(baseline.max_size_kb ?? 0));
   useUnsavedDraftRegistration(open, dirty);
 
   const groupsQuery = useQuery({
@@ -109,15 +112,15 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
   const targetCount = [
     ...(hasRecipientDirections ? [draft.recipient_groups, draft.recipient_depts, draft.recipient_emails] : []),
     ...(hasSenderDirection ? [draft.sender_groups, draft.sender_depts, draft.sender_emails] : []),
-  ].reduce((sum, values) => sum + (values?.length ?? 0), 0);
+  ].reduce((sum, values) => sum + (values?.length ?? 0), draft.recipient_tags?.length ?? 0);
   const validationError = useMemo(() => {
     if (!draft.name.trim()) return t('errors.needName');
     if (draft.directions.length === 0) return t('errors.needDirection');
-    if (!draft.sender_first_seen && !draft.require_qrcode && !draft.require_executable) return t('errors.needRiskSignal');
+    if (!draft.require_url && !draft.sender_first_seen && !draft.require_qrcode && !draft.require_executable) return t('errors.needRiskSignal');
     if (draft.filter_on && targetCount === 0) return t('errors.needRecipientTarget');
-    if ((draft.max_size_mb ?? 0) < 0 || (draft.max_size_mb ?? 0) > 100000) return t('errors.maxSizeTooLarge');
+    if ((maxSizeInput.trim() !== '' && !/^\d+$/.test(maxSizeInput.trim())) || !Number.isSafeInteger(draft.max_size_kb ?? 0) || (draft.max_size_kb ?? 0) < 0 || (draft.max_size_kb ?? 0) > 102400000) return t('errors.maxSizeTooLarge');
     return null;
-  }, [draft, t, targetCount]);
+  }, [draft, t, targetCount, maxSizeInput]);
 
   const toggleDirection = (direction: Direction) => patch({
     directions: draft.directions.includes(direction)
@@ -130,6 +133,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
     const normalized: PhishAdmissionRuleWrite = {
       ...draft,
       name: draft.name.trim(),
+      recipient_tags: draft.filter_on ? draft.recipient_tags ?? [] : [],
       recipient_groups: draft.filter_on && hasRecipientDirections ? draft.recipient_groups ?? [] : [],
       recipient_depts: draft.filter_on && hasRecipientDirections ? draft.recipient_depts ?? [] : [],
       recipient_emails: draft.filter_on && hasRecipientDirections ? (draft.recipient_emails ?? []).map((value) => value.toLowerCase()) : [],
@@ -212,26 +216,26 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
         </SheetHeader>
         <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
           <div className="space-y-2"><Label htmlFor="rule-name">{t('colName')}</Label><Input id="rule-name" data-testid="rule-name-input" value={draft.name} onChange={(event) => patch({ name: event.target.value })} /></div>
-          <section className="space-y-4">
-            <div className="flex items-center gap-2"><span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">1</span><h4 className="text-sm font-semibold">{t('sectionScope')}</h4></div>
+          <section className="space-y-4 rounded-lg border border-border p-4" aria-label={t('sectionScope')}>
+            <div><div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-semibold">{t('sectionScope')}</h4><span className="text-xs text-muted-foreground">{t('scopeRelation')}</span></div><p className="mt-1 text-xs text-muted-foreground">{t('scopeHint')}</p></div>
+            <Label>{t('colDirection')}</Label>
             <div className="flex flex-wrap gap-2" data-testid="rule-direction-group">
               {DIRECTIONS.map((direction) => <Button key={direction} type="button" size="sm" variant={draft.directions.includes(direction) ? 'default' : 'outline'} data-testid={`rule-direction-${direction}`} onClick={() => toggleDirection(direction)}>{tdir(direction)}</Button>)}
             </div>
+            <div className="space-y-2"><Label htmlFor="rule-maxsize">{t('maxSize')}</Label><div className="relative min-w-0"><Input id="rule-maxsize" data-testid="rule-max-size-input" inputMode="numeric" className="w-full pr-12" value={maxSizeInput} onChange={(event) => { setMaxSizeInput(event.target.value); patch({ max_size_kb: Number(event.target.value) }); }} /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">KB</span></div><p className="text-xs text-muted-foreground">{t('maxSizeHint')}</p></div>
             <div className="flex items-center justify-between rounded-lg border border-border p-4"><div><Label>{t(mixedSides ? 'mixedScope' : hasSenderDirection ? 'senderScope' : 'recipientScope')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('recipientTagsHint')}</p></div><Switch checked={draft.filter_on ?? false} onCheckedChange={(filter_on) => patch({ filter_on })} data-testid="rule-recipient-filter" /></div>
+            {draft.filter_on && Boolean(draft.recipient_tags?.length) ? <p className="text-sm text-muted-foreground">{t('legacyRecipientTags')}: {draft.recipient_tags!.join(', ')}</p> : null}
             {draft.filter_on ? <div className="space-y-3">{hasRecipientDirections ? renderScope('recipient') : null}{hasSenderDirection ? renderScope('sender') : null}</div> : null}
           </section>
-          <section className="space-y-3">
-            <div className="flex items-center gap-2"><span className="flex size-6 items-center justify-center rounded-md bg-warning/15 text-xs font-semibold text-warning">2</span><h4 className="text-sm font-semibold">{t('sectionRisk')}</h4></div>
-            <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
-              <div className="flex items-center justify-between gap-3"><div><Label>{t('requireUrl')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('urlNotQRHint')}</p></div><Switch checked={draft.require_url} data-testid="rule-require-url" onCheckedChange={(require_url) => patch({ require_url })} /></div>
-              <div className="space-y-2 border-t border-border pt-4"><div><Label htmlFor="rule-maxsize">{t('maxSize')}</Label><p className="mt-1 text-sm text-muted-foreground">{t('maxSizeHint')}</p></div><div className="relative min-w-0"><Input id="rule-maxsize" data-testid="rule-max-size-input" type="number" min={0} max={100000} className="w-full pr-12" value={draft.max_size_mb ?? 0} onChange={(event) => patch({ max_size_mb: Number(event.target.value) || 0 })} /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">MB</span></div></div>
-            </div>
+          <section className="space-y-3 rounded-lg border border-border p-4" aria-label={t('sectionRisk')}>
+            <div><div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-semibold">{t('sectionRisk')}</h4><span className="text-xs text-muted-foreground">{t('riskRelation')}</span></div><p className="mt-1 text-xs text-muted-foreground">{t('riskHint')}</p></div>
             {([
-              ['sender_first_seen', 'senderFirstSeen', 'senderFirstSeenHint'],
+              ['require_url', 'requireUrl', 'urlNotQRHint'],
               ['require_qrcode', 'qrcode', 'qrcodeDesc'],
               ['require_executable', 'executable', 'executableDesc'],
+              ['sender_first_seen', 'senderFirstSeen', 'senderFirstSeenHint'],
             ] as const).map(([field, label, description]) => (
-              <div key={field} className="flex items-center justify-between rounded-lg border border-border p-4"><div><Label>{t(label)}</Label><p className="mt-1 text-xs text-muted-foreground">{t(description)}</p></div><Switch checked={Boolean(draft[field])} data-testid={`rule-${field.replaceAll('_', '-')}`} onCheckedChange={(value) => patch({ [field]: value })} /></div>
+              <div key={field} className="flex items-center justify-between gap-3 border-t border-border py-3"><div><Label htmlFor={`rule-signal-${field}`}>{t(label)}</Label><p className="mt-1 text-xs text-muted-foreground">{t(description)}</p></div><Switch id={`rule-signal-${field}`} checked={Boolean(draft[field])} data-testid={`rule-${field.replaceAll('_', '-')}`} onCheckedChange={(value) => patch({ [field]: value })} /></div>
             ))}
             {validationError ? <p className="text-sm text-destructive" data-testid="rule-validation-error">{validationError}</p> : null}
           </section>

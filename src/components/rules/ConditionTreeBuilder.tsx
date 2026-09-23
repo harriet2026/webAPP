@@ -109,7 +109,7 @@ export function ConditionTreeBuilder({ value, onChange, stage, allowedFields, ru
         group = 'connection';
       } else if (['similar_detection_matched', 'similar_detection_direction', 'similar_detection_namespace', 'similar_detection_cluster_id', 'similar_detection_counter', 'similar_detection_similarity_pct', 'similar_detection_skip_reason'].includes(name)) {
         group = 'detection';
-      } else if (['sideline_phish_checked', 'sideline_phish_status', 'sideline_phish_verdict', 'sideline_phish_risk', 'sideline_phish_confidence', 'sideline_phish_confidence_available', 'sideline_phish_policy_score', 'sideline_phish_error'].includes(name)) {
+      } else if (['sideline_phish_checked', 'sideline_phish_status', 'sideline_phish_verdict', 'sideline_phish_confidence', 'sideline_phish_confidence_available', 'sideline_phish_error'].includes(name)) {
         group = 'detection';
       } else if (['is_internal', 'headers'].includes(name)) {
         group = 'body';

@@ -1,6 +1,8 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { toast } from 'sonner';
+import { ApiError } from '@/lib/api/client';
 import { SenderActions } from './sender-actions';
 
 // Identity translator (mirrors recipient-status.test.tsx): keeps namespace +
@@ -13,9 +15,14 @@ vi.mock('@/contexts/auth-context', () => ({
 }));
 
 vi.mock('next-intl', () => ({
-  useTranslations: (namespace: string) => (key: string, params?: Record<string, unknown>) => (
-    params ? `${namespace}.${key}:${JSON.stringify(params)}` : `${namespace}.${key}`
-  ),
+  useTranslations: (namespace?: string) => {
+    const translate = (key: string, params?: Record<string, unknown>) => {
+      const fullKey = namespace ? `${namespace}.${key}` : `localized:${key}`;
+      return params ? `${fullKey}:${JSON.stringify(params)}` : fullKey;
+    };
+    translate.has = () => true;
+    return translate;
+  },
 }));
 
 vi.mock('sonner', () => ({
@@ -24,6 +31,9 @@ vi.mock('sonner', () => ({
 
 vi.mock('../../lib/disposal-detail-api', () => ({
   addSenderFilterRule: vi.fn(),
+  isDuplicateSenderFilterRuleError: (error: { status?: number; code?: string }) => (
+    error?.status === 409 && error?.code === 'unified_rule.name_exists'
+  ),
   // 真实实现（GT-12601/GT-12628）：按角色 5000/1000，mock 同语义。
   disposalRulePriority: (isSystemAdmin: boolean) => (isSystemAdmin ? 5000 : 1000),
 }));
@@ -44,6 +54,8 @@ function baseProps(overrides: Partial<React.ComponentProps<typeof SenderActions>
 beforeEach(() => {
   mockAddSenderFilterRule.mockReset();
   mockAddSenderFilterRule.mockResolvedValue(undefined);
+  (toast.success as ReturnType<typeof vi.fn>).mockReset();
+  (toast.error as ReturnType<typeof vi.fn>).mockReset();
 });
 
 describe('SenderActions', () => {
@@ -140,6 +152,39 @@ describe('SenderActions', () => {
       5000,
       { scope: 'tenant' },
     );
+  });
+
+  it('GT-13651: reports an existing whitelist entry instead of a generic failure', async () => {
+    const user = userEvent.setup();
+    mockAddSenderFilterRule.mockRejectedValueOnce(new ApiError(409, 'rule name already exists', {
+      error: { code: 'unified_rule.name_exists', message: 'rule name already exists' },
+    }));
+    render(<SenderActions {...baseProps()} />);
+
+    await user.click(screen.getByTestId('email-disposal-overview-action-whitelist'));
+    await user.click(screen.getByTestId('email-disposal-overview-whitelist-confirm'));
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(
+      'emailDisposal.detail.overview.senderActions.whitelistDialog.alreadyExists',
+    ));
+    expect(toast.error).not.toHaveBeenCalledWith(
+      'emailDisposal.detail.overview.senderActions.whitelistDialog.failed',
+    );
+  });
+
+  it('GT-13651: preserves other stable API error reasons for whitelist failures', async () => {
+    const user = userEvent.setup();
+    mockAddSenderFilterRule.mockRejectedValueOnce(new ApiError(403, 'access denied', {
+      error: { code: 'unified_rule.access_denied', message: 'access denied' },
+    }));
+    render(<SenderActions {...baseProps()} />);
+
+    await user.click(screen.getByTestId('email-disposal-overview-action-whitelist'));
+    await user.click(screen.getByTestId('email-disposal-overview-whitelist-confirm'));
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(
+      'localized:apiErrors.unified_rule.access_denied:{}',
+    ));
   });
 
   it('disables the blacklist and whitelist buttons when readOnly', () => {

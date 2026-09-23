@@ -31,7 +31,6 @@ import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { useRouter } from '@/i18n/navigation';
-import type { Viewer } from '@/lib/product-form/resolve';
 import { RefreshCw, ArrowRight, Settings, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
@@ -39,11 +38,13 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useApiRequest } from '@/lib/api/client';
 import { getModuleEnabled, listAdvancedRules } from '@/lib/api/advanced-rules';
-import { getSecurityModules, type SecurityModulePage } from '@/lib/api/security-modules';
-import { getSimilarDetection } from '@/lib/api/similar-detection';
+import { getSecurityModules, type SecurityModuleMap, type SecurityModulePage } from '@/lib/api/security-modules';
 import { useAgentCenterOverview } from '@/hooks/use-agent-center-overview';
 import { resolveAgentPresentation } from '@/lib/agent-center/presentation';
 import { parsePipelineDeepLink } from '@/lib/policy-deep-link';
+import { canAccessPolicyPipeline } from './policy-pipeline-access';
+
+export { canAccessPolicyPipeline } from './policy-pipeline-access';
 
 // PipelinePolicy 类型随卡片组件收敛到 pipeline-policy-card.tsx（2026-07-25 柔和交互反馈规格整改）。
 
@@ -85,8 +86,6 @@ const stage1NavItems: { key: Stage1PolicyKey; nameKey: string; functional: boole
 
 export const stage2NavItems: { key: Stage2PolicyKey; nameKey: string; functional: boolean }[] = [
   { key: 'senderFilter', nameKey: 'pipeline.senderFilter', functional: true },
-  { key: 'authSpoofing', nameKey: 'pipeline.authSpoofing', functional: true },
-  { key: 'behaviorControl', nameKey: 'pipeline.behaviorControl', functional: true },
   // GT-11878: 收信人检测的后端能力（收信人数量限制）完整且在线生效，只是管理入口
   // 被合并进了「发信行为管控」抽屉（2026-05-04-recipient-detection-design.md：
   // 「合并到 behavior_control，不创建新的功能页面」）。但该合并只在流水线页执行了，
@@ -94,6 +93,8 @@ export const stage2NavItems: { key: Stage2PolicyKey; nameKey: string; functional
   // 一致。这里补回卡片作为一个「入口」，点击后打开同一个行为管控抽屉。
   { key: 'recipientCheck', nameKey: 'pipeline.recipientCheck', functional: true },
   { key: 'userList', nameKey: 'pipeline.userBlackWhiteList', functional: true },
+  { key: 'authSpoofing', nameKey: 'pipeline.authSpoofing', functional: true },
+  { key: 'behaviorControl', nameKey: 'pipeline.behaviorControl', functional: true },
 ];
 
 export const stage3NavItems: { key: Stage3PolicyKey; nameKey: string; functional: boolean }[] = [
@@ -180,27 +181,12 @@ export const actionLegendItems: {
  * `system_admin`; authorization must therefore use the resolved viewer rather
  * than the raw authenticated role alone.
  */
-export function canAccessPolicyPipeline({
-  multiTenant,
-  effectiveViewer,
-  isSystemAdmin,
-  isTenantAdmin,
-}: {
-  multiTenant: boolean;
-  effectiveViewer: Viewer;
-  isSystemAdmin: boolean;
-  isTenantAdmin: boolean;
-}): boolean {
-  if (multiTenant && effectiveViewer === 'platform') return false;
-  return isSystemAdmin || isTenantAdmin || effectiveViewer === 'tenant';
-}
-
 export function PolicyPipelinePage() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const deepLink = parsePipelineDeepLink(searchParams);
-  const { isSystemAdmin, user } = useAuth();
+  const { isSystemAdmin, user, canSeeRoute } = useAuth();
   const isTenantAdmin = user?.role === 'tenant_admin';
   // switcherEnabled：高级过滤规则暂不对外露出，仅在产品形态切换器
   // （OSGATEWAY_PRODUCT_FORM_SWITCHER=true，演示/开发环境）开启时渲染
@@ -297,34 +283,26 @@ export function PolicyPipelinePage() {
   });
   const similarDetectionEnabled = securityModulesMap?.similar_detection ?? true;
   const comprehensiveStrategyEnabled = securityModulesMap?.comprehensive_strategy ?? true;
-  // html_spec §2.3-13 对齐：左导航「相似邮件与主题检测」摘要=「窗口{N}分钟 / 阈值{M}%」，
-  // 取自当前生效方向组（mode==='separate' 取 similar_email.receive，'aggregate' 取 aggregate）。
-  // 同 advancedRulesEnabledResp/securityModulesMap，仅在抽屉处于阶段5时取数。
-  // 刷新按钮：让本页四类查询全部失效重取（原型只在 demo 里有 queryClient，
+  // GT-14251：左导航用于说明模块能力，不展示某一方向的窗口/阈值配置。
+  // 相似检测可能按三个方向分别配置，选取接收方向或聚合值都不能代表完整策略；
+  // 使用固定功能文案也避免宿主为渲染导航额外请求相似检测配置。
+  // 刷新按钮：让本页三类查询全部失效重取（原型只在 demo 里有 queryClient，
   // 产品这边要显式取一个）。
   const queryClient = useQueryClient();
+  // GT-13648：相似检测总开关由子页即时保存。把子页确认过的状态同步回本查询缓存，
+  // 让左导航圆点和摘要随面板开关同步变化；保存失败时 ModuleMasterSwitch 会回滚并再次
+  // 回传旧值，因此父级展示也会一并回滚。
+  const handleSimilarDetectionEnabledChange = useCallback((enabled: boolean) => {
+    queryClient.setQueryData<SecurityModuleMap>(['security-modules'], (current) => {
+      if (!current || current.similar_detection === enabled) return current;
+      return { ...current, similar_detection: enabled };
+    });
+  }, [queryClient]);
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['agent-center-overview'] });
     queryClient.invalidateQueries({ queryKey: ['advanced-rules'] });
     queryClient.invalidateQueries({ queryKey: ['security-modules'] });
-    queryClient.invalidateQueries({ queryKey: ['similar-detection-config'] });
   }, [queryClient]);
-
-  const { data: similarDetectionConfigResp } = useQuery({
-    queryKey: ['similar-detection-config'],
-    queryFn: () => getSimilarDetection(apiRequest),
-    enabled: stage5Active,
-  });
-  const similarDetectionNavSummary = similarDetectionConfigResp
-    ? t('similarDetection.navSummary', {
-        window: similarDetectionConfigResp.mode === 'aggregate'
-          ? similarDetectionConfigResp.aggregate.window_minutes
-          : similarDetectionConfigResp.similar_email.receive.window_minutes,
-        threshold: similarDetectionConfigResp.mode === 'aggregate'
-          ? similarDetectionConfigResp.aggregate.similarity_pct
-          : similarDetectionConfigResp.similar_email.receive.similarity_pct,
-      })
-    : undefined;
 
   // mailMarking exposes no module-level enable/disable API at all (grepped
   // src/lib/api/mail-marking.ts + MailMarkingPage.tsx) — no nav dot, and the
@@ -362,6 +340,7 @@ export function PolicyPipelinePage() {
     effectiveViewer,
     isSystemAdmin,
     isTenantAdmin,
+    hasViewPermission: canSeeRoute('/security/pipeline'),
   });
   // GT-12154: a platform administrator (multi-tenant + platform view) does not
   // belong to any tenant, so the tenant-level policy pipeline route must not
@@ -427,10 +406,10 @@ export function PolicyPipelinePage() {
       // 强制阻断 → forced（红）；发信行为管控/收信人检测隔离 → configurable（橙）。
       policies: [
         { key: 'senderFilter', nameKey: 'pipeline.senderFilter', descKey: 'pipeline.senderFilterDesc', type: 'exception', functional: true },
-        { key: 'authSpoofing', nameKey: 'pipeline.authSpoofing', descKey: 'pipeline.authSpoofingDesc', type: 'forced', functional: true },
-        { key: 'behaviorControl', nameKey: 'pipeline.behaviorControl', descKey: 'pipeline.behaviorControlDesc', type: 'configurable', functional: true },
         { key: 'recipientCheck', nameKey: 'pipeline.recipientCheck', descKey: 'pipeline.recipientCheckDesc', type: 'configurable', functional: true },
         { key: 'userList', nameKey: 'pipeline.userBlackWhiteList', descKey: 'pipeline.userListDesc', type: 'exception', functional: true },
+        { key: 'authSpoofing', nameKey: 'pipeline.authSpoofing', descKey: 'pipeline.authSpoofingDesc', type: 'forced', functional: true },
+        { key: 'behaviorControl', nameKey: 'pipeline.behaviorControl', descKey: 'pipeline.behaviorControlDesc', type: 'configurable', functional: true },
       ],
     },
     {
@@ -707,7 +686,7 @@ export function PolicyPipelinePage() {
     // 阶段3 内容层：url/attachment/content/intentEngine 为动态摘要，
     // 由 STAGE3_NAV_MODULE 配置表驱动（见 renderNavItems）。
     // 阶段5 综合策略
-    similarDetection: 'pipeline.similarDetectionDesc',
+    similarDetection: 'similarDetection.navSummary',
     advancedRules: 'pipeline.advancedRulesSummary',
     mailMarking: 'pipeline.mailMarkingDesc',
   };
@@ -738,8 +717,8 @@ export function PolicyPipelinePage() {
       : item.functional;
     // html_spec §2.2-2：url 摘要 启用=「信誉评估/沙箱分析/仿冒检测」，禁用=「未启用」
     // 意图引擎摘要 启用=「涉黄赌/涉政/钓鱼/垃圾/订阅」，禁用=「未启用」（Task 10）
-    // 相似检测摘要 启用=「窗口{N}分钟 / 阈值{M}%」（Task 13），禁用=「已禁用」（复用 common.disabled，
-    // demo D-8 未新造 key）；配置 query 未就绪前退回静态描述文案，避免摘要闪烁。
+    // GT-14251：相似检测摘要启用时始终显示固定功能说明，禁用时显示「已禁用」。
+    // 窗口、阈值和各方向差异只在右侧配置区展示。
     // GT-12731：摘要的启用/未启用判断同样以「本地状态 ?? 父级兜底真值」为准，
     // 使加载期首帧就显示正确的摘要（未启用模块直接显示「未启用」，不再先显示能力摘要再闪回）。
     // html_spec §2.2-2 / Task 10 / GT-12731：摘要启用/禁用判断以
@@ -749,7 +728,7 @@ export function PolicyPipelinePage() {
       : item.key === 'similarDetection'
           ? (similarDetectionEnabled === false
               ? t('common.disabled')
-              : similarDetectionNavSummary ?? t(navSummaryKey.similarDetection))
+              : t(navSummaryKey.similarDetection))
           : navSummaryKey[item.key]
             ? t(navSummaryKey[item.key])
             : undefined;
@@ -890,7 +869,13 @@ export function PolicyPipelinePage() {
       return <IntentEnginePage embedded onDirtyChange={setIntentDirty} onEnabledChange={(v) => handleStage3EnabledChange('intentEngine', v)} />;
     }
     if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'similarDetection') {
-      return <SimilarDetectionPage embedded onDirtyChange={setSimilarDirty} />;
+      return (
+        <SimilarDetectionPage
+          embedded
+          onDirtyChange={setSimilarDirty}
+          onEnabledChange={handleSimilarDetectionEnabledChange}
+        />
+      );
     }
     if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'mailMarking') {
       return <MailMarkingPage embedded />;
@@ -1095,17 +1080,21 @@ export function PolicyPipelinePage() {
                     // content (scrollHeight == clientHeight) and the wheel has
                     // nothing to scroll while the outer overflow-hidden clips the
                     // overflow — the mouse-wheel-can't-scroll symptom.
-                    drawerContentOwnsScrolling && 'h-full min-h-0',
+                    drawerContentOwnsScrolling && 'flex h-full min-h-0 flex-col',
                     stage5Active && !comprehensiveStrategyEnabled && 'pointer-events-none opacity-50',
                   )}>
                     {deepLink?.ruleRef && activeDrawerPolicy.stage === deepLink.stage && activeDrawerPolicy.key === deepLink.key && (
-                      <Alert className="mb-4" data-testid="pipeline-rule-deep-link-context">
+                      <Alert className="mb-4 shrink-0" data-testid="pipeline-rule-deep-link-context">
                         <AlertDescription>
                           {t('pipeline.deepLinkRuleContext', { ruleId: deepLink.ruleRef })}
                         </AlertDescription>
                       </Alert>
                     )}
-                    {drawerContent}
+                    {drawerContentOwnsScrolling ? (
+                      <div className="min-h-0 flex-1" data-testid="pipeline-drawer-owned-scroll-content">
+                        {drawerContent}
+                      </div>
+                    ) : drawerContent}
                   </div>
                 </div>
               ) : (

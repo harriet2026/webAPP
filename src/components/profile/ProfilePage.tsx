@@ -31,12 +31,12 @@ export function ProfilePage() {
 
       <Tabs defaultValue="account" className="w-full">
         <TabsList>
-          <TabsTrigger value="account">{t('tabs.account')}</TabsTrigger>
-          <TabsTrigger value="password">{t('tabs.password')}</TabsTrigger>
-          <TabsTrigger value="twoFactor">{t('tabs.twoFactor')}</TabsTrigger>
-          <TabsTrigger value="sessions">{t('tabs.sessions')}</TabsTrigger>
-          <TabsTrigger value="devices">{t('tabs.trustedDevices')}</TabsTrigger>
-          <TabsTrigger value="history">{t('tabs.history')}</TabsTrigger>
+          <TabsTrigger data-testid="profile-tab-account" value="account">{t('tabs.account')}</TabsTrigger>
+          <TabsTrigger data-testid="profile-tab-password" value="password">{t('tabs.password')}</TabsTrigger>
+          <TabsTrigger data-testid="profile-tab-two-factor" value="twoFactor">{t('tabs.twoFactor')}</TabsTrigger>
+          <TabsTrigger data-testid="profile-tab-sessions" value="sessions">{t('tabs.sessions')}</TabsTrigger>
+          <TabsTrigger data-testid="profile-tab-devices" value="devices">{t('tabs.trustedDevices')}</TabsTrigger>
+          <TabsTrigger data-testid="profile-tab-history" value="history">{t('tabs.history')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="account" className="mt-4">

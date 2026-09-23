@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatActionKey, protocolActionKey, flowSubKey } from './auth-spoofing-labels';
+import { dominantAction, formatActionKey, protocolActionKey, flowSubKey } from './auth-spoofing-labels';
 import zh from '../../messages/zh.json';
 import en from '../../messages/en.json';
 import ru from '../../messages/ru.json';
@@ -66,12 +66,26 @@ describe('auth-spoofing protocol action labels (GT-12650)', () => {
 describe('auth-spoofing label mapping', () => {
   // Keys are relative to the `authSpoofing` namespace (resolved via
   // useTranslations('authSpoofing')) — no leading `authSpoofing.` prefix.
-  it('flow sub: discard->drop, reject->block, else quarantine; ptr non-discard->check', () => {
-    expect(flowSubKey('discard', false)).toBe('flowSub.drop');
-    expect(flowSubKey('reject', false)).toBe('flowSub.block');
-    expect(flowSubKey('quarantine', false)).toBe('flowSub.quarantine');
-    expect(flowSubKey('quarantine', true)).toBe('flowSub.check');
-    expect(flowSubKey('discard', true)).toBe('flowSub.drop');
+  it('uses the same concise action labels in every protocol flow node', () => {
+    expect(flowSubKey('discard')).toBe('protocolActionShort.discard');
+    expect(flowSubKey('reject')).toBe('protocolActionShort.reject');
+    expect(flowSubKey('quarantine')).toBe('protocolActionShort.quarantine');
+    expect(flowSubKey('audit')).toBe('protocolActionShort.audit');
+    expect(flowSubKey('proceed')).toBe('protocolActionShort.proceed');
+  });
+
+  it('computes the dominant action from enabled rules only', () => {
+    expect(dominantAction({
+      stale: { enabled: false, action: 'discard' },
+      active: { enabled: true, action: 'proceed' },
+    })).toBe('proceed');
+  });
+
+  it('falls back to proceed when every rule is disabled', () => {
+    expect(dominantAction({
+      staleReject: { enabled: false, action: 'reject' },
+      staleQuarantine: { enabled: false, action: 'quarantine' },
+    })).toBe('proceed');
   });
   it('context keys', () => {
     expect(formatActionKey('proceed')).toBe('formatActionLabel.proceed');

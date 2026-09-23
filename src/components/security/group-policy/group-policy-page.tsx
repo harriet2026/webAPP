@@ -2,7 +2,7 @@
 
 import { Fragment, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useIsFetching, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, RefreshCw, Loader2, GitBranch, Info, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +69,7 @@ export function GroupPolicyPage() {
   const [editingPolicy, setEditingPolicy] = useState<GroupPolicyRule | null>(null);
   const [deletingPolicy, setDeletingPolicy] = useState<GroupPolicyRule | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   // 策略配置详情展开的规则 id 集合（demo expandedRuleIds）
   const [expandedRuleIds, setExpandedRuleIds] = useState<Set<number>>(new Set());
   const toggleRuleExpand = (id: number) =>
@@ -78,12 +79,41 @@ export function GroupPolicyPage() {
       return next;
     });
 
-  const { data: policies, isLoading, isFetching, refetch } = useQuery<GroupPolicyRule[]>({
-    queryKey: [...QUERY_KEY, effectiveTenantId],
+  const policyQueryKey = [...QUERY_KEY, effectiveTenantId] as const;
+  const groupQueryKey = ['groups', effectiveTenantId] as const;
+  const { data: policies, isLoading, isFetching } = useQuery<GroupPolicyRule[]>({
+    queryKey: policyQueryKey,
     queryFn: () => listGroupPolicies(apiRequest),
     // 卡片二被切换器隐藏时不再取数（该 query 只喂群组策略规则表）。
     enabled: !platformWithoutTenant && switcherEnabled,
   });
+  const groupsFetching = useIsFetching({ queryKey: groupQueryKey, exact: true }) > 0;
+  const refreshBusy = refreshing || groupsFetching || (switcherEnabled && isFetching);
+
+  const handleRefresh = async () => {
+    if (refreshBusy) return;
+    setRefreshing(true);
+    try {
+      const requests = [
+        queryClient.refetchQueries(
+          { queryKey: groupQueryKey, exact: true, type: 'active' },
+          { throwOnError: true },
+        ),
+      ];
+      if (switcherEnabled) {
+        requests.push(queryClient.refetchQueries(
+          { queryKey: policyQueryKey, exact: true, type: 'active' },
+          { throwOnError: true },
+        ));
+      }
+      await Promise.all(requests);
+      toast.success(tGp('refreshSuccess'));
+    } catch (error) {
+      toast.error(apiErrorMessage(error, tGp('refreshFailed')));
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteGroupPolicy(apiRequest, id),
@@ -186,16 +216,11 @@ export function GroupPolicyPage() {
           <Button
             variant="outline"
             data-testid="group-policy-refresh"
-            onClick={() => {
-              // 页级刷新统一驱动两张卡片：策略列表 + 群组列表。
-              // 卡片二被切换器隐藏时 query 已 disabled（refetch 会绕过
-              // enabled 强制拉取），此时跳过策略列表刷新。
-              if (switcherEnabled) refetch();
-              queryClient.invalidateQueries({ queryKey: ['groups'] });
-            }}
-            disabled={isFetching}
+            onClick={handleRefresh}
+            disabled={refreshBusy}
+            aria-busy={refreshBusy}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshBusy ? 'animate-spin' : ''}`} />
             {tCommon('refresh')}
           </Button>
         }

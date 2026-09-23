@@ -16,8 +16,12 @@ import { FormatChecksSection } from './auth-spoofing/FormatChecksSection';
 import { ProtocolChecksSection } from './auth-spoofing/ProtocolChecksSection';
 import { SimilarDomainSection } from './auth-spoofing/SimilarDomainSection';
 import { DisplayNameSpoofSection } from './auth-spoofing/DisplayNameSpoofSection';
+import { useAuthSpoofingAccess } from './auth-spoofing/use-auth-spoofing-access';
 import { ModuleMasterSwitch } from '@/components/security/ModuleMasterSwitch';
-import { hasEmptyAuthSpoofingTag } from '@/lib/auth-spoofing-validation';
+import {
+  hasEmptyAuthSpoofingTag,
+  hasInvalidAuthSpoofingHeaderName,
+} from '@/lib/auth-spoofing-validation';
 
 // 后端响应到达前 / 后端漏发某个 key 时的兜底，逐项对齐 auth-spoofing-templates.ts
 // 的 standard 模板（也就是后端 defaultStandardConfig）。不对齐会让 mergeWithDefaults
@@ -44,6 +48,7 @@ const DEFAULT_CONFIG: AuthSpoofingConfig = {
       neutral: { enabled: true, action: 'quarantine', observe_mode: false },
       partial: { enabled: true, action: 'proceed', observe_mode: false },
       none: { enabled: true, action: 'proceed', observe_mode: false },
+      permerror: { enabled: true, action: 'proceed', observe_mode: false },
     },
     dmarc: {
       reject: { enabled: true, action: 'reject', observe_mode: false },
@@ -121,8 +126,11 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
   const { apiRequest, effectiveTenantId } = useApiRequest();
-  const { isSystemAdmin, user } = useAuth();
+  const { canSeeRoute } = useAuth();
   const { capabilities } = useProductForm();
+  const roleAccess = useAuthSpoofingAccess();
+  const canViewConfig = canSeeRoute('/security/pipeline') && roleAccess.canView;
+  const canEditConfig = roleAccess.status === 'ready' && roleAccess.canEdit;
 
   const [localConfig, setLocalConfig] = useState<AuthSpoofingConfig>(DEFAULT_CONFIG);
   const [lastSavedConfig, setLastSavedConfig] = useState<AuthSpoofingConfig>(DEFAULT_CONFIG);
@@ -132,7 +140,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   const configQuery = useQuery({
     queryKey: configQueryKey,
     queryFn: () => getAuthSpoofingConfig(apiRequest),
-    enabled: isSystemAdmin || user?.role === 'tenant_admin',
+    enabled: canViewConfig,
     retry: false,
   });
   const config = configQuery.data;
@@ -183,9 +191,13 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   const isChanged = JSON.stringify(localConfig) !== JSON.stringify(lastSavedConfig);
 
   const handleSave = () => {
-    if (!configReady) return;
+    if (!canEditConfig || !configReady) return;
     if (hasEmptyAuthSpoofingTag(localConfig)) {
       toast.error(t('tagPanel.errorTagFieldRequired'));
+      return;
+    }
+    if (hasInvalidAuthSpoofingHeaderName(localConfig)) {
+      toast.error(t('tagPanel.errorHeaderNameInvalid'));
       return;
     }
     saveMutation.mutate(localConfig);
@@ -197,7 +209,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
       data-testid="auth-spoofing-save"
       className="min-w-28"
       onClick={handleSave}
-      disabled={!configReady || !isChanged || saveMutation.isPending}
+      disabled={!canEditConfig || !configReady || !isChanged || saveMutation.isPending}
     >
       {saveMutation.isPending ? (
         <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -212,11 +224,11 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   const { data: observeStatsTotal } = useQuery({
     queryKey: ['auth-spoofing-observe-stats-total', effectiveTenantId],
     queryFn: () => getObserveStats(7, apiRequest),
-    enabled: isSystemAdmin || user?.role === 'tenant_admin',
+    enabled: canViewConfig,
   });
   const wouldDrop = (observeStatsTotal?.points ?? []).reduce((sum, p) => sum + p.hits, 0);
 
-  if (!isSystemAdmin && user?.role !== 'tenant_admin') {
+  if (!canViewConfig) {
     return (
       <PageShell>
         <PageHeader title={t('title')} />
@@ -228,7 +240,7 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
   }
 
   const content = (
-    <ModuleMasterSwitch page="auth_spoofing">
+    <ModuleMasterSwitch page="auth_spoofing" editable={canEditConfig}>
     <div className="space-y-4">
       {/* demo 对齐：不渲染重复的模块级标题/描述/观察提示条；父级策略卡头部已提供标题与启用开关。 */}
       {configLoadFailed ? (
@@ -253,13 +265,13 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
           <FormatChecksSection
             config={localConfig.format_checks}
             onChange={(format_checks) => setLocalConfig((c) => ({ ...c, format_checks }))}
+            disabled={!canEditConfig}
           />
 
           <ProtocolChecksSection
             config={localConfig.protocol_checks}
             onChange={(protocol_checks) => setLocalConfig((c) => ({ ...c, protocol_checks }))}
-            disabled={!isSystemAdmin && user?.role !== 'tenant_admin'}
-            ptrReadonly={localConfig.protocol_checks.ptr_readonly ?? false}
+            disabled={!canEditConfig}
             wouldDrop={wouldDrop}
           />
 
@@ -268,11 +280,13 @@ export function AuthSpoofingPage({ embedded }: { embedded?: boolean } = {}) {
               <SimilarDomainSection
                 config={localConfig.similar_domain}
                 onChange={(similar_domain) => setLocalConfig((c) => ({ ...c, similar_domain }))}
+                disabled={!canEditConfig}
               />
 
               <DisplayNameSpoofSection
                 config={localConfig.display_name_spoof}
                 onChange={(display_name_spoof) => setLocalConfig((c) => ({ ...c, display_name_spoof }))}
+                disabled={!canEditConfig}
               />
             </>
           )}

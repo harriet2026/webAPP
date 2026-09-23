@@ -1,5 +1,7 @@
 'use client';
 
+import { AssessmentReportView } from '@/components/agent-center/assessment-report';
+
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Check, ChevronRight, Copy, Globe, Loader2, Sparkles } from 'lucide-react';
@@ -176,7 +178,7 @@ export function InvestigationDetailDialog({
     };
   }, []);
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError } = useQuery({
     queryKey: ['investigation', taskId],
     queryFn: () => getInvestigation(taskId!, apiRequest),
     enabled: open && !!taskId,
@@ -332,7 +334,7 @@ export function InvestigationDetailDialog({
           </div>
         </DialogHeader>
 
-        {isLoading ? (
+        {isError ? <div className="p-6"><AssessmentReportView error /></div> : isLoading ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
@@ -360,10 +362,12 @@ export function InvestigationDetailDialog({
                   </div>
                 </div>
 
+                {task.type === 'phish_analysis' || task.type === 'spoof_analysis' ? <div className="min-w-0 lg:col-span-2"><AssessmentReportView result={task.result} /></div> : null}
+
                 <InfoCard label={t('investigations.fields.taskId')} value={task.id} mono />
                 <InfoCard label={t('investigations.fields.createdBy')} value={task.created_by || '-'} />
                 <InfoCard label={t('investigations.fields.targetType')} value={formatTargetType(task.target_type, t)} />
-                <InfoCard label={t('investigations.fields.targetIds')} value={task.target_ids.join(', ') || '-'} mono />
+                <InfoCard label={t('investigations.fields.targetIds')} value={task.target_ids?.join(', ') || '-'} mono />
                 <InfoCard label={t('investigations.fields.confidence')} value={formatConfidence(task.confidence)} />
                 <InfoCard label={t('investigations.fields.updatedAt')} value={formatDate(task.updated_at)} />
 
@@ -531,7 +535,7 @@ export function InvestigationDetailDialog({
                             item={item}
                             rules={actionRules}
                             returnTaskId={task.id}
-                            returnMailLogId={detailMailLogId || task.target_ids[0]}
+                            returnMailLogId={detailMailLogId || task.target_ids?.[0]}
                           />
                         ))}
                       </DetailList>
@@ -550,7 +554,7 @@ export function InvestigationDetailDialog({
                               item={item}
                               rules={actionRules}
                               returnTaskId={task.id}
-                              returnMailLogId={detailMailLogId || task.target_ids[0]}
+                              returnMailLogId={detailMailLogId || task.target_ids?.[0]}
                             />
                           ))}
                         </DetailList>
@@ -568,7 +572,7 @@ export function InvestigationDetailDialog({
                 ) : null}
 
                 <div className="space-y-5 rounded-2xl border border-border/60 bg-muted/20 p-4 lg:col-span-2">
-                  <DetailList title={t('investigations.sections.evidence')} empty={t('investigations.emptyEvidence')}>
+                  <DetailList title={task.type === 'phish_analysis' || task.type === 'spoof_analysis' ? t('assessment.legacyEvidence') : t('investigations.sections.evidence')} empty={t('investigations.emptyEvidence')}>
                     {(task.result.evidence ?? []).map((item, index) => (
                       <EvidenceRow key={`${item.type}-${index}`} item={item} />
                     ))}

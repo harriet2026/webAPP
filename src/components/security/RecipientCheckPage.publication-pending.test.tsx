@@ -73,6 +73,31 @@ beforeEach(() => {
 });
 
 describe('RecipientCheckPage publication-pending cache contract', () => {
+  it('does not expose a count-scope selector in any direction', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    mocks.apiRequest.mockImplementation(async (path: string, options?: { method?: string; body?: unknown }) => {
+      if (path === '/behavior-control/recipient-limit-config') return limit;
+      if (path === '/behavior-control/recipient-check-config') {
+        return { existence_enabled: false, existence_action: 'reject' };
+      }
+      if (path === '/behavior-control/recipient-check/directory-status') {
+        return { available: true, source_count: 1, contact_count: 1, stale_minutes: 30 };
+      }
+      if (path === '/behavior-control/recipient-policy' && options?.method === 'PUT') return scopedView(8);
+      throw new Error(`unexpected GET ${path}`);
+    });
+
+    renderPage(client);
+
+    expect(await screen.findByTestId('recipient-limit-card-inbound')).toBeInTheDocument();
+    expect(screen.getByTestId('recipient-limit-card-outbound')).toBeInTheDocument();
+    expect(screen.getByTestId('recipient-limit-card-internal')).toBeInTheDocument();
+    expect(screen.queryByTestId('recipient-limit-scope-inbound')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('recipient-limit-scope-outbound')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('recipient-limit-scope-internal')).not.toBeInTheDocument();
+    expect(screen.queryByText('recipientCheck.limit.countScope')).not.toBeInTheDocument();
+  });
+
   it('accepts a full HTTP 202 ScopedConfigView without refetching the stale runtime snapshot', async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     client.setQueryData(['tenant-config', 'antispam', 832], scopedView(7));
@@ -215,4 +240,30 @@ describe('RecipientCheckPage configuration load guard', () => {
       }),
     ));
   });
+
+  it('shows degradation for an empty directory and clears it when local contacts become available', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    client.setQueryData(['tenant-config', 'antispam', 832], scopedView(7, true));
+    mocks.apiRequest.mockImplementation(async (path: string) => {
+      if (path === '/behavior-control/recipient-limit-config') return limit;
+      if (path === '/behavior-control/recipient-check-config') {
+        return { existence_enabled: true, existence_action: 'reject' };
+      }
+      if (path === '/behavior-control/recipient-check/directory-status') {
+        return { available: false, reason: 'empty_directory', source_count: 1, contact_count: 0, stale_minutes: 0 };
+      }
+      throw new Error(`unexpected GET ${path}`);
+    });
+    renderPage(client);
+    expect(await screen.findByTestId('recipient-directory-reason'))
+      .toHaveTextContent('recipientCheck.existence.offlineReason.empty_directory');
+    client.setQueryData(['recipient-directory-status', 832], {
+      available: true, source_count: 2, contact_count: 1,
+      last_sync_status: 'failed', stale_minutes: 2880,
+    });
+    await waitFor(() => expect(screen.queryByTestId('recipient-directory-reason')).not.toBeInTheDocument());
+    expect(screen.getByTestId('recipient-existence-switch')).toHaveAttribute('aria-checked', 'true');
+    client.clear();
+  });
+
 });

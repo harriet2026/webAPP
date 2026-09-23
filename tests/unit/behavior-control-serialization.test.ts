@@ -36,12 +36,12 @@ describe('buildConditionTreeFromForm', () => {
     expect(t).toEqual({ type: 'condition', field: 'sender', operator: 'isNotNull' });
   });
 
-  it('sender group produces rcpttags hasTag grp:NAME', () => {
+  it('sender group matches the sender membership map', () => {
     const t = buildConditionTreeFromForm({
       ...baseForm,
       object_config: { type: 'sender', sub_type: 'group', value: 'staff' },
     });
-    expect(t).toEqual({ type: 'condition', field: 'rcpttags', operator: 'hasTag', value: 'grp:staff' });
+    expect(t).toEqual({ type: 'condition', field: 'sender_group', map_key: 'grp:staff', operator: 'eq', value: 'true' });
   });
 });
 
@@ -152,8 +152,26 @@ describe('formToCreateBody', () => {
     expect(body.metadata.direction).toBe('outbound');
     expect(body.metadata.feature).toBe('behavior_control');
     expect(body.page).toBe('behavior_control');
-    expect(body.stage).toBe('rcpt');
+    expect(body.stage).toBe('data');
     expect(body.rule_class).toBe('action');
+  });
+
+  it('serializes a date-only valid-until as the end of that Beijing day', () => {
+    const body = formToCreateBody({ ...baseForm, valid_until: '2026-09-10' });
+
+    expect(body.valid_until).toBe('2026-09-10T15:59:59.999Z');
+  });
+
+  it('rejects an impossible date-only valid-until instead of rolling it forward', () => {
+    const body = formToCreateBody({ ...baseForm, valid_until: '2026-02-30' });
+
+    expect(body.valid_until).toBeNull();
+  });
+
+  it('keeps RFC3339 valid-until callers compatible', () => {
+    const body = formToCreateBody({ ...baseForm, valid_until: '2026-09-10T12:30:00+08:00' });
+
+    expect(body.valid_until).toBe('2026-09-10T04:30:00.000Z');
   });
 });
 

@@ -24,7 +24,10 @@ import { cn } from '@/lib/utils';
 export function ARCSealingSection() {
   const hasQueryClient = useContext(QueryClientContext) != null;
   const hasAuth = useContext(AuthContext) != null;
-  if (!hasQueryClient || !hasAuth) return null;
+  const { switcherEnabled } = useProductForm();
+  // ARC 暂不对外露出：与高级过滤规则、群组策略等模块保持一致，仅在
+  // OSGATEWAY_PRODUCT_FORM_SWITCHER 开启时挂载，关闭时也不发起后台请求。
+  if (!hasQueryClient || !hasAuth || !switcherEnabled) return null;
   return <ARCSealingSectionInner />;
 }
 

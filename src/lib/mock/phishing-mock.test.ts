@@ -17,6 +17,17 @@ describe('phishing demo boundary', () => {
     expect(dispatch({ method, path, body })).toMatchObject({ status: expected });
   });
 
+  it.each([
+    { max_size_kb: 0.5 }, { max_size_kb: -1 }, { max_size_kb: 102400001 },
+    { max_size_kb: null }, { max_size_mb: 5 }, { require_url: false },
+  ])('rejects invalid admission content in demo mode: %j', (invalid) => {
+    expect(dispatch({ method: 'POST', path: '/phishing-agent/admission-rules', body: {
+      name: 'Invalid rule', directions: ['inbound'], enabled: true,
+      require_url: true, sender_first_seen: false, require_qrcode: false, require_executable: false,
+      ...invalid,
+    } })).toMatchObject({ status: 400, data: { error: { code: 'invalid_request' } } });
+  });
+
   it('keeps detection rows stable with internally consistent policy facts', () => {
     const response = dispatch({ method: 'GET', path: '/phishing-agent/detection-logs' });
     expect(response.status).toBe(200);

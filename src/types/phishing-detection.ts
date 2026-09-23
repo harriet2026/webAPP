@@ -1,5 +1,6 @@
 import type { DisplayStatusEntry as DisposalDisplayStatusEntry } from '@/types/email-disposal';
 import type { RecipientDisposition as DisposalRecipientDisposition } from '@/types/email-disposal-detail';
+import type { AssessmentResultFields } from '@/types/agent-assessment';
 
 export type Disposition = 'quarantine' | 'mark' | 'pass' | 'audit' | 'pending' | 'processing' | 'failed' | 'manual_hold' | 'unknown';
 export type DetectionMode = 'realtime' | 'observe' | '';
@@ -9,7 +10,13 @@ export type PolicyDisposition = 'proceed' | 'audit' | 'quarantine' | 'discard';
 export type PhishTaskStatus = 'submitting' | 'pending' | 'processing' | 'completed' | 'failed' | 'expired' | '';
 
 export type DisplayStatusEntry = DisposalDisplayStatusEntry;
-export interface UrlSummary { total: number; phishing: number; suspicious: number; normal: number }
+export interface UrlSummary {
+  version?: number; legacy?: boolean;
+  total: number; phishing: number; suspicious: number;
+  /** @deprecated Alias of safe for version 2 summaries. */
+  normal: number;
+  malicious?: number; safe?: number; needs_review?: number; invalid?: number; unvalidated?: number;
+}
 export interface RecallRecord { receiver: string; operate_result: string }
 export type RecipientDisposition = DisposalRecipientDisposition;
 
@@ -51,6 +58,7 @@ export interface InvestigationEvidence {
 }
 export interface UrlFindingAgent { verdict?: string; risk_level?: string }
 export interface UrlFinding {
+  validation?: { status?: string; code?: string; contract_version?: string };
   url?: string;
   final_url?: string;
   risk_level?: string;
@@ -61,7 +69,21 @@ export interface UrlFinding {
   screenshot_ref?: { storage_node?: string; key?: string };
   agent?: UrlFindingAgent;
 }
-export interface InvestigationResultDetails { url_findings?: UrlFinding[] }
+export interface ScreenshotObservation {
+  task_id: string;
+  attempt_id: string;
+  fetch_id: string;
+  url: string;
+  final_url?: string;
+  captured_at: string;
+  screenshot_ref?: { storage_node: string; key: string; digest_sha256?: string };
+  screenshot_omitted?: string;
+}
+export interface InvestigationResultDetails {
+  url_findings?: UrlFinding[];
+  screenshots?: ScreenshotObservation[];
+  screenshots_omitted_count?: number;
+}
 export interface InvestigationTask {
   id?: string;
   summary?: string;
@@ -69,7 +91,7 @@ export interface InvestigationTask {
   risk_level?: string;
   error_message?: string;
   steps?: InvestigationStep[];
-  result?: { verdict?: string; summary?: string; confidence?: number | null; evidence?: InvestigationEvidence[]; details?: InvestigationResultDetails };
+  result?: AssessmentResultFields & { verdict?: string; summary?: string; confidence?: number | null; evidence?: InvestigationEvidence[]; details?: InvestigationResultDetails };
   [key: string]: unknown;
 }
 export interface DetectionLogDetail {

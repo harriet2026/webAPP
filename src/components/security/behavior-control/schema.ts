@@ -8,8 +8,22 @@ const behaviorDimensionSchema = z.enum([
 ]);
 
 const emailPattern = /^(\*@[\w.-]+\.\w+|[\w.-]+@[\w.-]+\.\w+)$/;
-const ipPattern = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/;
 const domainPattern = /^[\w.-]+\.\w+$/;
+
+function isValidIPv4OrCIDR(value: string): boolean {
+  const [address, prefix, extra] = value.split('/');
+  if (extra !== undefined) return false;
+
+  const octets = address.split('.');
+  if (
+    octets.length !== 4
+    || !octets.every((octet) => /^(0|[1-9]\d{0,2})$/.test(octet) && Number(octet) <= 255)
+  ) {
+    return false;
+  }
+
+  return prefix === undefined || (/^\d{1,2}$/.test(prefix) && Number(prefix) <= 32);
+}
 
 export type BehaviorControlPriorityRange = {
   min: number;
@@ -40,7 +54,7 @@ const objectConfigSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('global') }),
   z.object({
     type: z.literal('sender'),
-    sub_type: z.enum(['individual', 'group']),
+    sub_type: z.enum(['individual', 'group', 'organization']),
     value: z.string(),
   }).superRefine((d, ctx) => {
     const v = d.value.trim();
@@ -50,6 +64,8 @@ const objectConfigSchema = z.discriminatedUnion('type', [
       else if (!emailPattern.test(v)) ctx.addIssue({ code: 'custom', path: ['value'], message: 'invalidEmail' });
     } else if (d.sub_type === 'group') {
       if (!v) ctx.addIssue({ code: 'custom', path: ['value'], message: 'groupRequired' });
+    } else if (!v) {
+      ctx.addIssue({ code: 'custom', path: ['value'], message: 'orgRequired' });
     }
   }),
   z.object({
@@ -60,7 +76,7 @@ const objectConfigSchema = z.discriminatedUnion('type', [
     const v = d.value.trim();
     if (d.sub_type === 'single') {
       if (!v) ctx.addIssue({ code: 'custom', path: ['value'], message: 'ipRequired' });
-      else if (!ipPattern.test(v)) ctx.addIssue({ code: 'custom', path: ['value'], message: 'invalidIp' });
+      else if (!isValidIPv4OrCIDR(v)) ctx.addIssue({ code: 'custom', path: ['value'], message: 'invalidIp' });
     } else if (!v) {
       ctx.addIssue({ code: 'custom', path: ['value'], message: 'ipGroupRequired' });
     }
@@ -84,7 +100,11 @@ export function createBehaviorControlSchema(priorityRange: BehaviorControlPriori
   return z.object({
     name: z.string().min(1, 'nameRequired').max(50, 'nameMaxLength'),
     description: z.string().max(200, 'descriptionMaxLength').optional(),
-    priority: z.number().int().min(priorityRange.min, 'priorityRange').max(priorityRange.max, 'priorityRange'),
+    priority: z
+      .number({ error: 'priorityRequired' })
+      .int('priorityInteger')
+      .min(priorityRange.min, 'priorityRange')
+      .max(priorityRange.max, 'priorityRange'),
     is_active: z.boolean(),
     valid_from: z.string().optional(),
     valid_until: z.string().optional(),

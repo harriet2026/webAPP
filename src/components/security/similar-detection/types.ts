@@ -31,12 +31,18 @@ export interface SubjectNormalization {
   similar_subject: boolean;
 }
 
+export type SimilarDetectionGroupConfig = Record<
+  SimilarDetectionDirection | 'aggregate',
+  SimilarDetectionDirectionConfig
+>;
+
 export interface SimilarDetectionConfig {
   mode: SimilarDetectionMode;
   enabled_directions: SimilarDetectionDirection[];
+  /** V2 compatibility mirror of similar_email.aggregate. */
   aggregate: SimilarDetectionDirectionConfig;
-  similar_email: Record<SimilarDetectionDirection, SimilarDetectionDirectionConfig>;
-  same_subject: Record<SimilarDetectionDirection, SimilarDetectionDirectionConfig>;
+  similar_email: SimilarDetectionGroupConfig;
+  same_subject: SimilarDetectionGroupConfig;
   subject_normalization: SubjectNormalization;
   version: number;
   updated_at?: string;

@@ -3,7 +3,9 @@ import type { CheckStatus } from '@/types/email-disposal-detail';
 const CHECK_STATUS_PRIORITY: readonly CheckStatus[] = [
   'threat',
   'suspicious',
+  'timeout',
   'processing',
+  'observed',
   'pass',
   'skipped',
 ];

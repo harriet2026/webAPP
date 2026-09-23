@@ -8,6 +8,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import zh from '../../messages/zh.json';
 import { recipientActionsForStatus } from '@/components/email-disposal/lib/detail-helpers';
 import { SingleRecipientActions } from '@/components/email-disposal/sections/overview/single-recipient-actions';
+import { RecipientStatus } from '@/components/email-disposal/components/recipient-status';
 
 vi.mock('sonner', () => ({
   toast: { info: vi.fn(), success: vi.fn(), error: vi.fn() },
@@ -26,7 +27,11 @@ describe('recipientActionsForStatus (GT-12880 B)', () => {
   });
 });
 
-function renderStrip(status: string, apiRequest = vi.fn().mockResolvedValue({ queue_id: 'Q1' })) {
+function renderStrip(
+  status: string,
+  apiRequest = vi.fn().mockResolvedValue({ queue_id: 'Q1' }),
+  availability: { available?: boolean; reason?: 'original_expired' | 'storage_unavailable' } = {},
+) {
   const utils = render(
     <NextIntlClientProvider locale="zh" messages={zh as unknown as Record<string, unknown>}>
       <SingleRecipientActions
@@ -36,6 +41,8 @@ function renderStrip(status: string, apiRequest = vi.fn().mockResolvedValue({ qu
         apiRequest={apiRequest}
         onDisposed={vi.fn()}
         readOnly={false}
+        redeliverAvailable={availability.available}
+        redeliverUnavailableReason={availability.reason}
       />
     </NextIntlClientProvider>,
   );
@@ -65,5 +72,47 @@ describe('SingleRecipientActions redeliver dialog (GT-12880 B)', () => {
     await screen.findByTestId('email-disposal-redeliver-dialog');
     // delivered 无失败者 → 默认全选（即该收件人已勾选）→ 警示可见
     expect(await screen.findByTestId('email-disposal-redeliver-duplicate-warning')).toBeTruthy();
+  });
+
+  it('原文未保留或已过期：重新投递前置禁用，不能打开弹窗或提交 API', () => {
+    const apiRequest = vi.fn();
+    renderStrip('delivery_failed', apiRequest, { available: false, reason: 'original_expired' });
+    const button = screen.getByRole('button', { name: /重新投递/ });
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(screen.queryByTestId('email-disposal-redeliver-dialog')).not.toBeInTheDocument();
+    expect(apiRequest).not.toHaveBeenCalled();
+  });
+
+  it('原文存储节点暂不可用：同样前置禁用，避免提交后才失败', () => {
+    renderStrip('delivered', vi.fn(), { available: false, reason: 'storage_unavailable' });
+    expect(screen.getByRole('button', { name: /重新投递/ })).toBeDisabled();
+  });
+});
+
+describe('RecipientStatus redeliver availability (GT-13113)', () => {
+  it('多收件人行入口和批量入口都在原文过期时禁用', () => {
+    render(
+      <NextIntlClientProvider locale="zh" messages={zh as unknown as Record<string, unknown>}>
+        <RecipientStatus
+          recipient_dispositions={[
+            { recipient: 'failed@partner.com', final_action: 'accept', status: 'delivery_failed' },
+            { recipient: 'delivered@partner.com', final_action: 'accept', status: 'delivered' },
+          ]}
+          mailLogId={99}
+          sender="user@tenant.example"
+          apiRequest={vi.fn()}
+          onDisposed={vi.fn()}
+          readOnly={false}
+          redeliverAvailable={false}
+          redeliverUnavailableReason="original_expired"
+        />
+      </NextIntlClientProvider>,
+    );
+
+    expect(screen.getByTestId('email-disposal-recipient-action-failed@partner.com-redeliver')).toBeDisabled();
+    expect(screen.getByTestId('email-disposal-recipient-action-delivered@partner.com-redeliver')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('email-disposal-recipient-checkbox-failed@partner.com'));
+    expect(screen.getByTestId('email-disposal-recipient-batch-redeliver')).toBeDisabled();
   });
 });

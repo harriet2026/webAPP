@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextIntlClientProvider } from 'next-intl';
 import zh from '@/../messages/zh.json';
 import type { MailLogDetail } from '@/types/email-disposal-detail';
 import { AnalysisSection } from './analysis-section';
+import { buildDetectionStages, deriveFinalVerdict } from '../hooks/use-detection-stages';
 
 // 命中模块清单的渲染守卫：effective_for 表示动作实际作用范围；终止动作候选
 // 无人生效时隐藏，proceed/observe 则由后端写入其实际命中收件人。
@@ -101,8 +102,103 @@ describe('命中模块清单（GT-12727 §7.10）', () => {
 
     expect(screen.queryByTestId('analysis-disposal-basis')).not.toBeInTheDocument();
     const modules = screen.getByTestId('analysis-hit-modules');
-    expect(modules).toHaveTextContent('sysrule:auth_spoofing_spf_none');
+    expect(modules).toHaveTextContent('SPF：未维护 (None)');
+    expect(modules).not.toHaveTextContent('sysrule:auth_spoofing_spf_none');
     expect(modules).toHaveTextContent('生效：qfliu@dm163.cacter.com');
+  });
+
+  it('GT-13660：四项配置化认证命中使用配置页名称，不展示内部标识', () => {
+    const detail = detailWithModules();
+    const checks = [
+      ['spf_none', 'SPF：未维护 (None)'],
+      ['ptr_ehlo_mismatch', 'PTR：与EHLO不匹配'],
+      ['dmarc_no_record', 'DMARC：DMARC无记录'],
+      ['dkim_none', 'DKIM：无签名'],
+    ];
+    detail.disposal_basis = {
+      modules: checks.map(([key]) => ({
+        policy_key: 'AUTH',
+        rule_name: `sysrule:auth_spoofing_${key}`,
+        rule_id: `config:antispam:tenant:1:${key}:615acc3a5021`,
+        action: 'proceed',
+        recipients: ['a@x.com', 'b@x.com'],
+        effective_for: ['a@x.com'],
+      })),
+    };
+
+    render(wrap(<AnalysisSection detail={detail} aiEnabled events={[]} />));
+
+    expect(screen.queryByTestId('analysis-disposal-basis')).not.toBeInTheDocument();
+    const modules = screen.getByTestId('analysis-hit-modules');
+    const items = within(modules).getAllByTestId('analysis-hit-module-item');
+    checks.forEach(([, label], index) => {
+      expect(items[index]).toHaveTextContent(label);
+      expect(within(items[index]).getByTestId('analysis-hit-module-rule-label')).toHaveTextContent(label);
+      expect(items[index]).toHaveTextContent('生效：a@x.com');
+      expect(items[index]).toHaveTextContent('仅命中：b@x.com');
+    });
+    expect(modules).not.toHaveTextContent('sysrule:');
+    expect(modules).not.toHaveTextContent('config:');
+  });
+
+  it('GT-13660：终结动作的完整处置依据使用友好名称', () => {
+    const detail = detailWithModules();
+    detail.disposal_basis = {
+      policy_key: 'AUTH',
+      rule_name: 'sysrule:auth_spoofing_spf_fail',
+      rule_id: 'config:antispam:tenant:1:spf_fail:615acc3a5021',
+      action: 'quarantine',
+    };
+
+    render(wrap(<AnalysisSection detail={detail} aiEnabled events={[]} />));
+
+    const basis = screen.getByTestId('analysis-disposal-basis');
+    expect(basis).toHaveTextContent('SPF：硬拒绝 (Fail)');
+    expect(basis).toHaveTextContent('隔离');
+    expect(basis).not.toHaveTextContent('sysrule:');
+    expect(basis).not.toHaveTextContent('config:');
+  });
+
+  it('GT-13660：按收件人分组的折叠、展开与检测阶段摘要保持相同友好名称', () => {
+    const detail = detailWithModules();
+    const auth = {
+      policy_key: 'AUTH',
+      rule_name: 'sysrule:auth_spoofing_dkim_fail',
+      rule_id: 'config:antispam:tenant:1:dkim_fail:615acc3a5021',
+      action: 'quarantine',
+      recipients: ['a@x.com'],
+      effective_for: ['a@x.com'],
+    };
+    detail.disposal_basis = {
+      ...auth,
+      modules: [auth, {
+        policy_key: 'ACF', rule_name: '财务审核规则', rule_id: 'ACF-77', action: 'audit',
+        recipients: ['b@x.com'], effective_for: ['b@x.com'],
+      }],
+    };
+    const stages = buildDetectionStages(detail);
+
+    render(wrap(<AnalysisSection detail={detail} aiEnabled events={[]}
+      analysis={{ scope: 'all', final_verdict: deriveFinalVerdict(stages), total_elapsed_ms: 0, stages }} />));
+
+    const stage = screen.getByTestId('analysis-stage-2-basis-groups');
+    expect(stage).toHaveTextContent('DKIM：验证失败');
+    expect(stage).not.toHaveTextContent('sysrule:');
+    const row = screen.getByTestId('analysis-disposal-basis-row-0');
+    expect(row).toHaveAttribute('aria-expanded', 'false');
+    expect(row).toHaveTextContent('DKIM：验证失败');
+    expect(row).toHaveTextContent('a@x.com');
+    expect(screen.getByTestId('analysis-disposal-basis-row-1')).toHaveTextContent('财务审核规则');
+
+    fireEvent.click(row);
+
+    const expanded = screen.getByTestId('analysis-disposal-basis-0');
+    expect(expanded).toHaveTextContent('DKIM：验证失败');
+    expect(expanded).toHaveTextContent('a@x.com');
+    expect(expanded).not.toHaveTextContent('sysrule:');
+    expect(expanded).not.toHaveTextContent('config:');
+    fireEvent.click(row);
+    expect(screen.queryByTestId('analysis-disposal-basis-0')).not.toBeInTheDocument();
   });
 
   it('整条规则无人最终生效时不展示，部分生效仍逐收件人标注', () => {
