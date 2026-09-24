@@ -47,7 +47,7 @@ const row = {
 
 describe('rule effectiveness detail table', () => {
   it('keeps the prototype version history and omits custom snapshot controls', () => {
-    render(<DetailTable rows={[row as RuleEffectivenessRow]} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
+    render(<DetailTable rows={[row as RuleEffectivenessRow]} totalCount={1} page={1} pageSize={20} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
 
     expect(screen.queryByTestId('rule-effectiveness-tenant-period-1')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', {name:'expandRow'}));
@@ -56,7 +56,7 @@ describe('rule effectiveness detail table', () => {
   });
 
   it('projects the action difference into separate false-positive and false-negative columns', () => {
-    const { rerender } = render(<DetailTable rows={[row as RuleEffectivenessRow]} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
+    const { rerender } = render(<DetailTable rows={[row as RuleEffectivenessRow]} totalCount={1} page={1} pageSize={20} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
     expect(screen.getByTestId('rule-effectiveness-fp-risk-period-1')).toHaveTextContent('50.0%');
     expect(screen.getByTestId('rule-effectiveness-fn-risk-period-1')).toHaveTextContent('notApplicable');
 
@@ -67,7 +67,7 @@ describe('rule effectiveness detail table', () => {
       false_positive_rate: null,
       false_negative_rate: 0.25,
     };
-    rerender(<DetailTable rows={[configuredAccept as RuleEffectivenessRow]} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
+    rerender(<DetailTable rows={[configuredAccept as RuleEffectivenessRow]} totalCount={1} page={1} pageSize={20} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
     expect(screen.getByTestId('rule-effectiveness-fp-risk-period-1')).toHaveTextContent('notApplicable');
     expect(screen.getByTestId('rule-effectiveness-fn-risk-period-1')).toHaveTextContent('25.0%');
   });
@@ -82,7 +82,7 @@ describe('rule effectiveness detail table', () => {
       risk_unavailable_reason: 'unsupported_configured_action',
     };
 
-    render(<DetailTable rows={[proceed as RuleEffectivenessRow]} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
+    render(<DetailTable rows={[proceed as RuleEffectivenessRow]} totalCount={1} page={1} pageSize={20} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
 
     expect(screen.getByTestId('rule-effectiveness-fp-risk-period-1')).toHaveTextContent('notApplicable');
     expect(screen.getByTestId('rule-effectiveness-fn-risk-period-1')).toHaveTextContent('notApplicable');
@@ -109,7 +109,7 @@ describe('rule effectiveness detail table', () => {
       }],
     };
 
-    render(<DetailTable rows={[versioned as RuleEffectivenessRow]} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
+    render(<DetailTable rows={[versioned as RuleEffectivenessRow]} totalCount={1} page={1} pageSize={20} onPageChange={vi.fn()} onPageSizeChange={vi.fn()} isLoading={false} onViewHits={vi.fn()} onNavigateToConfig={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', {name:'expandRow'}));
 
     const current = screen.getByTestId('rule-effectiveness-version-period-1-2');

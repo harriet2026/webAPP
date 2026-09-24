@@ -21,18 +21,35 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ServerPagination } from '@/components/shared/server-pagination';
 import { actionColor, OBSERVE_TIMEOUT_DAYS, strategyPathLabels } from './constants';
 import { StrategyPathBreadcrumb } from './StrategyPathBreadcrumb';
 import type { RuleEffectivenessRow } from '@/lib/api/rule-effectiveness-view';
 
 interface DetailTableProps {
+  // 当前页要渲染的行；totalCount 是筛选后的全量行数，用于分页条计算总页数。
   rows: RuleEffectivenessRow[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
   isLoading: boolean;
   onViewHits: (row: RuleEffectivenessRow) => void;
   onNavigateToConfig: (row: RuleEffectivenessRow) => void;
 }
 
-export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }: DetailTableProps) {
+export function DetailTable({
+  rows,
+  totalCount,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  isLoading,
+  onViewHits,
+  onNavigateToConfig,
+}: DetailTableProps) {
   const t = useTranslations('ruleEffectiveness.detail');
   const tPath = useTranslations('ruleEffectiveness.path');
   const tAction = useTranslations('ruleEffectiveness.wouldBeActions');
@@ -295,6 +312,19 @@ export function DetailTable({ rows, isLoading, onViewHits, onNavigateToConfig }:
               </Table>
             </div>
           </TooltipProvider>
+        )}
+        {!isLoading && totalCount > 0 && (
+          <div className="mt-4">
+            <ServerPagination
+              testId="rule-effectiveness-detail-pagination"
+              page={page}
+              pageSize={pageSize}
+              total={totalCount}
+              onPageChange={onPageChange}
+              onPageSizeChange={onPageSizeChange}
+              pageSizeOptions={[10, 20, 50, 100]}
+            />
+          </div>
         )}
       </CardContent>
     </Card>

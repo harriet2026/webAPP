@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { AlertCircle, Gauge, RefreshCw, ShieldX } from 'lucide-react';
@@ -53,6 +53,9 @@ export function RuleEffectivenessPage() {
   const [durationBuckets, setDurationBuckets] = useState<ObserveDurationBucket[]>([]);
   const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
   const { scopeActive } = useSecurityScope(scopeTenantId);
+  // 效能明细表分页：与处置中心使用同一套 ServerPagination 组件/交互规范。
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const { startDate, endDate } = useMemo(
     () => timeRangeToDates(timeRange, customRange),
@@ -73,6 +76,24 @@ export function RuleEffectivenessPage() {
     durationBuckets,
     scopeTenantId,
   });
+
+  // 筛选条件变化时回到第一页，避免筛出的数据变少后停留在一个已经不存在的页码上。
+  const moduleOptionsKey = effectiveModules.join(',');
+  const similarDetectionTypesKey = effectiveSimilarDetectionTypes.join(',');
+  const durationBucketsKey = durationBuckets.join(',');
+  useEffect(() => {
+    setPage(1);
+  }, [startDate, endDate, moduleOptionsKey, similarDetectionTypesKey, durationBucketsKey, scopeTenantId]);
+
+  const totalCount = data?.rows.length ?? 0;
+  const pagedRows = useMemo(
+    () => (data?.rows ?? []).slice((page - 1) * pageSize, page * pageSize),
+    [data?.rows, page, pageSize],
+  );
+  const handlePageSizeChange = useCallback((nextPageSize: number) => {
+    setPageSize(nextPageSize);
+    setPage(1);
+  }, []);
 
   // 携带 source=rule_effectiveness 标记，供目标配置页（策略流水线/智能体中心）
   // 识别来源并展示可返回的上下文提示条，不改变目标页原有的 deep-link 参数解析。
@@ -155,7 +176,12 @@ export function RuleEffectivenessPage() {
           <KpiCards data={data?.kpi} isLoading={isLoading} />
 
           <DetailTable
-            rows={data?.rows ?? []}
+            rows={pagedRows}
+            totalCount={totalCount}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
             isLoading={isLoading}
             onViewHits={handleViewHits}
             onNavigateToConfig={handleNavigateToConfig}
