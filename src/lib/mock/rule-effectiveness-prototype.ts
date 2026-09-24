@@ -11,7 +11,7 @@ function threatSeriesValue(
 
 interface RuleEffectivenessMockRow {
   id: string;
-  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection';
+  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter';
   // 相似邮件检测/相同主题检测是两条独立策略（不同判定维度、不同误判特征），
   // 观察对象必须按策略拆分，不能合并为一个笼统的「相似检测」模块级观察对象。
   similar_detection_type?: 'similar_email' | 'same_subject';
@@ -35,12 +35,19 @@ interface RuleEffectivenessMockRow {
   version_no?: number;
   /** 历史版本的变更摘要，未指定时使用通用文案。 */
   version_change_summary?: string;
+  /**
+   * 覆盖模块级动作候选集合。发信人黑白名单下白名单规则（action=accept）观察期内
+   * 命中即为放行，不会产生拦截类结果，因此用空数组覆盖模块级的拦截动作候选；
+   * 黑名单规则沿用模块级候选（不设置该字段）。
+   */
+  actions?: RuleEffectivenessWouldBeAction[];
 }
 
 const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_module'], string> = {
   auth_spoofing: '/security/pipeline?module=authSpoofing',
   similar_detection: '/security/pipeline?module=similarDetection',
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
+  sender_filter: '/security/sender-filter',
 };
 
 // 相似检测配置页按 detectionType Tab 划分（相似邮件检测/相同主题检测），跳转时
@@ -376,13 +383,106 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
     version_no: 1,
   },
+  // 发信人黑白名单——按单条规则拆分观察对象（与 src/lib/mock/fixtures.ts 中
+  // mockSenderFilterRulesList 的 id 1-5 一一对应），而不是笼统的模块级观察对象，
+  // 演示黑名单/白名单规则各自不同的命中特征与策略版本管理。
+  {
+    id: 'sender-filter-rule-1',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:1',
+    sub_strategy_name_snapshot: '垃圾邮件发送者',
+    is_deleted: false,
+    observed_days: 26,
+    hits: 62,
+    would_block_ratio: 0.82,
+    reviewed_ratio: 0.4,
+    weighted_reviewed_ratio: 0.33,
+    false_positive_rate: 0.04,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    version_no: 1,
+  },
+  {
+    id: 'sender-filter-rule-2',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:2',
+    sub_strategy_name_snapshot: '钓鱼域名',
+    is_deleted: false,
+    observed_days: 18,
+    hits: 45,
+    would_block_ratio: 0.65,
+    reviewed_ratio: 0.5,
+    weighted_reviewed_ratio: 0.42,
+    false_positive_rate: 0.09,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    // 示例：该规则的匹配条件曾发生实质性调整（新增子域名通配符匹配），触发过一次
+    // 观察期重置——当前 observed_days=18 只反映 v2 的观察时长。
+    version_no: 2,
+    version_change_summary: '匹配条件调整：新增子域名通配符匹配，触发观察期重置',
+  },
+  {
+    id: 'sender-filter-rule-3',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:3',
+    sub_strategy_name_snapshot: '可疑群组',
+    is_deleted: false,
+    observed_days: 50,
+    hits: 30,
+    would_block_ratio: 0.3,
+    reviewed_ratio: 0.6,
+    weighted_reviewed_ratio: 0.5,
+    false_positive_rate: 0.15,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    version_no: 1,
+  },
+  // 白名单规则（action=accept）——观察期内命中即为放行，不产生拦截类结果，
+  // 因此用 actions: [] 覆盖模块级的拦截动作候选。
+  {
+    id: 'sender-filter-rule-4',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:4',
+    sub_strategy_name_snapshot: '可信合作伙伴',
+    is_deleted: false,
+    observed_days: 15,
+    hits: 40,
+    would_block_ratio: 0,
+    reviewed_ratio: 0.2,
+    weighted_reviewed_ratio: 0.15,
+    false_positive_rate: 0.01,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    version_no: 1,
+    actions: [],
+  },
+  {
+    id: 'sender-filter-rule-5',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:5',
+    sub_strategy_name_snapshot: '内部财务组',
+    is_deleted: false,
+    observed_days: 8,
+    hits: 25,
+    would_block_ratio: 0,
+    reviewed_ratio: 0.1,
+    weighted_reviewed_ratio: 0.08,
+    false_positive_rate: 0.02,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    // 示例：该规则的白名单成员组曾发生实质性调整（财务部门人员变更），触发过一次
+    // 观察期重置。
+    version_no: 2,
+    version_change_summary: '白名单成员组调整（财务部门人员变更），触发观察期重置',
+    actions: [],
+  },
 ];
 
 
 type RuleEffectivenessWouldBeAction = 'accept' | 'quarantine' | 'audit' | 'reject' | 'discard' | 'recall';
 
 // 命中构成的候选「拦截类」处置动作必须逐模块对齐系统真实支持的动作枚举，不能
-// 三个模块共用同一份列表：reject 只有身份认证与仿冒检测（AuthSpoofingAction）
+// 三个模块共用同一份列表：reject 只有身份认证与仿冒检测���AuthSpoofingAction）
 // 支持，相似检测（SimilarDetectionAction）与钓鱼检测智能体（PolicyDisposition）
 // 都没有 reject，只有 quarantine/discard/audit。accept（投递）/recall（召回）
 // 是命中最终结果里必然存在的两类，与模块无关，单独在下方计算。
@@ -390,6 +490,9 @@ const RULE_EFFECTIVENESS_MODULE_ACTIONS: Record<RuleEffectivenessMockRow['policy
   auth_spoofing: ['reject', 'discard', 'quarantine', 'audit'],
   similar_detection: ['discard', 'quarantine', 'audit'],
   phishing_detection: ['discard', 'quarantine', 'audit'],
+  // 黑名单规则动作与 BlacklistAction 对齐（reject/quarantine/audit/discard）；
+  // 白名单规则（action=accept）通过每行的 `actions: []` 覆盖，不落到这个默认集合。
+  sender_filter: ['reject', 'discard', 'quarantine', 'audit'],
 };
 
 function allocateActionCounts(
@@ -413,9 +516,13 @@ function ruleEffectivenessActionBreakdown(
   row: RuleEffectivenessMockRow,
   index: number,
 ): { action: RuleEffectivenessWouldBeAction; count: number }[] {
-  const actions = RULE_EFFECTIVENESS_MODULE_ACTIONS[row.policy_module];
+  const actions = row.actions ?? RULE_EFFECTIVENESS_MODULE_ACTIONS[row.policy_module];
   const total = row.hits;
   if (total <= 0) return [];
+  if (actions.length === 0) {
+    // 白名单规则：命中即放行，观察期内不产生拦截类结果。
+    return [{ action: 'accept' as const, count: total }];
+  }
 
   // 投递（accept）：观察模式下命中本身不拦截，最终正常送达的占比——用确定性
   // 伪随机取 55%~75% 区间，作为观察态命中结果里天然占大头的一类。
