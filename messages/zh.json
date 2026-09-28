@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则总开关�����关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则总开关�������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选择“未检测 (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选择“未检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1180,7 +1180,7 @@
       "probeCompleteToast": "探测完成",
       "drawerTitleNew": "新建收信域",
       "drawerTitleEdit": "编辑收信域",
-      "drawerDescription": "登记入站域名并映射到内部投递地址",
+      "drawerDescription": "登记入站域名并映射到内部投递���址",
       "sectionBasic": "基础配置",
       "domainNameLabel": "收信域名",
       "domainNamePlaceholder": "如 example.cn",
@@ -1341,7 +1341,7 @@
   },
   "groupPolicy": {
     "eyebrow": "群组策略",
-    "title": "群组策略",
+    "title": "群组���略",
     "refreshSuccess": "刷新完成",
     "refreshFailed": "刷新失败，请重试",
     "description": "描述",
@@ -1462,7 +1462,7 @@
       "ipFilter": "基于 IP 地址的黑白名单过滤",
       "rbl": "基于公共 RBL 名单过滤",
       "overseas": "识别海外邮件并按策略处置",
-      "senderFilter": "发信人黑白名单过滤",
+      "senderFilter": "发信人黑白名��过滤",
       "userList": "用户���黑白名单管理",
       "behaviorControl": "发信行为分析和控制",
       "authSpoofing": "检测伪造发件人和认证仿冒",
@@ -1611,7 +1611,7 @@
       "dkimValid": "DKIM 验证",
       "dmarcValid": "DMARC 验证",
       "ptrValid": "PTR 验证",
-      "ptrDomain": "PTR 反向域名",
+      "ptrDomain": "PTR ���向域名",
       "cacRules": "CAC 规则",
       "cacResultCode": "CAC 结果代码",
       "cacTag": "CAC 标签",
@@ -2044,7 +2044,7 @@
       "byAuto": "自动",
       "byDns": "DNS",
       "byManual": "人工",
-      "autoVerified": "自动校验"
+      "autoVerified": "自动校��"
     },
     "form": {
       "code": "租户编码",
@@ -2205,7 +2205,7 @@
     "username": "用户名",
     "email": "邮箱",
     "role": "角色",
-    "tenant": "租户",
+    "tenant": "租���",
     "systemAdmin": "系统管理员",
     "tenantAdmin": "租户管理员",
     "lastLogin": "最后登录",
@@ -2824,7 +2824,7 @@
     }
   },
   "emailPreview": {
-    "title": "邮件预览",
+    "title": "��件预览",
     "subject": "主题",
     "from": "发件人",
     "to": "收件人",
@@ -3545,7 +3545,7 @@
     "tempfailPlaceholder": "自定义 421 消息",
     "connectionLimits": "连接数限制（-1 = 不限制）",
     "dailyLimit": "每日连接数限制",
-    "concurrentLimit": "并发连接数限制",
+    "concurrentLimit": "并���连接数限制",
     "windowMinutes": "时间窗口（分钟���",
     "windowLimit": "窗口内连接数限制",
     "failureLimits": "失败次数限制（-1 = 不限制）",
@@ -3677,7 +3677,7 @@
   "ipFilter": {
     "title": "IP 黑白名单",
     "blacklist": "黑名单规则",
-    "whitelist": "白名单规则",
+    "whitelist": "��名单规则",
     "enabled": "已启用",
     "disabled": "已停用",
     "unsavedChanges": "有未保存的更改",
@@ -4094,7 +4094,7 @@
     "regionNameLabel": "归属地",
     "regionNamePlaceholder": "如「Google DNS」或「阿里云香港」",
     "autoFillHint": "选择地区后自动填充，可手动修改，最多50字符",
-    "ipRequired": "请输入IP段",
+    "ipRequired": "请输���IP段",
     "regionRequired": "请选择地区代码",
     "usageTip": "自定义IP定位库的优先级高于系统内置GeoIP库，配置后将优先使用自定义映射进行地域识别。",
     "countryCN": "中国",
@@ -4792,6 +4792,8 @@
     "searchPlaceholder": "搜索规则名称、管控对象...",
     "complexRule": "配置异常",
     "toggleRule": "切换规则“{name}”的启用状态",
+    "toggleObserveMode": "切换规则“{name}”的观察模式",
+
     "empty": "暂无规则",
     "emptyHint": "点击“{action}”创建第一条规则",
     "createNow": "立即创建",
@@ -4806,6 +4808,7 @@
       "action": "执行动作",
       "priority": "优先级",
       "status": "状态",
+      "observeMode": "观察模式",
       "modified": "修改时间",
       "operations": "操作"
     },
@@ -4892,6 +4895,7 @@
       "validFrom": "有效期开始",
       "validUntil": "有效期结束",
       "isActive": "启用该规则",
+      "observeMode": "观察模式",
       "description": "备注",
       "thresholdA": "阈值A",
       "thresholdB": "阈值B",
@@ -5209,7 +5213,7 @@
       "attachments": "个附件",
       "ocrMode_none": "不检测",
       "ocrMode_light": "检测",
-      "qrDetection": "二维码图片检测",
+      "qrDetection": "二���码图片检测",
       "qrMode_none": "不检测",
       "qrMode_light": "轻度检测 - 识别到二维码即拦截",
       "qrMode_deep": "深度检测 - 解码内容并送入后续模块检测",
@@ -5370,7 +5374,7 @@
     "failedToSave": "保存失败",
     "tenantRequired": {
       "title": "需要选择租户",
-      "description": "URL 检测与防护是租户级别的配置，请先选择要管理的租户。",
+      "description": "URL 检测与防护���租户级别的配置，请先选择要管理的租户。",
       "hint": "请使用页面右上角的租户选择器选择一个租户"
     },
     "tabs": {
@@ -5415,7 +5419,7 @@
       "cleanupHint": "自动清理超过该天数的旧记录（有效范围：30-365天）",
       "cleanupError": "清理周期需在 30-365 天之间",
       "cloudIntel": "云端URL情报查询",
-      "cloudIntelDesc": "启用后，查询云端威胁情报库；禁用后仅依赖本地沙箱",
+      "cloudIntelDesc": "启用后，查询云端威胁情报库；禁用后仅依��本地沙箱",
       "cloudIntelTip": "查询云端威胁情报库，获取更全面的URL风险评估"
     },
     "linkProtection": {
@@ -6164,7 +6168,7 @@
       },
       "total": "共 {n} 条",
       "sameMailResult": "同一封邮件 {current}/{total}",
-      "sameMailResultTooltip": "本行与同一关联号（{messageUuid}）的其他记录属于同一次 SMTP 投递，分别展示不同收件人的处理结果。",
+      "sameMailResultTooltip": "本行与同��关联号（{messageUuid}）的其他记录属于同一次 SMTP 投递，分别展示不同收件人的处理结果。",
       "settings": "设置",
       "columnSettings": "列设置",
       "densitySettings": "显示密度",
@@ -6473,7 +6477,7 @@
           "ruleFailed": "加入黑名单规则失败",
           "confirmTitle": {
             "domain": "确认将此域名加入黑名单？",
-            "url": "确认将此 URL 加入黑名单？",
+            "url": "确认将此 URL 加入黑名��？",
             "attachment_hash": "确认将此附件哈希加入黑名单？"
           },
           "confirmImpact": {
@@ -7086,7 +7090,7 @@
       "selectConditionHint": "从左侧选择条件进行配置,或点击已有条件进行编辑。",
       "previewTitle": "表达式预览",
       "previewHint": "条件树的实时 JSON 预览。",
-      "previewC6Hint": "富表达式预览将在下一迭代上线。",
+      "previewC6Hint": "富表达式预览将在下一迭代上��。",
       "matchModeLabel": "匹配模式",
       "comparisonLabel": "比较",
       "valuesLabel": "值(每行一个)",
@@ -7174,7 +7178,7 @@
         "ptrResult": "PTR 结果",
         "similarDomain": "相似域名",
         "mailFromEmpty": "Mail From 为空",
-        "mailFromFromConsistency": "信封-头 From 一致性",
+        "mailFromFromConsistency": "信封-头 From ���致性",
         "virusScanResult": "病毒扫描结果",
         "comprehensiveEngineResult": "意图引擎",
         "senderIpCount15Min": "发件 IP 数 (15分钟)",
@@ -7761,7 +7765,7 @@
     "notifyTimesRequired": "尚未添加通知时间点。请选择时间并点击“添加时间点”后再保存。",
     "tzComputedIn": "通知时间以 {tz} 计算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
-    "tzUseBrowser": "使用浏览器时区（{tz}）",
+    "tzUseBrowser": "使用��览器时区（{tz}）",
     "tzKeepCurrent": "保持���前时区（{tz}）",
     "range": "通知范围",
     "recipientGroups": "收信人组",
@@ -8872,7 +8876,7 @@
         "screenshot_save_failed": "截图保存失败",
         "screenshot_conflict": "截图保存发生冲突",
         "http_fallback": "本次使用普通网页抓取，无法生成截图",
-        "crawl4ai_response_too_large": "网页服务响应超过大小限制，未能保存截图"
+        "crawl4ai_response_too_large": "网页服务��应超过大小限制，未能保存截图"
       }
     },
     "eyebrow": "钓鱼邮件检测智能体",
@@ -9444,7 +9448,7 @@
     "category": {
       "all": "全部",
       "intercepted": "已拦截",
-      "pending_review": "待审核",
+      "pending_review": "待��核",
       "displayname": "发信人名称仿冒",
       "brand": "品牌保护命中"
     },
@@ -9605,7 +9609,7 @@
       "sensExtreme": "极高",
       "sensRecommended": "已按职务推荐灵敏度",
       "confidenceThreshold": "置信度阈值",
-      "disposition": "处置策略",
+      "disposition": "���置策略",
       "modeObserve": "观察模式",
       "modeStandard": "标准模式",
       "modeStrict": "严格模式",
@@ -9632,7 +9636,7 @@
       "errEmailDup": "该邮箱已作为保护对象存在",
       "errEmailInvalid": "请输入合法的邮箱地址",
       "errPasteOverLimit": "批量添加单次最多 20 条",
-      "pasteIssue": "第 {line} 行：{reason}",
+      "pasteIssue": "第 {line} ��：{reason}",
       "pasteIssueReason": {
         "format": "请按 姓名,邮箱 格式填写",
         "email": "邮箱格式不正确",
@@ -9960,7 +9964,7 @@
       "title": "标记为误报",
       "description": "标记后将停止对该邮件执行召回，可选把发件人加入白名单。",
       "addWhitelist": "同时把发件人加入白名单",
-      "detailPlaceholder": "补充说明（可选）",
+      "detailPlaceholder": "补充说���（可选）",
       "cancel": "取消",
       "submit": "提交",
       "reasons": {
@@ -10246,7 +10250,7 @@
     "addSource": "新增数据源",
     "appIdPlaceholder": "如 app-8821",
     "authCodePlaceholderNew": "请输入授权码",
-    "autoSyncDesc": "开启后按 Cron 周期自动拉取远端数据",
+    "autoSyncDesc": "开启���按 Cron 周期自动拉取远端数据",
     "autoSyncOff": "关闭",
     "autoSyncOn": "开启",
     "autoSyncTitle": "开启自动同步",
@@ -10906,7 +10910,7 @@
     },
     "hints": {
       "minCharClasses": "四类字符（大写/小写/数字/特殊）中至少满足 N 类",
-      "historyLimit": "新密码不能与最近 N 次重复；0 表示不限制",
+      "historyLimit": "新密码不能与最近 N 次重复；0 表��不限制",
       "passwordMaxAgeDays": "0 表示永不过期",
       "maxOnline": "0 表示不限制",
       "overflowPolicy": "「拒绝新登录」更严：合法会话在线时，攻击者的新登录会被直接拒绝",
@@ -11416,7 +11420,7 @@
       "helo_pattern_regex_invalid": "HELO 匹配的正则表达式不合法，请检查语法",
       "is_active_required": "请指定是否生效",
       "not_found": "准入规则不存在，可能已被删除",
-      "null_sender_requires_cidr": "允许空发件人的规则只按来源 IP 匹配，因此必须填写来源 IP 段",
+      "null_sender_requires_cidr": "允许空发件人的规则只按来源 IP 匹配，因此必须填写来�� IP 段",
       "privileged_requires_system_admin": "创建特权准入规则需要平台管理员权限",
       "rate_limit_must_be_positive": "每小时限额必须大于 0",
       "rcpt_domain_not_owned": "收件域必须是本租户已验证的域名或其子域",
@@ -11894,7 +11898,7 @@
     "mail_routing_helper": {
       "mail_routing_rules_managed_by_system": "邮件路由规则仅平台管理员可管理",
       "mail_routing_rules_imported_with_scope": "邮件路由规则必须以 scope=mail_routing_relay 或 scope=mail_routing_outbound 导入",
-      "tenant_id_required_select_tenant_x": "请先选择租户，再管理邮件路由规则"
+      "tenant_id_required_select_tenant_x": "请先选择租户，再管理邮件路由���则"
     },
     "monitor_handlers": {
       "backup_task_not_found": "备份任务不存在"

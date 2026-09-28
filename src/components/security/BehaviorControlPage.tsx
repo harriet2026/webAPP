@@ -46,6 +46,7 @@ export function BehaviorControlPage({ embedded = false }: Props) {
   const [dirFilter, setDirFilter] = useState<string>('all');
   const [objFilter, setObjFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [observeModes, setObserveModes] = useState<Record<number, boolean>>({});
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<BehaviorControlRuleView | null>(null);
   const [drawerDefaults, setDrawerDefaults] = useState<Partial<import('@/types/behavior-control').BehaviorControlFormData> | undefined>(undefined);
@@ -227,6 +228,8 @@ export function BehaviorControlPage({ embedded = false }: Props) {
             onDelete={(v) => setDeleteTarget(v)}
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
             togglePending={toggleMutation.isPending}
+            observeModes={observeModes}
+            onObserveToggle={(id, enabled) => setObserveModes((current) => ({ ...current, [id]: enabled }))}
           />
           <RuleListPagination
             page={page}
@@ -243,7 +246,14 @@ export function BehaviorControlPage({ embedded = false }: Props) {
         </>
       )}
 
-      <BehaviorControlDrawer open={drawerOpen} onOpenChange={setDrawerOpen} editing={editing} defaults={drawerDefaults} />
+      <BehaviorControlDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        editing={editing}
+        defaults={drawerDefaults}
+        observeMode={editing ? observeModes[editing.rule.id] ?? false : false}
+        onObserveModeChange={(id, enabled) => setObserveModes((current) => ({ ...current, [id]: enabled }))}
+      />
 
       {deleteTarget && (
         <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
