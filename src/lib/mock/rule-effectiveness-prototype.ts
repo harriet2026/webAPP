@@ -49,8 +49,18 @@ const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_mo
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
   sender_filter: '/security/sender-filter',
   behavior_control: '/security/pipeline?module=behaviorControl',
-  content_rules: '/security/pipeline?module=contentRules',
+  // 流水线页内容规则模块的真实 key 是 'content'（见 PolicyPipelinePage 的
+  // Stage3PolicyKey 与 policy-deep-link.ts 的 PipelineModuleKey），不是
+  // 'contentRules'；用错 key 会导致跳转后流水线页无法定位到内容规则抽屉。
+  content_rules: '/security/pipeline?module=content',
 };
+
+// 内容规则按单条规则拆分观察对象（与 fixtures.ts 中 mockContentRules 的 id
+// 一一对应），跳转必须带上具体规则的 rule_id，落到该规则的编辑抽屉，而不是
+// 停在内容规则列表页让用户自己再找一遍。
+function contentRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.content_rules}&rule_id=${ruleId}`;
+}
 
 // 相似检测配置页按 detectionType Tab 划分（相似邮件检测/相同主题检测），跳转时
 // 需要带上具体 Tab，而不是笼统跳到模块首个 Tab，否则用户还要自己再切一次。
@@ -408,7 +418,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     id: 'sender-filter-rule-2',
     policy_module: 'sender_filter',
     sub_strategy_id: 'rule:2',
-    sub_strategy_name_snapshot: '钓鱼域名',
+    sub_strategy_name_snapshot: '钓鱼域���',
     is_deleted: false,
     observed_days: 18,
     hits: 45,
@@ -468,7 +478,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   weighted_reviewed_ratio: 0.34,
   false_positive_rate: 0.05,
   attribution_status: 'attributable',
-  config_path: RULE_EFFECTIVENESS_CONFIG_PATH.content_rules,
+  config_path: contentRuleConfigPath(1),
   version_no: 1,
   },
   {
@@ -484,7 +494,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   weighted_reviewed_ratio: 0.2,
   false_positive_rate: 0.13,
   attribution_status: 'attributable',
-  config_path: RULE_EFFECTIVENESS_CONFIG_PATH.content_rules,
+  config_path: contentRuleConfigPath(30),
   version_no: 1,
   },
   // 白名单规则（action=accept）——观察期内命中即为放行，不产生拦截类结果，

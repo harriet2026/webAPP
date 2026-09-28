@@ -37,7 +37,10 @@ const CONFIG_PATH_BY_MODULE: Record<PolicyModule, string> = {
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
   sender_filter: '/security/sender-filter',
   behavior_control: '/security/pipeline?module=behaviorControl',
-  content_rules: '/security/pipeline?module=contentRules',
+  // 流水线页内容规则模块的真实 key 是 'content'（见 PolicyPipelinePage 的
+  // Stage3PolicyKey 与 policy-deep-link.ts 的 PipelineModuleKey），不是
+  // 'contentRules'；用错 key 会导致跳转后流水线页无法定位到内容规则抽屉。
+  content_rules: '/security/pipeline?module=content',
 };
 
 export function RuleEffectivenessPage() {
