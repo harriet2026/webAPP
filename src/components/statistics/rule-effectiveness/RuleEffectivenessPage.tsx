@@ -37,6 +37,7 @@ const CONFIG_PATH_BY_MODULE: Record<PolicyModule, string> = {
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
   sender_filter: '/security/sender-filter',
   behavior_control: '/security/pipeline?module=behaviorControl',
+  content_rules: '/security/pipeline?module=contentRules',
 };
 
 export function RuleEffectivenessPage() {

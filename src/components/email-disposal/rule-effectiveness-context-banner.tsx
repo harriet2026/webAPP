@@ -30,8 +30,8 @@ export function RuleEffectivenessContextBanner() {
     return null;
   }
 
-  if (!['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter', 'BEHAVIOR'].includes(policyKey)) return null;
-  const pathLabels = policyKey === 'sender_filter' || policyKey === 'BEHAVIOR'
+  if (!['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter', 'BEHAVIOR', 'content_rules'].includes(policyKey)) return null;
+  const pathLabels = policyKey === 'sender_filter' || policyKey === 'BEHAVIOR' || policyKey === 'content_rules'
     ? [searchParams.get('strategy_name') ?? subStrategy]
     : strategyPathLabels({ policy_module: policyKey as PolicyModule, sub_strategy_id: subStrategy, sub_strategy_name_snapshot: searchParams.get('strategy_name') ?? subStrategy }, tPath);
   if (pathLabels.length === 0) {

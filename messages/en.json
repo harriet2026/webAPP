@@ -12250,7 +12250,8 @@
         "sender_filter": "Sender lists",
         "similar_detection_similar_email": "Similar email detection",
   "similar_detection_same_subject": "Same subject detection",
-  "behavior_control": "Sending behavior control"
+  "behavior_control": "Sending behavior control",
+  "content_rules": "Content rules"
   },
       "durationBucket": {
         "label": "Observed Duration",
@@ -12289,7 +12290,8 @@
       "aggregateScope": "All Directions Aggregated",
       "phishingDetection": "Phishing Detection Agent",
   "senderFilter": "Sender lists",
-  "behaviorControl": "Sending behavior control"
+  "behaviorControl": "Sending behavior control",
+  "contentRules": "Content rules"
   },
     "timeoutAlert": {
       "warning": "{count} policies have been in observe mode for over {days} days and are pending promotion evaluation.",

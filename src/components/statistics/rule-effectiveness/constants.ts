@@ -11,6 +11,7 @@ export const POLICY_MODULES: PolicyModule[] = [
   'phishing_detection',
   'sender_filter',
   'behavior_control',
+  'content_rules',
 ];
 
 export const SIMILAR_DETECTION_TYPES: SimilarDetectionType[] = ['similar_email', 'same_subject'];
@@ -21,7 +22,8 @@ export type ModuleFilterOption =
   | 'similar_detection_same_subject'
   | 'phishing_detection'
   | 'sender_filter'
-  | 'behavior_control';
+  | 'behavior_control'
+  | 'content_rules';
 
 export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'auth_spoofing',
@@ -30,6 +32,7 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'phishing_detection',
   'sender_filter',
   'behavior_control',
+  'content_rules',
 ];
 
 export function resolveModuleFilterParams(options: ModuleFilterOption[]): {
@@ -78,6 +81,7 @@ export function strategyPathKeys(
   if (row.policy_module === 'phishing_detection') return ['phishingDetection'];
   if (row.policy_module === 'sender_filter') return ['senderFilter'];
   if (row.policy_module === 'behavior_control') return ['behaviorControl'];
+  if (row.policy_module === 'content_rules') return ['contentRules'];
   switch (row.sub_strategy_id) {
     case 'protocol_check_spf': return ['authSpoofing', 'protocolCheck', 'protocolCheckSpf'];
     case 'protocol_check_dkim': return ['authSpoofing', 'protocolCheck', 'protocolCheckDkim'];
@@ -102,7 +106,7 @@ export function strategyPathLabels(
   if (row.policy_module === 'auth_spoofing' && !KNOWN_AUTH_SUB_STRATEGY_IDS.has(row.sub_strategy_id)) {
     labels.push(row.sub_strategy_name_snapshot);
   }
-  if (row.policy_module === 'sender_filter' || row.policy_module === 'behavior_control') {
+  if (row.policy_module === 'sender_filter' || row.policy_module === 'behavior_control' || row.policy_module === 'content_rules') {
     labels.push(row.sub_strategy_name_snapshot);
   }
   return labels;
@@ -117,6 +121,7 @@ export const MODULE_COLORS: Record<PolicyModule, string> = {
   phishing_detection: '#F59E0B',
   sender_filter: '#10B981',
   behavior_control: '#0EA5E9',
+  content_rules: '#EC4899',
 };
 
 export function moduleColor(module: PolicyModule): string {

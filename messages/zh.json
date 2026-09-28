@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则总开关���������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则总开关�����������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选��“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1180,7 +1180,7 @@
       "probeCompleteToast": "探测完成",
       "drawerTitleNew": "新建收信域",
       "drawerTitleEdit": "编辑收信域",
-      "drawerDescription": "登记入站域名并映射到内���投递���址",
+      "drawerDescription": "登记入站域名���映射到内���投递���址",
       "sectionBasic": "基础配置",
       "domainNameLabel": "收信域名",
       "domainNamePlaceholder": "如 example.cn",
@@ -1461,7 +1461,7 @@
       "ipFrequency": "限制单个 IP 的连接频率与认证失败次数",
       "ipFilter": "基于 IP 地址的黑白名单过滤",
       "rbl": "基于公共 RBL 名单过滤",
-      "overseas": "识别海外邮件并按策略处置",
+      "overseas": "识别海外邮件并按策���处置",
       "senderFilter": "发信人黑白名��过滤",
       "userList": "用户���黑白名单管理",
       "behaviorControl": "发信行为分析和控制",
@@ -2419,7 +2419,7 @@
     "stages": {
       "cloud_intel": "云端情报",
       "local_blacklist": "本地黑名单",
-      "phishing_agent": "钓鱼邮件智能体",
+      "phishing_agent": "钓��邮件智能体",
       "none": "未命中"
     },
     "verdicts": {
@@ -3361,7 +3361,7 @@
     "authSpoofingDesc": "检测伪造发件人和认证仿冒",
     "behaviorControl": "发信行为管控",
     "behaviorControlDesc": "检测异常发信行为并管控",
-    "recipientCheck": "收信人检测",
+    "recipientCheck": "收信��检测",
     "recipientCheckDesc": "收信人数���限制与存在性验证",
     "personalList": "用户黑白名单",
     "personalListDesc": "���户级黑白名单管理",
@@ -3545,7 +3545,7 @@
     "tempfailPlaceholder": "自定义 421 消息",
     "connectionLimits": "连接数限制（-1 = 不限制）",
     "dailyLimit": "每日连接数限制",
-    "concurrentLimit": "并���连接数限制",
+    "concurrentLimit": "并�����接数限制",
     "windowMinutes": "时间窗口（分钟���",
     "windowLimit": "窗口内连接数限制",
     "failureLimits": "失败次数限制（-1 = 不限制）",
@@ -3970,7 +3970,7 @@
     "serversUnit": "个服务器",
     "rblServers": "RBL服务器",
     "add": "添加",
-    "timeoutTip": "DNS 查询超时时间，超时后视为未命中。建议设置 3-10 秒，过短可能漏检，过长影响邮件处理速度。",
+    "timeoutTip": "DNS 查询超时时间，超��后视为未命中。建议设置 3-10 秒，过短可能漏检，过长影响邮件处理速度。",
     "serverTipGeneric": "实时黑名单查询服务器，用于检测发信IP是否在垃圾邮件黑名单中",
     "serverTipZenSpamhaus": "Spamhaus综合黑名单，包含SBL、XBL、PBL等多个子列表，覆盖范围广",
     "serverTipBlSpamcop": "SpamCop用户举报黑名单，基于用户举报的垃圾邮件来源IP",
@@ -4092,7 +4092,7 @@
     "regionCodeLabel": "地区代码",
     "selectRegion": "请选择地区",
     "regionNameLabel": "归属地",
-    "regionNamePlaceholder": "如「Google DNS」或「阿里云香港」",
+    "regionNamePlaceholder": "如「Google DNS」或「阿里云香港��",
     "autoFillHint": "选择地区后自动填充，可���动修改，最多50字符",
     "ipRequired": "请输���IP段",
     "regionRequired": "请选择地区代码",
@@ -4120,7 +4120,7 @@
       "descriptionMaxLength": "备注最多200个字符",
       "priorityRequired": "优先级不能为空",
       "priorityInteger": "优先级必须为整数",
-      "priorityRange": "优先级需在 {min}–{max} 之间",
+      "priorityRange": "��先级需在 {min}–{max} 之间",
       "whitelistModeRequired": "请选择白名单模式",
       "invalidEmail": "请输入有效的邮箱地址",
       "invalidDomain": "请输入有效的���名",
@@ -4660,7 +4660,7 @@
       "exact": "精确匹配",
       "substring": "子串匹配",
       "addUser": "添加",
-      "userNamePlaceholder": "输入用户名或显示名",
+      "userNamePlaceholder": "输入用户名或显示��",
       "emptyUsersWarning": "未配置内部用户，显示名仿冒检测的内部方向将无法生效"
     },
     "observeStats": {
@@ -4719,7 +4719,7 @@
       "pipeline": "策略流水线",
       "next": "下一模块"
     },
-    "policyTemplate": "策略模板",
+    "policyTemplate": "策略模��",
     "globalObserve": "观察模式",
     "wouldDropCount": "预计丢弃",
     "observingRecordOnly": "允许（仅记录）",
@@ -5204,7 +5204,7 @@
       "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
       "updateSuccess": "病毒库更新请求已提交",
       "updateFailed": "病毒库更新失败",
-      "receiveDefault": "收信方向默认：发现病毒后隔离；扫描超时继续流水线"
+      "receiveDefault": "收信方向默认：发现病毒后���离；扫描超时继续流水线"
     },
     "imageDetect": {
       "ocrDetection": "图片OCR检测",
@@ -5668,7 +5668,7 @@
     "actionBlock": "拒收",
     "actionDiscard": "丢弃",
     "tagModeTitle": "标记方式",
-    "tagModeHint": "标记方式可选；启用某种标记后需填写对应内容，可同时启用多种标记",
+    "tagModeHint": "标记方式可选；启用某种标记后需���写对应内容，可同时启用多种标记",
     "tagSubjectLabel": "主题标记",
     "tagPositionPrefix": "前缀",
     "tagPositionSuffix": "后缀",
@@ -6406,7 +6406,7 @@
           "recallRequestCreateFailed": "召回任务创建失败，请稍后重试",
           "recallNoRecallableRecipients": "当前收件人不具备召回条件",
           "recallMailNotFound": "邮件记录不存在或已删除",
-          "recallForbidden": "无权召回这封邮件",
+          "recallForbidden": "无��召回这封邮件",
           "redeliverSuccess": "重投请求已提交，投递结果稍后在状态中更新",
           "redeliverUnavailable": {
             "original_expired": "原文未保留���已超保留期，无法重新投递",
@@ -6639,7 +6639,7 @@
           "recommendedActionsLabel": "处置建议",
           "noRecommendedActions": "暂无建议"
         },
-        "noAiData": "暂无数据"
+        "noAiData": "���无数据"
       },
       "features": {
         "basicInfo": "邮件基本信息",
@@ -7798,7 +7798,7 @@
     "selfServicePending": "终端用户自助入口待上线，当前仅保存配置",
     "portalBaseUrlLabel": "外部访问地址",
     "portalBaseUrlPlaceholder": "https://gw.example.com",
-    "portalBaseUrlHelp": "收件人浏览器可访问的控制台地址（https）；启用取回、预览、加白或加黑权限时必填。",
+    "portalBaseUrlHelp": "收件人浏览器可访问的控制台���址（https）；启用取回、预览、加白或加黑权限时必填。",
     "periodAndTimeout": "审核时长与超时配置",
     "durationControl": "审核时长控制",
     "duration_unlimited": "不限时长",
@@ -8381,7 +8381,7 @@
     "detailTitle": "明细数据",
     "chartType": {
       "line": "折线图",
-      "area": "堆叠面积图"
+      "area": "���叠面积图"
     },
     "linkType": {
       "phishing": "钓鱼链接",
@@ -8537,7 +8537,7 @@
       "7d": "近7天"
     },
     "refresh": "刷新",
-    "updatedAt": "数据更新时间",
+    "updatedAt": "数据更��时间",
     "noData": "暂无数据",
     "loadTimeout": "加载超时，请稍后重试",
     "retry": "重试",
@@ -9237,7 +9237,7 @@
       "riskHint": "至少选择一项；开启多项会扩大匹配范围。"
     },
     "runtime": {
-      "title": "智能体调查与处置",
+      "title": "智能��调查与处置",
       "description": "运行模式决定是否执行处置，风险等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
@@ -9628,7 +9628,7 @@
       "pasteHint": "单次最多 20 条，邮箱实时去重校验",
       "save": "保存",
       "saveSelected": "保存已选 {n} 人",
-      "cancel": "取消",
+      "cancel": "��消",
       "cancelConfirmTitle": "放弃未保存的修改？",
       "cancelConfirmDescription": "当前抽屉中有未保存的修改，关闭后将无法恢复。",
       "continueEditing": "继续编辑",
@@ -9664,7 +9664,7 @@
       "previewNotify": "预览通知内容",
       "previewNotifyUnavailable": "模板预览暂不可用",
       "previewNotifyHint": "由后端正式模板渲染，仅预览，不发送邮件",
-      "confidenceThresholdHint": "仿冒概率高于此阈值时触发处置动作（0-100）",
+      "confidenceThresholdHint": "仿冒概率高于���阈值时触发处置动作（0-100）",
       "adminEmailsHint": "多个邮箱用英文逗号分隔，留空则发送至系统管理员",
       "importKeyword": "联系人",
       "importKeywordPlaceholder": "搜索姓名 / 邮箱 / 部门",
@@ -9777,7 +9777,7 @@
     },
     "whitelist": {
       "title": "放行名单",
-      "subtitle": "命中信封发件人即整封放行、不进检测（不以 Header-From 放行）",
+      "subtitle": "命中信封发件人即整���放行、不进检测（不以 Header-From 放行）",
       "value": "邮箱 / 域名",
       "valuePlaceholder": "boss@corp.com 或 corp.com",
       "matchType": "类型",
@@ -9952,7 +9952,7 @@
     },
     "recall": {
       "title": "确认召回",
-      "description": "将对「{subject}」等 {count} 封邮件执行软删除召回，未读邮件可撤回，已读邮件仅告警。",
+      "description": "将对「{subject}」等 {count} 封邮件执行软删除召回，未读���件可撤回，已读邮件仅告警。",
       "unreadPolicy": "未读邮件策略",
       "readPolicy": "已读邮件策略",
       "policy": {
@@ -10716,7 +10716,7 @@
       "pending": "待处置邮件",
       "nodes": "系统在线节点",
       "ratio": "环比",
-      "blockRate": "拦截率",
+      "blockRate": "���截率",
       "allOnline": "全部在线",
       "nOffline": "{n} 个离线",
       "attention": "待处理",
@@ -11481,7 +11481,7 @@
       "not_found": "角色不存在，可能已被删除",
       "scope_invalid": "角色范围无效，只能是：{allowed}",
       "status_invalid": "角色状态无效，只能是：{allowed}",
-      "super_admin_required": "管理平台级角色需要超级管理员权限",
+      "super_admin_required": "管理平台级角色需要超级管��员权限",
       "system_default_cannot_delete": "系统内置角色不能删除",
       "system_default_cannot_disable": "系统内置角色与超级管理员角色不能停用",
       "system_default_cannot_edit": "系统内置角色不能编辑"
@@ -11900,7 +11900,7 @@
     "mail_routing_helper": {
       "mail_routing_rules_managed_by_system": "邮���路由规则仅平台管理员可管理",
       "mail_routing_rules_imported_with_scope": "邮件路由规则必须以 scope=mail_routing_relay 或 scope=mail_routing_outbound 导入",
-      "tenant_id_required_select_tenant_x": "请先选择租户，再管理邮件路由���则"
+      "tenant_id_required_select_tenant_x": "请先选择租户，再管理邮件��由���则"
     },
     "monitor_handlers": {
       "backup_task_not_found": "备份任务不存在"
@@ -12015,7 +12015,7 @@
       "action_cancel": "action 只能是 cancel"
     },
     "threat_retro_notification": {
-      "kind_immediate_digest": "通知类型只能是即时或汇总"
+      "kind_immediate_digest": "通知类型只��是即时或汇总"
     },
     "threat_retro_routes": {
       "tenant_id_required_select_tenant_x": "请先选择租户",
@@ -12205,7 +12205,7 @@
       "unsupported_version": "不支持的报告版本。",
       "unknown": "未记录报告原因。"
     },
-    "legacyEvidence": "旧版依据表示",
+    "legacyEvidence": "旧���依据表示",
     "omittedSubjects": "省略对象数：{count}",
     "omittedSources": "省略来源数：{count}",
     "omittedGaps": "另有 {count} 个覆盖缺口未保留",
@@ -12311,7 +12311,8 @@
         "similar_detection_same_subject": "相同主题检测",
         "phishing_detection": "钓鱼检测智能体",
   "sender_filter": "发信人黑白名单",
-  "behavior_control": "发信行为管控"
+  "behavior_control": "发信行为管控",
+  "content_rules": "内容规则"
   },
       "durationBucket": {
         "label": "观察时长",
@@ -12350,7 +12351,8 @@
       "aggregateScope": "全方向聚合",
       "phishingDetection": "钓鱼检测智能体",
   "senderFilter": "发信人黑白名单",
-  "behaviorControl": "发信行为管控"
+  "behaviorControl": "发信行为管控",
+  "contentRules": "内容规则"
   },
     "timeoutAlert": {
       "warning": "有 {count} 个策略已观察超过 {days} 天，待转正评估",
