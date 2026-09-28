@@ -52,6 +52,7 @@ export interface ContentRuleRuleView {
   rule: Rule;
   resolved: ContentRulesMetadata | null;
   is_complex: boolean;
+  observe_mode: boolean;
 }
 
 export interface ContentRuleFormData {
@@ -59,6 +60,7 @@ export interface ContentRuleFormData {
   description?: string;
   priority: number;
   is_active: boolean;
+  observe_mode?: boolean;
   valid_from?: string;
   valid_until?: string;
   match_type: ContentRuleMatchType;
