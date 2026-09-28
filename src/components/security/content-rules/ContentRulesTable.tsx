@@ -298,13 +298,13 @@ export function ContentRulesTable({
     },
     {
       id: 'observe_mode',
-      header: t('senderFilter.observeMode'),
+      header: t('contentRules.observeMode'),
       cell: ({ row }) => (
         <Switch
           checked={row.original.observe_mode}
           disabled={!canEdit}
           onCheckedChange={(enabled) => onToggleObserve(row.original.rule.id, enabled)}
-          aria-label={t('senderFilter.observeMode')}
+          aria-label={t('contentRules.observeMode')}
         />
       ),
     },

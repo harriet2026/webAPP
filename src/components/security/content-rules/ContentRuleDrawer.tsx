@@ -546,12 +546,12 @@ export function ContentRuleDrawer({
                       <span className="text-xs text-muted-foreground">({t('contentRules.permanentHint')})</span>
   </div>
   </Field>
-  <Field label={t('senderFilter.observeMode')} hint={t('senderFilter.observeModeHint')}>
+  <Field label={t('contentRules.observeMode')} hint={t('contentRules.observeModeHint')}>
     <div className="flex items-center gap-3">
       <Switch
         checked={draft.observe_mode ?? false}
         onCheckedChange={(enabled) => setDraft((current) => ({ ...current, observe_mode: enabled }))}
-        aria-label={t('senderFilter.observeMode')}
+        aria-label={t('contentRules.observeMode')}
       />
       <span className="text-sm text-muted-foreground">
         {draft.observe_mode ? t('common.enabled') : t('common.disabled')}

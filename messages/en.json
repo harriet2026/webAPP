@@ -4360,6 +4360,8 @@
     "validUntilTip": "Set an expiry date; the rule is disabled after it expires",
     "permanentHint": "leave empty for permanent",
     "priorityRangeHint": "Range {min}–{max}; higher numbers have higher priority",
+    "observeMode": "Observe Mode",
+    "observeModeHint": "When enabled, the rule only logs hits without taking any block/quarantine action, useful for verifying rule effectiveness",
     "createRule": "New rule",
     "editRule": "Edit Rule",
     "createRuleTitle": "Create Content Rule",

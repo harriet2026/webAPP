@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选择“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选��“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1340,7 +1340,7 @@
     "platformScopeHint": "平台级 IP 组对全部租户生效，供 IP 策略（IP 黑白名单表达式）引用。"
   },
   "groupPolicy": {
-    "eyebrow": "群组策略",
+    "eyebrow": "群组策���",
     "title": "群组���略",
     "refreshSuccess": "刷新完成",
     "refreshFailed": "刷新失败，请重试",
@@ -1805,7 +1805,7 @@
         "regenerate": "重新生成",
         "errors": {
           "llmUnavailable": "AI 服务暂不可用，请联系管理员检查 LLM 配置",
-          "timeout": "解读超时，可点击重新生成",
+          "timeout": "解读超时，可点击重新生���",
           "rateLimited": "请求过于频繁，请稍后再试",
           "generic": "解读失败，请重试"
         },
@@ -2820,7 +2820,7 @@
     "passwordMismatch": "两次输入的新密码不一致",
     "passwordChanged": "密码修改成功",
     "errors": {
-      "internal": "服务器内部错误"
+      "internal": "服务器内��错误"
     }
   },
   "emailPreview": {
@@ -4243,7 +4243,7 @@
     "createRule": "新建规则",
     "editRule": "编辑规则",
     "deleteRule": "删除规则",
-    "deleteConfirm": "确定要删除规则「{name}」吗？此操作不可恢复。",
+    "deleteConfirm": "确定要删除���则「{name}」吗？此操作不可恢复。",
     "ruleId": "规则ID",
     "ruleName": "规则名称",
     "description": "描述",
@@ -4365,6 +4365,8 @@
     "validUntilTip": "设置规则的过期日期，过期后规则自动失效",
     "permanentHint": "留空表示永久有效",
     "priorityRangeHint": "范围 {min}–{max}，数值越大优先级越高",
+    "observeMode": "观察模式",
+    "observeModeHint": "启用后规则仅记录命中情况，不实际执行拦截/隔离等动作，用于验证规则效果",
     "createRule": "新建规则",
     "editRule": "编辑规则",
     "createRuleTitle": "新建内容规则",
@@ -4407,7 +4409,7 @@
     "exampleContentGroupAudit": "敏感词过滤",
     "exampleContentGroupAuditDesc": "主题或正文包含敏感词时阻断邮件",
     "addHeaders": "添加头部",
-    "headerName": "头部名称",
+    "headerName": "头��名称",
     "headerValue": "头部值",
     "addHeader": "添加头部",
     "tips": "配置提示",
@@ -5095,7 +5097,7 @@
       "truncateHint": "仅显示前 {shown} 条，共 {total} 条",
       "close": "关闭",
       "typeSender": "发信人群组",
-      "typeIp": "IP 群组",
+      "typeIp": "IP 群���",
       "typeOrg": "组织群组"
     }
   },
@@ -5957,7 +5959,7 @@
         "drop": "丢弃",
         "recall": "召回",
         "accept": "投递",
-        "reject": "拒收",
+        "reject": "���收",
         "sideline": "待判定",
         "audit": "审核",
         "discard": "丢弃",
@@ -6407,7 +6409,7 @@
           "recallForbidden": "无权召回这封邮件",
           "redeliverSuccess": "重投请求已提交，投递结果稍后在状态中更新",
           "redeliverUnavailable": {
-            "original_expired": "原文未保留或已超保留期，无法重新投递",
+            "original_expired": "原文未保留���已超保留期，无法重新投递",
             "storage_unavailable": "原文��储节点暂不可用，请稍后刷新重试"
           },
           "deferredRetrying": "投递暂缓，系统自动重试中",
@@ -7342,7 +7344,7 @@
         "note": "大量二维码可能为恶意邮件"
       },
       "desc_attachmentZipBomb": {
-        "source": "压缩包安全检测",
+        "source": "压缩��安全检测",
         "usage": "检测是否为恶意压缩炸弹文件",
         "note": "压缩炸弹解压后可能导致系统资源耗尽"
       },
@@ -7428,7 +7430,7 @@
       "desc_senderRecipientCount15Min": {
         "source": "发信行为统计",
         "usage": "统计15分钟内发信人发送的不同收信人数量",
-        "note": "大量收信人可能为群发攻击"
+        "note": "大量收信人可能为群���攻击"
       },
       "desc_senderMailCount15Min": {
         "source": "发信行为统计",
@@ -7476,7 +7478,7 @@
       "previewEmptyHint": "添加条件后将自动生成逻辑表达式",
       "notMarker": "(NOT)",
       "foldedMore": "+{count}",
-      "groupSelectLabel": "选择对象",
+      "groupSelectLabel": "选���对象",
       "groupSelectPlaceholder": "请选择群组",
       "orgDeptSelectLabel": "��择部门",
       "orgDeptSelectedCount": "已选 {n} 个",
@@ -7762,7 +7764,7 @@
     "timePoints": "通知时间点",
     "addTimePoint": "添加时间点",
     "notifyTimeAddHint": "选择时间后，请点击“添加时间点”将其加入下方列表，再保存。",
-    "notifyTimesRequired": "尚未添加通知时间点。请选择时间并点击“添加时间点”后再保存。",
+    "notifyTimesRequired": "尚未添加���知时间点。请选择时间并点击“添加时间点”后再保存。",
     "tzComputedIn": "通知时间以 {tz} 计算",
     "tzMismatchHint": "检测到你的浏览器时区（{browserTz}）与当前通知计算时区（{effectiveTz}）不一致，请选择用哪个时区解释通知时间：",
     "tzUseBrowser": "使用��览器时区（{tz}）",
@@ -8912,7 +8914,7 @@
       "accuracy": "准确率"
     },
     "filters": {
-      "keywordPlaceholder": "搜索发件人、主题...",
+      "keywordPlaceholder": "搜索���件人、主题...",
       "selectedCount": "已选 {count} 项",
       "start": "开始时间",
       "end": "结束时间",
@@ -9263,7 +9265,7 @@
         "realtime": "按四档风险策略执行审核、隔离、丢弃或继续处理。",
         "observe": "保留完整检测结论，但不执行风险策略处置。"
       },
-      "observeModeBanner": "观察模式只记录命中，不执行风险处置、标记或其他附加策略；已保存的隐藏策略值会保持不变。",
+      "observeModeBanner": "观察模式只记录命中，不执行风险处置、标记或其他附加策略；已保���的隐藏策略值会保持不变。",
       "timeoutPolicy": "超时时间线",
       "timeoutMinutes": "实时等待（分钟）",
       "maxRecheckMinutes": "后台续测（分钟）",
@@ -10184,7 +10186,7 @@
       "mediumThresholdInvalid": "中危阈值必须是 70–89 的整数。",
       "mediumNoFallbackHint": "中危未达到该阈值时不会回退到低危汇总。",
       "lowDigest": "低危威胁每日汇总时间",
-      "notifyVersionHint": "修改收件人或汇总时间只影响新任务；当天可能按不同配置版本分别汇总。",
+      "notifyVersionHint": "修改收件人或汇总时间���影响新任务；当天可能按不同配置版本分别汇总。",
       "previewImmediate": "高/中危即时通知",
       "previewDigest": "低危每日汇总"
     },
@@ -10901,7 +10903,7 @@
       "lockoutMinutes": "锁定时长",
       "sessionTimeoutSecs": "会话超时时间",
       "ipMode": "访问模式",
-      "maxOnline": "同一账号最大在线数",
+      "maxOnline": "同一账号最���在线数",
       "overflowPolicy": "超出后策略",
       "cidr": "IP 地址/段",
       "remark": "备注",
@@ -11529,7 +11531,7 @@
       "system_baseline_no_create": "系统基线规则不能通过接口创建",
       "system_baseline_no_edit": "系统基线规则不能由租户管理员编辑",
       "tag_required": "标记类规则至少要指定一个标记",
-      "tenant_config_managed": "该规则由租户附件安全设置管理，无法直接修改，请前往附件安全设置页编辑",
+      "tenant_config_managed": "该规则由租户附���安全设置管理，无法直接修改，请前往附件安全设置页编辑",
       "tenant_context_required": "该操作需要先选择租户",
       "valid_range_invalid": "生效结束时间不能早于开始时间",
       "group_type_immutable": "群组类型不可更改（{before} → {after}）：类型决定成员的解释方式，请新建一个群组。"
@@ -11970,7 +11972,7 @@
       "recipient_configuration_requires_tenant_administ": "收件人配置需要租户管理员权限"
     },
     "recipient_limit": {
-      "mode_detailed_merged": "模式只能是明细或合并",
+      "mode_detailed_merged": "模式只能是明���或合并",
       "merged_limit_limit_1_unlimited_between": "合并限额必须是 -1（不限）或 1-1000 之间",
       "invalid_action_merged_limit": "合并限额不支持该操作",
       "action_invalid": "{name} 的处置动作无效",
@@ -12191,7 +12193,7 @@
       "error": "无法安全加载判断详情，请重试。"
     },
     "reasons": {
-      "report_draft_invalid": "判断报告草稿无效，未发布报告。业务分析结果仍然有效。",
+      "report_draft_invalid": "判断报告草稿无效，未���布报告。业务分析结果仍然有效。",
       "report_reference_invalid": "判断报告引用无效，未发布报告��业务分析结果仍然有效。",
       "report_budget_exceeded": "判断报告超出预算，未发布报告。业务分析结果仍然有效。",
       "legacy_result": "早期结果未包含结构化报告。",
