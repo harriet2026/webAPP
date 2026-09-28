@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则总开关�������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则总开关���������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选择“未检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选择“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1111,7 +1111,7 @@
         "domainScopeRequired": "请选择适用域名",
         "domainScopePlaceholder": "请选择适用域名",
         "domainScopeAllOption": "全部域名（All）",
-        "domainScopeAllBadge": "全部域名",
+        "domainScopeAllBadge": "全��域名",
         "domainScopeSelectedCount": "已选 {count} 个域名",
         "domainScopeHint": "选择「全部域名」后将与具体域名互斥",
         "protocol": "认证协议",
@@ -1180,7 +1180,7 @@
       "probeCompleteToast": "探测完成",
       "drawerTitleNew": "新建收信域",
       "drawerTitleEdit": "编辑收信域",
-      "drawerDescription": "登记入站域名并映射到内部投递���址",
+      "drawerDescription": "登记入站域名并映射到内���投递���址",
       "sectionBasic": "基础配置",
       "domainNameLabel": "收信域名",
       "domainNamePlaceholder": "如 example.cn",
@@ -1334,7 +1334,7 @@
     "importResultFailed": "失败",
     "importResultReason": "原因",
     "importFailureValue": "内容",
-    "importFailureReason": "失败原因",
+    "importFailureReason": "���败原因",
     "importSkipAlreadyExists": "成员已存在",
     "platformIpGroupTitle": "平台 IP 组",
     "platformScopeHint": "平台级 IP 组对全部租户生效，供 IP 策略（IP 黑白名单表达式）引用。"
@@ -2204,7 +2204,7 @@
     "editUser": "编辑用户",
     "username": "用户名",
     "email": "邮箱",
-    "role": "角色",
+    "role": "���色",
     "tenant": "租���",
     "systemAdmin": "系统管理员",
     "tenantAdmin": "租户管理员",
@@ -3362,7 +3362,7 @@
     "behaviorControl": "发信行为管控",
     "behaviorControlDesc": "检测异常发信行为并管控",
     "recipientCheck": "收信人检测",
-    "recipientCheckDesc": "收信人数量限制与存在性验证",
+    "recipientCheckDesc": "收信人数���限制与存在性验证",
     "personalList": "用户黑白名单",
     "personalListDesc": "���户级黑白名单管理",
     "userBlackWhiteList": "用户黑白名单",
@@ -3814,7 +3814,7 @@
     "useThisExample": "使用该示例",
     "exampleSpamSource": "垃圾邮件来源",
     "exampleSpamSourceDesc": "已确认的垃圾邮件发送源",
-    "exampleSpamSourceRemark": "恶意垃圾邮件发送者",
+    "exampleSpamSourceRemark": "恶意垃��邮件发送者",
     "exampleSpamSourceEffect": "来自该网段的邮件将被直接阻断，发件方收到退信",
     "exampleSuspiciousIp": "可疑IP段",
     "exampleSuspiciousIpDesc": "需要进一步审查的IP段",
@@ -4093,7 +4093,7 @@
     "selectRegion": "请选择地区",
     "regionNameLabel": "归属地",
     "regionNamePlaceholder": "如「Google DNS」或「阿里云香港」",
-    "autoFillHint": "选择地区后自动填充，可手动修改，最多50字符",
+    "autoFillHint": "选择地区后自动填充，可���动修改，最多50字符",
     "ipRequired": "请输���IP段",
     "regionRequired": "请选择地区代码",
     "usageTip": "自定义IP定位库的优先级高于系统内置GeoIP库，配置后将优先使用自定义映射进行地域识别。",
@@ -4432,7 +4432,7 @@
     "statusExpiringSoon": "即将到期",
     "statusExpired": "已过期",
     "permanent": "永久有效",
-    "notFilled": "未填写",
+    "notFilled": "��填写",
     "notSelected": "未选择",
     "operations": "操作",
     "moreOperations": "更多操作",
@@ -5039,7 +5039,7 @@
     "unit": {
       "ip_count": "个",
       "recipient_count": "人",
-      "mail_count": "封",
+      "mail_count": "���",
       "attachment_size": "MB"
     },
     "examples": {
@@ -5082,7 +5082,7 @@
       "title": "配置提示",
       "item1": "优先级越大越先匹配",
       "item2": "支持通配符如 *@domain.com",
-      "item3": "留空有效期表示永久有效",
+      "item3": "留空���效期表示永久有效",
       "item4": "群组和组织来自群组策略配置",
       "item5": "OR条件达到任一阈值即触发",
       "item6": "IP群组来自IP群组管理模块"
@@ -5208,7 +5208,7 @@
       "ocrDetection": "图片OCR检测",
       "ocrSendHint": "（外发方向建议启用，防截图泄密）",
       "detectionMode": "检测模式",
-      "ocrLimit": "检测数量上限（防止性能耗尽）",
+      "ocrLimit": "检测数量上限（防止��能耗尽）",
       "ocrLimitDisabledHint": "选择「检测」后可配置",
       "attachments": "个附件",
       "ocrMode_none": "不检测",
@@ -5416,7 +5416,7 @@
       "cleanupLabel": "URL情报库清理周期",
       "cleanupTip": "自动清理超过指定天数的旧记录，释放存储空间",
       "cleanupUnit": "天",
-      "cleanupHint": "自动清理超过该天数的旧记录（有效范围：30-365天）",
+      "cleanupHint": "自动清理超过该天数的旧记录（有效范���：30-365天）",
       "cleanupError": "清理周期需在 30-365 天之间",
       "cloudIntel": "云端URL情报查询",
       "cloudIntelDesc": "启用后，查询云端威胁情报库；禁用后仅依��本地沙箱",
@@ -5501,7 +5501,7 @@
         "block": "拦截并提示（安全优先，推荐）",
         "allow": "放行并标记（可用性优先）",
         "hold": "继续等待（保持等待页轮询结果）",
-        "hint": "到达超时上限仍无检测结果时的处理方式"
+        "hint": "到达超时上限仍无检测结果时的处理方��"
       }
     },
     "statusEnabled": "已启用",
@@ -5672,7 +5672,7 @@
     "tagPositionSuffix": "后缀",
     "tagSubjectPlaceholder": "如：[相似邮件]",
     "tagHeaderLabel": "信头标记",
-    "tagBodyLabel": "正文标记",
+    "tagBodyLabel": "���文标记",
     "tagBodyPlaceholder": "如：[相似邮件]",
     "tagHeaderNamePlaceholder": "字段名，如：X-Similar-Tag",
     "tagHeaderValuePlaceholder": "字段值，如：matched",
@@ -6310,7 +6310,7 @@
           "mailHeadersTruncated": "邮件头信息超过保存上限，以下内容不完整。"
         },
         "emailContent": "邮件原文",
-        "noContent": "暂无正文内容",
+        "noContent": "暂无正文���容",
         "collapse": "收起",
         "downloadFailed": "下载失败",
         "releaseWhitelist": "放行并加白",
@@ -6408,7 +6408,7 @@
           "redeliverSuccess": "重投请求已提交，投递结果稍后在状态中更新",
           "redeliverUnavailable": {
             "original_expired": "原文未保留或已超保留期，无法重新投递",
-            "storage_unavailable": "原文存储节点暂不可用，请稍后刷新重试"
+            "storage_unavailable": "原文��储节点暂不可用，请稍后刷新重试"
           },
           "deferredRetrying": "投递暂缓，系统自动重试中",
           "redeliverDialog": {
@@ -6751,7 +6751,7 @@
         "status": {
           "querying": "查询中",
           "completed": "已完成",
-          "partial": "部分完成",
+          "partial": "部分���成",
           "timedOut": "已超时",
           "failed": "失败"
         },
@@ -7478,7 +7478,7 @@
       "foldedMore": "+{count}",
       "groupSelectLabel": "选择对象",
       "groupSelectPlaceholder": "请选择群组",
-      "orgDeptSelectLabel": "选择部门",
+      "orgDeptSelectLabel": "��择部门",
       "orgDeptSelectedCount": "已选 {n} 个",
       "orgDeptHint": "从组织通讯录选择部门；选中父部门将自动匹配其所有子部门的发信人（支持多级组织架构）。",
       "orgDeptSearchPlaceholder": "搜索部门…",
@@ -7802,7 +7802,7 @@
     "duration_unlimited": "不限时长",
     "duration_custom": "自定义等待时长",
     "minutes": "分钟",
-    "currentSetting": "当前设置：{minutes}分钟",
+    "currentSetting": "当前设��：{minutes}分钟",
     "maxRecheckMinutes": "复检窗口（分钟）",
     "timeoutAutoDeliver": "超时自动投递",
     "autoDeliverDesc": "审核超时后自动投递邮件",
@@ -7965,7 +7965,7 @@
     "title": "密码策略",
     "minLength": "密码最小长度",
     "minCharClasses": "最少字符类别数",
-    "classesHint": "字符类别：大写字母、小写字母、数字、特殊符号（共 4 类）"
+    "classesHint": "字符类��：大写字母、小写字母、数字、特殊符号（共 4 类）"
   },
   "securityOverview": {
     "trendPeakHint": "单击图例可切换系列，双击可单独查看某一类",
@@ -8541,7 +8541,7 @@
     "retry": "重试",
     "agentOffline": "数据采集异常",
     "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
-    "degradeNotInitialized": "监控库尚未初始化",
+    "degradeNotInitialized": "监控库尚未初���化",
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "backendUnsupported": "该后端暂不支持",
     "hardware": {
@@ -9239,7 +9239,7 @@
       "description": "运行模式决定是否执行处置，风险等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
-      "disposalLoadFailed": "超时配置加载失败，运行模式仍按真实引擎配置展示。",
+      "disposalLoadFailed": "超时配置加载失败，运行模式���按真实引擎配置展示。",
       "editUnavailable": "超时配置加载成功后才能编辑",
       "edit": "编辑",
       "save": "保存",
@@ -9603,7 +9603,7 @@
       "matchWildcard": "通配",
       "matchRegex": "正则",
       "sensitivity": "检测灵敏度",
-      "sensLoose": "宽松",
+      "sensLoose": "宽���",
       "sensStandard": "标准",
       "sensStrict": "严格",
       "sensExtreme": "极高",
@@ -9880,7 +9880,7 @@
       "finding": "实时联动"
     },
     "modeBadge": {
-      "async": "异步"
+      "async": "��步"
     },
     "table": {
       "title": "检测日志",
@@ -11060,7 +11060,7 @@
     "failureNotFound": "规则不存在，可能已被删除",
     "failureAccessDenied": "无权访问该用户名单规则",
     "failureProtected": "该规则受保护，不能在此删除",
-    "failureMissingResult": "服务端未返回该规则的删除结果，请重试"
+    "failureMissingResult": "服务���未返回该规则的删除结果，请重试"
   },
   "portalWhitelist": {
     "loading": "加载中...",
@@ -11274,7 +11274,7 @@
       "username_immutable": "用户名创建后不可修改"
     },
     "advanced_rule": {
-      "addon_type_invalid": "附加动作类型无效",
+      "addon_type_invalid": "附加动作类型��效",
       "delete_attachment_scope_invalid": "删除附件的适用范围无效，只能是：{allowed}",
       "primary_action_invalid": "规则的主处置动作取值无效",
       "scope_invalid": "规则的生效范围取值无效"
@@ -11371,7 +11371,7 @@
       "recipient_required": "请指定收件人",
       "review": {
         "custom_minutes_out_of_range": "自定义审核时长需在 {min}–{max} 分钟之间",
-        "duration_mode_invalid": "审核时长模式取值无效，只能是：{allowed}",
+        "duration_mode_invalid": "审核时长模式取值无效，只能��：{allowed}",
         "max_recheck_minutes_out_of_range": "最长复检时间需在 {min}–{max} 分钟之间",
         "reviewer_active_end_format_invalid": "审核人值班结束时间格式不正确，应为 HH:MM:SS",
         "reviewer_active_start_format_invalid": "审核人值班开始时间格式不正确，应为 HH:MM:SS",
@@ -11417,7 +11417,7 @@
       "enabled_required": "请指定是否启用",
       "expires_at_format_invalid": "过期时间格式不正确，应为 RFC3339（如 2026-08-01T12:00:00+08:00）",
       "helo_match_invalid": "HELO 匹配方式无效，只能是：{allowed}",
-      "helo_pattern_regex_invalid": "HELO 匹配的正则表达式不合法，请检查语法",
+      "helo_pattern_regex_invalid": "HELO 匹配的正则表��式不合法，请检查语法",
       "is_active_required": "请指定是否生效",
       "not_found": "准入规则不存在，可能已被删除",
       "null_sender_requires_cidr": "允许空发件人的规则只按来源 IP 匹配，因此必须填写来�� IP 段",
@@ -11896,7 +11896,7 @@
       "invalid_client_ip": "客户端 IP 无效"
     },
     "mail_routing_helper": {
-      "mail_routing_rules_managed_by_system": "邮件路由规则仅平台管理员可管理",
+      "mail_routing_rules_managed_by_system": "邮���路由规则仅平台管理员可管理",
       "mail_routing_rules_imported_with_scope": "邮件路由规则必须以 scope=mail_routing_relay 或 scope=mail_routing_outbound 导入",
       "tenant_id_required_select_tenant_x": "请先选择租户，再管理邮件路由���则"
     },
@@ -12308,8 +12308,9 @@
         "similar_detection_similar_email": "相似邮件检测",
         "similar_detection_same_subject": "相同主题检测",
         "phishing_detection": "钓鱼检测智能体",
-        "sender_filter": "发信人黑白名单"
-      },
+  "sender_filter": "发信人黑白名单",
+  "behavior_control": "发信行为管控"
+  },
       "durationBucket": {
         "label": "观察时长",
         "lt7": "小于7天",
@@ -12346,8 +12347,9 @@
       "directionInternal": "内部方向",
       "aggregateScope": "全方向聚合",
       "phishingDetection": "钓鱼检测智能体",
-      "senderFilter": "发信人黑白名单"
-    },
+  "senderFilter": "发信人黑白名单",
+  "behaviorControl": "发信行为管控"
+  },
     "timeoutAlert": {
       "warning": "有 {count} 个策略已观察超过 {days} 天，待转正评估",
       "viewDetails": "查看",

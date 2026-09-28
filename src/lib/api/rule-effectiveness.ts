@@ -1,7 +1,7 @@
 import { apiRequest, type ApiRequestFn } from './client';
 
 // Recipient-copy observation statistics, scoped to the current observation period.
-export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter';
+export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control';
 
 export type Direction = 'receive' | 'send' | 'internal';
 
@@ -161,7 +161,7 @@ export function buildEmailDisposalCenterQuery(row: RuleEffectivenessRow, startDa
     startDate = calendar(row.window_from); endDate = calendar(row.window_to, true);
   }
   return new URLSearchParams({
-    source: 'rule_effectiveness', policy_key: row.policy_module,
+    source: 'rule_effectiveness', policy_key: row.policy_module === 'behavior_control' ? 'BEHAVIOR' : row.policy_module,
     strategy_name: row.sub_strategy_name_snapshot,
     sub_strategy: row.sub_strategy_id, observation_period_id: row.observation_period_id,
     tenant_id: String(row.tenant_id), observe_window_from: startDate,

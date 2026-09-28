@@ -11,7 +11,7 @@ function threatSeriesValue(
 
 interface RuleEffectivenessMockRow {
   id: string;
-  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter';
+  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control';
   // 相似邮件检测/相同主题检测是两条独立策略（不同判定维度、不同误判特征），
   // 观察对象必须按策略拆分，不能合并为一个笼统的「相似检测」模块级观察对象。
   similar_detection_type?: 'similar_email' | 'same_subject';
@@ -48,6 +48,7 @@ const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_mo
   similar_detection: '/security/pipeline?module=similarDetection',
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
   sender_filter: '/security/sender-filter',
+  behavior_control: '/security/pipeline?module=behaviorControl',
 };
 
 // 相似检测配置页按 detectionType Tab 划分（相似邮件检测/相同主题检测），跳转时
@@ -437,6 +438,22 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
     version_no: 1,
   },
+  {
+    id: 'behavior-control-rule-101',
+    policy_module: 'behavior_control',
+    sub_strategy_id: 'rule:101',
+    sub_strategy_name_snapshot: '外发频率限制',
+    is_deleted: false,
+    observed_days: 11,
+    hits: 76,
+    would_block_ratio: 0.64,
+    reviewed_ratio: 0.39,
+    weighted_reviewed_ratio: 0.31,
+    false_positive_rate: 0.08,
+    attribution_status: 'attributable',
+    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.behavior_control,
+    version_no: 1,
+  },
   // 白名单规则（action=accept）——观察期内命中即为放行，不产生拦截类结果，
   // 因此用 actions: [] 覆盖模块级的拦截动作候选。
   {
@@ -493,6 +510,7 @@ const RULE_EFFECTIVENESS_MODULE_ACTIONS: Record<RuleEffectivenessMockRow['policy
   // 黑名单规则动作与 BlacklistAction 对齐（reject/quarantine/audit/discard）；
   // 白名单规则（action=accept）通过每行的 `actions: []` 覆盖，不落到这个默认集合。
   sender_filter: ['reject', 'discard', 'quarantine', 'audit'],
+  behavior_control: ['reject', 'discard', 'quarantine', 'audit'],
 };
 
 function allocateActionCounts(

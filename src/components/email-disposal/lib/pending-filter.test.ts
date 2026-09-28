@@ -49,6 +49,14 @@ describe('GT-14263 similar-detection observation deep-link filter', () => {
     });
   });
 
+  it('maps behavior-control observation deep links to the behavior module filter', () => {
+    const params = new URLSearchParams({ source: 'rule_effectiveness', policy_key: 'BEHAVIOR' });
+
+    expect(disposalDeepLinkQuickFilter(params)).toEqual({
+      disposalPolicyKeys: ['BEHAVIOR'],
+    });
+  });
+
   it('ignores unknown deep-link values and leaves the default page unfiltered', () => {
     const params = new URLSearchParams({ similar: 'other', direction: 'other' });
 
