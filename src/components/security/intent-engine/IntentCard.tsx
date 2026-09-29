@@ -208,6 +208,9 @@ export function IntentCard({
               onClick={(event) => event.stopPropagation()}
               onKeyDown={(event) => event.stopPropagation()}
             >
+              <span className="text-xs text-muted-foreground">
+                {tCommon('observeMode.label')}
+              </span>
               {value.observe_mode && (
                 <Badge variant="secondary" className="text-[10px]">
                   {tCommon('observeMode.observing')}

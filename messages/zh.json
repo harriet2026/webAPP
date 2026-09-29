@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则��开��������������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开����������������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -2012,7 +2012,7 @@
     },
     "status": {
       "pending": "待开通",
-      "active": "活跃",
+      "active": "活���",
       "suspended": "已暂停",
       "expired": "已过期"
     },
@@ -2069,7 +2069,7 @@
       "activate": "启用"
     },
     "confirm": {
-      "impersonate": "确认以该租户管理员身份进入?",
+      "impersonate": "确认以该租户管��员身份进入?",
       "suspend": "���认暂停该租户?",
       "activate": "确认启用该���户?",
       "removeDomains": "确认移除 {count} 个域名？",
@@ -2384,7 +2384,7 @@
     "download": "下载",
     "downloadFailed": "下载失败：{error}",
     "close": "关闭",
-    "aiPlaceholder": "用自然语言描述要查询的点击事件，如“本周被云端情报拦截的钓鱼链接��",
+    "aiPlaceholder": "用自然语言描述要查询的点击事件，如“本周被云端��报拦截的钓鱼链接��",
     "advancedFilter": "高级筛��",
     "collapse": "收起",
     "search": "搜索",
@@ -3356,7 +3356,7 @@
     "overseas": "海外邮件检测",
     "overseasDesc": "识别海外邮件并按策略处置",
     "senderFilter": "发信人黑白名单",
-    "senderFilterDesc": "命中白名单则跳过后续检测",
+    "senderFilterDesc": "命中白名��则跳过后续检测",
     "authSpoofing": "身份认证与仿冒��测",
     "authSpoofingDesc": "检测伪造发件人和认证仿冒",
     "behaviorControl": "发信行为管控",
@@ -3507,7 +3507,7 @@
     "suspend30min": "启用30分钟",
     "suspend1hour": "启用1小时",
     "suspend2hour": "启用2小时",
-    "zeroConfirmWarning": "0表示禁止任何连接/命令，确认要保存吗？",
+    "zeroConfirmWarning": "0表示禁止任何连接/命令，确认要保存��？",
     "orRelationTip": "各维度为\"或\"关系，满足任��即触发处置动作",
     "saving": "保存中...",
     "createRule": "新增规则",
@@ -3668,7 +3668,7 @@
     "nameRequired": "请输入规则名称",
     "nameTooLong": "规则名称不能超过 50 个字符",
     "invalidIp": "请输入有效的 IP 地址（如 192.168.1.1）",
-    "invalidCidr": "请输入有效的 CIDR 网段（如 192.168.1.0/24）",
+    "invalidCidr": "请输入有效的 CIDR 网��（如 192.168.1.0/24）",
     "validUntilBeforeFrom": "失效时间不能早于生效时间",
     "windowLimitHint": "时间窗设�� -1（不限制）时，窗口连接数也必须为 -1",
     "suspendDurationInvalid": "请选择受支持的���停时长",
@@ -3962,7 +3962,7 @@
     "deleteServerGeneralConfirm": "确定要删除此 RBL 服务器吗？",
     "referencedDelete": "该服务器正在被 {count} 条规则使用",
     "statsToday": "今日命中",
-    "domainInvalid": "请输入有效的域名格式",
+    "domainInvalid": "请��入有效的域名格式",
     "domainDuplicate": "该服务器已存在",
     "domainRequired": "域名为必填项",
     "notEnabled": "未启用",
@@ -4087,7 +4087,7 @@
     "sheetDesc": "配置IP地址与地理位置的映射关系，用于海外邮件检测",
     "basicSettings": "基础设置",
     "ipRangeLabel": "IP地址/段",
-    "ipRangePlaceholder": "请输入IP地址或CIDR网段，如 8.8.8.8、8.8.8.0/24 或 2001:db8::/32",
+    "ipRangePlaceholder": "请输入IP地���或CIDR网段，如 8.8.8.8、8.8.8.0/24 或 2001:db8::/32",
     "ipRangeFormat": "支持格式：IPv4单地址或CIDR（/0至/32）；IPv6单地址或CIDR（/0至/128）",
     "regionCodeLabel": "地区代码",
     "selectRegion": "请选择地区",
@@ -4230,7 +4230,7 @@
     "configHint4": "群组和组织来自群组策略配置",
     "scheduleSection": "生效时间",
     "complexEditTitle": "复杂条件",
-    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与有效期；保存不会改动原有条件与执行动作。",
+    "complexEditHint": "该规则由高级编辑器或 API 创建，条件无法在此编辑。可修改规则名称、备注、优先级与��效期；保存不会改动原有条件与执行动作。",
     "statusFilter": "状态��选",
     "statusAll": "全部��态",
     "statusEnabled": "已启用",
@@ -5010,7 +5010,7 @@
     },
     "toast": {
       "saveOk": "规则已保存",
-      "deleteOk": "规则已删除"
+      "deleteOk": "规则已删��"
     },
     "closeConfirm": {
       "title": "确认离开",
@@ -5252,7 +5252,7 @@
       "ocrMode": "OCR 模式",
       "ocrMaxCount": "OCR 最大数量",
       "qrSection": "二维码检测",
-      "qrMode": "二维码模式",
+      "qrMode": "二维码模��",
       "qrMaxCount": "二维码最大数量",
       "qrDeepRoutesSection": "二维码深度路由配置",
       "urlCheck": "URL 检查",
@@ -5347,7 +5347,7 @@
     "validation": {
       "attachmentCountMin": "附件数量上限最小为 1",
       "attachmentSizeMin": "附件大小上限最小为 1 KB",
-      "dangerExtListEmpty": "危险扩展名列表为空，建议添加常见危险扩展名",
+      "dangerExtListEmpty": "危险扩展名列表为空��建议添加常见危险扩展名",
       "duplicatePassword": "该密码已存在",
       "emptyPassword": "密码不能为空"
     },
@@ -5529,7 +5529,7 @@
     "statusEnabled": "已启用",
     "statusDisabled": "已禁用",
     "observeMode": {
-      "label": "意图策略观察模式",
+      "label": "观察模式",
       "observing": "观察模式",
       "hint": "启用后命中仅记录和统计，不执行当前配置的处置动作"
     },
@@ -5571,6 +5571,7 @@
     },
     "action": {
       "accept": "投递",
+      "reject": "阻断",
       "proceed": "进行下一步",
       "quarantine": "隔离",
       "audit": "审核",
@@ -5656,7 +5657,7 @@
     "actionQuarantine": "隔离",
     "tooltipAction": "检测到相似邮件时执行的触发动作。选择「仅采集信号」则只记录不执行动作。",
     "syncToOthers": "同步到其他方向",
-    "exemptionNote": "豁免名单统一由群组策略模块配置，本模块不再提供免检测发信人管理入口",
+    "exemptionNote": "豁免名单统一由群组策略模块配置，本模块不再提供免检��发信人管理入口",
     "tooltipWindow": "统计相似邮件的时间范围,单位为分钟",
     "tooltipThreshold": "邮件内容相似度达到此百分比时被视为相似邮件",
     "tooltipMinCount": "相似邮件数量达到此阈值后才触发动作",
@@ -5807,7 +5808,7 @@
       "priorityRange": "优先级需在 {min}–{max} 之间"
     },
     "errorMarkRequired": "请输入标记文案",
-    "errorMarkTooLong": "标记文案不能超过 50 个字符",
+    "errorMarkTooLong": "标记文案不能超过 50 ���字符",
     "errorDisclaimerRequired": "请输入免责声明内容",
     "errorDisclaimerTooLong": "免责声明不能超过 10240 UTF-8 bytes",
     "errorHeaderRequired": "请输入邮件头字段名",
@@ -5930,7 +5931,7 @@
       "aiClear": "清空 AI 条件",
       "aiUnavailable": "语义解析服务繁忙，请稍后重试",
       "truncatedTo500": "已截断至 500 字符",
-      "aiTimeout": "语义解析超时，请重试或直接使用结构化筛选",
+      "aiTimeout": "语义解析��时，请重试或直接使用结构化筛选",
       "aiError": "语义解析服务繁忙，请稍后重试或直接使用结构化筛选",
       "selectedConditions": "已选条件",
       "pendingConditions": "待应用条件",
@@ -7409,7 +7410,7 @@
         "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
         "example": "对象选择「公司主域名档���」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
         "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，兼顾召回与误报。",
-        "note": "先选择受保护域名档案，再填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
+        "note": "先选择受保护域名档案，���填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
       },
       "desc_displayNameSpoof": {
         "source": "仿冒检��模块",
@@ -7608,7 +7609,7 @@
     },
     "testAnalysis": {
       "testSectionTitle": "规则测试",
-      "dropHint": "拖拽EML文件到此处",
+      "dropHint": "拖拽EML文件���此处",
       "pickFileButton": "点击选择文件",
       "emlHint": "支持 .eml 格式，最大 10MB",
       "fileError": {
@@ -7737,7 +7738,7 @@
     "pageTitle": "处置设置",
     "pageDescription": "配置邮件隔离区、审核流程和召回策略的相关设置",
     "selectTenantEmpty": "请先选择租户以管理其处置设置",
-    "save": "保存设置",
+    "save": "保存设��",
     "reset": "重置",
     "saveSuccess": "设置已保存",
     "saveFailed": "保存失败",
@@ -7928,7 +7929,7 @@
     "generateNew": "+ 生成新密钥",
     "importKey": "+ 导入私钥",
     "selector": "Selector",
-    "selectorHint": "只能是小写字母/数字/连字符，1-63 字符",
+    "selectorHint": "只能是小写字母/数���/连字符，1-63 字符",
     "selectorInvalid": "Selector 格式不合法：只能是小写字母/数字/连字符，1-63 字符",
     "algorithm": "算法",
     "note": "备注",
@@ -7981,7 +7982,7 @@
     "title": "密码策略",
     "minLength": "密码最小长度",
     "minCharClasses": "最少字符类别数",
-    "classesHint": "字符类��：大写字母、小写字母、数字、特殊符号（共 4 类）"
+    "classesHint": "字符类����：大写字母、小写字母、数字、特殊符号（共 4 类）"
   },
   "securityOverview": {
     "trendPeakHint": "单击图例可切换系列，双击可单独查看某一类",
@@ -8503,7 +8504,7 @@
       "blockRate": "拦截率",
       "blockRateHelp": "当日恶意邮件投递层拦截率",
       "change": "环比变化",
-      "expandRow": "展开 {date} 的威胁分布",
+      "expandRow": "展开 {date} 的��胁分布",
       "collapseRow": "收起 {date} 的威胁分布",
       "threatDistribution": "威胁类型分布"
     },
@@ -8557,7 +8558,7 @@
     "retry": "重试",
     "agentOffline": "数据采集异常",
     "degradeBackendUnavailable": "监控数据源（时序数据库）暂时不可达，数据可能缺失",
-    "degradeNotInitialized": "监控库尚未初���化",
+    "degradeNotInitialized": "监控���尚未初���化",
     "degradeDbUnavailable": "数据库监控数据源暂时不可用",
     "backendUnsupported": "该后端暂不支持",
     "hardware": {
@@ -8888,7 +8889,7 @@
         "screenshot_too_large": "截图超过大小限制",
         "screenshot_metadata_too_large": "截图网址超过长度限制",
         "storage_capability_unavailable": "截图保存能力不可用",
-        "no_storage_node": "未找到邮件存储节点",
+        "no_storage_node": "未找到��件存储节点",
         "screenshot_save_failed": "截图保存失败",
         "screenshot_conflict": "截图保存发生冲突",
         "http_fallback": "本次使用普通网页抓取，无法生成截图",
@@ -9365,7 +9366,7 @@
     },
     "bands": {
       "title": "置信度分级处置",
-      "description": "按置信度区间连续覆盖 0–100，每段配置不同的处置动作。",
+      "description": "按置信度区间连续覆盖 0–100，每段配置不同���处置动作。",
       "loading": "加载中...",
       "save": "保存",
       "saving": "保存中...",
@@ -9919,7 +9920,7 @@
         "alert_only": "仅告警",
         "false_positive": "已标误报",
         "multiple": "多种处置",
-        "proposed_pending_recall": "拟待确认召回",
+        "proposed_pending_recall": "拟待确认召���",
         "proposed_recalled": "拟自动召回",
         "proposed_alert_only": "拟仅告警",
         "proposed_multiple": "拟多种处置"
@@ -10318,7 +10319,7 @@
     "detailSource": "数据源",
     "detailTitle": "人员详情",
     "detailUsername": "用户名",
-    "emptyAddNow": "立即添加",
+    "emptyAddNow": "立即��加",
     "emptyNoMatch": "未找到匹配结果",
     "emptyText": "暂无数据",
     "errBaseDnRequired": "请输入 Base DN",
@@ -10676,7 +10677,7 @@
       "encKeyMissing": "告警 SMTP 加密密钥未配置；外部 SMTP 凭据存储已禁用。内置 Postfix 仍可正常使用。",
       "server": "SMTP 服务器",
       "port": "端���",
-      "encryption": "加密方式",
+      "encryption": "加密���式",
       "encNone": "无",
       "auth": "认证方式",
       "auth_none": "无",
@@ -11020,7 +11021,7 @@
       "actionDesc": {
         "quarantine": "收件人不存在或验证失败时进入隔离区，管理员审核后可放行或删除",
         "audit": "收件人不存在或验证失败时进入待审核队列，人工确认后投递或退回",
-        "reject": "收件人不存在或验证失败时在 RCPT TO 阶段拒绝该收件人",
+        "reject": "收件人不存在或验证失败时在 RCPT TO 阶段���绝该收件人",
         "discard": "收件人不存在或验证失败时静默丢弃，发送方无感知、无退信"
       },
       "offlineTitle": "通讯录为空",
@@ -11985,7 +11986,7 @@
       "recall_request_does_not_belong_your": "该召回请求不属于当前租户"
     },
     "recipient_check": {
-      "invalid_existence_action": "收件人存在性处置动作无效"
+      "invalid_existence_action": "收件人存在性��置动作无效"
     },
     "recipient_config_access": {
       "recipient_configuration_requires_tenant_context": "多租户模式下，收件人配置需要先选择租户",
@@ -12129,7 +12130,7 @@
       "unknown": "判断对象"
     },
     "directions": {
-      "supports_threat": "支持威胁",
+      "supports_threat": "支持威��",
       "supports_legitimate": "支持正常",
       "limits_certainty": "限制确定性",
       "unknown": "未知方向"
