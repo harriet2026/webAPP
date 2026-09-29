@@ -54,7 +54,6 @@ export interface BehaviorControlFormData {
   description?: string;
   priority: number;
   is_active: boolean;
-  observe_mode?: boolean;
   valid_from?: string;
   valid_until?: string;
   direction: BehaviorDirection;

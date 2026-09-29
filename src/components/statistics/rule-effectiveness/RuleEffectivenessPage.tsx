@@ -35,18 +35,7 @@ const CONFIG_PATH_BY_MODULE: Record<PolicyModule, string> = {
   auth_spoofing: '/security/pipeline?module=authSpoofing',
   similar_detection: '/security/pipeline?module=similarDetection',
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
-  // 发信人黑白名单没有独立路由页面，只挂载在流水线抽屉里（module=senderFilter），
-  // '/security/sender-filter' 是不存在的路径，用错会导致跳转 404。
-  sender_filter: '/security/pipeline?module=senderFilter',
-  behavior_control: '/security/pipeline?module=behaviorControl',
-  // 流水线页内容规则模块的真实 key 是 'content'（见 PolicyPipelinePage 的
-  // Stage3PolicyKey 与 policy-deep-link.ts 的 PipelineModuleKey），不是
-  // 'contentRules'；用错 key 会导致跳转后流水线页无法定位到内容规则抽屉。
-  content_rules: '/security/pipeline?module=content',
-  // GT-14369：模块级兜底路径（无 rule_id）；mock 明细行按具体规则拼接的
-  // config_path（含 rule_id）优先命中，见上方 configPath 取值逻辑与
-  // rule-effectiveness-prototype.ts 的 RULE_EFFECTIVENESS_CONFIG_PATH。
-  advanced_filter_rules: '/security/pipeline?module=advancedRules',
+  sender_filter: '/security/sender-filter',
 };
 
 export function RuleEffectivenessPage() {

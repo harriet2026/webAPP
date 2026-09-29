@@ -43,7 +43,6 @@ interface ContentRulesTableProps {
   onEditComplex: (ruleId: number) => void;
   onDelete: (rule: ContentRuleRuleView) => void;
   onToggle: (id: number, isActive: boolean) => void;
-  onToggleObserve: (id: number, enabled: boolean) => void;
   onCopy: (ruleId: number) => void;
   selectedIds: number[];
   onSelectionChange: (ids: number[]) => void;
@@ -126,7 +125,6 @@ export function ContentRulesTable({
   onEditComplex,
   onDelete,
   onToggle,
-  onToggleObserve,
   onCopy,
   selectedIds,
   onSelectionChange,
@@ -295,18 +293,6 @@ export function ContentRulesTable({
           </div>
         );
       },
-    },
-    {
-      id: 'observe_mode',
-      header: t('contentRules.observeMode'),
-      cell: ({ row }) => (
-        <Switch
-          checked={row.original.observe_mode}
-          disabled={!canEdit}
-          onCheckedChange={(enabled) => onToggleObserve(row.original.rule.id, enabled)}
-          aria-label={t('contentRules.observeMode')}
-        />
-      ),
     },
     {
       id: 'valid_until',

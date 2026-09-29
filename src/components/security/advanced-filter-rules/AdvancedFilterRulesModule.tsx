@@ -17,7 +17,6 @@
 // of the concatenated `incomingoutgoinginternal` string), D-12 (pagination is
 // real front-end slicing, not permanently-disabled placeholder buttons).
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RuleExecutionWarning } from '@/components/rules/RuleExecutionWarning';
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -45,6 +44,7 @@ import {
   getAdvancedFieldDefinitions,
   type RuleWithExtras,
 } from '@/lib/api/advanced-rules';
+import type { Rule } from '@/types/unified-rules';
 import { filterRules, foldKeywords } from './list-filter';
 import { getRulePrimaryAction, getRuleScope } from './list-row';
 import { CONDITIONS } from './catalogue';
@@ -91,18 +91,11 @@ interface ListItem extends RuleWithExtras {
 export function AdvancedFilterRulesModule({
   embedded,
   aggregateDisabled = false,
-  deepLinkRuleID,
-  deepLinkRuleRef,
 }: {
   embedded?: boolean;
   // 综合策略聚合开关关闭时保留子项自身配置，但禁止在此修改；重新开启后
   // 仍显示并恢复此前的高级规则开关和值。
   aggregateDisabled?: boolean;
-  // GT-14369 7.1.1：来自规则效能统计"前往策略配置"的深链，携带具体规则的
-  // 数据库 id/原始 rule_id 字符串。规则列表加载完成后自动定位并打开该规则
-  // 的编辑抽屉；未找到（如规则已被删除）则不自动打开，停留在列表。
-  deepLinkRuleID?: number;
-  deepLinkRuleRef?: string;
 }) {
   const t = useTranslations('advancedRulesFeature');
   const apiErrorMessage = useApiErrorMessage();
@@ -126,13 +119,7 @@ export function AdvancedFilterRulesModule({
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_OPTIONS[0]);
   const [currentPage, setCurrentPage] = useState(0);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [editingRule, setEditingRule] = useState<RuleWithExtras | null>(null);
-  // GT-14369: 观察模式暂无后端持久化承载，读写均落在这份前端本地 mock 状态；
-  // 组件卸载/页面刷新后重置为空，等价于全部规则观察模式关闭。
-  const [observeModeById, setObserveModeById] = useState<Record<number, boolean>>({});
-  // GT-14369 7.1.1: 深链自动定位到具体规则的编辑抽屉；记录已处理过的
-  // deepLinkRuleID，避免规则列表 refetch 后重复弹出同一条规则的编辑抽屉。
-  const [handledDeepLinkRuleID, setHandledDeepLinkRuleID] = useState<number | undefined>(undefined);
+  const [editingRule, setEditingRule] = useState<Rule | null>(null);
 
   const rulesQueryKey = ['advanced-rules', 'list', effectiveTenantId] as const;
   const enabledQueryKey = ['advanced-rules', 'enabled', effectiveTenantId] as const;
@@ -197,24 +184,16 @@ export function AdvancedFilterRulesModule({
     setEditorOpen(true);
   };
 
-  const handleEdit = (rule: RuleWithExtras) => {
+  const handleEdit = (rule: Rule) => {
     setEditingRule(rule);
     setEditorOpen(true);
   };
 
-  const handleEditorSaved = (observeMode: boolean, newRuleId?: number) => {
+  const handleEditorSaved = () => {
     // RuleEditorDrawer already toasts + closes itself on success; this
     // callback only owns list-side bookkeeping.
-    const savedId = editingRule?.id ?? newRuleId;
-    if (savedId !== undefined) {
-      setObserveModeById((prev) => ({ ...prev, [savedId]: observeMode }));
-    }
     setEditingRule(null);
     queryClient.invalidateQueries({ queryKey: rulesQueryKey });
-  };
-
-  const handleToggleObserve = (id: number, next: boolean) => {
-    setObserveModeById((prev) => ({ ...prev, [id]: next }));
   };
 
   const listItems: ListItem[] = useMemo(
@@ -224,21 +203,9 @@ export function AdvancedFilterRulesModule({
         keywords: r.keywords ?? [],
         scope: getRuleScope(r),
         enabled: r.is_active,
-        observe_mode: observeModeById[r.id] ?? false,
       })),
-    [rules, observeModeById],
+    [rules],
   );
-
-  // GT-14369 7.1.1: 深链自动定位到具体规则的编辑抽屉；找不到则停留在列表，
-  // 不重复弹出同一条规则。这是从新到达的查询数据派生本地状态的守卫式渲染期
-  // 调整，而非级联同步 effect（同 ContentRulesPage 的既有模式）。
-  const deepLinkTarget = deepLinkRuleID !== undefined ? rules?.find((r) => r.id === deepLinkRuleID) : undefined;
-  const deepLinkNotFound = deepLinkRuleID !== undefined && rules !== undefined && !deepLinkTarget;
-  if (deepLinkTarget && handledDeepLinkRuleID !== deepLinkRuleID) {
-    setHandledDeepLinkRuleID(deepLinkRuleID);
-    setEditingRule({ ...deepLinkTarget, observe_mode: observeModeById[deepLinkTarget.id] ?? false });
-    setEditorOpen(true);
-  }
 
   const filteredRules = useMemo(
     () => filterRules(listItems, search, statusFilter, scopeFilter),
@@ -356,21 +323,6 @@ export function AdvancedFilterRulesModule({
           </div>
         </div>
 
-        {deepLinkRuleID !== undefined && isLoading && (
-          <Alert data-testid="advanced-rule-deep-link-loading">
-            <AlertDescription>
-              {t('deepLinkLoading', { ruleId: deepLinkRuleRef ?? deepLinkRuleID })}
-            </AlertDescription>
-          </Alert>
-        )}
-        {deepLinkNotFound && (
-          <Alert variant="destructive" data-testid="advanced-rule-deep-link-unavailable">
-            <AlertDescription>
-              {t('deepLinkUnavailable', { ruleId: deepLinkRuleRef ?? deepLinkRuleID })}
-            </AlertDescription>
-          </Alert>
-        )}
-
         <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
@@ -381,7 +333,6 @@ export function AdvancedFilterRulesModule({
                 <TableHead className="w-[140px]">{t('scope')}</TableHead>
                 <TableHead className="w-[90px]">{t('priority')}</TableHead>
                 <TableHead className="w-[100px]">{t('status')}</TableHead>
-                <TableHead className="w-[100px]">{t('observeMode')}</TableHead>
                 <TableHead className="w-[110px]">{t('action')}</TableHead>
                 <TableHead className="w-[130px]">{t('expiresAt')}</TableHead>
                 <TableHead className="w-[150px] text-right">{t('operations')}</TableHead>
@@ -390,13 +341,13 @@ export function AdvancedFilterRulesModule({
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                     {tc('loading')}
                   </TableCell>
                 </TableRow>
               ) : pagedRules.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
                     {tc('noData')}
                   </TableCell>
                 </TableRow>
@@ -453,14 +404,6 @@ export function AdvancedFilterRulesModule({
                           onCheckedChange={(isActive) => toggleMutation.mutate({ id: rule.id, isActive })}
                           data-testid={`rule-row-toggle-${rule.id}`}
                           aria-label={rule.is_active ? tc('disabled') : tc('enabled')}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={rule.observe_mode ?? false}
-                          onCheckedChange={(next) => handleToggleObserve(rule.id, next)}
-                          data-testid={`rule-row-observe-${rule.id}`}
-                          aria-label={rule.observe_mode ? t('disableObserveMode') : t('enableObserveMode')}
                         />
                       </TableCell>
                       <TableCell>

@@ -10,7 +10,7 @@ import { getRuleEffectiveness as getReportPage, getObservationVersions, getObser
 //   - sender_filter：发信人黑白名单，按单条规则（黑名单/白名单）拆分观察对象
 // 高级规则（单条 action=observe）与仿冒品牌/人物检测不在本期范围内。
 
-export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'advanced_filter_rules';
+export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter';
 
 /** 与安全总览共用的邮件方向枚举，相似检测按方向拆分观察对象时复用同一枚举。 */
 export type Direction = 'receive' | 'send' | 'internal';
@@ -152,7 +152,7 @@ export interface RuleEffectivenessRow {
   sub_strategy_name_snapshot: string;
   is_deleted: boolean;
   /**
-   * 当前生效的策略版本号，从 1 开始。规则��实质性修改（��响判断逻辑的字段变更）
+   * 当前生效的策略版本号，从 1 开始。规则被实质性修改（影响判断逻辑的字段变更）
    * 后版本号 +1，observed_since 重新计算，历史版本移入 version_history。
    */
   version_no: number;
@@ -279,9 +279,7 @@ export async function getRuleEffectiveness(
 export function buildEmailDisposalCenterQuery(row: RuleEffectivenessRow, startDate: string, endDate: string): string {
   if (row.backend) return buildScopedMailQuery(row.backend, startDate, endDate);
   // Product mock navigation keeps the original prototype contract.
-  return new URLSearchParams({ source: 'rule_effectiveness', policy_key: row.policy_module === 'behavior_control' ? 'BEHAVIOR' : row.policy_module,
-    // content_rules / advanced_filter_rules 都是新引入的模块，不存在历史别名
-    // 冲突，直接用原值即可，不需要像 behavior_control 一样映射成大写别名。
+  return new URLSearchParams({ source: 'rule_effectiveness', policy_key: row.policy_module,
     sub_strategy: row.similar_detection_type ? `${row.similar_detection_type}:${row.similar_detection_scope ?? row.sub_strategy_id}` : row.sub_strategy_id,
     observe_window_from: row.observed_since,
   }).toString();

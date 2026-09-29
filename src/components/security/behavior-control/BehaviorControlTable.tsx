@@ -19,8 +19,6 @@ interface Props {
   onDelete: (view: BehaviorControlRuleView) => void;
   onToggle: (id: number, isActive: boolean) => void;
   togglePending?: boolean;
-  observeModes: Record<number, boolean>;
-  onObserveToggle: (id: number, enabled: boolean) => void;
 }
 
 const DIR_BADGE: Record<BehaviorDirection, string> = {
@@ -60,15 +58,7 @@ function ObjectCell({ type, subType, value }: { type: BehaviorObjectType; subTyp
   );
 }
 
-export function BehaviorControlTable({
-  views,
-  onEdit,
-  onDelete,
-  onToggle,
-  togglePending = false,
-  observeModes,
-  onObserveToggle,
-}: Props) {
+export function BehaviorControlTable({ views, onEdit, onDelete, onToggle, togglePending = false }: Props) {
   const t = useTranslations();
 
   return (
@@ -83,7 +73,6 @@ export function BehaviorControlTable({
             <TableHead className="w-[90px]" data-testid="behavior-control-col-action">{t('behaviorControl.col.action')}</TableHead>
             <TableHead className="w-[80px]" data-testid="behavior-control-col-priority">{t('behaviorControl.col.priority')}</TableHead>
             <TableHead className="w-[110px]" data-testid="behavior-control-col-status">{t('behaviorControl.col.status')}</TableHead>
-            <TableHead className="w-[110px]" data-testid="behavior-control-col-observe-mode">{t('behaviorControl.col.observeMode')}</TableHead>
             <TableHead className="w-[130px]" data-testid="behavior-control-col-modified">{t('behaviorControl.col.modified')}</TableHead>
             <TableHead className="w-[100px]" data-testid="behavior-control-col-operations">{t('behaviorControl.col.operations')}</TableHead>
           </TableRow>
@@ -91,7 +80,7 @@ export function BehaviorControlTable({
         <TableBody>
           {views.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={10} className="h-32 text-center" data-testid="behavior-control-empty">
+              <TableCell colSpan={9} className="h-32 text-center" data-testid="behavior-control-empty">
                 <div className="text-muted-foreground">{t('behaviorControl.empty')}</div>
                 <p className="text-sm text-muted-foreground">
                   {t('behaviorControl.emptyHint', { action: t('behaviorControl.addRule') })}
@@ -151,17 +140,7 @@ export function BehaviorControlTable({
                     </div>
                   )}
                 </TableCell>
-                <TableCell>
-                  <div className="flex items-center" data-testid={`behavior-control-observe-mode-${v.rule.id}`}>
-                    <Switch
-                      data-testid={`behavior-control-observe-toggle-${v.rule.id}`}
-                      checked={observeModes[v.rule.id] ?? false}
-                      onCheckedChange={(enabled) => onObserveToggle(v.rule.id, enabled)}
-                      aria-label={t('behaviorControl.toggleObserveMode', { name: v.rule.name })}
-                    />
-                  </div>
-                </TableCell>
-                {/* GT-12500：本地时区分钟精度���不再裸渲染 UTC ISO 串 */}
+                {/* GT-12500：本地时区分钟精度，不再裸渲染 UTC ISO 串 */}
                 <TableCell className="text-sm text-muted-foreground">{formatTimestamp(v.rule.updated_at)}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">

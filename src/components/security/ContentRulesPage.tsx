@@ -108,7 +108,6 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [importExportTab, setImportExportTab] = useState<"export" | "import">("export");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [observeModeById, setObserveModeById] = useState<Record<number, boolean>>({});
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [handledDeepLinkRuleID, setHandledDeepLinkRuleID] = useState<number | undefined>(undefined);
   const importTemplate = useMemo(
@@ -188,10 +187,9 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
         rule,
         resolved,
         is_complex: resolved === null,
-        observe_mode: observeModeById[rule.id] ?? false,
       };
     });
-  }, [observeModeById, rulesData]);
+  }, [rulesData]);
 
   // A deep link may target a rule outside the current page/filter, so load it
   // directly by its stable database ID and open the same edit drawer used by
@@ -202,7 +200,7 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
   if (deepLinkRuleID && deepLinkedRule && !deepLinkWrongPage && handledDeepLinkRuleID !== deepLinkRuleID) {
     setHandledDeepLinkRuleID(deepLinkRuleID);
     const resolved = resolveContentRulesRule(deepLinkedRule);
-    setEditingRule({ rule: deepLinkedRule, resolved, is_complex: resolved === null, observe_mode: observeModeById[deepLinkedRule.id] ?? false });
+    setEditingRule({ rule: deepLinkedRule, resolved, is_complex: resolved === null });
     setDrawerOpen(true);
   }
 
@@ -315,7 +313,6 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
             method: "PUT",
             body: payload,
           });
-          setObserveModeById((previous) => ({ ...previous, [editingRule.rule.id]: data.observe_mode ?? false }));
         } else {
           const payload: CreateRuleRequest = {
             name: data.name,
@@ -332,10 +329,7 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
             valid_until: toRFC3339(data.valid_until),
             email_type: data.email_type,
           };
-          const created = await apiRequest<Rule>("/unified-rules?scope=content_rules", { method: "POST", body: payload });
-          if (created?.id) {
-            setObserveModeById((previous) => ({ ...previous, [created.id]: data.observe_mode ?? false }));
-          }
+          await apiRequest("/unified-rules?scope=content_rules", { method: "POST", body: payload });
         }
         queryClient.invalidateQueries({ queryKey });
         toast.success(
@@ -352,11 +346,6 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
     },
     [apiErrorMessage, apiRequest, editingRule, queryClient, queryKey, t],
   );
-
-  const handleToggleObserve = useCallback((id: number, enabled: boolean) => {
-    setObserveModeById((previous) => ({ ...previous, [id]: enabled }));
-    toast.success(t("common.updateSuccess"));
-  }, [t]);
 
   const handleCopy = useCallback(
     (ruleId: number) => {
@@ -559,7 +548,6 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
               setDeleteTarget({ id: rule.rule.id, name: rule.rule.name })
             }
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
-            onToggleObserve={handleToggleObserve}
             onCopy={handleCopy}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}

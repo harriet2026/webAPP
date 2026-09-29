@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
     // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true��多租户平台视角恒隐藏，与 grants 无关）。
+    // platformHidden:true，多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
@@ -676,7 +676,7 @@ export function mockDashboardSummaryFor(
   };
 }
 
-// ─── 邮件安全总览（/statistics/security-overview/**）���────────────────────────
+// ─── 邮件安全总览（/statistics/security-overview/**）─────────────────────────
 // 与 demo 的默认口径一致，所有数据确定性生成，保证离线演示和 E2E 可复现。
 const SECURITY_KPI = {
   total_filtered: 12_450,
@@ -2099,7 +2099,7 @@ export function mockThreatRetroStats(): ThreatRetroStats {
   };
 }
 
-// ─── 系统��服务健康（新端点 GET /system/health-summary）──────────────────────
+// ─── 系统与服务健康（新端点 GET /system/health-summary）──────────────────────
 // demo SYSTEM_HEALTH，snake_case 字段（组件将按此形状消费）。
 export function mockSystemHealthSummary(): {
   license_days: number;
@@ -2193,7 +2193,7 @@ function makeRule(input: {
   };
 }
 
-// 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成，�� 20 条
+// 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成，共 20 条
 // （demo 总数 55，但只展示 20 条/页；前 5 条手工的与 demo 完全一致）
 function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
   const base = [
@@ -3115,7 +3115,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ════════════════════════════════���═══════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -4173,157 +4173,6 @@ export function mockBulkContentRules(body: unknown): number[] {
   if (action === "enable" || action === "disable")
     ids.forEach((id) => mockSetContentRuleStatus(id, action === "enable"));
   return ids;
-}
-
-// GT-14369：高级过滤规则的 mock 规则列表/CRUD，镶嵌模式与上面的内容规则一致，
-// 用于让「规则效能统计 → 前往策略配置」的 rule_id 深链能在 mock 环境下找到
-// 对应规则并自动打开编辑抽屉（否则 mockAdvancedRulesList 恒为空，抽屉会一直
-// 停在“规则不存在”提示上）。
-let mockAdvancedRules: Rule[] = [
-  {
-    id: 1,
-    name: "外发压缩包附件管控",
-    description: "外发邮件携带压缩包附件时进入观察/拦截",
-    page: "advanced_rules",
-    rule_class: "action",
-    stage: "data",
-    priority: 800,
-    condition_tree: JSON.stringify({
-      type: "AND",
-      children: [
-        {
-          type: "condition",
-          field: "is_outbound",
-          operator: "eq",
-          value: "true",
-        },
-        {
-          type: "condition",
-          field: "attachment_types",
-          operator: "in",
-          value: "zip,rar,7z",
-        },
-      ],
-    } satisfies RuleNode),
-    action: "quarantine",
-    metadata: JSON.stringify({
-      feature: "advanced_rules",
-      scope: { send: true, receive: false, internal: false },
-    }),
-    is_active: true,
-    keywords: ["压缩包", "外发"],
-    valid_from: null,
-    valid_until: null,
-    created_at: "2026-05-10T09:00:00Z",
-    updated_at: "2026-05-10T09:00:00Z",
-  },
-  {
-    id: 2,
-    name: "高危可执行文件拦截",
-    description: "命中高危可执行文件扩展名的附件直接拦截",
-    page: "advanced_rules",
-    rule_class: "action",
-    stage: "data",
-    priority: 950,
-    condition_tree: JSON.stringify({
-      type: "AND",
-      children: [
-        {
-          type: "condition",
-          field: "attachment_types",
-          operator: "in",
-          value: "exe,bat,vbs,scr",
-        },
-      ],
-    } satisfies RuleNode),
-    action: "reject",
-    metadata: JSON.stringify({
-      feature: "advanced_rules",
-      scope: { send: true, receive: true, internal: true },
-    }),
-    is_active: true,
-    keywords: ["可执行文件", "高危"],
-    valid_from: null,
-    valid_until: null,
-    created_at: "2026-04-02T08:30:00Z",
-    updated_at: "2026-06-01T10:00:00Z",
-  },
-];
-
-export function mockAdvancedRulesList(): { items: Rule[]; total: number } {
-  const rules = [...mockAdvancedRules].sort(
-    (left, right) => right.priority - left.priority || right.id - left.id,
-  );
-  return { items: rules, total: rules.length };
-}
-
-function normalizeAdvancedRule(
-  body: unknown,
-  id: number,
-  previous?: Rule,
-): Rule {
-  const source = readObject(body);
-  const now = "2026-07-16T06:00:00Z";
-  const conditionTree =
-    source.condition_tree ?? readObject(previous?.condition_tree);
-  const metadata = source.metadata ?? readObject(previous?.metadata);
-  return {
-    id,
-    name: String(source.name ?? previous?.name ?? `高级过滤规则 #${id}`),
-    description: String(source.description ?? previous?.description ?? ""),
-    page: "advanced_rules",
-    rule_class: "action",
-    stage: String(source.stage ?? previous?.stage ?? "data") as Rule["stage"],
-    priority: Number(source.priority ?? previous?.priority ?? 100),
-    condition_tree: JSON.stringify(conditionTree),
-    action: String(source.action ?? previous?.action ?? "quarantine"),
-    metadata: JSON.stringify(metadata),
-    is_active: Boolean(source.is_active ?? previous?.is_active ?? true),
-    keywords: (source.keywords ?? previous?.keywords ?? []) as string[],
-    valid_from: (source.valid_from ?? previous?.valid_from ?? null) as
-      string | null,
-    valid_until: (source.valid_until ?? previous?.valid_until ?? null) as
-      string | null,
-    created_at: previous?.created_at ?? now,
-    updated_at: now,
-  };
-}
-
-export function mockCreateAdvancedRule(body: unknown): Rule {
-  const id = Math.max(0, ...mockAdvancedRules.map((rule) => rule.id)) + 1;
-  const rule = normalizeAdvancedRule(body, id);
-  mockAdvancedRules.push(rule);
-  return rule;
-}
-
-export function mockUpdateAdvancedRule(id: number, body: unknown): Rule | null {
-  const index = mockAdvancedRules.findIndex((rule) => rule.id === id);
-  if (index < 0) return null;
-  mockAdvancedRules[index] = normalizeAdvancedRule(
-    body,
-    id,
-    mockAdvancedRules[index],
-  );
-  return mockAdvancedRules[index];
-}
-
-export function mockSetAdvancedRuleStatus(
-  id: number,
-  active: boolean,
-): Rule | null {
-  return mockUpdateAdvancedRule(id, { is_active: active });
-}
-
-export function mockCopyAdvancedRule(id: number): Rule | null {
-  const source = mockAdvancedRules.find((rule) => rule.id === id);
-  if (!source) return null;
-  return mockCreateAdvancedRule({ ...source, name: `${source.name} - 副本` });
-}
-
-export function mockDeleteAdvancedRule(id: number): boolean {
-  const before = mockAdvancedRules.length;
-  mockAdvancedRules = mockAdvancedRules.filter((rule) => rule.id !== id);
-  return mockAdvancedRules.length < before;
 }
 
 function evaluateContentNode(
@@ -9040,7 +8889,7 @@ function mockNowStamp(): string {
 }
 
 // fixtures 状态是原地可变的（同步状态机 1.5s 后改写同一对象）；返回深拷贝，
-// 否则 react-query 拿到同一引用会因结构共享/引用���等而不触发重渲染。
+// 否则 react-query 拿到同一引用会因结构共享/引用相等而不触发重渲染。
 function deepClone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v)) as T;
 }
@@ -9680,7 +9529,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 8, operation_id: 'OP20260622010', admin_user_id: 3, username: 'chenjing@lanhai.cn', operator_name: '陈静（我）',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'create',
     resource_type: 'users', status: 'success', client_ip: '112.65.1.18', ip_location: '上海',
-    details: { summary: '新增一��安全审计管理员' }, created_at: '2026-06-22T11:10:22Z' },
+    details: { summary: '新增一名安全审计管理员' }, created_at: '2026-06-22T11:10:22Z' },
   { id: 9, operation_id: 'OP20260622011', admin_user_id: 4, username: 'sunqi@lanhai.cn', operator_name: '孙琦',
     operator_role: 'tenant', layer: 'tenant', tenant_id: 2, tenant_name: '蓝海物流集团', action: 'update',
     resource_type: 'policy_pipeline', status: 'success', client_ip: '112.65.1.30', ip_location: '上海',

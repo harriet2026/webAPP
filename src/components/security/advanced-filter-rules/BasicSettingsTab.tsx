@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import type { RuleForm, Scope } from './rule-form';
 import type { PriorityRange } from './priority-range';
@@ -170,28 +169,6 @@ export function BasicSettingsTab({ form, setForm, errors, priorityRange }: Props
             onChange={(e) => setForm((f) => ({ ...f, validUntil: e.target.value || null }))}
           />
           <p className="text-xs text-muted-foreground">{t('basic.expiresAtHint')}</p>
-        </div>
-      </section>
-
-      {/* 观察模式（GT-14369） */}
-      <section className="space-y-2">
-        <h3 className="text-sm font-semibold">{t('basic.sectionObserveMode')}</h3>
-        <div className="flex items-center justify-between gap-4 rounded-md border px-3.5 py-2.5">
-          <div className="space-y-0.5">
-            <Label htmlFor="basic-observe-mode">{t('observeMode')}</Label>
-            <p className="text-xs text-muted-foreground">{t('observeModeHint')}</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              {form.observeMode ? t('enabled') : t('disabled')}
-            </span>
-            <Switch
-              id="basic-observe-mode"
-              data-testid="basic-observe-mode"
-              checked={form.observeMode}
-              onCheckedChange={(v) => setForm((f) => ({ ...f, observeMode: v }))}
-            />
-          </div>
         </div>
       </section>
 

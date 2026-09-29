@@ -61,9 +61,6 @@ export function disposalDeepLinkQuickFilter(
   if (searchParams.get('similar') === 'matched') {
     filter.disposalPolicyKeys = ['SIM'];
   }
-  if (searchParams.get('policy_key') === 'BEHAVIOR') {
-    filter.disposalPolicyKeys = ['BEHAVIOR'];
-  }
 
   return Object.keys(filter).length > 0 ? filter : null;
 }

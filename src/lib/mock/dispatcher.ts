@@ -141,12 +141,6 @@ import {
   mockCopyContentRule,
   mockDeleteContentRule,
   mockBulkContentRules,
-  mockAdvancedRulesList,
-  mockCreateAdvancedRule,
-  mockUpdateAdvancedRule,
-  mockSetAdvancedRuleStatus,
-  mockCopyAdvancedRule,
-  mockDeleteAdvancedRule,
   mockTestContentRule,
   mockContentRulesExport,
   mockPreviewContentRulesImport,
@@ -439,7 +433,7 @@ function fieldDefForPanel(field: string, panel: PanelKind): FieldDef {
       // 二值判定字段（见 BOOLEAN_SELECT_FIELDS，如加密附件 is_encrypted_attachment /
       // ZIP 炸弹 is_zip_bomb / Mail From 为空 mailfrom_empty）语义只有「是 / 否」，返回
       // type 'boolean' 让 PanelBody 路由到 BooleanValueSelect（是/否 固定下拉，算子
-      // eq/ne），杜���自由输入产生的 true/1/yes/加密 等脏值。其余 select 字段维持 enum
+      // eq/ne），杜绝自由输入产生的 true/1/yes/加密 等脏值。其余 select 字段维持 enum
       //（结果码枚举下拉，见 ConditionConfigPanel 的 ENUM_VALUES）。
       if (BOOLEAN_SELECT_FIELDS.has(field)) {
         return { ...base, type: 'boolean', operators: ['eq', 'ne'] };
@@ -1877,7 +1871,6 @@ const routes: Route[] = [
         params.get('rule_page') === 'behavior_control' ||
         params.get('rule_page') === 'user_list' ||
         params.get('rule_page') === 'content_rules' ||
-        params.get('rule_page') === 'advanced_rules' ||
         params.get('rule_page') === 'mail_marking' ||
         params.get('rule_page') === 'groups' ||
         params.get('page') === GROUPS_PAGE_KEY ||
@@ -1925,7 +1918,6 @@ const routes: Route[] = [
       if (params.get('rule_page') === 'user_list') return { status: 200, data: mockUserListRulesList() };
       if (params.get('rule_page') === 'behavior_control') return { status: 200, data: mockBehaviorControlRulesList() };
       if (params.get('rule_page') === 'content_rules') return { status: 200, data: mockContentRulesList(params) };
-      if (params.get('rule_page') === 'advanced_rules') return { status: 200, data: mockAdvancedRulesList() };
       return { status: 200, data: mockSenderFilterRulesList() };
     },
   },
@@ -1997,58 +1989,6 @@ const routes: Route[] = [
       const id = Number(pathname(req.path).split('/')[2]);
       const rule = mockCopyContentRule(id);
       return rule ? { status: 201, data: rule } : { status: 404, data: { message: 'not found' } };
-    },
-  },
-  // ─── 高级过滤规则的写操作（GT-14369）────────────────────────────────────
-  // POST/PUT 携带的 body 都带 `page: 'advanced_rules'`（见
-  // rule-form.ts 的 formToCreateRequest/formToUpdateRequest），用它做 matchQuery
-  // 收窄，与 content_rules 用 URL scope query 收窄的做法一致，都只影响各自模块。
-  {
-    method: 'POST',
-    pattern: '/unified-rules',
-    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
-    handler: (req) => ({ status: 201, data: mockCreateAdvancedRule(req.body) }),
-  },
-  {
-    method: 'PUT',
-    pattern: /^\/unified-rules\/\d+$/,
-    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
-    handler: (req) => {
-      const id = Number(pathname(req.path).split('/')[2]);
-      const rule = mockUpdateAdvancedRule(id, req.body);
-      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
-    },
-  },
-  {
-    method: 'PUT',
-    pattern: /^\/unified-rules\/\d+\/status$/,
-    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
-    handler: (req) => {
-      const id = Number(pathname(req.path).split('/')[2]);
-      const body = (req.body ?? {}) as { is_active?: boolean };
-      const rule = mockSetAdvancedRuleStatus(id, body.is_active ?? true);
-      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
-    },
-  },
-  {
-    method: 'POST',
-    pattern: /^\/unified-rules\/\d+\/copy$/,
-    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
-    handler: (req) => {
-      const id = Number(pathname(req.path).split('/')[2]);
-      const rule = mockCopyAdvancedRule(id);
-      return rule ? { status: 201, data: rule } : { status: 404, data: { message: 'not found' } };
-    },
-  },
-  {
-    method: 'DELETE',
-    pattern: /^\/unified-rules\/\d+$/,
-    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
-    handler: (req) => {
-      const id = Number(pathname(req.path).split('/')[2]);
-      return mockDeleteAdvancedRule(id)
-        ? { status: 200, data: { status: 'deleted' } }
-        : { status: 404, data: { message: 'not found' } };
     },
   },
   // ─── 群组策略规则的写操作（mock id 段 9001-9099，按 id 命名空间收窄）────
@@ -2802,7 +2742,7 @@ const routes: Route[] = [
   {
     method: 'GET',
     pattern: '/unified-rules',
-    // task-2-brief 与设计文档字面���求的 query 键是 `page=mail_routing_outbound`；
+    // task-2-brief 与设计文档字面要求的 query 键是 `page=mail_routing_outbound`；
     // 但当前 OutboundRoutingTab.tsx（后续任务会重写）实际复用
     // src/lib/api/unified-rules.ts 的通用 getUnifiedRules()，那个函数把
     // `page` 参数编码成 `rule_page=`，不是 `page=`。两种键都收，兼容重写前后
@@ -3010,7 +2950,7 @@ function matchPath(pattern: string | RegExp, p: string): boolean {
 
 // 主分发：返回 MockResponse；找不到匹配时返回空壳 200，避免页面整体崩溃。
 // 写操作（POST/PUT/DELETE/PATCH）默认返回 204 空体；GET 返回 { items: [] }
-// 或 {}，调用方都能��错地"展示空列表/空对象"。
+// 或 {}，调用方都能容错地"展示空列表/空对象"。
 export function dispatch(req: MockRequest): MockResponse {
   const m = req.method.toUpperCase();
   const p = pathname(req.path);
