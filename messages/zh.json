@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则��开������������������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开��������������������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -2037,7 +2037,7 @@
       "confirmManualTitle": "人工认证域名归属",
       "confirmManualDesc": "确认跳过 DNS 校验,将域名 {domain} 直接标记为已校验? 该操作将记录为人工认证。",
       "toastVerified": "域名归属校验通过",
-      "toastPending": "DNS 记录尚未生效,请稍后重��",
+      "toastPending": "DNS 记录尚未生效,请稍��重��",
       "toastManual": "已人工��证该域名",
       "verifiedAt": "校验时间",
       "verifiedBy": "校���方式",
@@ -2814,7 +2814,7 @@
     "currentPassword": "当前密码",
     "newPassword": "新密码",
     "confirmPassword": "确认新密码",
-    "changePassword": "修改密码",
+    "changePassword": "���改密码",
     "allFieldsRequired": "请填写所有字段",
     "passwordTooShort": "新密码至少6个��符",
     "passwordMismatch": "两次输入的新密码不��致",
@@ -3355,7 +3355,7 @@
     "rblDesc": "基于公共RBL名单过滤",
     "overseas": "海外邮件检测",
     "overseasDesc": "识别海外邮件并按策略处置",
-    "senderFilter": "发信人黑白名单",
+    "senderFilter": "发信人��白名单",
     "senderFilterDesc": "命中白名��则跳过后续检测",
     "authSpoofing": "身份认证与仿冒��测",
     "authSpoofingDesc": "检测伪造发件人和认证仿冒",
@@ -3827,7 +3827,7 @@
     "examplePartnerIp": "合作伙伴IP",
     "examplePartnerIpDesc": "信任的合作伙伴网络",
     "examplePartnerIpRemark": "合作伙伴网络",
-    "examplePartnerIpEffect": "来自该网段的邮件放行并添加标记，继续内容层检测",
+    "examplePartnerIpEffect": "来自该网段的邮件放行并添加标记，继续内容层检���",
     "simulationTest": "模拟测试",
     "simulatorIpLabel": "模拟IP地址",
     "startTest": "开始测试",
@@ -4701,7 +4701,7 @@
       "accept": "投递",
       "quarantine": "隔离（进垃圾箱）",
       "reject": "阻断（返回5xx）",
-      "audit": "审核（待审批）",
+      "audit": "审核（待��批）",
       "proceed": "进行下一步（可标记）",
       "discard": "丢弃（静默删除）"
     },
@@ -6287,7 +6287,7 @@
           "accountCompromise": "账号泄露",
           "maliciousAttachment": "恶意附件"
         },
-        "aiReasoning": "AI 深度推理",
+        "aiReasoning": "AI 深度���理",
         "generateAi": "生成 AI 推理",
         "aiGenerating": "正在生成…",
         "regenerate": "重新生成",
@@ -6397,7 +6397,7 @@
             "notify": "通知",
             "redeliver": "重新投递"
           },
-          "readOnlyTooltip": "下钻视图仅供查看",
+          "readOnlyTooltip": "下钻视图���供查看",
           "selected": "已选中 {n} 个收件人",
           "empty": "暂无收件人处置记录",
           "actionSuccess": "操作成功",
@@ -9944,7 +9944,7 @@
       "empty": "暂无扫描任务"
     },
     "leakDetail": {
-      "title": "漏报明���",
+      "title": "漏报������",
       "loading": "加载漏报明细…",
       "empty": "本 run 暂无漏报邮件。",
       "sender": "发件人",
@@ -11019,7 +11019,7 @@
       "methodDesc": "基于已同步到网关的通讯录数据进行验证。收信过程中不会实时查询 LDAP/AD、调用外部 API 或递归解析别名。",
       "failActionLabel": "验证失败执行动作",
       "actionDesc": {
-        "quarantine": "收件人不存在或验证失败时进入隔离区，管理员审核后可放行或删除",
+        "quarantine": "收件人不存在或验证失败时进��隔离区，管理员审核后可放行或删除",
         "audit": "收件人不存在或验证失败时进入待审核队列，人工确认后投递或退回",
         "reject": "收件人不存在或验证失败时在 RCPT TO 阶段���绝该收件人",
         "discard": "收件人不存在或验证失败时静默丢弃，发送方无感知、无退信"
@@ -11475,7 +11475,7 @@
       "action_invalid": "审核动作无效，只能是：{allowed}",
       "id_invalid": "审核条目 ID 无效",
       "not_found": "审核条目不存在，可能已被处理",
-      "not_pending": "该条目已不在待审核状态，或正在被其他人处理",
+      "not_pending": "该��目已不在待审核状态，或正在被其他人处理",
       "operation_in_progress": "该邮件正有另一个处置操作在进行，请稍后重试"
     },
     "proxysvr": {
@@ -12047,7 +12047,7 @@
       "run_not_found": "运行记录不存在"
     },
     "threat_retro_strategies": {
-      "strategy_not_found": "处置策略不存在"
+      "strategy_not_found": "处置策略��存在"
     },
     "unified_rules_pagespec": {
       "behavior_control_rule_have_metadata_feature": "发信行为管控规则的 metadata.feature 必须是 behavior_control",
@@ -12335,6 +12335,7 @@
   "behavior_control": "发信行为管控",
   "content_rules": "内容规则",
   "intent_engine": "意图引擎",
+  "attachment_security": "附件安全检测",
   "advanced_filter_rules": "高级过滤规则",
         "recipient_check": "收件人检测"
       },
@@ -12376,12 +12377,13 @@
       "phishingDetection": "钓鱼检测智能体",
   "senderFilter": "发信人黑白名单",
   "behaviorControl": "发信行为管控",
-  "contentRules": "内容规则",
-  "advancedFilterRules": "高级过滤规则",
+"contentRules": "内容规则",
+      "attachmentSecurity": "附件安全检测",
+      "advancedFilterRules": "高级过滤规则",
   "recipientCheck": "收件人检测"
   },
     "timeoutAlert": {
-      "warning": "有 {count} 个策略已观察超过 {days} 天，待转正评估",
+      "warning": "有 {count} ���策略已观察超过 {days} 天，待转正评估",
       "viewDetails": "查看",
       "drawerTitle": "超时观察对象清单",
       "observedDays": "已观察 {days} 天",

@@ -13,6 +13,7 @@ export const POLICY_MODULES: PolicyModule[] = [
   'behavior_control',
   'content_rules',
   'intent_engine',
+  'attachment_security',
   'advanced_filter_rules',
   'recipient_check',
 ];
@@ -28,6 +29,7 @@ export type ModuleFilterOption =
   | 'behavior_control'
   | 'content_rules'
   | 'intent_engine'
+  | 'attachment_security'
   | 'advanced_filter_rules'
   | 'recipient_check';
 
@@ -40,6 +42,7 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'behavior_control',
   'content_rules',
   'intent_engine',
+  'attachment_security',
   'advanced_filter_rules',
   'recipient_check',
 ];
@@ -92,6 +95,7 @@ export function strategyPathKeys(
   if (row.policy_module === 'behavior_control') return ['behaviorControl'];
   if (row.policy_module === 'content_rules') return ['contentRules'];
   if (row.policy_module === 'intent_engine') return ['intentEngine'];
+  if (row.policy_module === 'attachment_security') return ['attachmentSecurity'];
   if (row.policy_module === 'advanced_filter_rules') return ['advancedFilterRules'];
   if (row.policy_module === 'recipient_check') return ['recipientCheck'];
   switch (row.sub_strategy_id) {
@@ -142,6 +146,7 @@ export const MODULE_COLORS: Record<PolicyModule, string> = {
   behavior_control: '#0EA5E9',
   content_rules: '#EC4899',
   intent_engine: '#6366F1',
+  attachment_security: '#0F766E',
   // 与现有六色（蓝/紫/琥珀/绿/天蓝/玫红）区分的第七色——橙棕。
   advanced_filter_rules: '#EA580C',
   recipient_check: '#14B8A6',

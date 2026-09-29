@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
     // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true������多租户平台视角恒隐藏，与 grants 无关）。
+    // platformHidden:true�������多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
@@ -2193,7 +2193,7 @@ function makeRule(input: {
   };
 }
 
-// 与 demo `generateMockRules` 对齐：5 条手�� + 15 条自动生成����� 20 条
+// 与 demo `generateMockRules` 对齐：5 ��手�� + 15 条自动生成����� 20 条
 // （demo 总数 55，但只展示 20 条/页；前 5 条手工的与 demo 完全一致）
 function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
   const base = [
@@ -3115,7 +3115,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ══════════════════���═���═���════���════���═══════════════════════════════════════════════
+// ═════════════════������═���═���════���════���═══════════════════════════════════════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -4620,6 +4620,9 @@ const MOCK_RULE_EFFECTIVENESS_ROWS: RuleEffectivenessRow[] = [
   mockEffectivenessRow({ id: "mock-period-intent-internal-phishing", module: "intent_engine", key: "intent.phishing.internal", name: "仿冒/钓鱼（域内）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 1, reject: 5 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-intent-internal-spam", module: "intent_engine", key: "intent.spam.internal", name: "垃圾信息（域内）", observedSince: "2026-09-11", observedDays: 9, configuredAction: "audit", outcomes: { accept: 5, audit: 1 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-intent-internal-subscription", module: "intent_engine", key: "intent.subscription.internal", name: "订阅类信息（域内）", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 7 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-attachment-danger-ext", module: "attachment_security", key: "attachment.danger_ext.receive", name: "危险扩展名（附件）", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 12, quarantine: 8 }, messages: 7 }),
+  mockEffectivenessRow({ id: "mock-period-attachment-virus", module: "attachment_security", key: "attachment.antivirus.receive", name: "病毒命中（附件）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "quarantine", outcomes: { accept: 5, quarantine: 6 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-attachment-encrypted", module: "attachment_security", key: "attachment.encrypted.receive", name: "加密附件解密失败", observedSince: "2026-09-10", observedDays: 10, configuredAction: "audit", outcomes: { accept: 9, audit: 3 }, messages: 5 }),
   mockEffectivenessRow({ id: "mock-period-auth-spf", module: "auth_spoofing", version: 2, key: "spf_fail", name: "SPF fail", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 12, reject: 6, pending: 2 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dkim", module: "auth_spoofing", key: "dkim_fail", name: "DKIM fail", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 8, quarantine: 4 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dmarc", module: "auth_spoofing", key: "dmarc_reject", name: "DMARC reject", observedSince: "2026-08-31", observedDays: 20, configuredAction: "reject", outcomes: { accept: 1, quarantine: 7, reject: 2 }, messages: 3 }),
@@ -4695,7 +4698,7 @@ export function mockRuleEffectiveness(path: string): RuleEffectivenessResponse {
   };
 }
 
-// ════════════════��═══════════��═══════════════════════════════════════════════════
+// ═════════════��══��═══════════��═══════════════════════════════════════════════════
 // 身份认证与仿冒防护（auth-spoofing，mock）
 // 配置照抄 demo 默认值（src/components/security/AuthSpoofingPage.tsx 的
 // DEFAULT_CONFIG，已是映射到统一 action 的 demo 默认），保证 Mock 模式下页面
@@ -4860,7 +4863,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 // 发信行为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
-// organization 使用组织通讯录 department_path，与真实 API/运行时一致��GT-12170）。
+// organization 使用组织���讯录 department_path，与真实 API/运行时一致��GT-12170）。
 // 系统 `Rule`：metadata 携带 `BehaviorControlMetadata`（feature/direction/object_config/
 // time_window/dim_a/threshold_a/or_enabled/dim_b/threshold_b），action 经
 // `PRODUCT_TO_BACKEND` 转换，is_active=demo.enabled，priority=demo.priority，
@@ -5725,6 +5728,7 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
 
 const mockAttachmentScopedDocument: Record<string, unknown> = {
   module_enabled: true,
+  observe_mode: false,
   schema_version: 1,
   basic_limit: {
     receive: {
@@ -6924,7 +6928,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     attachmentCount: 0,
     hasQrCode: false,
     score: 94,
-    basis: ["AI-PHISH", "仿冒政府机构策略", "AI-026"],
+    basis: ["AI-PHISH", "仿冒政���机构策略", "AI-026"],
     senderIsNewOnThisMail: true,
   },
   {

@@ -1,5 +1,6 @@
 import type {
   ActiveContentConfig,
+  AttachmentAction,
   AntivirusActionConfig,
   AntivirusConfig,
   AVStatusResponse,
@@ -23,6 +24,21 @@ import {
 } from './scoped-configs';
 
 export type AttachmentSecurityConfigScope = 'platform' | 'tenant';
+
+export interface AttachmentActionDecision {
+  actualAction: AttachmentAction;
+  configuredAction: AttachmentAction;
+  status: 'observed' | 'enforced';
+}
+
+export function resolveAttachmentAction(
+  observeMode: boolean,
+  configuredAction: AttachmentAction,
+): AttachmentActionDecision {
+  return observeMode
+    ? { actualAction: 'proceed', configuredAction, status: 'observed' }
+    : { actualAction: configuredAction, configuredAction, status: 'enforced' };
+}
 
 /**
  * AttachmentSecurityPage edits one attachd scoped document. Loading that one
@@ -442,7 +458,7 @@ export async function getTenantAttachmentSecuritySettings(
   return requestFn<TenantAttachmentSecuritySettings>('/attachment-security/settings');
 }
 
-// GT-12704：body 必须是**对象**，不能在这里先 JSON.stringify。
+// GT-12704：body 必须是**对象**，不能在这里先 JSON.stringify���
 // 公共请求层 apiRequest 已经统一做一次 `JSON.stringify(options.body)`
 // （webapp/src/lib/api/client.ts），这里再序列化一次就变成双重序列化 ——
 // 发出去的请求体顶层是个被引号包住的字符串，后端按结构体绑定直接 400
