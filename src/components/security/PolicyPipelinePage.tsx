@@ -254,7 +254,7 @@ export function PolicyPipelinePage() {
 
   // F10: stage5 综合策略抽屉宿主对齐 — 左导航启用圆点 + 页级
   // 综合策略开关状态（阶段5 各子模块是否被总开关关停）的数据源。仅在抽屉处于阶段5时取数;
-  // 开关本身的 UI 入口（ComprehensiveStrategyHeader）已随原型改版移除，这里只读不写���
+  // 开关本身的 UI 入口（ComprehensiveStrategyHeader）已随原型改版移除，这里只读不写�����
   // (`enabled` gate)，不影响阶段1/2/3；其余阶段完全不读取这些 query。
   const stage5Active = drawerOpen && activeDrawerPolicy.stage === 5;
 
@@ -903,7 +903,14 @@ export function PolicyPipelinePage() {
       return <MailMarkingPage embedded />;
     }
     if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'advancedRules') {
-      return <AdvancedFilterRulesModule embedded aggregateDisabled={!comprehensiveStrategyEnabled} />;
+      return (
+        <AdvancedFilterRulesModule
+          embedded
+          aggregateDisabled={!comprehensiveStrategyEnabled}
+          deepLinkRuleID={deepLink?.key === 'advancedRules' ? deepLink.ruleDatabaseID : undefined}
+          deepLinkRuleRef={deepLink?.key === 'advancedRules' ? deepLink.ruleRef : undefined}
+        />
+      );
     }
     if (activeDrawerPolicy.key === 'ipFrequency') return <IPFrequencyPage embedded />;
     if (activeDrawerPolicy.key === 'ipFilter') return <IPFilterPage embedded />;

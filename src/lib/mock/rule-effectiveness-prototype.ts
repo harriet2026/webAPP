@@ -11,7 +11,7 @@ function threatSeriesValue(
 
 interface RuleEffectivenessMockRow {
   id: string;
-  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules';
+  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'advanced_filter_rules';
   // 相似邮件检测/相同主题检测是两条独立策略（不同判定维度、不同误判特征），
   // 观察对象必须按策略拆分，不能合并为一个笼统的「相似检测」模块级观察对象。
   similar_detection_type?: 'similar_email' | 'same_subject';
@@ -56,6 +56,9 @@ const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_mo
   // Stage3PolicyKey 与 policy-deep-link.ts 的 PipelineModuleKey），不是
   // 'contentRules'；用错 key 会导致跳转后流水线页无法定位到内容规则抽屉。
   content_rules: '/security/pipeline?module=content',
+  // 流水线第五阶段高级过滤规则模块的真实 key 是 'advancedRules'（见
+  // policy-deep-link.ts 的 ACF 映射与 PolicyPipelinePage 的 Stage5PolicyKey）。
+  advanced_filter_rules: '/security/pipeline?module=advancedRules',
 };
 
 // 内容规则按单条规则拆分观察对象（与 fixtures.ts 中 mockContentRules 的 id
@@ -73,6 +76,12 @@ function senderFilterRuleConfigPath(ruleId: number): string {
 
 function behaviorControlRuleConfigPath(ruleId: number): string {
   return `${RULE_EFFECTIVENESS_CONFIG_PATH.behavior_control}&rule_id=${ruleId}`;
+}
+
+// 高级过滤规则同样按单条规则拆分观察对象，跳转需要带上具体 rule_id，落到
+// 该规则在流水线第五阶段抽屉内的编辑态，而不是停在规则列表页。
+function advancedFilterRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.advanced_filter_rules}&rule_id=${ruleId}`;
 }
 
 // 相似检测配置页按 detectionType Tab 划分（相似邮件检测/相同主题检测），跳转时
@@ -513,6 +522,43 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
   config_path: contentRuleConfigPath(30),
   version_no: 1,
   },
+  // 高级过滤规则——按单条规则拆分观察对象，演示流水线第五阶段规则各自
+  // 不同的命中特征与策略版本管理。
+  {
+    id: 'advanced-filter-rule-1',
+    policy_module: 'advanced_filter_rules',
+    sub_strategy_id: 'rule:1',
+    sub_strategy_name_snapshot: '外发压缩包附件管控',
+    is_deleted: false,
+    observed_days: 9,
+    hits: 28,
+    would_block_ratio: 0.57,
+    reviewed_ratio: 0.39,
+    weighted_reviewed_ratio: 0.29,
+    false_positive_rate: 0.11,
+    attribution_status: 'attributable',
+    config_path: advancedFilterRuleConfigPath(1),
+    version_no: 1,
+  },
+  {
+    id: 'advanced-filter-rule-2',
+    policy_module: 'advanced_filter_rules',
+    sub_strategy_id: 'rule:2',
+    sub_strategy_name_snapshot: '高危可执行文件拦截',
+    is_deleted: false,
+    observed_days: 22,
+    hits: 51,
+    would_block_ratio: 0.82,
+    reviewed_ratio: 0.28,
+    weighted_reviewed_ratio: 0.21,
+    false_positive_rate: 0.02,
+    attribution_status: 'attributable',
+    config_path: advancedFilterRuleConfigPath(2),
+    // 示例：该规则的匹配条件曾发生实质性调整（新增双重扩展名检测），触发过一次
+    // 观察期重置。
+    version_no: 2,
+    version_change_summary: '匹配条件调整：新增双重扩展名检测，触发观察期重置',
+  },
   // 白名单规则（action=accept）——观察期内命中即为放行，不产生拦截类结果，
   // 因此用 actions: [] 覆盖模块级的拦截动作候选。
   {
@@ -573,6 +619,11 @@ const RULE_EFFECTIVENESS_MODULE_ACTIONS: Record<RuleEffectivenessMockRow['policy
   // 内容规则动作与 ContentRuleAction 对齐（reject/quarantine/audit/discard），
   // accept 属于观察期内默认放行的语义，已由下方 accept 计算逻辑覆盖，不重复出现在候选集合里。
   content_rules: ['reject', 'discard', 'quarantine', 'audit'],
+  // 高级过滤规则的执行动作与 PrimaryAction 对齐（accept/proceed/quarantine/
+  // audit/discard，见 AdvancedFilterRulesModule.tsx 的 ACTION_BADGE_CLASS）；
+  // reject 不在该模块的动作枚举里，不能出现在候选集合中。accept 属于观察期
+  // 内默认放行的语义，已由下方 accept 计算逻辑覆盖，不重复出现在候选集合里。
+  advanced_filter_rules: ['discard', 'quarantine', 'audit'],
 };
 
 function allocateActionCounts(

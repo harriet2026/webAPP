@@ -12,6 +12,7 @@ export const POLICY_MODULES: PolicyModule[] = [
   'sender_filter',
   'behavior_control',
   'content_rules',
+  'advanced_filter_rules',
 ];
 
 export const SIMILAR_DETECTION_TYPES: SimilarDetectionType[] = ['similar_email', 'same_subject'];
@@ -23,7 +24,8 @@ export type ModuleFilterOption =
   | 'phishing_detection'
   | 'sender_filter'
   | 'behavior_control'
-  | 'content_rules';
+  | 'content_rules'
+  | 'advanced_filter_rules';
 
 export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'auth_spoofing',
@@ -33,6 +35,7 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'sender_filter',
   'behavior_control',
   'content_rules',
+  'advanced_filter_rules',
 ];
 
 export function resolveModuleFilterParams(options: ModuleFilterOption[]): {
@@ -82,6 +85,7 @@ export function strategyPathKeys(
   if (row.policy_module === 'sender_filter') return ['senderFilter'];
   if (row.policy_module === 'behavior_control') return ['behaviorControl'];
   if (row.policy_module === 'content_rules') return ['contentRules'];
+  if (row.policy_module === 'advanced_filter_rules') return ['advancedFilterRules'];
   switch (row.sub_strategy_id) {
     case 'protocol_check_spf': return ['authSpoofing', 'protocolCheck', 'protocolCheckSpf'];
     case 'protocol_check_dkim': return ['authSpoofing', 'protocolCheck', 'protocolCheckDkim'];
@@ -106,7 +110,12 @@ export function strategyPathLabels(
   if (row.policy_module === 'auth_spoofing' && !KNOWN_AUTH_SUB_STRATEGY_IDS.has(row.sub_strategy_id)) {
     labels.push(row.sub_strategy_name_snapshot);
   }
-  if (row.policy_module === 'sender_filter' || row.policy_module === 'behavior_control' || row.policy_module === 'content_rules') {
+  if (
+    row.policy_module === 'sender_filter' ||
+    row.policy_module === 'behavior_control' ||
+    row.policy_module === 'content_rules' ||
+    row.policy_module === 'advanced_filter_rules'
+  ) {
     labels.push(row.sub_strategy_name_snapshot);
   }
   return labels;
@@ -122,6 +131,8 @@ export const MODULE_COLORS: Record<PolicyModule, string> = {
   sender_filter: '#10B981',
   behavior_control: '#0EA5E9',
   content_rules: '#EC4899',
+  // 与现有六色（蓝/紫/琥珀/绿/天蓝/玫红）区分的第七色——橙棕。
+  advanced_filter_rules: '#EA580C',
 };
 
 export function moduleColor(module: PolicyModule): string {

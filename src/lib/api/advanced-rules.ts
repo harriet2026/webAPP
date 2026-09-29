@@ -13,6 +13,12 @@ import type {
 export interface RuleWithExtras extends Rule {
   hit_stats?: never;
   keywords?: string[];
+  /**
+   * 观察模式——前端专用的只读展示字段，不在后端返回的原始接口响应体中，
+   * 由 AdvancedFilterRulesModule 在组装 listItems 时按规则 id 从本地
+   * mock 态注入（GT-14369）。该字段不进入 create/update 请求体。
+   */
+  observe_mode?: boolean;
 }
 
 export type RuleRange = '24h' | '7d' | '30d';
