@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AntivirusServerFields, AntivirusStatusSection } from './antivirus-engine-fields';
 import type { AttachmentAction, AntivirusActionConfig, AntivirusConfig, Direction } from '@/types/attachment-security';
@@ -24,6 +25,8 @@ interface AntivirusTabProps {
   actions: AntivirusActionConfig;
   onChange: (config: AntivirusConfig) => void;
   onActionsChange: (config: AntivirusActionConfig) => void;
+  observeMode?: boolean;
+  onObserveModeChange?: (value: boolean) => void;
   /**
    * 多租户形态下隐藏平台级两段（服务器配置 + 病毒库状态/立即更新），
    * 仅保留租户级处置动作，并在顶部提示引导至平台安全策略。
@@ -38,6 +41,8 @@ export function AntivirusTab({
   actions,
   onChange,
   onActionsChange,
+  observeMode,
+  onObserveModeChange,
   hidePlatformConfig = false,
 }: AntivirusTabProps) {
   const t = useTranslations('attachmentSecurity');
@@ -56,6 +61,13 @@ export function AntivirusTab({
 
   return (
     <div className="space-y-6" data-testid="antivirus-tab" data-direction={direction}>
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-100">
+        <div>
+          <p className="text-sm font-medium">反病毒引擎观察模式</p>
+          <p className="text-xs text-indigo-800 dark:text-indigo-200">仅记录病毒和扫描超时命中，不执行本模块配置的处置动作。</p>
+        </div>
+        <Switch checked={observeMode ?? false} onCheckedChange={(value) => onObserveModeChange?.(value)} data-testid="antivirus-observe-mode-switch" aria-label="反病毒引擎观察模式" />
+      </div>
       {!hidePlatformConfig && (
         <>
           <AntivirusServerFields config={config} onChange={onChange} />

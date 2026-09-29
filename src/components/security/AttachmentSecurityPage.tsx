@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, Eye, Loader2, Save } from 'lucide-react';
+import { AlertTriangle, Loader2, Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -24,7 +24,6 @@ import {
 } from './attachment-security/EncryptedAttachmentTab';
 import { Button } from '@/components/ui/button';
 import { SegmentedButton } from '@/components/ui/segmented-button';
-import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/auth-context';
 import { useProductForm } from '@/contexts/product-form-context';
 import {
@@ -58,7 +57,9 @@ type TabKey = (typeof TABS)[number]['key'];
 
 interface AttachmentDraft {
   enabled: boolean;
-  observeMode: boolean;
+  antivirusObserveMode: boolean;
+  imageObserveMode: boolean;
+  encryptedObserveMode: boolean;
   basic: BasicLimitConfig;
   antivirus: AntivirusConfig;
   antivirusActions: AntivirusActionConfig;
@@ -79,7 +80,9 @@ interface Props {
 function defaultDraft(): AttachmentDraft {
   return {
     enabled: true,
-    observeMode: false,
+    antivirusObserveMode: false,
+    imageObserveMode: false,
+    encryptedObserveMode: false,
     basic: { ...DEFAULT_BASIC_LIMIT_CONFIG },
     antivirus: { ...DEFAULT_ANTIVIRUS_CONFIG },
     antivirusActions: { ...DEFAULT_ANTIVIRUS_ACTIONS },
@@ -126,7 +129,9 @@ function draftFromEffectiveDocument(document: Record<string, unknown>): Attachme
   const intentCategories = stringList(imageRoutes.intent_categories);
   return {
     enabled: document.module_enabled,
-    observeMode: document.observe_mode === true,
+    antivirusObserveMode: objectAt(document, 'antivirus').observe_mode === true,
+    imageObserveMode: objectAt(document, 'image_detection').observe_mode === true,
+    encryptedObserveMode: objectAt(document, 'encrypted').observe_mode === true,
     basic: {
       ...DEFAULT_BASIC_LIMIT_CONFIG,
       ...basic,
@@ -191,7 +196,9 @@ function csvList(value: string): string[] {
 
 function configurationValues(draft: AttachmentDraft, includeAntivirusEndpoint: boolean): Record<string, unknown> {
   const values: Record<string, unknown> = {
-    observe_mode: draft.observeMode,
+    'antivirus.observe_mode': draft.antivirusObserveMode,
+    'image_detection.observe_mode': draft.imageObserveMode,
+    'encrypted.observe_mode': draft.encryptedObserveMode,
     'basic_limit.receive.attachment_count_max': draft.basic.attachment_count_max,
     'basic_limit.receive.attachment_size_max_kb': draft.basic.attachment_size_max_kb,
     'basic_limit.receive.nested_zip_count_max': draft.basic.nested_zip_count_max,
@@ -462,23 +469,6 @@ export function AttachmentSecurityPage({
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-100" data-testid="attachment-observe-mode-panel">
-            <div className="flex items-start gap-3">
-              <Eye className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium">观察模式</span>
-                <span className="text-xs text-indigo-800 dark:text-indigo-200">开启后继续检测并记录附件风险，但不会执行隔离、拒绝或阻断动作。</span>
-              </div>
-            </div>
-            <Switch
-              checked={draft.observeMode}
-              onCheckedChange={(checked) => updateDraft('observeMode', checked)}
-              disabled={!moduleEditable || saving || togglingEnabled || !draft.enabled}
-              aria-label="附件安全检测观察模式"
-              data-testid="attachment-observe-mode-switch"
-            />
-          </div>
-
           <div
             className={cn(!draft.enabled && 'pointer-events-none opacity-50')}
             data-enabled={draft.enabled}
@@ -514,8 +504,10 @@ export function AttachmentSecurityPage({
                     config={draft.antivirus}
                     actions={draft.antivirusActions}
                     onChange={(config) => updateDraft('antivirus', config)}
-                    onActionsChange={(actions) => updateDraft('antivirusActions', actions)}
-                    hidePlatformConfig={antivirusPlatformManaged}
+  onActionsChange={(actions) => updateDraft('antivirusActions', actions)}
+  observeMode={draft.antivirusObserveMode}
+  onObserveModeChange={(value) => updateDraft('antivirusObserveMode', value)}
+  hidePlatformConfig={antivirusPlatformManaged}
                   />
                 ) : activeTab === 'image' ? (
                   <ImageDetectTab
@@ -524,15 +516,19 @@ export function AttachmentSecurityPage({
                     actions={draft.imageActions}
                     onChange={(config) => updateDraft('image', config)}
                     onRoutesChange={(routes) => updateDraft('imageRoutes', routes)}
-                    onActionsChange={(actions) => updateDraft('imageActions', actions)}
-                  />
+  onActionsChange={(actions) => updateDraft('imageActions', actions)}
+  observeMode={draft.imageObserveMode}
+  onObserveModeChange={(value) => updateDraft('imageObserveMode', value)}
+  />
                 ) : activeTab === 'encrypted' ? (
                   <EncryptedAttachmentTab
                     config={draft.encrypted}
                     actions={draft.encryptedActions}
                     onChange={(config) => updateDraft('encrypted', config)}
-                    onActionsChange={(actions) => updateDraft('encryptedActions', actions)}
-                  />
+  onActionsChange={(actions) => updateDraft('encryptedActions', actions)}
+  observeMode={draft.encryptedObserveMode}
+  onObserveModeChange={(value) => updateDraft('encryptedObserveMode', value)}
+  />
                 ) : null}
               </div>
             </div>

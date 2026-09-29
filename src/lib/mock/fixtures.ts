@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
     // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true�������多租户平台视角恒隐藏，与 grants 无关）。
+    // platformHidden:true��������多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
@@ -1922,7 +1922,7 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
   {
     sideline_id: 'ph-100002', message_id: '<8f2c1a0002@hr-portal-secure.cn>', sender: 'payroll-alert@hr-portal-secure.cn',
-    subject: '薪资平台安全升级，请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
+    subject: '薪资平台安��升级，请立即验证账户', recipients: ['hr1@example.com', 'hr2@example.com', 'hr3@example.com'], direction: 'inbound', status: 'sidelined',
     sidelined_at: phishingHoursAgo(1.5), task_status: 'completed', failure_reason: null, verdict: 'phishing', risk_level: 'high', policy_disposition: 'quarantine', confidence: 0.98, mail_log_id: 9002,
     display_statuses: [{ status: 'recall_success', count: 2 }, { status: 'quarantine_pending', count: 1 }], recipient_dispositions: [{ recipient: 'hr1@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr2@example.com', final_action: 'recall', status: 'recall_success' }, { recipient: 'hr3@example.com', final_action: 'quarantine', status: 'quarantine_pending', object_kind: 'quarantine', object_id: 'demo-q-2' }],
     recalls: [{ receiver: 'hr1@example.com', operate_result: 'success' }, { receiver: 'hr2@example.com', operate_result: 'success' }, { receiver: 'hr3@example.com', operate_result: 'pending' }], disposition_actions: ['quarantine', 'recall'], disposition: 'quarantine', detection_mode: 'realtime', recall_status: 'expanded', agent_rounds: 6, url_summary: { total: 5, phishing: 4, suspicious: 1, normal: 0 }, result_truncated: true,
@@ -3115,7 +3115,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ═════════════════������═���═���════���════���═══════════════════════════════════════════════
+// ═══════════════���═������═���═���════���════���═══════════════════════════════════════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -5728,7 +5728,6 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
 
 const mockAttachmentScopedDocument: Record<string, unknown> = {
   module_enabled: true,
-  observe_mode: false,
   schema_version: 1,
   basic_limit: {
     receive: {
@@ -5746,13 +5745,13 @@ const mockAttachmentScopedDocument: Record<string, unknown> = {
       mime_mismatch_action: 'quarantine',
     },
   },
-  antivirus: { host: 'av-server', port: 6600, virus_action: 'quarantine', timeout_action: 'proceed' },
-  image_detection: {
+  antivirus: { host: 'av-server', port: 6600, observe_mode: false, virus_action: 'quarantine', timeout_action: 'proceed' },
+  image_detection: { observe_mode: false,
     ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light', qr_max_count: 5,
     qr_light_action: 'quarantine', qr_deep_exceed_action: 'proceed', qr_deep_exceed_warn: true,
     qr_deep_routes: { url_check: true, url_unshorten: true, keyword_filter: true, keyword_scope: ['url_path', 'plain_text'], intent_engine: true, intent_categories: ['high', 'medium', 'low'], advanced_rules: false },
   },
-  encrypted: { detect_mode: 'detect_only', extract_password_from_body: true, extract_password_from_filename: true, use_password_book: true, recursive_detect: true, max_password_attempts: 100, mark_suspicious: true, decrypt_fail_action: 'proceed' },
+  encrypted: { observe_mode: false, detect_mode: 'detect_only', extract_password_from_body: true, extract_password_from_filename: true, use_password_book: true, recursive_detect: true, max_password_attempts: 100, mark_suspicious: true, decrypt_fail_action: 'proceed' },
 };
 
 let mockAttachmentPlatformVersion = 1;
@@ -5978,7 +5977,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
       { policyKey: "SBL", ruleName: "营销发件人白名单", ruleId: "SBL-201", hitValues: { sender: "bulk-sender@marketing-external.com", list_type: "whitelist" } },
-      { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
+      { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "��时优惠" } },
       { policyKey: "SIM", ruleName: "相似邮件批量检测", ruleId: "SIM-077", hitValues: { detection_type: "similar_email", direction: "receive", cluster_id: "marketing-cluster", counter: "12", similarity_pct: "91" } },
       { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },
       { policyKey: "CR", ruleName: "营销内容隔离规则", ruleId: "CR-088", hitValues: { match_position: "正文", match_method: "关键词", matched_content: "限时优惠" } },

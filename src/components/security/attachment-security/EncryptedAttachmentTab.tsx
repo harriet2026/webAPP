@@ -1,6 +1,7 @@
 'use client';
 
 import { Info } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { useTranslations } from 'next-intl';
 
 import { Checkbox } from '@/components/ui/checkbox';
@@ -32,6 +33,8 @@ interface EncryptedAttachmentTabProps {
   actions: EncryptedActionConfig;
   onChange: (config: EncryptedConfig) => void;
   onActionsChange: (config: EncryptedActionConfig) => void;
+  observeMode?: boolean;
+  onObserveModeChange?: (value: boolean) => void;
 }
 
 export function EncryptedAttachmentTab({
@@ -40,6 +43,8 @@ export function EncryptedAttachmentTab({
   actions,
   onChange,
   onActionsChange,
+  observeMode,
+  onObserveModeChange,
 }: EncryptedAttachmentTabProps) {
   const t = useTranslations('attachmentSecurity');
 
@@ -57,6 +62,13 @@ export function EncryptedAttachmentTab({
 
   return (
     <div className="space-y-6" data-testid="encrypted-attachment-tab" data-direction={direction}>
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-100">
+        <div>
+          <p className="text-sm font-medium">加密附件观察模式</p>
+          <p className="text-xs text-indigo-800 dark:text-indigo-200">仅记录解密失败命中，不执行本模块配置的处置动作。</p>
+        </div>
+        <Switch checked={observeMode ?? false} onCheckedChange={(value) => onObserveModeChange?.(value)} data-testid="encrypted-observe-mode-switch" aria-label="加密附件观察模式" />
+      </div>
       <section className="space-y-3">
         <Label>{infoLabel(t('encrypted.detectPolicy'), t('tooltips.encryptedMode'), 'encrypted-detect-mode')}</Label>
         <Select value={config.detect_mode} onValueChange={(mode) => onChange({ ...config, detect_mode: mode as EncryptedConfig['detect_mode'] })}>

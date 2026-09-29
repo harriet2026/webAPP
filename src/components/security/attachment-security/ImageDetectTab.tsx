@@ -50,6 +50,8 @@ interface ImageDetectTabProps {
   config: ImageDetectConfig;
   routes: QrDeepRoutesConfig;
   actions: ImageDetectActionConfig;
+  observeMode?: boolean;
+  onObserveModeChange?: (value: boolean) => void;
   onChange: (config: ImageDetectConfig) => void;
   onRoutesChange: (config: QrDeepRoutesConfig) => void;
   onActionsChange: (config: ImageDetectActionConfig) => void;
@@ -63,6 +65,8 @@ export function ImageDetectTab({
   onChange,
   onRoutesChange,
   onActionsChange,
+  observeMode,
+  onObserveModeChange,
 }: ImageDetectTabProps) {
   const t = useTranslations('attachmentSecurity');
 
@@ -93,6 +97,13 @@ export function ImageDetectTab({
 
   return (
     <div className="space-y-6" data-testid="image-detect-tab" data-direction={direction}>
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-indigo-950 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-100">
+        <div>
+          <p className="text-sm font-medium">图片识别观察模式</p>
+          <p className="text-xs text-indigo-800 dark:text-indigo-200">仅记录 OCR 和二维码识别命中，不执行本模块配置的处置动作。</p>
+        </div>
+        <Switch checked={observeMode ?? false} onCheckedChange={(value) => onObserveModeChange?.(value)} data-testid="image-observe-mode-switch" aria-label="图片识别观察模式" />
+      </div>
       <section className="space-y-4">
         <Label className="font-medium">{t('imageDetect.ocrDetection')}</Label>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
