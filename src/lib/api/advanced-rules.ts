@@ -71,7 +71,13 @@ export async function createAdvancedRule(
   data: CreateRuleRequest,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<Rule> {
-  return requestFn<Rule>(`/unified-rules`, { method: 'POST', body: data });
+  // `scope=advanced_rules` 镶嵌 content_rules 写操作的既有约定（见
+  // ContentRulesPage.tsx），让 mock dispatcher 能按 query 收窄到本模块的
+  // mockCreateAdvancedRule，而不会误伤其余共用 /unified-rules 的模块。
+  return requestFn<Rule>(`/unified-rules?scope=advanced_rules`, {
+    method: 'POST',
+    body: data,
+  });
 }
 
 export async function updateAdvancedRule(
@@ -79,14 +85,19 @@ export async function updateAdvancedRule(
   data: UpdateRuleRequest,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<Rule> {
-  return requestFn<Rule>(`/unified-rules/${id}`, { method: 'PUT', body: data });
+  return requestFn<Rule>(`/unified-rules/${id}?scope=advanced_rules`, {
+    method: 'PUT',
+    body: data,
+  });
 }
 
 export async function deleteAdvancedRule(
   id: number,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<void> {
-  return requestFn<void>(`/unified-rules/${id}`, { method: 'DELETE' });
+  return requestFn<void>(`/unified-rules/${id}?scope=advanced_rules`, {
+    method: 'DELETE',
+  });
 }
 
 export async function toggleAdvancedRule(
@@ -94,7 +105,7 @@ export async function toggleAdvancedRule(
   isActive: boolean,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<Rule> {
-  return requestFn<Rule>(`/unified-rules/${id}/status`, {
+  return requestFn<Rule>(`/unified-rules/${id}/status?scope=advanced_rules`, {
     method: 'PUT',
     body: { is_active: isActive },
   });
