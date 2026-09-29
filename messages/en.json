@@ -4128,6 +4128,7 @@
       "nameDuplicate": "A rule with this name already exists, please choose another name"
     },
     "title": "Sender Blacklist/Whitelist",
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule was deleted, does not belong to the sender blacklist/whitelist module, or the current account lacks access.",
     "blacklist": "Blacklist Rules",
     "whitelist": "Whitelist Rules",
     "createRule": "New Rule",
@@ -4360,6 +4361,8 @@
     "validUntilTip": "Set an expiry date; the rule is disabled after it expires",
     "permanentHint": "leave empty for permanent",
     "priorityRangeHint": "Range {min}–{max}; higher numbers have higher priority",
+    "observeMode": "Observe Mode",
+    "observeModeHint": "When enabled, the rule only logs hits without taking any block/quarantine action, useful for verifying rule effectiveness",
     "createRule": "New rule",
     "editRule": "Edit Rule",
     "createRuleTitle": "Create Content Rule",
@@ -4782,11 +4785,13 @@
   },
   "behaviorControl": {
     "title": "Behavior Control",
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule was deleted, does not belong to the behavior control module, or the current account lacks access.",
     "infoTip": "Detect and handle abnormal sending behavior (botnets, proxy pools, compromised accounts, internal spam floods, etc.). Rules are matched in priority order.",
     "addRule": "New Rule",
     "searchPlaceholder": "Search rule name, control object...",
     "complexRule": "Config Error",
     "toggleRule": "Toggle rule “{name}”",
+  "toggleObserveMode": "Toggle observe mode for rule “{name}”",
     "empty": "No rules yet",
     "emptyHint": "Click “{action}” to create your first rule",
     "createNow": "Create Now",
@@ -4800,8 +4805,9 @@
       "detection": "Detection",
       "action": "Action",
       "priority": "Priority",
-      "status": "Status",
-      "modified": "Modified",
+    "status": "Status",
+    "observeMode": "Observe Mode",
+    "modified": "Modified",
       "operations": "Operations"
     },
     "direction": {
@@ -4886,8 +4892,9 @@
       "priorityTooltip": "Higher values take priority, range {min}–{max}",
       "validFrom": "Valid From",
       "validUntil": "Valid Until",
-      "isActive": "Enable this rule",
-      "description": "Description",
+    "isActive": "Enable this rule",
+    "observeMode": "Observe Mode",
+    "description": "Description",
       "thresholdA": "Threshold A",
       "thresholdB": "Threshold B",
       "orToggle": "Enable OR combination",
@@ -6800,6 +6807,12 @@
     "moduleEnabled": "Module Enabled",
     "moduleDisabled": "Module Disabled",
     "moduleDisabledDesc": "Module is disabled, rules will not participate in mail filtering",
+    "deepLinkLoading": "Locating matched rule {ruleId}...",
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule has been deleted, does not belong to the advanced filter rules module, or the current account does not have access.",
+    "observeMode": "Observe Mode",
+    "observeModeHint": "When enabled, the rule only logs hits without taking any disposition action, useful for verifying rule effectiveness",
+    "enableObserveMode": "Enable observe mode",
+    "disableObserveMode": "Disable observe mode",
     "infoCard": {
       "title": "Supports {count} condition types:",
       "groupMailBasic": "Mail Basic Info",
@@ -10881,8 +10894,14 @@
   },
   "recipientCheck": {
     "banner": "Inspect recipient addresses at the RCPT TO stage to guard against directory harvest attacks (DHA), mail bombing, and intra-domain lateral phishing",
-    "loadFailed": "Failed to load the configuration. Editing and saving are unavailable to protect the existing settings. Please retry.",
-    "module": {
+  "loadFailed": "Failed to load the configuration. Editing and saving are unavailable to protect the existing settings. Please retry.",
+  "observeMode": {
+    "enabled": "Observe only",
+    "disabled": "Enforce actions",
+    "limitLabel": "Recipient limit observe mode",
+    "existenceLabel": "Recipient existence observe mode"
+  },
+  "module": {
       "enabled": "Enabled",
       "disabled": "Disabled",
       "switchLabel": "Module enable switch"
@@ -12244,8 +12263,11 @@
         "phishing_detection": "Phishing Detection Agent",
         "sender_filter": "Sender lists",
         "similar_detection_similar_email": "Similar email detection",
-        "similar_detection_same_subject": "Same subject detection"
-      },
+  "similar_detection_same_subject": "Same subject detection",
+  "behavior_control": "Sending behavior control",
+  "content_rules": "Content rules",
+  "advanced_filter_rules": "Advanced filter rules"
+  },
       "durationBucket": {
         "label": "Observed Duration",
         "lt7": "Under 7 days",
@@ -12282,8 +12304,11 @@
       "directionInternal": "Internal Direction",
       "aggregateScope": "All Directions Aggregated",
       "phishingDetection": "Phishing Detection Agent",
-      "senderFilter": "Sender lists"
-    },
+  "senderFilter": "Sender lists",
+  "behaviorControl": "Sending behavior control",
+  "contentRules": "Content rules",
+  "advancedFilterRules": "Advanced filter rules"
+  },
     "timeoutAlert": {
       "warning": "{count} policies have been in observe mode for over {days} days and are pending promotion evaluation.",
       "viewDetails": "View",

@@ -21,6 +21,7 @@ import { useApiRequest, ApiError } from "@/lib/api/client";
 import {
   createAdvancedRule,
   updateAdvancedRule,
+  type RuleWithExtras,
 } from "@/lib/api/advanced-rules";
 import { canSaveActions, validateBasics, hasNoConditions } from "./validation";
 import {
@@ -35,7 +36,7 @@ import { BasicSettingsTab, type BasicSettingsErrors } from "./BasicSettingsTab";
 import { ConditionsTab } from "./ConditionsTab";
 import { ActionsTab } from "./ActionsTab";
 import { TestAnalysisTab } from "./TestAnalysisTab";
-import type { Rule, FieldDef } from "@/types/unified-rules";
+import type { FieldDef } from "@/types/unified-rules";
 import { useApiErrorMessage } from "@/lib/api/use-api-error-message";
 
 type TabKey = "basic" | "conditions" | "disposition" | "test";
@@ -43,9 +44,12 @@ type TabKey = "basic" | "conditions" | "disposition" | "test";
 interface Props {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  rule: Rule | null;
+  rule: RuleWithExtras | null;
   fieldDefs: Record<string, FieldDef>;
-  onSaved: () => void;
+  // GT-14369: 保存后把当前表单的观察模式值回传给列表层，列表层负责把它落进
+  // 本地 observeModeById 状态（后端暂无持久化该字段的接口）。newRuleId 仅在
+  // 新建成功时有值——编辑已存在规则时列表层用 rule.id 即可定位，不依赖它。
+  onSaved: (observeMode: boolean, newRuleId?: number) => void;
 }
 
 // Maps a subset of the backend's raw English validation-error strings
@@ -183,13 +187,17 @@ export function RuleEditorDrawer({
           apiRequest,
         );
       } else {
-        await createAdvancedRule(
+        const created = await createAdvancedRule(
           formToCreateRequest(form, fieldDefs),
           apiRequest,
         );
+        toast.success(t("saveSuccess"));
+        onSaved(form.observeMode, created.id);
+        onOpenChange(false);
+        return;
       }
       toast.success(t("saveSuccess"));
-      onSaved();
+      onSaved(form.observeMode);
       onOpenChange(false);
     } catch (e) {
       if (e instanceof ApiError) {

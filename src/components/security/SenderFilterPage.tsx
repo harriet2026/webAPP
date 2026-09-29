@@ -6,6 +6,7 @@ import { Plus, Download, Upload, Loader2, RotateCcw, AlertCircle } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { SenderFilterTable } from '@/components/security/sender-filter/SenderFilterTable';
@@ -28,7 +29,13 @@ import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { buildSenderFilterImportTemplate } from '@/lib/security-rule-import-templates';
 import { RULE_LIST_DEFAULT_PAGE_SIZE } from '@/components/shared/rule-list-pagination';
 
-export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
+export function SenderFilterPage({ embedded, deepLinkRuleID, deepLinkRuleRef }: {
+  embedded?: boolean;
+  /** 规则效能统计等外部入口深链接解析出的规则数字主键。 */
+  deepLinkRuleID?: number;
+  /** 原始规则标识（例如 SBL-1），用于定位失败时的提示文案。 */
+  deepLinkRuleRef?: string;
+} = {}) {
   const t = useTranslations();
   const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
@@ -48,6 +55,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   // 观察模式：本次为纯前端交付（mock），后端尚无承载字段，先用本地态记录每条
   // 规则的开关值，按 rule.id 索引；不参与任何 CRUD 请求体。
   const [observeModeById, setObserveModeById] = useState<Record<number, boolean>>({});
+  const [handledDeepLinkRuleID, setHandledDeepLinkRuleID] = useState<number | undefined>(undefined);
 
   const senderFilterImportTemplate = useMemo(
     () => buildSenderFilterImportTemplate(effectiveTenantId ?? user?.tenant_id),
@@ -129,6 +137,21 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
       };
     });
   }, [rulesData, observeModeById]);
+
+  // 深链接目标可能不在当前列表 Tab（黑/白名单）或筛选条件内，因此直接从全量
+  // ruleViews（而不是 filteredRules）里按 rule.id 定位，避免因筛选条件不匹配
+  // 而找不到规则。这是从新到达的查询数据派生本地选中态的受控渲染期状态调整，
+  // 与 ContentRulesPage 处理深链接的方式一致。
+  const deepLinkTarget = deepLinkRuleID
+    ? ruleViews.find((view) => view.rule.id === deepLinkRuleID)
+    : undefined;
+  const deepLinkNotFound = !!deepLinkRuleID && !pageLoading && !deepLinkTarget;
+  if (deepLinkRuleID && deepLinkTarget && handledDeepLinkRuleID !== deepLinkRuleID) {
+    setHandledDeepLinkRuleID(deepLinkRuleID);
+    setListTypeTab(deepLinkTarget.list_type);
+    setEditingRule(deepLinkTarget);
+    setDrawerOpen(true);
+  }
 
   const filteredRules = useMemo(
     () => filterSenderFilterRules(ruleViews, { listType: listTypeTab, search, status: statusFilter }),
@@ -317,6 +340,13 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const content = (
     <>
       <div className="space-y-4">
+        {deepLinkNotFound && (
+          <Alert variant="destructive" data-testid="sender-filter-deep-link-unavailable">
+            <AlertDescription>
+              {t('senderFilter.deepLinkUnavailable', { ruleId: deepLinkRuleRef ?? deepLinkRuleID })}
+            </AlertDescription>
+          </Alert>
+        )}
         <Tabs value={listTypeTab} onValueChange={(v) => { setListTypeTab(v); setPage(1); }}>
           <TabsList className="rounded-2xl border border-border/70 bg-muted/30 p-1">
             <TabsTrigger data-testid="sender-filter-tab-blacklist" value="blacklist">{t('senderFilter.blacklist')}</TabsTrigger>

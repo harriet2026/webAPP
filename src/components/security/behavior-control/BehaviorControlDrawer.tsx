@@ -75,11 +75,13 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   editing: BehaviorControlRuleView | null;
   defaults?: Partial<BehaviorControlFormData>;
+  observeMode?: boolean;
+  onObserveModeChange?: (id: number, enabled: boolean) => void;
 }
 
 function defaultForm(priority: number): BehaviorControlFormData {
   return {
-    name: '', priority, is_active: true,
+    name: '', priority, is_active: true, observe_mode: false,
     direction: 'outbound',
     object_config: { type: 'sender', sub_type: 'individual', value: '' },
     time_window: '15min',
@@ -117,7 +119,7 @@ function describeObject(
 
 interface GroupOption { name: string; memberCount?: number }
 
-export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }: Props) {
+export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults, observeMode = false, onObserveModeChange }: Props) {
   const t = useTranslations();
   const apiErrorMessage = useApiErrorMessage();
   const qc = useQueryClient();
@@ -218,6 +220,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       description: editing.rule.description ?? '',
       priority: editing.rule.priority,
       is_active: editing.rule.is_active,
+      observe_mode: observeMode,
       valid_from: editing.rule.valid_from ?? '',
       // input[type=date] only accepts YYYY-MM-DD. The API returns RFC3339, so
       // feeding the complete timestamp makes the browser render an empty field.
@@ -234,7 +237,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       threshold_b: m.threshold_b,
       action: BACKEND_TO_PRODUCT[editing.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? 'audit',
     };
-  }, [editing, defaults, priorityRange]);
+  }, [editing, defaults, observeMode, priorityRange]);
 
   const methods = useForm<BehaviorControlFormData>({
     resolver: zodResolver(schema) as unknown as Resolver<BehaviorControlFormData>,
@@ -266,7 +269,9 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       (editing
         ? updateBehaviorControlRule(editing.rule.id, form, apiRequest)
         : createBehaviorControlRule(form, apiRequest)),
-    onSuccess: () => {
+    onSuccess: (result) => {
+      const savedId = editing?.rule.id ?? result.rule.id;
+      onObserveModeChange?.(savedId, getValues('observe_mode') ?? false);
       qc.invalidateQueries({ queryKey: ['behavior-control-rules'] });
       toast.success(t('behaviorControl.toast.saveOk'));
       onOpenChange(false);
@@ -469,6 +474,24 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                               />
                               <span className="text-sm text-muted-foreground">
                                 {t(watchAll.is_active ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <Label htmlFor="behavior-control-observe-mode" className="min-w-[100px] text-right">
+                              {t('behaviorControl.form.observeMode')}
+                            </Label>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                id="behavior-control-observe-mode"
+                                data-testid="behavior-control-observe-mode"
+                                checked={watchAll.observe_mode}
+                                onCheckedChange={(enabled) => setValue('observe_mode', enabled, { shouldDirty: true })}
+                                aria-label={t('behaviorControl.form.observeMode')}
+                              />
+                              <span className="text-sm text-muted-foreground">
+                                {t(watchAll.observe_mode ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
                               </span>
                             </div>
                           </div>

@@ -1,4 +1,5 @@
 import type { CreateRuleRequest, FieldDef, Rule, RuleNode, UpdateRuleRequest } from '@/types/unified-rules';
+import type { RuleWithExtras } from '@/lib/api/advanced-rules';
 import { deserializeGroups, serializeGroups, type ConditionGroups } from './serde';
 import { deriveStage } from './stage-derive';
 import type { PrimaryAction } from './conflict-matrix';
@@ -67,6 +68,12 @@ export interface RuleForm {
     discard?: DiscardActionParams;
   };
   addons: AddonsState;
+  /**
+   * 观察模式（GT-14369）——前端专用表单字段，读写均落在
+   * AdvancedFilterRulesModule 的本地 observeModeById 状态中，不随
+   * formToCreateRequest/formToUpdateRequest 提交给后端。
+   */
+  observeMode: boolean;
 }
 
 const ALL_SCOPES: Scope[] = ['incoming', 'outgoing', 'internal'];
@@ -118,6 +125,7 @@ export function emptyRuleForm(defaultPriority = 50): RuleForm {
       discard: { logEnabled: true, silent: true, notifyAdmin: false },
     },
     addons: {},
+    observeMode: false,
   };
 }
 
@@ -229,13 +237,16 @@ function parseConditionTree(tree: Rule['condition_tree']): RuleNode | null {
   }
 }
 
-export function ruleToForm(rule: Rule): RuleForm {
+export function ruleToForm(rule: RuleWithExtras): RuleForm {
   const form = emptyRuleForm();
   form.name = rule.name;
   form.priority = rule.priority;
   form.enabled = rule.is_active;
   form.description = rule.description || '';
   form.validUntil = rule.valid_until ? rule.valid_until.slice(0, 10) : null;
+  // GT-14369: 观察模式回填自前端本地 mock 态注入的 observe_mode，未记录过
+  // 则视为关闭；该字段不来自后端 metadata。
+  form.observeMode = rule.observe_mode ?? false;
 
   const meta = parseMetadata(rule.metadata);
 
