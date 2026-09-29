@@ -254,7 +254,7 @@ export function PolicyPipelinePage() {
 
   // F10: stage5 综合策略抽屉宿主对齐 — 左导航启用圆点 + 页级
   // 综合策略开关状态（阶段5 各子模块是否被总开关关停）的数据源。仅在抽屉处于阶段5时取数;
-  // 开关本身的 UI 入口（ComprehensiveStrategyHeader）已随原型改版移除，这里只读不写。
+  // 开关本身的 UI 入口（ComprehensiveStrategyHeader）已随原型改版移除，这里只读不写���
   // (`enabled` gate)，不影响阶段1/2/3；其余阶段完全不读取这些 query。
   const stage5Active = drawerOpen && activeDrawerPolicy.stage === 5;
 
@@ -577,7 +577,7 @@ export function PolicyPipelinePage() {
             // 隔离区跳转说明，文案与动作组合逐字匹配 demo），其余卡保持单行描述（各自 spec 范围）。
             <div className="space-y-0.5">
               <div>{t('pipeline.policyTooltipPolicy')}：{t(policy.nameKey)}</div>
-              <div>{t('pipeline.policyTooltipAction')}：{t('pipeline.actionQuarantineAction')}、{t('pipeline.actionDeliver')}</div>
+              <div>{t('pipeline.policyTooltipAction')}：{t('pipeline.actionQuarantineAction')}���{t('pipeline.actionDeliver')}</div>
               <div>{t('pipeline.policyTooltipEffect')}：{t('pipeline.policyEffectQuarantine')}</div>
               <div className="opacity-80">{t('pipeline.quarantineModuleLink')}</div>
             </div>
@@ -710,7 +710,7 @@ export function PolicyPipelinePage() {
     // else falls back to item.functional (mailMarking — no enabled API, see above).
     const stage5Enabled = isStage5 ? stage5EnabledByKey[item.key as Stage5PolicyKey] : undefined;
     // GT-12731：stage3（url/attachment/intentEngine）在对应子页把真实启用态回传前，
-    // 本地状态为 undefined。此前会退回 item.functional（恒 true），使「未启用」模块的
+    // 本地状态为 undefined。此前会退回 item.functional（恒 true）���使「未启用」模块的
     // 圆点先亮起、子页加载完成后再闪回熄灭。改为优先用父级预取的 securityModulesMap
     // 作为加载期兜底真值，让首帧就正确。子页回传后（含未保存草稿）本地状态优先。
     // GT-12731：stage3 在对应子页把真实启用态回传前，本地状态为 undefined。
@@ -828,15 +828,27 @@ export function PolicyPipelinePage() {
   })();
 
   const drawerContent = (() => {
-    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'senderFilter') {
-      return <SenderFilterPage embedded />;
-    }
-    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'authSpoofing') {
-      return <AuthSpoofingPage embedded />;
-    }
-    if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'behaviorControl') {
-      return <BehaviorControlPage embedded />;
-    }
+  if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'senderFilter') {
+  return (
+  <SenderFilterPage
+  embedded
+  deepLinkRuleID={deepLink?.key === 'senderFilter' ? deepLink.ruleDatabaseID : undefined}
+  deepLinkRuleRef={deepLink?.key === 'senderFilter' ? deepLink.ruleRef : undefined}
+  />
+  );
+  }
+  if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'authSpoofing') {
+  return <AuthSpoofingPage embedded />;
+  }
+  if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'behaviorControl') {
+  return (
+  <BehaviorControlPage
+  embedded
+  deepLinkRuleID={deepLink?.key === 'behaviorControl' ? deepLink.ruleDatabaseID : undefined}
+  deepLinkRuleRef={deepLink?.key === 'behaviorControl' ? deepLink.ruleRef : undefined}
+  />
+  );
+  }
     // GT-11878: 收信人数量限制原先配置在行为管控里；对齐 demo 后行为管控页面移除了
     // 该配置，收信人数量限制现在拥有独立的 RecipientCheckPage。
     if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'recipientCheck') {

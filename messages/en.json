@@ -4128,6 +4128,7 @@
       "nameDuplicate": "A rule with this name already exists, please choose another name"
     },
     "title": "Sender Blacklist/Whitelist",
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule was deleted, does not belong to the sender blacklist/whitelist module, or the current account lacks access.",
     "blacklist": "Blacklist Rules",
     "whitelist": "Whitelist Rules",
     "createRule": "New Rule",
@@ -4784,6 +4785,7 @@
   },
   "behaviorControl": {
     "title": "Behavior Control",
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule was deleted, does not belong to the behavior control module, or the current account lacks access.",
     "infoTip": "Detect and handle abnormal sending behavior (botnets, proxy pools, compromised accounts, internal spam floods, etc.). Rules are matched in priority order.",
     "addRule": "New Rule",
     "searchPlaceholder": "Search rule name, control object...",

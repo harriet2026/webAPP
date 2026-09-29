@@ -8,6 +8,7 @@ import { Download, Info, Plus, RotateCcw, Search, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -32,9 +33,13 @@ import { isBehaviorControlRuleExpired } from './behavior-control/validity';
 
 interface Props {
   embedded?: boolean;
+  /** 规则效能统计等外部入口深链接解析出的规则数字主键。 */
+  deepLinkRuleID?: number;
+  /** 原始规则标识（例如 BEHAVIOR-1），用于定位失败时的提示文案。 */
+  deepLinkRuleRef?: string;
 }
 
-export function BehaviorControlPage({ embedded = false }: Props) {
+export function BehaviorControlPage({ embedded = false, deepLinkRuleID, deepLinkRuleRef }: Props) {
   const t = useTranslations();
   const qc = useQueryClient();
   const { apiRequest, effectiveTenantId } = useApiRequest();
@@ -53,6 +58,7 @@ export function BehaviorControlPage({ embedded = false }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<BehaviorControlRuleView | null>(null);
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [importExportTab, setImportExportTab] = useState<'export' | 'import'>('export');
+  const [handledDeepLinkRuleID, setHandledDeepLinkRuleID] = useState<number | undefined>(undefined);
 
   const behaviorControlImportTemplate = useMemo(
     () => buildBehaviorControlImportTemplate(effectiveTenantId ?? user?.tenant_id),
@@ -77,6 +83,19 @@ export function BehaviorControlPage({ embedded = false }: Props) {
     if (!data?.items) return [];
     return data.items.map(resolveBehaviorControlRule);
   }, [data]);
+
+  // 深链接目标可能不在当前筛选条件内，因此直接从全量 views（而不是 filtered）
+  // 里按 rule.id 定位，避免因筛选条件不匹配而找不到规则。
+  const deepLinkTarget = deepLinkRuleID
+    ? views.find((view) => view.rule.id === deepLinkRuleID)
+    : undefined;
+  const deepLinkNotFound = !!deepLinkRuleID && !isLoading && !deepLinkTarget;
+  if (deepLinkRuleID && deepLinkTarget && handledDeepLinkRuleID !== deepLinkRuleID) {
+    setHandledDeepLinkRuleID(deepLinkRuleID);
+    setEditing(deepLinkTarget);
+    setDrawerDefaults(undefined);
+    setDrawerOpen(true);
+  }
 
   const filtered = useMemo(() => {
     let result = views;
@@ -160,6 +179,13 @@ export function BehaviorControlPage({ embedded = false }: Props) {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">{t('behaviorControl.title')}</h1>
         </div>
+      )}
+      {deepLinkNotFound && (
+        <Alert variant="destructive" data-testid="behavior-control-deep-link-unavailable">
+          <AlertDescription>
+            {t('behaviorControl.deepLinkUnavailable', { ruleId: deepLinkRuleRef ?? deepLinkRuleID })}
+          </AlertDescription>
+        </Alert>
       )}
       <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">

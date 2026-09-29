@@ -47,7 +47,10 @@ const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_mo
   auth_spoofing: '/security/pipeline?module=authSpoofing',
   similar_detection: '/security/pipeline?module=similarDetection',
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
-  sender_filter: '/security/sender-filter',
+  // 发信人黑白名单没有独立路由页面，SenderFilterPage 只挂载在流水线抽屉里
+  // （module=senderFilter，见 PolicyPipelinePage），不是 '/security/sender-filter'
+  // 这个不存在的路径——用错会导致跳转 404。
+  sender_filter: '/security/pipeline?module=senderFilter',
   behavior_control: '/security/pipeline?module=behaviorControl',
   // 流水线页内容规则模块的真实 key 是 'content'（见 PolicyPipelinePage 的
   // Stage3PolicyKey 与 policy-deep-link.ts 的 PipelineModuleKey），不是
@@ -60,6 +63,16 @@ const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_mo
 // 停在内容规则列表页让用户自己再找一遍。
 function contentRuleConfigPath(ruleId: number): string {
   return `${RULE_EFFECTIVENESS_CONFIG_PATH.content_rules}&rule_id=${ruleId}`;
+}
+
+// 发信人黑白名单/发信行为管控同样按单条规则拆分观察对象，跳转同理需要带上
+// 具体 rule_id，落到该规则的编辑抽屉。
+function senderFilterRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter}&rule_id=${ruleId}`;
+}
+
+function behaviorControlRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.behavior_control}&rule_id=${ruleId}`;
 }
 
 // 相似检测配置页按 detectionType Tab 划分（相似邮件检测/相同主题检测），跳转时
@@ -327,7 +340,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     version_change_summary: '执行动作调整：隔离 → 审核，触发观察期重置',
   },
   // 钓鱼邮件智能体按版本归属拆分为准入规则、风险处置策略和运行时策略。
-  // 三条记录分别演示独立版本号、观察起始时间和历史版本，不使用智能体整体版本。
+  // 三���记录分别演示独立版本号、观察起始时间和历史版本，不使用智能体整体版本。
   {
     id: 'phishing-admission-rule-url',
     policy_module: 'phishing_detection',
@@ -411,7 +424,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.33,
     false_positive_rate: 0.04,
     attribution_status: 'attributable',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    config_path: senderFilterRuleConfigPath(1),
     version_no: 1,
   },
   {
@@ -427,7 +440,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.42,
     false_positive_rate: 0.09,
     attribution_status: 'attributable',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    config_path: senderFilterRuleConfigPath(2),
     // 示例：该规则的匹配条件曾发生实质性调整（新增子域名通配符匹配），触发过一次
     // 观察期重置——当前 observed_days=18 只反映 v2 的观察时长。
     version_no: 2,
@@ -446,13 +459,16 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.5,
     false_positive_rate: 0.15,
     attribution_status: 'attributable',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    config_path: senderFilterRuleConfigPath(3),
     version_no: 1,
   },
   {
-    id: 'behavior-control-rule-101',
+    // 对应 fixtures.ts 中 BEHAVIOR_CONTROL_DEMO_RULES 的 rule-4（个人账号发信限制，
+    // 外发方向 · mail_count），而不是不存在的规则 id 101，否则跳转会因找不到
+    // 对应规则而无法定位到编辑抽屉。
+    id: 'behavior-control-rule-4',
     policy_module: 'behavior_control',
-    sub_strategy_id: 'rule:101',
+    sub_strategy_id: 'rule:4',
     sub_strategy_name_snapshot: '外发频率限制',
     is_deleted: false,
     observed_days: 11,
@@ -462,7 +478,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.31,
     false_positive_rate: 0.08,
     attribution_status: 'attributable',
-  config_path: RULE_EFFECTIVENESS_CONFIG_PATH.behavior_control,
+  config_path: behaviorControlRuleConfigPath(4),
   version_no: 1,
   },
   {
@@ -512,7 +528,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.15,
     false_positive_rate: 0.01,
     attribution_status: 'attributable',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    config_path: senderFilterRuleConfigPath(4),
     version_no: 1,
     actions: [],
   },
@@ -529,7 +545,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     weighted_reviewed_ratio: 0.08,
     false_positive_rate: 0.02,
     attribution_status: 'attributable',
-    config_path: RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter,
+    config_path: senderFilterRuleConfigPath(5),
     // 示例：该规则的白名单成员组曾发生实质性调整（财务部门人员变更），触发过一次
     // 观察期重置。
     version_no: 2,

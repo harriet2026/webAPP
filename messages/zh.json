@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则总开关�����������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开关�����������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件请选���“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮件��选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1180,7 +1180,7 @@
       "probeCompleteToast": "探测完成",
       "drawerTitleNew": "新建收信域",
       "drawerTitleEdit": "编辑收信域",
-      "drawerDescription": "登记入站域名���映射到内���投递���址",
+      "drawerDescription": "��记入站域名���映射到内���投递���址",
       "sectionBasic": "基础配置",
       "domainNameLabel": "收信域名",
       "domainNamePlaceholder": "如 example.cn",
@@ -1461,7 +1461,7 @@
       "ipFrequency": "限制单个 IP 的连接频率与认证失败次数",
       "ipFilter": "基于 IP 地址的黑白名单过滤",
       "rbl": "基于公共 RBL 名单过滤",
-      "overseas": "识别海外邮件并按策���处置",
+      "overseas": "识别海外���件并按策���处置",
       "senderFilter": "发信人黑白名��过滤",
       "userList": "用户���黑白名单管理",
       "behaviorControl": "发信行为分析和控制",
@@ -3153,7 +3153,7 @@
       "fetch": "抓取",
       "finalUrl": "最终 URL",
       "trusted": "可信",
-      "allowlist": "白名单",
+      "allowlist": "白名��",
       "deliveredCount": "已投递 {count}",
       "blockedCount": "已拦截 {count}"
     },
@@ -3513,7 +3513,7 @@
     "createRule": "新增规则",
     "editRule": "编辑规则",
     "deleteRule": "删除规则",
-    "deleteConfirm": "确定要删除\"{name}\"吗？",
+    "deleteConfirm": "确定���删除\"{name}\"吗？",
     "releaseOnDelete": "删除时释放该规则封禁的 IP",
     "suspendedIPs": "已封禁 IP",
     "noSuspendedIPs": "暂无封禁 IP",
@@ -4119,7 +4119,7 @@
       "nameMaxLength": "名称最多50个字符",
       "descriptionMaxLength": "备注最多200个字符",
       "priorityRequired": "优先级不能为空",
-      "priorityInteger": "优先级必须为整数",
+      "priorityInteger": "优先级必须为���数",
       "priorityRange": "��先级需在 {min}–{max} 之间",
       "whitelistModeRequired": "请选择白名单模式",
       "invalidEmail": "请输入有效的邮箱地址",
@@ -4133,6 +4133,7 @@
       "nameDuplicate": "规则名称已存在，请更换名称"
     },
     "title": "发信人黑白名单",
+    "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于发信人黑白名单模块，或当前账号无权访问。",
     "blacklist": "黑名单规则",
     "whitelist": "白名单规则",
     "createRule": "新建规则",
@@ -4789,6 +4790,7 @@
   },
   "behaviorControl": {
     "title": "发信行为管控",
+    "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于发信行为管控模块，或当前账号无权访问。",
     "infoTip": "检测并处置异常发信行为（僵尸网络、代理池、账号被盗、内部滥发等），各规则按优先级顺序匹配。",
     "addRule": "新建规则",
     "searchPlaceholder": "搜索规则名称、管控对象...",
@@ -4867,7 +4869,7 @@
       "scopeLabel": "统计范围",
       "scope": {
         "local": "仅本地域",
-        "all": "所有收件人"
+        "all": "所有收件��"
       },
       "actionLabel": "处置动作",
       "action": {
@@ -5030,7 +5032,7 @@
     },
     "pagination": {
       "total": "共",
-      "rules": "条规则",
+      "rules": "条规��",
       "goToPage": "前往第",
       "page": "页",
       "perPage10": "10 条/页",
@@ -5360,7 +5362,7 @@
       "lnkSection": "LNK 文件分析",
       "lnkEnabled": "启用 LNK 文件分析",
       "lnkToUrl": "从 LNK 中提取 URL 进行评估",
-      "lnkAction": "LNK 可疑动作",
+      "lnkAction": "LNK 可疑��作",
       "tnefUnwrap": "TNEF (winmail.dat) 自动解包"
     }
   },
@@ -5820,7 +5822,7 @@
   "configManagement": {
     "eyebrow": "高级规则设置",
     "title": "配置管理",
-    "description": "查看各服务的配置文件内容，并通过数据库覆盖配置项",
+    "description": "查看各服���的配置文件内容，并通过数据库覆盖配置项",
     "noFiles": "未找到配置文件",
     "key": "配置键",
     "fileValue": "文件值",
@@ -6405,7 +6407,7 @@
           "recallBackendResolutionFailed": "无法确认收件人的邮箱系统，请稍后重试",
           "recallRequestCreateFailed": "召回任务创建失败，请稍后重试",
           "recallNoRecallableRecipients": "当前收件人不具备召回条件",
-          "recallMailNotFound": "邮件记录不存在或已删除",
+          "recallMailNotFound": "邮件记录不���在或已删除",
           "recallForbidden": "无��召回这封邮件",
           "redeliverSuccess": "重投请求已提交，投递结果稍后在状态中更新",
           "redeliverUnavailable": {
@@ -6973,7 +6975,7 @@
       "disclaimerContentSourceHint": "声明正文取自系统统一配置的免责声明文案，此处只需选择插入位置；正文内容请联系管理员在系统配置中修改。"
     },
     "review": {
-      "paramsTitle": "审核参数",
+      "paramsTitle": "审核��数",
       "reviewers": "审核人邮箱",
       "timeoutHours": "超时时间（小时）"
     },
@@ -7081,7 +7083,7 @@
       "orGroup": "OR (任一)",
       "andGroup": "AND (全部)",
       "category_mailBasic": "邮件基础信息",
-      "category_attachment": "附件相关",
+      "category_attachment": "附件相��",
       "category_security": "安全检测",
       "subgroupEnvelope": "信封层",
       "subgroupConnection": "连接层",
@@ -7336,7 +7338,7 @@
       "desc_imageQrCodeResult": {
         "source": "附件图片识别引擎（OCR/二维码）",
         "usage": "判断图片识别处理是否成功完成：成功=识别步骤正常跑完（即使无发现）；失败=识别服务出错或超时截断，结果可能不完整",
-        "note": "二维码数量用「二维码数量」条件；识别失败的邮件可转人工或隔离兜底"
+        "note": "二维码数量用「二维码数量」条件；识别失败��邮件可转人工或隔离兜底"
       },
       "desc_qrCodeCount": {
         "source": "图片二维码识别引擎",
@@ -7472,7 +7474,7 @@
       "previewOrGroupTitle": "OR 条件组",
       "previewAndGroupTitle": "AND 条件组",
       "previewOrGroupTooltip": "命中任意一个条件即触发规则（逻辑或）",
-      "previewAndGroupTooltip": "命中全部条件才触发规则（逻辑与）",
+      "previewAndGroupTooltip": "命中全部条件才��发规则（逻辑与）",
       "previewAndConnector": "AND",
       "previewFullExpressionTitle": "完整表达式",
       "previewEmptyHint": "添加条件后将自动生成逻辑表达式",
@@ -9234,7 +9236,7 @@
       "scopeRelation": "已设置条件全部满足",
       "scopeHint": "限定邮件范围；大小和人员范围可不限制。",
       "riskRelation": "任一命中即可",
-      "riskHint": "至少选择一项；开启多项会扩大匹配范围。"
+      "riskHint": "至少选择一项；开启��项会扩大匹配范围。"
     },
     "runtime": {
       "title": "智能��调查与处置",
@@ -9951,7 +9953,7 @@
       }
     },
     "recall": {
-      "title": "确认召回",
+      "title": "确认召���",
       "description": "将对「{subject}」等 {count} 封邮件执行软删除召回，未读���件可撤回，已读邮件仅告警。",
       "unreadPolicy": "未读邮件策略",
       "readPolicy": "已读邮件策略",
@@ -10540,7 +10542,7 @@
       "viewDetail": "详情",
       "batchConfirm": "批量确认",
       "batchResolve": "批量解决",
-      "addRule": "新增规则",
+      "addRule": "新��规则",
       "edit": "编辑",
       "configure": "配置",
       "success": "操作成功",
@@ -11083,7 +11085,7 @@
     "expiredTitle": "链接已过期或无效",
     "expiredDesc": "请联系管理员获取新的链接。",
     "errorTitle": "操作失败",
-    "errorDesc": "请稍后重试或联系管理员。",
+    "errorDesc": "请稍后��试或联系管理员。",
     "confirmTitle": "确认将发件人加入黑名单",
     "confirmHint": "加入后��该发件人发给您的邮件将被直接拒收。",
     "confirmButton": "确认加黑",
@@ -11366,7 +11368,7 @@
       "recall": {
         "notify_email_invalid": "召回通知邮箱「{value}」格式不正确",
         "notify_frequency_invalid": "召回通知频率取值无效，只能是：{allowed}",
-        "policy_invalid": "召回策略「{value}」无效，只能是：{allowed}",
+        "policy_invalid": "召回��略「{value}」无效，只能是：{allowed}",
         "task_timeout_out_of_range": "召回任务超时需在 {min}–{max} 秒之间"
       },
       "recipient_not_in_mail": "该收件人不属于这封邮件",
@@ -11414,7 +11416,7 @@
       "client_cidr_item_all_network": "来源 IP 列表第 {index} 项「{value}」不能授权整个互联网",
       "client_cidr_item_invalid": "来源 IP 列表第 {index} 项「{value}」不是有效的 IP 或 CIDR",
       "client_cidr_item_outside_trusted_pool": "来源 IP 列表第 {index} 项「{value}」不在可信中继 IP 池（{pool}）内",
-      "client_cidr_item_prefix_too_broad": "来源 IP 列表第 {index} 项「{value}」的前缀 /{prefix} 过宽，最小为 /{min}",
+      "client_cidr_item_prefix_too_broad": "来源 IP 列���第 {index} 项「{value}」的前缀 /{prefix} 过宽，最小为 /{min}",
       "client_cidr_list_too_long": "来源 IP 列表规范化后超过 {max} 个字符，请减少地址数量",
       "enabled_required": "请指定是否启用",
       "expires_at_format_invalid": "过期时间格式不正确，应为 RFC3339（如 2026-08-01T12:00:00+08:00）",
@@ -12171,7 +12173,7 @@
       "truncated": "内容已截断",
       "subject_omitted": "预算省略对象",
       "source_omitted": "预算省略来源",
-      "capture_budget_omitted": "采集预算省略",
+      "capture_budget_omitted": "采��预算省略",
       "display_label_bounded": "显示名称已缩短",
       "ledger_omitted": "保留记录省略了观察",
       "observed": "采集不完整"
