@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则��开������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开��������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行��放��邮�����选���“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未��行��放��邮�����选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1337,7 +1337,7 @@
     "importFailureReason": "���败原因",
     "importSkipAlreadyExists": "成员已存在",
     "platformIpGroupTitle": "平台 IP 组",
-    "platformScopeHint": "平台级 IP 组对全部租户生效，供 IP 策略（IP 黑白名单表达式）��用。"
+    "platformScopeHint": "平台级 IP 组对全部租户生效，供 IP 策略（IP 黑白名单表��式）��用。"
   },
   "groupPolicy": {
     "eyebrow": "群组策���",
@@ -1460,7 +1460,7 @@
     "policyDesc": {
       "ipFrequency": "限制单个 IP 的连接频率与认证失败次数",
       "ipFilter": "基于 IP 地址的黑白名单过滤",
-      "rbl": "基于公共 RBL 名��过滤",
+      "rbl": "基于公��� RBL 名��过滤",
       "overseas": "识���海外���件并按策���处置",
       "senderFilter": "发信人黑白名��过滤",
       "userList": "用户���黑白名单管理",
@@ -1633,7 +1633,7 @@
     },
     "operators": {
       "equal": "等于",
-      "notEqual": "不等于",
+      "notEqual": "不���于",
       "greaterThan": "大于",
       "lessThan": "小于",
       "greaterEqual": "大于等于",
@@ -2217,7 +2217,7 @@
     "filteredByTenant": "仅显示租户 #{id} 的用户",
     "clearTenantFilter": "清除筛选",
     "eyebrow": "用户访问",
-    "subtitle": "统一管理平台管理员账号、角色权限与登录安全策略",
+    "subtitle": "统一管理平台��理员账号、角色权限与登录安全策略",
     "mustChangePassword": "首次登录强制修改密码",
     "mustChangePasswordHint": "新用户初始密码为临时密码，登录后需自行修改。",
     "initialPassword": "初始密码",
@@ -3186,7 +3186,7 @@
       "obfuscated_content": "内容存在混淆特征",
       "cac_signal": "CAC 信号",
       "auth_failure": "认证失败",
-      "header_mismatch": "头部信息不一致",
+      "header_mismatch": "头部信息不��致",
       "empty_visible_content": "可见内容过���",
       "cac_cluster": "CAC 簇关联",
       "historical_similarity": "历史相似性",
@@ -3369,7 +3369,7 @@
     "userListDesc": "管理员配置的用户级黑白名单规则",
     "userListTip": "管理员配置的用户级规则，可针对特定收信人或收信人组设置发信人黑白名单，优先级高于个人黑白名单。",
     "attachment": "附件安全检测",
-    "attachmentDesc": "附件类型和大小检查",
+    "attachmentDesc": "附件类型��大小检查",
     "url": "URL检测与防护",
     "urlDesc": "恶意URL检测和过滤",
     "content": "内容规则",
@@ -4251,7 +4251,7 @@
     "priority": "优先级",
     "priorityHelp": "数值越大优先级越高，优先级高的规则先匹配",
     "status": "状态",
-    "complexCondition": "复杂条件",
+    "complexCondition": "复���条件",
     "recipientSection": "收信人配置",
     "recipientType": "收信人类型",
     "recipientType_individual": "个人邮箱",
@@ -4414,7 +4414,7 @@
     "headerValue": "头部值",
     "addHeader": "添加头部",
     "tips": "配置提示",
-    "tipPriority": "优先级数值越大越优先",
+    "tipPriority": "优先级数值��大越优先",
     "tipScopes": "内容规则仅检查选定的作用域，选择多个作用域可扩大匹配范围",
     "tipRegex": "正则表达式使用标准Go regexp语法，无效正则保存��会被拒绝",
     "tipDirections": "规则可同时启用多个方向，每个方向有独立的执行动作",
@@ -6803,7 +6803,7 @@
     "moduleEnabled": "模块已启用",
     "moduleDisabled": "模块已禁用",
     "moduleDisabledDesc": "模块已禁用，规则不参与邮件过滤",
-    "deepLinkLoading": "正在定位命中规则 {ruleId}…",
+    "deepLinkLoading": "正在定位命中规�� {ruleId}…",
     "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于高级过滤规���模块，或当前账号无权访问。",
     "observeMode": "观察模式",
     "observeModeHint": "启用后规则仅记录命中情况，不实际执行处置动作，用于验证规则效果",
@@ -7320,7 +7320,7 @@
       "desc_attachmentMd5": {
         "source": "附件哈希计算",
         "usage": "精确匹配已知恶意文件的MD5值",
-        "note": "适用于已知威胁情报匹配"
+        "note": "适��于已知威胁情报匹配"
       },
       "desc_attachmentSizeTotal": {
         "source": "邮件附件解析",
@@ -7412,7 +7412,7 @@
         "note": "常见于CEO欺诈等社工攻击"
       },
       "desc_mailFromEmpty": {
-        "source": "SMTP协议层",
+        "source": "SMTP���议层",
         "usage": "检测信封发信人是否为空",
         "note": "空MAIL FROM常见于退信或系统邮件"
       },
@@ -8892,7 +8892,7 @@
     },
     "eyebrow": "钓鱼邮件检测智能体",
     "title": "钓鱼邮件检测总览",
-    "description": "查看钓鱼邮件检测智能体的检测统计、研判明细与链接证据，并对可疑邮件进行拦截或误报豁免。",
+    "description": "查看钓鱼邮件检测智能体的检测统计、研判明细与链接证据，并对可疑邮件��行拦截或误报豁免。",
     "tabs": {
       "overview": "检测���览",
       "config": "检测引擎配置",
@@ -9077,7 +9077,7 @@
       "description": "确认拦截该邮件？此操作将阻止该邮件继续投递。",
       "confirm": "确认拦截",
       "confirming": "处理中...",
-      "success": "已拦截",
+      "success": "已��截",
       "alreadyBlocked": "该邮件已被拦截",
       "error": "拦截失败",
       "liveStateError": "邮件仍在旁路处理中，请在旁路队列处置"
@@ -9218,7 +9218,7 @@
       "qrcode": "邮件包含二维码",
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "executable": "可执行文件",
-      "executableDesc": "检测邮件中可能执行代码或触发程序行为的文件。",
+      "executableDesc": "检测邮件中可能执行代码或触发程序行为的文件��",
       "urlNotQRHint": "普通链接，不含二维码解码出的链接。",
       "validationFailed": "请检查必填字段。",
       "created": "准入规则已创建",
@@ -9438,7 +9438,7 @@
       "allSpoofMethods": "仿冒手法：全部",
       "search": "搜索",
       "reset": "重置",
-      "rangeOver90": "时间范围不能超过 90 天",
+      "rangeOver90": "时间范围不��超过 90 天",
       "range": {
         "today": "今日",
         "7d": "近 7 天",
@@ -9579,7 +9579,7 @@
         "executive": "高管",
         "finance": "财务",
         "business": "业务",
-        "hr": "人资",
+        "hr": "人��",
         "tech": "技术",
         "custom": "自定义"
       },
@@ -9961,7 +9961,7 @@
     },
     "recall": {
       "title": "确认召���",
-      "description": "将对「{subject}」等 {count} 封邮件执行软删除召回，未读���件可撤回，已读邮件仅告���。",
+      "description": "将对���{subject}」等 {count} 封邮件执行软删除召回，未读���件可撤回，已读邮件仅告���。",
       "unreadPolicy": "未读邮件策略",
       "readPolicy": "已读邮件策略",
       "policy": {
@@ -10301,7 +10301,7 @@
     "csvEmailColMissing": "无法自动识别邮箱列，请确认 CSV 表头",
     "csvUploadFailed": "CSV 文件处理失败：{reason}",
     "deleteConfirm": "确认删除",
-    "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略��受影响（引用人员降级为未匹配）。是否继续？",
+    "deleteDesc": "删除后将同步清除该数据源下的通��录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略��受影响（引用人员降级为未匹配）。是否继续？",
     "deleteTitle": "删除数据源「{name}」？",
     "detailAlias": "邮箱别名",
     "detailCurrentTag": "当前标记",
@@ -10688,7 +10688,7 @@
       "saved": "配置已保存",
       "saveFailed": "保存失败",
       "testFailed": "测试失败",
-      "unsavedTitle": "未保存的更改",
+      "unsavedTitle": "未���存的更改",
       "unsavedDesc": "您有未保存的更改，离开后将丢失。",
       "leave": "��开（不保存）",
       "continueEdit": "继续编辑",
@@ -10959,6 +10959,8 @@
     "observeMode": {
       "enabled": "观察中",
       "disabled": "正常执行",
+      "observing": "观察中",
+      "hint": "启用后规则仅记录命中情况，不实际执行动作，用于验证规则效果",
       "limitLabel": "数量限制策略观察模式开关",
       "existenceLabel": "存在性验证策略观察模式开关"
     },
@@ -11025,7 +11027,7 @@
         "no_source": "尚未配置任何通讯录数据源",
         "never_synced": "通讯录从未同步成功",
         "last_sync_failed": "最近一次通讯录同步失败",
-        "stale": "通讯录数据已超过 24 小时未更新"
+        "stale": "通讯录数��已超过 24 小时未更新"
       },
       "badge": {
         "alias": "别名递归解析"
@@ -11370,7 +11372,7 @@
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
         "notify_times_empty": "通知频率不为「从不」时，至少要设置一个通知时间",
         "permission_unknown": "无法识别的权限项「{value}」",
-        "portal_base_url_host_missing": "外部访问地址缺少主机名",
+        "portal_base_url_host_missing": "外部访问地址��少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到��请填写网关对外可达的地址",
         "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到��名和端口即���",
@@ -11883,7 +11885,7 @@
     },
     "geoip_rules": {
       "ip_range_already_exists": "该 IP 段已存在",
-      "geoip_rule_not_found": "IP 归属地规则不存在",
+      "geoip_rule_not_found": "IP ���属地规则不存在",
       "format_json_csv": "导出格式只能是 json 或 csv"
     },
     "group_management_access": {
@@ -11991,7 +11993,7 @@
       "merged_limit_limit_1_unlimited_between": "合并限额必须是 -1（不限）或 1-1000 之间",
       "invalid_action_merged_limit": "合并限额不支持该操作",
       "action_invalid": "{name} 的处置动作无效",
-      "scope_invalid": "{name} 的生效范围无效，只能是本域或全部"
+      "scope_invalid": "{name} 的生效范围无效，只能是本��或全部"
     },
     "roles": {
       "system_default_role_cannot_edited": "系统内置角色不可修改",

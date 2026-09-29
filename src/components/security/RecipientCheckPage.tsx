@@ -376,7 +376,7 @@ export function RecipientCheckPage({ embedded = false }: Props) {
     setResetting(true);
     try {
       // DELETE 会删除托管规则；recipient_limit 的空配置 is_active=false，
-      // 因而“重置为默认”会错误地变成关闭数量限制。默认值必须显式保存，
+      // 因而“重置���默认”会错误地变成关闭数量限制。默认值必须显式保存，
       // 使配置和由其生成的托管规则一起恢复��
       const defaultLimit = normalizeLimit();
       const defaultCheck = normalizeCheck();
@@ -453,16 +453,19 @@ export function RecipientCheckPage({ embedded = false }: Props) {
                 <h4 className="text-sm font-medium">{t('recipientCheck.limit.title')}</h4>
                 <p className="mt-0.5 text-xs text-muted-foreground">{t('recipientCheck.limit.desc')}</p>
               </div>
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  {limitObserveMode ? t('recipientCheck.observeMode.enabled') : t('recipientCheck.observeMode.disabled')}
-                </span>
+              <div className="ml-auto flex min-w-[100px] items-center gap-2">
                 <Switch
+                  size="sm"
                   checked={limitObserveMode}
                   onCheckedChange={setLimitObserveMode}
                   aria-label={t('recipientCheck.observeMode.limitLabel')}
                   data-testid="recipient-limit-observe-mode-switch"
                 />
+                {limitObserveMode && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {t('recipientCheck.observeMode.observing')}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -601,16 +604,19 @@ export function RecipientCheckPage({ embedded = false }: Props) {
                 <h4 className="text-sm font-medium">{t('recipientCheck.existence.title')}</h4>
                 <p className="mt-0.5 text-xs text-muted-foreground">{t('recipientCheck.existence.desc')}</p>
               </div>
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  {existenceObserveMode ? t('recipientCheck.observeMode.enabled') : t('recipientCheck.observeMode.disabled')}
-                </span>
+              <div className="ml-auto flex min-w-[100px] items-center gap-2">
                 <Switch
+                  size="sm"
                   checked={existenceObserveMode}
                   onCheckedChange={setExistenceObserveMode}
                   aria-label={t('recipientCheck.observeMode.existenceLabel')}
                   data-testid="recipient-existence-observe-mode-switch"
                 />
+                {existenceObserveMode && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {t('recipientCheck.observeMode.observing')}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
