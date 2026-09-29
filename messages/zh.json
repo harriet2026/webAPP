@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则��开关�����������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开��������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮����选���“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮�����选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1180,7 +1180,7 @@
       "probeCompleteToast": "探测完成",
       "drawerTitleNew": "新建收信域",
       "drawerTitleEdit": "编辑收信域",
-      "drawerDescription": "����记入站域名���映射到内���投递���址",
+      "drawerDescription": "������记入站域名���映射到内���投递���址",
       "sectionBasic": "基础配置",
       "domainNameLabel": "收信域名",
       "domainNamePlaceholder": "如 example.cn",
@@ -1608,7 +1608,7 @@
       "emailSize": "邮件大小",
       "attachmentCount": "附件数量",
       "spfValid": "SPF 验证",
-      "dkimValid": "DKIM 验证",
+      "dkimValid": "DKIM 验���",
       "dmarcValid": "DMARC 验证",
       "ptrValid": "PTR 验证",
       "ptrDomain": "PTR ���向域名",
@@ -1626,7 +1626,7 @@
       "originKind": "自产信类型",
       "mxRegion": "收件域 MX 地域",
       "recipient": "收件人",
-      "recipientCount": "收件人数量",
+      "recipientCount": "收��人数量",
       "recipientDomain": "收件人域名",
       "senderDomain": "发件人域名",
       "rcpttags": "收件人标签"
@@ -2418,7 +2418,7 @@
     },
     "stages": {
       "cloud_intel": "云端情报",
-      "local_blacklist": "本地黑名单",
+      "local_blacklist": "本地��名单",
       "phishing_agent": "钓��邮件智能体",
       "none": "未命中"
     },
@@ -3360,7 +3360,7 @@
     "authSpoofing": "身份认证与仿冒检测",
     "authSpoofingDesc": "检测伪造发件人和认证仿冒",
     "behaviorControl": "发信行为管控",
-    "behaviorControlDesc": "检测异常发信行为并管控",
+    "behaviorControlDesc": "检测��常发信行为并管控",
     "recipientCheck": "收信��检测",
     "recipientCheckDesc": "收信人数���限制与存在性验证",
     "personalList": "用户黑白名单",
@@ -3542,7 +3542,7 @@
     "actionTempfail": "421 错误（临时拒绝）",
     "actionDisconnect": "断开连接",
     "tempfailMessage": "临时拒绝消息",
-    "tempfailPlaceholder": "自定义 421 消息",
+    "tempfailPlaceholder": "自定��� 421 消息",
     "connectionLimits": "连接数限制（-1 = 不限制）",
     "dailyLimit": "每日连接数限制",
     "concurrentLimit": "并�����接数限制",
@@ -3671,7 +3671,7 @@
     "invalidCidr": "请输入有效的 CIDR 网段（如 192.168.1.0/24）",
     "validUntilBeforeFrom": "失效时间不能早于生效时间",
     "windowLimitHint": "时间窗设为 -1（不限制）时，窗口连接数也必须为 -1",
-    "suspendDurationInvalid": "请选择受支持的暂停时长",
+    "suspendDurationInvalid": "请选择受支持的���停时长",
     "windowMinutesInvalid": "时间窗分钟数无效"
   },
   "ipFilter": {
@@ -3922,7 +3922,7 @@
     "presetSpamhaus": "Spamhaus",
     "presetSpamhausTip": "综合 IP 黑名单 (SBL+XBL+PBL+DBL)",
     "presetSpamcop": "SpamCop",
-    "presetSpamcopTip": "社区驱动的垃圾邮件举报系统",
+    "presetSpamcopTip": "社区驱动的垃圾邮件举���系统",
     "presetBarracuda": "Barracuda",
     "presetBarracudaTip": "Barracuda Central IP 黑名单",
     "presetSorbs": "SORBS",
@@ -4159,7 +4159,7 @@
     "action_discard_desc": "静默丢弃邮件，发信方收到投递成功响应但邮件实际被丢弃",
     "action_quarantine": "隔离",
     "action_quarantine_desc": "邮件进入隔离区，管理员可审阅后决定是否放行",
-    "action_audit": "审核",
+    "action_audit": "��核",
     "action_audit_desc": "邮件正常投递，同时写入审核日志供管理员事后审查",
     "action_accept": "投递",
     "action_accept_desc": "允许邮件通过，跳过后续检测直接投递至收件箱",
@@ -4511,7 +4511,7 @@
     "restoreDefault": "恢复系统默认",
     "moduleEnabled": "启用认证仿冒检测",
     "moduleEnabledHint": "关闭后，所有认证仿冒检测规则将不再生效",
-    "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔离等动作。建议在首次部署或调整策略时开启观察模式，验证��则影响范围后再正式启用。",
+    "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔离等动作。建议在首次部署或调整策略时开启��察模式，验证��则影响范围后再正式启用。",
     "probe": {
       "title": "模拟测试邮件认证",
       "description": "输入邮件参数测试认证仿冒检测的结果",
@@ -4655,7 +4655,7 @@
     "displayNameSpoof": {
       "title": "显示名仿冒检测",
       "inbound": "入站邮件",
-      "outbound": "出站邮件",
+      "outbound": "出站邮���",
       "internal": "内部邮件",
       "internalUsers": "内部用户列表",
       "exact": "精确匹配",
@@ -4714,7 +4714,7 @@
       "review": "审核",
       "pass": "进行下一步检测"
     },
-    "flowTitle": "邮件身份验证流��",
+    "flowTitle": "邮��身份验证流��",
     "flowSummaryHint": "节点显示已启用规则中的最严格处置",
     "flowNode": {
       "pipeline": "策略流水线",
@@ -5020,7 +5020,7 @@
     },
     "drawerSubtitle": "配置发信人行为管控规则",
     "filter": {
-      "allDirections": "全部方向",
+      "allDirections": "全��方向",
       "allTypes": "全部类型",
       "allStatus": "全部状态",
       "enabled": "启用",
@@ -5086,7 +5086,7 @@
       "title": "配置提示",
       "item1": "优先级越大越先匹配",
       "item2": "支持通配符如 *@domain.com",
-      "item3": "留空���效期表示永��有效",
+      "item3": "留空����效期表示永��有效",
       "item4": "群组和组织来自群组策略配置",
       "item5": "OR条件达到任一阈值即触发",
       "item6": "IP群组来自IP群组管理模块"
@@ -5202,7 +5202,7 @@
       "configured": "已配置",
       "notConfigured": "未配置",
       "hostRequired": "请填写杀毒引擎服务器地址",
-      "platformManagedHint": "反病毒服务器与病毒库由平台管理员在「平���安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
+      "platformManagedHint": "反病毒服务器��病毒库由平台管理员在「平���安全策略 → 反病毒引擎」统一配置，此处仅设置本租户的处置动作。",
       "actualCapabilityHint": "显示 attachd 当前可用的通用病毒扫描能力，不虚构厂商引擎状态",
       "updateSuccess": "病毒库更新请求已提交",
       "updateFailed": "病毒库更新失败",
@@ -5410,7 +5410,7 @@
       "timeoutLabel": "沙箱分析超时（超过30秒）",
       "timeoutContinue": "进行下一步检测（放行，依赖链接保护兜底）",
       "timeoutContinueTip": "超时后放行邮件，依赖链接保护在用户点击时进行实时检测",
-      "timeoutTreatMalicious": "按恶意处置（使用上述处置动作）",
+      "timeoutTreatMalicious": "按恶意处置（使用上述处置���作）",
       "timeoutTreatMaliciousTip": "超时后按照恶意URL的处置策略执行",
       "timeoutPass": "放行（仅记录日志）",
       "intelGroup": "情报库设置",
@@ -5659,7 +5659,7 @@
     "errorVersionConflict": "配置已被他人修改,请刷新后重试",
     "errorWindowRange": "检测窗口必须在 1 到 1440 之间",
     "similarEmailTab": "相似邮件检测",
-    "sameSubjectTab": "相同主题检测",
+    "sameSubjectTab": "相同主题���测",
     "detectionWindow": "��测窗口",
     "minutes": "分钟",
     "triggerCount": "触发数量",
@@ -5812,7 +5812,7 @@
     "saved": "保存成功",
     "deleted": "删除成功",
     "saveFailed": "保存失败",
-    "deleteFailed": "删除失败",
+    "deleteFailed": "删除失��",
     "loadFailed": "加载失败"
   },
   "passwordBook": {
@@ -6310,7 +6310,7 @@
           "size": "大小",
           "expandFullInfo": "展开完整信息",
           "mailHeaders": "邮件头信息",
-          "mailHeadersUnavailable": "邮件头信息不可用",
+          "mailHeadersUnavailable": "邮件头信息���可用",
           "mailHeadersTruncated": "邮件头信息超过保存上限，以下内容不完整。"
         },
         "emailContent": "邮件原文",
@@ -6805,6 +6805,7 @@
     "moduleDisabledDesc": "模块已禁用，规则不参与邮件过滤",
     "deepLinkLoading": "正在定位命中规则 {ruleId}…",
     "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于高级过滤规则模块，或当前账号无权访问。",
+    "observeMode": "观察模式",
     "infoCard": {
       "title": "支持{count}种条件类型：",
       "groupMailBasic": "邮件基础信息",
@@ -6965,7 +6966,7 @@
       "modifyHeaderTargetFieldReplyTo": "Reply-To",
       "modifyHeaderTargetFieldSubject": "Subject",
       "modifyHeaderTargetFieldTo": "To",
-      "modifyHeaderVariableHint": "支持变量：{sender}、{recipient}、{subject}",
+      "modifyHeaderVariableHint": "支持变量��{sender}、{recipient}、{subject}",
       "tagPositionBodyEnd": "正文结尾",
       "tagPositionBodyStart": "正文开头",
       "tagPositionSuffix": "主题后缀",
@@ -7414,7 +7415,7 @@
       "desc_mailFromFromConsistency": {
         "source": "SMTP会话MAIL FROM + 邮件头From字段",
         "usage": "检测信封层与信头层发信人是否一致",
-        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果综合判断"
+        "note": "钓鱼邮件常伪造信头From以冒充领导或合作伙伴，但信封层MAIL FROM保持真实以通过SPF验证；两者不一致是仿冒的重要特征，建议配合SPF/DKIM/DMARC结果��合判断"
       },
       "desc_virusScanResult": {
         "source": "防病毒引擎",
@@ -7943,7 +7944,7 @@
     "activateSuccess": "已设为当前密钥",
     "deleteSuccess": "已删除",
     "activateConfirmTitle": "设为当前密钥",
-    "activateConfirmDesc": "确定要将 selector {selector} 设为该域当前生效的 DKIM 密钥吗？",
+    "activateConfirmDesc": "确��要将 selector {selector} 设为该域当前生效的 DKIM 密钥吗？",
     "deleteConfirmTitle": "删除密钥",
     "deleteConfirmDesc": "确定要删除 selector {selector} 吗？此操作不可恢复。",
     "overviewTitle": "DKIM 总览",
@@ -8700,7 +8701,7 @@
       "avgMs": "累计平均耗时(ms)",
       "totalMs": "累计总耗时(ms)",
       "lockWaitScope": "API 监控连接可见的当前等待锁请求，不受顶部节点和时间范围筛选影响。按语句开始时间从早到晚排列，未知时间置后；一条语句可能对应多个请求。",
-      "lockWaitTimeBasis": "时长从 query_start 计算，包含开始等锁前的运行时间，不是精确锁等待时长。仅解析当前连接数据库中的关系名称，跨库及非关系锁显示原始标识；本列表未判定阻塞者。",
+      "lockWaitTimeBasis": "时长从 query_start 计算，包含开始等锁前的运行时间，不是精确锁等待时长。仅解析当前连接数据库中的���系名称，跨库及非关系锁显示原始标识；本列表未判定阻塞者。",
       "lockWaitCount": "显示 {shown} 条 / 共 {total} 个等待锁请求",
       "lockWaitCountUnknown": "当前接口未提供等待锁请求总数或完整排序信息。",
       "lockWaitTruncated": "列表已截断，仅显示语句开始最早的请求。",
@@ -9410,7 +9411,7 @@
     "expandMenu": "展开菜单",
     "enableSwitch": "启用智能体",
     "auditOnlyBanner": "已进入「仅审计」模式：检测流程仍运行，但处置动作统一降级为「标记投递」，下方配置项不可编辑。",
-    "inheritedReadOnly": "继承自平台（只读）",
+    "inheritedReadOnly": "继承自平台（只读��",
     "whitelistEntry": "放行名单",
     "detectionLogs": "仿冒检测日志",
     "tabs": {
@@ -9615,7 +9616,7 @@
       "sensExtreme": "极高",
       "sensRecommended": "已按职务推荐灵敏度",
       "confidenceThreshold": "置信度阈值",
-      "disposition": "���置策略",
+      "disposition": "���置��略",
       "modeObserve": "观察模式",
       "modeStandard": "标准模式",
       "modeStrict": "严格模式",
@@ -9657,7 +9658,7 @@
       "sectionBatch": "批量数据",
       "sectionContacts": "组织架构导入",
       "sectionNotify": "通知设置",
-      "modeObserveDesc": "仅记录观察命中，不拦截也不标记",
+      "modeObserveDesc": "仅记录观察命中，不拦��也不标记",
       "modeStandardDesc": "隔离处置，拦截后等待审核",
       "modeStrictDesc": "阻断或丢弃，直接拒绝入站",
       "markPreview": "标记效果预览",
@@ -9937,7 +9938,7 @@
       "loading": "加载漏报明细…",
       "empty": "本 run 暂无漏报邮件。",
       "sender": "发件人",
-      "subject": "主题",
+      "subject": "���题",
       "threatType": "威胁类型",
       "disposition": "处置",
       "recheckConfidence": "复检置信度",
@@ -10170,7 +10171,7 @@
       },
       "maxRecallPerRun": "单次召回上限",
       "circuitBreakerThreshold": "熔断阈值",
-      "exclusions": "排除策略",
+      "exclusions": "排除���略",
       "excludeTags": "排除收件人系统标签",
       "excludeEmails": "排除邮件地址",
       "tagPlaceholder": "sys:标签名",
@@ -11362,7 +11363,7 @@
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
-        "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即可",
+        "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即���",
         "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的操作链接需要它才能生成",
         "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
         "valid_days_out_of_range": "「{permission}」的链接有效期需在 {min}–{max} 天之间"
@@ -11592,7 +11593,7 @@
       "has_withheld_mail": "该租户仍有被扣留的邮件（隔离 / 旁路 / 外发审核），请��放行或清除后再删除租户",
       "next_hop_pair_required": "下一跳主机与端口必须同时填写",
       "next_hop_triad_required": "下一跳类型、主机与端口必须同时填写",
-      "next_hop_host_empty": "下一跳主机不能为空"
+      "next_hop_host_empty": "下一��主机不能为空"
     },
     "tenant_routing": {
       "nexthop_not_found": "下一跳配置不存在",
@@ -11998,7 +11999,7 @@
     },
     "spoofing_persons_bulk": {
       "confidence_threshold_out_of_range": "置信度阈值必须在 0-100 之间",
-      "unsupported_bulk_action": "不支持的批量操作",
+      "unsupported_bulk_action": "不支持的��量操作",
       "bulk_add_limit_exceeded": "批量添加单次最多 20 人",
       "duplicate_email_in_group": "组内存在重复邮箱 {email}"
     },

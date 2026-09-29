@@ -6809,6 +6809,7 @@
     "moduleDisabledDesc": "Module is disabled, rules will not participate in mail filtering",
     "deepLinkLoading": "Locating matched rule {ruleId}...",
     "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule has been deleted, does not belong to the advanced filter rules module, or the current account does not have access.",
+    "observeMode": "Observe Mode",
     "infoCard": {
       "title": "Supports {count} condition types:",
       "groupMailBasic": "Mail Basic Info",
