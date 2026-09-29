@@ -12266,8 +12266,9 @@
   "similar_detection_same_subject": "Same subject detection",
   "behavior_control": "Sending behavior control",
   "content_rules": "Content rules",
-  "advanced_filter_rules": "Advanced filter rules"
-  },
+        "advanced_filter_rules": "Advanced filter rules",
+        "recipient_check": "Recipient check"
+      },
       "durationBucket": {
         "label": "Observed Duration",
         "lt7": "Under 7 days",
