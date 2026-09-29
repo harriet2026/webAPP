@@ -77,6 +77,14 @@ export function RuleEffectivenessPage() {
   );
 
   const effectiveModuleOptions = moduleOptions.length > 0 ? moduleOptions : MODULE_FILTER_OPTIONS;
+
+  const handleResetFilters = useCallback(() => {
+    setTimeRange('7d');
+    setCustomRange(defaultCustomRange());
+    setModuleOptions([]);
+    setDurationBuckets([]);
+    setPage(1);
+  }, []);
   const { modules: effectiveModules, similarDetectionTypes: effectiveSimilarDetectionTypes } = useMemo(
     () => resolveModuleFilterParams(effectiveModuleOptions),
     [effectiveModuleOptions],
@@ -95,9 +103,11 @@ export function RuleEffectivenessPage() {
   const moduleOptionsKey = effectiveModules.join(',');
   const similarDetectionTypesKey = effectiveSimilarDetectionTypes.join(',');
   const durationBucketsKey = durationBuckets.join(',');
+  /* eslint-disable react-hooks/set-state-in-effect -- 筛选条件变化时必须同步回到第一页 */
   useEffect(() => {
     setPage(1);
   }, [startDate, endDate, moduleOptionsKey, similarDetectionTypesKey, durationBucketsKey, scopeTenantId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const totalCount = data?.rows.length ?? 0;
   const pagedRows = useMemo(
@@ -138,6 +148,7 @@ export function RuleEffectivenessPage() {
         onModuleOptionsChange={setModuleOptions}
         durationBuckets={durationBuckets}
         onDurationBucketsChange={setDurationBuckets}
+        onReset={handleResetFilters}
         leftSlot={scopeActive ? <TenantScopeSelector value={scopeTenantId} onChange={setScopeTenantId} /> : null}
       />
 

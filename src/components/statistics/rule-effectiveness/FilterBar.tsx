@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check } from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 import { SegmentedControl } from '@/components/shared/segmented-control';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -22,6 +22,7 @@ interface FilterBarProps {
   onModuleOptionsChange: (m: ModuleFilterOption[]) => void;
   durationBuckets: ObserveDurationBucket[];
   onDurationBucketsChange: (b: ObserveDurationBucket[]) => void;
+  onReset: () => void;
   leftSlot?: ReactNode;
 }
 
@@ -38,6 +39,7 @@ export function FilterBar({
   onModuleOptionsChange,
   durationBuckets,
   onDurationBucketsChange,
+  onReset,
   leftSlot,
 }: FilterBarProps) {
   const t = useTranslations('ruleEffectiveness.filter');
@@ -140,7 +142,7 @@ export function FilterBar({
       <Popover>
         <PopoverTrigger render={
           <Button variant="outline" size="sm" data-testid="rule-effectiveness-module-filter">
-            {t('modules.label')}
+            {moduleOptions.length === 0 ? '全部策略模块' : `已选 ${moduleOptions.length} 个策略模块`}
             {moduleOptions.length > 0 && moduleOptions.length < MODULE_FILTER_OPTIONS.length && (
               <Badge variant="secondary" className="ml-1 px-1.5 text-[10px]">{moduleOptions.length}</Badge>
             )}
@@ -196,6 +198,11 @@ export function FilterBar({
           </div>
         </PopoverContent>
       </Popover>
+
+      <Button type="button" variant="ghost" size="sm" onClick={onReset} data-testid="rule-effectiveness-reset">
+        <RotateCcw data-icon="inline-start" />
+        重置
+      </Button>
     </div>
   );
 }
