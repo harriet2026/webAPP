@@ -158,6 +158,8 @@ import {
   mockDeleteMailMarkingRule,
   mockTestMailMarkingRule,
   mockAttachmentConfigList,
+  mockAttachmentScopedConfig,
+  mockPatchAttachmentScopedConfig,
   mockCreateAttachmentConfig,
   mockUpdateAttachmentConfig,
   mockAttachmentPasswordList,
@@ -944,6 +946,16 @@ const routes: Route[] = [
   // ─── 附件安全检测 ───────────────────────────────────────────────────────
   {
     method: 'GET',
+    pattern: /^\/configs\/(platform|tenant)\/attachd$/,
+    handler: (req) => ({ status: 200, data: mockAttachmentScopedConfig(pathname(req.path).split('/')[2] as 'platform' | 'tenant') }),
+  },
+  {
+    method: 'PATCH',
+    pattern: /^\/configs\/(platform|tenant)\/attachd$/,
+    handler: (req) => ({ status: 200, data: mockPatchAttachmentScopedConfig(pathname(req.path).split('/')[2] as 'platform' | 'tenant', (req.body ?? {}) as Parameters<typeof mockPatchAttachmentScopedConfig>[1]) }),
+  },
+  {
+    method: 'GET',
     pattern: '/config-overrides',
     matchQuery: (query) => new URLSearchParams(query).get('config_file') === 'attachd.cf',
     handler: (req) => ({ status: 200, data: mockAttachmentConfigList(req.path) }),
@@ -1662,7 +1674,7 @@ const routes: Route[] = [
   },
 
   // ─── 全局 IP 组元信息（GT-11464 expression 组多选，mock）────────────────────
-  // 只接管 type=ip；其他 type 落到通用 fallback（返回空 items），不影响别的页面。
+  // 只接管 type=ip；其他 type 落到通用 fallback（返回空 items），���影响别的页面。
   {
     method: 'GET',
     pattern: '/unified-rules/_meta/groups',
@@ -1673,7 +1685,7 @@ const routes: Route[] = [
     }),
   },
 
-  // ─── 群组元信息（发信人组等，高级过滤规则 group 面板下拉数据源）────────────────
+  // ─── 群组元信息（发信人组等，高级过滤规则 group 面板��拉数据源）────────────────
   // 复用群组管理 / 群组策略同源的 mockSenderFilterGroupsList，按 type 派生。只接管
   // sender/recipient/content；type=ip 由上面的 mockIPGroupsMetaList 接管（更完整的
   // 独立列表），互不重叠。这样「发信人组」条件即可从群组策略的发信人组里筛选选择。

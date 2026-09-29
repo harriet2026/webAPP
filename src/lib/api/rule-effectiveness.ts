@@ -1,7 +1,7 @@
 import { apiRequest, type ApiRequestFn } from './client';
 
 // Recipient-copy observation statistics, scoped to the current observation period.
-export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'advanced_filter_rules' | 'recipient_check';
+export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'intent_engine' | 'advanced_filter_rules' | 'recipient_check';
 
 export type Direction = 'receive' | 'send' | 'internal';
 

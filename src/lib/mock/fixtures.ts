@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
     // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true�����多租户平台视角恒隐藏，与 grants 无关）。
+    // platformHidden:true������多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
@@ -3115,7 +3115,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ════════════════════���═���════���════���═══════════════════════════════════════════════
+// ══════════════════���═���═���════���════���═══════════════════════════════════════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -4695,7 +4695,7 @@ export function mockRuleEffectiveness(path: string): RuleEffectivenessResponse {
   };
 }
 
-// ════════════════════════════��═══════════════════════════════════════════════════
+// ════════════════��═══════════��═══════════════════════════════════════════════════
 // 身份认证与仿冒防护（auth-spoofing，mock）
 // 配置照抄 demo 默认值（src/components/security/AuthSpoofingPage.tsx 的
 // DEFAULT_CONFIG，已是映射到统一 action 的 demo 默认），保证 Mock 模式下页面
@@ -4930,7 +4930,7 @@ const BC_ORGANIZATIONS: DemoNamedGroup[] = [
 
 const BC_IP_GROUPS: DemoNamedGroup[] = [
   { id: "ip-1", name: "海外IP", memberCount: 45 },
-  { id: "ip-2", name: "可信代理IP", memberCount: 8 },
+  { id: "ip-2", name: "可信代���IP", memberCount: 8 },
   { id: "ip-3", name: "CDN节点", memberCount: 120 },
   { id: "ip-4", name: "VPN出口", memberCount: 5 },
   { id: "ip-5", name: "可疑来源", memberCount: 200 },
@@ -5722,6 +5722,69 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     decrypt_fail_action: "proceed",
   }),
 ];
+
+const mockAttachmentScopedDocument: Record<string, unknown> = {
+  module_enabled: true,
+  schema_version: 1,
+  basic_limit: {
+    receive: {
+      attachment_count_max: 10,
+      attachment_size_max_kb: 10240,
+      nested_zip_count_max: 2,
+      nested_file_count_max: 20,
+      nested_level_max: 2,
+      scan_timeout_sec: 30,
+      exceed_action: 'quarantine',
+      partial_skip: false,
+      danger_ext_enabled: true,
+      danger_ext_list: ['.exe', '.scr', '.com', '.bat', '.cmd', '.pif', '.vbs', '.js', '.jse', '.ws', '.wsh', '.hta', '.lnk', '.iso', '.img', '.vhd', '.ps1', '.psm1', '.msi'],
+      mime_mismatch_check: true,
+      mime_mismatch_action: 'quarantine',
+    },
+  },
+  antivirus: { host: 'av-server', port: 6600, virus_action: 'quarantine', timeout_action: 'proceed' },
+  image_detection: {
+    ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light', qr_max_count: 5,
+    qr_light_action: 'quarantine', qr_deep_exceed_action: 'proceed', qr_deep_exceed_warn: true,
+    qr_deep_routes: { url_check: true, url_unshorten: true, keyword_filter: true, keyword_scope: ['url_path', 'plain_text'], intent_engine: true, intent_categories: ['high', 'medium', 'low'], advanced_rules: false },
+  },
+  encrypted: { detect_mode: 'detect_only', extract_password_from_body: true, extract_password_from_filename: true, use_password_book: true, recursive_detect: true, max_password_attempts: 100, mark_suspicious: true, decrypt_fail_action: 'proceed' },
+};
+
+let mockAttachmentPlatformVersion = 1;
+let mockAttachmentTenantVersion = 0;
+
+function attachmentScopedView(scope: 'platform' | 'tenant') {
+  const document = structuredClone(mockAttachmentScopedDocument);
+  const version = scope === 'platform' ? mockAttachmentPlatformVersion : mockAttachmentTenantVersion;
+  return {
+    stored: scope === 'tenant' ? undefined : { namespace: 'attachd', scope_kind: scope, scope_id: 1, schema_version: 1, version, document, checksum: 'mock-attachd', updated_at: '2026-09-29T00:00:00Z' },
+    effective: { namespace: 'attachd', tenant_id: 1, schema_version: 1, snapshot_version: `mock-${version}`, platform_version: mockAttachmentPlatformVersion, tenant_version: mockAttachmentTenantVersion, hash: 'mock-attachd', document, provenance: {} },
+    published: true,
+  };
+}
+
+export function mockAttachmentScopedConfig(scope: 'platform' | 'tenant') {
+  return attachmentScopedView(scope);
+}
+
+export function mockPatchAttachmentScopedConfig(scope: 'platform' | 'tenant', body: { operations?: Array<{ op: 'set' | 'remove'; path: string; value?: unknown }> }) {
+  for (const operation of body.operations ?? []) {
+    const parts = operation.path.split('.').filter(Boolean);
+    let cursor = mockAttachmentScopedDocument;
+    for (const part of parts.slice(0, -1)) {
+      if (!cursor[part] || typeof cursor[part] !== 'object' || Array.isArray(cursor[part])) cursor[part] = {};
+      cursor = cursor[part] as Record<string, unknown>;
+    }
+    if (parts.length) {
+      if (operation.op === 'remove') delete cursor[parts[parts.length - 1]];
+      else cursor[parts[parts.length - 1]] = operation.value;
+    }
+  }
+  if (scope === 'platform') mockAttachmentPlatformVersion += 1;
+  else mockAttachmentTenantVersion += 1;
+  return { ...attachmentScopedView(scope), published: true };
+}
 
 export function mockAttachmentConfigList(path: string) {
   const query = new URLSearchParams(path.split("?")[1] ?? "");
@@ -9019,7 +9082,7 @@ interface MockContactRow {
 const contactPeople: MockContactRow[] = [
   { id: 1, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 后端组', display_name: '张三', email: 'zhangsan@corp.cn', job_title: '工程师', tag: 'executive', status: 'active', email_alias: '张三.alias@corp.cn' },
   { id: 2, source_id: 3, source_name: '总部 AD', department_path: '财务部', display_name: '李四', email: 'lisi@corp.cn', job_title: '总监', tag: 'key_position', status: 'active', email_alias: '李四.alias@corp.cn' },
-  { id: 3, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 前端组', display_name: '王五', email: 'wangwu@corp.cn', job_title: '工程师', tag: 'none', status: 'active', email_alias: '王五.alias@corp.cn' },
+  { id: 3, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 前端���', display_name: '王五', email: 'wangwu@corp.cn', job_title: '工程师', tag: 'none', status: 'active', email_alias: '王五.alias@corp.cn' },
   { id: 4, source_id: 5, source_name: '邮件系统', department_path: '市场部', display_name: '赵六', email: 'zhaoliu@corp.cn', job_title: '经理', tag: 'none', status: 'active', email_alias: '赵六.alias@corp.cn' },
   { id: 5, source_id: 11, source_name: '网易企邮', department_path: '总裁办', display_name: '陈总', email: 'chenzong@corp.cn', job_title: '首席执行官', tag: 'executive', status: 'active', email_alias: '陈总.alias@corp.cn' },
   { id: 6, source_id: 11, source_name: '网易企邮', department_path: '人力资源部', display_name: '孙七', email: 'sunqi@corp.cn', job_title: 'HRBP', tag: 'none', status: 'active', email_alias: '���七.alias@corp.cn' },
@@ -9670,7 +9733,7 @@ export const mockAdminAuditLogs: AdminAuditLog[] = [
   { id: 3, operation_id: 'OP20260622003', admin_user_id: 1, username: 'admin', operator_name: '张运维（我）',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'phishing_agent',
     status: 'success', client_ip: '10.8.0.12', ip_location: '内网',
-    details: { summary: '为租户开通智能体能力' }, before_value: { text: '未开通' },
+    details: { summary: '为租户��通智能体能力' }, before_value: { text: '未开通' },
     after_value: { text: '已开通 agent-management' }, created_at: '2026-06-22T10:40:08Z' },
   { id: 4, operation_id: 'OP20260622004', admin_user_id: 6, username: 'liyang', operator_name: '李扬',
     operator_role: 'platform', layer: 'platform', action: 'update', resource_type: 'ip_rules',
