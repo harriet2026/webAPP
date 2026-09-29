@@ -183,7 +183,7 @@ export function IntentCard({
             </Badge>
             {detectionMode === 'threshold' ? (
               // GT-12171 D-03：分段阈值模式下卡头显示区间处置摘要（各段动作按区间
-              // 升序去重），而非分类模式的单一动作，让管理员一眼看清配置结果。
+              // 升序去重），而非分类模式的单一动作，让管理员一眼看清配置结果���
               <Badge
                 variant="outline"
                 className="text-[10px]"
@@ -211,11 +211,6 @@ export function IntentCard({
               <span className="text-xs text-muted-foreground">
                 {tCommon('observeMode.label')}
               </span>
-              {value.observe_mode && (
-                <Badge variant="secondary" className="text-[10px]">
-                  {tCommon('observeMode.observing')}
-                </Badge>
-              )}
               <Switch
                 size="sm"
                 checked={value.observe_mode}
