@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则��开��������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开����������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放行邮�����选���“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放��邮�����选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -2040,7 +2040,7 @@
       "toastPending": "DNS 记录尚未生效,请稍后重试",
       "toastManual": "已人工认证该域名",
       "verifiedAt": "校验时间",
-      "verifiedBy": "校验方式",
+      "verifiedBy": "校���方式",
       "byAuto": "自动",
       "byDns": "DNS",
       "byManual": "人工",
@@ -3187,7 +3187,7 @@
       "cac_signal": "CAC 信号",
       "auth_failure": "认证失败",
       "header_mismatch": "头部信息不一致",
-      "empty_visible_content": "可见内容过少",
+      "empty_visible_content": "可见内容过���",
       "cac_cluster": "CAC 簇关联",
       "historical_similarity": "历史相似性",
       "target_threat_signal": "目标威胁信号",
@@ -3967,7 +3967,7 @@
     "domainRequired": "域名为必填项",
     "notEnabled": "未启用",
     "toggleLabel": "启用/禁用 RBL 过滤",
-    "serversUnit": "个服务器",
+    "serversUnit": "个服���器",
     "rblServers": "RBL服务器",
     "add": "添加",
     "timeoutTip": "DNS 查询超时时间，超��后视为未命中。建议设置 3-10 秒，过短可能漏检，过长影响邮件处理速度。",
@@ -4511,7 +4511,7 @@
     "restoreDefault": "恢复系统默认",
     "moduleEnabled": "启用认证仿冒检测",
     "moduleEnabledHint": "关闭后，所有认证仿冒检测规则将不再生效",
-    "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔离等动作。建议在首次部署或调整策略时开启��察模式，验证��则影响范围后再正式启用。",
+    "observeModeTip": "观察模式：开启后，规则仅记录命中日志，不会对邮件执行拦截/隔离等动��。建议在首次部署或调整策略时开启��察模式，验证��则影响范围后再正式启用。",
     "probe": {
       "title": "模拟测试邮件认证",
       "description": "输入邮件参数测试认证仿冒检测的结果",
@@ -5018,7 +5018,7 @@
       "stay": "继续编辑",
       "discard": "放弃并关闭"
     },
-    "drawerSubtitle": "配置发信人行为管控规则",
+    "drawerSubtitle": "配置发信人行为管��规则",
     "filter": {
       "allDirections": "全��方向",
       "allTypes": "全部类型",
@@ -5258,7 +5258,7 @@
       "urlCheck": "URL 检查",
       "urlUnshorten": "URL 短链展开",
       "keywordScope": "关键词范围",
-      "advancedRules": "高级规则",
+      "advancedRules": "��级规则",
       "arbitration_highest_priority": "最高优先级",
       "arbitration_first_match": "首次匹配",
       "overflowAction": "溢出处理",
@@ -5810,7 +5810,7 @@
     "deleteDialogTitle": "确认删除规则",
     "deleteConfirm": "确定要删除规则 \"{name}\" 吗？此操作不可撤销。",
     "saved": "保存成功",
-    "deleted": "删除成功",
+    "deleted": "删除���功",
     "saveFailed": "保存失败",
     "deleteFailed": "删除失��",
     "loadFailed": "加载失败"
@@ -6149,7 +6149,7 @@
       "mailType": "邮件类型",
       "corrected": "已纠正",
       "correctedTooltip": "原判定：{original} → 纠正为：{current}（{source}）",
-      "action": "执行动作",
+      "action": "执行��作",
       "status": "邮件状态",
       "operations": "操作",
       "view": "查看",
@@ -6736,7 +6736,7 @@
         "adminRelease": "管理员放行",
         "adminRecall": "管理员召回",
         "userRetrieval": "用户取回",
-        "unknown": "未知来源"
+        "unknown": "未知��源"
       },
       "rawLogs": {
         "title": "原始日志",
@@ -6804,8 +6804,11 @@
     "moduleDisabled": "模块已禁用",
     "moduleDisabledDesc": "模块已禁用，规则不参与邮件过滤",
     "deepLinkLoading": "正在定位命中规则 {ruleId}…",
-    "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于高级过滤规则模块，或当前账号无权访问。",
+    "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于高级过滤规���模块，或当前账号无权访问。",
     "observeMode": "观察模式",
+    "observeModeHint": "启用后规则仅记录命中情况，不实际执行处置动作，用于验证规则效果",
+    "enableObserveMode": "启用观察模式",
+    "disableObserveMode": "关闭观察模式",
     "infoCard": {
       "title": "支持{count}种条件类型：",
       "groupMailBasic": "邮件基础信息",
@@ -7073,6 +7076,7 @@
       "sectionScope": "生效范围",
       "sectionValidity": "有效期设置",
       "sectionDescription": "备注说明",
+      "sectionObserveMode": "观察模式",
       "expiresAtHint": "留空=永久有效"
     },
     "cannotSave": {
@@ -7326,7 +7330,7 @@
       "desc_attachmentSizeSingle": {
         "source": "邮件附件解析",
         "usage": "限制单个附件的大小",
-        "note": "单位为MB"
+        "note": "单位���MB"
       },
       "desc_nestedZipLevel": {
         "source": "压缩包解析引擎",
@@ -7462,7 +7466,7 @@
       "orGroupName": "匹配任意条件",
       "andGroupName": "匹配所有条件",
       "groupConditionCount": "已添加 {count} 个条件",
-      "conditionSearchPlaceholder": "搜索条件...",
+      "conditionSearchPlaceholder": "���索条件...",
       "addConditionHeader": "添加条件",
       "noMatchingConditions": "未找到匹配的条件",
       "emptyConfigPanel": "选择一个条件进行配置",
@@ -7787,7 +7791,7 @@
     "invalidRef": "已失效",
     "clearAll": "清空",
     "userPermissionSettings": "用户权限设置",
-    "permissionDescription": "配置用户在隔离区的操作权限和有效期",
+    "permissionDescription": "配置用户在隔离区的操���权限和有效期",
     "permissionItem": "权限项",
     "status": "状态",
     "validDays": "有效天数",
@@ -7941,7 +7945,7 @@
     "switchBeforeDelete": "请先切换到其它 selector",
     "generateSuccess": "密钥已生成",
     "importSuccess": "私钥已导入",
-    "activateSuccess": "已设为当前密钥",
+    "activateSuccess": "已���为当前密钥",
     "deleteSuccess": "已删除",
     "activateConfirmTitle": "设为当前密钥",
     "activateConfirmDesc": "确��要将 selector {selector} 设为该域当前生效的 DKIM 密钥吗？",
@@ -8898,7 +8902,7 @@
       "ariaLabel": "钓鱼检测智能体总开关",
       "readOnly": "当前账号只有查看权限",
       "enableTitle": "开启钓鱼检测智能体？",
-      "enableDescription": "开启后，命中已启用准入规则的邮件将进入钓鱼检测。",
+      "enableDescription": "开���后，命中已启用准入规则的邮件将进入钓鱼检测。",
       "disableTitle": "关闭钓鱼检测智能体？",
       "disableDescription": "关闭后不再提交新的检测任务，已有任务继续完成。",
       "updateSuccess": "智能体状态已更新",
@@ -9759,7 +9763,7 @@
       "modeStrictDesc": "阻断或丢弃",
       "modeCustomHint": "自定义：已手动调整处置动作",
       "previewTitle": "检测预览",
-      "preview": "当发信域名与受保护域名编辑距离介于 1 与阈值之间时，触发研判与处置。",
+      "preview": "当发信域名与受保护域名编辑距离介于 1 与阈值之间时，触发研���与处置。",
       "errBrandName": "品牌名必须 1-30 字符",
       "errKeywords": "关键词最多 20 个",
       "errKeywordLen": "单个关键词最多 30 字符",
@@ -9934,7 +9938,7 @@
       "empty": "暂无扫描任务"
     },
     "leakDetail": {
-      "title": "漏报明细",
+      "title": "漏报明���",
       "loading": "加载漏报明细…",
       "empty": "本 run 暂无漏报邮件。",
       "sender": "发件人",
@@ -9969,7 +9973,7 @@
     },
     "falsePositive": {
       "title": "标记为误报",
-      "description": "标记后将停止对该邮件执行召回，可选把发件人加入白名单。",
+      "description": "���记后将停止对该邮件执行召回，可选把发件人加入白名单。",
       "addWhitelist": "同时把发件人加入白名单",
       "detailPlaceholder": "补充说���（可选）",
       "cancel": "取消",
@@ -10694,7 +10698,7 @@
         "sender": "发件邮箱格式不正确",
         "username": "用户名不能为空",
         "password": "密码不能为空",
-        "noEncKey": "缺少加密密钥；无法保存外部 SMTP 密码",
+        "noEncKey": "缺少加密密钥；无法保存外�� SMTP 密码",
         "testEmail": "请输入有效的测试收件人"
       }
     }
@@ -11362,7 +11366,7 @@
         "permission_unknown": "无法识别的权限项「{value}」",
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
-        "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到，请填写网关对外可达的地址",
+        "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到��请填写网关对外可达的地址",
         "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即���",
         "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的操作链接需要它才能生成",
         "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
@@ -11877,7 +11881,7 @@
       "format_json_csv": "导出格式只能是 json 或 csv"
     },
     "group_management_access": {
-      "group_management_requires_tenant_administrator_a": "分组管理需要租户管理员权限",
+      "group_management_requires_tenant_administrator_a": "分组管理需要租户��理员权限",
       "group_management_accessed_within_tenant_context": "多租户模式下，分组管理需要先选择租户",
       "access_denied_group_management_rule": "无权访问该分组管理规则",
       "group_management_rules_imported_with_scope": "分组管理规则必须以 scope=groups 导入"
@@ -11995,7 +11999,7 @@
       "admin_emails_invalid": "管理员邮箱列表中含有无效邮箱",
       "sample_sender_invalid": "样本发件人必须是合法邮箱地址",
       "sample_subject_too_long": "样本主题最多 500 个字符",
-      "sample_confidence_out_of_range": "样本置信度必须在 0-100 之间"
+      "sample_confidence_out_of_range": "样本置信度必须在 0-100 之��"
     },
     "spoofing_persons_bulk": {
       "confidence_threshold_out_of_range": "置信度阈值必须在 0-100 之间",

@@ -6810,6 +6810,9 @@
     "deepLinkLoading": "Locating matched rule {ruleId}...",
     "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule has been deleted, does not belong to the advanced filter rules module, or the current account does not have access.",
     "observeMode": "Observe Mode",
+    "observeModeHint": "When enabled, the rule only logs hits without taking any disposition action, useful for verifying rule effectiveness",
+    "enableObserveMode": "Enable observe mode",
+    "disableObserveMode": "Disable observe mode",
     "infoCard": {
       "title": "Supports {count} condition types:",
       "groupMailBasic": "Mail Basic Info",
