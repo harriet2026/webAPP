@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
     // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true���多租户平台视角恒隐藏，与 grants 无关）。
+    // platformHidden:true����多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
@@ -1993,7 +1993,7 @@ export function mockPhishingDetectionDetail(id: string): DetectionLogDetail | nu
       id: summary.investigation_id ?? `investigation-${id}`,
       status: 'completed', summary: prototypeInvestigation?.summary ?? (summary.verdict === 'phishing' ? '发现可疑链接和仿冒登录页面' : '未发现明确的钓鱼迹象'),
       result: { verdict: summary.verdict, summary: prototypeInvestigation?.resultSummary ?? (summary.verdict === 'phishing' ? '链接证据支持钓鱼风险' : '邮件内容风险较低'), confidence: summary.confidence, evidence: prototypeInvestigation?.evidence ?? [{ type: 'url', severity: summary.risk_level === 'high' ? 'high' : 'low', title: '链接研判', detail: summary.url_summary.total ? `检测到 ${summary.url_summary.total} 个链接` : '未检测到链接' }], details: { url_findings: prototypeInvestigation?.findings ?? findings } },
-      steps: prototypeInvestigation?.steps ?? [{ name: '基础邮件事实', status: 'completed', message: '已完成发件人与收件人范围校验' }, { name: '链接调查', status: 'completed', message: '已完成 URL 证据汇总' }],
+      steps: prototypeInvestigation?.steps ?? [{ name: '基础邮件事实', status: 'completed', message: '已完成发件人与��件人范围校验' }, { name: '链接调查', status: 'completed', message: '已完成 URL 证据汇总' }],
     } : null,
     config_snapshot: null,
   };
@@ -3115,7 +3115,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ═══════════════════════════���════���═══════════════════════════════════════════════
+// ══════════════════════���════���════���═══════════════════════════════════════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -3770,7 +3770,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9001,
       name: "高管邮箱快速通道",
-      description: "针对高管邮箱的优化通道",
+      description: "针对高管邮箱��优化通道",
       priority: 0,
       is_active: true,
       target_groups: { recipientGroup: ["高管邮箱"] },
@@ -4603,6 +4603,23 @@ const MOCK_RULE_EFFECTIVENESS_ROWS: RuleEffectivenessRow[] = [
   // 示例：该规则的白名单成员组曾发生实质性调整（财务部门成员变更），触发过一次
   // 观察期重置——version=2。
   mockEffectivenessRow({ id: "mock-period-sender-5", module: "sender_filter", version: 2, key: "rule:5", name: "内部财务组", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 6 }, messages: 3 }),
+  // GT-14388：意图引擎按「方向 × 意图类型」提供 15 条独立观察对象，
+  // 用于验证规则效能统计的模块筛选、动作分布、观察期和策略配置深链。
+  mockEffectivenessRow({ id: "mock-period-intent-receive-porn", module: "content_rules", key: "intent.porn_gambling.receive", name: "色情/赌博（收信）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 6, quarantine: 9 }, messages: 5 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-political", module: "content_rules", key: "intent.political.receive", name: "政治敏感（收信）", observedSince: "2026-09-03", observedDays: 17, configuredAction: "reject", outcomes: { accept: 2, reject: 7 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-phishing", module: "content_rules", key: "intent.phishing.receive", name: "仿冒/钓鱼（收信）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "quarantine", outcomes: { accept: 5, quarantine: 11 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-spam", module: "content_rules", key: "intent.spam.receive", name: "垃圾信息（收信）", observedSince: "2026-09-07", observedDays: 13, configuredAction: "audit", outcomes: { accept: 10, audit: 4 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-subscription", module: "content_rules", key: "intent.subscription.receive", name: "订阅类信息（收信）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "accept", outcomes: { accept: 13 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-porn", module: "content_rules", key: "intent.porn_gambling.send", name: "色情/赌博（发信）", observedSince: "2026-09-02", observedDays: 18, configuredAction: "reject", outcomes: { accept: 3, reject: 5 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-political", module: "content_rules", key: "intent.political.send", name: "政治敏感（发信）", observedSince: "2026-09-04", observedDays: 16, configuredAction: "audit", outcomes: { accept: 6, audit: 3 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-phishing", module: "content_rules", key: "intent.phishing.send", name: "仿冒/钓鱼（发信）", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 4, quarantine: 8 }, messages: 5 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-spam", module: "content_rules", key: "intent.spam.send", name: "垃圾信息（发信）", observedSince: "2026-09-09", observedDays: 11, configuredAction: "reject", outcomes: { accept: 5, reject: 10 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-subscription", module: "content_rules", key: "intent.subscription.send", name: "订阅类信息（发信）", observedSince: "2026-09-10", observedDays: 10, configuredAction: "accept", outcomes: { accept: 9 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-porn", module: "content_rules", key: "intent.porn_gambling.internal", name: "色情/赌博（域内）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 4 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-political", module: "content_rules", key: "intent.political.internal", name: "政治敏感（域内）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "audit", outcomes: { accept: 4, audit: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-phishing", module: "content_rules", key: "intent.phishing.internal", name: "仿冒/钓鱼（域内）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 1, reject: 5 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-spam", module: "content_rules", key: "intent.spam.internal", name: "垃圾信息（域内）", observedSince: "2026-09-11", observedDays: 9, configuredAction: "audit", outcomes: { accept: 5, audit: 1 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-subscription", module: "content_rules", key: "intent.subscription.internal", name: "订阅类信息（域内）", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 7 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-spf", module: "auth_spoofing", version: 2, key: "spf_fail", name: "SPF fail", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 12, reject: 6, pending: 2 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dkim", module: "auth_spoofing", key: "dkim_fail", name: "DKIM fail", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 8, quarantine: 4 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dmarc", module: "auth_spoofing", key: "dmarc_reject", name: "DMARC reject", observedSince: "2026-08-31", observedDays: 20, configuredAction: "reject", outcomes: { accept: 1, quarantine: 7, reject: 2 }, messages: 3 }),
@@ -6146,7 +6163,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     direction: "incoming",
     sender: "client@customer.com",
     recipients: "sales@company.com",
-    subject: "Re: 产品报价单（单投信）",
+    subject: "Re: 产品报价��（单投信）",
     action: "deliver",
     reason: "所有检测通过",
     mailType: "normal",
@@ -8359,7 +8376,7 @@ export function mockEmailDisposalMutate(
   // mail_log_id + object_id，且读的是 `{results: ObjectDisposeResult[]}`，
   // 不是整封维度的 succeeded/failed 汇总——真实后端 dispatchDisposeObject 同样
   // 分流（internal/api/mail_log_disposal.go 的 BulkDisposeMailLogs），mock 需
-  // 要镜像这个分支，否则 useRecipientDisposition 的单/多收件人处置按钮读不到
+  // 要镜像这个分支，否�� useRecipientDisposition 的单/多收件人处置按钮读不到
   // results[] 而永远显示失败。
   if (raw.object_id) {
     const mailLogId = ids[0];
@@ -8831,7 +8848,7 @@ export function mockLinkClickLogsList(
   return { items: rows, total, page, page_size: pageSize };
 }
 
-// GET /link-click-logs/:id/download：单条留证导出（返回整行 JSON）。
+// GET /link-click-logs/:id/download��单条留证导出（返回整行 JSON）。
 export function mockLinkClickLogById(id: number): LinkClickLog | undefined {
   return mockLinkClickLogs.find((r) => r.id === id);
 }
