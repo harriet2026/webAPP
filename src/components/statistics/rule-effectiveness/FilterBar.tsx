@@ -157,7 +157,11 @@ export function FilterBar({
                   onClick={() => toggleModule(m)}
                   className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted"
                 >
-                  <span>{t(`modules.${m}`)}</span>
+                  <span>
+                    {m === 'recipient_check' && !t.has('modules.recipient_check')
+                      ? '收件人检测'
+                      : t(`modules.${m}`)}
+                  </span>
                   {checked && <Check className="h-4 w-4 text-primary" />}
                 </button>
               );
