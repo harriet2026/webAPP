@@ -654,9 +654,10 @@ const RULE_EFFECTIVENESS_MODULE_ACTIONS: Record<RuleEffectivenessMockRow['policy
   content_rules: ['reject', 'discard', 'quarantine', 'audit'],
   // 高级过滤规则的执行动作与 PrimaryAction 对齐（accept/proceed/quarantine/
   // audit/discard，见 AdvancedFilterRulesModule.tsx 的 ACTION_BADGE_CLASS）；
-  // reject 不在该模块的动作枚举里，不能出现在候选集合中。accept 属于观察期
+  // reject 不在该模块的���作枚举里，不能出现在候选集合中。accept 属于观察期
   // 内默认放行的语义，已由下方 accept 计算逻辑覆盖，不重复出现在候选集合里。
   advanced_filter_rules: ['discard', 'quarantine', 'audit'],
+  recipient_check: ['reject', 'discard', 'quarantine', 'audit'],
 };
 
 function allocateActionCounts(

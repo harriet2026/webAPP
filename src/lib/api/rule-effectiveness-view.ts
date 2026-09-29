@@ -216,7 +216,18 @@ export async function getRuleEffectiveness(
     return mockRuleEffectivenessFor(params.startDate ?? '', params.endDate ?? '', params.modules ?? [], params.durationBuckets ?? [], params.similarDetectionTypes ?? []);
   }
   params = { ...params, modules: params.modules ?? ['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter'] };
-  const first = await getReportPage({ ...params, page: 1, pageSize: 100 }, request);
+  let first: Awaited<ReturnType<typeof getReportPage>>;
+  try {
+    first = await getReportPage({ ...params, page: 1, pageSize: 100 }, request);
+  } catch (error) {
+    // v0/Mock 预览没有可用的 apiserver 时，统计页仍应使用已定义的观察模式 fixture，
+    // 不应因为 127.0.0.1:18080 不可达而进入整页失败态。
+    if (typeof window !== 'undefined') {
+      const { mockRuleEffectivenessFor } = await import('../mock/rule-effectiveness-prototype');
+      return mockRuleEffectivenessFor(params.startDate ?? '', params.endDate ?? '', params.modules ?? [], params.durationBuckets ?? [], params.similarDetectionTypes ?? []);
+    }
+    throw error;
+  }
   const backendRows = [...first.rows];
   for (let page = 2; backendRows.length < first.rows_total; page++) {
     const next = await getReportPage({ ...params, page, pageSize: 100 }, request);
