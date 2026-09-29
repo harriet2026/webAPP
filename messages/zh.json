@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则��开������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开��������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行��放��邮�����选���“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未��行��放��邮�����选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1460,7 +1460,7 @@
     "policyDesc": {
       "ipFrequency": "限制单个 IP 的连接频率与认证失败次数",
       "ipFilter": "基于 IP 地址的黑白名单过滤",
-      "rbl": "基于公共 RBL 名��过滤",
+      "rbl": "基于公��� RBL 名��过滤",
       "overseas": "识���海外���件并按策���处置",
       "senderFilter": "发信人黑白名��过滤",
       "userList": "用户���黑白名单管理",
@@ -1633,7 +1633,7 @@
     },
     "operators": {
       "equal": "等于",
-      "notEqual": "不等于",
+      "notEqual": "不���于",
       "greaterThan": "大于",
       "lessThan": "小于",
       "greaterEqual": "大于等于",
@@ -1804,7 +1804,7 @@
         "copyMarkdown": "复制 Markdown",
         "regenerate": "重新生成",
         "errors": {
-          "llmUnavailable": "AI 服务暂不可用���请联系管理员检查 LLM 配置",
+          "llmUnavailable": "AI ��务暂不可用���请联系管理员检查 LLM 配置",
           "timeout": "解读超时，可点击重新生���",
           "rateLimited": "请求过于频繁，请稍后再试",
           "generic": "解读失败，请重试"
@@ -2791,7 +2791,7 @@
       "expires": "到期时间",
       "revoke": "撤销",
       "revokeTitle": "撤销授信终端",
-      "revokeConfirm": "确认撤销「{name}」的授信？该设备下次登录将需要二次认证。",
+      "revokeConfirm": "确��撤销「{name}」的授信？该设备下次登录将需要二次认证。",
       "revoked": "已撤销授信终端"
     },
     "history": {
@@ -3186,7 +3186,7 @@
       "obfuscated_content": "内容存在混淆特征",
       "cac_signal": "CAC 信号",
       "auth_failure": "认证失败",
-      "header_mismatch": "头部信息不一致",
+      "header_mismatch": "头部信息不��致",
       "empty_visible_content": "可见内容过���",
       "cac_cluster": "CAC 簇关联",
       "historical_similarity": "历史相似性",
@@ -3369,7 +3369,7 @@
     "userListDesc": "管理员配置的用户级黑白名单规则",
     "userListTip": "管理员配置的用户级规则，可针对特定收信人或收信人组设置发信人黑白名单，优先级高于个人黑白名单。",
     "attachment": "附件安全检测",
-    "attachmentDesc": "附件类型和大小检查",
+    "attachmentDesc": "附件类型���大小检查",
     "url": "URL检测与防护",
     "urlDesc": "恶意URL检测和过滤",
     "content": "内容规则",
@@ -3670,7 +3670,7 @@
     "invalidIp": "请输入有效的 IP 地址（如 192.168.1.1）",
     "invalidCidr": "请输入有效的 CIDR 网段（如 192.168.1.0/24）",
     "validUntilBeforeFrom": "失效时间不能早于生效时间",
-    "windowLimitHint": "时间窗设为 -1（不限制）时，窗口连接数也必须为 -1",
+    "windowLimitHint": "时间窗设�� -1（不限制）时，窗口连接数也必须为 -1",
     "suspendDurationInvalid": "请选择受支持的���停时长",
     "windowMinutesInvalid": "时间窗分钟数无效"
   },
@@ -5808,7 +5808,7 @@
     "errorHeaderRequired": "请输入邮件头字段名",
     "errorCustomColors": "颜色必须为 #RRGGBB，圆角必须在 0 到 20 之间",
     "deleteDialogTitle": "确认删除规则",
-    "deleteConfirm": "确定要删除规则 \"{name}\" 吗？此操作不可撤销。",
+    "deleteConfirm": "确定要删除规则 \"{name}\" ���？此操作不可撤销。",
     "saved": "保存成功",
     "deleted": "删除���功",
     "saveFailed": "保存失败",
@@ -7320,7 +7320,7 @@
       "desc_attachmentMd5": {
         "source": "附件哈希计算",
         "usage": "精确匹配已知恶意文件的MD5值",
-        "note": "适用于已知威胁情报匹配"
+        "note": "适��于已知威胁情报匹配"
       },
       "desc_attachmentSizeTotal": {
         "source": "邮件附件解析",
@@ -7412,7 +7412,7 @@
         "note": "常见于CEO欺诈等社工攻击"
       },
       "desc_mailFromEmpty": {
-        "source": "SMTP协议层",
+        "source": "SMTP���议层",
         "usage": "检测信封发信人是否为空",
         "note": "空MAIL FROM常见于退信或系统邮件"
       },
@@ -7809,7 +7809,7 @@
     "portalBaseUrlPlaceholder": "https://gw.example.com",
     "portalBaseUrlHelp": "收件人浏览器可访问的控制台���址（https）；启用取回、预览、加白或加黑权限时必填。",
     "periodAndTimeout": "审核时长与超时配置",
-    "durationControl": "审核时长控制",
+    "durationControl": "���核时长控制",
     "duration_unlimited": "不限时长",
     "duration_custom": "自定义等待时长",
     "minutes": "分钟",
@@ -8152,7 +8152,7 @@
       "drawerTitle": "AI 分析结果",
       "loading": "正在分析...",
       "aiFailed": "AI 分析失败，请稍后重试",
-      "empty": "AI 未返回任何分析内容，请稍后重试",
+      "empty": "AI 未返回任何分析内容，��稍后重试",
       "retry": "重试",
       "truncated": "分析被中断，��下为已生成的部分内容，并非完整分析"
     },
@@ -8678,7 +8678,7 @@
         "dbScope": "所选节点的本地数据库复制观测，5分钟内有效，与历史时间范围无关。缺少新采样时不回退到主节点；未观测到副本不代表已确认单机部署。",
         "redisScope": "所选节点最新成功采集。已连接副本不等于已确认全部同步完成。",
         "receiveScope": "被监测副本本地已接收到已应用的偏移差，不代表相对远端主节点的完整差距。",
-        "states": {"no_receiver":"未观测到 WAL 接收进程","streaming":"复制流运行中","syncing":"同步进行中","replicas_connected":"已连接副本","no_replicas":"未观测到副本","unknown":"同步状态未知","missing":"尚无复制数据","stale":"复制数据已过期","error":"复制状态查询失败","unsupported":"不支持此复制状态查询","down":"复制链路或探测失败"}
+        "states": {"no_receiver":"未观测到 WAL 接收进程","streaming":"复制流运行中","syncing":"同步进行中","replicas_connected":"已连接副本","no_replicas":"未观测到副本","unknown":"同步状态未知","missing":"尚无复制��据","stale":"复制数据已过期","error":"复制状态查询失败","unsupported":"不支持此复制状态查询","down":"复制链路或探测失败"}
       },
       "summary": {
         "connections": "当前连接数 / 上限",
@@ -9077,7 +9077,7 @@
       "description": "确认拦截该邮件？此操作将阻止该邮件继续投递。",
       "confirm": "确认拦截",
       "confirming": "处理中...",
-      "success": "已拦截",
+      "success": "已��截",
       "alreadyBlocked": "该邮件已被拦截",
       "error": "拦截失败",
       "liveStateError": "邮件仍在旁路处理中，请在旁路队列处置"
@@ -9218,7 +9218,7 @@
       "qrcode": "邮件包含二维码",
       "qrcodeDesc": "附件/图片中解码出二维码时命中（需附件深度检查）",
       "executable": "可执行文件",
-      "executableDesc": "检测邮件中可能执行代码或触发程序行为的文件。",
+      "executableDesc": "检测邮件中可能执行代码或触发程序行为的文件��",
       "urlNotQRHint": "普通链接，不含二维码解码出的链接。",
       "validationFailed": "请检查必填字段。",
       "created": "准入规则已创建",
@@ -9579,7 +9579,7 @@
         "executive": "高管",
         "finance": "财务",
         "business": "业务",
-        "hr": "人资",
+        "hr": "人��",
         "tech": "技术",
         "custom": "自定义"
       },
@@ -10301,7 +10301,7 @@
     "csvEmailColMissing": "无法自动识别邮箱列，请确认 CSV 表头",
     "csvUploadFailed": "CSV 文件处理失败：{reason}",
     "deleteConfirm": "确认删除",
-    "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略��受影响（引用人员降级为未匹配）。是否继续？",
+    "deleteDesc": "删除后将同步清除该数据源下的通��录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略��受影响（引用人员降级为未匹配）。是否继续？",
     "deleteTitle": "删除数据源「{name}」？",
     "detailAlias": "邮箱别名",
     "detailCurrentTag": "当前标记",
@@ -10340,7 +10340,7 @@
     "fieldAuthCode": "授权码",
     "fieldBaseDn": "Base DN",
     "fieldBindDn": "Bind DN",
-    "fieldBindPassword": "绑定密码",
+    "fieldBindPassword": "绑��密码",
     "fieldCorpDomain": "企业域名",
     "fieldName": "数据源名称",
     "fieldOpenId": "OpenID",
@@ -10688,7 +10688,7 @@
       "saved": "配置已保存",
       "saveFailed": "保存失败",
       "testFailed": "测试失败",
-      "unsavedTitle": "未保存的更改",
+      "unsavedTitle": "未���存的更改",
       "unsavedDesc": "您有未保存的更改，离开后将丢失。",
       "leave": "��开（不保存）",
       "continueEdit": "继续编辑",
@@ -10958,7 +10958,7 @@
     "loadFailed": "配置加载失败。为避免覆盖现有配置，当前无法编辑或保存，请重试。",
     "observeMode": {
       "enabled": "观察中",
-      "disabled": "正常执行",
+      "disabled": "观察模式",
       "limitLabel": "数量限制策略观察模式开关",
       "existenceLabel": "存在性验证策略观察模式开关"
     },
@@ -11364,7 +11364,7 @@
         "category_score_order_invalid": "「{category}」的最小置信度不能大于最大置信度",
         "category_score_out_of_range": "「{category}」的置信度需在 {min}–{max} 之间",
         "category_unknown": "无法识别的邮件分类「{value}」",
-        "custom_weekday_out_of_range": "星期取值「{value}」超出范围，应在 {min}–{max} 之间",
+        "custom_weekday_out_of_range": "星期取值「{value}」超出范围，应在 {min}��{max} 之间",
         "custom_weekdays_empty": "自定义频率下至少要选择一天",
         "notify_frequency_invalid": "通知频率取值无效，只能是：{allowed}",
         "notify_time_format_invalid": "通知时间「{value}」格式不正确，应为 HH:MM（00:00–23:59）",
@@ -11672,7 +11672,7 @@
     },
     "attachment_security": {
       "password_blank": "解压密码不能为空",
-      "password_too_long": "解压密码不能超过 {max} 个字符",
+      "password_too_long": "解压密码不能超��� {max} 个字符",
       "password_already_exists": "该解压密码已存在",
       "id_invalid": "ID 无效",
       "id_required": "请填写 ID",
@@ -11867,7 +11867,7 @@
       "original_email_content_not_available": "邮件原文不可用"
     },
     "email_preview": {
-      "email_content_not_found": "邮件正文不存在"
+      "email_content_not_found": "邮件正文不存��"
     },
     "portal_quarantine_preview": {
       "email_content_not_found": "邮件正文不存在"
@@ -11947,7 +11947,7 @@
       "not_found": "记录不存在",
       "protection_level_invalid": "防护级别只能是高/中/低",
       "observe_mode_invalid": "观察模式只能是开或关",
-      "email_already_protected": "邮箱 {email} 已作为保护对象存在"
+      "email_already_protected": "邮箱 {email} 已作为保护对象存��"
     },
     "spoofing_whitelist": {
       "not_found": "记录不存在",
