@@ -13,6 +13,7 @@ export const POLICY_MODULES: PolicyModule[] = [
   'behavior_control',
   'content_rules',
   'advanced_filter_rules',
+  'recipient_check',
 ];
 
 export const SIMILAR_DETECTION_TYPES: SimilarDetectionType[] = ['similar_email', 'same_subject'];
@@ -25,7 +26,8 @@ export type ModuleFilterOption =
   | 'sender_filter'
   | 'behavior_control'
   | 'content_rules'
-  | 'advanced_filter_rules';
+  | 'advanced_filter_rules'
+  | 'recipient_check';
 
 export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'auth_spoofing',
@@ -36,6 +38,7 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'behavior_control',
   'content_rules',
   'advanced_filter_rules',
+  'recipient_check',
 ];
 
 export function resolveModuleFilterParams(options: ModuleFilterOption[]): {
@@ -86,6 +89,7 @@ export function strategyPathKeys(
   if (row.policy_module === 'behavior_control') return ['behaviorControl'];
   if (row.policy_module === 'content_rules') return ['contentRules'];
   if (row.policy_module === 'advanced_filter_rules') return ['advancedFilterRules'];
+  if (row.policy_module === 'recipient_check') return ['recipientCheck'];
   switch (row.sub_strategy_id) {
     case 'protocol_check_spf': return ['authSpoofing', 'protocolCheck', 'protocolCheckSpf'];
     case 'protocol_check_dkim': return ['authSpoofing', 'protocolCheck', 'protocolCheckDkim'];
@@ -114,7 +118,8 @@ export function strategyPathLabels(
     row.policy_module === 'sender_filter' ||
     row.policy_module === 'behavior_control' ||
     row.policy_module === 'content_rules' ||
-    row.policy_module === 'advanced_filter_rules'
+    row.policy_module === 'advanced_filter_rules' ||
+    row.policy_module === 'recipient_check'
   ) {
     labels.push(row.sub_strategy_name_snapshot);
   }
@@ -133,6 +138,7 @@ export const MODULE_COLORS: Record<PolicyModule, string> = {
   content_rules: '#EC4899',
   // 与现有六色（蓝/紫/琥珀/绿/天蓝/玫红）区分的第七色——橙棕。
   advanced_filter_rules: '#EA580C',
+  recipient_check: '#14B8A6',
 };
 
 export function moduleColor(module: PolicyModule): string {

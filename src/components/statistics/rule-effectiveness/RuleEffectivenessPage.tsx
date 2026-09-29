@@ -47,6 +47,7 @@ const CONFIG_PATH_BY_MODULE: Record<PolicyModule, string> = {
   // config_path（含 rule_id）优先命中，见上方 configPath 取值逻辑与
   // rule-effectiveness-prototype.ts 的 RULE_EFFECTIVENESS_CONFIG_PATH。
   advanced_filter_rules: '/security/pipeline?module=advancedRules',
+  recipient_check: '/security/pipeline?module=recipientCheck',
 };
 
 export function RuleEffectivenessPage() {

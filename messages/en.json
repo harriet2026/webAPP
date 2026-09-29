@@ -12307,7 +12307,8 @@
   "senderFilter": "Sender lists",
   "behaviorControl": "Sending behavior control",
   "contentRules": "Content rules",
-  "advancedFilterRules": "Advanced filter rules"
+  "advancedFilterRules": "Advanced filter rules",
+  "recipientCheck": "Recipient check"
   },
     "timeoutAlert": {
       "warning": "{count} policies have been in observe mode for over {days} days and are pending promotion evaluation.",

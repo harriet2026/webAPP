@@ -11,7 +11,7 @@ function threatSeriesValue(
 
 interface RuleEffectivenessMockRow {
   id: string;
-  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'advanced_filter_rules';
+  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'advanced_filter_rules' | 'recipient_check';
   // 相似邮件检测/相同主题检测是两条独立策略（不同判定维度、不同误判特征），
   // 观察对象必须按策略拆分，不能合并为一个笼统的「相似检测」模块级观察对象。
   similar_detection_type?: 'similar_email' | 'same_subject';
@@ -59,6 +59,7 @@ const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_mo
   // 流水线第五阶段高级过滤规则模块的真实 key 是 'advancedRules'（见
   // policy-deep-link.ts 的 ACF 映射与 PolicyPipelinePage 的 Stage5PolicyKey）。
   advanced_filter_rules: '/security/pipeline?module=advancedRules',
+  recipient_check: '/security/pipeline?module=recipientCheck',
 };
 
 // 内容规则按单条规则拆分观察对象（与 fixtures.ts 中 mockContentRules 的 id
@@ -382,7 +383,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     attribution_status: 'attributable',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
     version_no: 3,
-    version_change_summary: '高风险处置调整：审核 → 隔离，触发观察期重置',
+    version_change_summary: '高风险处置调整：审核 → 隔离���触发观察期重置',
   },
   {
     id: 'phishing-runtime-policy',
@@ -597,6 +598,38 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     version_no: 2,
     version_change_summary: '白名单成员组调整（财务部门人员变更），触发观察期重置',
     actions: [],
+  },
+  {
+    id: 'recipient-check-recipient-limit',
+    policy_module: 'recipient_check',
+    sub_strategy_id: 'recipient_limit',
+    sub_strategy_name_snapshot: '数量限制策略',
+    is_deleted: false,
+    observed_days: 14,
+    hits: 126,
+    would_block_ratio: 0.78,
+    reviewed_ratio: 0.64,
+    weighted_reviewed_ratio: 0.58,
+    false_positive_rate: 0.06,
+    attribution_status: 'attributable',
+    config_path: '/security/pipeline?module=recipientCheck&section=limit',
+    version_no: 2,
+    version_change_summary: '收件人数量阈值调整，重新进入观察期',
+  },
+  {
+    id: 'recipient-check-existence-validation',
+    policy_module: 'recipient_check',
+    sub_strategy_id: 'existence_validation',
+    sub_strategy_name_snapshot: '存在性验证策略',
+    is_deleted: false,
+    observed_days: 9,
+    hits: 47,
+    would_block_ratio: 0.51,
+    reviewed_ratio: 0.72,
+    weighted_reviewed_ratio: 0.69,
+    false_positive_rate: 0.04,
+    attribution_status: 'attributable',
+    config_path: '/security/pipeline?module=recipientCheck&section=existence',
   },
 ];
 
