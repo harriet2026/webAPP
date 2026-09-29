@@ -5519,10 +5519,15 @@
       "send": "Outbound",
       "internal": "Internal"
     },
-    "engineEnabled": "Enable intent engine",
-    "statusEnabled": "Enabled",
-    "statusDisabled": "Disabled",
-    "actionLabel": "Action",
+  "engineEnabled": "Enable intent engine",
+  "statusEnabled": "Enabled",
+  "statusDisabled": "Disabled",
+  "observeMode": {
+    "label": "Intent strategy observe mode",
+    "observing": "Observe mode",
+    "hint": "When enabled, hits are recorded and counted without executing the configured disposition action"
+  },
+  "actionLabel": "Action",
     "sendMarkUnsupported": "\"Proceed\" is not supported on outbound direction; it will be downgraded to \"Quarantine\".",
     "internalMarkUnsupported": "\"Proceed\" is not supported on internal direction; it will be downgraded to \"Quarantine\".",
     "directionMarkUnsupported": "\"Proceed\" is not supported on outbound/internal directions; it will be downgraded to \"Quarantine\".",

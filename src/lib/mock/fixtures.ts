@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
     // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true��多租户平台视角恒隐藏，与 grants 无关）。
+    // platformHidden:true���多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
@@ -676,7 +676,7 @@ export function mockDashboardSummaryFor(
   };
 }
 
-// ─── 邮件安全总览（/statistics/security-overview/**）���────────────────────────
+// ─── 邮件安全总览（/statistics/security-overview/**������────────────────────────
 // 与 demo 的默认口径一致，所有数据确定性生成，保证离线演示和 E2E 可复现。
 const SECURITY_KPI = {
   total_filtered: 12_450,
@@ -2193,7 +2193,7 @@ function makeRule(input: {
   };
 }
 
-// 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成，�� 20 条
+// 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成����� 20 条
 // （demo 总数 55，但只展示 20 条/页；前 5 条手工的与 demo 完全一致）
 function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
   const base = [
@@ -3115,7 +3115,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ════════════════════════════════���═══════════════════════════════════════════════
+// ═══════════════════════════���════���═══════════════════════════════════════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -4495,7 +4495,7 @@ export function mockContentGroupsList(): { items: Rule[] } {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 规则效能统计（观察模式，mock）
-// 与真实 GET /statistics/rule-effectiveness 使用同一响应类型。每一行代表一个
+// 与真实 GET /statistics/rule-effectiveness 使用同��响应类型。每一行代表一个
 // observation period；命中数按收件人份数计，邮件数按 message_uuid 去重。
 // ════════════════════════════════════════════════════════════════════════════════
 
@@ -4964,7 +4964,7 @@ function generateDemoBehaviorRules(): DemoBehaviorRule[] {
       objectType: "sender",
       senderSubType: "group",
       senderGroupId: "sg-2",
-      senderGroupName: "销售团队",
+      senderGroupName: "���售团队",
       timeWindow: "15min",
       dimensionA: "mail_count",
       thresholdA: 300,
@@ -5536,6 +5536,7 @@ function intentMockSingle(it: string, dir: string) {
   else action = isReceive ? "accept" : "audit";
   const cfg: Record<string, unknown> = {
     enabled: true,
+    observe_mode: false,
     action,
     detection_mode: "classification",
     threshold_segments: intentMockSegments(risk, dir),
@@ -6188,7 +6189,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     mailType: "phishing",
     deliveryStatus: "quarantine_pending",
     sourceIp: "45.146.26.18",
-    ipLocation: "美国",
+    ipLocation: "���国",
     cluster: "Node 1",
     attachmentCount: 0,
     hasQrCode: false,
@@ -6662,7 +6663,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     recipients: "court@justice.gov.cn",
     subject: "法律文件提交 - 案号 2026-BJ-0412",
     action: "deliver",
-    reason: "正常出站邮件",
+    reason: "正常���站邮件",
     mailType: "normal",
     deliveryStatus: "delivered",
     sourceIp: "10.0.1.12",
@@ -6705,7 +6706,7 @@ const MOCK_DISPOSAL_SEEDS: MockDisposalSeed[] = [
     mailType: "spoofing",
     deliveryStatus: "quarantine_pending",
     sourceIp: "104.21.32.88",
-    ipLocation: "美国",
+    ipLocation: "���国",
     cluster: "Node 2",
     attachmentCount: 0,
     hasQrCode: false,

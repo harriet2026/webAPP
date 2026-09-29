@@ -32,6 +32,7 @@ export interface IntentMarkConfig {
 
 export interface IntentSingleConfig {
   enabled: boolean;
+  observe_mode: boolean;
   action: IntentAction;
   mark_config?: IntentMarkConfig;
   detection_mode: DetectionMode;
