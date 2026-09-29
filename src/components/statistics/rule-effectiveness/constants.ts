@@ -12,6 +12,7 @@ export const POLICY_MODULES: PolicyModule[] = [
   'sender_filter',
   'behavior_control',
   'content_rules',
+  'intent_engine',
   'advanced_filter_rules',
   'recipient_check',
 ];
@@ -26,6 +27,7 @@ export type ModuleFilterOption =
   | 'sender_filter'
   | 'behavior_control'
   | 'content_rules'
+  | 'intent_engine'
   | 'advanced_filter_rules'
   | 'recipient_check';
 
@@ -37,6 +39,7 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'sender_filter',
   'behavior_control',
   'content_rules',
+  'intent_engine',
   'advanced_filter_rules',
   'recipient_check',
 ];
@@ -88,6 +91,7 @@ export function strategyPathKeys(
   if (row.policy_module === 'sender_filter') return ['senderFilter'];
   if (row.policy_module === 'behavior_control') return ['behaviorControl'];
   if (row.policy_module === 'content_rules') return ['contentRules'];
+  if (row.policy_module === 'intent_engine') return ['intentEngine'];
   if (row.policy_module === 'advanced_filter_rules') return ['advancedFilterRules'];
   if (row.policy_module === 'recipient_check') return ['recipientCheck'];
   switch (row.sub_strategy_id) {
@@ -118,6 +122,7 @@ export function strategyPathLabels(
     row.policy_module === 'sender_filter' ||
     row.policy_module === 'behavior_control' ||
     row.policy_module === 'content_rules' ||
+    row.policy_module === 'intent_engine' ||
     row.policy_module === 'advanced_filter_rules' ||
     row.policy_module === 'recipient_check'
   ) {
@@ -136,6 +141,7 @@ export const MODULE_COLORS: Record<PolicyModule, string> = {
   sender_filter: '#10B981',
   behavior_control: '#0EA5E9',
   content_rules: '#EC4899',
+  intent_engine: '#6366F1',
   // 与现有六色（蓝/紫/琥珀/绿/天蓝/玫红）区分的第七色——橙棕。
   advanced_filter_rules: '#EA580C',
   recipient_check: '#14B8A6',

@@ -468,7 +468,7 @@ export function mockBootstrap(): Bootstrap {
     // 给 Mock 租户授予 AI 智能体功能（phishing/spoofing/threat-retro 均为
     // grantable）。这样切到租户视角能完整演示「智能体中心」——对应 parity_vectors
     // 里 ai-multi/tenant/granted=true → visible。平台视角不受影响（这些功能
-    // platformHidden:true����多租户平台视角恒隐藏，与 grants 无关）。
+    // platformHidden:true�����多租户平台视角恒隐藏，与 grants 无关）。
     grants: ["phishing-detection", "spoofing-detection", "threat-retro"],
   };
 }
@@ -2193,7 +2193,7 @@ function makeRule(input: {
   };
 }
 
-// 与 demo `generateMockRules` 对齐：5 条手工 + 15 条自动生成����� 20 条
+// 与 demo `generateMockRules` 对齐：5 条手�� + 15 条自动生成����� 20 条
 // （demo 总数 55，但只展示 20 条/页；前 5 条手工的与 demo 完全一致）
 function makeMockIPFrequencyRules(): IPFrequencyRuleView[] {
   const base = [
@@ -3115,7 +3115,7 @@ export function mockIPFilterRulesList(query: {
 
 // ════════════════════════════════════════════════════════════════════════════════
 // RBL 过滤（mock）
-// ══════════════════════���════���════���═══════════════════════════════════════════════
+// ════════════════════���═���════���════���═══════════════════════════════════════════════
 
 function makeRBLRule(input: {
   id: number;
@@ -3545,7 +3545,7 @@ export function mockSenderFilterRulesList(): { items: Rule[] } {
 //   - 分组名取自 tags 里 `grp:<name>` 前缀（GROUP_TAG_PREFIX），而非 `name` 字段；
 //   - 分组类型优先取 metadata.group_type，其次由 stage 反推（GROUP_TYPE_TO_STAGE 的反映射）；
 //   - 普通组 condition_tree 用 `serializeMembers` 生成（与 `parseMembers` 互为逆运算）；
-//     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形态）；
+//     特征组直接给 condition_tree（serde 的 AND[OR[any],AND[all]] 形态���；
 //   - member_count / reference_count 显式下发（与真实后端 include=member_count,reference_count
 //     的响应一致），memberCount 不再依赖成员数组长度，特征组的 member_count = 条件数。
 // 数据值照抄群组策略页 demo 的 staticGroups + 特征组（html_spec filter-rules-group-policy），
@@ -3770,7 +3770,7 @@ function groupPolicyRulesSeed(): Rule[] {
     gpRule({
       id: 9001,
       name: "高管邮箱快速通道",
-      description: "针对高管邮箱��优化通道",
+      description: "针对���管邮箱��优化通道",
       priority: 0,
       is_active: true,
       target_groups: { recipientGroup: ["高管邮箱"] },
@@ -4007,7 +4007,7 @@ let mockContentRules: Rule[] = [
   }),
   contentFixtureRule({
     id: 5,
-    name: "竞争对手信息泄露",
+    name: "竞争对���信息泄露",
     priority: 200,
     matchType: "keyword",
     matchContent: "竞品A|竞品B|商业机密",
@@ -4605,21 +4605,21 @@ const MOCK_RULE_EFFECTIVENESS_ROWS: RuleEffectivenessRow[] = [
   mockEffectivenessRow({ id: "mock-period-sender-5", module: "sender_filter", version: 2, key: "rule:5", name: "内部财务组", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 6 }, messages: 3 }),
   // GT-14388：意图引擎按「方向 × 意图类型」提供 15 条独立观察对象，
   // 用于验证规则效能统计的模块筛选、动作分布、观察期和策略配置深链。
-  mockEffectivenessRow({ id: "mock-period-intent-receive-porn", module: "content_rules", key: "intent.porn_gambling.receive", name: "色情/赌博（收信）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 6, quarantine: 9 }, messages: 5 }),
-  mockEffectivenessRow({ id: "mock-period-intent-receive-political", module: "content_rules", key: "intent.political.receive", name: "政治敏感（收信）", observedSince: "2026-09-03", observedDays: 17, configuredAction: "reject", outcomes: { accept: 2, reject: 7 }, messages: 4 }),
-  mockEffectivenessRow({ id: "mock-period-intent-receive-phishing", module: "content_rules", key: "intent.phishing.receive", name: "仿冒/钓鱼（收信）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "quarantine", outcomes: { accept: 5, quarantine: 11 }, messages: 6 }),
-  mockEffectivenessRow({ id: "mock-period-intent-receive-spam", module: "content_rules", key: "intent.spam.receive", name: "垃圾信息（收信）", observedSince: "2026-09-07", observedDays: 13, configuredAction: "audit", outcomes: { accept: 10, audit: 4 }, messages: 6 }),
-  mockEffectivenessRow({ id: "mock-period-intent-receive-subscription", module: "content_rules", key: "intent.subscription.receive", name: "订阅类信息（收信）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "accept", outcomes: { accept: 13 }, messages: 6 }),
-  mockEffectivenessRow({ id: "mock-period-intent-send-porn", module: "content_rules", key: "intent.porn_gambling.send", name: "色情/赌博（发信）", observedSince: "2026-09-02", observedDays: 18, configuredAction: "reject", outcomes: { accept: 3, reject: 5 }, messages: 4 }),
-  mockEffectivenessRow({ id: "mock-period-intent-send-political", module: "content_rules", key: "intent.political.send", name: "政治敏感（发信）", observedSince: "2026-09-04", observedDays: 16, configuredAction: "audit", outcomes: { accept: 6, audit: 3 }, messages: 4 }),
-  mockEffectivenessRow({ id: "mock-period-intent-send-phishing", module: "content_rules", key: "intent.phishing.send", name: "仿冒/钓鱼（发信）", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 4, quarantine: 8 }, messages: 5 }),
-  mockEffectivenessRow({ id: "mock-period-intent-send-spam", module: "content_rules", key: "intent.spam.send", name: "垃圾信息（发信）", observedSince: "2026-09-09", observedDays: 11, configuredAction: "reject", outcomes: { accept: 5, reject: 10 }, messages: 6 }),
-  mockEffectivenessRow({ id: "mock-period-intent-send-subscription", module: "content_rules", key: "intent.subscription.send", name: "订阅类信息（发信）", observedSince: "2026-09-10", observedDays: 10, configuredAction: "accept", outcomes: { accept: 9 }, messages: 4 }),
-  mockEffectivenessRow({ id: "mock-period-intent-internal-porn", module: "content_rules", key: "intent.porn_gambling.internal", name: "色情/赌博（域内）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 4 }, messages: 3 }),
-  mockEffectivenessRow({ id: "mock-period-intent-internal-political", module: "content_rules", key: "intent.political.internal", name: "政治敏感（域内）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "audit", outcomes: { accept: 4, audit: 2 }, messages: 3 }),
-  mockEffectivenessRow({ id: "mock-period-intent-internal-phishing", module: "content_rules", key: "intent.phishing.internal", name: "仿冒/钓鱼（域内）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 1, reject: 5 }, messages: 3 }),
-  mockEffectivenessRow({ id: "mock-period-intent-internal-spam", module: "content_rules", key: "intent.spam.internal", name: "垃圾信息（域内）", observedSince: "2026-09-11", observedDays: 9, configuredAction: "audit", outcomes: { accept: 5, audit: 1 }, messages: 3 }),
-  mockEffectivenessRow({ id: "mock-period-intent-internal-subscription", module: "content_rules", key: "intent.subscription.internal", name: "订阅类信息（域内）", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 7 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-porn", module: "intent_engine", key: "intent.porn_gambling.receive", name: "色情/赌博（收信）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 6, quarantine: 9 }, messages: 5 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-political", module: "intent_engine", key: "intent.political.receive", name: "政治敏感（收信）", observedSince: "2026-09-03", observedDays: 17, configuredAction: "reject", outcomes: { accept: 2, reject: 7 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-phishing", module: "intent_engine", key: "intent.phishing.receive", name: "仿冒/钓鱼（收信）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "quarantine", outcomes: { accept: 5, quarantine: 11 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-spam", module: "intent_engine", key: "intent.spam.receive", name: "垃圾信息（收信）", observedSince: "2026-09-07", observedDays: 13, configuredAction: "audit", outcomes: { accept: 10, audit: 4 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-subscription", module: "intent_engine", key: "intent.subscription.receive", name: "订阅类信息（收信���", observedSince: "2026-09-08", observedDays: 12, configuredAction: "accept", outcomes: { accept: 13 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-porn", module: "intent_engine", key: "intent.porn_gambling.send", name: "色情/赌博（发信）", observedSince: "2026-09-02", observedDays: 18, configuredAction: "reject", outcomes: { accept: 3, reject: 5 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-political", module: "intent_engine", key: "intent.political.send", name: "政治敏感（发信）", observedSince: "2026-09-04", observedDays: 16, configuredAction: "audit", outcomes: { accept: 6, audit: 3 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-phishing", module: "intent_engine", key: "intent.phishing.send", name: "仿冒/钓鱼（发信）", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 4, quarantine: 8 }, messages: 5 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-spam", module: "intent_engine", key: "intent.spam.send", name: "垃圾信息（发信）", observedSince: "2026-09-09", observedDays: 11, configuredAction: "reject", outcomes: { accept: 5, reject: 10 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-subscription", module: "intent_engine", key: "intent.subscription.send", name: "订阅类信息（发信）", observedSince: "2026-09-10", observedDays: 10, configuredAction: "accept", outcomes: { accept: 9 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-porn", module: "intent_engine", key: "intent.porn_gambling.internal", name: "色情/赌博（域内）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 4 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-political", module: "intent_engine", key: "intent.political.internal", name: "政治敏感（域内）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "audit", outcomes: { accept: 4, audit: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-phishing", module: "intent_engine", key: "intent.phishing.internal", name: "仿冒/钓鱼（域内）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 1, reject: 5 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-spam", module: "intent_engine", key: "intent.spam.internal", name: "垃圾信息（域内）", observedSince: "2026-09-11", observedDays: 9, configuredAction: "audit", outcomes: { accept: 5, audit: 1 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-subscription", module: "intent_engine", key: "intent.subscription.internal", name: "订阅类信息（域内）", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 7 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-spf", module: "auth_spoofing", version: 2, key: "spf_fail", name: "SPF fail", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 12, reject: 6, pending: 2 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dkim", module: "auth_spoofing", key: "dkim_fail", name: "DKIM fail", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 8, quarantine: 4 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dmarc", module: "auth_spoofing", key: "dmarc_reject", name: "DMARC reject", observedSince: "2026-08-31", observedDays: 20, configuredAction: "reject", outcomes: { accept: 1, quarantine: 7, reject: 2 }, messages: 3 }),
@@ -4695,7 +4695,7 @@ export function mockRuleEffectiveness(path: string): RuleEffectivenessResponse {
   };
 }
 
-// ════════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════��═══════════════════════════════════════════════════
 // 身份认证与仿冒防护（auth-spoofing，mock）
 // 配置照抄 demo 默认值（src/components/security/AuthSpoofingPage.tsx 的
 // DEFAULT_CONFIG，已是映射到统一 action 的 demo 默认），保证 Mock 模式下页面
@@ -4860,7 +4860,7 @@ export function mockAuthSpoofingProbe(): ProbeResponse {
 // 发信行为管控（behavior_control，mock）
 // 数据源自 demo `design/origin/demo/components/sender-behavior-control/mock-data.ts`
 // 的 `mockBehaviorRules`（7 条手工命名 + 生成的 #8..#35，共 35 条），并映射到统一规则。
-// organization 使用组织通讯录 department_path，与真实 API/运行时一致（GT-12170）。
+// organization 使用组织通讯录 department_path，与真实 API/运行时一致��GT-12170）。
 // 系统 `Rule`：metadata 携带 `BehaviorControlMetadata`（feature/direction/object_config/
 // time_window/dim_a/threshold_a/or_enabled/dim_b/threshold_b），action 经
 // `PRODUCT_TO_BACKEND` 转换，is_active=demo.enabled，priority=demo.priority，
@@ -6966,7 +6966,7 @@ const OPERABLE_RECIPIENT_STATUSES = new Set([
   "audited",
 ]);
 
-// demo getContextData().generateRecipientStatus 的多投场景状态分布（同上文件
+// demo getContextData().generateRecipientStatus 的多投场景状态分���（同上文件
 // 207-210 行）：收件人数 > 1 时按下标对 5 态列表取模，逐一铺开
 // delivered/quarantined/pending_review/blocked/discarded。单投信仍沿用
 // recipientDisposalStatus（按整封邮件的 deliveryStatus 映射）。
@@ -7442,7 +7442,7 @@ function displayStatusesOf(
   const dispositions = item.recipient_dispositions ?? [];
   if (item.recall_status_summary === "partial_recall_success") {
     // Mock 没有独立召回计数列；部分态至少证明一成一败。真实 API 使用
-    // recall_req_total / recall_success_total 下发精确 count。
+    // recall_req_total / recall_success_total 下发精�� count。
     return [
       { status: "recall_success", count: 1 },
       { status: "recall_failed", count: 1 },
@@ -9022,7 +9022,7 @@ const contactPeople: MockContactRow[] = [
   { id: 3, source_id: 3, source_name: '总部 AD', department_path: '研发部 / 前端组', display_name: '王五', email: 'wangwu@corp.cn', job_title: '工程师', tag: 'none', status: 'active', email_alias: '王五.alias@corp.cn' },
   { id: 4, source_id: 5, source_name: '邮件系统', department_path: '市场部', display_name: '赵六', email: 'zhaoliu@corp.cn', job_title: '经理', tag: 'none', status: 'active', email_alias: '赵六.alias@corp.cn' },
   { id: 5, source_id: 11, source_name: '网易企邮', department_path: '总裁办', display_name: '陈总', email: 'chenzong@corp.cn', job_title: '首席执行官', tag: 'executive', status: 'active', email_alias: '陈总.alias@corp.cn' },
-  { id: 6, source_id: 11, source_name: '网易企邮', department_path: '人力资源部', display_name: '孙七', email: 'sunqi@corp.cn', job_title: 'HRBP', tag: 'none', status: 'active', email_alias: '孙七.alias@corp.cn' },
+  { id: 6, source_id: 11, source_name: '网易企邮', department_path: '人力资源部', display_name: '孙七', email: 'sunqi@corp.cn', job_title: 'HRBP', tag: 'none', status: 'active', email_alias: '���七.alias@corp.cn' },
   { id: 7, source_id: 5, source_name: '邮件系统', department_path: '销售部 / 华东区', display_name: '周八', email: 'zhouba@corp.cn', job_title: '区域总监', tag: 'key_position', status: 'active', email_alias: '周八.alias@corp.cn' },
   { id: 8, source_id: 3, source_name: '总部 AD', department_path: '法务部', display_name: '吴九', email: 'wujiu@corp.cn', job_title: '法务专员', tag: 'none', status: 'active', email_alias: '吴九.alias@corp.cn' },
 ];

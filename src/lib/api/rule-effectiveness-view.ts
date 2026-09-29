@@ -10,7 +10,7 @@ import { getRuleEffectiveness as getReportPage, getObservationVersions, getObser
 //   - sender_filter：发信人黑白名单，按单条规则（黑名单/白名单）拆分观察对象
 // 高级规则（单条 action=observe）与仿冒品牌/人物检测不在本期范围内。
 
-export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'advanced_filter_rules' | 'recipient_check';
+export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'intent_engine' | 'advanced_filter_rules' | 'recipient_check';
 
 /** 与安全总览共用的邮件方向枚举，相似检测按方向拆分观察对象时复用同一枚举。 */
 export type Direction = 'receive' | 'send' | 'internal';

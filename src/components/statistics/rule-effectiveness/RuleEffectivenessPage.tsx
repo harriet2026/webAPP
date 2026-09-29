@@ -43,6 +43,7 @@ const CONFIG_PATH_BY_MODULE: Record<PolicyModule, string> = {
   // Stage3PolicyKey 与 policy-deep-link.ts 的 PipelineModuleKey），不是
   // 'contentRules'；用错 key 会导致跳转后流水线页无法定位到内容规则抽屉。
   content_rules: '/security/pipeline?module=content',
+  intent_engine: '/security/pipeline?module=intentEngine',
   // GT-14369：模块级兜底路径（无 rule_id）；mock 明细行按具体规则拼接的
   // config_path（含 rule_id）优先命中，见上方 configPath 取值逻辑与
   // rule-effectiveness-prototype.ts 的 RULE_EFFECTIVENESS_CONFIG_PATH。
