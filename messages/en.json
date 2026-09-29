@@ -10894,8 +10894,14 @@
   },
   "recipientCheck": {
     "banner": "Inspect recipient addresses at the RCPT TO stage to guard against directory harvest attacks (DHA), mail bombing, and intra-domain lateral phishing",
-    "loadFailed": "Failed to load the configuration. Editing and saving are unavailable to protect the existing settings. Please retry.",
-    "module": {
+  "loadFailed": "Failed to load the configuration. Editing and saving are unavailable to protect the existing settings. Please retry.",
+  "observeMode": {
+    "enabled": "Observe only",
+    "disabled": "Enforce actions",
+    "limitLabel": "Recipient limit observe mode",
+    "existenceLabel": "Recipient existence observe mode"
+  },
+  "module": {
       "enabled": "Enabled",
       "disabled": "Disabled",
       "switchLabel": "Module enable switch"

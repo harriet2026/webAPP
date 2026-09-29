@@ -702,7 +702,7 @@
       "searchPlaceholder": "搜索规则名称…",
       "masterSwitch": "规则总开关",
       "masterSwitchOff": "规则总开关已关闭，当前所有转发规则均不会生效，请联系系统管理员开启。",
-      "masterSwitchOffActionable": "规则��开����������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
+      "masterSwitchOffActionable": "规则��开������������������关闭，当前所有转发规则均不会生效。开启后规则才会参与 SMTP 准入判定。",
       "columns": {
         "priority": "优先级",
         "sourceIp": "来源 IP",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行的放��邮�����选���“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC 尚未运行��放��邮�����选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1337,7 +1337,7 @@
     "importFailureReason": "���败原因",
     "importSkipAlreadyExists": "成员已存在",
     "platformIpGroupTitle": "平台 IP 组",
-    "platformScopeHint": "平台级 IP 组对全部租户生效，供 IP 策略（IP 黑白名单表达式）引用。"
+    "platformScopeHint": "平台级 IP 组对全部租户生效，供 IP 策略（IP 黑白名单表达式）��用。"
   },
   "groupPolicy": {
     "eyebrow": "群组策���",
@@ -1460,7 +1460,7 @@
     "policyDesc": {
       "ipFrequency": "限制单个 IP 的连接频率与认证失败次数",
       "ipFilter": "基于 IP 地址的黑白名单过滤",
-      "rbl": "基于公共 RBL 名单过滤",
+      "rbl": "基于公共 RBL 名��过滤",
       "overseas": "识���海外���件并按策���处置",
       "senderFilter": "发信人黑白名��过滤",
       "userList": "用户���黑白名单管理",
@@ -1804,7 +1804,7 @@
         "copyMarkdown": "复制 Markdown",
         "regenerate": "重新生成",
         "errors": {
-          "llmUnavailable": "AI 服务暂不可用，请联系管理员检查 LLM 配置",
+          "llmUnavailable": "AI 服务暂不可用���请联系管理员检查 LLM 配置",
           "timeout": "解读超时，可点击重新生���",
           "rateLimited": "请求过于频繁，请稍后再试",
           "generic": "解读失败，请重试"
@@ -2071,7 +2071,7 @@
     "confirm": {
       "impersonate": "确认以该租户管理员身份进入?",
       "suspend": "确认暂停该租户?",
-      "activate": "确认启用该租户?",
+      "activate": "确认启用该���户?",
       "removeDomains": "确认移除 {count} 个域名？",
       "removeDomainsHint": "将移除：{domains}。其中 {routed} 个已配置路由，移除后该域名的下一跳与出口绑定会���并删除，收信将立即中断。此操作不可撤销。"
     },
@@ -2311,7 +2311,7 @@
         "remarkLabel": "备注",
         "remarkPlaceholder": "选填",
         "visibleSectionTitle": "模块可见权限",
-        "visibleSectionHint": "勾选后该子模块在下方操作权限矩阵中出现",
+        "visibleSectionHint": "勾选后该子���块在下方操作权限矩阵中出现",
         "actionSectionTitle": "操作权限",
         "noVisibleModules": "请先在上方勾选「模块可见权限」",
         "save": "确定",
@@ -2527,7 +2527,7 @@
     },
     "failAdvice": {
       "wrongPassword": "短时间内多次密码错误可能为撞库/暴力破解，建议核查账号是否泄露并启用登录限速。",
-      "userNotExist": "账号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
+      "userNotExist": "��号不存在，常见于扫描探测，建议关注来源 IP 是否存在批量尝试。",
       "accountLocked": "账号已被锁定，请确认是否为多次失败触发的安全策略，必要时人工解锁。",
       "serverTimeout": "认证服务器响应超时，请检查服务器负载与网络链路，或适当调大认证超时时间。",
       "connectionRefused": "连接被拒绝，请检查认证服务后端的可达性与防火墙策略。",
@@ -2817,7 +2817,7 @@
     "changePassword": "修改密码",
     "allFieldsRequired": "请填写所有字段",
     "passwordTooShort": "新密码至少6个字符",
-    "passwordMismatch": "两次输入的新密码不一致",
+    "passwordMismatch": "两次输入的新密码不��致",
     "passwordChanged": "密码修改成功",
     "errors": {
       "internal": "服务器内��错误"
@@ -3541,7 +3541,7 @@
     "actionReject": "拒绝",
     "actionTempfail": "421 错误（临时拒绝）",
     "actionDisconnect": "断开连接",
-    "tempfailMessage": "临时拒绝消息",
+    "tempfailMessage": "临时���绝消息",
     "tempfailPlaceholder": "自定��� 421 消息",
     "connectionLimits": "连接数限制（-1 = 不限制）",
     "dailyLimit": "每日连接数限制",
@@ -4117,7 +4117,7 @@
     "errors": {
       "nameRequired": "规则名称不能为空",
       "nameMaxLength": "名称最多50个字符",
-      "descriptionMaxLength": "备注最多200个字符",
+      "descriptionMaxLength": "备注最多200个���符",
       "priorityRequired": "优先级不能为空",
       "priorityInteger": "优先级必须为���数",
       "priorityRange": "��先级需在 {min}–{max} 之间",
@@ -4653,7 +4653,7 @@
       "protectedDomainsHint": "每行一个域名，将检测这些域名的相似域名仿冒"
     },
     "displayNameSpoof": {
-      "title": "显示名仿冒检测",
+      "title": "显示名仿��检测",
       "inbound": "入站邮件",
       "outbound": "出站邮���",
       "internal": "内部邮件",
@@ -5409,7 +5409,7 @@
       "anomalyGroup": "扫描异常处置",
       "timeoutLabel": "沙箱分析超时（超过30秒）",
       "timeoutContinue": "进行下一步检测（放行，依赖链接保护兜底）",
-      "timeoutContinueTip": "超时后放行邮件，依赖链接保护在用户点击时进行实时检测",
+      "timeoutContinueTip": "超时后放行邮件，依赖链接保护在��户点击时进行实时检测",
       "timeoutTreatMalicious": "按恶意处置（使用上述处置���作）",
       "timeoutTreatMaliciousTip": "超时后按照恶意URL的处置策略执行",
       "timeoutPass": "放行（仅记录日志）",
@@ -5494,7 +5494,7 @@
       "skip": {
         "title": "允许用户跳过深度检测",
         "desc": "允许终端用户在等待期间主动跳过【{engine}】检测并直接访问链接，跳过前需二次确认风险。开启会降低防护强度，请谨慎使用。",
-        "riskBanner": "已允许用户跳过深度复检：用户可在等待期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录��链接日志以供审计。"
+        "riskBanner": "已允许用户跳过深度复检：用户可在等��期间点击“跳过并访问”，经二次风险确认后直接访问未完成检测的链接，存在放行恶意链接的风险。该操作将记录��链接日志以供审计。"
       },
       "timeoutFixedNotice": "深度复检超时的链接将被视为未知风险链接，展示提示页。",
       "desc": "终端用户点击改写后的链接时，网关按下列已启用项对该 URL 做实时复检",
@@ -6698,7 +6698,7 @@
         "platformPolicyModule": "平台管控策略",
         "platformPolicyRuleName": "平台统一管控",
         "platformPolicyHitDetail": "该邮件由平台连接层策略拦截，如需了解详情请联系平台管理员",
-        "platformPolicyListReason": "平台管控策略拦截",
+        "platformPolicyListReason": "平台��控策略拦截",
         "basisScope": "适用范围",
         "hitModules": "命中模块",
         "hitModulesHint": "动作实际作���于至少一个收件人的模块。仅条件匹配但动作未作用于任何收件人的终止候选规则不计为命中。",
@@ -7065,7 +7065,7 @@
       "nameRequired": "请输入规则名称",
       "conditionRequired": "请至少添加一个条件",
       "scopeRequired": "请选择适用范围",
-      "priorityRange": "优先级需在 {min}–{max} 之间"
+      "priorityRange": "优先级需在 {min}���{max} 之间"
     },
     "basic": {
       "descriptionLabel": "描述",
@@ -8090,7 +8090,7 @@
         "TW": "中国台湾"
       },
       "blockRateLegend": "横条颜色 = 拦截率",
-      "blockRateGood": "≥97%  防护良好",
+      "blockRateGood": "≥97%  ���护良好",
       "blockRateWarn": "95–97%  需关注",
       "blockRateBad": "<95%  风险较高"
     },
@@ -8154,7 +8154,7 @@
       "aiFailed": "AI 分析失败，请稍后重试",
       "empty": "AI 未返回任何分析内容，请稍后重试",
       "retry": "重试",
-      "truncated": "分析被中断，以下为已生成的部分内容，并非完整分析"
+      "truncated": "分析被中断，��下为已生成的部分内容，并非完整分析"
     },
     "print": {
       "title": "邮件安全总览报告",
@@ -8894,7 +8894,7 @@
     "title": "钓鱼邮件检测总览",
     "description": "查看钓鱼邮件检测智能体的检测统计、研判明细与链接证据，并对可疑邮件进行拦截或误报豁免。",
     "tabs": {
-      "overview": "检测总览",
+      "overview": "检测���览",
       "config": "检测引擎配置",
       "configPlaceholder": "检测引擎配置 — 配置模块上线后提供"
     },
@@ -9247,7 +9247,7 @@
     },
     "runtime": {
       "title": "智能��调查与处置",
-      "description": "运行模式决定是否执行处置，风险等级与置信度分级决定处置方式；超时策略对所有旁路检测生效。",
+      "description": "运行模式决定是否执行处置，风险等级与置信度分���决定处置方式；超时策略对所有旁路检测生效。",
       "loading": "加载中...",
       "engineLoadFailed": "检测引擎配置加载失败",
       "disposalLoadFailed": "超时配置加载失败，运行模式���按真实引擎配置展示。",
@@ -9929,7 +9929,7 @@
       "selectedRuns": "已选择 {count} 个任务",
       "batchExport": "批量导出报告",
       "batchCancel": "批量取消任务",
-      "bulkCancelDescription": "取消后不可恢复。已完成或失败的任务会跳过，其余任务将逐项取消。",
+      "bulkCancelDescription": "取消后不可恢���。已完成或失败的任务会跳过，其余任务将逐项取消。",
       "viewEml": "查看原文",
       "recall": "确认召回",
       "falsePositive": "标记误报",
@@ -9961,7 +9961,7 @@
     },
     "recall": {
       "title": "确认召���",
-      "description": "将对「{subject}」等 {count} 封邮件执行软删除召回，未读���件可撤回，已读邮件仅告警。",
+      "description": "将对「{subject}」等 {count} 封邮件执行软删除召回，未读���件可撤回，已读邮件仅告���。",
       "unreadPolicy": "未读邮件策略",
       "readPolicy": "已读邮件策略",
       "policy": {
@@ -10301,7 +10301,7 @@
     "csvEmailColMissing": "无法自动识别邮箱列，请确认 CSV 表头",
     "csvUploadFailed": "CSV 文件处理失败：{reason}",
     "deleteConfirm": "确认删除",
-    "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略将受影响（引用人员降级为未匹配）。是否继续？",
+    "deleteDesc": "删除后将同步清除该数据源下的通讯录数据，同时「高管邮件保护」「仿冒邮件检测」「收件人合法性校验」等策略��受影响（引用人员降级为未匹配）。是否继续？",
     "deleteTitle": "删除数据源「{name}」？",
     "detailAlias": "邮箱别名",
     "detailCurrentTag": "当前标记",
@@ -10327,7 +10327,7 @@
     "errServerRequired": "服务器地址不能为空",
     "errUrlInvalid": "请输入正确的 URL 地址",
     "export": "导出",
-    "exportFailures": "导出失败明细",
+    "exportFailures": "导出失败明��",
     "exportLimitToast": "数据量超过 50,000 条导出上限，请添加筛选条件",
     "exportSelected": "导出选中",
     "exportTaskToast": "已生成导出任务，共 {count} 条记录",
@@ -10690,7 +10690,7 @@
       "testFailed": "测试失败",
       "unsavedTitle": "未保存的更改",
       "unsavedDesc": "您有未保存的更改，离开后将丢失。",
-      "leave": "离开（不保存）",
+      "leave": "��开（不保存）",
       "continueEdit": "继续编辑",
       "err": {
         "server": "SMTP 服务器不能为空",
@@ -10956,6 +10956,12 @@
   "recipientCheck": {
     "banner": "在 RCPT TO 阶段检测收件人地址，防范目录收割攻击（DHA）、邮件轰炸及域内横向钓鱼",
     "loadFailed": "配置加载失败。为避免覆盖现有配置，当前无法编辑或保存，请重试。",
+    "observeMode": {
+      "enabled": "观察中",
+      "disabled": "正常执行",
+      "limitLabel": "数量限制策略观察模式开关",
+      "existenceLabel": "存在性验证策略观察模式开关"
+    },
     "module": {
       "enabled": "已启用",
       "disabled": "已禁用",
@@ -11028,7 +11034,7 @@
     "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
   },
   "userList": {
-    "blacklistRules": "黑名单规则",
+    "blacklistRules": "黑名单��则",
     "whitelistRules": "白名单规则",
     "searchPlaceholder": "搜索规则ID、发信人或收信人...",
     "ruleId": "规则ID",
@@ -11043,7 +11049,7 @@
     "block": "阻断",
     "quarantine": "隔离",
     "allow": "放行",
-    "enabled": "启用",
+    "enabled": "��用",
     "disabled": "禁用",
     "noData": "暂无数据",
     "deleteSelected": "删除选中",
@@ -11367,7 +11373,7 @@
         "portal_base_url_host_missing": "外部访问地址缺少主机名",
         "portal_base_url_invalid": "外部访问地址不是合法的网址",
         "portal_base_url_loopback": "外部访问地址不能是本机回环地址——收件人访问不到��请填写网关对外可达的地址",
-        "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到域名和端口即���",
+        "portal_base_url_path_not_allowed": "外部访问地址不能带路径、查询参数或锚点，只填到��名和端口即���",
         "portal_base_url_required": "启用取回、预览、加白或加黑权限时，必须填写外部访问地址——通知信里的操作链接需要它才能生成",
         "portal_base_url_scheme_invalid": "外部访问地址必须使用 {scheme}：取回和预览的令牌不能明文传输",
         "valid_days_out_of_range": "「{permission}」的链接有效期需在 {min}–{max} 天之间"
@@ -11471,7 +11477,7 @@
       "egress_ip_invalid": "出口 IP 必须是合法的 IPv4 地址，或留空",
       "endpoint_name_exists": "已存在同名的代理节点",
       "endpoint_not_found": "代理节点不存在，可能已被删除",
-      "group_name_exists": "已存在同名的代理分组",
+      "group_name_exists": "��存在同名的代理分组",
       "group_not_found": "代理分组不存在，可能已被删除",
       "group_referenced_by_routes": "该分组正被外发路由规则引用，不能删除，请先移除相关路由规则",
       "helo_hostname_invalid": "HELO 主机名必须是合法域名（不能填 IP 地址），或留空",
@@ -11583,7 +11589,7 @@
       "leak_mail_not_in_run": "该邮件不属于本次回溯运行",
       "window_start_invalid": "开始时间格式不正确",
       "window_end_invalid": "结束时间格式不正确",
-      "window_order_invalid": "开始时间必须早于结束时间",
+      "window_order_invalid": "开始时��必须早于结束时间",
       "indicator_tag_format_invalid": "威胁标签格式应为 indicator:「标签代码」，且代码不能为空"
     },
     "tenant": {
@@ -12193,7 +12199,7 @@
     "excerpt": "保留的摘录",
     "captureIncomplete": "采集到的来源本身已不完整。",
     "emptyContent": "没有保留的文本。",
-    "empty": "未形成可引用的判断因素。这不代表邮件安全。",
+    "empty": "未形成可引用的判断因素。这不代表��件安全。",
     "uncitedSources": "其他保留来源",
     "states": {
       "pending": "判断依据报告待生成，尚未发布最终报告。",
