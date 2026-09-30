@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { AlertCircle, Gauge, RefreshCw, ShieldX } from 'lucide-react';
@@ -27,6 +28,7 @@ import {
 import { useTenant } from '@/hooks/use-tenant';
 import { useProductForm } from '@/contexts/product-form-context';
 import { ApiError } from '@/lib/api/client';
+import { listTenants } from '@/lib/api/tenants';
 
 // 各观察模块「前往策略配置」的跳转目标——固定映射到 4 个已有的配置页，
 // 本页只做导航，不修改这些配置页自身的逻辑。与 fixtures.ts 中
@@ -56,8 +58,15 @@ export function RuleEffectivenessPage() {
   const t = useTranslations('ruleEffectiveness');
   const locale = useLocale();
   const router = useRouter();
-  const { setSelectedTenant, isSystemAdmin } = useTenant();
+  const { setSelectedTenant, isSystemAdmin, isAdmin, effectiveTenantId } = useTenant();
   const { setViewer } = useProductForm();
+  const { data: tenantList } = useQuery({
+    queryKey: ['rule-effectiveness-current-tenant', effectiveTenantId],
+    queryFn: () => listTenants({ search: '', status: 'active', pageSize: 100 }),
+    enabled: !isSystemAdmin && effectiveTenantId != null,
+    staleTime: 60_000,
+  });
+  const currentTenant = tenantList?.items.find((tenant) => tenant.id === effectiveTenantId);
 
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [customRange, setCustomRange] = useState<CustomRange>(() => defaultCustomRange());
@@ -67,7 +76,7 @@ export function RuleEffectivenessPage() {
   const [durationBuckets, setDurationBuckets] = useState<ObserveDurationBucket[]>([]);
   const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
   const { scopeActive } = useSecurityScope(scopeTenantId);
-  // 效能明细表分页：与处置中心使用同一套 ServerPagination 组件/交互规范。
+  // 效能明细表分页：与处���中心使用同一套 ServerPagination 组件/交互规范。
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
@@ -137,7 +146,12 @@ export function RuleEffectivenessPage() {
 
   return (
     <PageShell data-testid="rule-effectiveness-page">
-      <PageHeader title={t('title')} description={t('subtitle')} icon={Gauge} />
+      {isAdmin && !isSystemAdmin && (
+        <div className="-mx-4 -mt-4 mb-4 border-b border-warning/30 bg-warning-soft px-4 py-3 text-sm text-warning-foreground" data-testid="rule-effectiveness-tenant-context">
+          正在以租户 {currentTenant?.name ?? (effectiveTenantId ? `#${effectiveTenantId}` : '当前租户')} 管理员身份操作
+        </div>
+      )}
+      <PageHeader title={t('title')} description="统计当前观察模式策略规则的命中情况，辅助判断是否转为正式生效" icon={Gauge} />
 
       <FilterBar
         timeRange={timeRange}

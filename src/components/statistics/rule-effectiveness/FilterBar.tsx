@@ -142,7 +142,7 @@ export function FilterBar({
       <Popover>
         <PopoverTrigger render={
           <Button variant="outline" size="sm" data-testid="rule-effectiveness-module-filter">
-            {moduleOptions.length === 0 ? '全部策略模块' : `已选 ${moduleOptions.length} 个策略模块`}
+            {moduleOptions.length === 0 ? '策略模块' : `已选 ${moduleOptions.length} 个策略模块`}
             {moduleOptions.length > 0 && moduleOptions.length < MODULE_FILTER_OPTIONS.length && (
               <Badge variant="secondary" className="ml-1 px-1.5 text-[10px]">{moduleOptions.length}</Badge>
             )}
