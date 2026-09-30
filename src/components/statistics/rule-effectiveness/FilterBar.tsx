@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Check, ChevronDown, Circle, Funnel, RotateCcw } from 'lucide-react';
-import { SegmentedControl } from '@/components/shared/segmented-control';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
@@ -98,13 +97,35 @@ export function FilterBar({
     >
       {leftSlot ?? <Funnel className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />}
 
-      <SegmentedControl
-        value={timeRange}
-        onChange={onTimeRangeChange}
-        size="sm"
-        testIdPrefix="rule-effectiveness-timerange"
-        options={TIME_RANGES.map((r) => ({ value: r, label: t(`timeRange.${r}`) }))}
-      />
+      <Popover>
+        <PopoverTrigger render={
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 min-w-44 justify-between rounded-lg px-4 text-base font-normal"
+            data-testid="rule-effectiveness-timerange-filter"
+            aria-label="时间范围筛选"
+          >
+            <span>{t(`timeRange.${timeRange}`)}</span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </Button>
+        } />
+        <PopoverContent align="start" className="w-44 p-2">
+          <div className="space-y-1">
+            {TIME_RANGES.map((range) => (
+              <button
+                key={range}
+                type="button"
+                onClick={() => onTimeRangeChange(range)}
+                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-muted ${timeRange === range ? 'bg-primary text-primary-foreground hover:bg-primary' : ''}`}
+              >
+                <span>{t(`timeRange.${range}`)}</span>
+                {timeRange === range && <Check className="h-4 w-4" />}
+              </button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
 
       <Button
         type="button"
