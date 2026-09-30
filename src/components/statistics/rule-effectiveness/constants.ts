@@ -45,7 +45,7 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'recipient_check',
 ];
 
-export type RuleEffectivenessStageId = 'stage2' | 'stage3' | 'stage5';
+export type RuleEffectivenessStageId = 'stage2' | 'stage3' | 'stage4' | 'stage5';
 
 export interface RuleEffectivenessStage {
   id: RuleEffectivenessStageId;
@@ -65,7 +65,13 @@ export const RULE_EFFECTIVENESS_STAGES: RuleEffectivenessStage[] = [
     id: 'stage3',
     label: '阶段3：内容层',
     color: '#65A30D',
-    modules: ['content_rules', 'phishing_detection'],
+    modules: ['content_rules'],
+  },
+  {
+    id: 'stage4',
+    label: '阶段4：智能分析层',
+    color: '#2563EB',
+    modules: ['phishing_detection'],
   },
   {
     id: 'stage5',
