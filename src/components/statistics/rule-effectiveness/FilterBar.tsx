@@ -1,8 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, ChevronDown, Circle, Funnel, RotateCcw } from 'lucide-react';
+import { Check, ChevronDown, Circle, Funnel, RotateCcw, CalendarIcon } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
@@ -42,9 +45,6 @@ export function FilterBar({
   leftSlot,
 }: FilterBarProps) {
   const t = useTranslations('ruleEffectiveness.filter');
-  const startId = useId();
-  const endId = useId();
-
   const [draft, setDraft] = useState<CustomRange>(customRange);
   const [error, setError] = useState<ReturnType<typeof validateCustomRange>>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -128,40 +128,51 @@ export function FilterBar({
       </Popover>
 
       {timeRange === 'custom' && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2">
-          <div className="flex flex-col gap-1">
-            <label htmlFor={startId} className="text-xs text-muted-foreground whitespace-nowrap">
-              {t('customRange.start')}
-            </label>
-            <input
-              id={startId}
-              data-testid="rule-effectiveness-custom-start"
-              type="date"
-              value={draft.start}
-              onChange={(e) => editDraft({ start: e.target.value })}
-              className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
+        <Popover>
+          <PopoverTrigger render={
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                'h-11 min-w-64 justify-start rounded-lg px-3 text-left text-sm font-normal',
+                !draft.start && !draft.end && 'text-muted-foreground',
+              )}
+              data-testid="rule-effectiveness-custom-date-filter"
+              aria-label="自定义日期范围"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+              {draft.start && draft.end
+                ? `${draft.start} ~ ${draft.end}`
+                : draft.start || draft.end || '选择日期范围'}
+            </Button>
+          } />
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="range"
+              numberOfMonths={2}
+              selected={
+                draft.start || draft.end
+                  ? {
+                      from: draft.start ? parseISO(draft.start) : undefined,
+                      to: draft.end ? parseISO(draft.end) : undefined,
+                    }
+                  : undefined
+              }
+              onSelect={(range) => {
+                const next = {
+                  start: range?.from ? format(range.from, 'yyyy-MM-dd') : '',
+                  end: range?.to ? format(range.to, 'yyyy-MM-dd') : '',
+                };
+                editDraft(next);
+              }}
             />
-          </div>
-          <span className="mt-4 text-sm text-muted-foreground">~</span>
-          <div className="flex flex-col gap-1">
-            <label htmlFor={endId} className="text-xs text-muted-foreground whitespace-nowrap">
-              {t('customRange.end')}
-            </label>
-            <input
-              id={endId}
-              data-testid="rule-effectiveness-custom-end"
-              type="date"
-              value={draft.end}
-              onChange={(e) => editDraft({ end: e.target.value })}
-              className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
-            />
-          </div>
-          {error && (
-            <span role="alert" className="text-sm text-danger">
-              {t(`customRange.error.${error}`, { max: MAX_RANGE_DAYS })}
-            </span>
-          )}
-        </div>
+            {error && (
+              <p role="alert" className="border-t border-border px-3 py-2 text-sm text-danger">
+                {t(`customRange.error.${error}`, { max: MAX_RANGE_DAYS })}
+              </p>
+            )}
+          </PopoverContent>
+        </Popover>
       )}
 
       <Button
