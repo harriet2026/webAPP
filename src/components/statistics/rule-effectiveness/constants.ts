@@ -28,8 +28,6 @@ export type ModuleFilterOption =
   | 'sender_filter'
   | 'behavior_control'
   | 'content_rules'
-  | 'intent_engine'
-  | 'attachment_security'
   | 'advanced_filter_rules'
   | 'recipient_check';
 
@@ -47,7 +45,7 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'recipient_check',
 ];
 
-export type RuleEffectivenessStageId = 'stage1' | 'stage2' | 'stage3' | 'stage4' | 'stage5';
+export type RuleEffectivenessStageId = 'stage2' | 'stage3' | 'stage5';
 
 export interface RuleEffectivenessStage {
   id: RuleEffectivenessStageId;
@@ -58,34 +56,22 @@ export interface RuleEffectivenessStage {
 
 export const RULE_EFFECTIVENESS_STAGES: RuleEffectivenessStage[] = [
   {
-    id: 'stage1',
-    label: '阶段1：IP策略',
-    color: '#EF4444',
-    modules: ['auth_spoofing'],
-  },
-  {
     id: 'stage2',
     label: '阶段2：收发信人策略',
     color: '#F97316',
-    modules: ['sender_filter', 'behavior_control', 'recipient_check'],
+    modules: ['auth_spoofing', 'sender_filter', 'recipient_check', 'behavior_control'],
   },
   {
     id: 'stage3',
     label: '阶段3：内容层',
     color: '#65A30D',
-    modules: ['content_rules', 'attachment_security', 'advanced_filter_rules'],
-  },
-  {
-    id: 'stage4',
-    label: '阶段4：智能分析层',
-    color: '#2563EB',
-    modules: ['phishing_detection', 'intent_engine'],
+    modules: ['content_rules', 'phishing_detection'],
   },
   {
     id: 'stage5',
     label: '阶段5：综合策略',
     color: '#7C3AED',
-    modules: ['similar_detection_similar_email', 'similar_detection_same_subject'],
+    modules: ['similar_detection_similar_email', 'similar_detection_same_subject', 'advanced_filter_rules'],
   },
 ];
 
