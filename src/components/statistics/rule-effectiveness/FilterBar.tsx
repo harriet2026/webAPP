@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { MAX_RANGE_DAYS, validateCustomRange, type CustomRange } from './date-range';
-import { MODULE_FILTER_OPTIONS, OBSERVE_DURATION_BUCKETS, type ModuleFilterOption } from './constants';
+import { OBSERVE_DURATION_BUCKETS, RULE_EFFECTIVENESS_STAGES, type ModuleFilterOption, type RuleEffectivenessStageId } from './constants';
 import type { ObserveDurationBucket, TimeRange } from '@/lib/api/rule-effectiveness-view';
 
 interface FilterBarProps {
@@ -18,9 +18,12 @@ interface FilterBarProps {
   onTimeRangeChange: (r: TimeRange) => void;
   customRange: CustomRange;
   onCustomRangeChange: (r: CustomRange) => void;
+  stage: RuleEffectivenessStageId | 'all';
+  onStageChange: (stage: RuleEffectivenessStageId | 'all') => void;
   // 相似检测下相似邮件检测/相同主题检测是两条独立策略，筛选项按策略拆分展示，
   // 而不是用 PolicyModule 三选一（那样相似检测只能整体勾选/取消，无法单独看某一条策略）。
   moduleOptions: ModuleFilterOption[];
+  visibleModuleOptions: ModuleFilterOption[];
   onModuleOptionsChange: (m: ModuleFilterOption[]) => void;
   durationBuckets: ObserveDurationBucket[];
   onDurationBucketsChange: (b: ObserveDurationBucket[]) => void;
@@ -37,7 +40,10 @@ export function FilterBar({
   onTimeRangeChange,
   customRange,
   onCustomRangeChange,
+  stage,
+  onStageChange,
   moduleOptions,
+  visibleModuleOptions,
   onModuleOptionsChange,
   durationBuckets,
   onDurationBucketsChange,
@@ -175,23 +181,38 @@ export function FilterBar({
         </Popover>
       )}
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-11 min-w-60 justify-between rounded-lg border-l-4 border-l-muted-foreground px-4 text-base font-normal"
-        data-testid="rule-effectiveness-stage-filter"
-        aria-label="策略阶段筛选"
-      >
-        <span className="flex items-center gap-2">
-          <span className="flex items-center gap-1" aria-hidden="true">
-            <Circle className="h-3 w-3 fill-muted-foreground text-muted-foreground" />
-            <Circle className="h-3 w-3 fill-muted-foreground text-muted-foreground" />
-          </span>
-          全部阶段
-        </span>
-        <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-      </Button>
+      <Popover>
+        <PopoverTrigger render={
+          <Button type="button" variant="outline" size="sm" className="h-11 min-w-60 justify-between rounded-lg border-l-4 border-l-muted-foreground px-4 text-base font-normal" data-testid="rule-effectiveness-stage-filter" aria-label="策略阶段筛选">
+            <span className="flex items-center gap-2">
+              {stage === 'all' ? (
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  <Circle className="h-3 w-3 fill-muted-foreground text-muted-foreground" />
+                  <Circle className="h-3 w-3 fill-muted-foreground text-muted-foreground" />
+                </span>
+              ) : (
+                <Circle className="h-3 w-3 fill-current" style={{ color: RULE_EFFECTIVENESS_STAGES.find((item) => item.id === stage)?.color }} aria-hidden="true" />
+              )}
+              {stage === 'all' ? '全部阶段' : RULE_EFFECTIVENESS_STAGES.find((item) => item.id === stage)?.label}
+            </span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </Button>
+        } />
+        <PopoverContent align="start" className="w-72 p-2">
+          <div className="space-y-1">
+            <button type="button" onClick={() => onStageChange('all')} className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm ${stage === 'all' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>
+              <span className="flex items-center gap-2"><Circle className="h-3 w-3 fill-current text-muted-foreground" />全部阶段</span>
+              {stage === 'all' && <Check className="h-4 w-4" />}
+            </button>
+            {RULE_EFFECTIVENESS_STAGES.map((item) => (
+              <button key={item.id} type="button" onClick={() => onStageChange(item.id)} className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm ${stage === item.id ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>
+                <span className="flex items-center gap-2"><Circle className="h-3 w-3 fill-current" style={{ color: item.color }} />{item.label}<span className="text-muted-foreground">({item.modules.length})</span></span>
+                {stage === item.id && <Check className="h-4 w-4" />}
+              </button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
 
       <Popover>
         <PopoverTrigger render={
@@ -205,22 +226,29 @@ export function FilterBar({
         } />
         <PopoverContent align="start" className="w-56 p-2">
           <div className="space-y-1">
-            {MODULE_FILTER_OPTIONS.map((m) => {
-              const checked = moduleOptions.length === 0 || moduleOptions.includes(m);
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => toggleModule(m)}
-                  className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted"
-                >
-                  <span>
-                    {m === 'recipient_check' ? '收件人检测' : m === 'intent_engine' ? '意图引擎' : t(`modules.${m}`)}
-                  </span>
-                  {checked && <Check className="h-4 w-4 text-primary" />}
-                </button>
-              );
-            })}
+            <div className="max-h-96 space-y-2 overflow-y-auto">
+              {RULE_EFFECTIVENESS_STAGES.map((stageItem) => {
+                const modules = stageItem.modules.filter((module) => visibleModuleOptions.includes(module));
+                if (modules.length === 0) return null;
+                return (
+                  <div key={stageItem.id}>
+                    <div className="flex items-center gap-2 bg-muted px-2 py-1 text-xs text-muted-foreground">
+                      <Circle className="h-2.5 w-2.5 fill-current" style={{ color: stageItem.color }} />
+                      {stageItem.label}
+                    </div>
+                    {modules.map((m) => {
+                      const checked = moduleOptions.length === 0 || moduleOptions.includes(m);
+                      return (
+                        <button key={m} type="button" onClick={() => toggleModule(m)} className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-muted">
+                          <span>{m === 'recipient_check' ? '收件人检测' : m === 'intent_engine' ? '意图引擎' : t(`modules.${m}`)}</span>
+                          {checked && <Check className="h-4 w-4 text-primary" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </PopoverContent>
       </Popover>

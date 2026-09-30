@@ -17,7 +17,7 @@ import { TenantScopeSelector } from '@/components/statistics/security-overview/T
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { useRuleEffectiveness } from './hooks/useRuleEffectiveness';
 import { timeRangeToDates, defaultCustomRange, type CustomRange } from './date-range';
-import { MODULE_FILTER_OPTIONS, resolveModuleFilterParams, type ModuleFilterOption } from './constants';
+import { MODULE_FILTER_OPTIONS, resolveModuleFilterParams, RULE_EFFECTIVENESS_STAGES, type ModuleFilterOption, type RuleEffectivenessStageId } from './constants';
 import {
   buildEmailDisposalCenterQuery,
   type ObserveDurationBucket,
@@ -73,6 +73,7 @@ export function RuleEffectivenessPage() {
   // 相似检测下相似邮件检测/相同主题检测是两条独立策略，筛选项按策略拆分，
   // 而不是沿用 PolicyModule 三选一（那样无法单独筛出某一条相似检测策略）。
   const [moduleOptions, setModuleOptions] = useState<ModuleFilterOption[]>([]);
+  const [stage, setStage] = useState<RuleEffectivenessStageId | 'all'>('all');
   const [durationBuckets, setDurationBuckets] = useState<ObserveDurationBucket[]>([]);
   const [scopeTenantId, setScopeTenantId] = useState<number | null>(null);
   const { scopeActive } = useSecurityScope(scopeTenantId);
@@ -85,12 +86,23 @@ export function RuleEffectivenessPage() {
     [timeRange, customRange],
   );
 
-  const effectiveModuleOptions = moduleOptions.length > 0 ? moduleOptions : MODULE_FILTER_OPTIONS;
+  const selectedStage = stage === 'all' ? null : RULE_EFFECTIVENESS_STAGES.find((item) => item.id === stage) ?? null;
+  const visibleModuleOptions = selectedStage ? selectedStage.modules : MODULE_FILTER_OPTIONS;
+  const effectiveModuleOptions = moduleOptions.length > 0 ? moduleOptions.filter((module) => visibleModuleOptions.includes(module)) : visibleModuleOptions;
+
+  const handleStageChange = useCallback((nextStage: RuleEffectivenessStageId | 'all') => {
+    setStage(nextStage);
+    const nextModules = nextStage === 'all'
+      ? MODULE_FILTER_OPTIONS
+      : RULE_EFFECTIVENESS_STAGES.find((item) => item.id === nextStage)?.modules ?? [];
+    setModuleOptions(nextModules);
+  }, []);
 
   const handleResetFilters = useCallback(() => {
     setTimeRange('7d');
     setCustomRange(defaultCustomRange());
     setModuleOptions([]);
+    setStage('all');
     setDurationBuckets([]);
     setPage(1);
   }, []);
@@ -158,7 +170,10 @@ export function RuleEffectivenessPage() {
         onTimeRangeChange={setTimeRange}
         customRange={customRange}
         onCustomRangeChange={setCustomRange}
+        stage={stage}
+        onStageChange={handleStageChange}
         moduleOptions={moduleOptions}
+        visibleModuleOptions={visibleModuleOptions}
         onModuleOptionsChange={setModuleOptions}
         durationBuckets={durationBuckets}
         onDurationBucketsChange={setDurationBuckets}

@@ -47,6 +47,52 @@ export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'recipient_check',
 ];
 
+export type RuleEffectivenessStageId = 'stage1' | 'stage2' | 'stage3' | 'stage4' | 'stage5';
+
+export interface RuleEffectivenessStage {
+  id: RuleEffectivenessStageId;
+  label: string;
+  color: string;
+  modules: ModuleFilterOption[];
+}
+
+export const RULE_EFFECTIVENESS_STAGES: RuleEffectivenessStage[] = [
+  {
+    id: 'stage1',
+    label: '阶段1：IP策略',
+    color: '#EF4444',
+    modules: ['auth_spoofing'],
+  },
+  {
+    id: 'stage2',
+    label: '阶段2：收发信人策略',
+    color: '#F97316',
+    modules: ['sender_filter', 'behavior_control', 'recipient_check'],
+  },
+  {
+    id: 'stage3',
+    label: '阶段3：内容层',
+    color: '#65A30D',
+    modules: ['content_rules', 'attachment_security', 'advanced_filter_rules'],
+  },
+  {
+    id: 'stage4',
+    label: '阶段4：智能分析层',
+    color: '#2563EB',
+    modules: ['phishing_detection', 'intent_engine'],
+  },
+  {
+    id: 'stage5',
+    label: '阶段5：综合策略',
+    color: '#7C3AED',
+    modules: ['auth_spoofing', 'similar_detection_similar_email', 'similar_detection_same_subject'],
+  },
+];
+
+export function stageForModule(module: ModuleFilterOption): RuleEffectivenessStage {
+  return RULE_EFFECTIVENESS_STAGES.find((stage) => stage.modules.includes(module)) ?? RULE_EFFECTIVENESS_STAGES[0];
+}
+
 export function resolveModuleFilterParams(options: ModuleFilterOption[]): {
   modules: PolicyModule[];
   similarDetectionTypes: SimilarDetectionType[];
