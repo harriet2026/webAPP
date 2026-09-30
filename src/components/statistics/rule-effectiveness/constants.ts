@@ -28,6 +28,8 @@ export type ModuleFilterOption =
   | 'sender_filter'
   | 'behavior_control'
   | 'content_rules'
+  | 'attachment_security'
+  | 'intent_engine'
   | 'advanced_filter_rules'
   | 'recipient_check';
 
@@ -65,7 +67,7 @@ export const RULE_EFFECTIVENESS_STAGES: RuleEffectivenessStage[] = [
     id: 'stage3',
     label: '阶段3：内容层',
     color: '#65A30D',
-    modules: ['content_rules'],
+    modules: ['content_rules', 'attachment_security', 'intent_engine'],
   },
   {
     id: 'stage4',
