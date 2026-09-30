@@ -127,6 +127,43 @@ export function FilterBar({
         </PopoverContent>
       </Popover>
 
+      {timeRange === 'custom' && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2">
+          <div className="flex flex-col gap-1">
+            <label htmlFor={startId} className="text-xs text-muted-foreground whitespace-nowrap">
+              {t('customRange.start')}
+            </label>
+            <input
+              id={startId}
+              data-testid="rule-effectiveness-custom-start"
+              type="date"
+              value={draft.start}
+              onChange={(e) => editDraft({ start: e.target.value })}
+              className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
+            />
+          </div>
+          <span className="mt-4 text-sm text-muted-foreground">~</span>
+          <div className="flex flex-col gap-1">
+            <label htmlFor={endId} className="text-xs text-muted-foreground whitespace-nowrap">
+              {t('customRange.end')}
+            </label>
+            <input
+              id={endId}
+              data-testid="rule-effectiveness-custom-end"
+              type="date"
+              value={draft.end}
+              onChange={(e) => editDraft({ end: e.target.value })}
+              className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
+            />
+          </div>
+          {error && (
+            <span role="alert" className="text-sm text-danger">
+              {t(`customRange.error.${error}`, { max: MAX_RANGE_DAYS })}
+            </span>
+          )}
+        </div>
+      )}
+
       <Button
         type="button"
         variant="outline"
@@ -144,39 +181,6 @@ export function FilterBar({
         </span>
         <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       </Button>
-
-      {timeRange === 'custom' && (
-        <div className="flex flex-wrap items-center gap-2">
-          <label htmlFor={startId} className="text-sm text-muted-foreground whitespace-nowrap">
-            {t('customRange.start')}
-          </label>
-          <input
-            id={startId}
-            data-testid="rule-effectiveness-custom-start"
-            type="date"
-            value={draft.start}
-            onChange={(e) => editDraft({ start: e.target.value })}
-            className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
-          />
-          <span className="text-sm text-muted-foreground">~</span>
-          <label htmlFor={endId} className="text-sm text-muted-foreground whitespace-nowrap">
-            {t('customRange.end')}
-          </label>
-          <input
-            id={endId}
-            data-testid="rule-effectiveness-custom-end"
-            type="date"
-            value={draft.end}
-            onChange={(e) => editDraft({ end: e.target.value })}
-            className="h-9 rounded-md border border-border bg-card px-2 text-sm text-body"
-          />
-          {error && (
-            <span role="alert" className="text-sm text-danger">
-              {t(`customRange.error.${error}`, { max: MAX_RANGE_DAYS })}
-            </span>
-          )}
-        </div>
-      )}
 
       <Popover>
         <PopoverTrigger render={
