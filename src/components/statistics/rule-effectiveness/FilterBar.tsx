@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, RotateCcw } from 'lucide-react';
+import { Check, ChevronDown, Circle, Funnel, RotateCcw } from 'lucide-react';
 import { SegmentedControl } from '@/components/shared/segmented-control';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -93,10 +93,10 @@ export function FilterBar({
 
   return (
     <div
-      className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-sm"
+      className="flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-card px-6 py-5 shadow-sm md:flex-nowrap"
       data-testid="rule-effectiveness-filter-bar"
     >
-      {leftSlot}
+      {leftSlot ?? <Funnel className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />}
 
       <SegmentedControl
         value={timeRange}
@@ -105,6 +105,24 @@ export function FilterBar({
         testIdPrefix="rule-effectiveness-timerange"
         options={TIME_RANGES.map((r) => ({ value: r, label: t(`timeRange.${r}`) }))}
       />
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-11 min-w-60 justify-between rounded-lg border-l-4 border-l-muted-foreground px-4 text-base font-normal"
+        data-testid="rule-effectiveness-stage-filter"
+        aria-label="策略阶段筛选"
+      >
+        <span className="flex items-center gap-2">
+          <span className="flex items-center gap-1" aria-hidden="true">
+            <Circle className="h-3 w-3 fill-muted-foreground text-muted-foreground" />
+            <Circle className="h-3 w-3 fill-muted-foreground text-muted-foreground" />
+          </span>
+          全部阶段
+        </span>
+        <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      </Button>
 
       {timeRange === 'custom' && (
         <div className="flex flex-wrap items-center gap-2">
@@ -141,11 +159,12 @@ export function FilterBar({
 
       <Popover>
         <PopoverTrigger render={
-          <Button variant="outline" size="sm" data-testid="rule-effectiveness-module-filter">
+          <Button variant="outline" size="sm" className="h-11 min-w-60 justify-between rounded-lg px-4 text-base font-normal" data-testid="rule-effectiveness-module-filter">
             {moduleOptions.length === 0 ? '策略模块' : `已选 ${moduleOptions.length} 个策略模块`}
             {moduleOptions.length > 0 && moduleOptions.length < MODULE_FILTER_OPTIONS.length && (
               <Badge variant="secondary" className="ml-1 px-1.5 text-[10px]">{moduleOptions.length}</Badge>
             )}
+            <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </Button>
         } />
         <PopoverContent align="start" className="w-56 p-2">
@@ -172,11 +191,12 @@ export function FilterBar({
 
       <Popover>
         <PopoverTrigger render={
-          <Button variant="outline" size="sm" data-testid="rule-effectiveness-duration-filter">
+          <Button variant="outline" size="sm" className="h-11 min-w-60 justify-between rounded-lg px-4 text-base font-normal" data-testid="rule-effectiveness-duration-filter">
             {t('durationBucket.label')}
             {durationBuckets.length > 0 && durationBuckets.length < OBSERVE_DURATION_BUCKETS.length && (
               <Badge variant="secondary" className="ml-1 px-1.5 text-[10px]">{durationBuckets.length}</Badge>
             )}
+            <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </Button>
         } />
         <PopoverContent align="start" className="w-48 p-2">
