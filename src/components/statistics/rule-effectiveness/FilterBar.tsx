@@ -218,7 +218,7 @@ export function FilterBar({
         <PopoverTrigger render={
           <Button variant="outline" size="sm" className="h-11 min-w-60 justify-between rounded-lg px-4 text-base font-normal" data-testid="rule-effectiveness-module-filter">
             {moduleOptions.length === 0 ? '策略模块' : `已选 ${moduleOptions.length} 个策略模块`}
-            {moduleOptions.length > 0 && moduleOptions.length < MODULE_FILTER_OPTIONS.length && (
+            {moduleOptions.length > 0 && moduleOptions.length < visibleModuleOptions.length && (
               <Badge variant="secondary" className="ml-1 px-1.5 text-[10px]">{moduleOptions.length}</Badge>
             )}
             <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" aria-hidden="true" />
