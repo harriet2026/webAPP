@@ -19,6 +19,7 @@ interface FilterBarProps {
   customRange: CustomRange;
   onCustomRangeChange: (r: CustomRange) => void;
   stage: RuleEffectivenessStageId | 'all';
+  visibleStages: typeof RULE_EFFECTIVENESS_STAGES;
   onStageChange: (stage: RuleEffectivenessStageId | 'all') => void;
   // 相似检测下相似邮件检测/相同主题检测是两条独立策略，筛选项按策略拆分展示，
   // 而不是用 PolicyModule 三选一（那样相似检测只能整体勾选/取消，无法单独看某一条策略）。
@@ -41,6 +42,7 @@ export function FilterBar({
   customRange,
   onCustomRangeChange,
   stage,
+  visibleStages,
   onStageChange,
   moduleOptions,
   visibleModuleOptions,
@@ -193,7 +195,7 @@ export function FilterBar({
               ) : (
                 <Circle className="h-3 w-3 fill-current" style={{ color: RULE_EFFECTIVENESS_STAGES.find((item) => item.id === stage)?.color }} aria-hidden="true" />
               )}
-              {stage === 'all' ? '全部阶段' : RULE_EFFECTIVENESS_STAGES.find((item) => item.id === stage)?.label}
+              {stage === 'all' ? '全部阶段' : visibleStages.find((item) => item.id === stage)?.label}
             </span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </Button>
@@ -204,7 +206,7 @@ export function FilterBar({
               <span className="flex items-center gap-2"><Circle className="h-3 w-3 fill-current text-muted-foreground" />全部阶段</span>
               {stage === 'all' && <Check className="h-4 w-4" />}
             </button>
-            {RULE_EFFECTIVENESS_STAGES.map((item) => (
+            {visibleStages.map((item) => (
               <button key={item.id} type="button" onClick={() => onStageChange(item.id)} className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm ${stage === item.id ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>
                 <span className="flex items-center gap-2"><Circle className="h-3 w-3 fill-current" style={{ color: item.color }} />{item.label}<span className="text-muted-foreground">({item.modules.length})</span></span>
                 {stage === item.id && <Check className="h-4 w-4" />}
@@ -227,7 +229,7 @@ export function FilterBar({
         <PopoverContent align="start" className="w-56 p-2">
           <div className="space-y-1">
             <div className="max-h-96 space-y-2 overflow-y-auto">
-              {RULE_EFFECTIVENESS_STAGES.map((stageItem) => {
+              {visibleStages.map((stageItem) => {
                 const modules = stageItem.modules.filter((module) => visibleModuleOptions.includes(module));
                 if (modules.length === 0) return null;
                 return (

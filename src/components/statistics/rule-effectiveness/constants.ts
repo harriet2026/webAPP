@@ -85,7 +85,7 @@ export const RULE_EFFECTIVENESS_STAGES: RuleEffectivenessStage[] = [
     id: 'stage5',
     label: '阶段5：综合策略',
     color: '#7C3AED',
-    modules: ['auth_spoofing', 'similar_detection_similar_email', 'similar_detection_same_subject'],
+    modules: ['similar_detection_similar_email', 'similar_detection_same_subject'],
   },
 ];
 

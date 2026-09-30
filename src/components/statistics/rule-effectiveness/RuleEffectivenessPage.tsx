@@ -17,7 +17,7 @@ import { TenantScopeSelector } from '@/components/statistics/security-overview/T
 import { useSecurityScope } from '@/components/statistics/security-overview/hooks/useSecurityScope';
 import { useRuleEffectiveness } from './hooks/useRuleEffectiveness';
 import { timeRangeToDates, defaultCustomRange, type CustomRange } from './date-range';
-import { MODULE_FILTER_OPTIONS, resolveModuleFilterParams, RULE_EFFECTIVENESS_STAGES, type ModuleFilterOption, type RuleEffectivenessStageId } from './constants';
+import { resolveModuleFilterParams, RULE_EFFECTIVENESS_STAGES, type ModuleFilterOption, type RuleEffectivenessStageId } from './constants';
 import {
   buildEmailDisposalCenterQuery,
   type ObserveDurationBucket,
@@ -86,17 +86,35 @@ export function RuleEffectivenessPage() {
     [timeRange, customRange],
   );
 
-  const selectedStage = stage === 'all' ? null : RULE_EFFECTIVENESS_STAGES.find((item) => item.id === stage) ?? null;
-  const visibleModuleOptions = selectedStage ? selectedStage.modules : MODULE_FILTER_OPTIONS;
+  const visibleStages = useMemo(
+    () => isSystemAdmin ? RULE_EFFECTIVENESS_STAGES : RULE_EFFECTIVENESS_STAGES.filter((item) => item.id !== 'stage1'),
+    [isSystemAdmin],
+  );
+  const visibleStageIds = useMemo(() => new Set(visibleStages.map((item) => item.id)), [visibleStages]);
+  const selectedStage = stage === 'all' || !visibleStageIds.has(stage)
+    ? null
+    : visibleStages.find((item) => item.id === stage) ?? null;
+  const visibleModuleOptions = selectedStage
+    ? selectedStage.modules
+    : visibleStages.flatMap((item) => item.modules);
   const effectiveModuleOptions = moduleOptions.length > 0 ? moduleOptions.filter((module) => visibleModuleOptions.includes(module)) : visibleModuleOptions;
 
   const handleStageChange = useCallback((nextStage: RuleEffectivenessStageId | 'all') => {
     setStage(nextStage);
     const nextModules = nextStage === 'all'
-      ? MODULE_FILTER_OPTIONS
-      : RULE_EFFECTIVENESS_STAGES.find((item) => item.id === nextStage)?.modules ?? [];
+      ? visibleStages.flatMap((item) => item.modules)
+      : visibleStages.find((item) => item.id === nextStage)?.modules ?? [];
     setModuleOptions(nextModules);
-  }, []);
+  }, [visibleStages]);
+
+  /* eslint-disable react-hooks/set-state-in-effect -- 视角权限变化时必须清理不可见阶段筛选 */
+  useEffect(() => {
+    if (stage !== 'all' && !visibleStageIds.has(stage)) {
+      setStage('all');
+      setModuleOptions([]);
+    }
+  }, [stage, visibleStageIds]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleResetFilters = useCallback(() => {
     setTimeRange('7d');
@@ -171,6 +189,7 @@ export function RuleEffectivenessPage() {
         customRange={customRange}
         onCustomRangeChange={setCustomRange}
         stage={stage}
+        visibleStages={visibleStages}
         onStageChange={handleStageChange}
         moduleOptions={moduleOptions}
         visibleModuleOptions={visibleModuleOptions}
