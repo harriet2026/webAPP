@@ -87,7 +87,7 @@ export function RuleEffectivenessPage() {
   );
 
   const visibleStages = useMemo(
-    () => isSystemAdmin ? RULE_EFFECTIVENESS_STAGES : RULE_EFFECTIVENESS_STAGES.filter((item) => item.id !== 'stage1'),
+    () => isSystemAdmin ? RULE_EFFECTIVENESS_STAGES : RULE_EFFECTIVENESS_STAGES.filter((item) => (item.id as string) !== 'stage1'),
     [isSystemAdmin],
   );
   const visibleStageIds = useMemo(() => new Set(visibleStages.map((item) => item.id)), [visibleStages]);

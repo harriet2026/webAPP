@@ -87,8 +87,16 @@ export function DetailTable({
 
   return (
     <Card data-testid="rule-effectiveness-detail-table">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center gap-3">
         <CardTitle className="text-base">{t('title')}</CardTitle>
+        {!isLoading && (
+          <span
+            className="rounded-md bg-info/10 px-2 py-0.5 text-xs text-info"
+            data-testid="rule-effectiveness-observing-total"
+          >
+            {t('observingTotal', { count: totalCount })}
+          </span>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (

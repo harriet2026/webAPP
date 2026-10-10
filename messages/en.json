@@ -12242,6 +12242,7 @@
       "totalHits": "Total Hits During Observation",
       "avgObservedDays": "Avg. Observed Duration",
       "pendingReviewCount": "Policies Pending Promotion",
+      "scopeHint": "Metrics below are summarized for the selected time range",
       "vsPrevious": "vs previous",
       "days": "days"
     },
@@ -12329,6 +12330,7 @@
     },
     "detail": {
       "title": "Effectiveness Detail",
+      "observingTotal": "{count} policies currently in observation",
       "empty": "No policies/rules are currently in observe mode under the selected filters",
       "expandRow": "Expand to view action breakdown",
       "deletedSuffix": "(deleted)",

@@ -199,7 +199,7 @@
         "invalidCidr": "CIDR 地址段格式无效：{value}",
         "duplicateInFile": "导入文件中包含重复规则",
         "tenantMissing": "规则缺少租户归属，无法导入",
-        "permissionDenied": "当前账号无权导入该阶段规则",
+        "permissionDenied": "当前��号无权导入该阶段规则",
         "invalidRule": "规则结构或字段无效，无法导入"
       },
       "closeButton": "关闭",
@@ -237,7 +237,7 @@
     "showAdvancedRules": "显示高级规则设置",
     "showAdvancedRulesHint": "仅系统管理员勾选后可见",
     "twoFactorRequired": "需要二次认证",
-    "twoFactorRequiredHint": "您的账号已开启二次认证，请输入发送至 {target} 的验证码",
+    "twoFactorRequiredHint": "您���账号已开启二次认证，请输入发送至 {target} 的验证码",
     "twoFactorCode": "验证码",
     "otpBoxLabel": "验证码第 {n} 位",
     "verify": "验证",
@@ -1014,7 +1014,7 @@
           "rcptKindBcc": "密送",
           "intentTag": "意图引擎标签",
           "intentTagAny": "不限",
-          "intentTagHint": "匹配意图引擎的分类结果（cac_int_tag），可多选；CAC ��未��行��放��邮�����选���“��检�� (0)”，���选择则���限制",
+          "intentTagHint": "匹配意图引擎的分类结果��cac_int_tag），可多选；CAC ��未��行��放��邮�����选���“��检�� (0)”，���选择则���限制",
           "intentTagSelected": "已选 {count} 项",
           "intentTagClear": "清除",
           "intentTagValue0": "未检测 (0)",
@@ -1135,7 +1135,7 @@
         "authTimeout": "认证超时（秒）",
         "authTimeoutRange": "超时范围 1-300 秒",
         "scenesRequired": "请至少选择一个生效场景",
-        "sceneConflict": "与已有配置（{protocol}）在相同域名+场景下冲突，同一场景仅允许一条生效配置。"
+        "sceneConflict": "与已有配置（{protocol}）在相同域名+场景下冲突，同一场景仅允许一条生效配置���"
       },
       "scenes": {
         "userspace": "用户空间认证",
@@ -2037,7 +2037,7 @@
       "confirmManualTitle": "人工认证域名归属",
       "confirmManualDesc": "确认跳过 DNS 校验,将域名 {domain} 直接标记为已校验? 该操作将记录为人工认证。",
       "toastVerified": "域名归属校验通过",
-      "toastPending": "DNS 记录尚未生效,请稍��重��",
+      "toastPending": "DNS 记录尚未生效,��稍��重��",
       "toastManual": "已人工��证该域名",
       "verifiedAt": "校验时间",
       "verifiedBy": "校���方式",
@@ -2411,7 +2411,7 @@
       "sender": "发信人",
       "originalUrl": "原始链接",
       "triggerStage": "触发环节",
-      "verdict": "检测结论",
+      "verdict": "检测结��",
       "finalResult": "最终结果",
       "userAction": "用户操作",
       "action": "操作"
@@ -3827,7 +3827,7 @@
     "examplePartnerIp": "合作伙伴IP",
     "examplePartnerIpDesc": "信任的合作伙伴网络",
     "examplePartnerIpRemark": "合作伙伴网络",
-    "examplePartnerIpEffect": "来自该网段的邮件放行并添加标记，继续内容层检���",
+    "examplePartnerIpEffect": "来自该网段的邮件放行并添加标记，���续内容层检���",
     "simulationTest": "模拟测试",
     "simulatorIpLabel": "模拟IP地址",
     "startTest": "开始测试",
@@ -4109,7 +4109,7 @@
     "countryKR": "韩国",
     "privateIpNote": "注：私有地址段（10.x/172.16.x/192.168.x）不触发 GeoIP 判定，请使用 IP 黑白名单模块处理私网场景。",
     "searchCountry": "搜索国家/地区（代码或名称）...",
-    "noCountryFound": "未找到匹配的国家/地区",
+    "noCountryFound": "未找到匹配的国家/���区",
     "exportJSON": "导出 JSON",
     "exportCSV": "导出 CSV"
   },
@@ -4418,7 +4418,7 @@
     "tipScopes": "内容规则仅检查选定的作用域，选择多个作用域可扩大匹配范围",
     "tipRegex": "正则表达式使用标准Go regexp语法，无效正则保存��会被拒绝",
     "tipDirections": "规则可同时启用多个方向，每个方向有独立的执行动作",
-    "tipContentGroup": "内容组通过收件人标签匹配邮件，标签在分组页面管理",
+    "tipContentGroup": "内容组通过收件人标签匹配邮件，标���在分组页面管理",
     "tipKeyword": "关键词���竖线分隔，支持多个关键词",
     "tipSimulator": "建议先使用��拟测试验证规则效果",
     "validUntilBeforeFrom": "失效时间不���早于生效时间",
@@ -4744,7 +4744,7 @@
     "templateDesc": {
       "loose": "仅拦截明确伪造",
       "standard": "平衡安全与业务，明确伪造使用阻断/丢弃，疑似伪造使用隔离",
-      "strict": "零信任策略，大量使用丢弃动作，适用于金融/政务等高安全场景",
+      "strict": "零信任���略，大量使用丢弃动作，适用于金融/政务等高安全场景",
       "custom": "完全手动控制，脱离模板保护，需自行评估风险"
     },
     "strictObserveNotice": "切换后将强制开启观察模式",
@@ -5075,7 +5075,7 @@
       "senderMismatchReason": "测试发信人“{sender}”与适用对象“{target}”不匹配，未计算阈值",
       "ipMismatchReason": "测试 IP“{ip}”与适用对象“{target}”不匹配，未计算阈值",
       "groupUnavailableReason": "无法读取对象组“{target}”的成员，未计算阈值",
-      "organizationUnavailableReason": "本地模拟无法仅凭测试发信人判断组织归属，未计算阈值",
+      "organizationUnavailableReason": "本地模拟无法仅凭测试发信人判断组织归属，未计算���值",
       "hitReason": "触发维度{condition}“{dimension}”��当前{count}{unit}，达到阈值{threshold}{unit}",
       "unitIp": "个",
       "unitRecipient": "人",
@@ -5707,7 +5707,7 @@
     "totalRules": "共 {count} 条规则",
     "createRule": "新建规则",
     "priority": "优先级",
-    "priorityHint": "数值越大优先级越高，命中多条规则时优先执行数值大的规则（范围 {min}–{max}）",
+    "priorityHint": "数值越大优先级越高，命中多条规则时优先执行数值大的规则（���围 {min}–{max}）",
     "ruleName": "规则名称",
     "applyTo": "适���对象",
     "applyToAllUsers": "全部用户",
@@ -7056,7 +7056,7 @@
       "server": "服务器",
       "retries": "重试次数",
       "created": "创建时间",
-      "error": "错误",
+      "error": "错��",
       "actions": "操作",
       "noJobs": "暂无任务",
       "retrySuccess": "任务已加���重试队列",
@@ -7408,7 +7408,7 @@
         "usage": "检测是否存在仿冒相似域名",
         "object": "受保护域名档案；* 表示对全部受保护域名档案生效。",
         "operators": "大于/大于等于：差异越大越宽松，命中范围越大；小于/小于等于：差异越小越严格，只命中高度相似域名；介于：命中差异落在指定区间的域名。",
-        "example": "对象选择「公司主域名档���」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超过 2 的仿冒域名。",
+        "example": "对象选择「公司主域名档���」，比较方式「小于等于」，阈值「2」——命中与受保护域名字符差异不超�� 2 的仿冒域名。",
         "recommended": "推荐使用「小于等于 2」，与内置相似域名规则一致，���顾召回与误报。",
         "note": "先选择受保护域名档案，���填写编辑距离阈值：数值是发信域名与受保护域名的字符差异数（整数，通常 1-5），越小越相似。内置的相似域名规则用「小于等于 2」。"
       },
@@ -10983,7 +10983,7 @@
       },
       "direction": {
         "inbound": "接收方向",
-        "outbound": "外发方向",
+        "outbound": "���发方向",
         "internal": "域内方向"
       },
       "hint": {
@@ -11359,7 +11359,7 @@
       "access_denied": "没有权限执行该处置操作",
       "action_invalid": "处置动作无效，只能是：{allowed}",
       "description_required": "请填写说明",
-      "eml_not_on_storage_node": "在存储节点上找不到原始邮件，可能已被清理",
+      "eml_not_on_storage_node": "在存储节点上找不到原始邮件，可能已���清理",
       "eml_unavailable": "原始邮件不可用，可能已过保留期或被清理",
       "final_type_invalid": "最终邮件类型��值无效",
       "final_type_requires_release": "仅在执行「放行」时才能指定最终邮件类型",
@@ -11980,7 +11980,7 @@
     },
     "recall_admin": {
       "backend_coremail_exchange": "后端类型只能是 coremail 或 exchange",
-      "key_id_exists": "密钥 ID 已存在，请更换后重试",
+      "key_id_exists": "密钥 ID 已存在，请更��后重试",
       "mail_log_does_not_belong_your": "该邮件日志不属于当前租户",
       "recall_request_not_found": "召回请求不存在",
       "recall_request_does_not_belong_your": "该召回请求不属于当前租户"
@@ -12174,7 +12174,7 @@
     },
     "outcomes": {
       "observed": "已观察",
-      "empty": "查询成功，结果为空",
+      "empty": "查询成功���结果为空",
       "not_found": "查询成功，未命中",
       "unavailable": "不可用",
       "partial": "部分结果",
@@ -12306,6 +12306,7 @@
       "totalHits": "观察期总命中数",
       "avgObservedDays": "平均观察时长",
       "pendingReviewCount": "待转正策略数",
+      "scopeHint": "以下指标按所选统计时间范围汇总",
       "vsPrevious": "较上期",
       "days": "天"
     },
@@ -12392,6 +12393,7 @@
     },
     "detail": {
       "title": "效能明细",
+      "observingTotal": "当前观察中策略 {count} 条",
       "empty": "当前筛选条件下没有处于观察模式的策略/规则",
       "expandRow": "展开查看动作分布",
       "deletedSuffix": "（已删除）",
