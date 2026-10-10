@@ -112,9 +112,9 @@ export function FilterBar({
             size="sm"
             className="h-11 min-w-44 justify-between rounded-lg px-4 text-base font-normal"
             data-testid="rule-effectiveness-timerange-filter"
-            aria-label="时间范围筛选"
+            aria-label="统计时间范围筛选"
           >
-            <span>{t(`timeRange.${timeRange}`)}</span>
+            <span>统计时间范围：{t(`timeRange.${timeRange}`)}</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           </Button>
         } />
@@ -146,12 +146,14 @@ export function FilterBar({
                 !draft.start && !draft.end && 'text-muted-foreground',
               )}
               data-testid="rule-effectiveness-custom-date-filter"
-              aria-label="自定义日期范围"
+              aria-label="统计时间范围自定义日期"
             >
               <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
               {draft.start && draft.end
-                ? `${draft.start} ~ ${draft.end}`
-                : draft.start || draft.end || '选择日期范围'}
+                ? `统计时间范围：${draft.start} ~ ${draft.end}`
+                : draft.start || draft.end
+                  ? `统计时间范围：${draft.start || draft.end}`
+                  : '选择统计日期范围'}
             </Button>
           } />
           <PopoverContent className="w-auto p-0" align="start">
