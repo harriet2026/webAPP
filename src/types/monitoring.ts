@@ -132,16 +132,18 @@ export interface DatabaseSummary {
 
 export interface DatabaseResp extends DegradeInfo {
   lock_wait_info?: {
-    scope: 'monitor_connection_visible_requests';
+    node: string;
+    scope: 'selected_node_visible_requests';
     time_basis: 'statement_start';
     limit: number;
     total?: number;
     truncated?: boolean;
   };
   sql_ranking?: {
+    node?: string;
     order_by: 'total_ms_desc';
     period: 'retained_cumulative';
-    scope: 'monitor_connection_visible_entries';
+    scope: 'monitor_connection_visible_entries' | 'selected_node_visible_entries';
     node_filter_applied: boolean;
     range_filter_applied: boolean;
     slow_threshold_applied: boolean;

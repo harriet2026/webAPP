@@ -1,7 +1,7 @@
 import { apiRequest, type ApiRequestFn } from './client';
 
 // Recipient-copy observation statistics, scoped to the current observation period.
-export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter';
+export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'recipient_check' | 'intent_engine' | 'attachment_security' | 'advanced_filter_rules';
 
 export type Direction = 'receive' | 'send' | 'internal';
 
@@ -78,6 +78,8 @@ export interface RuleEffectivenessRow {
   sub_strategy_name_snapshot: string;
   observed_since: string | null;
   observed_days: number | null;
+  /** Current-period promotion eligibility, independent of the selected hit window. */
+  pending_review?: boolean;
   hits: number;
   tenant_id: number;
   tenant_name: string;

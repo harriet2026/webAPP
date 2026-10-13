@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DatabaseTab } from '@/components/monitoring/infrastructure/DatabaseTab';
 
 const { request } = vi.hoisted(() => ({ request: vi.fn() }));
+const sqlRanking = (node = 'dev') => ({ node, scope: 'selected_node_visible_entries', order_by: 'total_ms_desc', period: 'retained_cumulative', node_filter_applied: true, range_filter_applied: false, slow_threshold_applied: false, last_execution_time: 'unsupported' });
 vi.mock('@/lib/api/client', () => ({ useApiRequest: () => ({ apiRequest: request }), apiRequest: request }));
 vi.mock('next-intl', () => ({
   useLocale: () => 'zh',
@@ -14,6 +15,70 @@ vi.mock('echarts-for-react', () => ({ default: ({ option }: { option: { series: 
 ) }));
 
 describe('database performance switching', () => {
+  it('switches lock snapshots with node selection, independently of historical range', async () => {
+    request.mockImplementation(async (url: string) => {
+      const node = new URL(url, 'http://localhost').searchParams.get('node');
+      return { supported: true, status: { db: { status: 'ok' } }, conn_trend: { points: [] }, latency_trend: { points: [] },
+        lock_wait_info: { node, scope: 'selected_node_visible_requests', time_basis: 'statement_start', limit: 20 },
+        diagnostics: { lock_waits: 'ok', slow_queries: 'unsupported', connections: 'ok' },
+        lock_waits: [{ wait_type: 'relation', wait_object: `table_${node}`, pid: '123' }] };
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const view = render(<QueryClientProvider client={client}><DatabaseTab node="node1" range="1h" /></QueryClientProvider>);
+    expect(await screen.findByTestId('monitor-infrastructure-lock-wait-row-1')).toHaveTextContent('table_node1');
+    view.rerender(<QueryClientProvider client={client}><DatabaseTab node="node2" range="7d" /></QueryClientProvider>);
+    await waitFor(() => expect(screen.getByTestId('monitor-infrastructure-lock-wait-row-1')).toHaveTextContent('table_node2'));
+    expect(screen.queryByText('table_node1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('monitor-infrastructure-lock-wait-scope')).toHaveAttribute('data-node', 'node2');
+    view.unmount(); client.clear();
+  });
+
+  it.each(['wrong_node', 'legacy', 'error', 'unsupported', 'empty'])('does not display primary locks for node2: %s', async (mode) => {
+    request.mockResolvedValue({ supported: true, status: { db: { status: 'ok' } }, conn_trend: { points: [] }, latency_trend: { points: [] },
+      lock_wait_info: mode === 'legacy' ? undefined : { node: mode === 'wrong_node' ? 'node1' : 'node2', scope: 'selected_node_visible_requests', time_basis: 'statement_start', limit: 20 },
+      diagnostics: { lock_waits: mode === 'error' ? 'error' : mode === 'unsupported' ? 'unsupported' : 'ok', slow_queries: 'unsupported', connections: 'ok' },
+      lock_waits: mode === 'empty' ? [] : [{ wait_type: 'relation', wait_object: 'primary_only_lock', pid: '123' }] });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const view = render(<QueryClientProvider client={client}><DatabaseTab node="node2" range="1h" /></QueryClientProvider>);
+    await screen.findByTestId('monitor-infrastructure-lock-wait-card');
+    expect(screen.queryByText('primary_only_lock')).not.toBeInTheDocument();
+    if (mode === 'empty') expect(screen.getByText('database.noLockWaits')).toBeInTheDocument();
+    else if (mode === 'unsupported') expect(screen.getByTestId('monitor-infrastructure-lock-wait-unsupported')).toBeInTheDocument();
+    else expect(screen.getByTestId('monitor-infrastructure-lock-wait-error')).toBeInTheDocument();
+    view.unmount(); client.clear();
+  });
+  it('switches cumulative SQL rows with the selected node and keeps the cumulative range', async () => {
+    request.mockImplementation(async (url: string) => {
+      const node = new URL(url,'http://localhost').searchParams.get('node') ?? '';
+      return { supported:true,status:{db:{status:'ok'},redis:{status:'missing'}},conn_trend:{points:[]},latency_trend:{points:[]},lock_waits:[],
+        sql_ranking:sqlRanking(node),slow_queries:[{query:`SELECT ${node}`,exec_count:1,avg_ms:1,total_ms:1}] };
+    });
+    const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+    const view=render(<QueryClientProvider client={client}><DatabaseTab node="node1" range="1h" /></QueryClientProvider>);
+    expect(await screen.findByTestId('monitor-infrastructure-slow-query-trigger-1')).toHaveTextContent('SELECT node1');
+    view.rerender(<QueryClientProvider client={client}><DatabaseTab node="node2" range="7d" /></QueryClientProvider>);
+    await waitFor(()=>expect(screen.getByTestId('monitor-infrastructure-slow-query-trigger-1')).toHaveTextContent('SELECT node2'));
+    expect(screen.queryByText('SELECT node1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('monitor-infrastructure-sql-ranking-scope')).toHaveAttribute('data-node','node2');
+    view.unmount();client.clear();
+  });
+
+  it.each(['wrong_node','legacy','error','unsupported','empty'])('never substitutes primary SQL data for node2: %s', async (mode) => {
+    request.mockResolvedValue({ supported:true,status:{db:{status:'ok'},redis:{status:'missing'}},conn_trend:{points:[]},latency_trend:{points:[]},lock_waits:[],
+      sql_ranking:mode==='legacy'?undefined:sqlRanking(mode==='wrong_node'?'node1':'node2'),
+      diagnostics:{slow_queries:mode==='error'?'error':mode==='unsupported'?'unsupported':'ok',lock_waits:'ok',connections:'ok'},
+      slow_queries:mode==='empty'?[]:[{query:'SELECT primary_only',exec_count:1,avg_ms:1,total_ms:1}],
+    });
+    const client=new QueryClient({defaultOptions:{queries:{retry:false}}});
+    const view=render(<QueryClientProvider client={client}><DatabaseTab node="node2" range="1h" /></QueryClientProvider>);
+    await screen.findByTestId('monitor-infrastructure-slow-query-card');
+    expect(screen.queryByText('SELECT primary_only')).not.toBeInTheDocument();
+    if(mode==='empty') expect(screen.getByText('database.noSlowQueries')).toBeInTheDocument();
+    else expect(screen.queryByText('database.noSlowQueries')).not.toBeInTheDocument();
+    if(mode==='wrong_node'||mode==='legacy') expect(screen.getByTestId('monitor-infrastructure-sql-ranking-node-unavailable')).toBeInTheDocument();
+    view.unmount();client.clear();
+  });
+
   it.each([true, false])('does not display a control-node role for node2 (scoped response: %s)', async (scoped) => {
     request.mockImplementation(async (url: string) => {
       const node = new URL(url,'http://localhost').searchParams.get('node');
@@ -39,7 +104,7 @@ describe('database performance switching', () => {
     request.mockResolvedValue({
       supported: true, status: { db: { status: 'ok' }, redis: { status: 'missing' } },
       conn_trend: { points: [] }, latency_trend: { points: [] }, slow_queries: [],
-      lock_wait_info: { scope: 'monitor_connection_visible_requests', time_basis: 'statement_start', total: 42, limit: 20, truncated: true },
+      lock_wait_info: { node: 'dev', scope: 'selected_node_visible_requests', time_basis: 'statement_start', total: 42, limit: 20, truncated: true },
       lock_waits: [
         { wait_type: 'transactionid', wait_object: 'transactionid=456', pid: '9223372036854775807', session_id: '88', mode: 'ShareLock', database_name: 'mail', database_id: '17', user_name: 'alice', query: 'UPDATE items SET value=1', query_started_at: '2026-09-18T10:00:00Z', statement_elapsed_ms: 8123 },
         { wait_type: 'advisory', wait_object: 'objid=12', pid: '89', statement_elapsed_ms: 0 },
@@ -56,7 +121,7 @@ describe('database performance switching', () => {
     expect(first).toHaveTextContent('alice');
     expect(first).toHaveTextContent('ShareLock');
     expect(first).toHaveTextContent('transactionid=456');
-    expect(screen.getByTestId('monitor-infrastructure-lock-statement-age-1')).toHaveTextContent('8123ms');
+    expect(screen.getByTestId('monitor-infrastructure-lock-statement-age-1')).toHaveTextContent('8,123ms');
     expect(screen.getByTestId('monitor-infrastructure-lock-statement-age-2')).toHaveTextContent(/^0ms$/);
     expect(screen.getByTestId('monitor-infrastructure-lock-statement-age-3')).toHaveTextContent('database.sourceNotProvided');
     fireEvent.focus(screen.getByTestId('monitor-infrastructure-lock-query-trigger-1'));
@@ -68,6 +133,7 @@ describe('database performance switching', () => {
 
   it('shows cumulative SQL identities and never labels a statistics update as last execution', async () => {
     request.mockResolvedValue({
+      sql_ranking: sqlRanking(),
       supported: true, db_backend: 'OPENGAUSS', status: { db: { status: 'ok' }, redis: { status: 'missing' } },
       conn_trend: { points: [] }, latency_trend: { points: [] }, lock_waits: [],
       slow_queries: [
@@ -82,7 +148,12 @@ describe('database performance switching', () => {
     expect(screen.getByTestId('monitor-infrastructure-sql-identity-2')).toHaveTextContent('bob');
     expect(screen.getByTestId('monitor-infrastructure-sql-identity-2')).toHaveTextContent('database.nestedStatement');
     expect(screen.getByTestId('monitor-infrastructure-sql-ranking-scope')).toHaveTextContent('database.sqlRankingScope');
-    expect(within(screen.getByTestId('monitor-infrastructure-sql-updated-1')).getByTitle('2026-09-18T10:23:00.123Z')).toHaveAttribute('datetime','2026-09-18T10:23:00.123Z');
+    const updatedTime = screen.getByTestId('monitor-infrastructure-sql-updated-1').querySelector('time');
+    expect(updatedTime).toHaveAttribute('datetime', '2026-09-18T10:23:00.123Z');
+    expect(updatedTime?.textContent).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} .+$/);
+    expect(updatedTime).toHaveAttribute('title', updatedTime!.textContent!);
+    const localDate = new Date('2026-09-18T10:23:00.123Z');
+    expect(updatedTime?.textContent).toContain(`${String(localDate.getHours()).padStart(2, '0')}:23:00`);
     expect(screen.getByTestId('monitor-infrastructure-sql-updated-2')).toHaveTextContent('database.sourceNotProvided');
     expect(screen.getByRole('columnheader', { name: 'database.totalMs ↓' })).toHaveAttribute('aria-sort','descending');
     fireEvent.focus(screen.getByTestId('monitor-infrastructure-slow-query-trigger-1'));
@@ -116,18 +187,18 @@ describe('database performance switching', () => {
     });
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const view = render(<QueryClientProvider client={client}><DatabaseTab node="dev" range="1h" /></QueryClientProvider>);
-    expect(await screen.findByTestId('monitor-infrastructure-summary-connections')).toHaveTextContent('45 / 5000');
-    expect(screen.getByTestId('monitor-infrastructure-summary-p50')).toHaveTextContent('2.00 ms');
+    expect(await screen.findByTestId('monitor-infrastructure-summary-connections')).toHaveTextContent('45 / 5,000');
+    expect(screen.getByTestId('monitor-infrastructure-summary-p50')).toHaveTextContent('2 ms');
     expect(screen.getByTestId('monitor-infrastructure-summary-p95')).toHaveTextContent('metricStates.missing');
-    expect(screen.getByTestId('monitor-infrastructure-summary-p95')).not.toHaveTextContent('5.00 ms');
+    expect(screen.getByTestId('monitor-infrastructure-summary-p95')).not.toHaveTextContent('5 ms');
     expect(screen.getByTestId('monitor-infrastructure-db-replication')).toHaveAttribute('data-state', 'no_replicas');
     expect(screen.getByTestId('monitor-infrastructure-redis-replication')).toHaveAttribute('data-state', 'down');
     expect(screen.getByTestId('monitor-infrastructure-cache-card')).toHaveClass('border-destructive');
     expect(screen.getByTestId('monitor-infrastructure-cache-card')).toHaveTextContent('PING 0ms');
     fireEvent.click(screen.getByTestId('monitor-infrastructure-db-source-redis'));
-    await waitFor(() => expect(screen.getByTestId('monitor-infrastructure-summary-connections')).toHaveTextContent('0 / 10000'));
+    await waitFor(() => expect(screen.getByTestId('monitor-infrastructure-summary-connections')).toHaveTextContent('0 / 10,000'));
     expect(screen.queryByTestId('monitor-infrastructure-summary-p50')).not.toBeInTheDocument();
-    expect(screen.getByTestId('monitor-infrastructure-summary-p99')).toHaveTextContent('0.00 ms');
+    expect(screen.getByTestId('monitor-infrastructure-summary-p99')).toHaveTextContent('0 ms');
     view.rerender(<QueryClientProvider client={client}><DatabaseTab node="other" range="7d" /></QueryClientProvider>);
     await waitFor(() => expect(request).toHaveBeenCalledWith(expect.stringContaining('node=other&range=7d&source=redis&metric=summary')));
     view.unmount(); client.clear();
@@ -190,6 +261,8 @@ describe('database performance switching', () => {
     { slow: 'ok', lock: 'ok', connection: 'ok', supported: true },
   ])('isolates diagnostics: $slow / $lock / $connection', async ({ slow, lock, connection, supported }) => {
     request.mockResolvedValue({
+      lock_wait_info: { node: 'dev', scope: 'selected_node_visible_requests', time_basis: 'statement_start', limit: 20 },
+      sql_ranking: sqlRanking(),
       supported, db_backend: 'OPENGAUSS',
       degraded: [slow, lock, connection].includes('error'),
       degraded_code: [slow, lock, connection].includes('error') ? 'metrics_db_unavailable' : undefined,
@@ -221,6 +294,7 @@ describe('database performance switching', () => {
 
   it('keeps successful lock rows when slow-query monitoring fails', async () => {
     request.mockResolvedValue({
+      lock_wait_info: { node: 'dev', scope: 'selected_node_visible_requests', time_basis: 'statement_start', limit: 20 },
       supported: true, db_backend: 'OPENGAUSS', degraded: true, degraded_code: 'metrics_db_unavailable',
       diagnostics: { slow_queries: 'error', lock_waits: 'ok', connections: 'ok' },
       status: { db: { status: 'ok' }, redis: { status: 'ok' } },
@@ -258,7 +332,7 @@ describe('database performance switching', () => {
     const cache = within(screen.getByTestId('monitor-infrastructure-cache-card'));
     if (state === 'ok') {
       expect(screen.getByTestId('monitor-infrastructure-db-active_conns')).toHaveTextContent(/^0$/);
-      expect(screen.getByTestId('monitor-infrastructure-db-cache_hit_ratio')).toHaveTextContent('0.0%');
+      expect(screen.getByTestId('monitor-infrastructure-db-cache_hit_ratio')).toHaveTextContent('0%');
       expect(cache.getByText('PING 0ms')).toBeInTheDocument();
     } else {
       expect(cache.getByText(`database.metricStates.${state}`)).toBeInTheDocument();

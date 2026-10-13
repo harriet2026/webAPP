@@ -1,15 +1,16 @@
-import { apiRequest, type ApiRequestFn } from './client';
+import { ApiError, apiRequest, type ApiRequestFn } from './client';
 import { getRuleEffectiveness as getReportPage, getObservationVersions, getObservationSnapshot, buildEmailDisposalCenterQuery as buildScopedMailQuery, type RuleEffectivenessRow as BackendRow } from './rule-effectiveness';
 
 // 规则效能统计（观察模式）— 数据契约
 //
-// 范围固定为 3 类持续性「观察态」模块（详见需求方案）：
+// 当前已接入真实观察统计的模块：
 //   - auth_spoofing：身份认证与仿冒检测下的各子策略
 //   - similar_detection：相似邮件检测模块下的各方向
-//   - phishing_detection：钓鱼邮件检测智能体（整引擎级，无子策略维度）
-// 高级规则（单条 action=observe）与仿冒品牌/人物检测不在本期范围内。
+//   - phishing_detection：钓鱼检测智能体按风险等级划分的处置规则
+//   - sender_filter：发信人黑白名单，按规则分别统计
+// 其余模块复用同一观察周期、命中与统计链路。
 
-export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection';
+export type PolicyModule = 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'recipient_check' | 'intent_engine' | 'attachment_security' | 'advanced_filter_rules';
 
 /** 与安全总览共用的邮件方向枚举，相似检测按方向拆分观察对象时复用同一枚举。 */
 export type Direction = 'receive' | 'send' | 'internal';
@@ -102,6 +103,10 @@ export interface PolicyVersionEntry {
   change_type: PolicyVersionChangeType;
   /** 变更摘要，用于版本历史列表展示，如「执行动作：隔离 → 审核」。 */
   change_summary: string;
+  /** 通过按版本授权的快照接口加载，不来自普通历史列表。 */
+  changed_fields?: PolicyVersionFieldChange[];
+  /** 快照或差异不可读取时的稳定展示原因，避免退化为笼统的配置变更摘要。 */
+  change_details_unavailable_reason?: ChangeDetailsUnavailableReason;
   /** 该版本生效期间累计的命中数，与当前行的 hits 字段口径一致但范围限定在该版本内。 */
   hits: number;
 }
@@ -111,6 +116,13 @@ export interface PolicyVersionFieldChange {
   before: unknown;
   after: unknown;
 }
+
+export type ChangeDetailsUnavailableReason =
+  | 'snapshot_unavailable'
+  | 'access_denied'
+  | 'version_not_found'
+  | 'load_failed'
+  | 'difference_unavailable';
 
 export interface RuleEffectivenessParams {
   startDate?: string;
@@ -159,7 +171,9 @@ export interface RuleEffectivenessRow {
   observed_since: string;
   /** 观察时长——按当前版本的 observed_since 计算，不叠加历史版本的观察天数。 */
   observed_days: number;
+  pending_review?: boolean;
   hits: number;
+  distinct_message_count?: number;
   reviewed_count?: number;
   weighted_reviewed_count?: number;
   false_positive_rate: number | null;
@@ -181,6 +195,8 @@ export interface RuleEffectivenessRow {
   current_version_changes?: PolicyVersionFieldChange[];
   /** mock 或差异不可展开时使用的当前版本变更摘要。 */
   current_version_change_summary?: string;
+  /** 当前版本快照或差异不可读取时的稳定展示原因。 */
+  current_version_change_unavailable_reason?: ChangeDetailsUnavailableReason;
   /** 前往策略配置页的路径。 */
   config_path: string;
 }
@@ -193,14 +209,79 @@ export interface RuleEffectivenessResponse {
 }
 
 
-/** Presentation keys differ from persisted object identities; never use these for API scope. */
-function presentationStrategy(row: BackendRow): string {
-  if (row.policy_module !== 'auth_spoofing') return row.sub_strategy_id;
-  const key = row.sub_strategy_id;
-  if (key.startsWith('format_check.')) return key.replace('.', '_');
-  if (key.startsWith('display_name_spoof.')) return key.replace('display_name_spoof.', 'display_name_spoofing_');
-  if (key === 'similar_domain.main') return 'similar_domain';
-  return key;
+const SIMILAR_TYPES: readonly SimilarDetectionType[] = ['similar_email', 'same_subject'];
+const SIMILAR_SCOPES: readonly SimilarDetectionScope[] = ['aggregate', 'receive', 'send', 'internal'];
+
+export interface PresentationStrategy {
+  sub_strategy_id: string;
+  similar_detection_type?: SimilarDetectionType;
+  similar_detection_scope?: SimilarDetectionScope;
+}
+
+/**
+ * Presentation keys differ from persisted object identities; never use these for API scope.
+ * Shared by the report table and the email-disposal drill-down banner (GT-14322): the drill-down
+ * URL deliberately carries the backend object key, so the banner must map it the same way.
+ * Accepts backend keys (`same_subject.send`), presentation keys, and the product mock's
+ * `type:scope` drill-down form.
+ */
+export function presentationStrategy(policyModule: string, key: string): PresentationStrategy {
+  if (policyModule === 'similar_detection') {
+    const [type, scope] = key.split(/[.:]/, 2);
+    if (SIMILAR_TYPES.includes(type as SimilarDetectionType) && SIMILAR_SCOPES.includes(scope as SimilarDetectionScope)) {
+      return {
+        sub_strategy_id: key,
+        similar_detection_type: type as SimilarDetectionType,
+        similar_detection_scope: scope as SimilarDetectionScope,
+      };
+    }
+    return { sub_strategy_id: key };
+  }
+  if (policyModule !== 'auth_spoofing') return { sub_strategy_id: key };
+  if (key.startsWith('format_check.')) return { sub_strategy_id: key.replace('.', '_') };
+  if (key.startsWith('display_name_spoof.')) return { sub_strategy_id: key.replace('display_name_spoof.', 'display_name_spoofing_') };
+  if (key === 'similar_domain.main') return { sub_strategy_id: 'similar_domain' };
+  return { sub_strategy_id: key };
+}
+
+interface VersionChangeDetails {
+  changedFields: PolicyVersionFieldChange[];
+  unavailableReason?: ChangeDetailsUnavailableReason;
+}
+
+function snapshotRequestFailureReason(error: unknown): ChangeDetailsUnavailableReason {
+  if (error instanceof ApiError) {
+    if (error.status === 401 || error.status === 403) return 'access_denied';
+    if (error.status === 404) return 'version_not_found';
+  }
+  return 'load_failed';
+}
+
+async function loadVersionChangeDetails(
+  version: BackendRow,
+  request: ApiRequestFn,
+): Promise<VersionChangeDetails> {
+  if (!version.snapshot_available) {
+    return {
+      changedFields: [],
+      unavailableReason: version.change_summary === 'difference_unavailable'
+        ? 'difference_unavailable'
+        : 'snapshot_unavailable',
+    };
+  }
+  try {
+    const snapshot = await getObservationSnapshot(version, request);
+    if (
+      version.version_no > 1
+      && snapshot.changed_fields.length === 0
+      && (version.change_summary === 'configuration_changed' || version.change_summary === 'difference_unavailable')
+    ) {
+      return { changedFields: [], unavailableReason: 'difference_unavailable' };
+    }
+    return { changedFields: snapshot.changed_fields };
+  } catch (error) {
+    return { changedFields: [], unavailableReason: snapshotRequestFailureReason(error) };
+  }
 }
 
 /** Adapt the paginated backend to the product's complete, unpaginated view. */
@@ -214,7 +295,7 @@ export async function getRuleEffectiveness(
     const { mockRuleEffectivenessFor } = await import('../mock/rule-effectiveness-prototype');
     return mockRuleEffectivenessFor(params.startDate ?? '', params.endDate ?? '', params.modules ?? [], params.durationBuckets ?? [], params.similarDetectionTypes ?? []);
   }
-  params = { ...params, modules: params.modules ?? ['auth_spoofing', 'similar_detection', 'phishing_detection'] };
+  params = { ...params, modules: params.modules ?? ['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter', 'behavior_control', 'content_rules', 'recipient_check', 'intent_engine', 'attachment_security', 'advanced_filter_rules'] };
   const first = await getReportPage({ ...params, page: 1, pageSize: 100 }, request);
   const backendRows = [...first.rows];
   for (let page = 2; backendRows.length < first.rows_total; page++) {
@@ -226,35 +307,38 @@ export async function getRuleEffectiveness(
   // Bound simultaneous row-history requests while retaining every product row.
   for (let offset = 0; offset < backendRows.length; offset += 4) {
     rows.push(...await Promise.all(backendRows.slice(offset, offset + 4).map(async row => {
-      const history: PolicyVersionEntry[] = [];
-      for (let page = 1; row.history_count > history.length; page++) {
+      const historyRows: BackendRow[] = [];
+      for (let page = 1; row.history_count > historyRows.length; page++) {
         const batch = await getObservationVersions(row, page, request);
-        history.push(...batch.items.map(version => ({
+        historyRows.push(...batch.items);
+        if (historyRows.length >= batch.total) break;
+        if (batch.items.length === 0) throw new Error('Observation history changed during pagination; retry');
+      }
+      const history: PolicyVersionEntry[] = [];
+      // A report row may have many archived versions. Keep snapshot fan-out bounded
+      // while loading every version through the separately authorized endpoint.
+      for (let offset = 0; offset < historyRows.length; offset += 4) {
+        const versions = historyRows.slice(offset, offset + 4);
+        const details = await Promise.all(versions.map(version => loadVersionChangeDetails(version, request)));
+        history.push(...versions.map((version, index) => ({
           version_no: version.version_no,
           effective_at: version.effective_at,
           superseded_at: version.superseded_at,
           change_type: 'substantive' as const,
           change_summary: translateSummary(version.change_summary),
+          changed_fields: details[index].changedFields,
+          change_details_unavailable_reason: details[index].unavailableReason,
           hits: version.hits,
         })));
-        if (history.length >= batch.total) break;
-        if (batch.items.length === 0) throw new Error('Observation history changed during pagination; retry');
       }
-      let currentVersionChanges: PolicyVersionFieldChange[] = [];
-      if (row.history_count > 0 && row.snapshot_available) {
-        try {
-          const snapshot = await getObservationSnapshot(row, request);
-          currentVersionChanges = snapshot.changed_fields;
-        } catch {
-          // Keep the report usable for viewers without snapshot permission or while
-          // the snapshot endpoint is degraded; the persisted change summary remains.
-        }
-      }
+      const currentDetails = row.history_count > 0
+        ? await loadVersionChangeDetails(row, request)
+        : { changedFields: [] };
       if (row.observed_days == null || row.observed_since == null) throw new Error('Observation start unavailable');
       return {
         ...row,
         backend: row,
-        sub_strategy_id: presentationStrategy(row),
+        ...presentationStrategy(row.policy_module, row.sub_strategy_id),
         policy_module: row.policy_module as PolicyModule,
         observed_since: row.observed_since,
         observed_days: row.observed_days,
@@ -267,12 +351,13 @@ export async function getRuleEffectiveness(
         risk_unavailable_reason: row.risk_unavailable_reason,
         configured_action: row.configured_action,
         version_history: history.sort((a, b) => a.version_no - b.version_no),
-        current_version_changes: currentVersionChanges,
+        current_version_changes: currentDetails.changedFields,
         current_version_change_summary: translateSummary(row.change_summary),
+        current_version_change_unavailable_reason: currentDetails.unavailableReason,
       };
     })));
   }
-  return { kpi: first.kpi, rows, degraded_modules: first.degraded_modules.filter((module): module is PolicyModule => module !== 'sender_filter') };
+  return { kpi: first.kpi, rows, degraded_modules: first.degraded_modules };
 }
 
 export function buildEmailDisposalCenterQuery(row: RuleEffectivenessRow, startDate: string, endDate: string): string {

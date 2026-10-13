@@ -41,33 +41,33 @@ describe('advanced-rules API', () => {
     expect(await listAdvancedRules(fn)).toEqual([]);
   });
 
-  it('createAdvancedRule → POST /unified-rules with body', async () => {
+  it('createAdvancedRule → POST /unified-rules?scope=advanced_rules with body', async () => {
     const { fn, calls } = makeStub({ id: 5 });
     const data = { name: 'r', rule_class: 'action', stage: 'data', condition_tree: { type: 'AND' } } as CreateRuleRequest;
     await createAdvancedRule(data, fn);
-    expect(calls[0].path).toBe('/unified-rules');
+    expect(calls[0].path).toBe('/unified-rules?scope=advanced_rules');
     expect(calls[0].options).toEqual({ method: 'POST', body: data });
   });
 
-  it('updateAdvancedRule → PUT /unified-rules/:id with body', async () => {
+  it('updateAdvancedRule → PUT /unified-rules/:id?scope=advanced_rules with body', async () => {
     const { fn, calls } = makeStub({ id: 7 });
     const data = { name: 'x' } as UpdateRuleRequest;
     await updateAdvancedRule(7, data, fn);
-    expect(calls[0].path).toBe('/unified-rules/7');
+    expect(calls[0].path).toBe('/unified-rules/7?scope=advanced_rules');
     expect(calls[0].options).toEqual({ method: 'PUT', body: data });
   });
 
-  it('deleteAdvancedRule → DELETE /unified-rules/:id', async () => {
+  it('deleteAdvancedRule → DELETE /unified-rules/:id?scope=advanced_rules', async () => {
     const { fn, calls } = makeStub(undefined);
     await deleteAdvancedRule(9, fn);
-    expect(calls[0].path).toBe('/unified-rules/9');
+    expect(calls[0].path).toBe('/unified-rules/9?scope=advanced_rules');
     expect(calls[0].options).toEqual({ method: 'DELETE' });
   });
 
-  it('toggleAdvancedRule → PUT /unified-rules/:id/status with {is_active}', async () => {
+  it('toggleAdvancedRule → PUT /unified-rules/:id/status?scope=advanced_rules with {is_active}', async () => {
     const { fn, calls } = makeStub({ id: 3 });
     await toggleAdvancedRule(3, false, fn);
-    expect(calls[0].path).toBe('/unified-rules/3/status');
+    expect(calls[0].path).toBe('/unified-rules/3/status?scope=advanced_rules');
     expect(calls[0].options).toEqual({ method: 'PUT', body: { is_active: false } });
   });
 

@@ -23,6 +23,7 @@ export interface EmailPreviewResponse {
   cc: EmailPreviewRecipient[] | null;
   text_body: string;
   html_body: string;
+  attachment_count?: number | null;
   attachments: EmailPreviewAttachment[] | null;
   urls: string[] | null;
   headers: Record<string, string>;

@@ -569,7 +569,7 @@ export function AnalysisSection({
     const masked = maskModule(entry.policy_key);
     const meta = entry.policy_key ? getPolicyMeta(entry.policy_key) : undefined;
     const route = entry.policy_key
-      ? getPolicyRoute(entry.policy_key, shouldHideInternalRuleIdentity(entry) ? undefined : entry.rule_id)
+      ? getPolicyRoute(entry.policy_key, shouldHideInternalRuleIdentity(entry) ? undefined : entry.rule_id, detail.tenant_id ?? undefined)
       : undefined;
     const hasRuleName = !!entry.rule_name && entry.rule_name !== '—';
     const ruleLabel = formatRuleLabel(entry, tAuth, disposalLang, { translateIntent: tIntent, translateRecipient: tRecipient });
@@ -740,6 +740,10 @@ export function AnalysisSection({
             <div className="flex items-start gap-0 overflow-x-auto pb-2">
               {stages.map((st, i) => {
                 const isExpanded = expandedStages.includes(st.stage);
+                // Reserve reading space only while the actual judgement detail is visible.
+                const showWideAiDetail = st.key === 'ai' && isExpanded && phishAgentDetailExpanded
+                  && hasPhishAgentData && visibleAgentAccess?.phishingAgent === 'enabled'
+                  && st.checks.some((check) => check.key === 'phishingAgent');
                 const maxCheckRecipientGroupCount = Math.max(0, ...st.checks.map((check) => check.recipientGroups?.length ?? 0));
                 const stageBasisGroups = !selectedRecipient && isMultiBasis
                   ? displayBasisRuleGroups.filter((group) => getPolicyMeta(group.policyKey)?.stage === STAGE_KEY_TO_NUM[st.key])
@@ -753,7 +757,9 @@ export function AnalysisSection({
                       variant="card"
                       className={cn(
                         'relative rounded-lg border text-left',
-                        st.key === 'ai' ? 'min-w-[300px] max-w-[360px]' : 'min-w-[180px] max-w-[200px]',
+                        st.key === 'ai'
+                          ? showWideAiDetail ? 'w-[360px] min-w-[300px] max-w-[360px]' : 'w-[200px] min-w-[200px] max-w-[200px]'
+                          : 'min-w-[180px] max-w-[200px]',
                         'data-[hovered=true]:shadow-md',
                         STAGE_CARD_STYLE[st.status],
                       )}
@@ -802,12 +808,12 @@ export function AnalysisSection({
                                     const recipientGroups = check.recipientGroups ?? [];
                                     const isSplit = recipientGroups.length > 1;
                                     const row = (
-                                      <div className="flex items-center justify-between gap-2 text-xs">
+                                      <div className={cn('flex gap-2 text-xs', st.key === 'ai' ? 'flex-col items-stretch' : 'items-center justify-between')}>
                                         <div className="flex min-w-0 items-center gap-1">
                                           {STATUS_ICON[check.status]}
-                                          <span className="truncate">{checkLabel(check.key)}</span>
+                                          <span className={st.key === 'ai' ? 'min-w-0 whitespace-normal [overflow-wrap:anywhere]' : 'truncate'}>{checkLabel(check.key)}</span>
                                         </div>
-                                        <span className={cn('flex shrink-0 items-center gap-1 text-right', CHECK_RESULT_COLOR[check.status])}>
+                                        <span className={cn('flex shrink-0 items-center gap-1 text-right', st.key === 'ai' && 'flex-wrap justify-end', CHECK_RESULT_COLOR[check.status])}>
                                           {checkResultLabel(check.status, check.reason, agentAccess)}
                                           {canExpandPhish && confidencePct != null && (
                                             <span className="ml-1 text-muted-foreground">
@@ -852,7 +858,7 @@ export function AnalysisSection({
                                           </div>
                                         )}
                                         {canExpandPhish && phishAgentDetailExpanded && (
-                                          <div data-testid="analysis-check-phishingAgent-detail" className="mt-2 space-y-3 rounded-md border bg-background/70 p-3">
+                                          <div data-testid="analysis-check-phishingAgent-detail" className="mt-2 min-w-0 max-w-full space-y-3 rounded-md border bg-background/70 p-3 [overflow-wrap:anywhere]">
                                             <KV label={t('aiVerdict.verdictLabel')} value={phishAgent!.verdict || '—'} />
                                             <KV label={t('aiVerdict.riskLevelLabel')} value={phishAgent!.risk_level || '—'} />
                                             {phishAgent!.summary && <div className="rounded border bg-card p-2.5 text-sm">{phishAgent!.summary}</div>}
@@ -1096,6 +1102,9 @@ export function AnalysisSection({
               const effective = Array.isArray(m.effective_for) ? m.effective_for : undefined;
               const recips = m.recipients ?? [];
               const matchedOnly = effective ? recips.filter((r) => !effective.includes(r)) : [];
+              const configuredAction = m.action === 'observe'
+                ? m.hit_values?.configured_action?.trim()
+                : undefined;
               return (
                 <div key={`${m.policy_key ?? ''}-${m.rule_id ?? ''}-${m.action ?? ''}-${i}`} data-testid="analysis-hit-module-item" className="rounded border border-border/70 p-2.5 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
@@ -1105,6 +1114,14 @@ export function AnalysisSection({
                     <span className="font-medium">{masked ? tFeatures('platformPolicyModule') : m.policy_key ? getModuleName(m.policy_key, disposalLang) || '—' : '—'}</span>
                     <span data-testid="analysis-hit-module-rule-label" className="min-w-0 truncate text-muted-foreground">{masked ? tFeatures('platformPolicyRuleName') : ruleLabel}</span>
                     {m.action && <span className={cn('ml-auto rounded px-2 py-0.5 font-medium', getActionColor(m.action))}>{getActionLabel(m.action, disposalLang)}</span>}
+                    {!masked && configuredAction && (
+                      <span
+                        data-testid="analysis-hit-module-configured-action"
+                        className="rounded border border-border bg-muted px-2 py-0.5 font-medium text-foreground/80"
+                      >
+                        {tFeatures('configuredAction', { action: getActionLabel(configuredAction, disposalLang) })}
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1.5 whitespace-pre-line leading-relaxed text-muted-foreground">{masked ? tFeatures('platformPolicyHitDetail') : formatHitDetail(m, disposalLang) || '—'}</p>
                   {/* §7.10.2：逐收件人标注，不能用二元徽标——effective_for ⊊ recipients
@@ -1297,8 +1314,8 @@ export function AnalysisSection({
 function KV({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
     <div className="flex justify-between gap-4 border-b py-1.5 text-sm last:border-0">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={mono ? 'font-mono text-xs' : 'font-medium'}>{value}</span>
+      <span className="max-w-[40%] shrink-0 text-muted-foreground">{label}</span>
+      <span className={cn('min-w-0 flex-1 text-right', mono ? 'font-mono text-xs' : 'font-medium')}>{value}</span>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { Rule, RuleNode } from '@/types/unified-rules';
+import type { Rule, RuleNode, UpdateRuleRequest } from '@/types/unified-rules';
 import type {
   SenderFilterFormData,
   SenderFilterGroups,
@@ -6,6 +6,7 @@ import type {
   SenderFilterSenderConfig,
   SenderFilterIPRange,
   SenderFilterRuleView,
+  SenderFilterAction,
 } from '@/types/sender-filter';
 import type { ApiRequestFn } from './client';
 import { apiRequest } from './client';
@@ -30,6 +31,27 @@ function parseRuleObject(value: unknown): Record<string, unknown> | null {
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
   return parsed as Record<string, unknown>;
+}
+
+/** The configured action survives observation; never treat observe as a disposition. */
+export function senderFilterConfiguredAction(rule: Rule): SenderFilterAction | null {
+  const action = rule.action === 'observe'
+    ? parseRuleObject(rule.metadata)?.configured_action
+    : rule.action;
+  return action === 'accept' || action === 'reject' || action === 'quarantine'
+    || action === 'audit' || action === 'discard' ? action : null;
+}
+
+/** Partial update preserves complex conditions and all unrelated metadata. */
+export function senderFilterObservationUpdate(rule: Rule, observing: boolean): Pick<UpdateRuleRequest, 'action' | 'metadata'> {
+  const configuredAction = senderFilterConfiguredAction(rule);
+  if (!configuredAction) throw new Error('Sender filter configured action is unavailable');
+  const metadata = { ...(parseRuleObject(rule.metadata) ?? {}) };
+  metadata.feature = 'sender_filter';
+  metadata.list_type ??= configuredAction === 'accept' ? 'whitelist' : 'blacklist';
+  if (observing) metadata.configured_action = configuredAction;
+  else delete metadata.configured_action;
+  return { action: observing ? 'observe' : configuredAction, metadata };
 }
 
 function buildSenderChild(sc: SenderFilterSenderConfig): RuleNode {

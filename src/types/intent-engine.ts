@@ -31,6 +31,7 @@ export interface IntentMarkConfig {
 }
 
 export interface IntentSingleConfig {
+  observe_mode?: boolean;
   enabled: boolean;
   action: IntentAction;
   mark_config?: IntentMarkConfig;

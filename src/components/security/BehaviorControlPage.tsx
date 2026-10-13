@@ -8,6 +8,7 @@ import { Download, Info, Plus, RotateCcw, Search, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -16,12 +17,14 @@ import { RuleListPagination, RULE_LIST_DEFAULT_PAGE_SIZE } from '@/components/sh
 import { BehaviorControlTable } from './behavior-control/BehaviorControlTable';
 import { BehaviorControlDrawer } from './behavior-control/BehaviorControlDrawer';
 import {
+  behaviorControlObservationUpdate,
   deleteBehaviorControlRule,
   listBehaviorControlRules,
   resolveBehaviorControlRule,
   toggleBehaviorControlRule,
 } from '@/lib/api/behavior-control';
 import type { BehaviorControlRuleView } from '@/types/behavior-control';
+import type { Rule } from '@/types/unified-rules';
 import { useApiRequest } from '@/lib/api/client';
 import { useAuth } from '@/contexts/auth-context';
 import { RuleImportExportDialog } from '@/components/rules/RuleImportExportDialog';
@@ -32,9 +35,11 @@ import { isBehaviorControlRuleExpired } from './behavior-control/validity';
 
 interface Props {
   embedded?: boolean;
+  deepLinkRuleID?: number;
+  deepLinkRuleRef?: string;
 }
 
-export function BehaviorControlPage({ embedded = false }: Props) {
+export function BehaviorControlPage({ embedded = false, deepLinkRuleID, deepLinkRuleRef }: Props) {
   const t = useTranslations();
   const qc = useQueryClient();
   const { apiRequest, effectiveTenantId } = useApiRequest();
@@ -62,6 +67,23 @@ export function BehaviorControlPage({ embedded = false }: Props) {
     queryKey: ['behavior-control-rules'],
     queryFn: () => listBehaviorControlRules(apiRequest),
   });
+
+  const { data: deepLinkedRule, isError: deepLinkError } = useQuery({
+    queryKey: ['behavior-control-deep-link', effectiveTenantId, deepLinkRuleID],
+    queryFn: () => apiRequest<Rule>(`/unified-rules/${deepLinkRuleID}`),
+    enabled: !!deepLinkRuleID,
+  });
+  const [handledDeepLink, setHandledDeepLink] = useState<string>();
+  const deepLinkKey = deepLinkRuleID ? `${effectiveTenantId}:${deepLinkRuleID}` : undefined;
+  // Adjust selection when the URL target resolves, following the other rule
+  // editors. The key guard prevents reopening after the user closes the drawer.
+  if (deepLinkKey && deepLinkedRule?.page === 'behavior_control' && handledDeepLink !== deepLinkKey) {
+    setHandledDeepLink(deepLinkKey);
+    setEditing(resolveBehaviorControlRule(deepLinkedRule));
+    setDrawerDefaults(undefined);
+    setDrawerOpen(true);
+  }
+  const deepLinkNotFound = !!deepLinkRuleID && (deepLinkError || (!!deepLinkedRule && deepLinkedRule.page !== 'behavior_control'));
 
   const { data: tenantOptions = [] } = useQuery({
     queryKey: ['tenants', 'options'],
@@ -140,6 +162,13 @@ export function BehaviorControlPage({ embedded = false }: Props) {
     },
   });
 
+  const observeMutation = useMutation({
+    mutationFn: ({ view, observing }: { view: BehaviorControlRuleView; observing: boolean }) =>
+      apiRequest(`/unified-rules/${view.rule.id}`, { method: 'PUT', body: behaviorControlObservationUpdate(view, observing) }),
+    onSuccess: async () => { await qc.invalidateQueries({ queryKey: ['behavior-control-rules'] }); toast.success(t('common.updateSuccess')); },
+    onError: (error: unknown) => toast.error((error as Error)?.message ?? t('common.error')),
+  });
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -159,6 +188,13 @@ export function BehaviorControlPage({ embedded = false }: Props) {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">{t('behaviorControl.title')}</h1>
         </div>
+      )}
+      {deepLinkNotFound && (
+        <Alert variant="destructive" data-testid="behavior-control-deep-link-unavailable">
+          <AlertDescription>
+            {t('behaviorControl.deepLinkUnavailable', { ruleId: deepLinkRuleRef ?? deepLinkRuleID })}
+          </AlertDescription>
+        </Alert>
       )}
       <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
         <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
@@ -226,7 +262,8 @@ export function BehaviorControlPage({ embedded = false }: Props) {
             onEdit={handleEdit}
             onDelete={(v) => setDeleteTarget(v)}
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
-            togglePending={toggleMutation.isPending}
+            togglePending={toggleMutation.isPending || observeMutation.isPending}
+            onObserveChange={(view, observing) => observeMutation.mutate({ view, observing })}
           />
           <RuleListPagination
             page={page}

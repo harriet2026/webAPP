@@ -55,7 +55,7 @@ export function MailRoutingShell({ tenantId }: MailRoutingShellProps) {
       </TabsContent>
       {/* Tab bodies filled by future plans; each receives tenantId. */}
       <TabsContent value="relay" className="mt-4">
-        <RelayTab tenantId={tenantId} />
+        <RelayTab tenantId={tenantId} highlightConfigId={highlightConfigId} />
       </TabsContent>
       <TabsContent value="outbound" className="mt-4">
         <OutboundRoutingTab tenantId={tenantId} />

@@ -60,9 +60,8 @@ export function DisposalBasisCell({
   const needsDetail = summaryGroups.length > 1
     || summaryGroups.some((group) => group.entries.length > 1);
   const detailQuery = useQuery({
-    // Share the detail drawer's cache/invalidation key. `select` keeps this
-    // cell scoped to the basis while avoiding a second request when the user
-    // opens the same mail immediately after inspecting the tooltip.
+    // Share the drawer's invalidation prefix. Its combined detail/analysis
+    // response uses a separate key; this cache holds only mail detail.
     queryKey: ['mail-log-detail', mailLogId],
     queryFn: () => getMailLogDetail(mailLogId, requestFn),
     select: (detail) => detail.disposal_basis ?? null,

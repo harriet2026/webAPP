@@ -4,11 +4,17 @@ import type {
   SimilarDetectionType,
   WouldBeAction,
 } from '@/lib/api/rule-effectiveness-view';
+import { authSpoofingRuleLabelKeys } from '@/lib/auth_spoofing_rule_labels';
+
+/** Prefer server eligibility; the fallback supports older API/prototype fixtures. */
+export function isPendingPromotion(row: Pick<RuleEffectivenessRow, 'pending_review' | 'observed_days' | 'hits'>): boolean {
+  return row.pending_review ?? (row.observed_days > OBSERVE_TIMEOUT_DAYS && row.hits > 0);
+}
 
 // 规则效能统计（观察模式）页面的共享常量。
 // 颜色沿用安全总览「威胁语义色阶」token，不新增配色。
 
-export const POLICY_MODULES: PolicyModule[] = ['auth_spoofing', 'similar_detection', 'phishing_detection'];
+export const POLICY_MODULES: PolicyModule[] = ['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter', 'behavior_control', 'content_rules', 'recipient_check', 'intent_engine', 'attachment_security', 'advanced_filter_rules'];
 
 export const SIMILAR_DETECTION_TYPES: SimilarDetectionType[] = ['similar_email', 'same_subject'];
 
@@ -19,14 +25,34 @@ export type ModuleFilterOption =
   | 'auth_spoofing'
   | 'similar_detection_similar_email'
   | 'similar_detection_same_subject'
-  | 'phishing_detection';
+  | 'phishing_detection'
+  | 'sender_filter' | 'behavior_control' | 'content_rules' | 'recipient_check' | 'intent_engine' | 'attachment_security' | 'advanced_filter_rules';
 
 export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   'auth_spoofing',
   'similar_detection_similar_email',
   'similar_detection_same_subject',
   'phishing_detection',
+  'sender_filter',
+  'behavior_control',
+  'content_rules',
+  'recipient_check',
+  'intent_engine',
+  'attachment_security',
+  'advanced_filter_rules',
 ];
+
+
+export const RULE_EFFECTIVENESS_STAGES = [
+  { id: 'stage2', color: '#F97316', modules: ['auth_spoofing', 'sender_filter', 'recipient_check', 'behavior_control'] },
+  { id: 'stage3', color: '#65A30D', modules: ['content_rules', 'attachment_security', 'intent_engine'] },
+  { id: 'stage4', color: '#2563EB', modules: ['phishing_detection'] },
+  { id: 'stage5', color: '#7C3AED', modules: ['similar_detection_similar_email', 'similar_detection_same_subject', 'advanced_filter_rules'] },
+] as const;
+export type RuleEffectivenessStageId = typeof RULE_EFFECTIVENESS_STAGES[number]['id'];
+export function stageModuleOptions(stage: RuleEffectivenessStageId | 'all'): ModuleFilterOption[] {
+  return stage === 'all' ? RULE_EFFECTIVENESS_STAGES.flatMap((item) => [...item.modules]) : [...(RULE_EFFECTIVENESS_STAGES.find((item) => item.id === stage)?.modules ?? [])];
+}
 
 /** 把筛选栏勾选项拆解为请求参数：模块集合 + （若命中相似检测）具体策略集合。 */
 export function resolveModuleFilterParams(options: ModuleFilterOption[]): {
@@ -55,9 +81,9 @@ export function resolveModuleFilterParams(options: ModuleFilterOption[]): {
  * → 基础格式检查 → 无效 MAIL FROM」），用户一眼就能看出该去配置页的哪一级处理，
  * 不需要先理解报表内部的分栏逻辑。
  *
- * 已知的身份认证与仿冒检测子策略 id——与 AuthSpoofingSubStrategy 保持一致，
- * 用于判断某一行是否命中已知路径，命中不了时退化为「模块名 + 原始名称快照」，
- * 而不是让路径直接显示一个陌生的技术 id。
+ * 已知的身份认证与仿冒检测聚合策略 id——与 AuthSpoofingSubStrategy 保持一致。
+ * 协议结果级稳定标识（如 dkim_fail）不属于这组聚合路径，需改用认证仿冒配置页
+ * 的共享文案映射解析；只有映射也不认识的自定义策略才退化为原始名称快照。
  */
 const KNOWN_AUTH_SUB_STRATEGY_IDS = new Set<string>([
   'protocol_check_spf',
@@ -73,14 +99,16 @@ const KNOWN_AUTH_SUB_STRATEGY_IDS = new Set<string>([
   'similar_domain',
 ]);
 
+// GT-14317：相似检测方向名称与相似检测配置页（similarDetection.direction*Full）一致；
+// 与展示名仿冒共用的 direction* 键分开，避免一处改名影响另一模块。
 function similarDetectionScopeKey(scope: RuleEffectivenessRow['similar_detection_scope']): string {
   switch (scope) {
     case 'receive':
-      return 'directionReceive';
+      return 'similarDirectionReceive';
     case 'send':
-      return 'directionSend';
+      return 'similarDirectionSend';
     case 'internal':
-      return 'directionInternal';
+      return 'similarDirectionInternal';
     default:
       return 'aggregateScope';
   }
@@ -94,11 +122,34 @@ function similarDetectionScopeKey(scope: RuleEffectivenessRow['similar_detection
 export function strategyPathKeys(
   row: Pick<RuleEffectivenessRow, 'policy_module' | 'sub_strategy_id' | 'similar_detection_type' | 'similar_detection_scope'>,
 ): string[] {
+  const modulePaths: Partial<Record<PolicyModule, string>> = {"behavior_control": "behaviorControl", "content_rules": "contentRules", "recipient_check": "recipientCheck", "intent_engine": "intentEngine", "attachment_security": "attachmentSecurity", "advanced_filter_rules": "advancedFilterRules"};
+  const modulePath = modulePaths[row.policy_module];
+  if (modulePath) {
+    if (row.policy_module === 'recipient_check') return [modulePath, row.sub_strategy_id === 'limit' ? 'recipientLimit' : 'recipientExistence'];
+    if (row.policy_module === 'attachment_security') return [modulePath, `attachment_${row.sub_strategy_id}`];
+    if (row.policy_module === 'intent_engine') {
+      const [direction, intent] = row.sub_strategy_id.split(':');
+      return [modulePath, `intentDirection_${direction}`, `intent_${intent}`];
+    }
+    return [modulePath];
+  }
+  if (row.policy_module === 'sender_filter') return ['senderFilter'];
   if (row.policy_module === 'similar_detection') {
     const typeKey = row.similar_detection_type === 'same_subject' ? 'sameSubject' : 'similarEmail';
     return ['similarDetection', typeKey, similarDetectionScopeKey(row.similar_detection_scope)];
   }
   if (row.policy_module === 'phishing_detection') {
+    const dispositionKeys: Record<string, string> = {
+      'disposition:suspicious': 'phishingSuspicious',
+      'disposition:low': 'phishingLow',
+      'disposition:medium': 'phishingMedium',
+      'disposition:high': 'phishingHigh',
+    };
+    if (dispositionKeys[row.sub_strategy_id]) return ['phishingDetection', 'phishingRiskPolicy', dispositionKeys[row.sub_strategy_id]];
+    // Preserve readable paths for explicitly opened historical versions.
+    if (row.sub_strategy_id === 'runtime_policy') return ['phishingDetection', 'phishingRuntimePolicy'];
+    if (row.sub_strategy_id === 'risk_policy') return ['phishingDetection', 'phishingRiskPolicy'];
+    if (row.sub_strategy_id.startsWith('admission:')) return ['phishingDetection', 'phishingAdmissionRule'];
     return ['phishingDetection'];
   }
   switch (row.sub_strategy_id) {
@@ -130,9 +181,9 @@ export function strategyPathKeys(
 }
 
 /**
- * 把路径 key 数组解析为最终展示文案数组——身份认证与仿冒检测下若命中未知的
- * sub_strategy_id（不在 KNOWN_AUTH_SUB_STRATEGY_IDS 内），在模块名后追加原始
- * 名称快照作为兜底的最后一级，而不是让路径断在模块名就不再往下细化。
+ * 把路径 key 数组解析为最终展示文案数组——身份认证与仿冒检测下的协议结果级
+ * 稳定标识复用配置页文案，真正未知的自定义 sub_strategy_id 才在模块名后追加
+ * 原始名称快照作为兜底的最后一级。
  */
 export function strategyPathLabels(
   row: Pick<
@@ -140,9 +191,17 @@ export function strategyPathLabels(
     'policy_module' | 'sub_strategy_id' | 'sub_strategy_name_snapshot' | 'similar_detection_type' | 'similar_detection_scope'
   >,
   translatePath: (key: string) => string,
+  translateAuth: (key: string) => string,
 ): string[] {
   const labels = strategyPathKeys(row).map((key) => translatePath(key));
+  if (['sender_filter', 'behavior_control', 'content_rules', 'advanced_filter_rules'].includes(row.policy_module)) labels.push(row.sub_strategy_name_snapshot);
   if (row.policy_module === 'auth_spoofing' && !KNOWN_AUTH_SUB_STRATEGY_IDS.has(row.sub_strategy_id)) {
+    const authLabelKeys = authSpoofingRuleLabelKeys(row.sub_strategy_id);
+    labels.push(...(authLabelKeys?.map((key) => translateAuth(key)) ?? [row.sub_strategy_name_snapshot]));
+  }
+  // 准入规则追加规则名称；未识别的钓鱼对象追加名称快照兜底，保证多行可区分。
+  if (row.policy_module === 'phishing_detection' && row.sub_strategy_name_snapshot
+    && (row.sub_strategy_id.startsWith('admission:') || labels.length === 1)) {
     labels.push(row.sub_strategy_name_snapshot);
   }
   return labels;
@@ -154,6 +213,13 @@ export const OBSERVE_DURATION_BUCKETS = ['lt7', '7to30', 'gt30'] as const;
 export const OBSERVE_TIMEOUT_DAYS = 30;
 
 export const MODULE_COLORS: Record<PolicyModule, string> = {
+  behavior_control: '#0EA5E9',
+  content_rules: '#EC4899',
+  recipient_check: '#14B8A6',
+  intent_engine: '#6366F1',
+  attachment_security: '#0F766E',
+  advanced_filter_rules: '#EA580C',
+  sender_filter: '#10B981',
   auth_spoofing: '#3B82F6',
   similar_detection: '#8B5CF6',
   phishing_detection: '#F59E0B',

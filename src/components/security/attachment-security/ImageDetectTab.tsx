@@ -1,5 +1,6 @@
 'use client';
 
+import { ObservationModeControl } from '../ObservationModeControl';
 import { Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -18,6 +19,7 @@ import type {
 } from '@/types/attachment-security';
 
 export const DEFAULT_IMAGE_DETECT_CONFIG: ImageDetectConfig = {
+  observe_mode: false,
   ocr_mode: 'light',
   ocr_max_count: 2,
   qr_mode: 'light',
@@ -93,6 +95,13 @@ export function ImageDetectTab({
 
   return (
     <div className="space-y-6" data-testid="image-detect-tab" data-direction={direction}>
+      <ObservationModeControl
+        checked={config.observe_mode ?? false}
+        onChange={(observe_mode) => onChange({ ...config, observe_mode })}
+        testId="image-observe-mode-switch"
+        title={t('observation.image.title')}
+        description={t('observation.image.description')}
+      />
       <section className="space-y-4">
         <Label className="font-medium">{t('imageDetect.ocrDetection')}</Label>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

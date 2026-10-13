@@ -14,6 +14,7 @@ const DIRECTIONS: IntentDirection[] = ['receive', 'send', 'internal'];
 function normalizeSingle(cfg: IntentSingleConfig, it: IntentType, dir: IntentDirection): IntentSingleConfig {
   return {
     ...cfg,
+    observe_mode: cfg.observe_mode ?? false,
     detection_mode: cfg.detection_mode === 'threshold' ? 'threshold' : 'classification',
     threshold_segments: cfg.threshold_segments?.length ? cfg.threshold_segments : defaultThresholdSegmentsFor(it, dir),
   };

@@ -1,12 +1,14 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { formatMetric } from './format_metric';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDatabase } from './hooks';
 import type { TimeRange, DatabaseSummary } from '@/types/monitoring';
 
 export function DatabasePerformanceSummary({ node, range, source }: { node: string; range: TimeRange; source: 'db' | 'redis' }) {
   const t = useTranslations('infrastructure.database');
+  const locale = useLocale();
   const { data, isLoading, isError } = useDatabase(node, range, source, 'summary');
   const summary = data?.summary;
   function value(key: keyof DatabaseSummary['states'], number: number | undefined, latency = false) {
@@ -15,7 +17,7 @@ export function DatabasePerformanceSummary({ node, range, source }: { node: stri
       ? summary?.latency_scope === (source === 'redis' ? 'redis_ping_native' : 'app_db_calls')
       : summary?.connection_scope === (source === 'redis' ? 'selected_node' : 'monitor_database');
     return state === 'ok' && validScope && number != null && Number.isFinite(number)
-      ? `${latency ? number.toFixed(2) : number}${latency ? ' ms' : ''}`
+      ? `${formatMetric(number, locale, latency ? 2 : 0)}${latency ? ' ms' : ''}`
       : t(`metricStates.${state === 'ok' ? 'missing' : state}`);
   }
   return <div className="mt-4 border-t pt-4" data-testid="monitor-infrastructure-performance-summary" data-source={source}>

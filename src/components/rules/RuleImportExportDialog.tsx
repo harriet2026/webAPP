@@ -291,7 +291,9 @@ export function RuleImportExportDialog({
     }
   };
 
-  const hasSelection = Object.values(selection).some(Boolean);
+  const hasImportableItems = visibleGroupKeys.some(
+    (group) => selection[group] && (preview?.summary[group]?.importable ?? 0) > 0,
+  );
 
 	async function handleExport() {
 		if (!onExport) {
@@ -694,7 +696,7 @@ export function RuleImportExportDialog({
           {activeTab === 'import' ? (
             <Button
               onClick={handleImport}
-              disabled={!preview || isPreviewing || isImporting || !hasSelection}
+              disabled={!preview || isPreviewing || isImporting || !hasImportableItems}
               data-testid="rule-import-execute"
             >
               {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}

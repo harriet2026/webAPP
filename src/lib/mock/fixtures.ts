@@ -1392,7 +1392,7 @@ export const mockMonitorContainers: DockerContainersResp = {
   ],
 };
 
-export function mockMonitorDatabase(range: "1h" | "24h" | "7d"): DatabaseResp {
+export function mockMonitorDatabase(range: "1h" | "24h" | "7d", node = "node-1"): DatabaseResp {
   const count = range === "1h" ? 12 : range === "7d" ? 7 : 24;
   return {
     conn_trend: { points: monitorPoints(count, 45, 6) },
@@ -1404,8 +1404,10 @@ export function mockMonitorDatabase(range: "1h" | "24h" | "7d"): DatabaseResp {
     ],
     lock_waits: [{ wait_type: "transaction", wait_object: "mail_logs", wait_ms: 142 }],
     status: {
-      db: { status: "normal", latency_ms: 12 },
-      redis: { status: "normal", latency_ms: 2 },
+      // Card preview values follow html-spec/layer-2-tab-database (0.3s / 0B),
+      // expressed with the live API's status and selected-node scope semantics.
+      db: { status: "ok", replication: { node, scope: "selected_node", state: "streaming", role: "primary", peers: 1, lag_ms: 300, lag_state: "ok" } },
+      redis: { status: "ok", latency_ms: 2, replication: { scope: "selected_node", state: "streaming", role: "primary", peers: 1, lag_bytes: 0, lag_state: "unsupported" } },
     },
     supported: true,
     db_backend: "openGauss",
@@ -1902,6 +1904,7 @@ export function mockPhishingStats(): PhishingStats {
     pending_review: 5,
     today_recalled: 3,
     recall_success: 2,
+    next_business_day_at: new Date(new Date().setUTCHours(24, 0, 0, 0)).toISOString(),
   };
 }
 
@@ -1953,8 +1956,17 @@ const MOCK_PHISHING_DETECTIONS: DetectionLogItem[] = [
   },
 ];
 
-export function mockPhishingDetectionLogs(): DetectionLogListResponse {
-  return { items: structuredClone(MOCK_PHISHING_DETECTIONS), total: MOCK_PHISHING_DETECTIONS.length, page: 1, page_size: 20 };
+export function mockPhishingDetectionLogs(params = new URLSearchParams()): DetectionLogListResponse {
+  const risks = params.getAll('risk_level').filter(Boolean);
+  const filtered = MOCK_PHISHING_DETECTIONS.filter((item) => risks.length === 0 || risks.some((risk) => {
+    if (risk === 'unknown' || risk === 'none') return item.risk_level == null;
+    return item.risk_level === (risk === 'critical' ? 'high' : risk);
+  }));
+  const requestedPage = Number(params.get('page'));
+  const requestedSize = Number(params.get('page_size'));
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageSize = Number.isSafeInteger(requestedSize) && requestedSize > 0 && requestedSize <= 100 ? requestedSize : 20;
+  return { items: structuredClone(filtered.slice((page - 1) * pageSize, page * pageSize)), total: filtered.length, page, page_size: pageSize };
 }
 
 export function mockPhishingDetectionDetail(id: string): DetectionLogDetail | null {
@@ -4175,6 +4187,159 @@ export function mockBulkContentRules(body: unknown): number[] {
   return ids;
 }
 
+// GT-14369：高级过滤规则的 mock 规则列表/CRUD，镶嵌模式与上面的内容规则一致，
+// 用于让「规则效能统计 → 前往策略配置」的 rule_id 深链能在 mock 环境下找到
+// 对应规则并自动打开编辑抽屉（否则 mockAdvancedRulesList 恒为空，抽屉会一直
+// 停在“规则不存在”提示上）。
+let mockAdvancedRules: Rule[] = [
+  {
+    id: 1,
+    name: "外发压缩包附件管控",
+    description: "外发邮件携带压缩包附件时进入观察/拦截",
+    page: "advanced_rules",
+    rule_class: "action",
+    stage: "data",
+    priority: 800,
+    condition_tree: JSON.stringify({
+      type: "AND",
+      children: [
+        {
+          type: "condition",
+          field: "is_outbound",
+          operator: "eq",
+          value: "true",
+        },
+        {
+          type: "condition",
+          field: "attachment_types",
+          operator: "in",
+          value: "zip,rar,7z",
+        },
+      ],
+    } satisfies RuleNode),
+    action: "quarantine",
+    metadata: JSON.stringify({
+      feature: "advanced_rules",
+      scope: ["outgoing"],
+      primary_action: "quarantine",
+    }),
+    is_active: true,
+    keywords: ["压缩包", "外发"],
+    valid_from: null,
+    valid_until: null,
+    created_at: "2026-05-10T09:00:00Z",
+    updated_at: "2026-05-10T09:00:00Z",
+  },
+  {
+    id: 2,
+    name: "高危可执行文件拦截",
+    description: "命中高危可执行文件扩展名的附件直接拦截",
+    page: "advanced_rules",
+    rule_class: "action",
+    stage: "data",
+    priority: 950,
+    condition_tree: JSON.stringify({
+      type: "AND",
+      children: [
+        {
+          type: "condition",
+          field: "attachment_types",
+          operator: "in",
+          value: "exe,bat,vbs,scr",
+        },
+      ],
+    } satisfies RuleNode),
+    action: "discard",
+    metadata: JSON.stringify({
+      feature: "advanced_rules",
+      scope: ["incoming", "outgoing", "internal"],
+      primary_action: "discard",
+    }),
+    is_active: true,
+    keywords: ["可执行文件", "高危"],
+    valid_from: null,
+    valid_until: null,
+    created_at: "2026-04-02T08:30:00Z",
+    updated_at: "2026-06-01T10:00:00Z",
+  },
+];
+
+export function mockAdvancedRulesList(): { items: Rule[]; total: number } {
+  const rules = [...mockAdvancedRules].sort(
+    (left, right) => right.priority - left.priority || right.id - left.id,
+  );
+  return { items: rules, total: rules.length };
+}
+
+function normalizeAdvancedRule(
+  body: unknown,
+  id: number,
+  previous?: Rule,
+): Rule {
+  const source = readObject(body);
+  const now = "2026-07-16T06:00:00Z";
+  const conditionTree =
+    source.condition_tree ?? readObject(previous?.condition_tree);
+  const metadata = source.metadata ?? readObject(previous?.metadata);
+  return {
+    id,
+    name: String(source.name ?? previous?.name ?? `高级过滤规则 #${id}`),
+    description: String(source.description ?? previous?.description ?? ""),
+    page: "advanced_rules",
+    rule_class: "action",
+    stage: String(source.stage ?? previous?.stage ?? "data") as Rule["stage"],
+    priority: Number(source.priority ?? previous?.priority ?? 100),
+    condition_tree: JSON.stringify(conditionTree),
+    action: String(source.action ?? previous?.action ?? "quarantine"),
+    metadata: JSON.stringify(metadata),
+    is_active: Boolean(source.is_active ?? previous?.is_active ?? true),
+    keywords: (source.keywords ?? previous?.keywords ?? []) as string[],
+    valid_from: (source.valid_from ?? previous?.valid_from ?? null) as
+      string | null,
+    valid_until: (source.valid_until ?? previous?.valid_until ?? null) as
+      string | null,
+    created_at: previous?.created_at ?? now,
+    updated_at: now,
+  };
+}
+
+export function mockCreateAdvancedRule(body: unknown): Rule {
+  const id = Math.max(0, ...mockAdvancedRules.map((rule) => rule.id)) + 1;
+  const rule = normalizeAdvancedRule(body, id);
+  mockAdvancedRules.push(rule);
+  return rule;
+}
+
+export function mockUpdateAdvancedRule(id: number, body: unknown): Rule | null {
+  const index = mockAdvancedRules.findIndex((rule) => rule.id === id);
+  if (index < 0) return null;
+  mockAdvancedRules[index] = normalizeAdvancedRule(
+    body,
+    id,
+    mockAdvancedRules[index],
+  );
+  return mockAdvancedRules[index];
+}
+
+export function mockSetAdvancedRuleStatus(
+  id: number,
+  active: boolean,
+): Rule | null {
+  return mockUpdateAdvancedRule(id, { is_active: active });
+}
+
+export function mockCopyAdvancedRule(id: number): Rule | null {
+  const source = mockAdvancedRules.find((rule) => rule.id === id);
+  if (!source) return null;
+  return mockCreateAdvancedRule({ ...source, name: `${source.name} - 副本` });
+}
+
+export function mockDeleteAdvancedRule(id: number): boolean {
+  const before = mockAdvancedRules.length;
+  mockAdvancedRules = mockAdvancedRules.filter((rule) => rule.id !== id);
+  return mockAdvancedRules.length < before;
+}
+
 function evaluateContentNode(
   node: RuleNode,
   attrs: Record<string, unknown>,
@@ -4379,7 +4544,7 @@ function mockEffectivenessRow(input: {
   let rate: number | null = null;
   let direction = "";
   let reason = "";
-  if (input.module === "phishing_detection") {
+  if (input.module === "phishing_detection" && !input.key.startsWith("disposition:")) {
     reason = "module_level_only";
   } else if (input.mixed) {
     reason = "mixed_config";
@@ -4402,6 +4567,12 @@ function mockEffectivenessRow(input: {
         auth_spoofing: "authSpoofing",
         similar_detection: "similarDetection",
         sender_filter: "senderFilter",
+        behavior_control: "behaviorControl",
+        content_rules: "content",
+        advanced_filter_rules: "advancedRules",
+        recipient_check: "recipientCheck",
+        intent_engine: "intentEngine",
+        attachment_security: "attachment",
       } as Partial<Record<PolicyModule, string>>)[input.module]}`;
   return {
     time_zone: "Asia/Shanghai",
@@ -4417,6 +4588,7 @@ function mockEffectivenessRow(input: {
     change_summary: (input.version ?? 1)>1 ? 'configuration_changed' : 'first_observation', snapshot_available: true,
     observed_since: input.observedSince,
     observed_days: input.observedDays,
+    pending_review: (input.observedDays ?? 0) > 30 && hits > 0 && !input.deleted,
     hits,
     distinct_message_count: input.messages ?? Math.min(hits, 3),
     configured_action: input.configuredAction,
@@ -4427,7 +4599,7 @@ function mockEffectivenessRow(input: {
     action_difference_rate: rate,
     risk_direction: direction,
     risk_unavailable_reason: reason,
-    attribution_status: input.module === "phishing_detection" ? "module_level_only" : "attributable",
+    attribution_status: input.module === "phishing_detection" && !input.key.startsWith("disposition:") ? "module_level_only" : "attributable",
     action_breakdown: mockActionBreakdown(input.outcomes),
     config_path: configPath,
     ...(input.similarType ? { similar_detection_type: input.similarType } : {}),
@@ -4436,8 +4608,42 @@ function mockEffectivenessRow(input: {
 }
 
 const MOCK_RULE_EFFECTIVENESS_ROWS: RuleEffectivenessRow[] = [
-  mockEffectivenessRow({ id: "mock-period-sender-1", module: "sender_filter", key: "rule:sender-finance", name: "财务仿冒发件人", observedSince: "2026-09-02", observedDays: 18, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 2 }, messages: 3 }),
-  mockEffectivenessRow({ id: "mock-period-sender-2", module: "sender_filter", key: "rule:sender-partner", name: "合作方发件人白名单", observedSince: "2026-09-16", observedDays: 4, configuredAction: "accept", outcomes: { accept: 2 }, messages: 2 }),
+  // 与发信人黑白名单实际规则一一对应（src/lib/mock/fixtures.ts 的 mockSenderFilterRulesList，
+  // id 1-5），key 用 `rule:<实际规则id>` 直接关联，而不是笼统的模块级观察对象——每条黑/白名单
+  // 规则都各自拥有独立的命中特征与误判风险，必须按规则单独统计。
+  // 示例：该规则处置动作曾从「审核」调整为「隔离」，属于实质性变更，触发过一次
+  // 观察期重置——version=2，history_count=1（配套的 mockObservationVersions 会为其
+  // 合成 1 条历史版本记录，演示策略版本管理）。hits/messages 与既有 mail-logs 观察
+  // 联动测试保持一致（hits=5, messages=3, configured_action=quarantine）。
+  mockEffectivenessRow({ id: "mock-period-sender-1", module: "sender_filter", version: 2, key: "rule:2", name: "钓鱼域名", observedSince: "2026-09-02", observedDays: 18, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-sender-2", module: "sender_filter", key: "rule:1", name: "垃圾邮件发送者", observedSince: "2026-08-25", observedDays: 26, configuredAction: "reject", outcomes: { accept: 5, reject: 14 }, messages: 5 }),
+  // 该规则当前处于禁用状态（is_active=false），观察数据保留为禁用前最后一个观察期的
+  // 历史快照，不再产生新命中。
+  mockEffectivenessRow({ id: "mock-period-sender-3", module: "sender_filter", key: "rule:3", name: "可疑群组", observedSince: "2026-08-01", observedDays: 50, configuredAction: "audit", outcomes: { accept: 2, audit: 1 }, messages: 2 }),
+  mockEffectivenessRow({ id: "mock-period-sender-4", module: "sender_filter", key: "rule:4", name: "可信合作伙伴", observedSince: "2026-09-05", observedDays: 15, configuredAction: "accept", outcomes: { accept: 11 }, messages: 5 }),
+  // 示例：该规则的白名单成员组曾发生实质性调整（财务部门成员变更），触发过一次
+  // 观察期重置——version=2。
+  mockEffectivenessRow({ id: "mock-period-sender-5", module: "sender_filter", version: 2, key: "rule:5", name: "内部财务组", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 6 }, messages: 3 }),
+  // GT-14388：意图引擎按「方向 × 意图类型」提供 15 条独立观察对象，
+  // 用于验证规则效能统计的模块筛选、动作分布、观察期和策略配置深链。
+  mockEffectivenessRow({ id: "mock-period-intent-receive-porn", module: "intent_engine", key: "intent.porn_gambling.receive", name: "色情/赌博（收信）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 6, quarantine: 9 }, messages: 5 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-political", module: "intent_engine", key: "intent.political.receive", name: "政治敏感（收信）", observedSince: "2026-09-03", observedDays: 17, configuredAction: "reject", outcomes: { accept: 2, reject: 7 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-phishing", module: "intent_engine", key: "intent.phishing.receive", name: "仿冒/钓鱼（收信）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "quarantine", outcomes: { accept: 5, quarantine: 11 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-spam", module: "intent_engine", key: "intent.spam.receive", name: "垃圾信息（收信）", observedSince: "2026-09-07", observedDays: 13, configuredAction: "audit", outcomes: { accept: 10, audit: 4 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-receive-subscription", module: "intent_engine", key: "intent.subscription.receive", name: "订阅类信息（收信）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "accept", outcomes: { accept: 13 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-porn", module: "intent_engine", key: "intent.porn_gambling.send", name: "色情/赌博（发信）", observedSince: "2026-09-02", observedDays: 18, configuredAction: "reject", outcomes: { accept: 3, reject: 5 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-political", module: "intent_engine", key: "intent.political.send", name: "政治敏感（发信）", observedSince: "2026-09-04", observedDays: 16, configuredAction: "audit", outcomes: { accept: 6, audit: 3 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-phishing", module: "intent_engine", key: "intent.phishing.send", name: "仿冒/钓鱼（发信）", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 4, quarantine: 8 }, messages: 5 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-spam", module: "intent_engine", key: "intent.spam.send", name: "垃圾信息（发信）", observedSince: "2026-09-09", observedDays: 11, configuredAction: "reject", outcomes: { accept: 5, reject: 10 }, messages: 6 }),
+  mockEffectivenessRow({ id: "mock-period-intent-send-subscription", module: "intent_engine", key: "intent.subscription.send", name: "订阅类信息（发信）", observedSince: "2026-09-10", observedDays: 10, configuredAction: "accept", outcomes: { accept: 9 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-porn", module: "intent_engine", key: "intent.porn_gambling.internal", name: "色情/赌博（域内）", observedSince: "2026-09-01", observedDays: 19, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 4 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-political", module: "intent_engine", key: "intent.political.internal", name: "政治敏感（域内）", observedSince: "2026-09-05", observedDays: 15, configuredAction: "audit", outcomes: { accept: 4, audit: 2 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-phishing", module: "intent_engine", key: "intent.phishing.internal", name: "仿冒/钓鱼（域内）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 1, reject: 5 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-spam", module: "intent_engine", key: "intent.spam.internal", name: "垃圾信息（域内）", observedSince: "2026-09-11", observedDays: 9, configuredAction: "audit", outcomes: { accept: 5, audit: 1 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-intent-internal-subscription", module: "intent_engine", key: "intent.subscription.internal", name: "订阅类信息（域内）", observedSince: "2026-09-12", observedDays: 8, configuredAction: "accept", outcomes: { accept: 7 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-attachment-danger-ext", module: "attachment_security", key: "attachment.danger_ext.receive", name: "危险扩展名（附件）", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 12, quarantine: 8 }, messages: 7 }),
+  mockEffectivenessRow({ id: "mock-period-attachment-virus", module: "attachment_security", key: "attachment.antivirus.receive", name: "病毒命中（附件）", observedSince: "2026-09-08", observedDays: 12, configuredAction: "quarantine", outcomes: { accept: 5, quarantine: 6 }, messages: 4 }),
+  mockEffectivenessRow({ id: "mock-period-attachment-encrypted", module: "attachment_security", key: "attachment.encrypted.receive", name: "加密附件解密失败", observedSince: "2026-09-10", observedDays: 10, configuredAction: "audit", outcomes: { accept: 9, audit: 3 }, messages: 5 }),
   mockEffectivenessRow({ id: "mock-period-auth-spf", module: "auth_spoofing", version: 2, key: "spf_fail", name: "SPF fail", observedSince: "2026-09-08", observedDays: 12, configuredAction: "reject", outcomes: { accept: 12, reject: 6, pending: 2 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dkim", module: "auth_spoofing", key: "dkim_fail", name: "DKIM fail", observedSince: "2026-09-06", observedDays: 14, configuredAction: "quarantine", outcomes: { accept: 8, quarantine: 4 }, messages: 3 }),
   mockEffectivenessRow({ id: "mock-period-auth-dmarc", module: "auth_spoofing", key: "dmarc_reject", name: "DMARC reject", observedSince: "2026-08-31", observedDays: 20, configuredAction: "reject", outcomes: { accept: 1, quarantine: 7, reject: 2 }, messages: 3 }),
@@ -4448,10 +4654,10 @@ const MOCK_RULE_EFFECTIVENESS_ROWS: RuleEffectivenessRow[] = [
   mockEffectivenessRow({ id: "mock-period-same-subject", module: "similar_detection", key: "same_subject.aggregate", name: "相同主题检测", observedSince: "2026-08-06", observedDays: 45, configuredAction: "audit", outcomes: { accept: 7, audit: 2 }, messages: 3, similarType: "same_subject", similarScope: "aggregate" }),
   mockEffectivenessRow({ id: "mock-period-same-subject-in", tenantId: 2, module: "similar_detection", key: "same_subject.receive", name: "相同主题检测（收信）", observedSince: "2026-08-16", observedDays: 35, configuredAction: "reject", outcomes: { accept: 3, reject: 1 }, messages: 3, similarType: "same_subject", similarScope: "receive" }),
   mockEffectivenessRow({ id: "mock-period-similar-send", module: "similar_detection", key: "similar_email.send", name: "相似邮件检测（发信）", observedSince: "2026-09-15", observedDays: 5, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 1 }, messages: 2, similarType: "similar_email", similarScope: "send" }),
-  mockEffectivenessRow({ id: "mock-period-phish-risk", module: "phishing_detection", version: 3, key: "risk_policy", name: "风险处置策略", observedSince: "2026-09-15", observedDays: 5, configuredAction: "", outcomes: { accept: 3, quarantine: 2 } }),
-  mockEffectivenessRow({ id: "mock-period-phish-runtime", module: "phishing_detection", version: 2, key: "runtime_policy", name: "运行时策略", observedSince: "2026-09-16", observedDays: 4, configuredAction: "accept", outcomes: { accept: 5 } }),
-  mockEffectivenessRow({ id: "mock-period-phish-1", module: "phishing_detection", version: 2, key: "admission:external-link", name: "外部链接邮件", observedSince: "2026-09-10", observedDays: 10, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 8 }, messages: 3 }),
-  mockEffectivenessRow({ id: "mock-period-phish-2", tenantId: 2, module: "phishing_detection", version: 2, key: "runtime_policy", name: "运行时策略", observedSince: "2026-08-11", observedDays: 40, configuredAction: "quarantine", outcomes: { accept: 2, quarantine: 3 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-phish-risk", module: "phishing_detection", version: 3, key: "disposition:high", name: "高风险", observedSince: "2026-09-15", observedDays: 5, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 2 } }),
+  mockEffectivenessRow({ id: "mock-period-phish-runtime", module: "phishing_detection", version: 2, key: "disposition:suspicious", name: "可疑", observedSince: "2026-09-16", observedDays: 4, configuredAction: "proceed", outcomes: { accept: 5 } }),
+  mockEffectivenessRow({ id: "mock-period-phish-1", module: "phishing_detection", version: 2, key: "disposition:medium", name: "中风险", observedSince: "2026-09-10", observedDays: 10, configuredAction: "quarantine", outcomes: { accept: 3, quarantine: 8 }, messages: 3 }),
+  mockEffectivenessRow({ id: "mock-period-phish-2", tenantId: 2, module: "phishing_detection", version: 2, key: "disposition:low", name: "低风险", observedSince: "2026-08-11", observedDays: 40, configuredAction: "proceed", outcomes: { accept: 2, quarantine: 3 }, messages: 3 }),
 ];
 
 function mockDurationMatches(days: number | null, buckets: string[]): boolean {
@@ -4480,7 +4686,7 @@ export function mockRuleEffectiveness(path: string): RuleEffectivenessResponse {
   const page = Math.max(1, Number(query.get("page") ?? 1) || 1);
   const pageSize = Math.min(100, Math.max(1, Number(query.get("page_size") ?? 20) || 20));
   const rowsTotal = rows.length;
-  const overdueCount = rows.filter((row) => (row.observed_days ?? 0) > 30 && row.hits > 0).length;
+  const overdueCount = rows.filter((row) => row.pending_review === true).length;
   const unknownStartCount = rows.filter((row) => row.observed_days == null).length;
   rows = rows.slice((page - 1) * pageSize, page * pageSize);
   return {
@@ -4502,7 +4708,7 @@ export function mockRuleEffectiveness(path: string): RuleEffectivenessResponse {
       total_hits: totalHits,
       total_hits_delta: totalHits === 0 ? 0 : 6,
       avg_observed_days: observedDays.length === 0 ? 0 : Math.round(observedDays.reduce((sum, days) => sum + days, 0) / observedDays.length),
-      pending_review_count: rowsTotal,
+      pending_review_count: overdueCount,
       overdue_count: overdueCount,
       unknown_start_count: unknownStartCount,
     },
@@ -5371,6 +5577,7 @@ function intentMockSingle(it: string, dir: string) {
   else action = isReceive ? "accept" : "audit";
   const cfg: Record<string, unknown> = {
     enabled: true,
+    observe_mode: false,
     action,
     detection_mode: "classification",
     threshold_segments: intentMockSegments(risk, dir),
@@ -5539,6 +5746,69 @@ const mockAttachmentConfigOverrides: MockAttachmentConfigOverride[] = [
     decrypt_fail_action: "proceed",
   }),
 ];
+
+const mockAttachmentScopedDocument: Record<string, unknown> = {
+  module_enabled: true,
+  schema_version: 1,
+  basic_limit: {
+    receive: {
+      attachment_count_max: 10,
+      attachment_size_max_kb: 10240,
+      nested_zip_count_max: 2,
+      nested_file_count_max: 20,
+      nested_level_max: 2,
+      scan_timeout_sec: 30,
+      exceed_action: 'quarantine',
+      partial_skip: false,
+      danger_ext_enabled: true,
+      danger_ext_list: ['.exe', '.scr', '.com', '.bat', '.cmd', '.pif', '.vbs', '.js', '.jse', '.ws', '.wsh', '.hta', '.lnk', '.iso', '.img', '.vhd', '.ps1', '.psm1', '.msi'],
+      mime_mismatch_check: true,
+      mime_mismatch_action: 'quarantine',
+    },
+  },
+  antivirus: { host: 'av-server', port: 6600, observe_mode: false, virus_action: 'quarantine', timeout_action: 'proceed' },
+  image_detection: { observe_mode: false,
+    ocr_mode: 'light', ocr_max_count: 2, qr_mode: 'light', qr_max_count: 5,
+    qr_light_action: 'quarantine', qr_deep_exceed_action: 'proceed', qr_deep_exceed_warn: true,
+    qr_deep_routes: { url_check: true, url_unshorten: true, keyword_filter: true, keyword_scope: ['url_path', 'plain_text'], intent_engine: true, intent_categories: ['high', 'medium', 'low'], advanced_rules: false },
+  },
+  encrypted: { observe_mode: false, detect_mode: 'detect_only', extract_password_from_body: true, extract_password_from_filename: true, use_password_book: true, recursive_detect: true, max_password_attempts: 100, mark_suspicious: true, decrypt_fail_action: 'proceed' },
+};
+
+let mockAttachmentPlatformVersion = 1;
+let mockAttachmentTenantVersion = 0;
+
+function attachmentScopedView(scope: 'platform' | 'tenant') {
+  const document = structuredClone(mockAttachmentScopedDocument);
+  const version = scope === 'platform' ? mockAttachmentPlatformVersion : mockAttachmentTenantVersion;
+  return {
+    stored: scope === 'tenant' ? undefined : { namespace: 'attachd', scope_kind: scope, scope_id: 1, schema_version: 1, version, document, checksum: 'mock-attachd', updated_at: '2026-09-29T00:00:00Z' },
+    effective: { namespace: 'attachd', tenant_id: 1, schema_version: 1, snapshot_version: `mock-${version}`, platform_version: mockAttachmentPlatformVersion, tenant_version: mockAttachmentTenantVersion, hash: 'mock-attachd', document, provenance: {} },
+    published: true,
+  };
+}
+
+export function mockAttachmentScopedConfig(scope: 'platform' | 'tenant') {
+  return attachmentScopedView(scope);
+}
+
+export function mockPatchAttachmentScopedConfig(scope: 'platform' | 'tenant', body: { operations?: Array<{ op: 'set' | 'remove'; path: string; value?: unknown }> }) {
+  for (const operation of body.operations ?? []) {
+    const parts = operation.path.split('.').filter(Boolean);
+    let cursor = mockAttachmentScopedDocument;
+    for (const part of parts.slice(0, -1)) {
+      if (!cursor[part] || typeof cursor[part] !== 'object' || Array.isArray(cursor[part])) cursor[part] = {};
+      cursor = cursor[part] as Record<string, unknown>;
+    }
+    if (parts.length) {
+      if (operation.op === 'remove') delete cursor[parts[parts.length - 1]];
+      else cursor[parts[parts.length - 1]] = operation.value;
+    }
+  }
+  if (scope === 'platform') mockAttachmentPlatformVersion += 1;
+  else mockAttachmentTenantVersion += 1;
+  return { ...attachmentScopedView(scope), published: true };
+}
 
 export function mockAttachmentConfigList(path: string) {
   const query = new URLSearchParams(path.split("?")[1] ?? "");
@@ -7725,6 +7995,39 @@ export function mockEmailDisposalRuleOptions(path: string) {
   return { items: Array.from(unique, ([id, name]) => ({ id, name })) };
 }
 
+// Demo projection only: absent check evidence stays skipped instead of inventing
+// successful detections. The phishing result comes from the same detail fixture.
+export function mockEmailDisposalAnalysis(id: number, recipient?: string) {
+  const item = mockEmailDisposalDetail(id);
+  if (!item || (recipient && !item.recipients.includes(recipient))) return null;
+  const disposition = item.recipient_dispositions.find((entry) => entry.recipient === recipient);
+  const stages = [
+    { key: 'connection', checks: ['ipRateLimit', 'ipFilter', 'rblFilter', 'overseasDetection'] },
+    { key: 'identity', checks: ['senderList', 'authSpoofing', 'behaviorControl', 'recipientCheck', 'personalList'] },
+    { key: 'content', checks: ['attachmentSecurity', 'urlProtection', 'contentRules', 'intentEngine'] },
+    { key: 'ai', checks: ['phishingAgent'] },
+    { key: 'comprehensive', checks: ['similarityDetection', 'advancedRules', 'mailMarking'] },
+  ].map((stage, index) => {
+    const checked = stage.key === 'ai' && item.phish_agent_check?.checked;
+    const status = checked ? 'threat' : 'skipped';
+    return {
+      stage: index + 1,
+      key: stage.key,
+      status,
+      checks: stage.checks.map((key) => ({ key, status, rule_ids: [] })),
+    };
+  });
+  return {
+    scope: recipient ? 'recipient' : 'all',
+    recipient,
+    action: disposition?.final_action ?? item.action,
+    status: disposition?.status ?? item.status,
+    final_verdict: item.email_type === 'normal' ? 'safe' : item.phish_agent_check?.checked ? 'malicious' : 'suspicious',
+    total_elapsed_ms: item.processing_time_ms,
+    stages,
+  };
+}
+
 export function mockEmailDisposalDetail(id: number) {
   const item = mockDisposalMailLogs.find((entry) => entry.id === id);
   if (!item) return null;
@@ -9669,8 +9972,8 @@ const MOCK_OBSERVATION_HISTORY = MOCK_RULE_EFFECTIVENESS_ROWS.flatMap(row =>
     close_reason: 'superseded', change_summary: i===0 ? 'first_observation' : 'configuration_changed',
     hits: 10*(i+1), distinct_message_count: 5, action_breakdown: mockActionBreakdown({accept: 10*(i+1)}),
     pending_outcome_count: 0, other_outcome_count: 0, unknown_outcome_count: 0,
-    configured_action: 'reject', action_difference_rate: row.policy_module==='phishing_detection' ? null : 1,
-    risk_unavailable_reason: row.policy_module==='phishing_detection' ? 'module_level_only' : '',
+    configured_action: row.configured_action, action_difference_rate: row.configured_action==='proceed' ? null : 1,
+    risk_unavailable_reason: row.configured_action==='proceed' ? 'unsupported_configured_action' : '',
   })).reverse());
 
 export function mockObservationVersions(path: string) {

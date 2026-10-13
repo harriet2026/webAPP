@@ -25,6 +25,7 @@ export interface SenderFilterMetadata {
   ip_range: SenderFilterIPRange;
   list_type: ListType;
   whitelist_mode?: WhitelistMode;
+  configured_action?: SenderFilterAction;
 }
 
 export interface SenderFilterRuleView {
@@ -33,6 +34,8 @@ export interface SenderFilterRuleView {
   list_id_display: string;
   resolved: SenderFilterMetadata | null;
   is_complex: boolean;
+  // 从统一规则的原生 action=observe 派生，用于列表和编辑器展示。
+  observe_mode: boolean;
 }
 
 export interface SenderFilterGroupOption {
@@ -59,4 +62,6 @@ export interface SenderFilterFormData {
   // GT-11486: 复杂规则（resolved===null）经抽屉编辑时置 true——页面据此
   // 走"仅基础字段"的部分更新，绝不覆写原有 condition_tree/action/metadata。
   is_complex?: boolean;
+  // 表单开关由页面转换为 action=observe + metadata.configured_action。
+  observe_mode?: boolean;
 }

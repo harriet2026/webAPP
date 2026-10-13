@@ -42,7 +42,8 @@ describe('mail verdict compatibility and unvalidated historical URLs', () => {
       }
     }
     const cells = within(screen.getAllByRole('row')[1]).getAllByRole('cell');
-    expect(cells[2]).toHaveTextContent(/^—$/);
+    expect(within(cells[2]).getByRole('button')).toHaveTextContent('查看');
+    expect(screen.queryByRole('columnheader', { name: '威胁类型' })).not.toBeInTheDocument();
     expect(within(cells[1]).getByTestId('url-verdict')).toHaveTextContent('未校验');
     expect(cells[1]).toHaveTextContent(`原始输出：${verdict || '∅'} / high`);
     // A safe verdict must not rewrite the authoritative tenant policy.

@@ -65,7 +65,9 @@ export async function createAdvancedRule(
   data: CreateRuleRequest,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<Rule> {
-  return requestFn<Rule>(`/unified-rules`, { method: 'POST', body: data });
+  // Keep the shared unified-rule endpoint scoped for the preview dispatcher.
+  // Native action/metadata serialization is identical for the real API.
+  return requestFn<Rule>(`/unified-rules?scope=advanced_rules`, { method: 'POST', body: data });
 }
 
 export async function updateAdvancedRule(
@@ -73,14 +75,14 @@ export async function updateAdvancedRule(
   data: UpdateRuleRequest,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<Rule> {
-  return requestFn<Rule>(`/unified-rules/${id}`, { method: 'PUT', body: data });
+  return requestFn<Rule>(`/unified-rules/${id}?scope=advanced_rules`, { method: 'PUT', body: data });
 }
 
 export async function deleteAdvancedRule(
   id: number,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<void> {
-  return requestFn<void>(`/unified-rules/${id}`, { method: 'DELETE' });
+  return requestFn<void>(`/unified-rules/${id}?scope=advanced_rules`, { method: 'DELETE' });
 }
 
 export async function toggleAdvancedRule(
@@ -88,7 +90,7 @@ export async function toggleAdvancedRule(
   isActive: boolean,
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<Rule> {
-  return requestFn<Rule>(`/unified-rules/${id}/status`, {
+  return requestFn<Rule>(`/unified-rules/${id}/status?scope=advanced_rules`, {
     method: 'PUT',
     body: { is_active: isActive },
   });

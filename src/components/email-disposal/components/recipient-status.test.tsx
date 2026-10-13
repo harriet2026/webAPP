@@ -137,6 +137,15 @@ describe('RecipientStatus dispatch flow', () => {
     expect(unknown).not.toHaveTextContent('5.2.2 mailbox full');
   });
 
+  it('GT-14316: lets the delivery detail wrap inside the recipient cell instead of overflowing into the status column', () => {
+    render(<RecipientStatus {...baseProps([{ recipient: 'admin@163host.com', final_action: 'accept', status: 'delivered' }])} />);
+    const detail = screen.getByTestId('email-disposal-delivery-detail-admin@163host.com');
+    // The shared TableCell is whitespace-nowrap; the recipient cell must opt
+    // back into wrapping or break-words has no effect (jsdom has no layout,
+    // the rendered overlap is covered by the qc geometry case BF-14316).
+    expect(detail.closest('td')).toHaveClass('whitespace-normal');
+  });
+
   it('GT-13038: renders handling, success, and failed recall states per recipient', () => {
     const dispositions: RecipientDisposition[] = [
       { recipient: 'pending@test.local', final_action: 'accept', status: 'delivered', recall_state: 'handling', recall_at: '2026-08-31T01:00:00Z' },

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Check, ChevronDown, RotateCcw, Search } from 'lucide-react';
+import { Check, ChevronDown, Loader2, RotateCcw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { usePointerHover } from '@/hooks/use-pointer-hover';
 import { DISPLAY_STATUSES, type DisplayStatus } from '@/types/email-disposal';
-import type { DetectionMode, Disposition, RecallStatus, RiskLevel } from '@/types/phishing-detection';
+import type { DetectionMode, Disposition, RecallStatus, RiskLevelFilter } from '@/types/phishing-detection';
 
 function MultiSelect<T extends string>({ options, value, onChange, placeholder, selectedLabel }: {
   options: ReadonlyArray<{ value: T; label: string }>;
@@ -54,32 +54,35 @@ export interface DetectionFilterState {
   disposition: Disposition[];
   detection_mode: DetectionMode[];
   recall_status: RecallStatus[];
-  risk_level: RiskLevel[];
+  risk_level: RiskLevelFilter[];
   mail_status: DisplayStatus[];
   rangeKey: TimeRangeKey;
   start: string;
   end: string;
 }
 
-export function DetectionLogFilters({ value, onChange, onReset }: {
+export function DetectionLogFilters({ value, onChange, onSearch, onReset, searching = false }: {
   value: DetectionFilterState;
   onChange: (next: DetectionFilterState) => void;
+  // An explicit search re-queries even when the filters are unchanged (GT-14327).
+  onSearch: (next: DetectionFilterState) => void;
   onReset: () => void;
+  searching?: boolean;
 }) {
   const t = useTranslations('phishingDetection');
   const tc = useTranslations('common');
   const td = useTranslations('emailDisposal');
   const [keyword, setKeyword] = useState(value.keyword);
   const update = <K extends keyof DetectionFilterState>(key: K, next: DetectionFilterState[K]) => onChange({ ...value, [key]: next });
-  const submit = () => update('keyword', keyword.trim());
+  const submit = () => onSearch({ ...value, keyword: keyword.trim() });
   const selectedLabel = (count: number) => t('filters.selectedCount', { count });
   return <div className="space-y-3">
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative min-w-[240px] flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input data-testid="phishing-log-filter-keyword" value={keyword} onChange={(event) => setKeyword(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') submit(); }} placeholder={t('filters.keywordPlaceholder')} className="h-9 w-full pl-9" /></div>
       <div className="w-40 shrink-0"><MultiSelect value={value.mail_status} onChange={(next) => update('mail_status', next)} placeholder={t('filters.mailStatus')} selectedLabel={selectedLabel} options={DISPLAY_STATUSES.map((status) => ({ value: status, label: td(`filters.statuses.${status}`) }))} /></div>
       <div className="w-40 shrink-0"><MultiSelect value={value.detection_mode} onChange={(next) => update('detection_mode', next)} placeholder={t('filters.detectionMode')} selectedLabel={selectedLabel} options={(['realtime', 'observe'] satisfies DetectionMode[]).map((mode) => ({ value: mode, label: t(`detectionMode.${mode}`) }))} /></div>
-      <div className="w-40 shrink-0"><MultiSelect value={value.risk_level} onChange={(next) => update('risk_level', next)} placeholder={t('filters.riskLevel')} selectedLabel={selectedLabel} options={(['suspicious', 'low', 'medium', 'high'] satisfies RiskLevel[]).map((risk) => ({ value: risk, label: t(`riskLevel.${risk}`) }))} /></div>
-      <Button data-testid="phishing-log-filter-search" size="sm" className="h-9 shrink-0 gap-1.5" onClick={submit}><Search className="size-4" />{tc('search')}</Button><Button data-testid="phishing-log-filter-reset" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={() => { setKeyword(''); onReset(); }}><RotateCcw className="size-4" />{tc('reset')}</Button>
+      <div className="w-40 shrink-0"><MultiSelect value={value.risk_level} onChange={(next) => update('risk_level', next)} placeholder={t('filters.riskLevel')} selectedLabel={selectedLabel} options={(['suspicious', 'low', 'medium', 'high', 'unknown'] satisfies RiskLevelFilter[]).map((risk) => ({ value: risk, label: risk === 'unknown' ? t('policyDisposition.undecided') : t(`riskLevel.${risk}`) }))} /></div>
+      <Button data-testid="phishing-log-filter-search" size="sm" className="h-9 shrink-0 gap-1.5" onClick={submit} disabled={searching}>{searching ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}{tc('search')}</Button><Button data-testid="phishing-log-filter-reset" variant="outline" size="sm" className="h-9 shrink-0 gap-1.5" onClick={() => { setKeyword(''); onReset(); }}><RotateCcw className="size-4" />{tc('reset')}</Button>
     </div>
     <div className="flex flex-wrap items-center gap-2">
       <div className="inline-flex overflow-hidden rounded-md border border-border">{(['today', '7d', '30d', 'custom'] as TimeRangeKey[]).map((range) => <Button key={range} type="button" size="sm" variant={value.rangeKey === range ? 'default' : 'ghost'} onClick={() => update('rangeKey', range)} className={cn('h-9 rounded-none border-0 px-4 text-sm shadow-none', value.rangeKey !== range && 'text-muted-foreground data-[hovered=true]:bg-accent')}>{t(`filters.range.${range}`)}</Button>)}</div>

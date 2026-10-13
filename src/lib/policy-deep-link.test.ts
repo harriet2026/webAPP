@@ -7,6 +7,12 @@ import {
 } from './policy-deep-link';
 
 describe('policy configuration deep links (GT-12583)', () => {
+  it('routes admission evidence to the owning tenant and relay configuration', () => {
+    expect(buildPolicyConfigRoute('MAIL-ADMISSION', 'MAIL-ADMISSION-42', 7)).toBe(
+      '/mail-routing?tab=relay&config=42&tenant_id=7',
+    );
+    expect(buildPolicyConfigRoute('MAIL-ADMISSION', 'mail_admission:42:unknown')).toBe('/mail-routing?tab=relay');
+  });
   it('routes content-rule evidence to the content module with the public rule ID', () => {
     expect(buildPolicyConfigRoute('CR', 'CR-26694')).toBe(
       '/security/pipeline?module=content&rule_id=CR-26694',

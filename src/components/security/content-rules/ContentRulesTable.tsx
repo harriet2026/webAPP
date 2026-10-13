@@ -44,6 +44,8 @@ interface ContentRulesTableProps {
   onDelete: (rule: ContentRuleRuleView) => void;
   onToggle: (id: number, isActive: boolean) => void;
   onCopy: (ruleId: number) => void;
+  onObserveChange?: (view: ContentRuleRuleView, observing: boolean) => void;
+  observePending?: boolean;
   selectedIds: number[];
   onSelectionChange: (ids: number[]) => void;
   isLoading: boolean;
@@ -126,6 +128,8 @@ export function ContentRulesTable({
   onDelete,
   onToggle,
   onCopy,
+  onObserveChange,
+  observePending = false,
   selectedIds,
   onSelectionChange,
   canEdit = true,
@@ -293,6 +297,11 @@ export function ContentRulesTable({
           </div>
         );
       },
+    },
+    {
+      id: 'observe_mode',
+      header: t('contentRules.observeMode'),
+      cell: ({ row }) => <Switch checked={row.original.rule.action === 'observe'} disabled={!canEdit || observePending || !onObserveChange || row.original.is_complex} onCheckedChange={(value) => onObserveChange?.(row.original, value)} aria-label={t('contentRules.observeMode')} data-testid={`content-rule-observe-mode-${row.original.rule.id}`} />,
     },
     {
       id: 'valid_until',

@@ -1,5 +1,9 @@
 'use client';
 
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import { UrlFindingDetailSheet } from './UrlFindingDetailSheet';
 import { useTranslations } from 'next-intl';
 import {
   Table,
@@ -10,21 +14,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { ScreenshotCapture } from './screenshot-capture';
+import type { AssessmentResultFields } from '@/types/agent-assessment';
 import type { ScreenshotObservation, UrlFinding } from '@/types/phishing-detection';
-import { urlFindingState } from '@/lib/url-verdict';
 import { UrlVerdictDisplay } from './url-verdict-display';
 
 interface UrlFindingsTableProps {
   findings: UrlFinding[];
+  assessmentResult?: AssessmentResultFields;
   screenshots?: ScreenshotObservation[];
   screenshotsOmittedCount?: number;
   emptyText?: string;
   embedded?: boolean;
 }
 
-export function UrlFindingsTable({ findings, screenshots = [], screenshotsOmittedCount = 0, emptyText, embedded = false }: UrlFindingsTableProps) {
+export function UrlFindingsTable({ findings, assessmentResult, screenshots = [], screenshotsOmittedCount = 0, emptyText, embedded = false }: UrlFindingsTableProps) {
   const t = useTranslations('phishingDetection');
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const rows = [...findings];
   const urls = new Set(rows.map((finding) => finding.url || finding.final_url || ''));
@@ -44,24 +49,22 @@ export function UrlFindingsTable({ findings, screenshots = [], screenshotsOmitte
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="h-auto w-[62%] bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground">
+            <TableHead className="h-auto min-w-56 bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground">
               {t('table.urlColumn')}
             </TableHead>
             <TableHead className="h-auto bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground">
               {t('table.urlResult')}
             </TableHead>
             <TableHead className="h-auto bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground">
-              {t('table.threatType')}
+              {t('table.actions')}
             </TableHead>
+            <TableHead className="w-full bg-card" />
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((finding, index) => {
             const url = finding.url || finding.final_url || '';
             const finalUrl = finding.final_url && finding.final_url !== finding.url ? finding.final_url : '';
-            const verdict = urlFindingState(finding);
-            const threatType = verdict.status === 'valid' && verdict.verdict !== 'needs_review'
-              ? (verdict.verdict === 'safe' ? 'benign' : verdict.verdict) : null;
             return (
               <TableRow key={`url-finding-${index}`} className="hover:bg-transparent">
                 <TableCell className="whitespace-normal px-3.5 py-2.5">
@@ -73,19 +76,20 @@ export function UrlFindingsTable({ findings, screenshots = [], screenshotsOmitte
                       {t('table.finalUrlPrefix')}: {finalUrl}
                     </div>
                   ) : null}
-                  {screenshots.filter((capture) => capture.url === url).map((capture, captureIndex) => <ScreenshotCapture key={`${capture.attempt_id}:${capture.fetch_id}`} capture={capture} index={captureIndex + 1} />)}
                 </TableCell>
                 <TableCell className="px-3.5 py-2.5">
                   {index < findings.length ? <UrlVerdictDisplay finding={finding} /> : <span className="text-xs text-muted-foreground">{t('urlValidation.screenshotOnly')}</span>}
                 </TableCell>
                 <TableCell className="px-3.5 py-2.5 text-sm text-muted-foreground">
-                  {threatType ? t(`urlThreatType.${threatType}`) : '—'}
+                  <Button type="button" variant="link" size="sm" className="h-auto p-0 text-xs" data-testid={`phishing-url-finding-view-${index}`} onClick={() => setSelectedIndex(index)}>{t('urlDetail.view')}<ArrowRight className="ml-0.5 size-3.5" /></Button>
                 </TableCell>
+                <TableCell />
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
+      <UrlFindingDetailSheet assessmentResult={assessmentResult} screenshots={selectedIndex == null ? [] : screenshots.filter((capture) => capture.url === (rows[selectedIndex]?.url || rows[selectedIndex]?.final_url))} finding={selectedIndex == null ? null : rows[selectedIndex] ?? null} screenshotOnly={selectedIndex != null && selectedIndex >= findings.length} open={selectedIndex != null} onOpenChange={(open) => { if (!open) setSelectedIndex(null); }} />
     </div>
   );
 }

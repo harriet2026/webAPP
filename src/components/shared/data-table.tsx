@@ -57,6 +57,8 @@ interface DataTableProps<TData, TValue> {
   columnTestId?: (columnId: string) => string;
   /** 整表的稳定定位点，落在 DataTable 根节点上（避免调用方为放 testid 另包一层 <div>）。*/
   testId?: string;
+  /** 空态单元格的稳定定位点；未传时不渲染属性，对既有调用方无影响。 */
+  emptyStateTestId?: string;
   totalCount?: number;
   pageJumpLabel?: string;
 }
@@ -77,6 +79,7 @@ export function DataTable<TData, TValue>({
   rowDataLevel,
   columnTestId,
   testId,
+  emptyStateTestId,
   totalCount,
   pageJumpLabel,
 }: DataTableProps<TData, TValue>) {
@@ -186,7 +189,7 @@ export function DataTable<TData, TValue>({
                 );
               })
             ) : (
-              <TableRow>
+              <TableRow data-testid={emptyStateTestId}>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
                   {noDataText || t('noData')}
                 </TableCell>

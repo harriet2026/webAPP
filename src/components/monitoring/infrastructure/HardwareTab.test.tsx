@@ -56,9 +56,9 @@ describe('HardwareTab network Top5', () => {
     expect(within(table).getAllByRole('row')).toHaveLength(6); // header + five data rows
     const eth0 = screen.getByTestId('monitor-infrastructure-network-row-eth0');
     expect(within(eth0).getByText('10.25')).toBeTruthy();
-    expect(within(eth0).getByText('1.50')).toBeTruthy();
-    expect(within(eth0).getByText('1,234.6')).toBeTruthy();
-    expect(within(eth0).getByText('0.02%')).toBeTruthy();
+    expect(within(eth0).getByText('1.5')).toBeTruthy();
+    expect(within(eth0).getByText('1,234.56')).toBeTruthy();
+    expect(within(eth0).getByText('<0.1%')).toBeTruthy();
     expect(within(eth0).getByText('—')).toBeTruthy();
     const eth1 = screen.getByTestId('monitor-infrastructure-network-row-eth1');
     expect(within(eth1).getAllByText('—')).toHaveLength(4);

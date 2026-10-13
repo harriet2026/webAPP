@@ -27,25 +27,28 @@ export function InvestigationAssessment({ summary, investigation }: {
   const evidence = investigation.result?.evidence ?? [];
   const validConfidence = typeof summary.confidence === 'number' && Number.isFinite(summary.confidence) && summary.confidence >= 0 && summary.confidence <= 1;
 
-  return <section className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4" data-testid="phishing-investigation">
+  return <section id="phishing-detail-assessment" className="min-w-0 space-y-4 rounded-xl border border-border bg-card p-4" data-testid="phishing-investigation">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <h3 className="text-base font-semibold">{ta('presentation.title')}</h3>
       {investigation.status ? <Badge variant="outline">{t(`taskStatus.${['pending', 'running', 'completed', 'failed', 'needs_approval', 'cancelled'].includes(investigation.status) ? investigation.status : 'unknown'}`)}</Badge> : null}
     </div>
     <div className="space-y-2" data-testid="phishing-policy-assessment">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge className={`${riskBadgeClass(summary.risk_level)} h-auto px-3 py-1 text-base font-semibold`} data-testid="phishing-policy-risk">
+        <Badge className={`${riskBadgeClass(summary.risk_level)} h-auto px-3 py-1 text-base font-semibold`} data-testid="phishing-policy-risk" title={ta('presentation.policySource')}>
           {summary.risk_level ? t(`riskLevel.${summary.risk_level}`) : ta('presentation.undecided')}
         </Badge>
         <span className="text-xs text-muted-foreground">{ta('presentation.policySource')}</span>
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
         <span className="inline-flex flex-wrap items-center gap-2">{ta('presentation.policyDisposition')}<Badge className={policyDispositionBadgeClass(summary.policy_disposition)}>{t(`policyDisposition.${summary.policy_disposition ?? 'undecided'}`)}</Badge></span>
-        {validConfidence ? <span>{ta('presentation.threatScore', { score: Math.round(summary.confidence! * 100) })}</span> : null}
+        {validConfidence ? <span className="inline-flex items-center gap-2" title={ta('presentation.threatScoreHint')}>
+          <span>{ta('presentation.threatScore', { score: Math.round(summary.confidence! * 100) })}</span>
+          <span aria-hidden="true" className="h-1.5 w-20 overflow-hidden rounded-full bg-muted" data-testid="phishing-threat-score-bar"><span className="block h-full rounded-full bg-primary" style={{ width: `${Math.round(summary.confidence! * 100)}%` }} /></span>
+        </span> : null}
       </div>
     </div>
     <ModelAnalysisSummary text={text} />
-    {investigation.error_message ? <p className="break-words text-xs text-destructive">{investigation.error_message}</p> : null}
+    {investigation.error_message ? <p className="break-words text-xs text-destructive" data-testid="phishing-analysis-failed">{t('detail.analysisFailed')}</p> : null}
     {evidence.length ? <p className="text-sm text-muted-foreground">{ta('legacyEvidence')}</p> : null}
     {evidence.map((item, index) => <div key={`${item.type}-${index}`} className="rounded-xl border border-border/50 bg-background/70 p-3">
       <div className="flex items-center gap-2"><Badge variant="outline">{t(`evidenceSeverity.${['low', 'medium', 'high', 'critical'].includes(item.severity) ? item.severity : 'unknown'}`)}</Badge><span className="text-sm font-medium">{item.title}</span></div>

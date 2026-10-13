@@ -1,5 +1,6 @@
 'use client';
 
+import { ObservationModeControl } from '../ObservationModeControl';
 import { Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -11,6 +12,7 @@ import type { Direction, EncryptedActionConfig, EncryptedConfig } from '@/types/
 import { PasswordBookTable } from './PasswordBookTable';
 
 export const DEFAULT_ENCRYPTED_CONFIG: EncryptedConfig = {
+  observe_mode: false,
   detect_mode: 'detect_only',
   extract_password_from_body: true,
   extract_password_from_filename: true,
@@ -57,6 +59,13 @@ export function EncryptedAttachmentTab({
 
   return (
     <div className="space-y-6" data-testid="encrypted-attachment-tab" data-direction={direction}>
+      <ObservationModeControl
+        checked={config.observe_mode ?? false}
+        onChange={(observe_mode) => onChange({ ...config, observe_mode })}
+        testId="encrypted-observe-mode-switch"
+        title={t('observation.encrypted.title')}
+        description={t('observation.encrypted.description')}
+      />
       <section className="space-y-3">
         <Label>{infoLabel(t('encrypted.detectPolicy'), t('tooltips.encryptedMode'), 'encrypted-detect-mode')}</Label>
         <Select value={config.detect_mode} onValueChange={(mode) => onChange({ ...config, detect_mode: mode as EncryptedConfig['detect_mode'] })}>

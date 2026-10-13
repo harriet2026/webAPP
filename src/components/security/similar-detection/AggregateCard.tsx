@@ -129,7 +129,7 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
                 disabled={disabled}
                 className="flex-1"
               />
-              <span className="text-sm font-medium w-12">{value.similarity_pct}%</span>
+              <span className="text-sm font-medium w-12" data-testid="similar-detection-threshold-aggregate-similar_email-value">{value.similarity_pct}%</span>
             </div>
           </div>
         )}
@@ -182,7 +182,7 @@ export function AggregateCard({ detectionType, value, onChange, disabled }: Aggr
             </SelectTrigger>
             <SelectContent>
               {getSimilarDetectionActionOptions(value.action).map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} disabled={opt.disabled}>
+                <SelectItem key={opt.value} value={opt.value} disabled={opt.disabled} data-testid={`similar-detection-action-aggregate-option-${opt.value}`}>
                   {t(opt.labelKey)}
                 </SelectItem>
               ))}

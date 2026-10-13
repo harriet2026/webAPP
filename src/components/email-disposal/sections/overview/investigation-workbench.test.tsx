@@ -186,7 +186,7 @@ describe('InvestigationWorkbench', () => {
       }),
     })} />);
     expect(screen.getByTestId('email-disposal-workbench-blocked-overlay')).toBeInTheDocument();
-    expect(screen.getByTestId('email-disposal-workbench-view-smtp-session')).toBeInTheDocument();
+    expect(screen.queryByTestId('email-disposal-workbench-view-smtp-session')).not.toBeInTheDocument();
     expect(screen.queryByTestId('email-disposal-workbench-view-policy-detail')).not.toBeInTheDocument();
   });
 

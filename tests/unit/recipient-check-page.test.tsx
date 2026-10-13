@@ -165,7 +165,7 @@ describe('RecipientCheckPage', () => {
             outbound_limit: { limit: 50, scope: 'all', action: 'audit' },
             internal_limit: { limit: 20, scope: 'local', action: 'quarantine' },
           }),
-          check: { existence_enabled: false, existence_action: 'reject' },
+          check: { existence_enabled: false, existence_action: 'reject', observe_mode: false },
         },
       }),
     ));

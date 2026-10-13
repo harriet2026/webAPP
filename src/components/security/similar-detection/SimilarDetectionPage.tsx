@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -16,6 +16,8 @@ import type {
 import {
   DIRECTIONS,
   defaultConfig,
+  directionSettingsFor,
+  storedDirectionSettingsFor,
   WINDOW_MIN,
   WINDOW_MAX,
   SIMILARITY_MIN,
@@ -86,6 +88,15 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  // A save response can arrive after the administrator has already made the
+  // next edit. Track local edits independently from React state so a late
+  // response cannot restore the submitted values and clear that newer edit.
+  const editRevisionRef = useRef(0);
+
+  const markEdited = useCallback(() => {
+    editRevisionRef.current += 1;
+    setDirty(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,20 +118,37 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
     onDirtyChange?.(dirty);
   }, [dirty, onDirtyChange]);
 
-  const handleModeChange = useCallback((mode: SimilarDetectionMode) => {
-    setConfig((prev) => ({ ...prev, mode }));
-    setDirty(true);
-  }, []);
-
-  const toggleDirection = useCallback((dir: SimilarDetectionDirection, checked: boolean) => {
+  const handleModeChange = useCallback((type: SimilarDetectionType, mode: SimilarDetectionMode) => {
     setConfig((prev) => ({
       ...prev,
-      enabled_directions: checked
-        ? [...prev.enabled_directions, dir]
-        : prev.enabled_directions.filter((d) => d !== dir),
+      ...(type === 'similar_email' ? { mode } : {}),
+      direction_settings: {
+        similar_email: storedDirectionSettingsFor(prev, 'similar_email'),
+        same_subject: storedDirectionSettingsFor(prev, 'same_subject'),
+        [type]: { ...storedDirectionSettingsFor(prev, type), mode },
+      },
     }));
-    setDirty(true);
-  }, []);
+    markEdited();
+  }, [markEdited]);
+
+  const toggleDirection = useCallback((type: SimilarDetectionType, dir: SimilarDetectionDirection, checked: boolean) => {
+    setConfig((prev) => {
+      const settings = directionSettingsFor(prev, type);
+      const enabled_directions = checked
+        ? [...settings.enabled_directions, dir]
+        : settings.enabled_directions.filter((d) => d !== dir);
+      return {
+        ...prev,
+        ...(type === 'similar_email' ? { enabled_directions } : {}),
+        direction_settings: {
+          similar_email: storedDirectionSettingsFor(prev, 'similar_email'),
+          same_subject: storedDirectionSettingsFor(prev, 'same_subject'),
+          [type]: { ...settings, enabled_directions },
+        },
+      };
+    });
+    markEdited();
+  }, [markEdited]);
 
   const updateAggregate = useCallback((type: SimilarDetectionType, patch: Partial<SimilarDetectionDirectionConfig>) => {
     setConfig((prev) => {
@@ -132,21 +160,21 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
         [type]: { ...prev[type], aggregate },
       };
     });
-    setDirty(true);
-  }, []);
+    markEdited();
+  }, [markEdited]);
 
   const updateDirection = useCallback((type: SimilarDetectionType, dir: SimilarDetectionDirection, patch: Partial<SimilarDetectionDirectionConfig>) => {
     setConfig((prev) => ({
       ...prev,
       [type]: { ...prev[type], [dir]: { ...prev[type][dir], ...patch } },
     }));
-    setDirty(true);
-  }, []);
+    markEdited();
+  }, [markEdited]);
 
   const updateNormalization = useCallback((patch: Partial<SubjectNormalization>) => {
     setConfig((prev) => ({ ...prev, subject_normalization: { ...prev.subject_normalization, ...patch } }));
-    setDirty(true);
-  }, []);
+    markEdited();
+  }, [markEdited]);
 
   // 同步：把当前 Tab 组内 source 方向的整份配置（含 observe_mode 与 tag_*）复制到其他已启用方向，无弹窗
   const handleSync = useCallback((type: SimilarDetectionType, sourceDir: SimilarDetectionDirection) => {
@@ -154,13 +182,13 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
       const group = prev[type];
       const source = group[sourceDir];
       const nextGroup = { ...group };
-      prev.enabled_directions.forEach((dir) => {
+      directionSettingsFor(prev, type).enabled_directions.forEach((dir) => {
         if (dir !== sourceDir) nextGroup[dir] = { ...source };
       });
       return { ...prev, [type]: nextGroup };
     });
-    setDirty(true);
-  }, []);
+    markEdited();
+  }, [markEdited]);
 
   // 单卡校验：window/similarity(可选)/min_count/标记投递内容
   const validateCard = useCallback((c: SimilarDetectionDirectionConfig, checkSimilarity: boolean): string | null => {
@@ -178,20 +206,21 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
   }, [t]);
 
   const validate = useCallback((): string | null => {
-    if (config.enabled_directions.length === 0) {
-      return t('atLeastOneDirection');
+    for (const type of ['similar_email', 'same_subject'] as const) {
+      if (directionSettingsFor(config, type).enabled_directions.length === 0) {
+        return t('atLeastOneDirection');
+      }
     }
     let err = validateCard(config.similar_email.aggregate, true);
     if (err) return err;
     // same_subject 不展示相似度阈值，因此其聚合配置也不校验 similarity_pct。
     err = validateCard(config.same_subject.aggregate, false);
     if (err) return err;
-    for (const dir of config.enabled_directions) {
-      err = validateCard(config.similar_email[dir], true);
-      if (err) return err;
-      // same_subject 卡片不展示相似度滑块，不校验其 similarity_pct
-      err = validateCard(config.same_subject[dir], false);
-      if (err) return err;
+    for (const type of ['similar_email', 'same_subject'] as const) {
+      for (const dir of directionSettingsFor(config, type).enabled_directions) {
+        err = validateCard(config[type][dir], type === 'similar_email');
+        if (err) return err;
+      }
     }
     return null;
   }, [config, validateCard, t]);
@@ -202,11 +231,15 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
       toast.error(err);
       return;
     }
+    const submittedRevision = editRevisionRef.current;
     setSaving(true);
     try {
       const req = {
-        mode: config.mode,
-        enabled_directions: config.enabled_directions,
+        ...storedDirectionSettingsFor(config, 'similar_email'),
+        direction_settings: {
+          similar_email: storedDirectionSettingsFor(config, 'similar_email'),
+          same_subject: storedDirectionSettingsFor(config, 'same_subject'),
+        },
         // Keep the v2 field for mixed-version readers; v3 behavior comes from
         // each group's own aggregate entry.
         aggregate: config.similar_email.aggregate,
@@ -224,16 +257,39 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
         // the next save's CAS safe even if the immediate GET still sees the old
         // immutable snapshot.
         const committed = committedSimilarDetection(req);
-        setConfig(committed);
+        if (editRevisionRef.current === submittedRevision) {
+          setConfig(committed);
+          setDirty(false);
+        } else {
+          // Preserve the newer local fields while advancing CAS to the version
+          // just committed by this request, so the next save does not conflict.
+          setConfig((current) => ({
+            ...current,
+            version: Math.max(current.version, committed.version),
+          }));
+        }
         // Adopt server-owned metadata only when publication has caught up. An
-        // old GET must never roll the inferred committed version backwards.
+        // old GET or a GET that finishes after another local edit must never
+        // roll the inferred committed version or that edit backwards.
         void getSimilarDetection(apiRequest).then((refreshed) => {
-          if (refreshed.version >= committed.version) setConfig(refreshed);
+          if (
+            editRevisionRef.current === submittedRevision
+            && refreshed.version >= committed.version
+          ) {
+            setConfig(refreshed);
+          }
         }).catch(() => undefined);
       } else {
-        setConfig(updated);
+        if (editRevisionRef.current === submittedRevision) {
+          setConfig(updated);
+          setDirty(false);
+        } else {
+          setConfig((current) => ({
+            ...current,
+            version: Math.max(current.version, updated.version),
+          }));
+        }
       }
-      setDirty(false);
       toast.success(tc('saveSuccess'));
     } catch (e: unknown) {
       if (e instanceof ApiError && e.status === 409) {
@@ -264,23 +320,25 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
 
   // 观察集合：aggregate 模式下看当前检测类型自己的 aggregate；separate 模式下看当前 Tab 组内各已启用方向
   const currentGroup = config[activeTab];
+  const currentSettings = directionSettingsFor(config, activeTab);
   const observingDirections = useMemo(() => {
-    if (config.mode === 'aggregate') {
+    if (currentSettings.mode === 'aggregate') {
       return currentGroup.aggregate.observe_mode ? [t('modeAggregate')] : [];
     }
-    return config.enabled_directions
+    return currentSettings.enabled_directions
       .filter((dir) => currentGroup[dir].observe_mode)
       .map((dir) => t(DIR_FULL_LABEL_KEY[dir]));
-  }, [config.mode, config.enabled_directions, currentGroup, t]);
+  }, [currentSettings.mode, currentSettings.enabled_directions, currentGroup, t]);
 
   // 方向配置块 + 卡片区（similar_email/same_subject 两个 Tab 共用）
   const renderDirectionSection = (type: SimilarDetectionType) => {
     const group = config[type];
+    const settings = directionSettingsFor(config, type);
     return (
       <>
         <div className="p-4 bg-muted/50 rounded-lg border">
           <h3 className="font-medium mb-3">{t('directionConfig')}</h3>
-          <RadioGroup value={config.mode} onValueChange={(v) => handleModeChange(v as SimilarDetectionMode)}>
+          <RadioGroup value={settings.mode} onValueChange={(v) => handleModeChange(type, v as SimilarDetectionMode)}>
             <div className="flex items-center space-x-2 mb-2">
               <RadioGroupItem value="aggregate" id={`sd-aggregate-${type}`} data-testid="similar-detection-mode-aggregate" />
               <Label htmlFor={`sd-aggregate-${type}`}>{t('modeAggregate')}</Label>
@@ -289,15 +347,15 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
               <RadioGroupItem value="separate" id={`sd-separate-${type}`} className="mt-1" data-testid="similar-detection-mode-separate" />
               <div className="space-y-2">
                 <Label htmlFor={`sd-separate-${type}`}>{t('modeSeparate')}</Label>
-                {config.mode === 'separate' && (
+                {settings.mode === 'separate' && (
                   <div className="flex flex-wrap gap-4 ml-2">
                     {DIRECTIONS.map((dir) => (
                       <div key={dir} className="flex items-center space-x-2">
                         <Checkbox
                           id={`sd-dir-${dir}-${type}`}
                           data-testid={`similar-detection-dir-${dir}`}
-                          checked={config.enabled_directions.includes(dir)}
-                          onCheckedChange={() => toggleDirection(dir, !config.enabled_directions.includes(dir))}
+                          checked={settings.enabled_directions.includes(dir)}
+                          onCheckedChange={(checked) => toggleDirection(type, dir, !!checked)}
                         />
                         <Label htmlFor={`sd-dir-${dir}-${type}`} className="text-sm flex items-center gap-1">
                           {DIR_ICON[dir]} {t(DIR_LABEL_KEY[dir])}
@@ -311,8 +369,8 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
           </RadioGroup>
         </div>
 
-        {config.mode === 'separate' ? (
-          config.enabled_directions.length === 0 ? (
+        {settings.mode === 'separate' ? (
+          settings.enabled_directions.length === 0 ? (
             <div
               data-testid="similar-detection-empty-hint"
               className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-sm text-amber-700 dark:text-amber-400"
@@ -321,7 +379,7 @@ export function SimilarDetectionPage({ embedded, onDirtyChange, onEnabledChange 
             </div>
           ) : (
             <div className="grid grid-cols-1 min-[1366px]:grid-cols-2 gap-4">
-              {DIRECTIONS.filter((dir) => config.enabled_directions.includes(dir)).map((dir) => (
+              {DIRECTIONS.filter((dir) => settings.enabled_directions.includes(dir)).map((dir) => (
                 <DirectionCard
                   key={dir}
                   direction={dir}

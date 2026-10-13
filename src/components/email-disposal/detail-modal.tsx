@@ -52,6 +52,14 @@ function hasDeliveringRecipients(detail: MailLogDetail | undefined): boolean {
   }) ?? false;
 }
 
+function hasPendingDetection(detail: MailLogDetail | undefined): boolean {
+  const checkStatus = detail?.phish_agent_check?.status;
+  if (checkStatus) return checkStatus === 'pending' || checkStatus === 'running';
+  // Legacy mail without a task projection can still be waiting for
+  // asynchronous detection after Sideline admission.
+  return detail?.status === 'sidelined';
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('detail fetch timed out')), ms);
@@ -120,15 +128,29 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   }
 
   const detailQ = useQuery({
-    queryKey: ['mail-log-detail', mailLogId],
-    queryFn: () => withTimeout(getMailLogDetail(mailLogId!, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
+    queryKey: ['mail-log-detail', mailLogId, selectedAnalysisRecipient ?? 'all'],
+    queryFn: async () => {
+      // Publish both responses together: a refreshed confidence must never be
+      // paired with the previous analysis status. An analysis failure should
+      // still leave mail details and disposal actions available.
+      const [detail, analysis] = await Promise.all([
+        withTimeout(getMailLogDetail(mailLogId!, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
+        withTimeout(getMailLogAnalysis(mailLogId!, selectedAnalysisRecipient, apiRequest), DETAIL_FETCH_TIMEOUT_MS)
+          .then((data) => ({ data, error: false }), () => ({ data: undefined, error: true })),
+      ]);
+      return { detail, analysis: analysis.data, analysisError: analysis.error };
+    },
     enabled: open && mailLogId != null,
-    // Delivery facts arrive asynchronously after an accept/release action.
-    // The global 60s stale window must not keep a reopened drawer on the old
-    // "delivering" snapshot while the list already shows terminal outcomes.
+    placeholderData: (previous, previousQuery) => (
+      previousQuery?.queryKey[1] === mailLogId ? previous : undefined
+    ),
+    // Both delivery and detection state change asynchronously. Reopening must
+    // refresh both responses even inside the global 60s stale window.
     staleTime: 0,
     refetchInterval: (query) => (
-      open && hasDeliveringRecipients(query.state.data)
+      open && (hasDeliveringRecipients(query.state.data?.detail)
+        || hasPendingDetection(query.state.data?.detail)
+        || query.state.data?.analysis?.stages.some((stage) => stage.checks.some((check) => check.status === 'processing')))
         ? DETAIL_DELIVERY_REFRESH_MS
         : false
     ),
@@ -136,11 +158,6 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
   const eventsQ = useQuery({
     queryKey: ['mail-log-events', mailLogId],
     queryFn: () => withTimeout(getMailLogEvents(mailLogId!, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
-    enabled: open && mailLogId != null,
-  });
-  const analysisQ = useQuery({
-    queryKey: ['mail-log-analysis', mailLogId, selectedAnalysisRecipient ?? 'all'],
-    queryFn: () => withTimeout(getMailLogAnalysis(mailLogId!, selectedAnalysisRecipient, apiRequest), DETAIL_FETCH_TIMEOUT_MS),
     enabled: open && mailLogId != null,
   });
   const agentOverviewQ = useAgentCenterOverview({
@@ -157,7 +174,7 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     }
     return access;
   }, [agentOverviewQ.data]);
-  const detail = detailQ.data ?? null;
+  const detail = detailQ.data?.detail ?? null;
   const analysisEvents = useMemo(() => {
     const events = eventsQ.data ?? [];
     if (!selectedAnalysisRecipient) return events;
@@ -183,9 +200,6 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
     });
     void queryClient.invalidateQueries({
       queryKey: ['mail-log-events', mailLogId],
-    });
-    void queryClient.invalidateQueries({
-      queryKey: ['mail-log-analysis', mailLogId],
     });
     void queryClient.invalidateQueries({ queryKey: ['email-disposal'] });
   }, [queryClient, mailLogId]);
@@ -470,11 +484,11 @@ export function DetailModal({ open, onOpenChange, mailLogId, onFindSimilar, aiEn
                   <h3 className="text-base font-semibold mb-2">{t('securityAnalysis')}</h3>
                   <AnalysisSection
                     detail={detail}
-                    analysis={analysisQ.data}
-                    analysisLoading={analysisQ.isLoading || analysisQ.isFetching}
-                    analysisError={analysisQ.isError || (aiEnabled && agentOverviewQ.isError)}
+                    analysis={detailQ.data?.analysis}
+                    analysisLoading={detailQ.isLoading || detailQ.isPlaceholderData}
+                    analysisError={detailQ.data?.analysisError || (aiEnabled && agentOverviewQ.isError)}
                     onRetryAnalysis={() => {
-                      void analysisQ.refetch();
+                      void detailQ.refetch();
                       if (aiEnabled) void agentOverviewQ.refetch();
                     }}
                     visibleAgentAccess={visibleAgentAccess}

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { resolveSenderFilterRule } from '@/lib/api/sender-filter';
+import { getMailLogAnalysis } from '@/components/email-disposal/lib/disposal-detail-api';
+import { dispatch, isMockable } from './dispatcher';
 import {
   isMockActiveRecallState,
   mockEmailDisposalDetail,
@@ -17,6 +19,23 @@ import {
 describe('email disposal center mock contract', () => {
   beforeEach(() => {
     resetMockEmailDisposalStateForTests();
+  });
+
+  it('serves skipped and completed AI analysis through the detail API boundary', async () => {
+    const request = async <T,>(path: string): Promise<T> => {
+      expect(isMockable('GET', path)).toBe(true);
+      const response = dispatch({ method: 'GET', path });
+      expect(response.status).toBe(200);
+      return response.data as T;
+    };
+    const completed = await getMailLogAnalysis(1, undefined, request);
+    expect(completed.stages).toHaveLength(5);
+    expect(completed.stages[3]).toMatchObject({ key: 'ai', status: 'threat', checks: [{ key: 'phishingAgent', ruleIds: [] }] });
+    const skipped = await getMailLogAnalysis(2, 'alice@company.com', request);
+    expect(skipped).toMatchObject({ scope: 'recipient', recipient: 'alice@company.com', action: 'accept' });
+    expect(skipped.stages[3]).toMatchObject({ key: 'ai', status: 'skipped' });
+    expect(dispatch({ method: 'GET', path: '/mail-logs/99999/analysis' }).status).toBe(404);
+    expect(dispatch({ method: 'GET', path: '/mail-logs/1/analysis?recipient=absent@example.test' }).status).toBe(404);
   });
 
   it('provides the exact 53-row demo dataset and 30 advanced fields', () => {

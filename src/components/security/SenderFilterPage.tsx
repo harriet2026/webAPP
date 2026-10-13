@@ -6,12 +6,13 @@ import { Plus, Download, Upload, Loader2, RotateCcw, AlertCircle } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { SenderFilterTable } from '@/components/security/sender-filter/SenderFilterTable';
 import { SenderFilterDrawer } from '@/components/security/sender-filter/SenderFilterDrawer';
 import { useApiRequest } from '@/lib/api/client';
-import { listSenderFilterGroups, listSenderFilterRules, resolveSenderFilterRule, buildConditionTree, formatListId, filterSenderFilterRules } from '@/lib/api/sender-filter';
+import { listSenderFilterGroups, listSenderFilterRules, resolveSenderFilterRule, buildConditionTree, formatListId, filterSenderFilterRules, senderFilterConfiguredAction, senderFilterObservationUpdate } from '@/lib/api/sender-filter';
 import { listTenantDomains } from '@/lib/api/mail-routing';
 import type { SenderFilterStatusFilter } from '@/lib/api/sender-filter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -28,7 +29,13 @@ import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { buildSenderFilterImportTemplate } from '@/lib/security-rule-import-templates';
 import { RULE_LIST_DEFAULT_PAGE_SIZE } from '@/components/shared/rule-list-pagination';
 
-export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
+export function SenderFilterPage({ embedded, deepLinkRuleID, deepLinkRuleRef }: {
+  embedded?: boolean;
+  /** 外部配置入口深链接解析出的规则数字主键。 */
+  deepLinkRuleID?: number;
+  /** 原始规则标识（例如 SBL-1），用于定位失败时的提示文案。 */
+  deepLinkRuleRef?: string;
+} = {}) {
   const t = useTranslations();
   const apiErrorMessage = useApiErrorMessage();
   const queryClient = useQueryClient();
@@ -45,6 +52,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [importExportOpen, setImportExportOpen] = useState(false);
   const [importExportTab, setImportExportTab] = useState<'export' | 'import'>('export');
+  const [handledDeepLink, setHandledDeepLink] = useState<string | undefined>(undefined);
 
   const senderFilterImportTemplate = useMemo(
     () => buildSenderFilterImportTemplate(effectiveTenantId ?? user?.tenant_id),
@@ -115,16 +123,33 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
     if (!rulesData?.items) return [];
     return rulesData.items.map((rule) => {
       const resolved = resolveSenderFilterRule(rule);
-      const lt = resolved?.list_type || (rule.action === 'accept' ? 'whitelist' : 'blacklist');
+      const lt = resolved?.list_type || (senderFilterConfiguredAction(rule) === 'accept' ? 'whitelist' : 'blacklist');
       return {
         rule,
         list_type: lt,
         list_id_display: formatListId(rule, lt),
         resolved,
         is_complex: resolved === null,
+        observe_mode: rule.action === 'observe',
       };
     });
   }, [rulesData]);
+
+  // 深链接目标可能不在当前列表 Tab（黑/白名单）或筛选条件内，因此直接从全量
+  // ruleViews（而不是 filteredRules）里按 rule.id 定位，避免因筛选条件不匹配
+  // 而找不到规则。这是从新到达的查询数据派生本地选中态的受控渲染期状态调整，
+  // 与 ContentRulesPage 处理深链接的方式一致。
+  const deepLinkKey = deepLinkRuleID ? String(deepLinkRuleID) : undefined;
+  const deepLinkTarget = deepLinkKey
+    ? ruleViews.find((view) => view.rule.id === deepLinkRuleID)
+    : undefined;
+  const deepLinkNotFound = !!deepLinkKey && !pageLoading && !pageError && !deepLinkTarget;
+  if (deepLinkKey && deepLinkTarget && handledDeepLink !== deepLinkKey) {
+    setHandledDeepLink(deepLinkKey);
+    setListTypeTab(deepLinkTarget.list_type);
+    setEditingRule(deepLinkTarget);
+    setDrawerOpen(true);
+  }
 
   const filteredRules = useMemo(
     () => filterSenderFilterRules(ruleViews, { listType: listTypeTab, search, status: statusFilter }),
@@ -163,22 +188,40 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
     },
   });
 
+  const observeMutation = useMutation({
+    mutationFn: async ({ id, observing }: { id: number; observing: boolean }) => {
+      const view = ruleViews.find((item) => item.rule.id === id);
+      if (!view) throw new Error('Sender filter rule is unavailable');
+      await apiRequest(`/unified-rules/${id}`, {
+        method: 'PUT', body: senderFilterObservationUpdate(view.rule, observing),
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey });
+      await queryClient.invalidateQueries({ queryKey: ['rule-effectiveness'] });
+      toast.success(t('common.updateSuccess'));
+    },
+    onError: (error) => toast.error(apiErrorMessage(error)),
+  });
+
   const handleOpenDrawer = useCallback(
     (rule?: SenderFilterRuleView) => {
       setEditingRule(rule || null);
       setDrawerOpen(true);
     },
-    [],
+    [setDrawerOpen],
   );
 
   const handleSubmit = useCallback(
     async (data: SenderFilterFormData) => {
       // GT-11486: 复杂规则（高级编辑器/API 创建，简易抽屉无法表达其条件）
-      // 只允许更新基础字段。部分更新不携带 condition_tree/metadata/action/tags，
-      // 后端保留原值，避免把复杂条件覆写成简易表单拼出来的条件。
+      // 基础字段修改不重写条件和动作；仅在观察开关变化时部分更新原生动作
+      // 与原样保留的 metadata，避免将复杂条件覆写成简易表单。
       if (editingRule && data.is_complex) {
         try {
           const payload: UpdateRuleRequest = {
+            ...(data.observe_mode !== editingRule.observe_mode
+              ? senderFilterObservationUpdate(editingRule.rule, data.observe_mode ?? false) : {}),
             name: data.name,
             description: data.description,
             priority: data.priority,
@@ -187,6 +230,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
           };
           await apiRequest(`/unified-rules/${editingRule.rule.id}`, { method: 'PUT', body: payload });
           queryClient.invalidateQueries({ queryKey });
+          queryClient.invalidateQueries({ queryKey: ['rule-effectiveness'] });
           toast.success(t('common.updateSuccess'));
         } catch (err) {
           if ((err as { status?: number })?.status === 409) {
@@ -202,6 +246,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
       const conditionTree = buildConditionTree(data);
       const metadata = {
         feature: 'sender_filter' as const,
+        ...(data.observe_mode ? { configured_action: data.action } : {}),
         sender_config: data.sender_config,
         ip_range: data.ip_range,
         list_type: data.list_type,
@@ -218,7 +263,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             description: data.description,
             priority: data.priority,
             condition_tree: conditionTree,
-            action: data.action,
+            action: data.observe_mode ? 'observe' : data.action,
             metadata,
             is_active: data.is_active,
             tags,
@@ -235,7 +280,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             stage: 'rcpt',
             priority: data.priority,
             condition_tree: conditionTree,
-            action: data.action,
+            action: data.observe_mode ? 'observe' : data.action,
             metadata,
             is_active: data.is_active,
             tags,
@@ -244,6 +289,7 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
           await apiRequest('/unified-rules', { method: 'POST', body: payload });
         }
         queryClient.invalidateQueries({ queryKey });
+        queryClient.invalidateQueries({ queryKey: ['rule-effectiveness'] });
         toast.success(t(editingRule ? 'common.updateSuccess' : 'common.createSuccess'));
       } catch (err) {
         // GT-11685: 后端对重名返回 409（唯一索引 idx_rules_name_tenant）。
@@ -299,6 +345,13 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
   const content = (
     <>
       <div className="space-y-4">
+        {deepLinkNotFound && (
+          <Alert variant="destructive" data-testid="sender-filter-deep-link-unavailable">
+            <AlertDescription>
+              {t('senderFilter.deepLinkUnavailable', { ruleId: deepLinkRuleRef ?? deepLinkKey })}
+            </AlertDescription>
+          </Alert>
+        )}
         <Tabs value={listTypeTab} onValueChange={(v) => { setListTypeTab(v); setPage(1); }}>
           <TabsList className="rounded-2xl border border-border/70 bg-muted/30 p-1">
             <TabsTrigger data-testid="sender-filter-tab-blacklist" value="blacklist">{t('senderFilter.blacklist')}</TabsTrigger>
@@ -370,6 +423,8 @@ export function SenderFilterPage({ embedded }: { embedded?: boolean } = {}) {
             onEdit={(rule) => handleOpenDrawer(rule)}
             onDelete={(rule) => setDeleteTarget({ id: rule.rule.id, name: rule.rule.name })}
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
+            onToggleObserve={(id, observing) => observeMutation.mutate({ id, observing })}
+            observePending={observeMutation.isPending}
             groups={groupsData ?? { senderGroups: [], ipGroups: [] }}
             isLoading={pageLoading}
           />

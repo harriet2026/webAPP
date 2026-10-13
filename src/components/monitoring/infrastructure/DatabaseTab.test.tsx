@@ -51,11 +51,11 @@ beforeEach(() => {
 });
 
 describe('DatabaseTab trend charts', () => {
-  it('formats all three time axes for short and seven-day ranges', () => {
+  it('formats performance and DML time axes for short and seven-day ranges', () => {
     const timestamp = mocks.databaseData!.conn_trend.points[0].ts;
     const { rerender } = render(<DatabaseTab node="dev" range="1h" />);
 
-    expect(mocks.chartOptions).toHaveLength(3);
+    expect(mocks.chartOptions).toHaveLength(2);
     for (const option of mocks.chartOptions) {
       expect(option.xAxis.axisLabel.formatter(timestamp)).toBe(new Intl.DateTimeFormat('en-US', {
         hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
@@ -66,7 +66,7 @@ describe('DatabaseTab trend charts', () => {
     mocks.chartOptions = [];
     rerender(<DatabaseTab node="dev" range="7d" />);
 
-    expect(mocks.chartOptions).toHaveLength(3);
+    expect(mocks.chartOptions).toHaveLength(2);
     for (const option of mocks.chartOptions) {
       expect(option.xAxis.axisLabel.formatter(timestamp)).toBe(new Intl.DateTimeFormat('en-US', {
         month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',

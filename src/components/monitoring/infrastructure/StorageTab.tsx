@@ -17,6 +17,7 @@ import { BackupLogDrawer } from './BackupLogDrawer';
 import { useStorage, useBackup } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
 import { cn } from '@/lib/utils';
+import { formatMetric, formatMetricBytes } from './format_metric';
 
 interface StorageTabProps {
   node: string;
@@ -42,22 +43,15 @@ function usageColor(pct: number) {
   return USAGE_BAR_CLASS[usageLevel(pct)];
 }
 
-function formatBytes(bytes: number) {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-}
-
 function formatDuration(seconds: number, locale: string) {
+  if (!Number.isFinite(seconds) || seconds < 0) return '—';
   const value = seconds < 60 ? seconds : seconds / 60;
-  return new Intl.NumberFormat(locale, {
+  return `${value > 0 && value < 0.01 ? '<' : ''}${new Intl.NumberFormat(locale, {
     style: 'unit',
     unit: seconds < 60 ? 'second' : 'minute',
     unitDisplay: 'short',
-    maximumFractionDigits: 1,
-  }).format(value);
+    maximumFractionDigits: 2,
+  }).format(value > 0 && value < 0.01 ? 0.01 : value)}`;
 }
 
 export function StorageTab({ node }: StorageTabProps) {
@@ -103,7 +97,7 @@ export function StorageTab({ node }: StorageTabProps) {
                       {p.device} → {p.mount}
                     </span>
                     <span className="text-muted-foreground">
-                      {formatBytes(p.used_bytes)} / {formatBytes(p.total_bytes)} ({p.usage_pct}%)
+                      {formatMetricBytes(p.used_bytes, locale)} / {formatMetricBytes(p.total_bytes, locale)} ({formatMetric(p.usage_pct, locale, 1)}%)
                     </span>
                   </div>
                   <div className="h-3 rounded-full bg-muted">
@@ -155,7 +149,7 @@ export function StorageTab({ node }: StorageTabProps) {
                     <TableCell className="font-mono">{task.name}</TableCell>
                     <TableCell>{task.exec_time}</TableCell>
                     <TableCell>{formatDuration(task.duration, locale)}</TableCell>
-                    <TableCell>{formatBytes(task.size)}</TableCell>
+                    <TableCell>{formatMetricBytes(task.size, locale)}</TableCell>
                     <TableCell>
                       <Badge variant={task.status === 'success' ? 'default' : 'destructive'}>
                         {task.status === 'success' ? t('storage.statusSuccess') : t('storage.statusFailed')}

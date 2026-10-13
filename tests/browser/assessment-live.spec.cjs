@@ -108,10 +108,13 @@ async function assertReport(container, result, sample, locale) {
   expect(report.origin.plan_revision).toBe(sample.plan_revision);
   if (sample.snapshot_sha256) expect(report.snapshot_sha256).toBe(sample.snapshot_sha256);
   const factors = report.factors || [];
+  const toggle = view.getByTestId('assessment-toggle-all');
+  if (await toggle.count()) await toggle.click();
+  const findingsLayout = await view.getByTestId('assessment-direction-group-supports_threat').count() > 0;
   await expect(view.getByTestId('assessment-subject')).toHaveCount(report.subjects.length);
   await expect(view.getByTestId('assessment-factor')).toHaveCount(factors.length);
   for (const subject of report.subjects) {
-    const group = view.getByTestId('assessment-subject').filter({ has: container.page().getByRole('heading', { name: subject.label, exact: true }) });
+    const group = report.subjects.length === 1 ? view.getByTestId('assessment-subject') : view.getByTestId('assessment-subject').filter({ has: container.page().getByRole('heading', { name: subject.label, exact: true }) });
     await expect(group).toHaveCount(1);
     for (const factor of factors.filter((item) => item.subject_ref === subject.id)) {
       const card = group.getByTestId('assessment-factor').filter({ hasText: factor.observation });
@@ -119,7 +122,9 @@ async function assertReport(container, result, sample, locale) {
       await expect(card).toContainText(factor.relevance);
       if (factor.limitation) await expect(card).toContainText(factor.limitation);
       await expect(card).toContainText(labels.strengths[factor.strength]);
-      await expect(group).toContainText(labels.directions[factor.direction]);
+      await expect(group).toContainText(findingsLayout ? labels.findings.directions[factor.direction] : labels.directions[factor.direction]);
+      const sources = card.getByTestId('assessment-factor-sources');
+      if (await sources.count()) await sources.locator('summary').click();
     }
   }
   // Expand the entire rendered catalog, including retained sources no factor cites.
@@ -131,7 +136,7 @@ async function assertReport(container, result, sample, locale) {
   const displayed = [];
   for (let i = 0; i < await details.count(); i++) {
     const detail = details.nth(i);
-    await detail.locator('summary').click();
+    if (await detail.evaluate((element) => element.tagName === 'DETAILS')) await detail.locator('summary').click();
     const content = detail.getByTestId('assessment-source-content');
     await expect(content).toBeVisible();
     displayed.push(await content.textContent());
@@ -194,12 +199,7 @@ for (const sample of manifest.samples) {
           expect(await page.evaluate(() => localStorage.getItem('osgateway_demo_session'))).not.toBe('1');
           if (surface === 'drawer' && sample.kind === 'phish') {
             await page.getByTestId('phishing-detail-run-log').click();
-            const downloadEvent = page.waitForEvent('download');
-            await page.getByTestId('phishing-detail-export').click();
-            const download = await downloadEvent;
-            const file = testInfo.outputPath('detail-export.json');
-            await download.saveAs(file);
-            expect(JSON.parse(fs.readFileSync(file, 'utf8'))).toEqual(detail);
+            await expect(page.getByTestId('phishing-detail-export')).toHaveCount(0);
           }
           await testInfo.attach('actual-product-result', { body: JSON.stringify(generic), contentType: 'application/json' });
           await container.getByTestId('assessment-report').scrollIntoViewIfNeeded();

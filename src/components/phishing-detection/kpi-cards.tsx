@@ -1,15 +1,12 @@
 'use client';
 
-import { Info } from 'lucide-react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { PhishingStats } from '@/types/phishing-detection';
 
 interface KpiCardsProps {
   stats?: PhishingStats;
-  hitRate?: number | null;
   isLoading?: boolean;
   onDetectedClick?: () => void;
   onQuarantinedClick?: () => void;
@@ -22,16 +19,14 @@ interface KpiCardData {
   key: string;
   label: string;
   value: number | string | null;
-  hint?: string;
   tone?: 'default' | 'red' | 'orange' | 'green';
   onClick?: () => void;
 }
 
-function KpiCard({ cardKey, label, value, hint, tone, onClick, isLoading }: {
+function KpiCard({ cardKey, label, value, tone, onClick, isLoading }: {
   cardKey: string;
   label: string;
   value: number | string | null;
-  hint?: string;
   tone?: 'default' | 'red' | 'orange' | 'green';
   onClick?: () => void;
   isLoading?: boolean;
@@ -45,8 +40,8 @@ function KpiCard({ cardKey, label, value, hint, tone, onClick, isLoading }: {
   }[tone ?? 'default'];
   const content = (
     <>
-      <p className="flex items-center gap-1 text-sm text-muted-foreground">{label}{hint ? <Tooltip><TooltipTrigger aria-label={hint} render={<Info tabIndex={0} className="size-3.5 cursor-help" />} /><TooltipContent className="max-w-xs">{hint}</TooltipContent></Tooltip> : null}</p>
-      <div className={cn('mt-2 text-2xl font-bold tabular-nums', toneCls, value === null && 'text-muted-foreground')}>
+      <p className="flex items-center gap-1 text-sm text-muted-foreground">{label}</p>
+      <div data-testid={`phishing-metric-value-${cardKey}`} className={cn('mt-auto pt-2 text-2xl font-bold tabular-nums', toneCls, value === null && 'text-muted-foreground')}>
         {isLoading ? <span className="inline-block h-7 w-16 animate-pulse rounded-md bg-muted" /> : display}
       </div>
     </>
@@ -57,23 +52,21 @@ function KpiCard({ cardKey, label, value, hint, tone, onClick, isLoading }: {
         data-testid={`phishing-kpi-${cardKey}`}
         variant="outline"
         onClick={onClick}
-        className="h-auto w-full cursor-pointer flex-col items-stretch whitespace-normal rounded-xl border-border bg-card p-4 text-left shadow-sm data-[hovered=true]:bg-muted/35"
+        className="h-auto min-w-0 w-full cursor-pointer flex-col items-stretch justify-start gap-0 whitespace-normal rounded-xl border-border bg-card p-4 text-left shadow-sm data-[hovered=true]:bg-muted/35"
       >
         {content}
       </Button>
     );
   }
   return (
-    <div data-testid={`phishing-kpi-${cardKey}`} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div data-testid={`phishing-kpi-${cardKey}`} className="flex min-w-0 flex-col rounded-xl border border-border bg-card p-4 shadow-sm">
       {content}
     </div>
   );
 }
 
-export function KpiCards({ stats, hitRate, isLoading, onDetectedClick, onQuarantinedClick, onPendingReviewClick, onRecalledClick, onRecallSuccessClick }: KpiCardsProps) {
+export function KpiCards({ stats, isLoading, onDetectedClick, onQuarantinedClick, onPendingReviewClick, onRecalledClick, onRecallSuccessClick }: KpiCardsProps) {
   const t = useTranslations('phishingDetection');
-  const ta = useTranslations('agentCenterOverview.metrics');
-  const format = useFormatter();
 
   const cards: KpiCardData[] = [
     {
@@ -110,23 +103,16 @@ export function KpiCards({ stats, hitRate, isLoading, onDetectedClick, onQuarant
       tone: 'green',
       onClick: onRecallSuccessClick,
     },
-    {
-      key: 'hit_rate',
-      label: ta('hitRate'),
-      hint: ta('hitRateTooltip.phishing'),
-      value: hitRate === null || hitRate === undefined ? null : format.number(hitRate, { style: 'percent', maximumFractionDigits: 1 }),
-    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
       {cards.map((card) => (
         <KpiCard
           key={card.key}
           cardKey={card.key}
           label={card.label}
           value={card.value}
-          hint={card.hint}
           tone={card.tone}
           onClick={card.onClick}
           isLoading={isLoading}

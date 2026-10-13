@@ -272,10 +272,27 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
     setDrawerOpen(true);
   }, [setDrawerOpen, setEditingRule]);
 
+  const [observePending, setObservePending] = useState(false);
+  const handleObserveChange = async (view: ContentRuleRuleView, observing: boolean) => {
+    if (!view.resolved || observePending) return;
+    const formalAction = Object.values(view.resolved.directions).find((config) => config?.enabled)?.action;
+    if (!formalAction) return;
+    setObservePending(true);
+    try {
+      await apiRequest(`/unified-rules/${view.rule.id}?scope=content_rules`, { method: "PUT", body: {
+        action: observing ? "observe" : formalAction, expected_updated_at: view.rule.updated_at,
+      } });
+      await queryClient.invalidateQueries({ queryKey });
+      toast.success(t("common.updateSuccess"));
+    } catch (error) { toast.error((error as Error).message ?? t("common.error")); }
+    finally { setObservePending(false); }
+  };
+
   const handleSubmit = useCallback(
     async (data: ContentRuleFormData) => {
       const conditionTree = buildConditionTree(data);
       const metadata = {
+        ...editingRule?.resolved,
         feature: "content_rules" as const,
         match_type: data.match_type,
         match_content: data.match_content,
@@ -287,6 +304,8 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
           : {}),
       };
 
+      if (!data.mark_config) delete metadata.mark_config;
+      if (!data.block_alert_config) delete metadata.block_alert_config;
       const firstAction =
         data.directions.receive?.action ||
         data.directions.send?.action ||
@@ -300,7 +319,7 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
             description: data.description,
             priority: data.priority,
             condition_tree: conditionTree,
-            action: firstAction,
+            action: data.observe_mode ? "observe" : firstAction,
             metadata,
             is_active: data.is_active,
             page: "content_rules",
@@ -322,7 +341,7 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
             stage: "data",
             priority: data.priority,
             condition_tree: conditionTree,
-            action: firstAction,
+            action: data.observe_mode ? "observe" : firstAction,
             metadata,
             is_active: data.is_active,
             valid_from: toRFC3339(data.valid_from),
@@ -549,6 +568,8 @@ export function ContentRulesPage({ embedded, onEnabledChange, deepLinkRuleID, de
             }
             onToggle={(id, isActive) => toggleMutation.mutate({ id, isActive })}
             onCopy={handleCopy}
+            onObserveChange={handleObserveChange}
+            observePending={observePending}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             isLoading={isLoading}

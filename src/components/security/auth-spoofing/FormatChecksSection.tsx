@@ -68,10 +68,14 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
   };
 
   const isHighRisk =
-    (item.action === 'reject' || item.action === 'discard') && !item.observe_mode && item.enabled;
+    (item.action === 'reject' || item.action === 'discard') && item.enabled;
+  const configuredActionLabel = FORMAT_ACTIONS.includes(item.action as typeof FORMAT_ACTIONS[number])
+    ? t(formatActionKey(item.action) as Parameters<typeof t>[0])
+    : item.action;
 
   return (
     <div
+      data-testid={`auth-format-card-${checkKey}`}
       className={cn(
         'rounded-lg border bg-gray-50 p-4 space-y-3 dark:border-gray-800 dark:bg-gray-900',
         !item.enabled && 'opacity-60',
@@ -118,39 +122,29 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
       {item.enabled && (
         <>
           <div className="flex items-center gap-3 pl-12">
-            {item.observe_mode ? (
-              <div className="flex items-center gap-2 rounded bg-gray-100 px-3 py-1.5 text-sm text-muted-foreground dark:bg-gray-800">
-                {t('observingRecordOnly')}
-              </div>
-            ) : (
-              <Select
-                value={item.action}
-                onValueChange={(v) => onChange({ ...item, action: v as AuthSpoofingAction })}
-                disabled={disabled || !item.enabled}
-              >
-                <SelectTrigger className="w-[220px]" data-testid={`auth-format-action-${checkKey}`}>
-                  <SelectValue>
-                    {FORMAT_ACTIONS.includes(item.action as typeof FORMAT_ACTIONS[number])
-                      ? t(formatActionKey(item.action) as Parameters<typeof t>[0])
-                      : item.action}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="w-72">
-                  {FORMAT_ACTIONS.map((a) => (
-                    // 纯测试定位用途：option 的无障碍名是 label + 描述两段拼接，
-                    // 而 QC 框架强制 exact 匹配（ui-locator.ts:44-45,84），按 name 定位恒不命中。
-                    <SelectItem key={a} value={a} data-testid={`auth-spoofing-format-action-${a}`}>
-                      <div className="flex flex-col gap-0.5 py-0.5">
-                        <span>{t(formatActionKey(a) as Parameters<typeof t>[0])}</span>
-                        <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
-                          {tDesc(toMessageKeySegment(a) as Parameters<typeof tDesc>[0])}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select
+              value={item.action}
+              onValueChange={(v) => onChange({ ...item, action: v as AuthSpoofingAction })}
+              disabled={disabled || !item.enabled}
+            >
+              <SelectTrigger className="w-[220px]" data-testid={`auth-format-action-${checkKey}`}>
+                <SelectValue>{configuredActionLabel}</SelectValue>
+              </SelectTrigger>
+              <SelectContent className="w-72">
+                {FORMAT_ACTIONS.map((a) => (
+                  // 纯测试定位用途：option 的无障碍名是 label + 描述两段拼接，
+                  // 而 QC 框架强制 exact 匹配（ui-locator.ts:44-45,84），按 name 定位恒不命中。
+                  <SelectItem key={a} value={a} data-testid={`auth-spoofing-format-action-${a}`}>
+                    <div className="flex flex-col gap-0.5 py-0.5">
+                      <span>{t(formatActionKey(a) as Parameters<typeof t>[0])}</span>
+                      <span className="text-xs text-muted-foreground whitespace-normal leading-snug">
+                        {tDesc(toMessageKeySegment(a) as Parameters<typeof tDesc>[0])}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {isHighRisk && (
@@ -163,7 +157,7 @@ function FormatCheckCard({ checkKey, labelKey, descKey, warningKey, item, onChan
             </div>
           )}
 
-          {!item.observe_mode && item.action === 'proceed' && (
+          {item.action === 'proceed' && (
             <div className="pl-12">
               <AuthSpoofingTagPanel
                 value={item}

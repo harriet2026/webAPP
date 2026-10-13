@@ -36,9 +36,16 @@ export type SimilarDetectionGroupConfig = Record<
   SimilarDetectionDirectionConfig
 >;
 
+export interface SimilarDetectionDirectionSettings {
+  mode: SimilarDetectionMode;
+  enabled_directions: SimilarDetectionDirection[] | null;
+}
+
 export interface SimilarDetectionConfig {
   mode: SimilarDetectionMode;
-  enabled_directions: SimilarDetectionDirection[];
+  enabled_directions: SimilarDetectionDirection[] | null;
+  /** Missing groups inherit the legacy shared fields; explicit groups win. */
+  direction_settings?: Partial<Record<SimilarDetectionType, SimilarDetectionDirectionSettings>>;
   /** V2 compatibility mirror of similar_email.aggregate. */
   aggregate: SimilarDetectionDirectionConfig;
   similar_email: SimilarDetectionGroupConfig;

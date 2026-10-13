@@ -9,6 +9,7 @@
 
 import type { DisposalBasis, DisposalBasisGroupSummary } from '@/types/email-disposal';
 import { buildPolicyConfigRoute } from '@/lib/policy-deep-link';
+import { authSpoofingRuleLabelKeys } from '@/lib/auth_spoofing_rule_labels';
 
 export type { DisposalBasis };
 
@@ -55,7 +56,7 @@ const STAGE_COLOR: Record<number, string> = {
 };
 
 interface PolicyMeta {
-  stage: 1 | 2 | 3 | 4 | 5;
+  stage: 0 | 1 | 2 | 3 | 4 | 5;
   moduleZh: string;
   moduleEn: string;
   moduleTh: string;
@@ -66,7 +67,7 @@ interface PolicyMeta {
   // 对应的本地化字符串；模板里的变量用 `val()` 取自 HitValues。
   listSummary: (v: HitValues, lang: DisposalLang) => string;
   // 详情页「命中」行描述（变量已替换）。
-  hitDetail: (v: HitValues, lang: DisposalLang) => string;
+  hitDetail: (v: HitValues, lang: DisposalLang, recipients?: readonly string[]) => string;
 }
 
 const val = (v: HitValues | undefined, k: string, fallback = '-'): string => {
@@ -399,6 +400,77 @@ function crPositionLabel(token: string, lang: DisposalLang): string {
 }
 
 export const DISPOSAL_POLICY_MAP: Record<string, PolicyMeta> = {
+  'MAIL-ADMISSION': {
+    // Admission owns the routing exemption; it is outside the security stages.
+    stage: 0,
+    moduleZh: '邮件路由 / 转发设置',
+    moduleEn: 'Mail Routing / Relay Settings',
+    moduleTh: 'การกำหนดเส้นทางอีเมล / การตั้งค่ารีเลย์',
+    moduleRu: 'Маршрутизация почты / Настройки ретрансляции',
+    idPrefix: 'MAIL-ADMISSION-',
+    listSummary: (v, lang) => {
+      const sourceIP = optionalVal(v, 'source_ip');
+      const bypass = optionalVal(v, 'skip_antispam') === 'true';
+      switch (lang) {
+        case 'en': return `${sourceIP ? `Source IP ${sourceIP}: ` : ''}${bypass ? 'accepted by no-filter admission rule' : 'matched mail admission rule'}`;
+        case 'th': return `${sourceIP ? `IP ต้นทาง ${sourceIP}: ` : ''}${bypass ? 'อนุญาตตามกฎรับอีเมลแบบไม่กรอง' : 'ตรงกับกฎรับอีเมล'}`;
+        case 'ru': return `${sourceIP ? `IP источника ${sourceIP}: ` : ''}${bypass ? 'принято по правилу допуска без фильтрации' : 'сработало правило допуска почты'}`;
+        default: return `${sourceIP ? `来源 IP ${sourceIP} ` : ''}${bypass ? '命中不过滤准入规则并放行' : '命中邮件准入规则'}`;
+      }
+    },
+    hitDetail: (v, lang, recipients) => {
+      const sourceIP = optionalVal(v, 'source_ip');
+      const sender = optionalVal(v, 'sender');
+      const source = optionalVal(v, 'client_cidr');
+      const configuredDomain = optionalVal(v, 'rcpt_domain');
+      // One admission rule can match several recipient domains. The scalar
+      // hit value is a sampled match; the recorded recipient scope is the
+      // authority for formatting an aggregated module's actual domains.
+      const domains = [...new Set((recipients ?? []).map((recipient) => {
+        const at = recipient.lastIndexOf('@');
+        return at >= 0 ? recipient.slice(at + 1).trim().toLowerCase() : '';
+      }).filter(Boolean))].sort();
+      const recipientDomain = domains.length > 0
+        ? domains.join(lang === 'zh' ? '、' : ', ')
+        : optionalVal(v, 'recipient_domain');
+      const sample = domains.length === 0;
+      const details: string[] = [];
+      switch (lang) {
+        case 'en':
+          if (sourceIP) details.push(`Actual source IP: ${sourceIP}`);
+          if (sender) details.push(`Actual sender: ${sender}`);
+          if (source) details.push(`Configured source range: ${source}`);
+          if (configuredDomain) details.push(`Configured recipient domain: ${configuredDomain}`);
+          if (recipientDomain) details.push(`Actual recipient domain${sample ? ' (match example)' : ''}: ${recipientDomain}`);
+          if (v.skip_antispam === 'true') details.push('Accepted without further security-rule evaluation');
+          break;
+        case 'th':
+          if (sourceIP) details.push(`IP ต้นทางจริง: ${sourceIP}`);
+          if (sender) details.push(`ผู้ส่งจริง: ${sender}`);
+          if (source) details.push(`ช่วงต้นทางที่กำหนด: ${source}`);
+          if (configuredDomain) details.push(`โดเมนผู้รับที่กำหนด: ${configuredDomain}`);
+          if (recipientDomain) details.push(`โดเมนผู้รับจริง${sample ? ' (ตัวอย่างที่ตรงกัน)' : ''}: ${recipientDomain}`);
+          if (v.skip_antispam === 'true') details.push('อนุญาตโดยไม่ประเมินกฎความปลอดภัยเพิ่มเติม');
+          break;
+        case 'ru':
+          if (sourceIP) details.push(`Фактический IP источника: ${sourceIP}`);
+          if (sender) details.push(`Фактический отправитель: ${sender}`);
+          if (source) details.push(`Настроенный диапазон источника: ${source}`);
+          if (configuredDomain) details.push(`Настроенный домен получателя: ${configuredDomain}`);
+          if (recipientDomain) details.push(`Фактический домен получателя${sample ? ' (пример совпадения)' : ''}: ${recipientDomain}`);
+          if (v.skip_antispam === 'true') details.push('Принято без дальнейшей проверки правил безопасности');
+          break;
+        default:
+          if (sourceIP) details.push(`实际来源 IP：${sourceIP}`);
+          if (sender) details.push(`实际发信人：${sender}`);
+          if (source) details.push(`配置的来源范围：${source}`);
+          if (configuredDomain) details.push(`配置的收信域：${configuredDomain}`);
+          if (recipientDomain) details.push(`实际收信域${sample ? '（命中示例）' : ''}：${recipientDomain}`);
+          if (v.skip_antispam === 'true') details.push('不过滤放行，后续安全规则不再参与处置');
+      }
+      return details.join('；');
+    },
+  },
   // ===== 阶段一：IP 策略（连接层）=====
   IPFREQ: {
     stage: 1,
@@ -1396,41 +1468,9 @@ export function getStageColor(stage: number): string {
   return STAGE_COLOR[stage] ?? 'bg-gray-400';
 }
 
-export function getPolicyRoute(policyKey: string, ruleRef?: string): string | undefined {
-  return buildPolicyConfigRoute(policyKey, ruleRef);
+export function getPolicyRoute(policyKey: string, ruleRef?: string, tenantId?: number): string | undefined {
+  return buildPolicyConfigRoute(policyKey, ruleRef, tenantId);
 }
-
-// Built-in rule names are stable backend identities, not administrator-facing
-// copy. Reuse the configuration page's authSpoofing messages for all 26 rules
-// defined in internal/authspoofconfig/policy.go; unknown/custom names fall back.
-const AUTH_RULE_LABEL_KEYS: Record<string, readonly string[]> = {
-  spf_fail: ['protocolChecks.spf', 'protocolChecks.spf_fail'],
-  spf_softfail: ['protocolChecks.spf', 'protocolChecks.spf_softfail'],
-  spf_permerror: ['protocolChecks.spf', 'protocolChecks.spf_permerror'],
-  spf_none: ['protocolChecks.spf', 'protocolChecks.spf_none'],
-  spf_temperror: ['protocolChecks.spf', 'protocolChecks.spf_temperror'],
-  dkim_fail: ['protocolChecks.dkim', 'protocolChecks.dkim_fail'],
-  dkim_neutral: ['protocolChecks.dkim', 'protocolChecks.dkim_neutral'],
-  dkim_none: ['protocolChecks.dkim', 'protocolChecks.dkim_none'],
-  dkim_temperror: ['protocolChecks.dkim', 'protocolChecks.dkim_temperror'],
-  dkim_permerror: ['protocolChecks.dkim', 'protocolChecks.dkim_permerror'],
-  dkim_partial: ['protocolChecks.dkim', 'protocolChecks.dkim_partial'],
-  dmarc_reject: ['protocolChecks.dmarc', 'protocolChecks.dmarc_reject'],
-  dmarc_quarantine: ['protocolChecks.dmarc', 'protocolChecks.dmarc_quarantine'],
-  dmarc_none: ['protocolChecks.dmarc', 'protocolChecks.dmarc_none'],
-  dmarc_no_record: ['protocolChecks.dmarc', 'protocolChecks.dmarc_no_record'],
-  dmarc_query_fail: ['protocolChecks.dmarc', 'protocolChecks.dmarc_query_fail'],
-  ptr_nomatch: ['protocolChecks.ptr', 'protocolChecks.ptr_nomatch'],
-  ptr_noptr: ['protocolChecks.ptr', 'protocolChecks.ptr_noptr'],
-  ptr_ehlo_mismatch: ['protocolChecks.ptr', 'protocolChecks.ptr_ehlo_mismatch'],
-  format_mailfrom_empty: ['formatChecks.title', 'formatChecks.mailFromEmpty'],
-  format_mailfrom_invalid: ['formatChecks.title', 'formatChecks.mailFromInvalid'],
-  format_envelope_header_mismatch: ['formatChecks.title', 'formatChecks.envelopeHeaderMismatch'],
-  display_name_inbound: ['displayNameSpoof.title', 'displayNameSpoof.inbound'],
-  display_name_outbound: ['displayNameSpoof.title', 'displayNameSpoof.outbound'],
-  display_name_internal: ['displayNameSpoof.title', 'displayNameSpoof.internal'],
-  similar_domain: ['similarDomain.title'],
-};
 
 const RECIPIENT_EXISTENCE_RULE_NAME = 'sysrule:recipient_check_existence';
 const RECIPIENT_LIMIT_RULE_PREFIX = 'sysrule:recipient_check_limit_';
@@ -1448,6 +1488,22 @@ const ATTACHMENT_VIRUS_RULE_LABELS: Record<DisposalLang, string> = {
   th: 'กฎการจัดการไวรัสในไฟล์แนบ',
   ru: 'Правило обработки вирусов во вложениях',
 };
+
+// The phishing decision is an engine-owned policy snapshot, not a named
+// customer rule. Its synthetic ID includes a snapshot hash and risk version.
+const PHISH_POLICY_DECISION_RULE_LABELS: Record<DisposalLang, string> = {
+  zh: '钓鱼邮件处置策略',
+  en: 'Phishing Disposition Policy',
+  th: 'นโยบายจัดการอีเมลฟิชชิง',
+  ru: 'Политика обработки фишинговых писем',
+};
+
+function isBuiltinPhishPolicyDecision(basis: DisposalBasis): boolean {
+  return basis.policy_key === 'AI-PHISH' && (
+    basis.rule_name === 'phish_policy_decision' ||
+    /^AI-PHISH:phish_policy_decision:[^:]+:risk-v\d+$/.test(basis.rule_id ?? '')
+  );
+}
 
 function isBuiltinAttachmentVirusRule(basis: DisposalBasis): boolean {
   return (basis.policy_key === 'ATT-BASIC' || basis.policy_key === 'ATT-AV')
@@ -1481,7 +1537,11 @@ function builtinSimilarDetectionRuleLabel(basis: DisposalBasis, lang: DisposalLa
 }
 
 function displayRuleName(basis: DisposalBasis, lang: DisposalLang): string {
+  if (basis.policy_key === 'MAIL-ADMISSION' && (!basis.rule_name || basis.rule_name === 'mail_admission whitelist')) {
+    return { zh: '不过滤准入规则', en: 'No-filter Admission Rule', th: 'กฎรับอีเมลแบบไม่กรอง', ru: 'Правило допуска без фильтрации' }[lang];
+  }
   if (isBuiltinAttachmentVirusRule(basis)) return ATTACHMENT_VIRUS_RULE_LABELS[lang];
+  if (isBuiltinPhishPolicyDecision(basis)) return PHISH_POLICY_DECISION_RULE_LABELS[lang];
   const similarDetectionLabel = builtinSimilarDetectionRuleLabel(basis, lang);
   if (similarDetectionLabel) return similarDetectionLabel;
   return basis.rule_name ?? '';
@@ -1540,6 +1600,7 @@ function recipientRuleLabel(
 
 export function shouldHideInternalRuleIdentity(basis: DisposalBasis): boolean {
   if (isBuiltinAttachmentVirusRule(basis)) return true;
+  if (isBuiltinPhishPolicyDecision(basis)) return true;
   if (builtinSimilarDetectionRule(basis)) return true;
   if (recipientRuleLabel(basis, 'zh')) return true;
   return basis.policy_key === 'INTENT'
@@ -1560,15 +1621,17 @@ export function formatRuleLabel(
     translateRecipient?: (key: string) => string;
   } = {},
 ): string {
-  const name = basis.rule_name;
+  const name = displayRuleName(basis, lang);
   if (isBuiltinAttachmentVirusRule(basis)) return ATTACHMENT_VIRUS_RULE_LABELS[lang];
+  if (isBuiltinPhishPolicyDecision(basis)) return PHISH_POLICY_DECISION_RULE_LABELS[lang];
   const similarDetectionLabel = builtinSimilarDetectionRuleLabel(basis, lang);
   if (similarDetectionLabel) return similarDetectionLabel;
   const prefix = 'sysrule:auth_spoofing_';
   if (basis.policy_key === 'AUTH' && name?.startsWith(prefix)) {
     const key = name.slice(prefix.length);
-    if (Object.hasOwn(AUTH_RULE_LABEL_KEYS, key)) {
-      return AUTH_RULE_LABEL_KEYS[key].map((messageKey) => translateAuth(messageKey)).join(lang === 'zh' ? '：' : ': ');
+    const messageKeys = authSpoofingRuleLabelKeys(key);
+    if (messageKeys) {
+      return messageKeys.map((messageKey) => translateAuth(messageKey)).join(lang === 'zh' ? '：' : ': ');
     }
   }
   const intentMatch = basis.policy_key === 'INTENT'
@@ -1614,7 +1677,7 @@ export function formatHitDetail(basis: DisposalBasis, lang: DisposalLang = 'zh')
   if (basis.policy_key === 'RCPT' && basis.rule_name === RECIPIENT_EXISTENCE_RULE_NAME) {
     return RECIPIENT_EXISTENCE_HIT_DETAILS[lang];
   }
-  const detail = (isBuiltinAttachmentVirusRule(basis) ? DISPOSAL_POLICY_MAP['ATT-AV'] : meta).hitDetail(hv, lang);
+  const detail = (isBuiltinAttachmentVirusRule(basis) ? DISPOSAL_POLICY_MAP['ATT-AV'] : meta).hitDetail(hv, lang, basis.recipients);
   // ACF tags are a top-level Basis field, not hit_values. Keep that schema
   // boundary explicit so a missing hit_values.detection_tags can never render
   // as a fabricated "-" value.

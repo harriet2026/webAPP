@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { PageHeader, PageShell } from '@/components/shared/page-shell';
 import { AccessDeniedPanel } from '@/components/shared/state-panel';
@@ -16,6 +16,7 @@ export default function MailRoutingPage() {
   const t = useTranslations('mailRouting');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { capabilities } = useProductForm();
   const { apiRequest } = useApiRequest();
   const { isSystemAdmin } = useAuth();
@@ -32,9 +33,11 @@ export default function MailRoutingPage() {
   // in-place AccessDeniedPanel (review M18).
   useEffect(() => {
     if (isMultiTenant) {
-      router.replace(`/${locale}/tenants`);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('view', 'routing');
+      router.replace(`/${locale}/tenants?${params.toString()}`);
     }
-  }, [isMultiTenant, router, locale]);
+  }, [isMultiTenant, router, locale, searchParams]);
 
   // Mail routing is system_admin only in every form (spec §3.2). GT-12329:
   // stated positively (require system_admin) rather than as "deny tenant_admin",

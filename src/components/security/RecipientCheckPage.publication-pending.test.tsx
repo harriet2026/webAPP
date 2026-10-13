@@ -139,6 +139,7 @@ describe('RecipientCheckPage publication-pending cache contract', () => {
     expect(client.getQueryData(['recipient-check-config', 832])).toEqual({
       existence_enabled: true,
       existence_action: 'reject',
+      observe_mode: false,
     });
     const cached = client.getQueryData<ScopedConfigView>(['tenant-config', 'antispam', 832]);
     expect(cached?.stored?.version).toBe(8);
@@ -234,8 +235,8 @@ describe('RecipientCheckPage configuration load guard', () => {
       expect.objectContaining({
         method: 'PUT',
         body: {
-          limit,
-          check: { existence_enabled: false, existence_action: 'reject' },
+          limit: { ...limit, observe_mode: false },
+          check: { existence_enabled: false, existence_action: 'reject', observe_mode: false },
         },
       }),
     ));

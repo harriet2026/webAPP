@@ -49,6 +49,13 @@ describe('GT-14263 similar-detection observation deep-link filter', () => {
     });
   });
 
+  it('maps legacy behavior-control links without narrowing real observation-period links', () => {
+    expect(disposalDeepLinkQuickFilter(new URLSearchParams({ source: 'rule_effectiveness', policy_key: 'BEHAVIOR' })))
+      .toEqual({ disposalPolicyKeys: ['BEHAVIOR'] });
+    expect(disposalDeepLinkQuickFilter(new URLSearchParams({ source: 'rule_effectiveness', policy_key: 'behavior_control', observation_period_id: 'period-1' })))
+      .toBeNull();
+  });
+
   it('ignores unknown deep-link values and leaves the default page unfiltered', () => {
     const params = new URLSearchParams({ similar: 'other', direction: 'other' });
 

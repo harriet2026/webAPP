@@ -106,6 +106,7 @@ export function createBehaviorControlSchema(priorityRange: BehaviorControlPriori
       .min(priorityRange.min, 'priorityRange')
       .max(priorityRange.max, 'priorityRange'),
     is_active: z.boolean(),
+    observe_mode: z.boolean().optional(),
     valid_from: z.string().optional(),
     valid_until: z.string().optional(),
     direction: z.enum(['inbound', 'outbound', 'internal', 'bidirectional']),

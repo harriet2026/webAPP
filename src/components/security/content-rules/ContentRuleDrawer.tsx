@@ -39,6 +39,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -112,6 +113,7 @@ function defaultDraft(): ContentRuleFormData {
     description: '',
     priority: 100,
     is_active: true,
+    observe_mode: false,
     valid_from: '',
     valid_until: '',
     match_type: 'keyword',
@@ -149,6 +151,7 @@ function makeInitialState(rule: ContentRuleRuleView | null) {
           description: base.description ?? '',
           priority: base.priority,
           is_active: base.is_active,
+          observe_mode: base.action === 'observe',
           valid_from: base.valid_from ? base.valid_from.slice(0, 16) : '',
           valid_until: base.valid_until ? base.valid_until.slice(0, 10) : '',
           email_type: base.email_type,
@@ -168,6 +171,7 @@ function makeInitialState(rule: ContentRuleRuleView | null) {
       description: rule.rule.description ?? '',
       priority: rule.rule.priority,
       is_active: rule.rule.is_active,
+      observe_mode: rule.rule.action === 'observe',
       valid_from: rule.rule.valid_from ? rule.rule.valid_from.slice(0, 16) : '',
       valid_until: rule.rule.valid_until ? rule.rule.valid_until.slice(0, 10) : '',
       match_type: rule.resolved.match_type,
@@ -540,6 +544,19 @@ export function ContentRuleDrawer({
                         className="w-40"
                       />
                       <span className="text-xs text-muted-foreground">({t('contentRules.permanentHint')})</span>
+                    </div>
+                  </Field>
+                  <Field label={t('contentRules.observeMode')} hint={t('contentRules.observeModeHint')}>
+                    <div className="flex items-center gap-3">
+                      <Switch
+                        checked={draft.observe_mode ?? false}
+                        onCheckedChange={(enabled) => setDraft((current) => ({ ...current, observe_mode: enabled }))}
+                        aria-label={t('contentRules.observeMode')}
+                        data-testid="content-rule-observe-mode"
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {draft.observe_mode ? t('common.enabled') : t('common.disabled')}
+                      </span>
                     </div>
                   </Field>
                   {!actionTouched && editingRule && new Set(Object.values(draft.directions).filter(Boolean).map((item) => item?.action)).size > 1 && (

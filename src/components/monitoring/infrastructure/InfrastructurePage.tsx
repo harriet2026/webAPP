@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/auth-context';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { PageShell, PageHeader } from '@/components/shared/page-shell';
@@ -17,6 +17,7 @@ import type { TimeRange } from '@/types/monitoring';
 
 export function InfrastructurePage() {
   const t = useTranslations('infrastructure');
+  const locale = useLocale();
   const { isSystemAdmin } = useAuth();
   const [node, setNode] = useState('');
   const [range, setRange] = useState<TimeRange>('24h');
@@ -25,7 +26,16 @@ export function InfrastructurePage() {
   // GT-11536: surface nodes-load failure so the operator sees a degraded
   // banner instead of a silently-empty node selector.
   const { data: nodesResp, isError: nodesError, isLoading: nodesLoading } = useNodes();
-  const nodes = useMemo(() => nodesResp?.items ?? [], [nodesResp]);
+  const nodes = useMemo(() => {
+    const collator = new Intl.Collator(locale, { numeric: true, sensitivity: 'base' });
+    // Sort a copy so query-cache order remains untouched. Break equivalent
+    // natural-sort keys by exact ID for a stable order across refreshes.
+    return [...(nodesResp?.items ?? [])].sort((a, b) =>
+      collator.compare(a.id, b.id) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  }, [nodesResp, locale]);
+
+  // Capture the initial choice once; newly discovered nodes must not replace it.
+  if (!node && nodes.length > 0) setNode(nodes[0].id);
 
   const effectiveNode = useMemo(() => {
     if (node) return node;
@@ -54,6 +64,7 @@ export function InfrastructurePage() {
       )}
 
       <ControlBar
+        tab={tab}
         nodes={nodes}
         node={effectiveNode}
         range={range}

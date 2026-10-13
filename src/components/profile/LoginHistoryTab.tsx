@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar, CalendarDayButton } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -98,6 +98,17 @@ function HistoryDatePicker({
           onSelect={(date) => {
             onChange(date ? format(date, 'yyyy-MM-dd') : '');
             if (date) setOpen(false);
+          }}
+          components={{
+            PreviousMonthButton: (props) => <Button {...props} data-testid={`${testId}-previous-month`} />,
+            NextMonthButton: (props) => <Button {...props} data-testid={`${testId}-next-month`} />,
+            DayButton: ({ day, ...props }) => (
+              <CalendarDayButton
+                {...props}
+                day={day}
+                data-testid={`${testId}-day-${format(day.date, 'yyyy-MM-dd')}`}
+              />
+            ),
           }}
         />
       </PopoverContent>
@@ -233,10 +244,10 @@ export function LoginHistoryTab() {
                   <TableCell>
                     {r.abnormal ? (
                       <Tooltip>
-                        <TooltipTrigger render={<span className="inline-flex" />}>
+                        <TooltipTrigger render={<span className="inline-flex" data-testid={`profile-history-abnormal-${r.id}`} />}>
                           <AlertTriangle className="h-4 w-4 text-amber-500" />
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent data-testid={`profile-history-abnormal-reason-${r.id}`}>
                           {r.abnormal_reason || t('history.abnormalDefault')}
                         </TooltipContent>
                       </Tooltip>
@@ -257,6 +268,7 @@ export function LoginHistoryTab() {
           pageSize={pageSize}
           total={total}
           onPageChange={setPage}
+          testId="profile-history-pagination"
         />
       </div>
 

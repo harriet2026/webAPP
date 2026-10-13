@@ -34,6 +34,7 @@ export interface BehaviorCondition {
 }
 
 export interface BehaviorControlMetadata {
+  configured_action?: BehaviorBackendAction;
   feature: 'behavior_control';
   direction: BehaviorDirection;
   /** GT-12707 多条件模型（1~4 条）。存在时为权威，旧 dim_a/dim_b 字段是其派生镜像 */
@@ -50,6 +51,7 @@ export interface BehaviorControlMetadata {
 }
 
 export interface BehaviorControlFormData {
+  observe_mode?: boolean;
   name: string;
   description?: string;
   priority: number;
@@ -93,6 +95,7 @@ export interface RecipientLimitMergedConfig {
 }
 
 export interface RecipientLimitConfig {
+  observe_mode?: boolean;
   mode: RecipientLimitMode;
   inbound_limit?: RecipientLimitDirectionConfig;
   outbound_limit?: RecipientLimitDirectionConfig;
@@ -104,6 +107,7 @@ export interface RecipientLimitConfig {
 // 收件人检查的 API 组合视图：检测开关/阈值在 detection_profiles，动作由
 // page=recipient_check 的统一规则承载并由后端回填。
 export interface RecipientCheckConfig {
+  observe_mode?: boolean;
   existence_enabled: boolean; // 存在性验证策略开关
   existence_action: RecipientLimitAction; // 验证失败执行动作（仅接收方向生效）
 }

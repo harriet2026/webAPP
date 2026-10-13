@@ -7,7 +7,7 @@ import { ArrowLeft, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { strategyPathLabels } from '@/components/statistics/rule-effectiveness/constants';
-import type { PolicyModule } from '@/lib/api/rule-effectiveness-view';
+import { presentationStrategy, type PolicyModule } from '@/lib/api/rule-effectiveness-view';
 
 /**
  * 规则效能统计跳转过来的上下文提示条——仅当 URL 携带
@@ -20,6 +20,7 @@ export function RuleEffectivenessContextBanner() {
   const searchParams = useSearchParams();
   const t = useTranslations("emailDisposal.ruleEffectivenessContext");
   const tPath = useTranslations("ruleEffectiveness.path");
+  const tAuth = useTranslations("authSpoofing");
 
   const source = searchParams.get("source");
   const policyKey = searchParams.get("policy_key");
@@ -30,10 +31,15 @@ export function RuleEffectivenessContextBanner() {
     return null;
   }
 
-  if (!['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter'].includes(policyKey)) return null;
-  const pathLabels = policyKey === 'sender_filter'
+  if (!['auth_spoofing', 'similar_detection', 'phishing_detection', 'sender_filter', 'BEHAVIOR', 'behavior_control', 'content_rules', 'advanced_filter_rules', 'recipient_check', 'intent_engine', 'attachment_security'].includes(policyKey)) return null;
+  const pathLabels = ['sender_filter', 'BEHAVIOR', 'behavior_control', 'content_rules', 'advanced_filter_rules', 'recipient_check'].includes(policyKey)
     ? [searchParams.get('strategy_name') ?? subStrategy]
-    : strategyPathLabels({ policy_module: policyKey as PolicyModule, sub_strategy_id: subStrategy, sub_strategy_name_snapshot: searchParams.get('strategy_name') ?? subStrategy }, tPath);
+    // 链接携带的是后端对象键（下钻按对象身份查询），显示前按统计表同一套映射转为展示键（GT-14322）。
+    : strategyPathLabels({
+      policy_module: policyKey as PolicyModule,
+      ...presentationStrategy(policyKey, subStrategy),
+      sub_strategy_name_snapshot: searchParams.get('strategy_name') ?? subStrategy,
+    }, tPath, tAuth);
   if (pathLabels.length === 0) {
     return null;
   }
@@ -55,7 +61,7 @@ export function RuleEffectivenessContextBanner() {
       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
         <Info className="h-4 w-4 shrink-0 text-primary" />
         <span className="text-muted-foreground">{t("label")}</span>
-        <span className="font-medium">{pathText}</span>
+        <span className="font-medium" data-testid="disposal-rule-effectiveness-path">{pathText}</span>
         {observeWindowFrom && (
           <span className="text-muted-foreground">
             {t("observedSince", { date: `${observeWindowFrom} ~ ${searchParams.get("observe_window_to") ?? observeWindowFrom}` })}

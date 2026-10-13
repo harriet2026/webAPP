@@ -38,6 +38,7 @@ import {
 } from '@/components/spoofing-detection/spoofing-agent-page';
 import { ThreatRetroAgentPage, type ThreatRetroAgentTab } from '@/components/threat-retro/agent-management-page';
 import { useAgentManagementRoleAccess } from './use-agent-management-access';
+import { usePhishingStats } from '@/components/phishing-detection/usePhishingStats';
 
 const AGENT_ICON: Record<AgentCenterKey, ElementType> = {
   phishing: ShieldAlert,
@@ -45,8 +46,7 @@ const AGENT_ICON: Record<AgentCenterKey, ElementType> = {
   'threat-retro': History,
 };
 
-const HIT_RATE_TOOLTIP_KEY: Record<AgentCenterKey, 'phishing' | 'spoofing' | 'threatRetro'> = {
-  phishing: 'phishing',
+const HIT_RATE_TOOLTIP_KEY: Record<Exclude<AgentCenterKey, 'phishing'>, 'spoofing' | 'threatRetro'> = {
   spoofing: 'spoofing',
   'threat-retro': 'threatRetro',
 };
@@ -76,6 +76,7 @@ function threatRetroTab(tab: string | null): ThreatRetroAgentTab {
 
 export function AgentCenterOverviewPage() {
   const t = useTranslations('agentCenterOverview');
+  const tCommon = useTranslations('common');
   // 切换器未开启时仿冒/威胁回溯智能体隐藏（useAgentCenterOverview 过滤），
   // 页头描述同步降为仅钓鱼智能体的口径，避免文案泄漏未开放能力。
   const { switcherEnabled } = useProductForm();
@@ -88,6 +89,11 @@ export function AgentCenterOverviewPage() {
   const tab = searchParams.get('tab');
   const overviewQuery = useAgentCenterOverview();
   const roleAccess = useAgentManagementRoleAccess();
+  const phishingStatsEnabled = roleAccess.status === 'ready' && roleAccess.canView
+    && overviewQuery.isSuccess
+    && overviewQuery.data.agents.some((card) => card.key === 'phishing' && card.access === 'enabled' && card.status !== 'locked');
+  const phishingStats = usePhishingStats(phishingStatsEnabled);
+  const phishingTodayDetected = phishingStatsEnabled ? phishingStats.data?.today_detected : undefined;
 
   const visibleCards = useMemo(() => {
     return (overviewQuery.data?.agents ?? []).filter((card) => card.access !== 'hidden');
@@ -124,9 +130,9 @@ export function AgentCenterOverviewPage() {
           {showBackToRuleEffectiveness && (
             <div className="px-8 pt-3">
               <BackToContextBanner
-                label={t('common.ruleEffectivenessContext.label')}
+                label={tCommon('ruleEffectivenessContext.label')}
                 contextText={detailTitle}
-                backLabel={t('common.ruleEffectivenessContext.back')}
+                backLabel={tCommon('ruleEffectivenessContext.back')}
                 onBack={() => {
                   if (typeof window !== 'undefined' && window.history.length > 1) {
                     router.back();
@@ -139,6 +145,7 @@ export function AgentCenterOverviewPage() {
             </div>
           )}
           <AgentCenterWorkspace
+            phishingTodayDetected={phishingTodayDetected}
             cards={visibleCards}
             numberFmt={numberFmt}
             collapsed={summaryCollapsed}
@@ -168,7 +175,6 @@ export function AgentCenterOverviewPage() {
                   agent={selectedAgent}
                   tab={detailPresentation?.canConfigure ? tab : null}
                   configurationEnabled={detailPresentation?.canConfigure === true}
-                  hitRate={detailCard?.hit_rate ?? null}
                 />
               )}
             </div>
@@ -183,6 +189,7 @@ export function AgentCenterOverviewPage() {
       <PageShell className="space-y-0" data-testid="agent-center-overview">
         <AgentCenterHeader currentTitle={t('title')} description={overviewDescription} />
         <AgentCenterWorkspace
+          phishingTodayDetected={phishingTodayDetected}
           cards={visibleCards}
           numberFmt={numberFmt}
           collapsed={summaryCollapsed}
@@ -248,6 +255,7 @@ function AgentCenterHeader({ currentTitle, description }: { currentTitle: ReactN
 }
 
 function AgentCenterWorkspace({
+  phishingTodayDetected,
   cards,
   numberFmt,
   collapsed,
@@ -255,6 +263,7 @@ function AgentCenterWorkspace({
   onToggleCollapsed,
   children,
 }: {
+  phishingTodayDetected?: number;
   cards: AgentCenterCard[];
   numberFmt: Intl.NumberFormat;
   collapsed: boolean;
@@ -286,7 +295,7 @@ function AgentCenterWorkspace({
             {collapsed ? t('expandSummaryRail') : t('collapseSummaryRail')}
           </TooltipContent>
         </Tooltip>
-        <AgentSummaryRail cards={cards} numberFmt={numberFmt} collapsed={collapsed} selectedAgent={selectedAgent} />
+        <AgentSummaryRail cards={cards} numberFmt={numberFmt} collapsed={collapsed} selectedAgent={selectedAgent} phishingTodayDetected={phishingTodayDetected} />
         <PageSurface className="min-h-[calc(100vh-148px)] flex-1 overflow-hidden rounded-lg bg-card p-0">
           {children}
         </PageSurface>
@@ -314,17 +323,15 @@ function AgentDetail({
   agent,
   tab,
   configurationEnabled,
-  hitRate,
 }: {
   agent: AgentCenterKey;
   tab: string | null;
   configurationEnabled: boolean;
-  hitRate: number | null;
 }) {
   if (agent === 'phishing') {
     return (
       <div className="min-h-[620px] overflow-hidden" data-testid="agent-center-phishing-panel">
-        <PhishingAgentPanel initialTab={phishingTab(tab)} configurationEnabled={configurationEnabled} hitRate={hitRate} />
+        <PhishingAgentPanel initialTab={phishingTab(tab)} configurationEnabled={configurationEnabled} statsRefreshManaged />
       </div>
     );
   }
@@ -351,17 +358,20 @@ function AgentDetail({
 }
 
 function AgentSummaryRail({
+  phishingTodayDetected,
   cards,
   numberFmt,
   collapsed,
   selectedAgent,
 }: {
+  phishingTodayDetected?: number;
   cards: AgentCenterCard[];
   numberFmt: Intl.NumberFormat;
   collapsed: boolean;
   selectedAgent: AgentCenterKey | null;
 }) {
   const t = useTranslations('agentCenterOverview');
+  const tp = useTranslations('phishingDetection');
   const overviewSelected = selectedAgent === null;
   return (
     <aside
@@ -410,11 +420,15 @@ function AgentSummaryRail({
                 <Icon className={cn('mt-0.5 h-4 w-4 shrink-0', selected ? 'text-primary' : 'text-muted-foreground')} />
                 <div className={cn('min-w-0', collapsed && 'lg:hidden')}>
                   <div className={cn('truncate text-xs font-medium', selected ? 'text-primary' : 'text-foreground')}>{t(`agents.${card.key}.title`)}</div>
-                  <div className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
-                    {formatRate(card.hit_rate)} {t('summaryHitRate')}
-                  </div>
+                  {card.key !== 'phishing' ? (
+                    <div className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
+                      {formatRate(card.hit_rate)} {t('summaryHitRate')}
+                    </div>
+                  ) : null}
                   <div className="text-[11px] leading-4 text-muted-foreground">
-                    {formatMetric(card.today_processed, numberFmt)} {t('metrics.todayProcessed')}
+                    {card.key === 'phishing'
+                      ? <>{formatMetric(phishingTodayDetected ?? null, numberFmt)} {tp('kpi.todayDetected')}</>
+                      : <>{formatMetric(card.today_processed, numberFmt)} {t('metrics.todayProcessed')}</>}
                   </div>
                 </div>
               </div>
@@ -452,7 +466,7 @@ function AgentCard({ card, numberFmt }: { card: AgentCenterCard; numberFmt: Intl
       <CardContent className="space-y-2 px-4 pb-0">
         <Metric label={t('statusLabel')} value={t(`status.${card.status}`)} />
         <Metric label={t('metrics.todayProcessed')} value={formatMetric(card.today_processed, numberFmt)} />
-        <Metric
+        {card.key !== 'phishing' ? <Metric
           label={
             <span className="inline-flex items-center gap-1">
               {t('metrics.hitRate')}
@@ -465,7 +479,7 @@ function AgentCard({ card, numberFmt }: { card: AgentCenterCard; numberFmt: Intl
             </span>
           }
           value={formatRate(card.hit_rate)}
-        />
+        /> : null}
         <Metric label={t('metrics.stage')} value={stageLabel} testId={`agent-center-stage-${card.key}`} />
       </CardContent>
       <CardFooter className="mt-4 gap-2 border-t border-gray-100 px-4 py-3">

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 import zh from '../../messages/zh.json';
@@ -16,13 +16,15 @@ function show(content: ReactNode) {
 }
 
 describe('phishing assessment with independent real captures', () => {
-  it('preserves every original factor and reference in its original order', () => {
+  it('preserves every original factor and reference in direction groups', () => {
     show(<AssessmentReportView {...cliReportPropsZh} layout="findings" />);
+    expect(screen.queryByTestId('assessment-factor')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('assessment-toggle-all'));
     const cards = screen.getAllByTestId('assessment-factor');
     const factors = cliReportPropsZh.result.assessment_report!.factors!;
     expect(cards).toHaveLength(11);
-    factors.forEach((factor, index) => {
-      const card = within(cards[index]);
+    factors.forEach((factor) => {
+      const card = within(cards.find((element) => within(element).queryByRole('heading', { level: 5, name: factor.observation }))!);
       expect(card.getByRole('heading', { level: 5 })).toHaveTextContent(factor.observation!);
       expect(card.getByTestId('assessment-strength')).toHaveTextContent(zh.assessment.strengths[factor.strength as keyof typeof zh.assessment.strengths]);
       const sources = card.getByTestId('assessment-factor-sources');
@@ -33,8 +35,8 @@ describe('phishing assessment with independent real captures', () => {
         expect(within(sources).getAllByTestId('assessment-source-content')[sourceIndex].textContent).toBe(source.content);
       });
     });
-    expect(screen.getAllByText(zh.assessment.findings.directions.supports_threat)).toHaveLength(6);
-    expect(screen.getAllByText(zh.assessment.findings.directions.limits_certainty)).toHaveLength(5);
+    expect(screen.getByTestId('assessment-direction-group-supports_threat')).toHaveTextContent('6');
+    expect(screen.getByTestId('assessment-direction-group-limits_certainty')).toHaveTextContent('5');
     expect(screen.queryByText(zh.assessment.findings.directions.supports_legitimate)).not.toBeInTheDocument();
     expect(screen.queryByText('本次调查邮件')).not.toBeInTheDocument();
     expect(within(screen.getByTestId('assessment-uncited-sources')).getAllByTestId('assessment-source')).toHaveLength(2);
@@ -93,6 +95,7 @@ describe('phishing assessment with independent real captures', () => {
     expect(screen.getByRole('heading', { name: '本次调查邮件' })).toBeInTheDocument();
     expect(screen.getByText('Second subject')).toBeInTheDocument();
     expect(screen.getByText(zh.assessment.findings.directions.supports_legitimate)).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('assessment-toggle-all'));
     expect(screen.getAllByTestId('assessment-retained-range')[0]).toHaveTextContent('9000');
     expect(screen.getByText(zh.assessment.source.replace('{target}', 'subject'))).toBeInTheDocument();
     expect(container.querySelector('script')).toBeNull();

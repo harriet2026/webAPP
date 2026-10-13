@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { OBSERVE_TIMEOUT_DAYS, strategyPathLabels } from './constants';
+import { OBSERVE_TIMEOUT_DAYS, isPendingPromotion, strategyPathLabels } from './constants';
 import { StrategyPathBreadcrumb } from './StrategyPathBreadcrumb';
 import type { RuleEffectivenessRow } from '@/lib/api/rule-effectiveness-view';
 
@@ -21,9 +21,10 @@ interface Props {
 export function ObserveTimeoutAlert({ rows, onNavigateToConfig }: Props) {
   const t = useTranslations('ruleEffectiveness.timeoutAlert');
   const tPath = useTranslations('ruleEffectiveness.path');
+  const tAuth = useTranslations('authSpoofing');
   const [open, setOpen] = useState(false);
 
-  const timeoutRows = rows.filter((r) => r.observed_days > OBSERVE_TIMEOUT_DAYS && r.hits > 0);
+  const timeoutRows = rows.filter(isPendingPromotion);
   if (timeoutRows.length === 0) return null;
 
   return (
@@ -36,24 +37,24 @@ export function ObserveTimeoutAlert({ rows, onNavigateToConfig }: Props) {
         <span className="text-sm text-amber-800 dark:text-amber-300">
           {t('warning', { count: timeoutRows.length, days: OBSERVE_TIMEOUT_DAYS })}
         </span>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => setOpen(true)}>
+        <Button variant="outline" size="sm" className="ml-auto" onClick={() => setOpen(true)} data-testid="rule-effectiveness-timeout-view">
           {t('viewDetails')}
         </Button>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="flex w-[640px] flex-col p-0 sm:max-w-[640px]">
+        <SheetContent className="flex w-[640px] flex-col p-0 sm:max-w-[640px]" data-testid="rule-effectiveness-timeout-list">
           <SheetHeader className="shrink-0 border-b border-border px-6 py-4">
             <SheetTitle>{t('drawerTitle')}</SheetTitle>
           </SheetHeader>
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-4">
             {timeoutRows.map((row) => (
-              <div key={row.id} className="rounded-lg border border-border/60 p-3 text-sm">
+              <div key={row.id} className="rounded-lg border border-border/60 p-3 text-sm" data-testid={`rule-effectiveness-timeout-row-${row.id}`}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0 truncate">
-                    <StrategyPathBreadcrumb segments={strategyPathLabels(row, tPath)} />
+                    <StrategyPathBreadcrumb segments={strategyPathLabels(row, tPath, tAuth)} />
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => onNavigateToConfig(row)}>
+                  <Button variant="outline" size="sm" onClick={() => onNavigateToConfig(row)} data-testid={`rule-effectiveness-timeout-go-config-${row.id}`}>
                     {t('goToConfig')}
                   </Button>
                 </div>

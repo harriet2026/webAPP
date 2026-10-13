@@ -39,7 +39,7 @@ export function SpoofingNotificationPreviewDialog({
           </div>
         ) : null}
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('close')}</Button>
+          <Button type="button" variant="outline" data-testid="spoof-notification-preview-close" onClick={() => onOpenChange(false)}>{t('close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

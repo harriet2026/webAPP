@@ -129,6 +129,7 @@ export function formToCreateBody(form: BehaviorControlFormData) {
   const relation = multi ? (form.or_enabled ? 'or' : 'and') : undefined;
   const meta: BehaviorControlMetadata = {
     feature: 'behavior_control',
+    configured_action: PRODUCT_TO_BACKEND[form.action],
     direction: form.direction,
     object_config: form.object_config,
     time_window: form.time_window,
@@ -150,7 +151,7 @@ export function formToCreateBody(form: BehaviorControlFormData) {
     page: BEHAVIOR_CONTROL_PAGE,
     stage: 'data',
     rule_class: 'action',
-    action: PRODUCT_TO_BACKEND[form.action],
+    action: form.observe_mode ? 'observe' : PRODUCT_TO_BACKEND[form.action],
     tags: [],
     metadata: meta,
     condition_tree: buildConditionTreeFromForm(form),
@@ -224,10 +225,13 @@ export async function updateBehaviorControlRule(
   id: number,
   form: BehaviorControlFormData,
   requestFn: ApiRequestFn = apiRequest,
+  existing?: Rule,
 ): Promise<{ rule: Rule }> {
+  const body = formToCreateBody(form);
+  body.metadata = { ...parseRecord(existing?.metadata), ...body.metadata };
   return requestFn(`/unified-rules/${id}`, {
     method: 'PUT',
-    body: formToCreateBody(form),
+    body: { ...body, expected_updated_at: existing?.updated_at },
   });
 }
 
@@ -330,4 +334,14 @@ export async function getRecipientDirectoryStatus(
   requestFn: ApiRequestFn = apiRequest,
 ): Promise<RecipientDirectoryStatus> {
   return requestFn('/behavior-control/recipient-check/directory-status');
+}
+
+export function behaviorControlObservationUpdate(view: BehaviorControlRuleView, observing: boolean) {
+  const configuredAction = view.rule.action === 'observe' ? view.meta?.configured_action : view.rule.action;
+  if (!configuredAction || !(configuredAction in BACKEND_TO_PRODUCT)) throw new Error('Missing configured action');
+  return {
+    action: observing ? 'observe' : configuredAction,
+    metadata: { ...parseRecord(view.rule.metadata), configured_action: configuredAction },
+    expected_updated_at: view.rule.updated_at,
+  };
 }

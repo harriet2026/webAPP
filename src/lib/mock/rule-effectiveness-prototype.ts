@@ -11,7 +11,7 @@ function threatSeriesValue(
 
 interface RuleEffectivenessMockRow {
   id: string;
-  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection';
+  policy_module: 'auth_spoofing' | 'similar_detection' | 'phishing_detection' | 'sender_filter' | 'behavior_control' | 'content_rules' | 'advanced_filter_rules' | 'recipient_check';
   // 相似邮件检测/相同主题检测是两条独立策略（不同判定维度、不同误判特征），
   // 观察对象必须按策略拆分，不能合并为一个笼统的「相似检测」模块级观察对象。
   similar_detection_type?: 'similar_email' | 'same_subject';
@@ -35,13 +35,55 @@ interface RuleEffectivenessMockRow {
   version_no?: number;
   /** 历史版本的变更摘要，未指定时使用通用文案。 */
   version_change_summary?: string;
+  /**
+   * 覆盖模块级动作候选集合。发信人黑白名单下白名单规则（action=accept）观察期内
+   * 命中即为放行，不会产生拦截类结果，因此用空数组覆盖模块级的拦截动作候选；
+   * 黑名单规则沿用模块级候选（不设置该字段）。
+   */
+  actions?: RuleEffectivenessWouldBeAction[];
 }
 
 const RULE_EFFECTIVENESS_CONFIG_PATH: Record<RuleEffectivenessMockRow['policy_module'], string> = {
   auth_spoofing: '/security/pipeline?module=authSpoofing',
   similar_detection: '/security/pipeline?module=similarDetection',
   phishing_detection: '/agent-center/overview?agent=phishing&tab=config',
+  // 发信人黑白名单没有独立路由页面，SenderFilterPage 只挂载在流水线抽屉里
+  // （module=senderFilter，见 PolicyPipelinePage），不是 '/security/sender-filter'
+  // 这个不存在的路径——用错会导致跳转 404。
+  sender_filter: '/security/pipeline?module=senderFilter',
+  behavior_control: '/security/pipeline?module=behaviorControl',
+  // 流水线页内容规则模块的真实 key 是 'content'（见 PolicyPipelinePage 的
+  // Stage3PolicyKey 与 policy-deep-link.ts 的 PipelineModuleKey），不是
+  // 'contentRules'；用错 key 会导致跳转后流水线页无法定位到内容规则抽屉。
+  content_rules: '/security/pipeline?module=content',
+  // 流水线第五阶段高级过滤规则模块的真实 key 是 'advancedRules'（见
+  // policy-deep-link.ts 的 ACF 映射与 PolicyPipelinePage 的 Stage5PolicyKey）。
+  advanced_filter_rules: '/security/pipeline?module=advancedRules',
+  recipient_check: '/security/pipeline?module=recipientCheck',
 };
+
+// 内容规则按单条规则拆分观察对象（与 fixtures.ts 中 mockContentRules 的 id
+// 一一对应），跳转必须带上具体规则的 rule_id，落到该规则的编辑抽屉，而不是
+// 停在内容规则列表页让用户自己再找一遍。
+function contentRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.content_rules}&rule_id=${ruleId}`;
+}
+
+// 发信人黑白名单/发信行为管控同样按单条规则拆分观察对象，跳转同理需要带上
+// 具体 rule_id，落到该规则的编辑抽屉。
+function senderFilterRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.sender_filter}&rule_id=${ruleId}`;
+}
+
+function behaviorControlRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.behavior_control}&rule_id=${ruleId}`;
+}
+
+// 高级过滤规则同样按单条规则拆分观察对象，跳转需要带上具体 rule_id，落到
+// 该规则在流水线第五阶段抽屉内的编辑态，而不是停在规则列表页。
+function advancedFilterRuleConfigPath(ruleId: number): string {
+  return `${RULE_EFFECTIVENESS_CONFIG_PATH.advanced_filter_rules}&rule_id=${ruleId}`;
+}
 
 // 相似检测配置页按 detectionType Tab 划分（相似邮件检测/相同主题检测），跳转时
 // 需要带上具体 Tab，而不是笼统跳到模块首个 Tab，否则用户还要自己再切一次。
@@ -120,7 +162,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     id: 'auth-format_check_mailfrom_empty',
     policy_module: 'auth_spoofing',
     sub_strategy_id: 'format_check_mailfrom_empty',
-    sub_strategy_name_snapshot: '无效 MAIL FROM',
+    sub_strategy_name_snapshot: '空MAIL FROM',
     is_deleted: false,
     observed_days: 5,
     hits: 9,
@@ -135,7 +177,7 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     id: 'auth-format_check_mailfrom_invalid',
     policy_module: 'auth_spoofing',
     sub_strategy_id: 'format_check_mailfrom_invalid',
-    sub_strategy_name_snapshot: 'MAIL FROM 格式错误',
+    sub_strategy_name_snapshot: '无效MAIL FROM',
     is_deleted: false,
     observed_days: 19,
     hits: 33,
@@ -307,13 +349,12 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     version_no: 2,
     version_change_summary: '执行动作调整：隔离 → 审核，触发观察期重置',
   },
-  // 钓鱼邮件智能体按版本归属拆分为准入规则、风险处置策略和运行时策略。
-  // 三条记录分别演示独立版本号、观察起始时间和历史版本，不使用智能体整体版本。
+  // 钓鱼检测观察对象是实际命中的风险处置规则，各规则独立维护观察版本。
   {
-    id: 'phishing-admission-rule-url',
+    id: 'phishing-disposition-medium',
     policy_module: 'phishing_detection',
-    sub_strategy_id: 'admission_rule:rule-url-001',
-    sub_strategy_name_snapshot: '准入规则 · 外部链接邮件',
+    sub_strategy_id: 'disposition:medium',
+    sub_strategy_name_snapshot: '中风险',
     is_deleted: false,
     observed_days: 9,
     hits: 87,
@@ -324,13 +365,13 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     attribution_status: 'attributable',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
     version_no: 2,
-    version_change_summary: '准入条件调整：增加二维码链接校验，触发观察期重置',
+    version_change_summary: '中风险处置调整：审核 → 隔离，触发观察期重置',
   },
   {
-    id: 'phishing-risk-policy',
+    id: 'phishing-disposition-high',
     policy_module: 'phishing_detection',
-    sub_strategy_id: 'risk_policy',
-    sub_strategy_name_snapshot: '风险处置策略',
+    sub_strategy_id: 'disposition:high',
+    sub_strategy_name_snapshot: '高风险',
     is_deleted: false,
     observed_days: 16,
     hits: 196,
@@ -344,10 +385,10 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     version_change_summary: '高风险处置调整：审核 → 隔离，触发观察期重置',
   },
   {
-    id: 'phishing-runtime-policy',
+    id: 'phishing-disposition-low',
     policy_module: 'phishing_detection',
-    sub_strategy_id: 'runtime_policy',
-    sub_strategy_name_snapshot: '运行时策略',
+    sub_strategy_id: 'disposition:low',
+    sub_strategy_name_snapshot: '低风险',
     is_deleted: false,
     observed_days: 24,
     hits: 341,
@@ -358,13 +399,13 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     attribution_status: 'attributable',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
     version_no: 2,
-    version_change_summary: '观察超时配置调整：30 分钟 → 60 分钟，触发观察期重置',
+    version_change_summary: '低风险置信度下限调整：40 → 45，触发观察期重置',
   },
   {
-    id: 'phishing-agent',
+    id: 'phishing-disposition-suspicious',
     policy_module: 'phishing_detection',
-    sub_strategy_id: 'engine',
-    sub_strategy_name_snapshot: '钓鱼检测智能体',
+    sub_strategy_id: 'disposition:suspicious',
+    sub_strategy_name_snapshot: '可疑',
     is_deleted: false,
     observed_days: 22,
     hits: 341,
@@ -375,6 +416,219 @@ const RULE_EFFECTIVENESS_MOCK_ROWS: RuleEffectivenessMockRow[] = [
     attribution_status: 'attributable',
     config_path: RULE_EFFECTIVENESS_CONFIG_PATH.phishing_detection,
     version_no: 1,
+  },
+  // 发信人黑白名单——按单条规则拆分观察对象（与 src/lib/mock/fixtures.ts 中
+  // mockSenderFilterRulesList 的 id 1-5 一一对应），而不是笼统的模块级观察对象，
+  // 演示黑名单/白名单规则各自不同的命中特征与策略版本管理。
+  {
+    id: 'sender-filter-rule-1',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:1',
+    sub_strategy_name_snapshot: '垃圾邮件发送者',
+    is_deleted: false,
+    observed_days: 26,
+    hits: 62,
+    would_block_ratio: 0.82,
+    reviewed_ratio: 0.4,
+    weighted_reviewed_ratio: 0.33,
+    false_positive_rate: 0.04,
+    attribution_status: 'attributable',
+    config_path: senderFilterRuleConfigPath(1),
+    version_no: 1,
+  },
+  {
+    id: 'sender-filter-rule-2',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:2',
+    sub_strategy_name_snapshot: '钓鱼域���',
+    is_deleted: false,
+    observed_days: 18,
+    hits: 45,
+    would_block_ratio: 0.65,
+    reviewed_ratio: 0.5,
+    weighted_reviewed_ratio: 0.42,
+    false_positive_rate: 0.09,
+    attribution_status: 'attributable',
+    config_path: senderFilterRuleConfigPath(2),
+    // 示例：该规则的匹配条件曾发生实质性调整（新增子域名通配符匹配），触发过一次
+    // 观察期重置——当前 observed_days=18 只反映 v2 的观察时长。
+    version_no: 2,
+    version_change_summary: '匹配条件调整：新增子域名通配符匹配，触发观察期重置',
+  },
+  {
+    id: 'sender-filter-rule-3',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:3',
+    sub_strategy_name_snapshot: '可疑群组',
+    is_deleted: false,
+    observed_days: 50,
+    hits: 30,
+    would_block_ratio: 0.3,
+    reviewed_ratio: 0.6,
+    weighted_reviewed_ratio: 0.5,
+    false_positive_rate: 0.15,
+    attribution_status: 'attributable',
+    config_path: senderFilterRuleConfigPath(3),
+    version_no: 1,
+  },
+  {
+    // 对应 fixtures.ts 中 BEHAVIOR_CONTROL_DEMO_RULES 的 rule-4（个人账号发信限制，
+    // 外发方向 · mail_count），而不是不存在的规则 id 101，否则跳转会因找不到
+    // 对应规则而无法定位到编辑抽屉。
+    id: 'behavior-control-rule-4',
+    policy_module: 'behavior_control',
+    sub_strategy_id: 'rule:4',
+    sub_strategy_name_snapshot: '外发频率限制',
+    is_deleted: false,
+    observed_days: 11,
+    hits: 76,
+    would_block_ratio: 0.64,
+    reviewed_ratio: 0.39,
+    weighted_reviewed_ratio: 0.31,
+    false_positive_rate: 0.08,
+    attribution_status: 'attributable',
+  config_path: behaviorControlRuleConfigPath(4),
+  version_no: 1,
+  },
+  {
+  id: 'content-rule-1',
+  policy_module: 'content_rules',
+  sub_strategy_id: 'rule:1',
+  sub_strategy_name_snapshot: '身份证外发管控',
+  is_deleted: false,
+  observed_days: 6,
+  hits: 42,
+  would_block_ratio: 0.71,
+  reviewed_ratio: 0.45,
+  weighted_reviewed_ratio: 0.34,
+  false_positive_rate: 0.05,
+  attribution_status: 'attributable',
+  config_path: contentRuleConfigPath(1),
+  version_no: 1,
+  },
+  {
+  id: 'content-rule-30',
+  policy_module: 'content_rules',
+  sub_strategy_id: 'rule:30',
+  sub_strategy_name_snapshot: '内容规则 #30',
+  is_deleted: false,
+  observed_days: 18,
+  hits: 15,
+  would_block_ratio: 0.4,
+  reviewed_ratio: 0.53,
+  weighted_reviewed_ratio: 0.2,
+  false_positive_rate: 0.13,
+  attribution_status: 'attributable',
+  config_path: contentRuleConfigPath(30),
+  version_no: 1,
+  },
+  // 高级过滤规则——按单条规则拆分观察对象，演示流水线第五阶段规则各自
+  // 不同的命中特征与策略版本管理。
+  {
+    id: 'advanced-filter-rule-1',
+    policy_module: 'advanced_filter_rules',
+    sub_strategy_id: 'rule:1',
+    sub_strategy_name_snapshot: '外发压缩包附件管控',
+    is_deleted: false,
+    observed_days: 9,
+    hits: 28,
+    would_block_ratio: 0.57,
+    reviewed_ratio: 0.39,
+    weighted_reviewed_ratio: 0.29,
+    false_positive_rate: 0.11,
+    attribution_status: 'attributable',
+    config_path: advancedFilterRuleConfigPath(1),
+    version_no: 1,
+  },
+  {
+    id: 'advanced-filter-rule-2',
+    policy_module: 'advanced_filter_rules',
+    sub_strategy_id: 'rule:2',
+    sub_strategy_name_snapshot: '高危可执行文件拦截',
+    is_deleted: false,
+    observed_days: 22,
+    hits: 51,
+    would_block_ratio: 0.82,
+    reviewed_ratio: 0.28,
+    weighted_reviewed_ratio: 0.21,
+    false_positive_rate: 0.02,
+    attribution_status: 'attributable',
+    config_path: advancedFilterRuleConfigPath(2),
+    // 示例：该规则的匹配条件曾发生实质性调整（新增双重扩展名检测），触发过一次
+    // 观察期重置。
+    version_no: 2,
+    version_change_summary: '匹配条件调整：新增双重扩展名检测，触发观察期重置',
+  },
+  // 白名单规则（action=accept）——观察期内命中即为放行，不产生拦截类结果，
+  // 因此用 actions: [] 覆盖模块级的拦截动作候选。
+  {
+    id: 'sender-filter-rule-4',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:4',
+    sub_strategy_name_snapshot: '可信合作伙伴',
+    is_deleted: false,
+    observed_days: 15,
+    hits: 40,
+    would_block_ratio: 0,
+    reviewed_ratio: 0.2,
+    weighted_reviewed_ratio: 0.15,
+    false_positive_rate: 0.01,
+    attribution_status: 'attributable',
+    config_path: senderFilterRuleConfigPath(4),
+    version_no: 1,
+    actions: [],
+  },
+  {
+    id: 'sender-filter-rule-5',
+    policy_module: 'sender_filter',
+    sub_strategy_id: 'rule:5',
+    sub_strategy_name_snapshot: '内部财务组',
+    is_deleted: false,
+    observed_days: 8,
+    hits: 25,
+    would_block_ratio: 0,
+    reviewed_ratio: 0.1,
+    weighted_reviewed_ratio: 0.08,
+    false_positive_rate: 0.02,
+    attribution_status: 'attributable',
+    config_path: senderFilterRuleConfigPath(5),
+    // 示例：该规则的白名单成员组曾发生实质性调整（财务部门人员变更），触发过一次
+    // 观察期重置。
+    version_no: 2,
+    version_change_summary: '白名单成员组调整（财务部门人员变更），触发观察期重置',
+    actions: [],
+  },
+  {
+    id: 'recipient-check-recipient-limit',
+    policy_module: 'recipient_check',
+    sub_strategy_id: 'recipient_limit',
+    sub_strategy_name_snapshot: '数量限制策略',
+    is_deleted: false,
+    observed_days: 14,
+    hits: 126,
+    would_block_ratio: 0.78,
+    reviewed_ratio: 0.64,
+    weighted_reviewed_ratio: 0.58,
+    false_positive_rate: 0.06,
+    attribution_status: 'attributable',
+    config_path: '/security/pipeline?module=recipientCheck&section=limit',
+    version_no: 2,
+    version_change_summary: '收件人数量阈值调整，重新进入观察期',
+  },
+  {
+    id: 'recipient-check-existence-validation',
+    policy_module: 'recipient_check',
+    sub_strategy_id: 'existence_validation',
+    sub_strategy_name_snapshot: '存在性验证策略',
+    is_deleted: false,
+    observed_days: 9,
+    hits: 47,
+    would_block_ratio: 0.51,
+    reviewed_ratio: 0.72,
+    weighted_reviewed_ratio: 0.69,
+    false_positive_rate: 0.04,
+    attribution_status: 'attributable',
+    config_path: '/security/pipeline?module=recipientCheck&section=existence',
   },
 ];
 
@@ -390,6 +644,19 @@ const RULE_EFFECTIVENESS_MODULE_ACTIONS: Record<RuleEffectivenessMockRow['policy
   auth_spoofing: ['reject', 'discard', 'quarantine', 'audit'],
   similar_detection: ['discard', 'quarantine', 'audit'],
   phishing_detection: ['discard', 'quarantine', 'audit'],
+  // 黑名单规则动作与 BlacklistAction 对齐（reject/quarantine/audit/discard）；
+  // 白名单规则（action=accept）通过每行的 `actions: []` 覆盖，不落到这个默认集合。
+  sender_filter: ['reject', 'discard', 'quarantine', 'audit'],
+  behavior_control: ['reject', 'discard', 'quarantine', 'audit'],
+  // 内容规则动作与 ContentRuleAction 对齐（reject/quarantine/audit/discard），
+  // accept 属于观察期内默认放行的语义，已由下方 accept 计算逻辑覆盖，不重复出现在候选集合里。
+  content_rules: ['reject', 'discard', 'quarantine', 'audit'],
+  // 高级过滤规则的执行动作与 PrimaryAction 对齐（accept/proceed/quarantine/
+  // audit/discard，见 AdvancedFilterRulesModule.tsx 的 ACTION_BADGE_CLASS）；
+  // reject 不在该模块的动作枚举里，不能出现在候选集合中。accept 属于观察期
+  // 内默认放行的语义，已由下方 accept 计算逻辑覆盖，不重复出现在候选集合里。
+  advanced_filter_rules: ['discard', 'quarantine', 'audit'],
+  recipient_check: ['reject', 'discard', 'quarantine', 'audit'],
 };
 
 function allocateActionCounts(
@@ -413,9 +680,13 @@ function ruleEffectivenessActionBreakdown(
   row: RuleEffectivenessMockRow,
   index: number,
 ): { action: RuleEffectivenessWouldBeAction; count: number }[] {
-  const actions = RULE_EFFECTIVENESS_MODULE_ACTIONS[row.policy_module];
+  const actions = row.actions ?? RULE_EFFECTIVENESS_MODULE_ACTIONS[row.policy_module];
   const total = row.hits;
   if (total <= 0) return [];
+  if (actions.length === 0) {
+    // 白名单规则：命中即放行，观察期内不产生拦截类结果。
+    return [{ action: 'accept' as const, count: total }];
+  }
 
   // 投递（accept）：观察模式下命中本身不拦截，最终正常送达的占比——用确定性
   // 伪随机取 55%~75% 区间，作为观察态命中结果里天然占大头的一类。

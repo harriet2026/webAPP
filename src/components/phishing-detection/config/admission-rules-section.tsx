@@ -75,7 +75,10 @@ export function AdmissionRulesSection({ readOnly = false, openCreateSignal }: { 
       queryClient.setQueryData<PhishAdmissionRuleListItem[] | undefined>(queryKey, (current) =>
         current?.map((rule) => rule.id === variables.rule.id ? { ...rule, enabled: variables.enabled, effective: false } : rule),
       );
-      invalidate();
+      // enabled is part of the rule revision and the status endpoint returns
+      // 204 without the new one. Keep the mutation pending until the refetch
+      // lands so edit/copy cannot open a stale revision snapshot (GT-13175).
+      return invalidate();
     },
     onError: (error) => toast.error(apiErrorMessage(error, t('toggleFailed'))),
   });
@@ -117,14 +120,14 @@ export function AdmissionRulesSection({ readOnly = false, openCreateSignal }: { 
             const recipients = rule.status === 'ready' ? [...(rule.recipient_tags ?? []), ...(rule.recipient_groups ?? []), ...(rule.recipient_depts ?? []), ...(rule.recipient_emails ?? [])] : [];
             const stateText = rule.status === 'rebuild_required' ? t('rebuildRequired') : rule.status === 'integrity_error' ? t('integrityError') : rule.enabled ? t('statusEnabled') : t('statusDisabled');
             return <TableRow key={rule.rule_uid || rule.id} data-testid="admission-rule-row">
-              <TableCell><div className="font-medium" data-testid={`admission-rule-name-${rule.id}`}>{rule.name}</div><div className="text-xs text-muted-foreground">{rule.tenant_id == null ? t('ownerGlobal') : rule.tenant_name || t('ownerTenant', { id: rule.tenant_id })}</div></TableCell>
-              <TableCell><div className="flex items-center gap-2"><Switch checked={rule.enabled} disabled={!editable || toggleMutation.isPending} onCheckedChange={(enabled) => { if (rule.status === 'ready') toggleMutation.mutate({ rule, enabled }); }} aria-label={t('toggleRule', { name: rule.name })} /><Badge variant={rule.status !== 'ready' ? 'destructive' : rule.enabled ? 'default' : 'secondary'} data-testid={`admission-rule-status-${rule.id}`}>{stateText}</Badge></div></TableCell>
+              <TableCell data-testid={`admission-rule-row-${rule.id}`}><div className="font-medium" data-testid={`admission-rule-name-${rule.id}`}>{rule.name}</div><div className="text-xs text-muted-foreground">{rule.tenant_id == null ? t('ownerGlobal') : rule.tenant_name || t('ownerTenant', { id: rule.tenant_id })}</div></TableCell>
+              <TableCell><div className="flex items-center gap-2"><Switch checked={rule.enabled} disabled={!editable || toggleMutation.isPending} onCheckedChange={(enabled) => { if (rule.status === 'ready') toggleMutation.mutate({ rule, enabled }); }} aria-label={t('toggleRule', { name: rule.name })} data-testid={`admission-rule-enabled-${rule.id}`} /><Badge variant={rule.status !== 'ready' ? 'destructive' : rule.enabled ? 'default' : 'secondary'} data-testid={`admission-rule-status-${rule.id}`}>{stateText}</Badge></div></TableCell>
               <TableCell className="text-sm text-muted-foreground" data-testid={`admission-rule-directions-${rule.id}`}>{rule.status === 'ready' ? rule.directions.map((direction) => tdir(direction)).join(' / ') : '—'}</TableCell>
               <TableCell className="max-w-[180px] truncate text-sm text-muted-foreground" title={rule.status === 'ready' ? recipients.join(', ') || t('allRecipients') : stateText}>{rule.status === 'ready' ? recipients.join(', ') || t('allRecipients') : '—'}</TableCell>
               <TableCell className="max-w-[220px] truncate text-sm text-muted-foreground">{signalText(rule) || '—'}</TableCell>
               <TableCell><div className="flex justify-end gap-1">
-                <Button variant="link" size="sm" className="h-auto p-0" disabled={!editable} onClick={() => { if (rule.status === 'ready') { setEditing(rule); setSheetOpen(true); } }} aria-label={t('edit')} data-testid={`admission-rule-edit-${rule.id}`}>{t('edit')}</Button>
-                <Button variant="ghost" size="icon-sm" disabled={!editable || copyMutation.isPending} onClick={() => { if (rule.status === 'ready') copyMutation.mutate(rule); }} aria-label={t('copy')}><Copy className="size-3.5" /></Button>
+                <Button variant="link" size="sm" className="h-auto p-0" disabled={!editable || toggleMutation.isPending} onClick={() => { if (rule.status === 'ready') { setEditing(rule); setSheetOpen(true); } }} aria-label={t('edit')} data-testid={`admission-rule-edit-${rule.id}`}>{t('edit')}</Button>
+                <Button variant="ghost" size="icon-sm" disabled={!editable || copyMutation.isPending || toggleMutation.isPending} onClick={() => { if (rule.status === 'ready') copyMutation.mutate(rule); }} aria-label={t('copy')}><Copy className="size-3.5" /></Button>
                 <Button variant="ghost" size="icon-sm" disabled={readOnly || rule.read_only || deleteMutation.isPending} onClick={() => setDeleting(rule)} aria-label={t('delete')}><Trash2 className="size-3.5" /></Button>
               </div>{rule.read_only && <p className="text-xs text-muted-foreground">{t('ownerRequired')}</p>}</TableCell>
             </TableRow>;

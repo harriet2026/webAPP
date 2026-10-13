@@ -36,6 +36,21 @@ describe('phishing demo boundary', () => {
     expect(item).toMatchObject({ policy_disposition: 'quarantine', risk_level: 'high', confidence: 0.96, agent_rounds: 5 });
   });
 
+  it('filters undecided risks, combines levels with OR, and paginates the filtered rows', () => {
+    type Row = { sideline_id: string; risk_level: string | null };
+    const logs = (query = '') => dispatch({ method: 'GET', path: `/phishing-agent/detection-logs${query}` }).data as { items: Row[]; total: number; page: number; page_size: number };
+    const all = logs();
+    const undecided = all.items.filter((row) => row.risk_level == null);
+    expect(undecided.length).toBeGreaterThan(0);
+    expect(logs('?risk_level=unknown').items).toEqual(undecided);
+    expect(logs('?risk_level=none').items).toEqual(undecided);
+    const combined = all.items.filter((row) => row.risk_level == null || row.risk_level === 'high');
+    expect(logs('?risk_level=unknown&risk_level=high').items).toEqual(combined);
+    expect(logs('?risk_level=unknown&risk_level=high&page=2&page_size=1')).toMatchObject({ items: combined.slice(1, 2), total: combined.length, page: 2, page_size: 1 });
+    expect(logs('?risk_level=invalid').items).toEqual([]);
+    expect(logs().items).toEqual(all.items);
+  });
+
   it('maps every completed confidence band to the configured policy', () => {
     const response = dispatch({ method: 'GET', path: '/phishing-agent/detection-logs' });
     expect(response.status).toBe(200);

@@ -829,13 +829,19 @@ export function PolicyPipelinePage() {
 
   const drawerContent = (() => {
     if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'senderFilter') {
-      return <SenderFilterPage embedded />;
+      return <SenderFilterPage embedded
+        deepLinkRuleID={deepLink?.key === 'senderFilter' ? deepLink.ruleDatabaseID : undefined}
+        deepLinkRuleRef={deepLink?.key === 'senderFilter' ? deepLink.ruleRef : undefined}
+      />;
     }
     if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'authSpoofing') {
       return <AuthSpoofingPage embedded />;
     }
     if (activeDrawerPolicy.stage === 2 && activeDrawerPolicy.key === 'behaviorControl') {
-      return <BehaviorControlPage embedded />;
+      return <BehaviorControlPage embedded
+        deepLinkRuleID={deepLink?.key === 'behaviorControl' ? deepLink.ruleDatabaseID : undefined}
+        deepLinkRuleRef={deepLink?.key === 'behaviorControl' ? deepLink.ruleRef : undefined}
+      />;
     }
     // GT-11878: 收信人数量限制原先配置在行为管控里；对齐 demo 后行为管控页面移除了
     // 该配置，收信人数量限制现在拥有独立的 RecipientCheckPage。
@@ -891,7 +897,10 @@ export function PolicyPipelinePage() {
       return <MailMarkingPage embedded />;
     }
     if (activeDrawerPolicy.stage === 5 && activeDrawerPolicy.key === 'advancedRules') {
-      return <AdvancedFilterRulesModule embedded aggregateDisabled={!comprehensiveStrategyEnabled} />;
+      return <AdvancedFilterRulesModule embedded aggregateDisabled={!comprehensiveStrategyEnabled}
+        deepLinkRuleID={deepLink?.key === 'advancedRules' ? deepLink.ruleDatabaseID : undefined}
+        deepLinkRuleRef={deepLink?.key === 'advancedRules' ? deepLink.ruleRef : undefined}
+      />;
     }
     if (activeDrawerPolicy.key === 'ipFrequency') return <IPFrequencyPage embedded />;
     if (activeDrawerPolicy.key === 'ipFilter') return <IPFilterPage embedded />;

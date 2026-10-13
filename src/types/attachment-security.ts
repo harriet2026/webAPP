@@ -24,6 +24,7 @@ export type AttachmentAction =
   | 'partial_skip';
 
 export interface AntivirusConfig {
+  observe_mode?: boolean;
   host: string;
   port: string;
 }
@@ -53,6 +54,7 @@ export interface AntivirusActionConfig {
 }
 
 export interface ImageDetectConfig {
+  observe_mode?: boolean;
   ocr_mode: 'none' | 'light';
   ocr_max_count: number;
   qr_mode: 'none' | 'light' | 'deep';
@@ -79,6 +81,7 @@ export interface ImageDetectActionConfig {
 }
 
 export interface EncryptedConfig {
+  observe_mode?: boolean;
   detect_mode: 'none' | 'detect_only' | 'decrypt';
   extract_password_from_body: boolean;
   extract_password_from_filename: boolean;

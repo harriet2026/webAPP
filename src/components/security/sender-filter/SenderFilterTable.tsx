@@ -10,7 +10,8 @@ import { DataTable } from '@/components/shared/data-table';
 import { RuleListPagination } from '@/components/shared/rule-list-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { SenderFilterRuleView, SenderFilterAction, SenderConfigType, SenderFilterGroups } from '@/types/sender-filter';
+import { senderFilterConfiguredAction } from '@/lib/api/sender-filter';
+import type { SenderFilterRuleView, SenderConfigType, SenderFilterGroups } from '@/types/sender-filter';
 
 // GT-12500：修改时间按本地时区展示（分钟精度）。此前刻意用 UTC（理由是与
 // 规则 ID 里的 UTC 日期一致），但管理员看到的是与本地钟表对不上的时间——
@@ -32,6 +33,8 @@ interface SenderFilterTableProps {
   onEdit: (rule: SenderFilterRuleView) => void;
   onDelete: (rule: SenderFilterRuleView) => void;
   onToggle: (id: number, isActive: boolean) => void;
+  onToggleObserve: (id: number, observeMode: boolean) => void;
+  observePending?: boolean;
   groups: SenderFilterGroups;
   isLoading: boolean;
 }
@@ -69,6 +72,8 @@ export function SenderFilterTable({
   onEdit,
   onDelete,
   onToggle,
+  onToggleObserve,
+  observePending = false,
   groups,
   isLoading: _isLoading,
 }: SenderFilterTableProps) {
@@ -133,11 +138,11 @@ export function SenderFilterTable({
       id: 'action',
       header: t('senderFilter.action'),
       cell: ({ row }) => {
-        const action = row.original.rule.action as SenderFilterAction;
+        const action = senderFilterConfiguredAction(row.original.rule);
         return (
           <StatusBadge
-            status={t(`senderFilter.action_${action}`)}
-            variant={actionVariant(action)}
+            status={action ? t(`senderFilter.action_${action}`) : '—'}
+            variant={actionVariant(action ?? '')}
           />
         );
       },
@@ -159,6 +164,19 @@ export function SenderFilterTable({
           checked={row.original.rule.is_active}
           onCheckedChange={(isActive) => onToggle(row.original.rule.id, isActive)}
           aria-label={row.original.rule.is_active ? t('common.disabled') : t('common.enabled')}
+        />
+      ),
+    },
+    {
+      id: 'observe_mode',
+      header: t('senderFilter.observeMode'),
+      cell: ({ row }) => (
+        <Switch
+          data-testid="sender-filter-row-observe-mode"
+          checked={row.original.observe_mode}
+          disabled={observePending || !senderFilterConfiguredAction(row.original.rule)}
+          onCheckedChange={(observeMode) => onToggleObserve(row.original.rule.id, observeMode)}
+          aria-label={row.original.observe_mode ? t('common.disabled') : t('common.enabled')}
         />
       ),
     },

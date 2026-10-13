@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ReactECharts from 'echarts-for-react';
+import { Database, Server } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -24,8 +25,10 @@ import { EmptyState, DegradedBanner } from './StateBanners';
 import { useDatabase } from './hooks';
 import { DatabaseReplicationStatus } from './DatabaseReplicationStatus';
 import { DatabasePerformanceSummary } from './DatabasePerformanceSummary';
+import { useChartTheme } from './useChartTheme';
+import { formatMetric, formatMetricBytes } from './format_metric';
 import { degradeMessage } from '@/lib/monitoring/degrade';
-import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
+import { createTimeAxisFormatter, createTimeTooltipFormatter } from '@/lib/monitoring/chart-time';
 import type { TimeRange, DatabaseMetricState, DatabaseResp } from '@/types/monitoring';
 
 interface DatabaseTabProps {
@@ -36,7 +39,9 @@ interface DatabaseTabProps {
 export function DatabaseTab({ node, range }: DatabaseTabProps) {
   const t = useTranslations('infrastructure');
   const locale = useLocale();
+  const chartColors = useChartTheme();
   const { data, isLoading, isError } = useDatabase(node, range);
+  const databaseDisplayName = data?.db_backend?.toLowerCase() === 'opengauss' ? 'openGauss' : data?.db_backend;
   const [source, setSource] = useState<'db' | 'redis'>('db');
   const [metric, setMetric] = useState('connections');
   // Keep status/diagnostic cards on the DB response. Source selection changes
@@ -53,12 +58,22 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
     () => createTimeAxisFormatter(locale, range === '7d'),
     [locale, range],
   );
-  const statisticsTimeFormatter = useMemo(() => new Intl.DateTimeFormat(locale, {
-    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short',
-  }), [locale]);
+  const timeAxisPointer = useMemo(() => {
+    const formatTooltipTime = createTimeTooltipFormatter(locale);
+    return { label: { formatter: ({ value }: { value: string | number }) => formatTooltipTime(String(value)) } };
+  }, [locale]);
+  const statisticsTimeFormatter = useMemo(() => {
+    const formatTime = createTimeTooltipFormatter(locale);
+    const zoneFormatter = new Intl.DateTimeFormat(locale, { timeZoneName: 'short' });
+    return (value: string) => {
+      const zone = zoneFormatter.formatToParts(new Date(value)).find(part => part.type === 'timeZoneName')?.value;
+      return [formatTime(value), zone].filter(Boolean).join(' ');
+    };
+  }, [locale]);
   function formatTimestamp(value: string | undefined) {
     if (!value || Number.isNaN(new Date(value).getTime())) return t('database.sourceNotProvided');
-    return <time dateTime={value} title={value}>{statisticsTimeFormatter.format(new Date(value))}</time>;
+    const displayTime = statisticsTimeFormatter(value);
+    return <time dateTime={value} title={displayTime}>{displayTime}</time>;
   }
 
   const trendKey = metric === 'connections' ? 'conn_trend' : 'latency_trend';
@@ -66,18 +81,19 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
     const pts = performance.data?.[trendKey]?.points;
     if (!pts?.length) return null;
     return {
-      tooltip: { trigger: 'axis' as const },
+      textStyle: { color: chartColors.foreground },
+      tooltip: { trigger: 'axis' as const, valueFormatter: (value: unknown) => `${formatMetric(value, locale, metric === 'connections' ? 0 : 2)}${metric === 'connections' ? '' : ' ms'}`, backgroundColor: chartColors.background, borderColor: chartColors.border, textStyle: { color: chartColors.foreground }, axisPointer: { lineStyle: { color: chartColors.muted } } },
       grid: { left: 48, right: 16, top: 24, bottom: 32 },
-      xAxis: { type: 'category' as const, data: pts.map((p) => p.ts), axisLabel: { showMaxLabel: true, formatter: timeAxisFormatter } },
-      yAxis: { type: 'value' as const, axisLabel: { formatter: metric === 'connections' ? '{value}' : '{value} ms' } },
-      series: [{ type: 'line', data: pts.map((p) => p.value), smooth: true, lineStyle: { width: 2 }, itemStyle: { color: '#3b82f6' }, areaStyle: { opacity: 0.1 } }],
+      xAxis: { type: 'category' as const, data: pts.map((p) => p.ts), axisPointer: timeAxisPointer, axisLabel: { showMaxLabel: true, formatter: timeAxisFormatter, color: chartColors.muted }, axisLine: { lineStyle: { color: chartColors.border } }, axisTick: { lineStyle: { color: chartColors.border } } },
+      yAxis: { type: 'value' as const, minInterval: metric === 'connections' ? 1 : undefined, axisLabel: { formatter: (value: number) => `${formatMetric(value, locale, metric === 'connections' ? 0 : 2)}${metric === 'connections' ? '' : ' ms'}`, color: chartColors.muted }, splitLine: { lineStyle: { color: chartColors.border } } },
+      series: [{ type: 'line', data: pts.map((p) => p.value), smooth: true, lineStyle: { width: 2 }, itemStyle: { color: chartColors.primary }, areaStyle: { opacity: 0.1 } }],
     };
-  }, [performance.data, timeAxisFormatter, trendKey, metric]);
+  }, [performance.data, timeAxisFormatter, timeAxisPointer, trendKey, metric, chartColors, locale]);
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Skeleton className="h-24 rounded-lg" />
           <Skeleton className="h-24 rounded-lg" />
         </div>
@@ -96,8 +112,12 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
   const dbReplication = dbStatus?.replication?.node === node && ['selected_node', 'db_receive_to_apply'].includes(dbStatus.replication.scope)
     ? dbStatus.replication : undefined;
   const redisStatus = data?.status?.redis;
-  const slowQueries = data?.slow_queries ?? [];
-  const lockWaits = data?.lock_waits ?? [];
+  const rankingMatchesNode = data?.sql_ranking?.node === node
+    && data.sql_ranking.scope === 'selected_node_visible_entries' && data.sql_ranking.node_filter_applied;
+  const slowQueries = rankingMatchesNode ? data?.slow_queries ?? [] : [];
+  const locksMatchNode = data?.lock_wait_info?.node === node
+    && data.lock_wait_info.scope === 'selected_node_visible_requests';
+  const lockWaits = locksMatchNode ? data?.lock_waits ?? [] : [];
   // Older servers have only the aggregate flag. Do not let that flag hide
   // independent TSDB/Redis metrics; unknown DB errors are not "no records".
   const legacyState = data?.degraded_code === 'metrics_db_unavailable' ? 'error'
@@ -123,51 +143,67 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
   }
   const redisState: DatabaseMetricState = data?.metric_states?.redis_latency
     ?? (redisStatus?.status === 'ok' && redisStatus.latency_ms != null ? 'ok' : 'missing');
+  const dbFailed = ['error', 'down', 'no_receiver'].includes(dbReplication?.state ?? '') || diagnostics.connections === 'error';
+  const redisFailed = ['error', 'down'].includes(redisStatus?.replication?.state ?? '') || ['error', 'down'].includes(redisState);
+  const dbHealthy = !dbFailed && diagnostics.connections === 'ok' && dbStatus?.status === 'ok';
+  const redisHealthy = !redisFailed && redisState === 'ok';
+  const cardStyle = 'gap-0 rounded-xl bg-card py-0 shadow-sm';
+  const iconTone = (failed: boolean, healthy: boolean) => failed ? 'text-destructive' : healthy ? 'text-success' : 'text-muted-foreground';
 
   return (
     <div className="space-y-4" data-testid="monitor-infrastructure-database">
       {data?.degraded && !localDBErrors && (
         <DegradedBanner message={degradeMessage(data.degraded_code, t)} />
       )}
-      <div className="grid grid-cols-2 gap-4">
-        <Card data-testid="monitor-infrastructure-db-card" className={['error', 'down', 'no_receiver'].includes(dbReplication?.state ?? '') || diagnostics.connections === 'error' ? 'border-destructive' : undefined}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted-foreground">{data?.db_backend ?? 'Database'}</div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" data-testid="monitor-infrastructure-db-status-cards">
+        <Card data-testid="monitor-infrastructure-db-card" className={`${cardStyle} ${dbFailed ? 'border-destructive' : 'border-border'}`}>
+          <CardContent className="p-4">
+            <div className="flex min-h-12 flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Database className={`size-8 shrink-0 ${iconTone(dbFailed, dbHealthy)}`} aria-hidden="true" data-testid="monitor-infrastructure-db-icon" />
+                <div>
+                  <div className="text-base font-medium" data-testid="monitor-infrastructure-db-name">{databaseDisplayName ?? 'Database'}</div>
+                  <div className="text-sm text-muted-foreground">{t('database.replication.title')}</div>
+                </div>
+              </div>
+              <div className="ml-auto max-w-full text-right">
                 {diagnostics.connections === 'error' ? (
                   <DegradedBanner message={t('database.connectionQueryFailed')} />
                 ) : diagnostics.connections === 'unsupported' ? (
-                  <p className="mt-1 text-sm text-muted-foreground">{t('database.connectionUnsupported')}</p>
-                ) : <div className="mt-1 flex items-center gap-2">
-                  <Badge variant={dbStatus?.status === 'ok' ? 'default' : 'destructive'}>
+                  <Badge variant="secondary" data-testid="monitor-infrastructure-db-health">{t('database.connectionUnsupported')}</Badge>
+                ) : <div className="space-y-1">
+                  <Badge variant="secondary" className={dbHealthy ? 'bg-success/10 text-success' : undefined} data-testid="monitor-infrastructure-db-health">
                     {t(dbStatus?.status === 'ok' ? 'database.queryAvailable' : 'database.metricStates.missing')}
                   </Badge>
                   {dbStatus?.latency_ms != null && (
-                    <span className="text-xs text-muted-foreground">{dbStatus.latency_ms}ms</span>
+                    <div className="text-xs text-muted-foreground">{formatMetric(dbStatus.latency_ms, locale)}ms</div>
                   )}
                 </div>}
-                <DatabaseReplicationStatus replication={dbReplication} source="db" />
               </div>
             </div>
+            <DatabaseReplicationStatus replication={dbReplication} source="db" />
           </CardContent>
         </Card>
-        <Card data-testid="monitor-infrastructure-cache-card" className={['error', 'down'].includes(redisStatus?.replication?.state ?? '') || ['error', 'down'].includes(redisState) ? 'border-destructive' : undefined}>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted-foreground">{t('database.redis')}</div>
-                <div className="mt-1 flex items-center gap-2">
-                  <Badge variant={redisState === 'ok' ? 'default' : redisState === 'error' || redisState === 'down' ? 'destructive' : 'secondary'} data-state={redisState}>
+        <Card data-testid="monitor-infrastructure-cache-card" className={`${cardStyle} ${redisFailed ? 'border-destructive' : 'border-border'}`}>
+          <CardContent className="p-4">
+            <div className="flex min-h-12 flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <Server className={`size-8 shrink-0 ${iconTone(redisFailed, redisHealthy)}`} aria-hidden="true" data-testid="monitor-infrastructure-redis-icon" />
+                <div>
+                  <div className="text-base font-medium" data-testid="monitor-infrastructure-redis-name">{t('database.redis')}</div>
+                  <div className="text-sm text-muted-foreground">{t('database.replication.title')}</div>
+                </div>
+              </div>
+              <div className="ml-auto max-w-full space-y-1 text-right">
+                  <Badge variant={redisState === 'error' || redisState === 'down' ? 'destructive' : 'secondary'} className={redisHealthy ? 'bg-success/10 text-success' : undefined} data-state={redisState} data-testid="monitor-infrastructure-redis-health">
                     {metricStateLabel(redisState)}
                   </Badge>
                   {redisState === 'ok' && redisStatus?.latency_ms != null && (
-                    <span className="text-xs text-muted-foreground">PING {redisStatus.latency_ms}ms</span>
+                    <div className="text-xs text-muted-foreground">PING {formatMetric(redisStatus.latency_ms, locale)}ms</div>
                   )}
-                </div>
-                <DatabaseReplicationStatus replication={redisStatus?.replication} source="redis" />
               </div>
             </div>
+            <DatabaseReplicationStatus replication={redisStatus?.replication} source="redis" />
           </CardContent>
         </Card>
       </div>
@@ -178,7 +214,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
             <CardContent className="pt-6">
               <div className="text-sm text-muted-foreground">{t('database.cacheHitRatio')}</div>
               <div className="mt-1 text-2xl font-semibold">
-                {currentValue('cache_hit_ratio', data.cache_hit_ratio, (value) => `${value.toFixed(1)}%`)}
+                {currentValue('cache_hit_ratio', data.cache_hit_ratio, (value) => `${formatMetric(value, locale, 1)}%`)}
               </div>
             </CardContent>
           </Card>
@@ -186,7 +222,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
             <CardContent className="pt-6">
               <div className="text-sm text-muted-foreground">{t('database.activeConns')}</div>
               <div className="mt-1 text-2xl font-semibold">
-                {currentValue('active_conns', data.active_conns, String)}
+                {currentValue('active_conns', data.active_conns, (value) => formatMetric(value, locale, 0))}
               </div>
             </CardContent>
           </Card>
@@ -194,7 +230,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
             <CardContent className="pt-6">
               <div className="text-sm text-muted-foreground">{t('database.dbSize')}</div>
               <div className="mt-1 text-2xl font-semibold">
-                {currentValue('db_size_bytes', data.db_size_bytes, (value) => `${(value / 1024 / 1024 / 1024).toFixed(2)} GB`)}
+                {currentValue('db_size_bytes', data.db_size_bytes, (value) => formatMetricBytes(value, locale))}
               </div>
             </CardContent>
           </Card>
@@ -209,10 +245,10 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
           <CardContent>
             {data.dml_rate?.points?.length && (!data.metric_states?.dml_rate || data.metric_states.dml_rate === 'ok') ? <ReactECharts
               option={{
-                tooltip: { trigger: 'axis' as const },
+                tooltip: { trigger: 'axis' as const, valueFormatter: (value: unknown) => formatMetric(value, locale) },
                 grid: { left: 48, right: 16, top: 24, bottom: 32 },
-                xAxis: { type: 'category' as const, data: data.dml_rate.points.map((p) => p.ts), axisLabel: { showMaxLabel: true, formatter: timeAxisFormatter } },
-                yAxis: { type: 'value' as const },
+                xAxis: { type: 'category' as const, data: data.dml_rate.points.map((p) => p.ts), axisPointer: timeAxisPointer, axisLabel: { showMaxLabel: true, formatter: timeAxisFormatter } },
+                yAxis: { type: 'value' as const, axisLabel: { formatter: (value: number) => formatMetric(value, locale) } },
                 series: [{ type: 'line', data: data.dml_rate.points.map((p) => p.value), smooth: true, lineStyle: { width: 2 }, itemStyle: { color: '#10b981' }, areaStyle: { opacity: 0.1 } }],
               }}
               style={{ height: 250 }}
@@ -226,14 +262,14 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-base">{t('database.performanceTrend')}</CardTitle>
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-1 rounded-md bg-gray-100 p-1 dark:bg-gray-700" role="group" aria-label={t('database.sourceSelection')}>
+              <div className="flex items-center gap-1 rounded-md bg-muted p-1" role="group" aria-label={t('database.sourceSelection')}>
                 {(['db', 'redis'] as const).map((value) => (
                   <button key={value} type="button" aria-pressed={source === value}
                     className={`rounded px-3 py-1 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-ring ${source === value
-                      ? 'bg-white font-medium text-blue-600 shadow-sm dark:bg-gray-600 dark:text-blue-400'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'}`}
+                      ? 'bg-background font-medium text-primary shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'}`}
                     data-testid={`monitor-infrastructure-db-source-${value}`} onClick={() => selectSource(value)}>
-                    {value === 'redis' ? t('database.redis') : data?.db_backend || t('database.relationalDatabase')}
+                    {value === 'redis' ? t('database.redis') : databaseDisplayName || t('database.relationalDatabase')}
                   </button>
                 ))}
               </div>
@@ -241,8 +277,8 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
                 {metrics.map((value) => (
                   <button key={value} type="button" aria-pressed={metric === value}
                     className={`rounded px-2 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-ring ${metric === value
-                      ? 'bg-blue-100 font-medium text-blue-600 dark:bg-blue-900/50 dark:text-blue-400'
-                      : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'}`}
+                      ? 'bg-primary/10 font-medium text-primary'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                     data-testid={`monitor-infrastructure-db-metric-${value}`} onClick={() => setMetric(value)}>
                     {metricLabel(value)}
                   </button>
@@ -282,7 +318,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
       <Card data-testid="monitor-infrastructure-slow-query-card">
         <CardHeader>
           <CardTitle>{t('database.slowQuery')}</CardTitle>
-          <p className="text-xs text-muted-foreground" data-testid="monitor-infrastructure-sql-ranking-scope">{t('database.sqlRankingScope')}</p>
+          <p className="text-xs text-muted-foreground" data-testid="monitor-infrastructure-sql-ranking-scope" data-node={node}>{t('database.sqlRankingScope', { node })}</p>
           <p className="text-xs text-muted-foreground">{t('database.sqlRankingTimeScope')}</p>
         </CardHeader>
         <CardContent>
@@ -290,6 +326,8 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
             <div data-testid="monitor-infrastructure-slow-query-error"><DegradedBanner message={t('database.slowQueryFailed')} /></div>
           ) : diagnostics.slow_queries === 'unsupported' ? (
             <div data-testid="monitor-infrastructure-slow-query-unsupported"><EmptyState message={t('database.slowQueryUnsupported')} /></div>
+          ) : !rankingMatchesNode ? (
+            <div data-testid="monitor-infrastructure-sql-ranking-node-unavailable"><EmptyState message={t('database.sqlRankingNodeUnavailable')} /></div>
           ) : slowQueries.length === 0 ? (
             <EmptyState message={t('database.noSlowQueries')} />
           ) : (
@@ -330,9 +368,9 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
                               <p>{t('database.statementUser')}: {q.user_name || '—'} / {q.user_id || '—'}</p>
                               <p>{t('database.statementDatabase')}: {q.database_name || '—'} / {q.database_id || '—'}</p>
                               {q.top_level != null && <p>{t(q.top_level ? 'database.topLevelStatement' : 'database.nestedStatement')}</p>}
-                              <p>{t('database.execCount')}: {q.exec_count}</p>
-                              <p>{t('database.avgMs')}: {q.avg_ms}ms</p>
-                              <p>{t('database.totalMs')}: {q.total_ms}ms</p>
+                              <p>{t('database.execCount')}: {formatMetric(q.exec_count, locale, 0)}</p>
+                              <p>{t('database.avgMs')}: {formatMetric(q.avg_ms, locale)}ms</p>
+                              <p>{t('database.totalMs')}: {formatMetric(q.total_ms, locale)}ms</p>
                               <p data-testid={`monitor-infrastructure-sql-last-executed-${i + 1}`}>{t('database.lastExecutedAt')}: {t('database.sourceNotProvided')}</p>
                               <p>{t('database.statisticsUpdatedAt')}: {formatTimestamp(q.statistics_updated_at)}</p>
                             </div>
@@ -346,9 +384,9 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
                       <div>{t(q.node_id || q.node_name ? 'database.statementNode' : 'database.statementDatabase')}: {q.node_name || q.node_id || q.database_name || q.database_id || '—'}</div>
                       {q.top_level != null && <div>{t(q.top_level ? 'database.topLevelStatement' : 'database.nestedStatement')}</div>}
                     </TableCell>
-                    <TableCell className="text-right">{q.exec_count}</TableCell>
-                    <TableCell className="text-right">{q.avg_ms}ms</TableCell>
-                    <TableCell className="text-right">{q.total_ms}ms</TableCell>
+                    <TableCell className="text-right">{formatMetric(q.exec_count, locale, 0)}</TableCell>
+                    <TableCell className="text-right">{formatMetric(q.avg_ms, locale)}ms</TableCell>
+                    <TableCell className="text-right">{formatMetric(q.total_ms, locale)}ms</TableCell>
                     <TableCell className="text-xs" data-testid={`monitor-infrastructure-sql-updated-${i + 1}`}>{formatTimestamp(q.statistics_updated_at)}</TableCell>
                   </TableRow>
                 ))}
@@ -361,11 +399,11 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
       <Card data-testid="monitor-infrastructure-lock-wait-card">
         <CardHeader>
           <CardTitle>{t('database.lockWait')}</CardTitle>
-          <p className="text-xs text-muted-foreground" data-testid="monitor-infrastructure-lock-wait-scope">{t('database.lockWaitScope')}</p>
+          <p className="text-xs text-muted-foreground" data-testid="monitor-infrastructure-lock-wait-scope" data-node={node}>{t('database.lockWaitScope', { node })}</p>
           <p className="text-xs text-muted-foreground">{t('database.lockWaitTimeBasis')}</p>
         </CardHeader>
         <CardContent>
-          {diagnostics.lock_waits === 'error' ? (
+          {!locksMatchNode || diagnostics.lock_waits === 'error' ? (
             <div data-testid="monitor-infrastructure-lock-wait-error"><DegradedBanner message={t('database.lockWaitFailed')} /></div>
           ) : diagnostics.lock_waits === 'unsupported' ? (
             <div data-testid="monitor-infrastructure-lock-wait-unsupported"><EmptyState message={t('database.lockWaitUnsupported')} /></div>
@@ -413,7 +451,7 @@ export function DatabaseTab({ node, range }: DatabaseTabProps) {
                         </TooltipContent>
                       </Tooltip></TooltipProvider>
                     </TableCell>
-                    <TableCell className="text-right" data-testid={`monitor-infrastructure-lock-statement-age-${i + 1}`}>{elapsed != null && Number.isFinite(elapsed) && elapsed >= 0 ? `${elapsed.toFixed(0)}ms` : t('database.sourceNotProvided')}</TableCell>
+                    <TableCell className="text-right" data-testid={`monitor-infrastructure-lock-statement-age-${i + 1}`}>{elapsed != null && Number.isFinite(elapsed) && elapsed >= 0 ? `${formatMetric(elapsed, locale)}ms` : t('database.sourceNotProvided')}</TableCell>
                   </TableRow>
                 })}
               </TableBody>

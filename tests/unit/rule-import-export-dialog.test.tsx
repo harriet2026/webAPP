@@ -434,7 +434,13 @@ describe('RuleImportExportDialog actions', () => {
   });
 
   it('shows duplicates as forced skips and always submits the skip policy', async () => {
-    const onPreviewImport = vi.fn().mockResolvedValue(duplicatePreview);
+    const onPreviewImport = vi.fn().mockResolvedValue({
+      ...duplicatePreview,
+      summary: {
+        ...duplicatePreview.summary,
+        rules: { parsed: 3, importable: 1, duplicates: 2, invalid: 0 },
+      },
+    });
     const onExecuteImport = vi.fn().mockResolvedValue(duplicateImportResult);
 
     render(
@@ -476,6 +482,82 @@ describe('RuleImportExportDialog actions', () => {
     expect(onExecuteImport).toHaveBeenCalledWith(expect.objectContaining({
       duplicate_resolutions: { apply_to_remaining: 'skip' },
     }));
+  });
+
+  it.each([
+    ['invalid', scopeMismatchPreview],
+    ['duplicate', duplicatePreview],
+  ])('GT-13423 disables import when all selected items are %s', async (_kind, result) => {
+    const onExecuteImport = vi.fn();
+    render(
+      <RuleImportExportDialog
+        open
+        onOpenChange={vi.fn()}
+        scopeLabel="Content Rules"
+        variant="unified-rules"
+        adminContext="tenant-admin"
+        initialTab="import"
+        onPreviewImport={vi.fn().mockResolvedValue(result)}
+        onExecuteImport={onExecuteImport}
+      />,
+    );
+    await userEvent.upload(screen.getByTestId('rule-import-file'), createImportFile(sampleEnvelope));
+    expect(screen.getByTestId('rule-import-execute')).toBeDisabled();
+    await userEvent.click(screen.getByTestId('rule-import-execute'));
+    expect(onExecuteImport).not.toHaveBeenCalled();
+  });
+
+  it('GT-13423 allows a partial import with valid and invalid items', async () => {
+    const result = {
+      ...scopeMismatchPreview,
+      summary: {
+        ...scopeMismatchPreview.summary,
+        rules: { parsed: 2, importable: 1, duplicates: 0, invalid: 1 },
+      },
+    };
+    const onExecuteImport = vi.fn().mockResolvedValue({ ...result, imported: { rules: 1, detection_profiles: 0 } });
+    render(
+      <RuleImportExportDialog
+        open
+        onOpenChange={vi.fn()}
+        scopeLabel="Content Rules"
+        variant="unified-rules"
+        adminContext="tenant-admin"
+        initialTab="import"
+        onPreviewImport={vi.fn().mockResolvedValue(result)}
+        onExecuteImport={onExecuteImport}
+      />,
+    );
+    await userEvent.upload(screen.getByTestId('rule-import-file'), createImportFile(sampleEnvelope));
+    expect(screen.getByTestId('rule-import-execute')).toBeEnabled();
+    await userEvent.click(screen.getByTestId('rule-import-execute'));
+    expect(onExecuteImport).toHaveBeenCalledOnce();
+  });
+
+  it('GT-13423 counts only the selected import groups', async () => {
+    const result = {
+      ...scopeMismatchPreview,
+      summary: {
+        ...scopeMismatchPreview.summary,
+        detection_profiles: { parsed: 1, importable: 1, duplicates: 0, invalid: 0 },
+      },
+    };
+    render(
+      <RuleImportExportDialog
+        open
+        onOpenChange={vi.fn()}
+        scopeLabel="Content Rules"
+        variant="unified-rules"
+        adminContext="tenant-admin"
+        initialTab="import"
+        onPreviewImport={vi.fn().mockResolvedValue(result)}
+      />,
+    );
+    await userEvent.upload(screen.getByTestId('rule-import-file'), createImportFile(mixedEnvelope));
+    expect(screen.getByTestId('rule-import-execute')).toBeEnabled();
+    await userEvent.click(within(screen.getByTestId('import-detection_profiles')).getByRole('checkbox'));
+    await waitFor(() => expect(screen.queryByTestId('rule-import-preview-loading')).toBeNull());
+    expect(screen.getByTestId('rule-import-execute')).toBeDisabled();
   });
 
   it('renders a localized module mismatch instead of the backend scope error', async () => {

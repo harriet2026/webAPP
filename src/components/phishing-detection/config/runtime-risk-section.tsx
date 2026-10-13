@@ -6,6 +6,8 @@ import { AlertTriangle, Pencil, ShieldAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ApiError, isPublicationPendingResponse, useApiRequest } from '@/lib/api/client';
+import { phishPolicyContract, phishRiskLevels, phishDispositions, phishMarkPositions, validateRiskPolicy } from '@/lib/phish_policy';
+import { usePhishPolicyErrorMessage } from '@/lib/usePhishPolicyErrorMessage';
 import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 import { getPhishingConfig, putPhishingConfig } from '@/lib/api/phishing-config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -25,15 +27,14 @@ import type {
   PhishAgentConfig,
   PhishAgentConfigPutRequest,
   PhishConfigConflictResponse,
-  PhishMarkPosition,
   PhishPolicyDisposition,
   PhishRiskLevel,
   PhishRunMode,
 } from '@/types/phishing-config';
 
-const RISKS: PhishRiskLevel[] = ['suspicious', 'low', 'medium', 'high'];
-const DISPOSITIONS: PhishPolicyDisposition[] = ['proceed', 'audit', 'quarantine', 'discard'];
-const MARK_POSITIONS: PhishMarkPosition[] = ['subject_prefix', 'header'];
+const RISKS = phishRiskLevels;
+const DISPOSITIONS = phishDispositions;
+const MARK_POSITIONS = phishMarkPositions;
 
 function isConfigConflict(body: unknown): body is PhishConfigConflictResponse {
   if (!body || typeof body !== 'object') return false;
@@ -101,6 +102,7 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
   const t = useTranslations('phishingConfig.runtime');
   const { apiRequest, effectiveTenantId } = useApiRequest();
   const apiErrorMessage = useApiErrorMessage();
+  const policyErrorMessage = usePhishPolicyErrorMessage();
   const queryClient = useQueryClient();
   const configQuery = useQuery({
     queryKey: phishingQueryKeys.config(effectiveTenantId),
@@ -157,7 +159,7 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
         toast.error(t('conflictDescription'));
         return;
       }
-      toast.error(apiErrorMessage(error, t('saveFailed')));
+      toast.error(policyErrorMessage(error) ?? apiErrorMessage(error, t('saveFailed')));
     },
   });
 
@@ -194,20 +196,8 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
     } : current);
   };
 
-  const validCutoffs = draft
-    ? draft.risk_policy.cutoffs.low > 0
-      && draft.risk_policy.cutoffs.low < draft.risk_policy.cutoffs.medium
-      && draft.risk_policy.cutoffs.medium < draft.risk_policy.cutoffs.high
-      && draft.risk_policy.cutoffs.high < 100
-    : false;
-  const invalidMarkText = draft
-    ? RISKS.some((risk) => {
-      const policy = draft.risk_policy.policies[risk];
-        if (policy.base_disposition !== 'proceed' || (policy.mark_positions?.length ?? 0) === 0) return false;
-      const markLength = Array.from(policy.mark_text ?? '').length;
-      return markLength === 0 || markLength > 20;
-    })
-    : false;
+  const policyError = draft ? validateRiskPolicy(requestFromDraft(draft).risk_policy) : null;
+  const policyOrder = DISPOSITIONS.map((action) => t(`disposition.${action}`)).join(' < ');
   const validRuntimeDeadlines = draft
     ? Number.isInteger(draft.runtime_policy.timeout_minutes)
       && draft.runtime_policy.timeout_minutes >= 1
@@ -248,7 +238,7 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
               <Label>{t('runMode')}</Label>
               <div className="flex gap-2">{(['realtime', 'observe'] as PhishRunMode[]).map((mode) => <OptionCard key={mode} selected={draft.runtime_policy.run_mode === mode} title={t(`runModeValue.${mode}`)} description={t(`runModeHint.${mode}`)} onClick={() => patchRuntime(mode === 'observe' ? { run_mode: mode, observe_action: 'accept', observe_mark_enabled: false } : { run_mode: mode })} testId={`run-mode-${mode}`} />)}</div>
               {draft.runtime_policy.run_mode === 'observe' ? (
-                <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning-foreground dark:text-warning">{t('observeModeBanner')}</div>
+                <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-warning-foreground dark:text-warning" data-testid="observe-mode-banner">{t('observeModeBanner')}</div>
               ) : null}
             </section>
             <section className="space-y-3">
@@ -258,40 +248,41 @@ export function RuntimeRiskSection({ readOnly = false }: { readOnly?: boolean })
                 <div className="min-w-0 space-y-2"><Label htmlFor="recheck-minutes" className="text-sm text-muted-foreground">{t('maxRecheckMinutes')}</Label><Input id="recheck-minutes" data-testid="recheck-minutes" type="number" min={1} max={60} value={draft.runtime_policy.max_recheck_minutes} onChange={(event) => patchRuntime({ max_recheck_minutes: Number(event.target.value) })} /></div>
               </div>
               {!validRuntimeDeadlines ? <p className="text-sm text-destructive">{t('invalidTimeoutWindow')}</p> : null}
-              {draft.runtime_policy.run_mode === 'realtime' ? <div className="flex items-center justify-between rounded-lg border border-border p-3"><div><Label>{t('timeoutAsync')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('timeoutAsyncHint')}</p></div><Switch checked={draft.runtime_policy.timeout_async_enabled} onCheckedChange={(timeoutAsyncEnabled) => {
+              <div className="flex items-center justify-between rounded-lg border border-border p-3"><div><Label>{t('timeoutAsync')}</Label><p className="mt-1 text-xs text-muted-foreground">{t('timeoutAsyncHint')}</p></div><Switch checked={draft.runtime_policy.timeout_async_enabled} onCheckedChange={(timeoutAsyncEnabled) => {
                 if (timeoutAsyncEnabled) {
                   patchRuntime({ timeout_async_enabled: true });
                   return;
                 }
                 setConfirmTimeoutDisable(true);
-              }} data-testid="timeout-async-enabled" /></div> : null}
+              }} data-testid="timeout-async-enabled" /></div>
             </section>
             <section className="space-y-3">
               <div><Label>{t('confidencePolicy')}</Label><p className="mt-1 text-sm text-muted-foreground">{t('confidenceHint')}</p></div>
               <div className="grid grid-cols-3 gap-2 rounded-lg border border-border bg-muted/30 p-3">
-                {(['low', 'medium', 'high'] as const).map((cutoff) => <div key={cutoff} className="min-w-0 space-y-2"><Label htmlFor={`cutoff-${cutoff}`} className="text-sm">{t(`cutoff.${cutoff}`)}</Label><Input id={`cutoff-${cutoff}`} data-testid={`cutoff-${cutoff}`} type="number" min={1} max={99} value={draft.risk_policy.cutoffs[cutoff]} onChange={(event) => patchCutoff(cutoff, Number(event.target.value))} /></div>)}
+                {(['low', 'medium', 'high'] as const).map((cutoff) => <div key={cutoff} className="min-w-0 space-y-2"><Label htmlFor={`cutoff-${cutoff}`} className="text-sm">{t(`cutoff.${cutoff}`)}</Label><div className="relative"><Input id={`cutoff-${cutoff}`} data-testid={`cutoff-${cutoff}`} type="number" min={phishPolicyContract.cutoffs.minimum} max={phishPolicyContract.cutoffs.maximum} className="pr-8" value={draft.risk_policy.cutoffs[cutoff]} onChange={(event) => patchCutoff(cutoff, Number(event.target.value))} /><span aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground" data-testid={`cutoff-${cutoff}-unit`}>%</span></div></div>)}
               </div>
-              {!validCutoffs ? <p className="text-sm text-destructive" data-testid="runtime-cutoff-error">{t('invalidCutoffs')}</p> : null}
+              <p className="text-sm text-muted-foreground" data-testid="runtime-policy-order">{t('policyOrderHint', { order: policyOrder })}</p>
+              {policyError ? <p role="alert" id="runtime-policy-error" className="text-sm text-destructive" data-testid="runtime-policy-error">{policyErrorMessage(policyError)}</p> : null}
               <div className="overflow-x-auto rounded-lg border border-border">
-                <div className="grid min-w-[570px] grid-cols-[126px_112px_170px_1fr] border-b border-border bg-muted/40 px-3 py-2 text-sm font-medium text-muted-foreground"><span>{t('range')}</span><span>{t('risk')}</span><span>{t('dispositionLabel')}</span><span>{t('markSetting')}</span></div>
+                <div className="grid min-w-[570px] grid-cols-[126px_112px_170px_1fr] gap-2 border-b border-border bg-muted/40 px-3 py-2 text-sm font-medium text-muted-foreground"><span>{t('range')}</span><span>{t('risk')}</span><span data-testid="risk-header-disposition">{t('dispositionLabel')}</span><span data-testid="risk-header-mark">{t('markSetting')}</span></div>
                 {RISKS.map((risk, index) => {
                   const policy = draft.risk_policy.policies[risk];
                   const positions = policy.mark_positions ?? [];
                   const markLength = Array.from(policy.mark_text ?? '').length;
                   return <div key={risk} className="grid min-w-[570px] grid-cols-[126px_112px_170px_1fr] items-start gap-2 border-b border-border px-3 py-3 last:border-b-0" data-testid={`risk-row-${risk}`}>
-                    <span className="font-mono text-xs text-muted-foreground">{ranges[index]?.[0]}–{ranges[index]?.[1]}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{ranges[index]?.[0]}%–{ranges[index]?.[1]}%</span>
                     <Badge variant={risk === 'high' ? 'destructive' : 'secondary'} className="w-fit">{t(`riskLevel.${risk}`)}</Badge>
-                    <Select value={policy.base_disposition} onValueChange={(value) => patchPolicy(risk, { base_disposition: value as PhishPolicyDisposition })}><SelectTrigger className="w-full" data-testid={`disposition-${risk}`}><SelectValue /></SelectTrigger><SelectContent>{DISPOSITIONS.map((value) => <SelectItem key={value} value={value} data-testid={`disposition-option-${risk}-${value}`}>{t(`disposition.${value}`)}</SelectItem>)}</SelectContent></Select>
+                    <Select value={policy.base_disposition} onValueChange={(value) => patchPolicy(risk, { base_disposition: value as PhishPolicyDisposition })}><SelectTrigger className="w-full" data-testid={`disposition-${risk}`} aria-invalid={policyError?.risk_level === risk || policyError?.previous_risk_level === risk} aria-describedby={policyError ? 'runtime-policy-error' : undefined}><SelectValue /></SelectTrigger><SelectContent>{DISPOSITIONS.map((value) => <SelectItem key={value} value={value} data-testid={`disposition-option-${risk}-${value}`}>{t(`disposition.${value}`)}</SelectItem>)}</SelectContent></Select>
                     {policy.base_disposition === 'proceed' ? <div className="space-y-2" data-testid={`mark-addon-${risk}`}>
                       <div className="flex flex-wrap gap-2">{MARK_POSITIONS.map((position) => <Button key={position} type="button" size="sm" variant={positions.includes(position) ? 'default' : 'outline'} onClick={() => patchPolicy(risk, { mark_positions: positions.includes(position) ? positions.filter((item) => item !== position) : [...positions, position] })} data-testid={`mark-position-${risk}-${position}`}>{t(`markPosition.${position}`)}</Button>)}</div>
-                      {positions.length > 0 ? <div className="space-y-1"><Input value={policy.mark_text ?? ''} placeholder={t('markText')} aria-invalid={markLength === 0 || markLength > 20} onChange={(event) => patchPolicy(risk, { mark_text: event.target.value })} data-testid={`mark-text-${risk}`} />{markLength === 0 ? <p className="text-sm text-destructive" data-testid={`mark-text-hint-${risk}`}>{t('markTextRequired')}</p> : markLength > 20 ? <p className="text-sm text-destructive" data-testid={`mark-text-hint-${risk}`}>{t('markTextTooLong')}</p> : <p className="text-xs text-muted-foreground" data-testid={`mark-text-hint-${risk}`}>{t('markTextLimit')}</p>}</div> : null}
+                      {positions.length > 0 ? <div className="space-y-1"><Input value={policy.mark_text ?? ''} placeholder={t('markText')} aria-invalid={markLength === 0 || markLength > phishPolicyContract.mark.max_text_length} onChange={(event) => patchPolicy(risk, { mark_text: event.target.value })} data-testid={`mark-text-${risk}`} />{markLength === 0 ? <p className="text-sm text-destructive" data-testid={`mark-text-hint-${risk}`}>{t('markTextRequired')}</p> : markLength > phishPolicyContract.mark.max_text_length ? <p className="text-sm text-destructive" data-testid={`mark-text-hint-${risk}`}>{t('markTextTooLong', { limit: phishPolicyContract.mark.max_text_length })}</p> : <p className="text-xs text-muted-foreground" data-testid={`mark-text-hint-${risk}`}>{t('markTextLimit', { limit: phishPolicyContract.mark.max_text_length })}</p>}</div> : null}
                     </div> : <span className="text-sm text-muted-foreground">—</span>}
                   </div>;
                 })}
               </div>
             </section>
           </div> : null}
-          <SheetFooter className="shrink-0 flex-row justify-end gap-2 border-t border-border px-5 py-3"><Button variant="outline" onClick={() => setOpen(false)} disabled={saveMutation.isPending} data-testid="runtime-cancel">{t('cancel')}</Button><Button onClick={() => draft && saveMutation.mutate(draft)} disabled={!draft || !validCutoffs || !validRuntimeDeadlines || invalidMarkText || saveMutation.isPending || readOnly} data-testid="runtime-save">{saveMutation.isPending ? t('saving') : t('save')}</Button></SheetFooter>
+          <SheetFooter className="shrink-0 flex-row justify-end gap-2 border-t border-border px-5 py-3"><Button variant="outline" onClick={() => setOpen(false)} disabled={saveMutation.isPending} data-testid="runtime-cancel">{t('cancel')}</Button><Button onClick={() => draft && saveMutation.mutate(draft)} disabled={!draft || Boolean(policyError) || !validRuntimeDeadlines || saveMutation.isPending || readOnly} data-testid="runtime-save">{saveMutation.isPending ? t('saving') : t('save')}</Button></SheetFooter>
         </SheetContent>
       </Sheet>
       <ConfirmDialog

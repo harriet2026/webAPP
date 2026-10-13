@@ -13,7 +13,7 @@ and run instructions.
 ## Assessment report tests
 
 The assessment suite checks report states, factors, expandable source text, and
-the existing Phish JSON download. It covers the phishing detection (Phish) and
+the removal of the Phish JSON export. It covers the phishing detection (Phish) and
 impersonation detection (Spoof) detail panels, and also retains rendering checks
 for two legacy pages.
 
@@ -82,7 +82,7 @@ The suite supplies them as browser API responses and supplies synthetic login,
 navigation, list, and overview data. It does not log in to a backend.
 
 Coverage includes available, empty, pending, failed, legacy, and unsupported
-reports; multiple report subjects; source expansion; and JSON downloads.
+reports; multiple report subjects; source expansion; and the absence of the removed JSON export.
 Additional UI scenarios check strong legitimate support and HTTP 503 errors.
 These scenarios do not modify the committed fixtures.
 
@@ -124,7 +124,7 @@ rerun after compilation finishes.
 The live suite logs in through `/api/v1/auth/login`, reads actual product APIs,
 and compares their results with the rendered reports. It uses no response
 fixtures. It checks source contents, retained byte counts and hashes, report
-identity, and the Phish JSON download.
+identity, and the absence of the removed Phish JSON export.
 
 Prepare the following before starting:
 
@@ -227,7 +227,7 @@ accepts self-signed HTTPS certificates for the test environment.
 
 Both modes write `results.json` and an `artifacts/` directory below their selected
 output directory. Attachments include screenshots and per-test network audits.
-The live suite also retains actual API results and Phish JSON downloads, which
+The live suite also retains actual API results, which
 may contain mail content; keep that output with the private test data.
 
 A fixture run verifies frontend behavior for the supplied synthetic responses.

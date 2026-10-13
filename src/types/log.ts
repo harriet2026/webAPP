@@ -56,6 +56,7 @@ export interface EmailLog {
   subject?: string;
   content?: string;
   html_content?: string;
+  attachment_count?: number | null;
   attachments?: MailAttachment[];
   urls?: string[];
 

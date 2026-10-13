@@ -141,6 +141,12 @@ import {
   mockCopyContentRule,
   mockDeleteContentRule,
   mockBulkContentRules,
+  mockAdvancedRulesList,
+  mockCreateAdvancedRule,
+  mockUpdateAdvancedRule,
+  mockSetAdvancedRuleStatus,
+  mockCopyAdvancedRule,
+  mockDeleteAdvancedRule,
   mockTestContentRule,
   mockContentRulesExport,
   mockPreviewContentRulesImport,
@@ -152,6 +158,8 @@ import {
   mockDeleteMailMarkingRule,
   mockTestMailMarkingRule,
   mockAttachmentConfigList,
+  mockAttachmentScopedConfig,
+  mockPatchAttachmentScopedConfig,
   mockCreateAttachmentConfig,
   mockUpdateAttachmentConfig,
   mockAttachmentPasswordList,
@@ -160,6 +168,7 @@ import {
   mockEmailDisposalList,
   mockEmailDisposalRuleOptions,
   mockEmailDisposalDetail,
+  mockEmailDisposalAnalysis,
   mockEmailDisposalBlacklistEntity,
   mockEmailDisposalPreview,
   mockEmailDisposalEvents,
@@ -799,6 +808,14 @@ const routes: Route[] = [
 
   // ─── 邮件处置中心 ──────────────────────────────────────────────────────
   {
+    method: 'GET', pattern: /^\/mail-logs\/\d+\/analysis$/,
+    handler: (req) => {
+      const url = new URL(req.path, 'http://mock.local');
+      const item = mockEmailDisposalAnalysis(Number(url.pathname.split('/')[2]), url.searchParams.get('recipient') ?? undefined);
+      return item ? { status: 200, data: item } : { status: 404, data: {} };
+    },
+  },
+  {
     method: 'GET', pattern: '/mail-logs/fields',
     handler: () => ({ status: 200, data: mockEmailDisposalFields() }),
   },
@@ -936,6 +953,16 @@ const routes: Route[] = [
   },
 
   // ─── 附件安全检测 ───────────────────────────────────────────────────────
+  {
+    method: 'GET',
+    pattern: /^\/configs\/(platform|tenant)\/attachd$/,
+    handler: (req) => ({ status: 200, data: mockAttachmentScopedConfig(pathname(req.path).split('/')[2] as 'platform' | 'tenant') }),
+  },
+  {
+    method: 'PATCH',
+    pattern: /^\/configs\/(platform|tenant)\/attachd$/,
+    handler: (req) => ({ status: 200, data: mockPatchAttachmentScopedConfig(pathname(req.path).split('/')[2] as 'platform' | 'tenant', (req.body ?? {}) as Parameters<typeof mockPatchAttachmentScopedConfig>[1]) }),
+  },
   {
     method: 'GET',
     pattern: '/config-overrides',
@@ -1251,9 +1278,10 @@ const routes: Route[] = [
     method: 'GET',
     pattern: '/monitor/database',
     handler: (req) => {
-      const value = new URLSearchParams(rawQuery(req.path)).get('range');
+      const params = new URLSearchParams(rawQuery(req.path));
+      const value = params.get('range');
       const range = value === '1h' || value === '7d' ? value : '24h';
-      return { status: 200, data: mockMonitorDatabase(range) };
+      return { status: 200, data: mockMonitorDatabase(range, params.get('node') ?? 'node-1') };
     },
   },
   {
@@ -1871,6 +1899,7 @@ const routes: Route[] = [
         params.get('rule_page') === 'behavior_control' ||
         params.get('rule_page') === 'user_list' ||
         params.get('rule_page') === 'content_rules' ||
+        params.get('rule_page') === 'advanced_rules' ||
         params.get('rule_page') === 'mail_marking' ||
         params.get('rule_page') === 'groups' ||
         params.get('page') === GROUPS_PAGE_KEY ||
@@ -1918,6 +1947,7 @@ const routes: Route[] = [
       if (params.get('rule_page') === 'user_list') return { status: 200, data: mockUserListRulesList() };
       if (params.get('rule_page') === 'behavior_control') return { status: 200, data: mockBehaviorControlRulesList() };
       if (params.get('rule_page') === 'content_rules') return { status: 200, data: mockContentRulesList(params) };
+      if (params.get('rule_page') === 'advanced_rules') return { status: 200, data: mockAdvancedRulesList() };
       return { status: 200, data: mockSenderFilterRulesList() };
     },
   },
@@ -1989,6 +2019,57 @@ const routes: Route[] = [
       const id = Number(pathname(req.path).split('/')[2]);
       const rule = mockCopyContentRule(id);
       return rule ? { status: 201, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  // ─── 高级过滤规则的写操作（GT-14369）────────────────────────────────────
+  // 使用 advanced-rules.ts 请求中的 scope=advanced_rules query 分流，
+  // 与 content_rules 相同，避免共享 unified-rules 路由误改其他模块 fixture。
+  {
+    method: 'POST',
+    pattern: '/unified-rules',
+    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
+    handler: (req) => ({ status: 201, data: mockCreateAdvancedRule(req.body) }),
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/unified-rules\/\d+$/,
+    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const rule = mockUpdateAdvancedRule(id, req.body);
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'PUT',
+    pattern: /^\/unified-rules\/\d+\/status$/,
+    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const body = (req.body ?? {}) as { is_active?: boolean };
+      const rule = mockSetAdvancedRuleStatus(id, body.is_active ?? true);
+      return rule ? { status: 200, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/unified-rules\/\d+\/copy$/,
+    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      const rule = mockCopyAdvancedRule(id);
+      return rule ? { status: 201, data: rule } : { status: 404, data: { message: 'not found' } };
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/unified-rules\/\d+$/,
+    matchQuery: (q) => new URLSearchParams(q).get('scope') === 'advanced_rules',
+    handler: (req) => {
+      const id = Number(pathname(req.path).split('/')[2]);
+      return mockDeleteAdvancedRule(id)
+        ? { status: 200, data: { status: 'deleted' } }
+        : { status: 404, data: { message: 'not found' } };
     },
   },
   // ─── 群组策略规则的写操作（mock id 段 9001-9099，按 id 命名空间收窄）────
@@ -2447,7 +2528,7 @@ const routes: Route[] = [
   {
     method: 'GET',
     pattern: '/phishing-agent/detection-logs',
-    handler: () => ({ status: 200, data: mockPhishingDetectionLogs() }),
+    handler: (req) => ({ status: 200, data: mockPhishingDetectionLogs(new URLSearchParams(rawQuery(req.path))) }),
   },
   {
     method: 'GET',

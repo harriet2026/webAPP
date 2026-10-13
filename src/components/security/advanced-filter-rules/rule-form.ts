@@ -67,6 +67,8 @@ export interface RuleForm {
     discard?: DiscardActionParams;
   };
   addons: AddonsState;
+  // UI 开关映射到原生 observe 执行动作，正式动作保存在高级规则 metadata。
+  observeMode: boolean;
 }
 
 const ALL_SCOPES: Scope[] = ['incoming', 'outgoing', 'internal'];
@@ -118,6 +120,7 @@ export function emptyRuleForm(defaultPriority = 50): RuleForm {
       discard: { logEnabled: true, silent: true, notifyAdmin: false },
     },
     addons: {},
+    observeMode: false,
   };
 }
 
@@ -145,6 +148,7 @@ function buildMetadata(f: RuleForm): Record<string, unknown> {
 
   const metadata: Record<string, unknown> = {
     feature: 'advanced_rules',
+    observe_mode: f.observeMode,
     scope: f.scope,
     primary_action: f.primaryAction,
     primary_action_params: buildPrimaryActionParams(f),
@@ -183,7 +187,7 @@ export function formToCreateRequest(f: RuleForm, fieldDefs: Record<string, Field
     stage,
     priority: f.priority,
     condition_tree: conditionTree as RuleNode,
-    action: ruleAction(f.primaryAction),
+    action: f.observeMode ? 'observe' : ruleAction(f.primaryAction),
     metadata: buildMetadata(f),
     is_active: f.enabled,
     valid_until: toValidUntilISO(f.validUntil),
@@ -202,7 +206,7 @@ export function formToUpdateRequest(f: RuleForm, fieldDefs: Record<string, Field
     stage,
     priority: f.priority,
     condition_tree: conditionTree as RuleNode,
-    action: ruleAction(f.primaryAction),
+    action: f.observeMode ? 'observe' : ruleAction(f.primaryAction),
     metadata: buildMetadata(f),
     is_active: f.enabled,
     valid_until: toValidUntilISO(f.validUntil),
@@ -236,6 +240,7 @@ export function ruleToForm(rule: Rule): RuleForm {
   form.enabled = rule.is_active;
   form.description = rule.description || '';
   form.validUntil = rule.valid_until ? rule.valid_until.slice(0, 10) : null;
+  form.observeMode = rule.action === 'observe';
 
   const meta = parseMetadata(rule.metadata);
 
@@ -274,4 +279,14 @@ export function ruleToForm(rule: Rule): RuleForm {
   form.conditions = deserializeGroups(tree);
 
   return form;
+}
+
+/** Preserve conditions, addons and unknown metadata when toggling from the list. */
+export function advancedRuleObservationUpdate(rule: Rule, observing: boolean): Pick<UpdateRuleRequest, 'action' | 'metadata'> | null {
+  const metadata = parseMetadata(rule.metadata);
+  if (metadata?.feature !== 'advanced_rules' || !isPrimaryAction(metadata.primary_action)) return null;
+  return {
+    action: observing ? 'observe' : ruleAction(metadata.primary_action),
+    metadata: { ...metadata, observe_mode: observing },
+  };
 }

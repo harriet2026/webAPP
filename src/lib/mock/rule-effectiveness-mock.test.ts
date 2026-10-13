@@ -8,6 +8,17 @@ import { setMockEnabled } from './storage';
 describe('rule effectiveness mock contract', () => {
   const realFetch = globalThis.fetch;
 
+  it('counts only eligible promotion objects before pagination (GT-14328)', () => {
+    const all = dispatch({ method: 'GET', path: '/statistics/rule-effectiveness?page=1&page_size=100' }).data as RuleEffectivenessResponse;
+    expect(all.kpi.observing_count).toBe(37);
+    expect(all.kpi.pending_review_count).toBe(5);
+    expect(all.kpi.overdue_count).toBe(5);
+    expect(all.rows.find(row => row.id === 'mock-period-sender-2')?.pending_review).toBe(false);
+    const paged = dispatch({ method: 'GET', path: '/statistics/rule-effectiveness?module=auth_spoofing&page=2&page_size=2' }).data as RuleEffectivenessResponse;
+    expect(paged.kpi.pending_review_count).toBe(1);
+    expect(paged.kpi.pending_review_count).not.toBe(paged.kpi.observing_count);
+  });
+
   beforeEach(() => {
     localStorage.clear();
     resetMockAuthSpoofingConfigForTests();
@@ -24,7 +35,7 @@ describe('rule effectiveness mock contract', () => {
     setMockEnabled(true);
 
     const mocked = await getRuleEffectiveness({ modules: ['sender_filter'] });
-    expect(mocked.rows_total).toBe(2);
+    expect(mocked.rows_total).toBe(5);
     expect(fetchMock).not.toHaveBeenCalled();
 
     setMockEnabled(false);
@@ -54,6 +65,14 @@ describe('rule effectiveness mock contract', () => {
     expect(data.kpi.total_hits).toBeGreaterThan(0);
     expect(data.quality).toMatchObject({ history_complete: true, complete: true });
   });
+
+  it.each([['intent_engine', 15, 'intentEngine'], ['attachment_security', 3, 'attachment']])(
+    'exposes %s observation rows and usable configuration links', (module, count, target) => {
+      const data = dispatch({ method: 'GET', path: `/statistics/rule-effectiveness?module=${module}&page_size=100` }).data as RuleEffectivenessResponse;
+      expect(data.rows).toHaveLength(count as number);
+      expect(data.rows.every(row => row.policy_module === module && row.config_path === `/security/pipeline?module=${target}`)).toBe(true);
+    },
+  );
 
   it('filters similar detection objects by strategy and observation duration', () => {
     const response = dispatch({
@@ -117,12 +136,14 @@ describe('rule effectiveness mock contract', () => {
 });
 
 describe('observation version fixtures', () => {
-  it('keeps phishing domains and closed history separate from current KPI', () => {
+  it('keeps phishing disposition rules and closed history separate from current KPI', () => {
     const path='/statistics/rule-effectiveness?tenant_id=1&module=phishing_detection';
     const before=dispatch({method:'GET',path}).data as RuleEffectivenessResponse;
-    expect(before.rows.map(r=>r.sub_strategy_id).sort()).toEqual(['admission:external-link','risk_policy','runtime_policy']);
-    expect(before.kpi.pending_review_count).toBe(3);
+    expect(before.rows.map(r=>r.sub_strategy_id).sort()).toEqual(['disposition:high','disposition:medium','disposition:suspicious']);
+    expect(before.kpi.pending_review_count).toBe(0);
     for(const row of before.rows) {
+      expect(row.attribution_status).toBe('attributable');
+      expect(row.risk_unavailable_reason).not.toBe('module_level_only');
       const history=dispatch({method:'GET',path:`/statistics/rule-effectiveness/versions?tenant_id=1&module=phishing_detection&sub_strategy_key=${encodeURIComponent(row.sub_strategy_id)}`});
       const data=history.data as {items: import('@/lib/api/rule-effectiveness').RuleEffectivenessRow[]};
       expect(data.items.length).toBe(row.version_no-1);

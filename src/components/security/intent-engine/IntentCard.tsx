@@ -202,6 +202,24 @@ export function IntentCard({
                 {tAction(uiAction)}
               </Badge>
             )}
+            <span
+              className="flex items-center gap-1.5"
+              title={tCommon('observeMode.hint')}
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
+              <span className="text-xs text-muted-foreground">
+                {tCommon('observeMode.label')}
+              </span>
+              <Switch
+                size="sm"
+                checked={value.observe_mode ?? false}
+                onCheckedChange={(observe_mode) => onChange({ ...value, observe_mode })}
+                disabled={!value.enabled || !engineEnabled}
+                aria-label={tCommon('observeMode.label')}
+                data-testid={`ie-observe-mode-${direction}-${intent}`}
+              />
+            </span>
             <span className="text-muted-foreground">
               {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </span>

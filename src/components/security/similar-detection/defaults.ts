@@ -2,9 +2,27 @@ import type {
   SimilarDetectionConfig,
   SimilarDetectionDirection,
   SimilarDetectionDirectionConfig,
+  SimilarDetectionType,
 } from './types';
 
 export const DIRECTIONS: SimilarDetectionDirection[] = ['receive', 'send', 'internal'];
+
+// Keep the wire value intact: a UI edit in the other tab must not rewrite null
+// and thereby change this type's observation configuration/version.
+export function storedDirectionSettingsFor(config: SimilarDetectionConfig, type: SimilarDetectionType) {
+  const settings = config.direction_settings?.[type];
+  return {
+    mode: settings?.mode ?? config.mode,
+    enabled_directions: settings ? settings.enabled_directions : config.enabled_directions,
+  };
+}
+
+export function directionSettingsFor(config: SimilarDetectionConfig, type: SimilarDetectionType) {
+  const settings = storedDirectionSettingsFor(config, type);
+  // Display null as all checked, without changing the stored value. [] remains
+  // empty and must not silently turn into all enabled.
+  return { ...settings, enabled_directions: settings.enabled_directions ?? DIRECTIONS };
+}
 
 export const WINDOW_MIN = 1;
 export const WINDOW_MAX = 1440;

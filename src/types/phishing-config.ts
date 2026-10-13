@@ -1,12 +1,14 @@
+import contract from '@/lib/generated/phish_policy';
+
 // Phishing deep-module DTOs. Field names mirror the versioned server contract
 // exactly; UI drafts do not translate or invent defaults for these domains.
 
 export type PhishRunMode = 'realtime' | 'observe';
 export type PhishObserveAction = 'accept';
 
-export type PhishRiskLevel = 'suspicious' | 'low' | 'medium' | 'high';
-export type PhishPolicyDisposition = 'proceed' | 'audit' | 'quarantine' | 'discard';
-export type PhishMarkPosition = 'subject_prefix' | 'header';
+export type PhishRiskLevel = typeof contract.risk_levels[number];
+export type PhishPolicyDisposition = typeof contract.dispositions[number]['value'];
+export type PhishMarkPosition = typeof contract.mark.positions[number];
 
 export interface PhishRiskBandPolicy {
   base_disposition: PhishPolicyDisposition;

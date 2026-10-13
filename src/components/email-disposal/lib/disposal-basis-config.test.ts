@@ -228,6 +228,38 @@ describe('GT-14105 attachment-virus rule labels', () => {
   });
 });
 
+describe('GT-14294 phishing policy decision labels', () => {
+  const basis: DisposalBasis = {
+    policy_key: 'AI-PHISH',
+    rule_name: 'phish_policy_decision',
+    rule_id: 'AI-PHISH:phish_policy_decision:5eb82441e799e7dc789ba9f1b8f79dcec4787807fecb14e55115f23800787c6b:risk-v19',
+    action: 'quarantine',
+  };
+
+  it.each([
+    ['zh', '钓鱼邮件处置策略'],
+    ['en', 'Phishing Disposition Policy'],
+    ['th', 'นโยบายจัดการอีเมลฟิชชิง'],
+    ['ru', 'Политика обработки фишинговых писем'],
+  ] as const)('uses a customer-facing label in %s across detail and list', (lang, label) => {
+    expect(formatRuleLabel(basis, (key) => key, lang)).toBe(label);
+    expect(formatListReason(basis, lang)).toContain(`「${label}」`);
+    expect(shouldHideInternalRuleIdentity(basis)).toBe(true);
+  });
+
+  it('recognizes the synthetic ID when older data has no rule name', () => {
+    expect(formatRuleLabel({ ...basis, rule_name: undefined }, (key) => key)).toBe('钓鱼邮件处置策略');
+  });
+
+  it('preserves ordinary phishing rules and other modules', () => {
+    const custom = { ...basis, rule_name: '自定义钓鱼规则', rule_id: 'AI-PHISH-9' };
+    expect(formatRuleLabel(custom, (key) => key)).toBe('自定义钓鱼规则（AI-PHISH-9）');
+    expect(shouldHideInternalRuleIdentity(custom)).toBe(false);
+    expect(formatRuleLabel({ ...basis, policy_key: 'AI-SPOOF' }, (key) => key))
+      .toContain('phish_policy_decision');
+  });
+});
+
 describe('disposal-basis-config', () => {
   const basis: DisposalBasis = {
     policy_key: 'IPBL',

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  behaviorControlObservationUpdate,
   buildConditionTreeFromForm,
   resolveBehaviorControlRule,
   normalizeDomain,
@@ -246,5 +247,25 @@ describe('formToCreateBody conditions/relation (GT-12707)', () => {
     const view = resolveBehaviorControlRule(rule);
     expect(view.meta?.conditions).toHaveLength(3);
     expect(view.meta?.relation).toBe('and');
+  });
+});
+
+
+describe('GT-14083 native behavior observation', () => {
+  it('retains the formal action and unknown metadata across observation toggles', () => {
+    const body = formToCreateBody({ ...baseForm, observe_mode: true });
+    expect(body.action).toBe('observe');
+    expect(body.metadata.configured_action).toBe('audit');
+    const metadata = { ...body.metadata, future_field: { nested: 'preserve' } };
+    const rule = { ...body, id: 87, created_at: '2026-10-13T00:00:00Z', updated_at: '2026-10-13T01:00:00Z', metadata: JSON.stringify(metadata), condition_tree: JSON.stringify(body.condition_tree) } as Rule;
+    const update = behaviorControlObservationUpdate(resolveBehaviorControlRule(rule), false);
+    expect(update).toEqual({ action: 'audit', metadata, expected_updated_at: rule.updated_at });
+    expect(rule.action).toBe('observe');
+  });
+
+  it('rejects an observed rule whose formal action cannot be recovered', () => {
+    const body = formToCreateBody(baseForm);
+    const rule = { ...body, id: 87, created_at: '2026-10-13T00:00:00Z', updated_at: '2026-10-13T00:00:00Z', action: 'observe', metadata: JSON.stringify({ ...body.metadata, configured_action: undefined }), condition_tree: JSON.stringify(body.condition_tree) } as Rule;
+    expect(() => behaviorControlObservationUpdate(resolveBehaviorControlRule(rule), false)).toThrow('Missing configured action');
   });
 });

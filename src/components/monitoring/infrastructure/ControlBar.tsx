@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { RefreshCw } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, useCallback } from 'react';
@@ -13,8 +13,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { NodeInfo, TimeRange } from '@/types/monitoring';
+import { useDataUpdate, matchesInfrastructureQuery } from './use_data_update';
 
 interface ControlBarProps {
+  tab: string;
   nodes: NodeInfo[];
   node: string;
   range: TimeRange;
@@ -26,6 +28,7 @@ interface ControlBarProps {
 }
 
 export function ControlBar({
+  tab,
   nodes,
   node,
   range,
@@ -34,17 +37,19 @@ export function ControlBar({
   rangeDisabled = false,
 }: ControlBarProps) {
   const t = useTranslations('infrastructure');
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [spinning, setSpinning] = useState(false);
-  const [lastFetchAt, setLastFetchAt] = useState<Date>(new Date());
+  const { updatedAt, failed, fetching } = useDataUpdate(tab, node, range);
 
   const handleRefresh = useCallback(() => {
     setSpinning(true);
-    queryClient.invalidateQueries({ queryKey: ['monitoring'] }).finally(() => {
-      setLastFetchAt(new Date());
-      setTimeout(() => setSpinning(false), 600);
+    queryClient.invalidateQueries({ predicate: (q) =>
+      (q.queryKey[0] === 'monitoring' && q.queryKey[1] === 'nodes') || matchesInfrastructureQuery(q, tab, node, range),
+    }).finally(() => {
+      setSpinning(false);
     });
-  }, [queryClient]);
+  }, [queryClient, tab, node, range]);
 
   const RANGES: { value: TimeRange; label: string }[] = [
     { value: '1h', label: t('range.1h') },
@@ -52,7 +57,7 @@ export function ControlBar({
     { value: '7d', label: t('range.7d') },
   ];
 
-  const updatedAt = lastFetchAt.toLocaleTimeString();
+  const updatedTime = updatedAt ? new Date(updatedAt).toLocaleString(locale) : '—';
 
   return (
     <div className="flex flex-wrap items-center gap-3" data-testid="monitor-infrastructure-control-bar">
@@ -82,13 +87,14 @@ export function ControlBar({
         </SelectContent>
       </Select>
 
-      <Button variant="outline" size="sm" onClick={handleRefresh} data-testid="monitor-infrastructure-refresh">
-        <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${spinning ? 'animate-spin' : ''}`} />
+      <Button variant="outline" size="sm" onClick={handleRefresh} disabled={spinning || fetching} data-testid="monitor-infrastructure-refresh">
+        <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${spinning || fetching ? 'animate-spin' : ''}`} />
         {t('refresh')}
       </Button>
 
-      <span className="ml-auto text-xs text-muted-foreground" data-testid="monitor-infrastructure-updated-at">
-        {t('updatedAt')}: {updatedAt}
+      <span className="ml-auto text-xs text-muted-foreground" title={t('updateTimeHint')} data-testid="monitor-infrastructure-updated-at">
+        {t('fetchedAt')}: {updatedTime}
+        {failed && <span role="status" className="ml-2 text-destructive">{t('fetchFailed')}</span>}
       </span>
     </div>
   );

@@ -119,12 +119,14 @@ export function InboundAuditPage() {
         <Checkbox
           checked={selectedIds.length === items.length && items.length > 0}
           onCheckedChange={handleSelectAll}
+          data-testid="inbound-audit-select-all"
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={selectedIds.includes(row.original.id)}
           onCheckedChange={(checked) => handleSelect(row.original.id, !!checked)}
+          data-testid={`inbound-audit-select-${row.original.id}`}
         />
       ),
       size: 40,
@@ -152,6 +154,7 @@ export function InboundAuditPage() {
         <StatusBadge
           status={row.original.status}
           variant={row.original.status === 'approved' ? 'success' : row.original.status === 'rejected' ? 'error' : 'warning'}
+          data-testid={`inbound-audit-status-${row.original.id}`}
         />
       ),
     },
@@ -211,11 +214,11 @@ export function InboundAuditPage() {
         title={t('inboundAudit.title')}
         actions={activeTab === 'pending' && selectedIds.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            <Button variant="default" onClick={() => handleBatchAction('approve')}>
+            <Button variant="default" onClick={() => handleBatchAction('approve')} data-testid="inbound-audit-bulk-approve">
               <Check className="h-4 w-4 mr-2" />
-              {t('inboundAudit.bulkApprove')} ({selectedIds.length})
+              {t('inboundAudit.bulkApprove')} (<span data-testid="inbound-audit-selected-count">{selectedIds.length}</span>)
             </Button>
-            <Button variant="destructive" onClick={() => handleBatchAction('reject')}>
+            <Button variant="destructive" onClick={() => handleBatchAction('reject')} data-testid="inbound-audit-bulk-reject">
               <X className="h-4 w-4 mr-2" />
               {t('inboundAudit.bulkReject')} ({selectedIds.length})
             </Button>
@@ -225,11 +228,11 @@ export function InboundAuditPage() {
 
       <PageSurface>
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab((v ?? 'pending') as typeof activeTab); setSelectedIds([]); }}>
-          <TabsList className="rounded-2xl border border-border/70 bg-muted/30 p-1">
-            <TabsTrigger value="pending">{t('inboundAudit.pending')}</TabsTrigger>
-            <TabsTrigger value="approved">{t('inboundAudit.approved')}</TabsTrigger>
-            <TabsTrigger value="rejected">{t('inboundAudit.rejected')}</TabsTrigger>
-            <TabsTrigger value="all">{t('inboundAudit.all')}</TabsTrigger>
+          <TabsList className="rounded-2xl border border-border/70 bg-muted/30 p-1" data-testid="inbound-audit-tabs">
+            <TabsTrigger value="pending" data-testid="inbound-audit-tab-pending">{t('inboundAudit.pending')}</TabsTrigger>
+            <TabsTrigger value="approved" data-testid="inbound-audit-tab-approved">{t('inboundAudit.approved')}</TabsTrigger>
+            <TabsTrigger value="rejected" data-testid="inbound-audit-tab-rejected">{t('inboundAudit.rejected')}</TabsTrigger>
+            <TabsTrigger value="all" data-testid="inbound-audit-tab-all">{t('inboundAudit.all')}</TabsTrigger>
           </TabsList>
           <TabsContent value={activeTab} className="mt-4">
             {isLoading ? (
@@ -237,7 +240,7 @@ export function InboundAuditPage() {
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : (
-              <DataTable columns={columns} data={items} />
+              <DataTable columns={columns} data={items} testId="inbound-audit-table" emptyStateTestId="inbound-audit-empty" rowTestId={(item) => `inbound-audit-row-${item.id}`} />
             )}
           </TabsContent>
         </Tabs>

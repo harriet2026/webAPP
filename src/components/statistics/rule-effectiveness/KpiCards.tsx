@@ -29,15 +29,6 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
 
   const cards = [
     {
-      key: 'observingCount',
-      icon: Eye,
-      value: data?.observing_count,
-      delta: data?.observing_count_delta,
-      accent: 'bg-info/10',
-      iconColor: 'text-info',
-      valueColor: '',
-    },
-    {
       key: 'totalHits',
       icon: Eye,
       value: data?.total_hits,
@@ -68,7 +59,11 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="rule-effectiveness-kpi-cards">
+    <div className="flex flex-col gap-3" data-testid="rule-effectiveness-kpi-section">
+      <p className="text-xs text-muted-foreground" data-testid="rule-effectiveness-kpi-scope-hint">
+        {t('scopeHint')}
+      </p>
+      <div className="grid gap-4 md:grid-cols-3" data-testid="rule-effectiveness-kpi-cards">
       {cards.map((card) => {
         const Icon = card.icon;
         const deltaStr = formatDelta(card.delta);
@@ -81,7 +76,10 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
                 {isLoading ? (
                   <Skeleton className="h-8 w-16" />
                 ) : (
-                  <div className={`text-2xl font-bold tracking-tight ${card.valueColor}`}>
+                  <div
+                    className={`text-2xl font-bold tracking-tight ${card.valueColor}`}
+                    data-testid={`rule-effectiveness-kpi-value-${card.key}`}
+                  >
                     {card.value ?? 0}
                     {card.unit ? <span className="ml-1 text-sm font-normal text-muted-foreground">{card.unit}</span> : null}
                   </div>
@@ -107,6 +105,7 @@ export function KpiCards({ data, isLoading }: KpiCardsProps) {
           </Card>
         );
       })}
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-export function OverflowCell({ text }: { text: string }) {
+export function OverflowCell({ text, triggerClassName = 'max-w-[200px]' }: { text: string; triggerClassName?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
 
@@ -22,7 +22,7 @@ export function OverflowCell({ text }: { text: string }) {
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<span ref={ref} className="block truncate cursor-default max-w-[200px]" />}>
+      <TooltipTrigger render={<span ref={ref} className={`block truncate cursor-default ${triggerClassName}`} />}>
         {text}
       </TooltipTrigger>
       {isOverflowing && (

@@ -803,6 +803,30 @@ describe('AnalysisSection (v2 spec alignment)', () => {
     expect(routerPush).toHaveBeenLastCalledWith('/security/pipeline?module=attachment');
   });
 
+  it('GT-14294：钓鱼邮件处置依据和命中模块隐藏决策快照身份', () => {
+    const phishDecision = {
+      policy_key: 'AI-PHISH',
+      rule_name: 'phish_policy_decision',
+      rule_id: 'AI-PHISH:phish_policy_decision:5eb82441e799e7dc789ba9f1b8f79dcec4787807fecb14e55115f23800787c6b:risk-v19',
+      action: 'quarantine',
+      recipients: ['victim@company.com'],
+      effective_for: ['victim@company.com'],
+    };
+    const detail = baseDetail({ disposal_basis: { ...phishDecision, modules: [phishDecision] } });
+
+    render(wrap(<TestAnalysisSection detail={detail} aiEnabled events={[]} />));
+
+    for (const testId of ['analysis-disposal-basis', 'analysis-hit-module-item']) {
+      const section = screen.getByTestId(testId);
+      expect(section).toHaveTextContent('钓鱼邮件检测智能体');
+      expect(section).toHaveTextContent('钓鱼邮件处置策略');
+      expect(section).toHaveTextContent('AI 判定为钓鱼邮件');
+      expect(section).not.toHaveTextContent('phish_policy_decision');
+      expect(section).not.toHaveTextContent('risk-v19');
+      expect(section).not.toHaveTextContent('5eb82441');
+    }
+  });
+
   it('renders all 5 stage cards default-expanded (gap 2.1/2.2)', () => {
     const authoritative = baseAnalysis();
     authoritative.stages[1].status = 'suspicious';

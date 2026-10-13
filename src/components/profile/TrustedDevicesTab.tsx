@@ -60,7 +60,7 @@ export function TrustedDevicesTab() {
     <Card className="p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-base font-medium">{t('tabs.devices')}</h3>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground" data-testid="profile-trusted-devices-count">
           {t('trustedDevices.count', { n: items.length })}
         </span>
       </div>
@@ -69,7 +69,7 @@ export function TrustedDevicesTab() {
       {isLoading ? (
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border" data-testid="profile-trusted-devices-table">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
@@ -85,7 +85,7 @@ export function TrustedDevicesTab() {
             <TableBody>
               {items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground" data-testid="profile-trusted-devices-empty">
                     {t('trustedDevices.empty')}
                   </TableCell>
                 </TableRow>

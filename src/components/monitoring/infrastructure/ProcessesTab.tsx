@@ -30,8 +30,9 @@ import {
 import { EmptyState, DegradedBanner } from './StateBanners';
 import { useProcesses, useRuntime, useDockerContainers, useRuntimeTrend } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
-import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
+import { createTimeAxisFormatter, createTimeTooltipFormatter } from '@/lib/monitoring/chart-time';
 import type { TimeRange } from '@/types/monitoring';
+import { formatMetric, formatMetricBytes } from './format_metric';
 
 interface ProcessesTabProps {
   node: string;
@@ -174,20 +175,22 @@ function buildChartOption(
   services.forEach((s) => seriesMap[s]?.forEach((p) => tsSet.add(p.ts)));
   const tsArr = Array.from(tsSet).sort();
   if (tsArr.length === 0) return null;
+  const formatTooltipTime = createTimeTooltipFormatter(locale);
 
   return {
-    tooltip: { trigger: 'axis' as const },
+    tooltip: { trigger: 'axis' as const, valueFormatter: (value: unknown) => `${formatMetric(value, locale, yLabel ? 2 : 0)}${yLabel ? ` ${yLabel}` : ''}` },
     legend: { data: services.map(serviceLabel), show: false },
     grid: { left: 56, right: 16, top: 12, bottom: 32 },
     xAxis: {
       type: 'category' as const,
       data: tsArr,
+      axisPointer: { label: { formatter: ({ value }: { value: string | number }) => formatTooltipTime(String(value)) } },
       axisLabel: {
         showMaxLabel: true,
         formatter: createTimeAxisFormatter(locale, range === '7d'),
       },
     },
-    yAxis: { type: 'value' as const, min: 0, axisLabel: { formatter: `{value} ${yLabel}` } },
+    yAxis: { type: 'value' as const, min: 0, minInterval: yLabel ? undefined : 1, axisLabel: { formatter: (value: number) => `${formatMetric(value, locale, yLabel ? 2 : 0)}${yLabel ? ` ${yLabel}` : ''}` } },
     series: services.map((svc) => {
       const ptMap = new Map((seriesMap[svc] ?? []).map((p) => [p.ts, p.value]));
       return {
@@ -551,7 +554,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
                     />
                   </svg>
                   <div className={`absolute inset-0 flex items-center justify-center text-xl font-bold ${color}`}>
-                    {pct}%
+                    {formatMetric(pct, locale, 1)}%
                   </div>
                 </div>
                 <div className="text-sm text-muted-foreground">
@@ -595,7 +598,7 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
                       {(p.count ?? 0) > 1 ? t('processes.procCount', { count: p.count ?? 0 }) : `PID: ${p.pid}`}
                     </TableCell>
                     <TableCell className="text-right">
-                      {p.memory > 0 ? `${(p.memory / 1024 / 1024).toFixed(1)} MB` : '-'}
+                      {p.memory > 0 ? formatMetricBytes(p.memory, locale) : '-'}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -628,8 +631,8 @@ export function ProcessesTab({ node, range }: ProcessesTabProps) {
                 {services.map((s) => (
                   <TableRow key={s.name} data-testid={`monitor-infrastructure-runtime-row-${s.name}`}>
                     <TableCell>{serviceLabel(s.name)}</TableCell>
-                    <TableCell className="text-right">{s.goroutine}</TableCell>
-                    <TableCell>{(s.heap_alloc / 1024 / 1024).toFixed(1)} MB</TableCell>
+                    <TableCell className="text-right">{formatMetric(s.goroutine, locale, 0)}</TableCell>
+                    <TableCell>{formatMetricBytes(s.heap_alloc, locale)}</TableCell>
                     <TableCell>{s.uptime}</TableCell>
                   </TableRow>
                 ))}

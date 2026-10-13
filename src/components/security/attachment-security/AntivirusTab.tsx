@@ -1,5 +1,6 @@
 'use client';
 
+import { ObservationModeControl } from '../ObservationModeControl';
 import { Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -9,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { AntivirusServerFields, AntivirusStatusSection } from './antivirus-engine-fields';
 import type { AttachmentAction, AntivirusActionConfig, AntivirusConfig, Direction } from '@/types/attachment-security';
 
-export const DEFAULT_ANTIVIRUS_CONFIG: AntivirusConfig = { host: '', port: '' };
+export const DEFAULT_ANTIVIRUS_CONFIG: AntivirusConfig = { host: '', port: '', observe_mode: false };
 export const DEFAULT_ANTIVIRUS_ACTIONS: AntivirusActionConfig = {
   virus_action: 'quarantine',
   timeout_action: 'proceed',
@@ -56,6 +57,13 @@ export function AntivirusTab({
 
   return (
     <div className="space-y-6" data-testid="antivirus-tab" data-direction={direction}>
+      <ObservationModeControl
+        checked={config.observe_mode ?? false}
+        onChange={(observe_mode) => onChange({ ...config, observe_mode })}
+        testId="antivirus-observe-mode-switch"
+        title={t('observation.antivirus.title')}
+        description={t('observation.antivirus.description')}
+      />
       {!hidePlatformConfig && (
         <>
           <AntivirusServerFields config={config} onChange={onChange} />

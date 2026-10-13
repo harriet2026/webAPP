@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   emptyRuleForm,
+  advancedRuleObservationUpdate,
   ruleToForm,
   formToCreateRequest,
   formToUpdateRequest,
@@ -428,5 +429,30 @@ describe('round trip: ruleToForm(formToCreateRequest-shaped Rule) ≈ original f
     const req = formToCreateRequest(f, fieldDefs);
     const back = ruleToForm(requestToFakeRule(req));
     expect(back.addons).toEqual(f.addons);
+  });
+});
+
+
+describe('advanced rules native observation', () => {
+  it.each(['accept', 'proceed', 'audit', 'quarantine', 'discard'] as const)('round-trips observation while retaining the %s configuration', (primaryAction) => {
+    const form = { ...emptyRuleForm(), primaryAction, observeMode: true, conditions: leafConditions() };
+    const payload = formToCreateRequest(form, fieldDefs);
+    expect(payload.action).toBe('observe');
+    expect(payload.metadata).toMatchObject({ primary_action: primaryAction, observe_mode: true });
+    expect(payload).not.toHaveProperty('observe_mode');
+    const saved = baseRule({ action: payload.action, metadata: JSON.stringify(payload.metadata) });
+    const restored = ruleToForm(saved);
+    expect(restored.observeMode).toBe(true);
+    expect(restored.primaryAction).toBe(primaryAction);
+    expect(formToUpdateRequest({ ...restored, observeMode: false }, fieldDefs)).toMatchObject({
+      action: primaryAction, metadata: { primary_action: primaryAction, observe_mode: false },
+    });
+  });
+
+  it('list toggles keep addons and unknown metadata without rewriting the condition tree', () => {
+    const metadata = { feature: 'advanced_rules', primary_action: 'proceed', addons: [{ type: 'tag', params: { tag: 'keep' } }], future: true };
+    const rule = baseRule({ action: 'proceed', metadata: JSON.stringify(metadata) });
+    expect(advancedRuleObservationUpdate(rule, true)).toEqual({ action: 'observe', metadata: { ...metadata, observe_mode: true } });
+    expect(advancedRuleObservationUpdate(baseRule({ metadata: '{}' }), true)).toBeNull();
   });
 });

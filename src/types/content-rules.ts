@@ -55,6 +55,7 @@ export interface ContentRuleRuleView {
 }
 
 export interface ContentRuleFormData {
+  observe_mode?: boolean;
   name: string;
   description?: string;
   priority: number;

@@ -106,6 +106,31 @@ describe('命中模块清单（GT-12727 §7.10）', () => {
     expect(modules).toHaveTextContent('生效：qfliu@dm163.cacter.com');
   });
 
+  it('GT-14326：AUTH 观察命中同时展示实际动作与原配置动作', () => {
+    const detail = detailWithModules();
+    detail.action = 'accept';
+    detail.status = 'delivered';
+    detail.disposal_basis = {
+      modules: [{
+        policy_key: 'AUTH',
+        rule_name: 'sysrule:auth_spoofing_format_mailfrom_invalid',
+        rule_id: 'config:antispam:tenant:1:format_mailfrom_invalid:abc123',
+        action: 'observe',
+        hit_values: { configured_action: 'reject' },
+        recipients: ['a@x.com'],
+        effective_for: ['a@x.com'],
+      }],
+    };
+
+    render(wrap(<AnalysisSection detail={detail} aiEnabled events={[]} />));
+
+    const hitModule = screen.getByTestId('analysis-hit-module-item');
+    expect(hitModule).toHaveTextContent('无效MAIL FROM');
+    expect(hitModule).toHaveTextContent('观察');
+    expect(within(hitModule).getByTestId('analysis-hit-module-configured-action'))
+      .toHaveTextContent('原配置动作：拒收');
+  });
+
   it('GT-13660：四项配置化认证命中使用配置页名称，不展示内部标识', () => {
     const detail = detailWithModules();
     const checks = [

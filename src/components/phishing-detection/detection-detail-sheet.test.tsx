@@ -11,9 +11,15 @@ import { cliMockDetail } from '../../../tests/fixtures/phish-ui-real-data/mock-d
 
 const getDetail = vi.fn();
 const recipientStatus = vi.fn();
+const disposalDetail = vi.fn();
+vi.mock('@/components/email-disposal/detail-modal', () => ({
+  DetailModal: (props: unknown) => { disposalDetail(props); return <div data-testid="disposal-detail-stub" />; },
+}));
+const request = vi.fn().mockRejectedValue(new Error('mail log unavailable'));
 vi.mock('@/lib/api/phishing-detection', () => ({ getDetectionLogDetail: (...args: unknown[]) => getDetail(...args) }));
-vi.mock('@/lib/api/client', () => ({ useApiRequest: () => ({ apiRequest: vi.fn(), effectiveTenantId: 2 }) }));
+vi.mock('@/lib/api/client', async (load) => ({ ...await load<typeof import('@/lib/api/client')>(), useApiRequest: () => ({ apiRequest: request, effectiveTenantId: 2 }) }));
 vi.mock('./access', () => ({ usePhishingAccess: () => ({ canEdit: true, readOnly: false }) }));
+vi.mock('@/contexts/auth-context', () => ({ useAuth: () => ({ isSystemAdmin: false }) }));
 vi.mock('@/components/email-disposal/components/recipient-status', () => ({
   RecipientStatus: (props: unknown) => { recipientStatus(props); return <div data-testid="recipient-status-stub" />; },
 }));
@@ -38,13 +44,39 @@ function renderDetail(value: DetectionLogDetail, locale = 'zh', messages: unknow
 }
 
 describe('DetectionDetailSheet disposal capability chain', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => { vi.clearAllMocks(); request.mockRejectedValue(new Error('mail log unavailable')); });
+
+  it('GT-14345: shows actual audit separately from quarantine policy in the drawer', async () => {
+    renderDetail({ ...detail, summary: { ...detail.summary, task_status: 'completed', policy_disposition: 'quarantine',
+      recipient_dispositions: [{ recipient: 'outside@example.com', final_action: 'audit', status: 'delivered' }],
+    } });
+    expect(await screen.findByTestId('phishing-detail-actual-disposition')).toHaveTextContent('审核');
+    expect(screen.getByTestId('phishing-detail-actual-disposition')).not.toHaveTextContent('隔离');
+    expect(screen.getByTestId('phishing-detail-disposition')).toHaveTextContent('策略动作：隔离');
+    expect(screen.queryByRole('button', { name: '查看处置过程' })).not.toBeInTheDocument();
+  });
+
+  it('GT-14345: opens the associated disposal history read-only', async () => {
+    request.mockResolvedValue({ id: 17, message_uuid: 'message-17', sender: 'sender@example.com', recipients: ['a@example.com'], subject: 'audit mail', recipient_dispositions: [] });
+    renderDetail({ ...detail, summary: { ...detail.summary, message_uuid: 'message-17' } });
+    fireEvent.click(await screen.findByRole('button', { name: '查看处置过程' }));
+    await screen.findByTestId('disposal-detail-stub');
+    expect(disposalDetail.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ mailLogId: 17, open: true, readOnly: true, isTenantAdmin: true }));
+  });
+
+  it('GT-14345: does not expose history for a mismatched mail identity', async () => {
+    request.mockResolvedValue({ id: 17, message_uuid: 'other-message' });
+    renderDetail({ ...detail, summary: { ...detail.summary, message_uuid: 'message-17' } });
+    await screen.findByTestId('phishing-recipient-actions');
+    expect(screen.queryByRole('button', { name: '查看处置过程' })).not.toBeInTheDocument();
+    expect(disposalDetail).not.toHaveBeenCalled();
+  });
 
   it('keeps link detection, recipient disposal, config and run log in the CLI preview drawer', async () => {
     renderDetail(cliMockDetail);
     await screen.findByTestId('phishing-model-summary');
     expect(screen.getByTestId('phishing-url-findings')).toHaveTextContent('https://sakura-cat3.com/');
-    expect(screen.getByTestId('phishing-recipient-actions')).toBeInTheDocument();
+    expect(await screen.findByTestId('phishing-recipient-actions')).toBeInTheDocument();
     expect(recipientStatus.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({
       recipient_dispositions: cliMockDetail.summary.recipient_dispositions,
       mailLogId: cliMockDetail.summary.mail_log_id,
@@ -52,7 +84,7 @@ describe('DetectionDetailSheet disposal capability chain', () => {
     fireEvent.click(screen.getByTestId('phishing-detail-config-snapshot'));
     expect(screen.getByTestId('phishing-detail-config-snapshot-body')).toHaveTextContent('risk_policy');
     fireEvent.click(screen.getByTestId('phishing-detail-run-log'));
-    expect(screen.getByTestId('phishing-detail-export')).toBeInTheDocument();
+    expect(screen.queryByTestId('phishing-detail-export')).not.toBeInTheDocument();
     expect(screen.getAllByTestId(/^phishing-detail-step-/)).toHaveLength(9);
     expect(screen.getByTestId('phishing-detail-step-5')).toHaveTextContent('没有 Microsoft 品牌标识');
   });
@@ -61,7 +93,7 @@ describe('DetectionDetailSheet disposal capability chain', () => {
     renderDetail(value);
     expect(await screen.findByTestId('phishing-policy-risk')).toHaveTextContent(zh.phishingDetection.riskLevel.medium);
     expect(screen.getByTestId('phishing-model-summary')).toHaveTextContent(value.investigation!.result!.summary!);
-    expect(screen.getByTestId('phishing-mail-context')).toHaveTextContent(value.summary.sender);
+    expect(await screen.findByTestId('phishing-mail-context')).toHaveTextContent(value.summary.sender);
     expect(recipientStatus.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({
       mailLogId: value.summary.mail_log_id,
       recipient_dispositions: value.summary.recipient_dispositions,
@@ -77,6 +109,21 @@ describe('DetectionDetailSheet disposal capability chain', () => {
     await waitFor(() => expect(recipientStatus).toHaveBeenCalled());
     expect(recipientStatus.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ mailLogId: 17, readOnly: true, recipient_dispositions: detail.summary.recipient_dispositions }));
     expect(groupRecipientDispositions(detail.summary.recipient_dispositions)[0].actions).toEqual(['deliver', 'discard']);
+  });
+
+  it('GT-13173: renders the drawer when a legacy record carries recipients: null', async () => {
+    // Recipients is typed string[], but the Go DTO has no omitempty and a nil slice
+    // serializes to null; the drawer must keep rendering instead of throwing on join().
+    renderDetail({ ...detail, summary: { ...detail.summary, recipients: null as unknown as string[] } });
+    const context = await screen.findByTestId('phishing-mail-context');
+    expect(context).toHaveTextContent(detail.summary.sender);
+    expect(screen.getByTestId('phishing-mail-context-recipients')).toHaveTextContent('—');
+    expect(screen.getByTestId('phishing-recipient-actions')).toBeInTheDocument();
+  });
+
+  it('GT-13173: lists every recipient in the mail context', async () => {
+    renderDetail({ ...detail, summary: { ...detail.summary, recipients: ['a@example.com', 'b@example.com'] } });
+    expect(await screen.findByTestId('phishing-mail-context-recipients')).toHaveTextContent('a@example.com, b@example.com');
   });
 
   it('relies on the shared status chain to expose no operations for terminal recipients', async () => {
@@ -104,6 +151,22 @@ describe('DetectionDetailSheet disposal capability chain', () => {
     expect(screen.getByText(/2026\/08\/18/)).toBeInTheDocument();
   });
 
+  it.each([
+    ['inbound', '入站', 'Inbound'],
+    ['outbound', '外发', 'Outbound'],
+    ['internal', '域内', 'Internal'],
+    [null, '未知', 'Unknown'],
+  ] as const)('renders public direction %s in both locales', async (direction, zhLabel, enLabel) => {
+    const localized = structuredClone(detail);
+    localized.summary.direction = direction;
+    renderDetail(localized);
+    expect(await screen.findByTestId('phishing-mail-context')).toHaveTextContent(zhLabel);
+    const english = structuredClone(detail);
+    english.summary.direction = direction;
+    renderDetail(english, 'en', en);
+    await waitFor(() => expect(screen.getAllByTestId('phishing-mail-context').at(-1)).toHaveTextContent(enLabel));
+  });
+
   it('keeps historical evidence, URL findings and steps independent from report absence', async () => {
     renderDetail({ ...detail, investigation: {
       status: 'completed',
@@ -122,28 +185,73 @@ describe('DetectionDetailSheet disposal capability chain', () => {
     expect(screen.getByText('Earlier result without a structured report.')).toBeInTheDocument();
     expect(screen.queryByTestId('assessment-factor')).not.toBeInTheDocument();
   });
-  it('exports report failure reasons alongside the retained business analysis', async () => {
+  it('loads the associated original and lazy preview while respecting unavailable EML and redelivery', async () => {
+    const value = structuredClone(detail);
+    value.summary.task_status = 'completed';
+    value.summary.message_uuid = 'same-message';
+    const mail = { id: 17, message_uuid: 'same-message', sender: value.summary.sender, recipients: value.summary.recipients,
+      subject: value.summary.subject, created_at: value.summary.sidelined_at, direction: null, action: 'accept', status: 'delivered',
+      content: 'retained original body', eml_available: false, redeliver_available: false,
+      redeliver_unavailable_reason: 'storage_unavailable', recipient_dispositions: [{ recipient: 'a@example.com', final_action: 'accept', status: 'delivered' }] };
+    request.mockImplementation(async (path: string) => path.endsWith('/preview') ? { headers: { Subject: 'retained header' }, text_body: 'preview body' } : mail);
+    renderDetail(value);
+    expect(await screen.findByTestId('phishing-mail-original')).toHaveTextContent('retained original body');
+    expect(screen.getByTestId('email-disposal-overview-recipient-action-redeliver')).toBeDisabled();
+    expect(screen.getByTestId('email-disposal-workbench-download-eml')).toBeDisabled();
+    expect(request).not.toHaveBeenCalledWith('/mail-logs/17/preview');
+    fireEvent.click(screen.getByTestId('email-disposal-workbench-content-view-raw'));
+    expect(await screen.findByText(/Subject: retained header/)).toBeInTheDocument();
+  });
+
+  it.each([{ id: 18, message_uuid: 'same-message' }, { id: 17, message_uuid: 'different-message' }])('falls back instead of showing an unrelated mail original: %j', async (identity) => {
+    const value = structuredClone(detail);
+    value.summary.message_uuid = 'same-message';
+    request.mockResolvedValue({ ...identity, content: 'unrelated original body' });
+    renderDetail(value);
+    expect(await screen.findByTestId('phishing-recipient-actions')).toBeInTheDocument();
+    expect(screen.queryByTestId('phishing-mail-original')).not.toBeInTheDocument();
+    expect(screen.queryByText('unrelated original body')).not.toBeInTheDocument();
+  });
+
+  it('GT-14290: shows readable failure text and keeps the raw codes only in the run log', async () => {
+    const value: DetectionLogDetail = {
+      ...detail,
+      summary: { ...detail.summary, status: 'reinjected', task_status: 'failed', failure_reason: 'analysis_not_checked' },
+      investigation: { status: 'failed', error_message: 'analysis runtime rejected the invocation', steps: [] },
+    };
+    renderDetail(value);
+    const investigation = await screen.findByTestId('phishing-investigation');
+    const context = await screen.findByTestId('phishing-mail-context');
+    expect(context).toHaveTextContent(zh.phishingDetection.detail.failureReasonValue.analysis_not_checked);
+    expect(investigation).toHaveTextContent(zh.phishingDetection.detail.analysisFailed);
+    expect(investigation).toHaveTextContent('未判定');
+    for (const raw of ['analysis_not_checked', 'analysis runtime rejected the invocation']) {
+      expect(context).not.toHaveTextContent(raw);
+      expect(investigation).not.toHaveTextContent(raw);
+    }
+    fireEvent.click(screen.getByTestId('phishing-detail-run-log'));
+    const diagnostic = screen.getByTestId('phishing-detail-diagnostic');
+    expect(diagnostic).toHaveTextContent('analysis runtime rejected the invocation');
+    expect(diagnostic).toHaveTextContent('analysis_not_checked');
+  });
+
+  it('GT-14290: falls back to a generic sentence for an unknown failure code', async () => {
+    renderDetail({ ...detail, summary: { ...detail.summary, failure_reason: 'brand_new_reason' } });
+    const context = await screen.findByTestId('phishing-mail-context');
+    expect(context).toHaveTextContent(zh.phishingDetection.detail.failureReasonValue.decision_undetermined);
+    expect(context).not.toHaveTextContent('brand_new_reason');
+  });
+
+  it('keeps report failure reasons and business analysis visible after removing JSON export', async () => {
     const value: DetectionLogDetail = { ...detail, investigation: { status: 'completed', result: {
       verdict: 'phishing_suspected', summary: 'Independent business result',
       assessment_report_status: 'not_recorded', assessment_report_reason: 'report_reference_invalid',
       assessment_failure: { schema_version: 2, reason: 2 },
     } } };
-    const create = vi.fn((_blob: Blob) => 'blob:assessment-export');
-    const revoke = vi.fn();
-    vi.stubGlobal('URL', Object.assign(class extends URL {}, { createObjectURL: create, revokeObjectURL: revoke }));
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
-    try {
-      renderDetail(value, 'en', en);
-      expect(await screen.findByText(en.assessment.reasons.report_reference_invalid)).toBeInTheDocument();
-      fireEvent.click(screen.getByTestId('phishing-detail-run-log'));
-      fireEvent.click(screen.getByTestId('phishing-detail-export'));
-      const blob = create.mock.calls[0]?.[0] as unknown as Blob;
-      const text = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsText(blob);
-      });
-      expect(JSON.parse(text).investigation.result).toEqual(value.investigation!.result);
-      expect(click).toHaveBeenCalledOnce();
-    } finally { click.mockRestore(); vi.unstubAllGlobals(); }
+    renderDetail(value, 'en', en);
+    expect(await screen.findByText(en.assessment.reasons.report_reference_invalid)).toBeInTheDocument();
+    expect(screen.getByText('Independent business result')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('phishing-detail-run-log'));
+    expect(screen.queryByTestId('phishing-detail-export')).not.toBeInTheDocument();
   });
-
 });

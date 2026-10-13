@@ -130,6 +130,7 @@ function draftFromEffectiveDocument(document: Record<string, unknown>): Attachme
     } as BasicLimitConfig,
     antivirus: {
       ...DEFAULT_ANTIVIRUS_CONFIG,
+      observe_mode: antivirus.observe_mode === true,
       host: String(antivirus.host ?? ''),
       port: String(antivirus.port ?? ''),
     },
@@ -140,6 +141,7 @@ function draftFromEffectiveDocument(document: Record<string, unknown>): Attachme
     } as AntivirusActionConfig,
     image: {
       ...DEFAULT_IMAGE_DETECT_CONFIG,
+      observe_mode: image.observe_mode === true,
       ocr_mode: image.ocr_mode === 'deep' ? 'light' : image.ocr_mode,
       ocr_max_count: image.ocr_max_count,
       qr_mode: image.qr_mode,
@@ -166,6 +168,7 @@ function draftFromEffectiveDocument(document: Record<string, unknown>): Attachme
     } as ImageDetectActionConfig,
     encrypted: {
       ...DEFAULT_ENCRYPTED_CONFIG,
+      observe_mode: encrypted.observe_mode === true,
       detect_mode: encrypted.detect_mode,
       extract_password_from_body: encrypted.extract_password_from_body,
       extract_password_from_filename: encrypted.extract_password_from_filename,
@@ -199,6 +202,9 @@ function configurationValues(draft: AttachmentDraft, includeAntivirusEndpoint: b
     'basic_limit.receive.danger_ext_list': csvList(draft.basic.danger_ext_list),
     'basic_limit.receive.mime_mismatch_check': draft.basic.mime_mismatch_check,
     'basic_limit.receive.mime_mismatch_action': draft.basic.mime_mismatch_action,
+    'antivirus.observe_mode': draft.antivirus.observe_mode ?? false,
+    'image_detection.observe_mode': draft.image.observe_mode ?? false,
+    'encrypted.observe_mode': draft.encrypted.observe_mode ?? false,
     'antivirus.virus_action': draft.antivirusActions.virus_action,
     'antivirus.timeout_action': draft.antivirusActions.timeout_action,
     'image_detection.ocr_mode': draft.image.ocr_mode,

@@ -306,7 +306,7 @@ export function RecipientStatus({
                     )}
                   </TableCell>
                 )}
-                <TableCell className="text-xs max-w-[220px]">
+                <TableCell className="text-xs max-w-[220px] whitespace-normal">
                   {showsDeliveryDetail ? (
                     <div className="space-y-1.5">
                       {g.dispositions.map((d, index) => (

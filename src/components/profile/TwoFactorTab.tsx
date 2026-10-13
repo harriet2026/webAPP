@@ -195,7 +195,7 @@ export function TwoFactorTab() {
                         {m === 'sms' ? t('twoFactor.sms') : t('twoFactor.email')}
                       </label>
                       {disabled && (
-                        <span className="text-xs text-muted-foreground">
+                        <span data-testid="profile-2fa-sms-unavailable" className="text-xs text-muted-foreground">
                           （{t('twoFactor.smsUnavailable')}）
                         </span>
                       )}

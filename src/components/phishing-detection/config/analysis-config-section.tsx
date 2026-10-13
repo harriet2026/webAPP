@@ -88,7 +88,7 @@ export function AnalysisConfigSection({ readOnly = false }: { readOnly?: boolean
         {query.isLoading ? <p className="text-sm text-muted-foreground">{t('loading')}</p> : query.isError || !displayed ? <p className="text-sm text-destructive">{query.isError ? apiErrorMessage(query.error, t('loadFailed')) : t('loadFailed')}</p> : FIELDS.map((field) => (
           <div key={field} className="flex items-start justify-between gap-3 rounded-lg border border-border p-4">
             <div><p className="text-sm font-medium">{t(`${field}.title`)}</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{t(`${field}.description`)}</p></div>
-            <Switch checked={displayed[field]} disabled={readOnly || mutation.isPending || (field === 'netdisk_extract' && !displayed.netdisk_domain)} onCheckedChange={(checked) => update(field, checked)} />
+            <Switch checked={displayed[field]} disabled={readOnly || mutation.isPending || (field === 'netdisk_extract' && !displayed.netdisk_domain)} onCheckedChange={(checked) => update(field, checked)} data-testid={`phishing-analysis-${field.replace(/_/g, '-')}`} />
           </div>
         ))}
       </CardContent>

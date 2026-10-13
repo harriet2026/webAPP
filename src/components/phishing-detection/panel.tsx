@@ -11,10 +11,10 @@ import { usePhishingControl } from './control/use-phishing-control';
 
 export type PhishingAgentTab = 'overview' | 'config';
 
-export function PhishingAgentPanel({ initialTab = 'overview', configurationEnabled = true, hitRate = null }: {
+export function PhishingAgentPanel({ initialTab = 'overview', configurationEnabled = true, statsRefreshManaged = false }: {
   initialTab?: PhishingAgentTab;
   configurationEnabled?: boolean;
-  hitRate?: number | null;
+  statsRefreshManaged?: boolean;
 }) {
   const t = useTranslations('phishingDetection');
   const router = useRouter();
@@ -65,7 +65,7 @@ export function PhishingAgentPanel({ initialTab = 'overview', configurationEnabl
     </TabsList>
     {control.errorMessage ? <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive" data-testid="phishing-control-error">{control.errorMessage}</div> : null}
     {control.control && !control.enabled ? <div className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning-foreground dark:text-warning" data-testid="phishing-disabled-banner">{t('control.disabledBanner')}</div> : null}
-    <TabsContent value="overview" className="mt-0 flex-1 overflow-auto"><PhishingOverviewPage hitRate={hitRate} /></TabsContent>
+    <TabsContent value="overview" className="mt-0 flex-1 overflow-auto"><PhishingOverviewPage statsRefreshManaged={statsRefreshManaged} /></TabsContent>
     {configurationEnabled ? <TabsContent value="config" className="mt-0 flex-1 overflow-auto"><PhishingConfigPage openCreateSignal={openCreateSignal} /></TabsContent> : null}
   </Tabs>;
 }

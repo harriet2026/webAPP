@@ -144,7 +144,9 @@
     "ruleEffectivenessContext": {
       "label": "来自规则效能统计：",
       "back": "返回规则效能统计"
-    }
+    },
+    "observeMode": "观察模式",
+    "observeModeHint": "仅记录本策略命中，不执行本策略的处置及附加动作；后续规则照常处理。"
   },
   "ruleImportExport": {
     "trigger": "统一导入 / 导出",
@@ -4232,7 +4234,10 @@
     "statusAll": "全部状态",
     "statusEnabled": "已启用",
     "statusDisabled": "已禁用",
-    "loadFailed": "发信人过滤规则加载失败，请重试"
+    "loadFailed": "发信人过滤规则加载失败，请重试",
+    "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于发信人黑白名单模块，或当前账号无权访问。",
+    "observeMode": "观察模式",
+    "observeModeHelp": "启用后规则仅记录命中情况，不实际执行动作，用于验证规则效果"
   },
   "personalFilter": {
     "title": "用户黑白名单",
@@ -4492,7 +4497,9 @@
     "cardTooltipStrategy": "策略：内容规则",
     "cardTooltipActions": "动作：隔离、投递",
     "cardTooltipEffect": "影响：命中则隔离，邮件保留至隔离区",
-    "cardTooltipQuarantineHint": "被隔离邮件可在邮件隔离模块查看"
+    "cardTooltipQuarantineHint": "被隔离邮件可在邮件隔离模块查看",
+    "observeMode": "观察模式",
+    "observeModeHint": "启用后规则仅记录命中情况，不实际执行拦截/隔离等动作，用于验证规则效果"
   },
   "authSpoofing": {
     "title": "认证仿冒检测",
@@ -4805,7 +4812,8 @@
       "priority": "优先级",
       "status": "状态",
       "modified": "修改时间",
-      "operations": "操作"
+      "operations": "操作",
+      "observeMode": "观察模式"
     },
     "direction": {
       "inbound": "接收",
@@ -4938,7 +4946,8 @@
       "relationAnd": "AND（同时满足）",
       "relationOr": "OR（任一满足）",
       "conditionCount": "已添加 {count}/4",
-      "threshold": "阈值"
+      "threshold": "阈值",
+      "observeMode": "观察模式"
     },
     "preview": {
       "title": "当前配置效果",
@@ -5091,7 +5100,9 @@
       "typeSender": "发信人群组",
       "typeIp": "IP 群组",
       "typeOrg": "组织群组"
-    }
+    },
+    "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于发信行为管控模块，或当前账号无权访问。",
+    "toggleObserveMode": "切换规则“{name}”的观察模式"
   },
   "attachmentSecurity": {
     "title": "附件安全检测",
@@ -5354,6 +5365,20 @@
       "lnkToUrl": "从 LNK 中提取 URL 进行评估",
       "lnkAction": "LNK 可疑动作",
       "tnefUnwrap": "TNEF (winmail.dat) 自动解包"
+    },
+    "observation": {
+      "antivirus": {
+        "title": "反病毒引擎观察模式",
+        "description": "仅记录病毒和扫描超时命中，不执行本模块配置的处置动作。"
+      },
+      "image": {
+        "title": "图片识别观察模式",
+        "description": "仅记录 OCR 和二维码识别命中，不执行本模块配置的处置动作。"
+      },
+      "encrypted": {
+        "title": "加密附件观察模式",
+        "description": "仅记录解密失败命中，不执行本模块配置的处置动作。"
+      }
     }
   },
   "urlProtection": {
@@ -5559,7 +5584,8 @@
       "proceed": "进行下一步",
       "quarantine": "隔离",
       "audit": "审核",
-      "discard": "丢弃"
+      "discard": "丢弃",
+      "reject": "阻断"
     },
     "markConfig": {
       "title": "进行下一步的附加标记",
@@ -5617,7 +5643,12 @@
     "loadFail": "加载失败：{error}",
     "loadRetry": "重试",
     "copyDone": "已复制到 {directions} 方向，请保存后生效",
-    "copyNoChange": "目标方向配置与当前方向一致，无需修改"
+    "copyNoChange": "目标方向配置与当前方向一致，无需修改",
+    "observeMode": {
+      "label": "观察模式",
+      "observing": "观察模式",
+      "hint": "启用后命中仅记录和统计，不执行当前配置的处置动作"
+    }
   },
   "similarDetection": {
     "title": "相似邮件与主题检测",
@@ -5998,6 +6029,7 @@
       "policyClear": "清空处置依据",
       "platformManagedPolicy": "平台管控策略",
       "policyStages": {
+        "0": "邮件准入",
         "1": "连接层",
         "2": "身份层",
         "3": "内容层",
@@ -6691,6 +6723,7 @@
         "platformPolicyListReason": "平台管控策略拦截",
         "basisScope": "适用范围",
         "hitModules": "命中模块",
+        "configuredAction": "原配置动作：{action}",
         "hitModulesHint": "动作实际作用于至少一个收件人的模块。仅条件匹配但动作未作用于任何收件人的终止候选规则不计为命中。",
         "effectiveFor": "生效：{list}",
         "matchedOnlyFor": "仅命中：{list}"
@@ -6774,10 +6807,7 @@
     "ruleEffectivenessContext": {
       "label": "来自规则效能统计：",
       "observedSince": "统计时间：{date}",
-      "back": "返回规则效能统计",
-      "counts": "命中 {hits} 份，涉及 {messages} 封邮件，其中 {missing} 封日志不可用。",
-      "matches": "查看命中收件人事实（当前页，最多 100 条）",
-      "orphans": "查看日志不可用的命中事实（当前页，最多 100 条）"
+      "back": "返回规则效能统计"
     }
   },
   "advancedRulesFeature": {
@@ -7060,7 +7090,8 @@
       "sectionScope": "生效范围",
       "sectionValidity": "有效期设置",
       "sectionDescription": "备注说明",
-      "expiresAtHint": "留空=永久有效"
+      "expiresAtHint": "留空=永久有效",
+      "sectionObserveMode": "观察模式"
     },
     "cannotSave": {
       "name": "请填写规则名称",
@@ -7709,7 +7740,13 @@
       "columnConfig": "配置",
       "terminalNoAddons": "终结动作 —— 不执行附加策略。",
       "emptySummary": "尚未配置任何内容。"
-    }
+    },
+    "deepLinkLoading": "正在定位命中规则 {ruleId}…",
+    "observeMode": "观察模式",
+    "observeModeHint": "启用后规则仅记录命中情况，不实际执行处置动作，用于验证规则效果",
+    "enableObserveMode": "启用观察模式",
+    "disableObserveMode": "关闭观察模式",
+    "deepLinkUnavailable": "无法打开规则 {ruleId}：规则已删除、不属于高级过滤规则模块，或当前账号无权访问。"
   },
   "disposalSettings": {
     "pageTitle": "处置设置",
@@ -8514,6 +8551,9 @@
     }
   },
   "infrastructure": {
+    "fetchedAt": "最近成功获取时间",
+    "updateTimeHint": "当前子页面各数据块成功获取时间的最早值；刷新完成后更新，失败保留上次时间。不是指标采样时间。",
+    "fetchFailed": "数据获取失败",
     "title": "基础设施",
     "description": "系统基础设施监控",
     "selectNode": "选择节点",
@@ -8632,8 +8672,8 @@
         "error": "指标查询失败",
         "unsupported": "暂不支持此指标"
       },
-      "slowQueryFailed": "累计 SQL 统计获取失败，请稍后重试。",
-      "slowQueryUnsupported": "当前数据库暂不支持此 SQL 统计榜单。",
+      "slowQueryFailed": "所选节点的累计 SQL 统计获取失败，请检查该节点 API 和本地监控连接。",
+      "slowQueryUnsupported": "所选节点暂不支持本地 SQL 统计榜单。",
       "noSlowQueries": "暂无可见的已执行 SQL 统计条目",
       "lockWaitFailed": "锁等待数据获取失败，请稍后重试。",
       "lockWaitUnsupported": "当前数据库暂不支持锁等待监控。",
@@ -8658,10 +8698,23 @@
         "receiveOffset": "本地接收/应用偏移差",
         "redisOffset": "复制偏移差",
         "delay": "最大复制时间延迟",
+        "details": "观测详情",
         "dbScope": "所选节点的本地数据库复制观测，5分钟内有效，与历史时间范围无关。缺少新采样时不回退到主节点；未观测到副本不代表已确认单机部署。",
         "redisScope": "所选节点最新成功采集。已连接副本不等于已确认全部同步完成。",
         "receiveScope": "被监测副本本地已接收到已应用的偏移差，不代表相对远端主节点的完整差距。",
-        "states": {"no_receiver":"未观测到 WAL 接收进程","streaming":"复制流运行中","syncing":"同步进行中","replicas_connected":"已连接副本","no_replicas":"未观测到副本","unknown":"同步状态未知","missing":"尚无复制数据","stale":"复制数据已过期","error":"复制状态查询失败","unsupported":"不支持此复制状态查询","down":"复制链路或探测失败"}
+        "states": {
+          "no_receiver": "未观测到 WAL 接收进程",
+          "streaming": "复制流运行中",
+          "syncing": "同步进行中",
+          "replicas_connected": "已连接副本",
+          "no_replicas": "未观测到副本",
+          "unknown": "同步状态未知",
+          "missing": "尚无复制数据",
+          "stale": "复制数据已过期",
+          "error": "复制状态查询失败",
+          "unsupported": "不支持此复制状态查询",
+          "down": "复制链路或探测失败"
+        }
       },
       "summary": {
         "connections": "当前连接数 / 上限",
@@ -8669,7 +8722,8 @@
         "redisScope": "连接数为所选节点当前普通客户端连接（含空闲、监控）；P99 为所选时段全部成功原生 PING 样本的近秩分位数。"
       },
       "slowQuery": "累计总耗时 Top5 SQL",
-      "sqlRankingScope": "按累计总耗时降序排列，展示 API 监控连接（OSG_MONITOR_DB_DSN）可见的统计条目；不受顶部节点及时间范围筛选影响，不设置慢阈值，也不限定业务 SQL。",
+      "sqlRankingScope": "节点 {node} 本地监控连接可见的 SQL 统计，按累计总耗时降序排列；随节点切换，不受历史时间范围筛选影响，不设置慢阈值，也不限定业务 SQL。",
+      "sqlRankingNodeUnavailable": "尚未取得所选节点的 SQL 榜单，请确认该节点 API 和本地监控连接已更新。",
       "sqlRankingTimeScope": "次数与耗时为统计条目当前保留的累计值；重置、重启或条目淘汰会影响累计范围，起点未知。统计更新时间不等于最后执行时间，也不能据此换算所选时段统计。",
       "statementIdentity": "统计身份",
       "queryId": "SQL 标识",
@@ -8687,7 +8741,7 @@
       "query": "查询语句",
       "avgMs": "累计平均耗时(ms)",
       "totalMs": "累计总耗时(ms)",
-      "lockWaitScope": "API 监控连接可见的当前等待锁请求，不受顶部节点和时间范围筛选影响。按语句开始时间从早到晚排列，未知时间置后；一条语句可能对应多个请求。",
+      "lockWaitScope": "节点 {node} 本地监控连接可见的当前等待锁请求，随节点切换，不受历史时间范围筛选影响。按语句开始时间从早到晚排列，未知时间置后；一条语句可能对应多个请求。",
       "lockWaitTimeBasis": "时长从 query_start 计算，包含开始等锁前的运行时间，不是精确锁等待时长。仅解析当前连接数据库中的关系名称，跨库及非关系锁显示原始标识；本列表未判定阻塞者。",
       "lockWaitCount": "显示 {shown} 条 / 共 {total} 个等待锁请求",
       "lockWaitCountUnknown": "当前接口未提供等待锁请求总数或完整排序信息。",
@@ -8896,6 +8950,10 @@
       "disabledBanner": "钓鱼检测智能体当前已关闭。检测日志仍可查看，但不会提交新的检测任务。"
     },
     "kpi": {
+      "totalQuarantined": "总隔离",
+      "totalReview": "总审核",
+      "totalRecalled": "总召回",
+      "totalRecallSuccess": "总召回成功",
       "todayDetected": "今日检测",
       "todayQuarantined": "今日隔离",
       "pendingReview": "待审核",
@@ -8934,6 +8992,7 @@
       "manual_hold": "人工暂扣",
       "unknown": "未知"
     },
+    "policyAction": "策略动作：{action}",
     "policyDisposition": {
       "proceed": "进行下一步",
       "audit": "审核",
@@ -8999,7 +9058,7 @@
       "urlPhishing": "钓鱼",
       "urlSuspicious": "可疑",
       "urlNormal": "正常",
-      "urlFindings": "链接研判明细",
+      "urlFindings": "链接检测明细",
       "urlFindingsTitle": "本封邮件的链接检测（{count} 个链接）",
       "urlLinks": "链接",
       "urlColumn": "URL",
@@ -9025,6 +9084,7 @@
       "truncatedBanner": "调查明细可能因体量被截断"
     },
     "detail": {
+      "viewDisposalHistory": "查看处置过程",
       "title": "检测详情",
       "noSubject": "(无主题)",
       "block": "拦截",
@@ -9032,6 +9092,21 @@
       "liveStateHint": "邮件仍在旁路处理中，请在旁路队列处置",
       "noDisposalTarget": "当前记录没有可操作的邮件对象。",
       "failureReason": "失败原因",
+      "failureReasonValue": {
+        "check_missing": "未找到钓鱼检测结果，未能生成检测结论",
+        "check_result_corrupt": "钓鱼检测结果损坏，未能生成检测结论",
+        "analysis_not_checked": "钓鱼分析未完成（执行失败或未执行），未能生成检测结论",
+        "analysis_partial": "钓鱼分析结果不完整，未能生成检测结论",
+        "confidence_missing": "分析结果缺少置信度，未能判定风险等级",
+        "confidence_invalid": "分析结果的置信度无效，未能判定风险等级",
+        "legacy_no_complete_snapshot": "升级前的在途任务缺少完整检测快照，未重新判定",
+        "realtime_timeout_cancelled": "实时检测超时，已按超时策略投递，未判定风险",
+        "realtime_continuation_deadline_exceeded": "后台续测时限内未能提交分析任务，未判定风险",
+        "observe_deadline_exceeded": "观察模式分析超过截止时间，未判定风险",
+        "decision_undetermined": "未能生成检测结论"
+      },
+      "analysisFailed": "钓鱼分析执行失败，未能生成检测结论；技术详情见运行日志。",
+      "diagnostic": "诊断信息",
       "mailContext": "邮件上下文",
       "sender": "发件人",
       "recipients": "收件人",
@@ -9053,7 +9128,10 @@
       "exportFilename": "钓鱼检测-{id}.json",
       "noSteps": "暂无步骤记录",
       "noVerdictContent": "智能体已完成检测，详细研判内容暂未生成",
-      "resultTruncatedHint": "调查明细可能因体量被截断，部分内容不完整"
+      "resultTruncatedHint": "研判明细因数据量较大被截断，部分内容不完整",
+      "runLogRawNote": "以下为原始运行日志，未翻译；历史数据可能缺少步骤状态。",
+      "stepStatusNotRecorded": "未记录",
+      "stepStatusNotRecordedHint": "历史数据未记录该步骤状态"
     },
     "block": {
       "title": "拦截该邮件",
@@ -9115,7 +9193,41 @@
     "navPhishingAgent": "钓鱼邮件检测智能体",
     "collapseMenu": "折叠菜单",
     "expandMenu": "展开菜单",
-    "urlVerdict": {}
+    "urlVerdict": {},
+    "urlDetail": {
+      "title": "链接检测详情",
+      "view": "查看透视证据",
+      "viewAriaLabel": "查看 {url} 的透视证据",
+      "copy": "复制 URL",
+      "copied": "已复制",
+      "riskLevel": "风险等级",
+      "linkSection": "链接与解析",
+      "originalUrl": "原始 URL",
+      "finalUrl": "落地 URL",
+      "redirected": "发生跳转",
+      "noRedirect": "未发生跳转",
+      "redirectChain": "跳转链",
+      "host": "域名",
+      "resolvedIps": "解析 IP",
+      "reputationSection": "信誉与情报",
+      "rbl": "RBL 黑名单",
+      "threatIntel": "云情报",
+      "domainAge": "域名年龄",
+      "tlsCert": "TLS 证书",
+      "notChecked": "未检查",
+      "notHit": "未命中",
+      "listed": "命中",
+      "domainAgeDays": "{days} 天",
+      "domainRegistered": "注册于 {date}",
+      "certTrusted": "信任链有效",
+      "certUntrusted": "信任链验证未通过",
+      "certIssuer": "签发者：{issuer}",
+      "screenshotSection": "落地页截图",
+      "screenshotNoStorage": "该邮件未落存储节点，未留存落地页截图",
+      "screenshotRetained": "截图已留存，在线查看接口待接入",
+      "noRetainedEvidence": "无可用留存证据",
+      "retainedSources": "留存来源"
+    }
   },
   "phishingConfig": {
     "pageTitle": "检测引擎配置",
@@ -9212,6 +9324,7 @@
       "cancel": "取消",
       "errors": {
         "needName": "请输入规则名称",
+        "nameTooLong": "规则名称不能超过 64 个字符",
         "needDirection": "请至少选择一个邮件流方向",
         "needRiskSignal": "请至少启用一个风险信号",
         "needRecipientTarget": "开启人员筛选时至少选择一个群组、部门或邮箱",
@@ -9257,20 +9370,21 @@
         "realtime": "按四档风险策略执行审核、隔离、丢弃或继续处理。",
         "observe": "保留完整检测结论，但不执行风险策略处置。"
       },
-      "observeModeBanner": "观察模式只记录命中，不执行风险处置、标记或其他附加策略；已保存的隐藏策略值会保持不变。",
+      "observeModeBanner": "观察模式只记录命中，不执行风险处置、标记或其他附加策略。下方处置策略仍可编辑并会保存，切回实时检测后执行；「超时后后台续测」设置保持不变。",
       "timeoutPolicy": "超时时间线",
-      "timeoutMinutes": "实时等待（分钟）",
+      "timeoutMinutes": "检测等待（分钟）",
       "maxRecheckMinutes": "后台续测（分钟）",
       "timeoutAsync": "超时后后台续测",
-      "timeoutAsyncHint": "实时等待超时后先投递，并在后台继续检测与按需召回。",
+      "timeoutAsyncHint": "检测等待超时后先投递，并在后台继续检测；实时检测模式下按需召回。",
       "confidencePolicy": "置信度分级处置",
-      "confidenceHint": "四档连续覆盖 0–100；只需调整三个共享分界点。",
+      "confidenceHint": "四档连续覆盖 0%–100%；只需调整三个共享分界点。",
+      "policyOrderHint": "风险越高，处置力度不能更弱；相邻等级可相同。动作力度：{order}。",
       "cutoff": {
         "low": "低风险起点",
         "medium": "中风险起点",
         "high": "高风险起点"
       },
-      "invalidCutoffs": "三个分界点必须严格递增，并位于 0–100 之间。",
+      "invalidCutoffs": "三个分界点必须严格递增，并位于 0%–100% 之间。",
       "invalidTimeoutWindow": "实时等待须为 1–300 分钟，后台续测须为 1–60 分钟。",
       "range": "置信度区间",
       "risk": "风险等级",
@@ -9290,8 +9404,8 @@
       },
       "markText": "标记文本",
       "markTextRequired": "启用附加标记时，标记文本不能为空。",
-      "markTextTooLong": "标记文本不能超过 20 个字符。",
-      "markTextLimit": "最多 20 个字符。",
+      "markTextTooLong": "标记文本不能超过 {limit} 个字符。",
+      "markTextLimit": "最多 {limit} 个字符。",
       "timeoutSectionTitle": "超时时间线",
       "timeoutScopeNote": "总超时 / 超时异步对所有旁路检测生效。",
       "soon": "即将支持",
@@ -11008,7 +11122,13 @@
         "alias": "别名递归解析"
       }
     },
-    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。"
+    "footerNote": "收信人检测在 RCPT TO 阶段执行，与发信行为管控形成「发信+收件」全链路防护。阈值范围：1-1000，-1 表示无限制。",
+    "observeMode": {
+      "enabled": "观察中",
+      "disabled": "观察模式",
+      "limitLabel": "数量限制策略观察模式开关",
+      "existenceLabel": "存在性验证策略观察模式开关"
+    }
   },
   "userList": {
     "blacklistRules": "黑名单规则",
@@ -11722,6 +11842,7 @@
       "profile_id_invalid_for_tenant": "所选检测档案不存在或不属于当前租户",
       "rule_not_found": "准入规则不存在",
       "rule_name_exists": "准入规则名称已存在，请使用其他名称",
+      "rule_name_required": "准入规则名称不能为空",
       "revision_conflict": "准入规则已被其他人修改，请刷新后重试",
       "integrity_error": "准入规则（ID {rule_id}）数据完整性校验失败，请联系管理员（规则标识：{rule_uid}）",
       "group_invalid": "准入规则引用的群组无效（群组标识：{group_uid}）"
@@ -12083,6 +12204,18 @@
       "rate_limited": "请求过于频繁，请稍后再试"
     },
     "phishing_agent": {
+      "risk_policy": {
+        "policy_missing": "风险策略不能为空。",
+        "cutoffs_invalid": "风险分界点须为整数，且满足 0 < low < medium < high ≤ 100。",
+        "levels_invalid": "风险策略必须恰好包含可疑、低风险、中风险和高风险四档。",
+        "disposition_invalid": "{risk_level} 的处置动作“{disposition}”不受支持。",
+        "disposition_order_conflict": "{risk_level} 的“{disposition}”弱于 {previous_risk_level} 的“{previous_disposition}”。请提高较高风险等级或降低较低风险等级的处置力度。",
+        "mark_not_allowed": "{risk_level} 只有选择“进行下一步”时才允许附加标记。",
+        "mark_positions_required": "{risk_level} 请至少选择一个标记位置。",
+        "mark_position_invalid": "{risk_level} 的标记位置不受支持。",
+        "mark_text_required": "{risk_level} 启用附加标记时，标记文本不能为空。",
+        "mark_text_too_long": "{risk_level} 的标记文本不能超过 {limit} 个字符。"
+      },
       "config_not_initialized": "钓鱼检测配置尚未初始化，请联系管理员",
       "config_version_conflict": "配置已被其他人修改（冲突域：{conflict_domains}），请刷新后重试",
       "control_revision_conflict": "开关状态已被其他人修改，请刷新后重试",
@@ -12093,7 +12226,7 @@
   "assessment": {
     "retainedRange": "保留来源字节范围 [{start}, {end})，已捕获来源共 {bytes} 字节",
     "retentionScope": "引用仅覆盖此处保留的内容，不包含省略的内容。",
-    "title": "判断依据",
+    "title": "研判依据",
     "version": "报告版本 {version}",
     "subjectKinds": {
       "mail": "邮件",
@@ -12206,18 +12339,28 @@
     "parentOutcome": "父来源结果：{value}",
     "parentIncomplete": "父来源的采集内容不完整。",
     "findings": {
-      "strength": "依据强度",
+      "strength": "证据强度",
       "limitation": "注意",
       "sources": "查看证据（{count}）",
       "directions": {
-        "supports_threat": "风险信号",
-        "supports_legitimate": "正常信号",
-        "limits_certainty": "判断局限",
-        "unknown": "其他依据"
+        "supports_threat": "指向钓鱼",
+        "supports_legitimate": "指向正常",
+        "limits_certainty": "不确定因素",
+        "unknown": "方向未明"
+      },
+      "intro": "方向由“指向钓鱼 / 指向正常”的证据决定；不确定因素只影响把握，不改变方向。",
+      "expandAll": "全部展开",
+      "collapseAll": "全部收起",
+      "strengthHint": "模型对该条证据的强度评估：强 / 中 / 弱",
+      "directionHints": {
+        "supports_threat": "该条证据支持钓鱼结论",
+        "supports_legitimate": "该条证据支持正常结论",
+        "limits_certainty": "该条证据与结论冲突或不完整，影响系统把握",
+        "unknown": "方向未识别的证据"
       }
     },
     "presentation": {
-      "title": "邮件研判",
+      "title": "研判结论",
       "undecided": "未判定",
       "policySource": "按本次检测冻结的租户策略判定",
       "policyDisposition": "策略处置",
@@ -12225,7 +12368,8 @@
       "summary": "模型分析摘要",
       "summaryHint": "摘要为模型分析；风险分级与策略处置以上方结果为准。",
       "rawVerdict": "查看模型原始判断",
-      "verdictHint": "模型原始判断不代表租户风险等级，也不表示处置已执行。"
+      "verdictHint": "模型原始判断不代表租户风险等级，也不表示处置已执行。",
+      "threatScoreHint": "威胁评分由本次检测冻结的租户策略阈值换算，满分 100"
     },
     "sourceTargets": {
       "mail": {
@@ -12250,7 +12394,7 @@
         "web_fetch": "网页抓取",
         "get_sender_history": "发件人历史查询",
         "search_similar_messages": "相似邮件查询",
-        "get_attachment_findings": "附件检测结果",
+        "get_attachment_scan_evidence": "附件检测结果",
         "lookup_domain_age": "域名注册时间查询",
         "inspect_tls_cert": "TLS 证书检查",
         "dig": "DNS 查询",
@@ -12258,27 +12402,79 @@
         "check_rbl_blocklist": "RBL 黑名单查询"
       },
       "mailIdentity": "邮件身份信息"
+    },
+    "gapsGroups": {
+      "unobserved": "未检查",
+      "omitted": "省略与截断",
+      "other": "其他覆盖局限"
+    },
+    "toolObs": {
+      "scoreValue": "{score} 分",
+      "features": "命中特征",
+      "noFeatures": "未命中可疑特征",
+      "checks": "结构检查",
+      "trusted": "受信域名检查",
+      "structure": "URL 结构",
+      "observation": "观察结果",
+      "yes": "是",
+      "no": "否",
+      "none": "无",
+      "fields": {
+        "input_url": "原始输入 URL",
+        "normalized_url": "规范化 URL",
+        "scheme": "协议",
+        "host": "域名",
+        "host_depth": "子域名层级",
+        "port": "端口",
+        "path": "路径",
+        "query": "查询参数",
+        "fragment": "片段",
+        "suspicious_indicators": "可疑指标",
+        "indicator_weights": "指标权重",
+        "url_risk_summary": "评分摘要",
+        "matched_suspicious_host_keywords": "可疑域名关键词",
+        "matched_suspicious_path_keywords": "可疑路径关键词",
+        "matched_suspicious_path_signals": "可疑路径信号",
+        "matched_suspicious_suffixes": "可疑后缀",
+        "matched_redirect_params": "跳转参数",
+        "matched_sensitive_query_params": "敏感查询参数",
+        "has_base64_like_segment": "含 Base64 样式段",
+        "has_hex_like_segment": "含十六进制样式段",
+        "has_long_subdomain_label": "超长子域名标签",
+        "trusted_domain_allowlist_loaded": "名单已加载",
+        "trusted_domain_match": "命中受信域名",
+        "matched_trusted_domain": "命中的受信域名",
+        "trusted_domain_match_type": "命中方式",
+        "trusted_domain_source": "名单来源",
+        "trusted_domain_allowlist_error": "名单加载错误",
+        "url_risk_score": "风险评分",
+        "url_risk_level": "风险等级"
+      },
+      "unknown": "未知"
     }
   },
   "ruleEffectiveness": {
     "title": "规则效能统计",
-    "subtitle": "统计当前观察模式策略/规则的命中情况，辅助判断是否转为正式生效",
+    "subtitle": "统计当前观察模式策略规则的命中情况，辅助判断是否转为正式生效",
     "noData": "暂无数据",
     "error": {
       "forbiddenTitle": "无权查看规则效能统计",
       "forbiddenDescription": "当前账号缺少统计查看权限，请联系管理员授权后重试。",
       "loadFailedTitle": "规则效能统计加载失败",
       "loadFailedDescription": "服务暂时不可用或网络异常，请稍后重试。",
+      "timeoutTitle": "规则效能统计请求超时",
+      "timeoutDescription": "服务在 30 秒内未响应，可能是网络异常或数据量较大，请稍后重试。",
       "retry": "重新加载",
       "retrying": "正在重试…"
     },
     "kpi": {
-      "observingCount": "观察策略数",
+      "observingCount": "观察中策略数",
       "totalHits": "观察期总命中数",
       "avgObservedDays": "平均观察时长",
       "pendingReviewCount": "待转正策略数",
       "vsPrevious": "较上期",
-      "days": "天"
+      "days": "天",
+      "scopeHint": "以下指标按所选统计时间范围汇总"
     },
     "filter": {
       "timeRange": {
@@ -12294,20 +12490,40 @@
           "invalid": "请选择起止日期",
           "order": "结束日期不能早于开始日期",
           "tooLong": "时间跨度不能超过 {max} 天"
-        }
+        },
+        "label": "统计时间范围自定义日期",
+        "placeholder": "选择统计日期范围"
       },
       "modules": {
         "label": "策略模块",
         "auth_spoofing": "身份认证与仿冒检测",
         "similar_detection_similar_email": "相似邮件检测",
         "similar_detection_same_subject": "相同主题检测",
-        "phishing_detection": "钓鱼检测智能体"
+        "phishing_detection": "钓鱼检测智能体",
+        "sender_filter": "发信人黑白名单",
+        "behavior_control": "发信行为管控",
+        "content_rules": "内容规则",
+        "recipient_check": "收件人检测",
+        "intent_engine": "意图引擎",
+        "attachment_security": "附件安全检测",
+        "advanced_filter_rules": "高级过滤规则",
+        "selectedCount": "已选 {count} 个策略模块"
       },
       "durationBucket": {
         "label": "观察时长",
         "lt7": "小于7天",
         "7to30": "7~30天",
         "gt30": "超过30天"
+      },
+      "timeRangeLabel": "统计时间范围",
+      "timeRangeValue": "统计时间范围：{range}",
+      "stages": {
+        "label": "策略阶段",
+        "all": "全部阶段",
+        "stage2": "阶段2：收发信人策略",
+        "stage3": "阶段3：内容层",
+        "stage4": "阶段4：智能分析层",
+        "stage5": "阶段5：综合策略"
       }
     },
     "wouldBeActions": {
@@ -12326,8 +12542,8 @@
       "protocolCheckDmarc": "DMARC 检查",
       "protocolCheckPtr": "PTR 检查",
       "formatCheck": "基础格式检查",
-      "formatCheckMailfromEmpty": "无效 MAIL FROM",
-      "formatCheckMailfromInvalid": "MAIL FROM 格式错误",
+      "formatCheckMailfromEmpty": "空MAIL FROM",
+      "formatCheckMailfromInvalid": "无效MAIL FROM",
       "formatCheckEnvelopeMismatch": "信封头不一致",
       "displayNameSpoofing": "展示名仿冒检测",
       "similarDomain": "相似域名检测",
@@ -12338,7 +12554,37 @@
       "directionSend": "发件方向",
       "directionInternal": "内部方向",
       "aggregateScope": "全方向聚合",
-      "phishingDetection": "钓鱼检测智能体"
+      "similarDirectionReceive": "接收方向",
+      "similarDirectionSend": "外发方向",
+      "similarDirectionInternal": "域内方向",
+      "phishingDetection": "钓鱼检测智能体",
+      "phishingRuntimePolicy": "运行时策略",
+      "phishingRiskPolicy": "风险处置策略",
+      "phishingAdmissionRule": "准入规则",
+      "phishingSuspicious": "可疑",
+      "phishingLow": "低风险",
+      "phishingMedium": "中风险",
+      "phishingHigh": "高风险",
+      "senderFilter": "发信人黑白名单",
+      "behaviorControl": "发信行为管控",
+      "contentRules": "内容规则",
+      "recipientCheck": "收件人检测",
+      "intentEngine": "意图引擎",
+      "attachmentSecurity": "附件安全检测",
+      "advancedFilterRules": "高级过滤规则",
+      "recipientLimit": "数量限制策略",
+      "recipientExistence": "存在性验证策略",
+      "attachment_antivirus": "反病毒引擎",
+      "attachment_image_detection": "图片识别",
+      "attachment_encrypted": "加密附件",
+      "intentDirection_receive": "收件方向",
+      "intentDirection_send": "发件方向",
+      "intentDirection_internal": "内部方向",
+      "intent_porn_gambling": "涉黄/赌",
+      "intent_political": "涉政/反动",
+      "intent_phishing": "钓鱼",
+      "intent_spam": "垃圾",
+      "intent_subscription": "订阅"
     },
     "timeoutAlert": {
       "warning": "有 {count} 个策略已观察超过 {days} 天，待转正评估",
@@ -12386,7 +12632,115 @@
         "proceed": "进行下一步",
         "enabled": "启用",
         "disabled": "停用",
-        "unset": "未设置"
+        "unset": "未设置",
+        "unavailable": {
+          "snapshot": "配置快照损坏或缺失，变更详情不可用",
+          "accessDenied": "没有查看权限，变更详情不可用",
+          "notFound": "版本不存在或已清理，变更详情不可用",
+          "loadFailed": "加载失败，变更详情不可用",
+          "difference": "前后版本差异计算失败，变更详情不可用"
+        }
+      },
+      "versionHistoryLabels": {
+        "configuredValue": "已配置",
+        "valueSeparator": "、",
+        "headerMarkEntry": "{name}: {value}",
+        "fieldLabels": {
+          "action": "执行动作",
+          "detectionWindow": "检测窗口",
+          "similarityThreshold": "相似度阈值",
+          "triggerCount": "触发数量",
+          "maxRecipientsPerWindow": "每个窗口最大收件人数",
+          "observationMode": "观察模式",
+          "detectionMode": "检测模式",
+          "directions": "检测方向",
+          "ignoreCase": "忽略大小写",
+          "ignoreReplyForwardPrefix": "忽略 Re:/Fwd: 前缀",
+          "ignoreNumbers": "忽略数字",
+          "similarSubject": "相似主题判定",
+          "subjectMarkEnabled": "启用主题标记",
+          "subjectMarkPosition": "主题标记位置",
+          "subjectMarkContent": "主题标记内容",
+          "subjectPrefixMarkContent": "主题前缀标记内容",
+          "subjectSuffixMarkContent": "主题后缀标记内容",
+          "headerMarkEnabled": "启用信头标记",
+          "headerName": "信头名称",
+          "headerValue": "信头值",
+          "headerMarks": "信头标记",
+          "bodyMarkEnabled": "启用正文标记",
+          "bodyMarkContent": "正文标记内容",
+          "bodyPrefixMarkContent": "正文前缀标记内容",
+          "bodySuffixMarkContent": "正文后缀标记内容",
+          "condition": "匹配条件",
+          "stage": "处理阶段",
+          "priority": "优先级",
+          "tags": "标签",
+          "effectiveStart": "生效时间",
+          "effectiveEnd": "失效时间",
+          "runMode": "运行模式",
+          "observationAction": "观察模式动作",
+          "observationMark": "观察模式标记",
+          "realtimeWait": "实时等待时间（分钟）",
+          "backgroundRecheck": "后台续测时间（分钟）",
+          "continueAfterTimeout": "超时后后台续测",
+          "riskLevel": "风险等级",
+          "confidenceMin": "置信度下限",
+          "confidenceMax": "置信度上限",
+          "upperInclusive": "包含上限值",
+          "lowRiskCutoff": "低风险分界点",
+          "mediumRiskCutoff": "中风险分界点",
+          "highRiskCutoff": "高风险分界点",
+          "baseDisposition": "基础处置动作",
+          "markPositions": "标记位置",
+          "markText": "标记文案",
+          "admissionRuleEnabled": "准入规则状态",
+          "admissionFilterEnabled": "适用范围筛选",
+          "recipientGroups": "收件人群组",
+          "recipientDepartments": "收件人部门",
+          "recipientAddresses": "收件人邮箱",
+          "recipientTags": "收件人标签",
+          "senderGroups": "发件人群组",
+          "senderDepartments": "发件人部门",
+          "senderAddresses": "发件人邮箱",
+          "requireUrl": "邮件包含 URL",
+          "maxMessageSize": "邮件大小上限（KB）",
+          "senderFirstSeen": "收发信人首次往来",
+          "requireQrCode": "邮件包含二维码",
+          "requireExecutable": "邮件包含可执行文件",
+          "formatVersion": "配置格式版本",
+          "policyFeature": "策略模块",
+          "policySubfeature": "检测类别",
+          "policyItem": "检测项",
+          "configurationSource": "配置来源",
+          "detectionType": "检测类型",
+          "mailDirection": "邮件方向",
+          "other": "其他配置项"
+        },
+        "valueLabels": {
+          "observe": "观察模式",
+          "realtime": "实时检测",
+          "aggregate": "全方向聚合",
+          "separate": "按方向独立检测",
+          "receive": "接收方向",
+          "send": "外发方向",
+          "inbound": "入站",
+          "outbound": "外发",
+          "internal": "域内",
+          "prefix": "前缀",
+          "suffix": "后缀",
+          "subjectPrefix": "主题前缀",
+          "subject": "主题",
+          "header": "信头",
+          "body": "正文",
+          "suspicious": "可疑",
+          "low": "低风险",
+          "medium": "中风险",
+          "high": "高风险",
+          "block": "拒收",
+          "review": "审核",
+          "markDelivery": "标记后投递",
+          "threshold": "阈值模式"
+        }
       },
       "col": {
         "path": "策略路径",
@@ -12402,7 +12756,10 @@
         "falseNegativeRisk": "配置动作预期投递、实际结果为隔离、审核、拒收、丢弃或召回的差异比例，仅为风险提示，不代表真实漏判率。"
       },
       "viewHits": "查看命中详情",
-      "goToConfig": "前往策略配置"
-    }
+      "goToConfig": "前往策略配置",
+      "observingTotal": "当前观察中策略 {count} 条"
+    },
+    "tenantContext": "正在以租户 {tenant} 管理员身份操作",
+    "currentTenant": "当前租户"
   }
 }

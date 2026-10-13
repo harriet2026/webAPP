@@ -136,3 +136,11 @@ describe('retained assessment report', () => {
   });
 
 });
+
+it('does not turn missing structural checks into negative observations', () => {
+  render(<NextIntlClientProvider locale="zh" messages={zh}>
+    <AssessmentReportView result={{ assessment_report_status: 'available', assessment_report: { schema_version: 2, sources: [{ id: 'empty-tool', kind: 'tool_observation', target: 'analyze_url', outcome: 'unavailable', content: JSON.stringify({ tool: 'analyze_url', query: { url: 'https://example.test/' }, observation: { has_hex_like_segment: false, suspicious_indicators: [] } }) }] } }} />
+  </NextIntlClientProvider>);
+  expect(screen.getByTestId('assessment-obs-checks')).not.toHaveTextContent('：否');
+  expect(screen.getByTestId('assessment-obs-no-features')).toHaveTextContent('未知');
+});

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatListId, buildConditionTree, resolveSenderFilterRule } from './sender-filter';
+import { formatListId, buildConditionTree, resolveSenderFilterRule, senderFilterConfiguredAction, senderFilterObservationUpdate } from './sender-filter';
 import type { Rule } from '@/types/unified-rules';
 
 const baseRule = (over: Partial<Rule> = {}): Rule => ({
@@ -83,6 +83,7 @@ describe('filterSenderFilterRules (GT-11721 状态筛选)', () => {
       list_id_display: formatListId(rule, listType),
       resolved: resolveSenderFilterRule(rule),
       is_complex: false,
+      observe_mode: false,
     };
   };
 
@@ -122,5 +123,30 @@ describe('filterSenderFilterRules (GT-11721 状态筛选)', () => {
     };
     const out = filterSenderFilterRules([complex], { listType: 'blacklist', search: 'a@b.com', status: 'all' });
     expect(out).toHaveLength(1);
+  });
+});
+
+
+describe('sender filter native observation', () => {
+  it.each(['reject', 'quarantine', 'audit', 'discard', 'accept'] as const)('restores %s after observation without changing rule conditions or metadata', (action) => {
+    const rule = baseRule({ action, metadata: JSON.stringify({ feature: 'sender_filter', list_type: action === 'accept' ? 'whitelist' : 'blacklist', unknown: { keep: true } }) });
+    const observed = senderFilterObservationUpdate(rule, true);
+    expect(observed.action).toBe('observe');
+    expect(observed.metadata).toMatchObject({ configured_action: action, unknown: { keep: true } });
+    expect(observed).not.toHaveProperty('condition_tree');
+    expect(observed).not.toHaveProperty('tags');
+    const saved = { ...rule, ...observed, metadata: JSON.stringify(observed.metadata) } as Rule;
+    expect(senderFilterConfiguredAction(saved)).toBe(action);
+    const restored = senderFilterObservationUpdate(saved, false);
+    expect(restored.action).toBe(action);
+    expect(restored.metadata).not.toHaveProperty('configured_action');
+    expect(restored.metadata).toMatchObject({ unknown: { keep: true } });
+    expect(rule.action).toBe(action);
+  });
+
+  it('refuses to guess an action for an observed rule with incomplete metadata', () => {
+    const rule = baseRule({ action: 'observe', metadata: '{}' });
+    expect(senderFilterConfiguredAction(rule)).toBeNull();
+    expect(() => senderFilterObservationUpdate(rule, false)).toThrow();
   });
 });

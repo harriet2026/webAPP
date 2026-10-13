@@ -6,8 +6,11 @@ export type Disposition = 'quarantine' | 'mark' | 'pass' | 'audit' | 'pending' |
 export type DetectionMode = 'realtime' | 'observe' | '';
 export type RecallStatus = 'none' | 'pending_processing' | 'pending_recall' | 'recalled' | 'recall_failed' | 'expanded';
 export type RiskLevel = 'suspicious' | 'low' | 'medium' | 'high';
+// `unknown` filters absent risk conclusions; it is never a result risk level.
+export type RiskLevelFilter = RiskLevel | 'unknown';
 export type PolicyDisposition = 'proceed' | 'audit' | 'quarantine' | 'discard';
 export type PhishTaskStatus = 'submitting' | 'pending' | 'processing' | 'completed' | 'failed' | 'expired' | '';
+export type DetectionLogDirection = 'inbound' | 'outbound' | 'internal';
 
 export type DisplayStatusEntry = DisposalDisplayStatusEntry;
 export interface UrlSummary {
@@ -23,10 +26,11 @@ export type RecipientDisposition = DisposalRecipientDisposition;
 export interface DetectionLogItem {
   sideline_id: string;
   message_id: string;
+  message_uuid?: string;
   sender: string;
   subject: string;
   recipients: string[];
-  direction: string;
+  direction: DetectionLogDirection | null;
   status: string;
   sidelined_at: string;
   investigation_id?: string;
@@ -58,6 +62,9 @@ export interface InvestigationEvidence {
 }
 export interface UrlFindingAgent { verdict?: string; risk_level?: string }
 export interface UrlFinding {
+  host?: string;
+  signals?: string[];
+  provenance?: string;
   validation?: { status?: string; code?: string; contract_version?: string };
   url?: string;
   final_url?: string;
@@ -105,6 +112,7 @@ export interface PhishingStats {
   pending_review: number;
   today_recalled: number;
   recall_success: number;
+  next_business_day_at: string;
 }
 export interface DetectionLogListResponse { items: DetectionLogItem[]; total: number; page: number; page_size: number }
 export interface DetectionLogFilters {
@@ -114,9 +122,10 @@ export interface DetectionLogFilters {
   disposition?: Disposition[];
   detection_mode?: DetectionMode[];
   recall_status?: RecallStatus[];
-  risk_level?: RiskLevel[];
+  risk_level?: RiskLevelFilter[];
   mail_status?: import('@/types/email-disposal').DisplayStatus[];
   start?: string;
   end?: string;
   status?: string;
+  range?: 'today';
 }

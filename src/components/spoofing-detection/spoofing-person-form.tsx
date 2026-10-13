@@ -457,7 +457,7 @@ export function SpoofingPersonForm({ open, onOpenChange, editing, onSaved }: {
                 {tsd('personForm.saveSelected', { n: selectedContactCount })}
               </Button>
             ) : !isEdit && tab === 'paste' ? (
-              <Button disabled={pasteSaveDisabled || saveMutation.isPending} onClick={() => saveMutation.mutate('paste')}>
+              <Button data-testid="spoof-person-paste-save" disabled={pasteSaveDisabled || saveMutation.isPending} onClick={() => saveMutation.mutate('paste')}>
                 {saveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {tsd('personForm.saveSelected', { n: pasteResult.rows.length })}
               </Button>

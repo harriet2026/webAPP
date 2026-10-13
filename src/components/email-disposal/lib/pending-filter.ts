@@ -62,5 +62,11 @@ export function disposalDeepLinkQuickFilter(
     filter.disposalPolicyKeys = ['SIM'];
   }
 
+  // Legacy prototype links use BEHAVIOR; real observation links retain behavior_control
+  // and their stable observation-period scope instead of adding a formal-disposition filter.
+  if (searchParams.get('policy_key') === 'BEHAVIOR') {
+    filter.disposalPolicyKeys = ['BEHAVIOR'];
+  }
+
   return Object.keys(filter).length > 0 ? filter : null;
 }

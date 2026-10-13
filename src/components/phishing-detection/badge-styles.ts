@@ -38,7 +38,9 @@ export function riskBadgeClass(risk: RiskLevel | null | undefined): string {
     case 'suspicious':
       return cn('border-border bg-muted/50 text-muted-foreground');
     default:
-      return cn('border-border text-muted-foreground');
+      // Undecided: set a neutral background explicitly, otherwise the Badge
+      // default variant keeps bg-primary behind muted text (GT-13539).
+      return cn('border-border bg-muted/40 text-muted-foreground');
   }
 }
 

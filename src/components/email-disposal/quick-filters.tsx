@@ -84,7 +84,7 @@ export function QuickFilters({
   // 查询语义不变）。
   const modulesByStage = useMemo(() => {
     const groups = groupDisposalModulesByStage(disposalLang);
-    return [1, 2, 3, 4, 5].map((stage) => ({
+    return [0, 1, 2, 3, 4, 5].map((stage) => ({
       stage,
       modules: groups
         .filter((g) => g.stage === stage)
@@ -489,6 +489,7 @@ export function QuickFilters({
                             >
                               <label>
                                 <Checkbox
+                                  data-testid={`disposal-policy-module-${keys.join('+')}`}
                                   checked={checked}
                                   onCheckedChange={() => {
                                     const next = checked
@@ -561,6 +562,7 @@ export function QuickFilters({
                             >
                               <label>
                                 <Checkbox
+                                  data-testid={`disposal-policy-rule-option-${rule.id}`}
                                   checked={checked}
                                   onCheckedChange={() => {
                                     const current = value.disposalRuleIds ?? [];

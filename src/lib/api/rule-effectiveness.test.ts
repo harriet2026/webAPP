@@ -35,7 +35,7 @@ describe('report locale coverage', () => {
       }
       expect(JSON.stringify(messages.ruleEffectiveness)).not.toContain('\uFFFD');
       expect(messages.ruleEffectiveness.detail.col.path).toBeTruthy();
-      expect(messages.emailDisposal.ruleEffectivenessContext.matches).toBeTruthy();
+      expect(messages.emailDisposal.ruleEffectivenessContext.back).toBeTruthy();
     }
   });
 });

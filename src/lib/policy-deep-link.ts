@@ -35,12 +35,18 @@ interface AgentTarget {
   tab: 'config' | 'sender-name' | 'strategy';
 }
 
-type PolicyTarget = PipelineTarget | AgentTarget;
+interface RoutingTarget {
+  kind: 'routing';
+  tab: 'relay';
+}
+
+type PolicyTarget = PipelineTarget | AgentTarget | RoutingTarget;
 
 // Disposal policy keys are runtime identities, while the pipeline uses UI
 // module keys. Keep the translation in one place so every evidence link opens
 // the same module that owns the matching rule.
 const POLICY_TARGETS: Record<string, PolicyTarget> = {
+  'MAIL-ADMISSION': { kind: 'routing', tab: 'relay' },
   IPFREQ: { kind: 'pipeline', stage: 1, key: 'ipFrequency' },
   IPBL: { kind: 'pipeline', stage: 1, key: 'ipFilter' },
   RBL: { kind: 'pipeline', stage: 1, key: 'rbl' },
@@ -80,11 +86,18 @@ export function parseRuleDatabaseID(ruleRef?: string): number | undefined {
   return Number.isSafeInteger(id) && id > 0 ? id : undefined;
 }
 
-export function buildPolicyConfigRoute(policyKey: string, ruleRef?: string): string | undefined {
+export function buildPolicyConfigRoute(policyKey: string, ruleRef?: string, tenantId?: number): string | undefined {
   const target = POLICY_TARGETS[policyKey];
   if (!target) return undefined;
 
   const params = new URLSearchParams();
+  if (target.kind === 'routing') {
+    params.set('tab', target.tab);
+    const configId = parseRuleDatabaseID(ruleRef);
+    if (configId) params.set('config', String(configId));
+    if (tenantId && Number.isSafeInteger(tenantId) && tenantId > 0) params.set('tenant_id', String(tenantId));
+    return `/mail-routing?${params.toString()}`;
+  }
   if (target.kind === 'agent') {
     params.set('agent', target.agent);
     params.set('tab', target.tab);

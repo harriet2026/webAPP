@@ -49,6 +49,7 @@ export function createDefaultIntentConfig(it: IntentType, dir: IntentDirection):
   }
   return {
     enabled: true,
+    observe_mode: false,
     action,
     detection_mode: 'classification',
     threshold_segments: defaultThresholdSegments(risk, dir),

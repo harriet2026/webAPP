@@ -16,8 +16,9 @@ import {
 import { EmptyState, DegradedBanner } from './StateBanners';
 import { useHardware } from './hooks';
 import { degradeMessage } from '@/lib/monitoring/degrade';
-import { createTimeAxisFormatter } from '@/lib/monitoring/chart-time';
+import { createTimeAxisFormatter, createTimeTooltipFormatter } from '@/lib/monitoring/chart-time';
 import type { TimeRange } from '@/types/monitoring';
+import { formatMetric } from './format_metric';
 
 interface HardwareTabProps {
   node: string;
@@ -36,19 +37,21 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
     const ts = (cpuPts.length >= memPts.length ? cpuPts : memPts).map((p) => p.ts);
     const cpuMap = new Map(cpuPts.map((p) => [p.ts, p.value]));
     const memMap = new Map(memPts.map((p) => [p.ts, p.value]));
+    const formatTooltipTime = createTimeTooltipFormatter(locale);
     return {
-      tooltip: { trigger: 'axis' as const },
+      tooltip: { trigger: 'axis' as const, valueFormatter: (value: unknown) => `${formatMetric(value, locale, 1)}%` },
       legend: { data: ['CPU', t('hardware.memory')], top: 0 },
       grid: { left: 48, right: 16, top: 36, bottom: 32 },
       xAxis: {
         type: 'category' as const,
         data: ts,
+        axisPointer: { label: { formatter: ({ value }: { value: string | number }) => formatTooltipTime(String(value)) } },
         axisLabel: {
           showMaxLabel: true,
           formatter: createTimeAxisFormatter(locale, range === '7d'),
         },
       },
-      yAxis: { type: 'value' as const, min: 0, max: 100, axisLabel: { formatter: '{value}%' } },
+      yAxis: { type: 'value' as const, min: 0, max: 100, axisLabel: { formatter: (value: number) => `${formatMetric(value, locale, 1)}%` } },
       series: [
         {
           name: 'CPU',
@@ -74,7 +77,7 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4" data-testid="monitor-infrastructure-hardware-loading">
         <Skeleton className="h-[300px] w-full rounded-lg" />
         <Skeleton className="h-[200px] w-full rounded-lg" />
       </div>
@@ -154,13 +157,13 @@ export function HardwareTab({ node, range }: HardwareTabProps) {
 }
 
 function formatPps(value: number | null, locale: string) {
-  return value == null ? '—' : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
+  return formatMetric(value, locale);
 }
 
 function formatMbps(value: number | null, locale: string) {
-  return value == null ? '—' : new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(value);
+  return formatMetric(value, locale);
 }
 
 function formatPercent(value: number | null, locale: string) {
-  return value == null ? '—' : `${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}%`;
+  return value == null ? '—' : `${formatMetric(value, locale, 1)}%`;
 }

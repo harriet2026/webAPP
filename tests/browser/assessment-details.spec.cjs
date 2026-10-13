@@ -112,6 +112,7 @@ function drawerResponses(kind, data) {
   const id = kind === 'phish' ? data.summary.sideline_id : data.summary.id;
   responses.set(prefix, list([data.summary]));
   responses.set(`${prefix}/${encodeURIComponent(id)}`, data);
+  if (kind === 'phish' && data.summary.mail_log_id != null) responses.set(`/mail-logs/${data.summary.mail_log_id}`, null);
   return responses;
 }
 
@@ -127,11 +128,14 @@ async function assertReport(container, result) {
     return;
   }
   const factors = report.factors || [];
+  const toggle = reportView.getByTestId('assessment-toggle-all');
+  if (await toggle.count()) await toggle.click();
+  const findingsLayout = await reportView.getByTestId('assessment-direction-group-supports_threat').count() > 0;
   await expect(reportView.getByTestId('assessment-factor')).toHaveCount(factors.length);
   if (!factors.length) await expect(reportView.getByTestId('assessment-state')).toHaveText(messages.assessment.empty);
   await expect(reportView.getByTestId('assessment-subject')).toHaveCount(report.subjects.length);
   for (const subject of report.subjects) {
-    const group = reportView.getByTestId('assessment-subject').filter({ has: container.page().getByRole('heading', { name: subject.label, exact: true }) });
+    const group = report.subjects.length === 1 ? reportView.getByTestId('assessment-subject') : reportView.getByTestId('assessment-subject').filter({ has: container.page().getByRole('heading', { name: subject.label, exact: true }) });
     await expect(group).toHaveCount(1);
     const subjectFactors = factors.filter((factor) => factor.subject_ref === subject.id);
     await expect(group.getByTestId('assessment-factor')).toHaveCount(subjectFactors.length);
@@ -139,19 +143,24 @@ async function assertReport(container, result) {
       const card = group.getByTestId('assessment-factor').filter({ hasText: factor.observation });
       await expect(card).toContainText(factor.relevance);
       await expect(card).toContainText(factor.limitation);
-      await expect(group.getByTestId('assessment-direction')).toContainText([messages.assessment.directions[factor.direction]]);
+      await expect(group).toContainText(findingsLayout ? messages.assessment.findings.directions[factor.direction] : messages.assessment.directions[factor.direction]);
+      const sourceGroup = card.getByTestId('assessment-factor-sources');
+      if (await sourceGroup.count()) await sourceGroup.locator('summary').click();
       for (let i = 0; i < factor.source_refs.length; i++) {
         const source = report.sources.find((item) => item.id === factor.source_refs[i]);
         const detail = card.getByTestId('assessment-source').nth(i);
-        await expect(detail).not.toHaveAttribute('open', '');
-        await expect(detail.getByTestId('assessment-source-content')).not.toBeVisible();
-        await detail.locator('summary').click();
-        await expect(detail).toHaveAttribute('open', '');
+        const expandable = await detail.evaluate((element) => element.tagName === 'DETAILS');
+        if (expandable) {
+          await expect(detail.getByTestId('assessment-source-content')).not.toBeVisible();
+          await detail.locator('summary').click();
+        }
         await expect(detail.getByTestId('assessment-source-content')).toHaveText(source.content);
         await expect(detail).toContainText(`Retained ${source.retained_bytes} of ${source.original_bytes} captured bytes`);
         await expect(detail.locator('script')).toHaveCount(0);
-        await detail.locator('summary').click();
-        await expect(detail.getByTestId('assessment-source-content')).not.toBeVisible();
+        if (expandable) {
+          await detail.locator('summary').click();
+          await expect(detail.getByTestId('assessment-source-content')).not.toBeVisible();
+        }
       }
     }
   }
@@ -181,7 +190,7 @@ async function captureReport(container, testInfo, label, subjectLabel) {
   const report = container.getByTestId('assessment-report');
   const sources = report.getByTestId('assessment-source');
   for (let i = 0; i < await sources.count(); i++) {
-    if (await sources.nth(i).getAttribute('open') === null) await sources.nth(i).locator('summary').click();
+    if (await sources.nth(i).evaluate((element) => element.tagName === 'DETAILS' && !element.open)) await sources.nth(i).locator('summary').click();
   }
   const heading = subjectLabel ? report.getByRole('heading', { name: subjectLabel, exact: true }) : report.getByRole('heading').first();
   await heading.evaluate((element) => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
@@ -251,21 +260,14 @@ for (const name of ['phish-available', 'spoof-available']) {
 }
 
 for (const name of ['phish-available', 'phish-failed']) {
-  test(`existing JSON export preserves ${name} report and status reason`, async ({ page, context }, testInfo) => {
+  test(`removed JSON export retains ${name} report and status reason`, async ({ page, context }, testInfo) => {
     const data = fixture(name);
     const finish = await isolate(page, context, testInfo, drawerResponses('phish', data));
     try {
       const drawer = await openDrawer(page, 'phish', data);
-      await expect(drawer.getByTestId('assessment-report')).toBeVisible();
+      await assertReport(drawer, data.investigation.result);
       await drawer.getByTestId('phishing-detail-run-log').click();
-      const downloaded = page.waitForEvent('download');
-      await drawer.getByTestId('phishing-detail-export').click();
-      const download = await downloaded;
-      expect(download.suggestedFilename()).toContain(data.summary.sideline_id);
-      const saved = testInfo.outputPath(`${name}.json`);
-      await download.saveAs(saved);
-      expect(JSON.parse(fs.readFileSync(saved, 'utf8'))).toEqual(data);
-      await testInfo.attach('existing-phish-json-export', { path: saved, contentType: 'application/json' });
+      await expect(drawer.getByTestId('phishing-detail-export')).toHaveCount(0);
     } finally { await finish(); }
   });
 }
@@ -316,3 +318,52 @@ for (const surface of ['phish', 'spoof', 'investigation']) {
     } finally { await finish(); }
   });
 }
+
+// Existing detail contract with UI-only URL/capture values, without preview assembly.
+test('URL evidence drawer preserves captures and closes independently of the main detail', async ({ page, context }, testInfo) => {
+  const data = fixture('phish-available');
+  const url = 'https://capture.example.test/login';
+  data.investigation.result.details = { url_findings: [], screenshots: [
+    { task_id: 'task', attempt_id: 'attempt', fetch_id: 'new', url, captured_at: '2026-09-24T12:00:00Z', screenshot_omitted: 'screenshot_save_failed' },
+    { task_id: 'task', attempt_id: 'attempt', fetch_id: 'old', url, final_url: 'https://capture.example.test/landing', captured_at: '2026-09-23T12:00:00Z', screenshot_ref: { key: 'fixture-shot', storage_node: 'fixture' } },
+  ], screenshots_omitted_count: 2 };
+  const responses = drawerResponses('phish', data);
+  const finish = await isolate(page, context, testInfo, responses);
+  // Override only the authenticated screenshot endpoint with a tiny valid PNG.
+  await context.route('**/api/v1/phishing-agent/screenshot?*', async (route) => {
+    expect(route.request().method()).toBe('GET');
+    expect(new URL(route.request().url()).searchParams.get('key')).toBe('fixture-shot');
+    await route.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=', 'base64') });
+  });
+  try {
+    const main = await openDrawer(page, 'phish', data);
+    await expect(main.locator('[data-slot="sheet-close"]')).toHaveCount(0);
+    await expect(main.getByTestId('phishing-screenshot')).toHaveCount(0);
+    await expect(main.getByTestId('phishing-url-findings')).toContainText(messages.phishingDetection.urlValidation.screenshotOnly);
+    await main.getByTestId('phishing-url-finding-view-0').click();
+    const secondary = page.getByTestId('phishing-url-detail-sheet');
+    await expect(secondary).toBeVisible();
+    const captures = secondary.getByTestId('phishing-screenshot');
+    await expect(captures).toHaveCount(2);
+    await expect(captures.nth(0).locator('time')).toHaveAttribute('datetime', '2026-09-24T12:00:00Z');
+    await expect(captures.nth(0)).toContainText(messages.phishingDetection.screenshot.reasons.screenshot_save_failed);
+    await expect(captures.nth(1).locator('img')).toBeVisible();
+    await expect.poll(() => captures.nth(1).locator('img').evaluate((img) => img.naturalWidth)).toBe(1);
+    await secondary.locator('[data-slot="sheet-close"]').click();
+    await expect(secondary).toHaveCount(0);
+    await expect(main).toBeVisible();
+    await main.getByTestId('phishing-url-finding-view-0').click();
+    await page.keyboard.press('Escape');
+    await expect(secondary).toHaveCount(0);
+    await expect(main).toBeVisible();
+    await main.getByTestId('phishing-url-finding-view-0').click();
+    await page.locator('[data-slot="sheet-overlay"]').last().click({ position: { x: 10, y: 100 } });
+    await expect(secondary).toHaveCount(0);
+    await expect(main).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(main).toHaveCount(0);
+    await page.getByTestId(`phishing-log-detail-${data.summary.sideline_id}`).click();
+    await page.locator('[data-slot="sheet-overlay"]').last().click({ position: { x: 10, y: 100 } });
+    await expect(main).toHaveCount(0);
+  } finally { await finish(); }
+});

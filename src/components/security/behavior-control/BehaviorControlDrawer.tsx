@@ -79,7 +79,7 @@ interface Props {
 
 function defaultForm(priority: number): BehaviorControlFormData {
   return {
-    name: '', priority, is_active: true,
+    name: '', priority, is_active: true, observe_mode: false,
     direction: 'outbound',
     object_config: { type: 'sender', sub_type: 'individual', value: '' },
     time_window: '15min',
@@ -218,6 +218,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       description: editing.rule.description ?? '',
       priority: editing.rule.priority,
       is_active: editing.rule.is_active,
+      observe_mode: editing.rule.action === 'observe',
       valid_from: editing.rule.valid_from ?? '',
       // input[type=date] only accepts YYYY-MM-DD. The API returns RFC3339, so
       // feeding the complete timestamp makes the browser render an empty field.
@@ -232,7 +233,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
       threshold_a: m.threshold_a,
       dim_b: m.dim_b,
       threshold_b: m.threshold_b,
-      action: BACKEND_TO_PRODUCT[editing.rule.action as keyof typeof BACKEND_TO_PRODUCT] ?? 'audit',
+      action: BACKEND_TO_PRODUCT[(editing.rule.action === 'observe' ? m.configured_action : editing.rule.action) as keyof typeof BACKEND_TO_PRODUCT] ?? 'audit',
     };
   }, [editing, defaults, priorityRange]);
 
@@ -264,7 +265,7 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
   const saveMutation = useMutation({
     mutationFn: async (form: BehaviorControlFormData) =>
       (editing
-        ? updateBehaviorControlRule(editing.rule.id, form, apiRequest)
+        ? updateBehaviorControlRule(editing.rule.id, form, apiRequest, editing.rule)
         : createBehaviorControlRule(form, apiRequest)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['behavior-control-rules'] });
@@ -473,6 +474,23 @@ export function BehaviorControlDrawer({ open, onOpenChange, editing, defaults }:
                             </div>
                           </div>
 
+                          <div className="flex items-center gap-3">
+                            <Label htmlFor="behavior-control-observe-mode" className="min-w-[100px] text-right">
+                              {t('behaviorControl.form.observeMode')}
+                            </Label>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                id="behavior-control-observe-mode"
+                                data-testid="behavior-control-observe-mode"
+                                checked={watchAll.observe_mode ?? false}
+                                onCheckedChange={(enabled) => setValue('observe_mode', enabled, { shouldDirty: true })}
+                                aria-label={t('behaviorControl.form.observeMode')}
+                              />
+                              <span className="text-sm text-muted-foreground">
+                                {t(watchAll.observe_mode ? 'behaviorControl.filter.enabled' : 'behaviorControl.filter.disabled')}
+                              </span>
+                            </div>
+                          </div>
                           {/* 管控方向 */}
                           <div className="flex items-center gap-3">
                             <Label className="min-w-[100px] text-right">

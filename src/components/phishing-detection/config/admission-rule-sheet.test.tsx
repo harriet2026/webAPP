@@ -87,6 +87,52 @@ describe('AdmissionRuleSheet duplicate-name conflict (GT-12513)', () => {
   });
 });
 
+describe.each(['create', 'update'] as const)('AdmissionRuleSheet %s name length', (operation) => {
+  it.each(['a', '界', '😀'])('rejects 65 characters and saves 64 trimmed characters: %s', async (character) => {
+    createAdmissionRuleMock.mockResolvedValue({});
+    updateAdmissionRuleMock.mockResolvedValue(undefined);
+    const rule: PhishAdmissionRule | null = operation === 'update' ? {
+      id: 15, revision: 'current-revision', name: '原规则', enabled: true,
+      directions: ['inbound'], require_url: true, sender_first_seen: false,
+      require_qrcode: false,
+    } : null;
+    const { onSaved } = renderSheet(undefined, undefined, rule);
+    const nameInput = screen.getByTestId('rule-name-input');
+    const saveButton = screen.getByTestId('rule-save');
+    const overlongName = character.repeat(65);
+
+    fireEvent.change(nameInput, { target: { value: overlongName } });
+    expect(screen.getByTestId('rule-validation-error')).toHaveTextContent('规则名称不能超过 64 个字符');
+    expect(nameInput).toHaveAccessibleDescription('规则名称不能超过 64 个字符');
+    expect(nameInput).toHaveAttribute('aria-invalid', 'true');
+    expect(nameInput.parentElement).toContainElement(screen.getByTestId('rule-validation-error'));
+    expect(nameInput).toHaveValue(overlongName);
+    expect(saveButton).toBeDisabled();
+    fireEvent.click(saveButton);
+    expect(createAdmissionRuleMock).not.toHaveBeenCalled();
+    expect(updateAdmissionRuleMock).not.toHaveBeenCalled();
+    expect(onSaved).not.toHaveBeenCalled();
+
+    const validName = character.repeat(64);
+    fireEvent.change(nameInput, { target: { value: `  ${validName}  ` } });
+    expect(screen.queryByTestId('rule-validation-error')).not.toBeInTheDocument();
+    expect(nameInput).not.toHaveAttribute('aria-describedby');
+    expect(nameInput).toHaveAttribute('aria-invalid', 'false');
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
+    await waitFor(() => expect(onSaved).toHaveBeenCalledOnce());
+    if (operation === 'create') {
+      expect(createAdmissionRuleMock).toHaveBeenCalledWith(
+        expect.objectContaining({ name: validName }), expect.any(Function),
+      );
+    } else {
+      expect(updateAdmissionRuleMock).toHaveBeenCalledWith(15,
+        expect.objectContaining({ name: validName, expected_revision: 'current-revision' }), expect.any(Function),
+      );
+    }
+  });
+});
+
 describe('AdmissionRuleSheet directional scopes', () => {
   it('saves URL as the only signal without requiring another risk feature', async () => {
     createAdmissionRuleMock.mockResolvedValue({});

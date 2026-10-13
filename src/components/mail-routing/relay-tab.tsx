@@ -98,6 +98,7 @@ import { useApiErrorMessage } from '@/lib/api/use-api-error-message';
 
 interface RelayTabProps {
   tenantId: number;
+  highlightConfigId?: number;
 }
 
 interface Filters {
@@ -119,7 +120,7 @@ const RCPT_MATCH_LABEL_KEY: Record<RcptMatchType, string> = {
   regex: 'fields.rcptMatchRegex',
 };
 
-export function RelayTab({ tenantId }: RelayTabProps) {
+export function RelayTab({ tenantId, highlightConfigId }: RelayTabProps) {
   const t = useTranslations('mailRouting.relay');
   const apiErrorMessage = useApiErrorMessage();
   const ts = useTranslations('mailRouting.shared');
@@ -531,7 +532,9 @@ export function RelayTab({ tenantId }: RelayTabProps) {
           </TableHeader>
           <TableBody>
             {filteredRows.map((row) => (
-              <TableRow key={row.id} data-testid={`mr-relay-row-${row.id}`}>
+              <TableRow key={row.id} data-testid={`mr-relay-row-${row.id}`}
+                aria-selected={highlightConfigId === row.id}
+                className={highlightConfigId === row.id ? 'bg-amber-100 dark:bg-amber-950/30' : undefined}>
                 <TableCell>{row.priority ?? '-'}</TableCell>
                 <TableCell className="max-w-[160px]">
                   <div className="flex items-center gap-1.5">
@@ -739,9 +742,9 @@ export function RelayTab({ tenantId }: RelayTabProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="contains">{t('fields.rcptMatchContains')}</SelectItem>
-                      <SelectItem value="equals">{t('fields.rcptMatchEquals')}</SelectItem>
-                      <SelectItem value="regex">{t('fields.rcptMatchRegex')}</SelectItem>
+                      <SelectItem value="contains" data-testid="mr-relay-rcpt-match-option-contains">{t('fields.rcptMatchContains')}</SelectItem>
+                      <SelectItem value="equals" data-testid="mr-relay-rcpt-match-option-equals">{t('fields.rcptMatchEquals')}</SelectItem>
+                      <SelectItem value="regex" data-testid="mr-relay-rcpt-match-option-regex">{t('fields.rcptMatchRegex')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <Input
@@ -768,8 +771,8 @@ export function RelayTab({ tenantId }: RelayTabProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="0">{t('fields.spamFilterOff')}</SelectItem>
-                    <SelectItem value="1">{t('fields.spamFilterOn')}</SelectItem>
+                    <SelectItem value="0" data-testid="mr-relay-spam-filter-option-off">{t('fields.spamFilterOff')}</SelectItem>
+                    <SelectItem value="1" data-testid="mr-relay-spam-filter-option-on">{t('fields.spamFilterOn')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -44,6 +44,7 @@ function baseView(overrides: Partial<SenderFilterRuleView> = {}): SenderFilterRu
       list_type: 'blacklist',
     },
     is_complex: false,
+    observe_mode: false,
     ...overrides,
   };
 }
@@ -66,6 +67,7 @@ function renderTable(
       onEdit={vi.fn()}
       onDelete={vi.fn()}
       onToggle={vi.fn()}
+      onToggleObserve={vi.fn()}
       groups={groups}
       isLoading={false}
     />,
@@ -87,7 +89,7 @@ describe('SenderFilterTable demo columns', () => {
 
   it('状态列仍是 Switch', () => {
     renderTable([baseView()]);
-    expect(screen.getByRole('switch')).toBeInTheDocument();
+    expect(screen.getByTestId('sender-filter-row-status')).toBeInTheDocument();
   });
 
   it('保留规则名称/发信人/执行动作/修改时间/操作列', () => {

@@ -32,6 +32,7 @@ export async function getDetectionLogs(
   setScalar('start', filters.start);
   setScalar('end', filters.end);
   setScalar('status', filters.status);
+  setScalar('range', filters.range);
   const appendMulti = (key: string, values: unknown[] | undefined) => {
     if (Array.isArray(values)) {
       values.forEach((value) => {

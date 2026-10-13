@@ -113,14 +113,20 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
     ...(hasRecipientDirections ? [draft.recipient_groups, draft.recipient_depts, draft.recipient_emails] : []),
     ...(hasSenderDirection ? [draft.sender_groups, draft.sender_depts, draft.sender_emails] : []),
   ].reduce((sum, values) => sum + (values?.length ?? 0), draft.recipient_tags?.length ?? 0);
-  const validationError = useMemo(() => {
+  const nameError = useMemo(() => {
     if (!draft.name.trim()) return t('errors.needName');
+    // Match the API's Unicode character count after trimming, including emoji.
+    if (Array.from(draft.name.trim()).length > 64) return t('errors.nameTooLong');
+    return null;
+  }, [draft.name, t]);
+  const validationError = useMemo(() => {
+    if (nameError) return nameError;
     if (draft.directions.length === 0) return t('errors.needDirection');
     if (!draft.require_url && !draft.sender_first_seen && !draft.require_qrcode && !draft.require_executable) return t('errors.needRiskSignal');
     if (draft.filter_on && targetCount === 0) return t('errors.needRecipientTarget');
     if ((maxSizeInput.trim() !== '' && !/^\d+$/.test(maxSizeInput.trim())) || !Number.isSafeInteger(draft.max_size_kb ?? 0) || (draft.max_size_kb ?? 0) < 0 || (draft.max_size_kb ?? 0) > 102400000) return t('errors.maxSizeTooLarge');
     return null;
-  }, [draft, t, targetCount, maxSizeInput]);
+  }, [draft, t, targetCount, maxSizeInput, nameError]);
 
   const toggleDirection = (direction: Direction) => patch({
     directions: draft.directions.includes(direction)
@@ -215,7 +221,11 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
           <SheetDescription>{t('sheetDescription')}</SheetDescription>
         </SheetHeader>
         <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
-          <div className="space-y-2"><Label htmlFor="rule-name">{t('colName')}</Label><Input id="rule-name" data-testid="rule-name-input" value={draft.name} onChange={(event) => patch({ name: event.target.value })} /></div>
+          <div className="space-y-2">
+            <Label htmlFor="rule-name">{t('colName')}</Label>
+            <Input id="rule-name" data-testid="rule-name-input" value={draft.name} onChange={(event) => patch({ name: event.target.value })} aria-invalid={Boolean(nameError)} aria-describedby={nameError ? 'rule-name-error' : undefined} />
+            {nameError ? <p id="rule-name-error" className="text-sm text-destructive" data-testid="rule-validation-error">{nameError}</p> : null}
+          </div>
           <section className="space-y-4 rounded-lg border border-border p-4" aria-label={t('sectionScope')}>
             <div><div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-semibold">{t('sectionScope')}</h4><span className="text-xs text-muted-foreground">{t('scopeRelation')}</span></div><p className="mt-1 text-xs text-muted-foreground">{t('scopeHint')}</p></div>
             <Label>{t('colDirection')}</Label>
@@ -237,7 +247,7 @@ export function AdmissionRuleSheet({ open, onOpenChange, rule, onSaved, readOnly
             ] as const).map(([field, label, description]) => (
               <div key={field} className="flex items-center justify-between gap-3 border-t border-border py-3"><div><Label htmlFor={`rule-signal-${field}`}>{t(label)}</Label><p className="mt-1 text-xs text-muted-foreground">{t(description)}</p></div><Switch id={`rule-signal-${field}`} checked={Boolean(draft[field])} data-testid={`rule-${field.replaceAll('_', '-')}`} onCheckedChange={(value) => patch({ [field]: value })} /></div>
             ))}
-            {validationError ? <p className="text-sm text-destructive" data-testid="rule-validation-error">{validationError}</p> : null}
+            {!nameError && validationError ? <p className="text-sm text-destructive" data-testid="rule-validation-error">{validationError}</p> : null}
           </section>
           <div className="flex items-center gap-3"><Switch id="rule-enabled" data-testid="rule-enabled" checked={draft.enabled} onCheckedChange={(enabled) => patch({ enabled })} /><Label htmlFor="rule-enabled">{t('enabledLabel')}</Label></div>
         </div>

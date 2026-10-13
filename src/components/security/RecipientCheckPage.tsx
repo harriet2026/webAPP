@@ -71,6 +71,7 @@ function coalesceDir(
 
 function normalizeLimit(config?: Partial<RecipientLimitConfig> | null): RecipientLimitConfig {
   return {
+    observe_mode: config?.observe_mode ?? false,
     mode: config?.mode || DEFAULT_RECIPIENT_LIMIT_CONFIG.mode,
     is_active: config?.is_active ?? DEFAULT_RECIPIENT_LIMIT_CONFIG.is_active,
     inbound_limit: coalesceDir(DEFAULT_RECIPIENT_LIMIT_CONFIG.inbound_limit!, config?.inbound_limit),
@@ -85,6 +86,7 @@ function normalizeLimit(config?: Partial<RecipientLimitConfig> | null): Recipien
 
 function normalizeCheck(config?: Partial<RecipientCheckConfig> | null): RecipientCheckConfig {
   return {
+    observe_mode: config?.observe_mode ?? false,
     existence_enabled: config?.existence_enabled ?? DEFAULT_RECIPIENT_CHECK_CONFIG.existence_enabled,
     existence_action: config?.existence_action || DEFAULT_RECIPIENT_CHECK_CONFIG.existence_action,
   };
@@ -428,7 +430,11 @@ export function RecipientCheckPage({ embedded = false }: Props) {
           </Button>
         </div>
       ) : configReady ? (
-      <div data-testid="recipient-check-config-content" className={cn('space-y-6', !moduleEnabled && 'pointer-events-none opacity-50')}>
+      <div
+        data-testid="recipient-check-config-content"
+        data-enabled={moduleEnabled}
+        className={cn('space-y-6', !moduleEnabled && 'pointer-events-none opacity-50')}
+      >
         {/* 功能说明横幅 */}
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30">
           <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
@@ -450,6 +456,17 @@ export function RecipientCheckPage({ embedded = false }: Props) {
               <div>
                 <h4 className="text-sm font-medium">{t('recipientCheck.limit.title')}</h4>
                 <p className="mt-0.5 text-xs text-muted-foreground">{t('recipientCheck.limit.desc')}</p>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {limit.observe_mode ? t('recipientCheck.observeMode.enabled') : t('recipientCheck.observeMode.disabled')}
+                </span>
+                <Switch
+                  checked={limit.observe_mode ?? false}
+                  onCheckedChange={(observe_mode) => setLimit((current) => ({ ...current, observe_mode }))}
+                  aria-label={t('recipientCheck.observeMode.limitLabel')}
+                  data-testid="recipient-limit-observe-mode-switch"
+                />
               </div>
             </div>
           </div>
@@ -587,6 +604,17 @@ export function RecipientCheckPage({ embedded = false }: Props) {
               <div>
                 <h4 className="text-sm font-medium">{t('recipientCheck.existence.title')}</h4>
                 <p className="mt-0.5 text-xs text-muted-foreground">{t('recipientCheck.existence.desc')}</p>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {check.observe_mode ? t('recipientCheck.observeMode.enabled') : t('recipientCheck.observeMode.disabled')}
+                </span>
+                <Switch
+                  checked={check.observe_mode ?? false}
+                  onCheckedChange={(observe_mode) => setCheck((current) => ({ ...current, observe_mode }))}
+                  aria-label={t('recipientCheck.observeMode.existenceLabel')}
+                  data-testid="recipient-existence-observe-mode-switch"
+                />
               </div>
             </div>
           </div>

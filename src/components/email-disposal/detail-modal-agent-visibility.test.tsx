@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
@@ -65,7 +65,7 @@ function jsonResponse(body: object, status = 200): Response {
   });
 }
 
-function analysisResponse(): object {
+function analysisResponse() {
   return {
     scope: 'all',
     final_verdict: 'safe',
@@ -248,5 +248,123 @@ describe('DetailModal agent visibility', () => {
     expect(fetchMock.mock.calls.filter(([input]) => (
       String(input) === '/api/v1/agent-center/overview?include_stats=false'
     ))).toHaveLength(1);
+  });
+});
+
+describe('DetailModal phishing progress refresh', () => {
+  it('keeps mail details available when analysis fails and retries both responses', async () => {
+    let failed = false;
+    const original = fetchMock.getMockImplementation()!;
+    fetchMock.mockImplementation(async (...args) => {
+      if (String(args[0]) === '/api/v1/mail-logs/1/analysis' && !failed) {
+        failed = true;
+        return jsonResponse({ error: 'analysis unavailable' }, 500);
+      }
+      return original(...args);
+    });
+    renderDetailModal();
+    expect(await screen.findByTestId('analysis-error')).toHaveTextContent('检测结果加载失败');
+    expect(screen.getAllByText('Agent visibility regression').length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: '重试' }));
+    expect(await screen.findByTestId('analysis-check-phishingAgent')).toHaveTextContent('跳过');
+    for (const url of ['/api/v1/mail-logs/1', '/api/v1/mail-logs/1/analysis']) {
+      expect(fetchMock.mock.calls.filter(([input]) => String(input) === url)).toHaveLength(2);
+    }
+  });
+
+  it('refreshes both responses on reopen and publishes them together', async () => {
+    let complete = false;
+    let releaseAnalysis: (() => void) | undefined;
+    const original = fetchMock.getMockImplementation()!;
+    fetchMock.mockImplementation(async (...args) => {
+      const url = String(args[0]);
+      if (url === '/api/v1/mail-logs/1' && complete) {
+        const response = await original(...args);
+        return jsonResponse({ ...await response.json(), phish_agent_check: { status: 'completed', checked: true, verdict: 'phishing_suspected', risk_level: 'high', confidence: 0.85 } });
+      }
+      if (url === '/api/v1/mail-logs/1/analysis' && complete) {
+        await new Promise<void>((resolve) => { releaseAnalysis = resolve; });
+        const response = analysisResponse();
+        response.stages[3].status = 'threat';
+        response.stages[3].checks[0].status = 'threat';
+        return jsonResponse(response);
+      }
+      return original(...args);
+    });
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: 60_000, refetchOnWindowFocus: false } },
+    });
+    const view = (open: boolean) => (
+      <QueryClientProvider client={queryClient}>
+        <AuthContext.Provider value={createAuthContextValue()}>
+          <NextIntlClientProvider locale="zh" messages={zh as never}>
+            <DetailModal open={open} mailLogId={1} onOpenChange={vi.fn()} aiEnabled />
+          </NextIntlClientProvider>
+        </AuthContext.Provider>
+      </QueryClientProvider>
+    );
+    const { rerender } = render(view(true));
+    expect(await screen.findByTestId('analysis-check-phishingAgent')).toHaveTextContent('跳过');
+    rerender(view(false));
+    complete = true;
+    rerender(view(true));
+    await waitFor(() => expect(releaseAnalysis).toBeTypeOf('function'));
+    expect(screen.getByTestId('analysis-check-phishingAgent')).not.toHaveTextContent('85%');
+    await act(async () => { releaseAnalysis!(); });
+    await waitFor(() => {
+      const row = screen.getByTestId('analysis-check-phishingAgent');
+      expect(row).toHaveTextContent('威胁');
+      expect(row).toHaveTextContent('85%');
+      expect(row).not.toHaveTextContent('跳过');
+    });
+    queryClient.clear();
+  });
+
+  it.each(['completion', 'close'])('polls both responses and stops on %s', async (stop) => {
+    let complete = false;
+    const original = fetchMock.getMockImplementation()!;
+    fetchMock.mockImplementation(async (...args) => {
+      const url = String(args[0]);
+      if (url === '/api/v1/mail-logs/1') {
+        const response = await original(...args);
+        return jsonResponse({
+          ...await response.json(),
+          status: 'sidelined',
+          phish_agent_check: complete
+            ? { status: 'completed', checked: true, risk_level: 'high', confidence: 0.85 }
+            : { status: 'running', checked: false },
+        });
+      }
+      if (url === '/api/v1/mail-logs/1/analysis') {
+        const response = analysisResponse();
+        response.stages[3].status = complete ? 'threat' : 'processing';
+        response.stages[3].checks[0].status = complete ? 'threat' : 'processing';
+        return jsonResponse(response);
+      }
+      return original(...args);
+    });
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] });
+    try {
+      const { unmount } = renderDetailModal();
+      await act(async () => { await vi.advanceTimersByTimeAsync(100); });
+      expect(screen.getByTestId('analysis-check-phishingAgent')).toHaveTextContent('处理中');
+      complete = stop === 'completion';
+      await act(async () => { await vi.advanceTimersByTimeAsync(3100); });
+      // React Query notifies observers on a timeout after the request settles.
+      await act(async () => { await vi.advanceTimersByTimeAsync(10); });
+      const row = screen.getByTestId('analysis-check-phishingAgent');
+      expect(row).toHaveTextContent(complete ? '威胁' : '处理中');
+      if (complete) expect(row).toHaveTextContent('85%');
+      const counts = () => fetchMock.mock.calls.filter(([input]) => /^\/api\/v1\/mail-logs\/1(?:\/analysis)?$/.test(String(input))).length;
+      expect(counts()).toBe(4);
+      if (stop === 'close') unmount();
+      await act(async () => { await vi.advanceTimersByTimeAsync(6000); });
+      expect(counts()).toBe(4);
+      if (stop === 'completion') unmount();
+      await act(async () => { await vi.advanceTimersByTimeAsync(6000); });
+      expect(counts()).toBe(4);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

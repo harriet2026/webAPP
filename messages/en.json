@@ -150,7 +150,9 @@
     "ruleEffectivenessContext": {
       "label": "From Rule Effectiveness Statistics:",
       "back": "Back to Rule Effectiveness Statistics"
-    }
+    },
+    "observeMode": "Observation mode",
+    "observeModeHint": "Record matches without applying this policy’s disposition or additional actions. Subsequent rules still apply."
   },
   "ruleImportExport": {
     "trigger": "Unified import / export",
@@ -4227,7 +4229,10 @@
     "statusAll": "All statuses",
     "statusEnabled": "Enabled",
     "statusDisabled": "Disabled",
-    "loadFailed": "Failed to load sender filter rules. Please retry."
+    "loadFailed": "Failed to load sender filter rules. Please retry.",
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule was deleted, does not belong to the sender blacklist/whitelist module, or the current account lacks access.",
+    "observeMode": "Observe Mode",
+    "observeModeHelp": "When enabled, the rule only logs hits without taking action, useful for verifying rule behavior"
   },
   "personalFilter": {
     "title": "User Whitelist/Blacklist",
@@ -4487,7 +4492,9 @@
     "cardTooltipStrategy": "Strategy: Content rules",
     "cardTooltipActions": "Actions: Isolate, deliver",
     "cardTooltipEffect": "Effect: Matching messages are isolated and retained in quarantine",
-    "cardTooltipQuarantineHint": "Isolated messages can be reviewed in Mail Quarantine"
+    "cardTooltipQuarantineHint": "Isolated messages can be reviewed in Mail Quarantine",
+    "observeMode": "Observe Mode",
+    "observeModeHint": "When enabled, the rule only logs hits without taking any block/quarantine action, useful for verifying rule effectiveness"
   },
   "authSpoofing": {
     "title": "Auth Spoofing Detection",
@@ -4800,7 +4807,8 @@
       "priority": "Priority",
       "status": "Status",
       "modified": "Modified",
-      "operations": "Operations"
+      "operations": "Operations",
+      "observeMode": "Observe Mode"
     },
     "direction": {
       "inbound": "Inbound",
@@ -4933,7 +4941,8 @@
       "relationAnd": "AND (all must match)",
       "relationOr": "OR (any one matches)",
       "conditionCount": "{count}/4 added",
-      "threshold": "Threshold"
+      "threshold": "Threshold",
+      "observeMode": "Observe Mode"
     },
     "preview": {
       "title": "Current Configuration Effect",
@@ -5086,7 +5095,9 @@
       "typeSender": "Sender Group",
       "typeIp": "IP Group",
       "typeOrg": "Organization Group"
-    }
+    },
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule was deleted, does not belong to the behavior control module, or the current account lacks access.",
+    "toggleObserveMode": "Toggle observe mode for rule “{name}”"
   },
   "attachmentSecurity": {
     "title": "Attachment Security",
@@ -5349,6 +5360,20 @@
       "lnkToUrl": "Extract URLs from LNK for Evaluation",
       "lnkAction": "LNK Suspicious Action",
       "tnefUnwrap": "TNEF (winmail.dat) Auto-Unwrap"
+    },
+    "observation": {
+      "antivirus": {
+        "title": "Antivirus observation mode",
+        "description": "Only record virus and scan timeout hits without executing the disposition actions configured for this module."
+      },
+      "image": {
+        "title": "Image detection observation mode",
+        "description": "Only record OCR and QR code detection hits without executing the disposition actions configured for this module."
+      },
+      "encrypted": {
+        "title": "Encrypted attachment observation mode",
+        "description": "Only record decryption failure hits without executing the disposition actions configured for this module."
+      }
     }
   },
   "urlProtection": {
@@ -5612,7 +5637,12 @@
     "loadFail": "Load failed: {error}",
     "loadRetry": "Retry",
     "copyDone": "Copied to {directions}; save to take effect",
-    "copyNoChange": "Target direction already matches the current one; nothing to change"
+    "copyNoChange": "Target direction already matches the current one; nothing to change",
+    "observeMode": {
+      "label": "Intent strategy observe mode",
+      "observing": "Observe mode",
+      "hint": "When enabled, hits are recorded and counted without executing the configured disposition action"
+    }
   },
   "similarDetection": {
     "title": "Similar Email & Subject Detection",
@@ -5993,6 +6023,7 @@
       "policyClear": "Clear disposal basis",
       "platformManagedPolicy": "Platform-managed Policy",
       "policyStages": {
+        "0": "Mail Admission",
         "1": "Connection",
         "2": "Identity",
         "3": "Content",
@@ -6696,6 +6727,7 @@
         "platformPolicyListReason": "Intercepted by platform-managed policy",
         "basisScope": "Applies to",
         "hitModules": "Modules hit",
+        "configuredAction": "Configured action: {action}",
         "hitModulesHint": "Modules whose actions applied to at least one recipient. Terminal candidates that only matched conditions but affected no recipient are not counted as hits.",
         "effectiveFor": "Effective for: {list}",
         "matchedOnlyFor": "Matched only: {list}"
@@ -6779,10 +6811,7 @@
     "ruleEffectivenessContext": {
       "label": "From rule effectiveness statistics:",
       "observedSince": "Reporting window: {date}",
-      "back": "Back to rule effectiveness statistics",
-      "counts": "{hits} recipient hits across {messages} messages; {missing} message logs unavailable.",
-      "matches": "View matched recipient facts (current page, up to 100)",
-      "orphans": "View hits with unavailable logs (current page, up to 100)"
+      "back": "Back to rule effectiveness statistics"
     }
   },
   "advancedRulesFeature": {
@@ -7005,7 +7034,8 @@
       "sectionScope": "Effective Scope",
       "sectionValidity": "Validity Period",
       "sectionDescription": "Remarks",
-      "expiresAtHint": "Leave blank = permanent"
+      "expiresAtHint": "Leave blank = permanent",
+      "sectionObserveMode": "Observe Mode"
     },
     "cannotSave": {
       "name": "Name is required",
@@ -7654,7 +7684,13 @@
       "columnConfig": "Config",
       "terminalNoAddons": "Terminal action — add-on policies are not applied.",
       "emptySummary": "Nothing configured yet."
-    }
+    },
+    "deepLinkLoading": "Locating matched rule {ruleId}...",
+    "deepLinkUnavailable": "Unable to open rule {ruleId}: the rule has been deleted, does not belong to the advanced filter rules module, or the current account does not have access.",
+    "observeMode": "Observe Mode",
+    "observeModeHint": "When enabled, the rule only logs hits without taking any disposition action, useful for verifying rule effectiveness",
+    "enableObserveMode": "Enable observe mode",
+    "disableObserveMode": "Disable observe mode"
   },
   "disposalSettings": {
     "pageTitle": "Disposal Settings",
@@ -8459,6 +8495,9 @@
     }
   },
   "infrastructure": {
+    "fetchedAt": "Last successful fetch",
+    "updateTimeHint": "Earliest successful fetch time across the current tab's data blocks. Updates after refresh completes; retained on failure. Not the metric sampling time.",
+    "fetchFailed": "Data fetch failed",
     "title": "Infrastructure",
     "description": "System infrastructure monitoring",
     "selectNode": "Select node",
@@ -8577,8 +8616,8 @@
         "error": "Metric query failed",
         "unsupported": "Metric not supported"
       },
-      "slowQueryFailed": "Failed to retrieve cumulative SQL statistics. Please try again later.",
-      "slowQueryUnsupported": "This SQL statistics ranking is not supported for this database.",
+      "slowQueryFailed": "Failed to retrieve the selected node's cumulative SQL statistics. Check its API and local monitoring connection.",
+      "slowQueryUnsupported": "The selected node does not support a local SQL statistics ranking.",
       "noSlowQueries": "No visible statistics for executed SQL",
       "lockWaitFailed": "Failed to retrieve lock waits. Please try again later.",
       "lockWaitUnsupported": "Lock-wait monitoring is not supported for this database.",
@@ -8594,15 +8633,32 @@
       "clientConnections": "Client connections",
       "queryAvailable": "Monitoring DB connection query available",
       "replication": {
-        "title": "Replication status", "primary": "Primary", "replica": "Replica", "peers": "Observed replicas: {count}",
-        "offset": "Maximum replication offset gap", "delay": "Maximum replication time lag",
+        "title": "Replication status",
+        "primary": "Primary",
+        "replica": "Replica",
+        "peers": "Observed replicas: {count}",
+        "offset": "Maximum replication offset gap",
+        "delay": "Maximum replication time lag",
         "primaryOffset": "Maximum observed replica offset gap",
         "receiveOffset": "Local received-to-applied offset gap",
         "redisOffset": "Replication offset gap",
+        "details": "Observation details",
         "dbScope": "Local database replication observed on the selected node, valid for five minutes and independent of the historical range. Missing samples never fall back to the primary. No observed replicas does not confirm a standalone deployment.",
         "redisScope": "Latest successful scrape on the selected node. Connected replicas do not prove that all replicas are synchronized.",
         "receiveScope": "Local received-to-applied backlog on the monitored replica, not the full gap from the remote primary.",
-        "states": {"no_receiver":"No WAL receiver observed","streaming":"Replication streaming","syncing":"Synchronizing","replicas_connected":"Replicas connected","no_replicas":"No replicas observed","unknown":"Replication state unknown","missing":"No replication data","stale":"Replication data stale","error":"Replication query failed","unsupported":"Replication query unsupported","down":"Replication link or probe failed"}
+        "states": {
+          "no_receiver": "No WAL receiver observed",
+          "streaming": "Replication streaming",
+          "syncing": "Synchronizing",
+          "replicas_connected": "Replicas connected",
+          "no_replicas": "No replicas observed",
+          "unknown": "Replication state unknown",
+          "missing": "No replication data",
+          "stale": "Replication data stale",
+          "error": "Replication query failed",
+          "unsupported": "Replication query unsupported",
+          "down": "Replication link or probe failed"
+        }
       },
       "summary": {
         "connections": "Current connections / limit",
@@ -8610,7 +8666,8 @@
         "redisScope": "Current ordinary client connections on the selected node, including idle and monitoring clients. P99 uses nearest rank over all successful native PING samples in the selected range."
       },
       "slowQuery": "Top 5 SQL by cumulative total time",
-      "sqlRankingScope": "Sorted by cumulative total time, using statistics visible to the API monitoring connection (OSG_MONITOR_DB_DSN). Independent of the node and time filters above; no slow threshold or business-only SQL filter is applied.",
+      "sqlRankingScope": "SQL statistics visible to node {node}'s local monitoring connection, sorted by cumulative total time. Follows node selection, independent of the historical range; no slow threshold or business-only SQL filter is applied.",
+      "sqlRankingNodeUnavailable": "No SQL ranking for the selected node. Check that its API and local monitoring connection are updated.",
       "sqlRankingTimeScope": "Counts and durations are retained cumulative values. Resets, restarts and entry eviction affect the period; its start is unknown. Statistics update time is not last execution time and cannot turn totals into selected-range statistics.",
       "statementIdentity": "Statistics identity",
       "queryId": "SQL ID",
@@ -8628,7 +8685,7 @@
       "query": "Query",
       "avgMs": "Cumulative mean (ms)",
       "totalMs": "Cumulative total (ms)",
-      "lockWaitScope": "Current waiting lock requests visible to the API monitoring connection; independent of the node and time filters above. Oldest statement start first, unknown times last. One statement may have multiple requests.",
+      "lockWaitScope": "Current waiting lock requests visible to node {node}'s local monitoring connection. Follows node selection, independent of the historical time range. Oldest statement start first, unknown times last. One statement may have multiple requests.",
       "lockWaitTimeBasis": "Age is measured from query_start, including execution before waiting, not precise lock-wait duration. Relation names are resolved only in the connected database; other targets use raw identifiers. Blockers are not identified by this list.",
       "lockWaitCount": "Showing {shown} of {total} waiting lock requests",
       "lockWaitCountUnknown": "This API did not provide the total request count or complete ordering information.",
@@ -8837,6 +8894,10 @@
       "disabledBanner": "The Phishing Detection Agent is disabled. Existing logs remain available, but no new detection tasks are submitted."
     },
     "kpi": {
+      "totalQuarantined": "Total quarantined",
+      "totalReview": "Total review",
+      "totalRecalled": "Total recalled",
+      "totalRecallSuccess": "Total recall success",
       "todayDetected": "Detected Today",
       "todayQuarantined": "Quarantined Today",
       "pendingReview": "Pending Review",
@@ -8875,6 +8936,7 @@
       "manual_hold": "Manual Hold",
       "unknown": "Unknown"
     },
+    "policyAction": "Policy action: {action}",
     "policyDisposition": {
       "proceed": "Proceed",
       "audit": "Audit",
@@ -8939,7 +9001,7 @@
       "urlPhishing": "Phishing",
       "urlSuspicious": "Suspicious",
       "urlNormal": "Normal",
-      "urlFindings": "URL Findings",
+      "urlFindings": "URL detection details",
       "urlFindingsTitle": "Link detection for this message ({count} links)",
       "urlLinks": "links",
       "urlColumn": "URL",
@@ -8966,6 +9028,7 @@
       "truncatedBanner": "Investigation details may be truncated due to volume"
     },
     "detail": {
+      "viewDisposalHistory": "View disposal history",
       "title": "Detection Detail",
       "noSubject": "(no subject)",
       "block": "Block",
@@ -8973,6 +9036,21 @@
       "liveStateHint": "The mail is still being processed in the sideline queue; handle it there",
       "noDisposalTarget": "This record has no operable mail object.",
       "failureReason": "Failure reason",
+      "failureReasonValue": {
+        "check_missing": "No phishing check result was found; no verdict was produced",
+        "check_result_corrupt": "The phishing check result is corrupted; no verdict was produced",
+        "analysis_not_checked": "Phishing analysis did not complete (failed or did not run); no verdict was produced",
+        "analysis_partial": "Phishing analysis result is incomplete; no verdict was produced",
+        "confidence_missing": "The analysis result has no confidence; risk level not determined",
+        "confidence_invalid": "The analysis result has an invalid confidence; risk level not determined",
+        "legacy_no_complete_snapshot": "A task in progress before the upgrade lacks a complete snapshot and was not re-evaluated",
+        "realtime_timeout_cancelled": "Real-time detection timed out; mail was delivered per the timeout policy and risk was not determined",
+        "realtime_continuation_deadline_exceeded": "The analysis task could not be submitted within the background-continuation window; risk not determined",
+        "observe_deadline_exceeded": "Observe-mode analysis exceeded its deadline; risk not determined",
+        "decision_undetermined": "No verdict was produced"
+      },
+      "analysisFailed": "Phishing analysis failed and produced no verdict; see the run log for technical details.",
+      "diagnostic": "Diagnostics",
       "mailContext": "Mail Context",
       "sender": "Sender",
       "recipients": "Recipients",
@@ -8994,7 +9072,10 @@
       "exportFilename": "phishing-detection-{id}.json",
       "noSteps": "No step records",
       "noVerdictContent": "The agent completed detection; detailed verdict content is not yet available",
-      "resultTruncatedHint": "Investigation details may be truncated due to size; some content may be incomplete."
+      "resultTruncatedHint": "Assessment details were truncated due to data size; some content is incomplete.",
+      "runLogRawNote": "Raw run log below, untranslated; historical data may lack step status.",
+      "stepStatusNotRecorded": "Not recorded",
+      "stepStatusNotRecordedHint": "Historical data did not record a status for this step"
     },
     "block": {
       "title": "Block this mail",
@@ -9056,7 +9137,41 @@
     "navPhishingAgent": "Phishing Detection Agent",
     "collapseMenu": "Collapse",
     "expandMenu": "Expand",
-    "urlVerdict": {}
+    "urlVerdict": {},
+    "urlDetail": {
+      "title": "URL Detection Details",
+      "view": "View Evidence Trace",
+      "viewAriaLabel": "View evidence trace for {url}",
+      "copy": "Copy URL",
+      "copied": "Copied",
+      "riskLevel": "Risk level",
+      "linkSection": "Link & Resolution",
+      "originalUrl": "Original URL",
+      "finalUrl": "Final URL",
+      "redirected": "Redirected",
+      "noRedirect": "No redirect",
+      "redirectChain": "Redirect chain",
+      "host": "Host",
+      "resolvedIps": "Resolved IPs",
+      "reputationSection": "Reputation & Intelligence",
+      "rbl": "RBL Blocklist",
+      "threatIntel": "Cloud Intelligence",
+      "domainAge": "Domain Age",
+      "tlsCert": "TLS Certificate",
+      "notChecked": "Not checked",
+      "notHit": "No hit",
+      "listed": "Listed",
+      "domainAgeDays": "{days} days",
+      "domainRegistered": "Registered on {date}",
+      "certTrusted": "Chain trusted",
+      "certUntrusted": "Trust chain validation failed",
+      "certIssuer": "Issued by {issuer}",
+      "screenshotSection": "Landing Page Screenshot",
+      "screenshotNoStorage": "This message has no storage node; no landing-page screenshot was retained",
+      "screenshotRetained": "Screenshot retained; online viewing API pending",
+      "noRetainedEvidence": "No available retained evidence",
+      "retainedSources": "Retained sources"
+    }
   },
   "phishingConfig": {
     "pageTitle": "Detection Engine Config",
@@ -9153,6 +9268,7 @@
       "cancel": "Cancel",
       "errors": {
         "needName": "Enter a rule name",
+        "nameTooLong": "Rule name cannot exceed 64 characters",
         "needDirection": "Select at least one mail-flow direction",
         "needRiskSignal": "Please enable at least one risk signal",
         "needRecipientTarget": "Select at least one group, department, or email address when the people filter is on.",
@@ -9198,20 +9314,21 @@
         "realtime": "Apply audit, quarantine, discard, or continue according to the four risk levels.",
         "observe": "Keep complete findings without applying risk-policy actions."
       },
-      "observeModeBanner": "Observe mode records hits only and applies no disposition, mark, or other addon; hidden saved values are preserved.",
+      "observeModeBanner": "Observe mode records hits only and applies no disposition, mark, or other addon. The policies below stay editable and are saved; their actions are applied after switching back to real-time detection. The background-continuation setting is kept unchanged.",
       "timeoutPolicy": "Timeout timeline",
-      "timeoutMinutes": "Realtime wait (minutes)",
+      "timeoutMinutes": "Detection wait (minutes)",
       "maxRecheckMinutes": "Background recheck (minutes)",
       "timeoutAsync": "Continue in background after timeout",
-      "timeoutAsyncHint": "Deliver after the realtime timeout, then continue analysis and recall when needed.",
+      "timeoutAsyncHint": "Deliver after the detection timeout, then continue analysis in the background. Recall when needed in real-time detection mode.",
       "confidencePolicy": "Confidence disposition policy",
-      "confidenceHint": "Four levels continuously cover 0–100; edit only the three shared cutoffs.",
+      "confidenceHint": "Four levels continuously cover 0%–100%; edit only the three shared cutoffs.",
+      "policyOrderHint": "Higher risk must not use a weaker disposition; adjacent levels may match. Disposition order: {order}.",
       "cutoff": {
         "low": "Low starts",
         "medium": "Medium starts",
         "high": "High starts"
       },
-      "invalidCutoffs": "Cutoffs must be strictly increasing and remain between 0 and 100.",
+      "invalidCutoffs": "Cutoffs must be strictly increasing and remain between 0% and 100%.",
       "invalidTimeoutWindow": "Realtime wait must be 1–300 minutes and background recheck must be 1–60 minutes.",
       "range": "Confidence range",
       "risk": "Risk level",
@@ -9231,8 +9348,8 @@
       },
       "markText": "Mark text",
       "markTextRequired": "Mark text is required when an add-on mark is enabled.",
-      "markTextTooLong": "Mark text cannot exceed 20 characters.",
-      "markTextLimit": "Up to 20 characters.",
+      "markTextTooLong": "Mark text cannot exceed {limit} characters.",
+      "markTextLimit": "Up to {limit} characters.",
       "timeoutSectionTitle": "Timeout timeline",
       "timeoutScopeNote": "Total timeout / async timeout apply to all sideline checks.",
       "soon": "Coming soon",
@@ -10947,7 +11064,13 @@
       },
       "badge": {}
     },
-    "footerNote": "Recipient check runs at the RCPT TO stage, forming end-to-end 'send + receive' protection together with sending behavior control. Threshold range: 1-1000; -1 means unlimited."
+    "footerNote": "Recipient check runs at the RCPT TO stage, forming end-to-end 'send + receive' protection together with sending behavior control. Threshold range: 1-1000; -1 means unlimited.",
+    "observeMode": {
+      "enabled": "Observe only",
+      "disabled": "Enforce actions",
+      "limitLabel": "Recipient limit observe mode",
+      "existenceLabel": "Recipient existence observe mode"
+    }
   },
   "userList": {
     "blacklistRules": "Blacklist Rules",
@@ -11661,6 +11784,7 @@
       "profile_id_invalid_for_tenant": "The selected detection profile does not exist or does not belong to the current tenant",
       "rule_not_found": "Admission rule not found",
       "rule_name_exists": "An admission rule with this name already exists. Use a different name",
+      "rule_name_required": "Admission rule name is required",
       "revision_conflict": "The admission rule was modified by someone else; please refresh and retry",
       "integrity_error": "Admission rule (ID {rule_id}) failed the integrity check; please contact the administrator (rule UID: {rule_uid})",
       "group_invalid": "The admission rule references an invalid group (group UID: {group_uid})"
@@ -12022,6 +12146,18 @@
       "rate_limited": "Too many requests, please try again later"
     },
     "phishing_agent": {
+      "risk_policy": {
+        "policy_missing": "Risk policy is required.",
+        "cutoffs_invalid": "Risk cutoffs must be integers satisfying 0 < low < medium < high ≤ 100.",
+        "levels_invalid": "Risk policy must contain exactly suspicious, low, medium and high.",
+        "disposition_invalid": "Disposition “{disposition}” is not supported for {risk_level}.",
+        "disposition_order_conflict": "{risk_level}: “{disposition}” is weaker than {previous_risk_level}: “{previous_disposition}”. Strengthen the higher risk disposition or weaken the lower risk disposition.",
+        "mark_not_allowed": "{risk_level}: marking is only allowed with Proceed.",
+        "mark_positions_required": "{risk_level}: select at least one mark position.",
+        "mark_position_invalid": "{risk_level}: unsupported mark position.",
+        "mark_text_required": "{risk_level}: mark text is required when marking is enabled.",
+        "mark_text_too_long": "{risk_level}: mark text must not exceed {limit} characters."
+      },
       "config_not_initialized": "Phishing detection configuration is not initialized; please contact the administrator",
       "config_version_conflict": "The configuration was modified by someone else (conflicting domains: {conflict_domains}); please refresh and retry",
       "control_revision_conflict": "The switch state was modified by someone else; please refresh and retry",
@@ -12032,7 +12168,7 @@
   "assessment": {
     "retainedRange": "Retained byte range [{start}, {end}) of {bytes} captured source bytes",
     "retentionScope": "Citations cover only this retained content, excluding omitted content.",
-    "title": "Assessment factors",
+    "title": "Assessment evidence",
     "version": "Report version {version}",
     "subjectKinds": {
       "mail": "Email",
@@ -12149,14 +12285,24 @@
       "limitation": "Note",
       "sources": "View evidence ({count})",
       "directions": {
-        "supports_threat": "Threat signal",
-        "supports_legitimate": "Legitimate signal",
-        "limits_certainty": "Assessment limitation",
-        "unknown": "Other evidence"
+        "supports_threat": "Points to phishing",
+        "supports_legitimate": "Points to legitimate",
+        "limits_certainty": "Uncertainty factor",
+        "unknown": "Direction unclear"
+      },
+      "intro": "Direction is decided by evidence pointing to phishing or legitimate; uncertainty factors only affect confidence, not direction.",
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all",
+      "strengthHint": "The model's strength rating for this factor: strong / moderate / weak",
+      "directionHints": {
+        "supports_threat": "This evidence supports the phishing verdict",
+        "supports_legitimate": "This evidence supports the legitimate verdict",
+        "limits_certainty": "This evidence conflicts with the verdict or is incomplete, affecting confidence",
+        "unknown": "Evidence with an unrecognized direction"
       }
     },
     "presentation": {
-      "title": "Mail assessment",
+      "title": "Assessment conclusion",
       "undecided": "Undecided",
       "policySource": "Determined by the tenant policy frozen for this investigation",
       "policyDisposition": "Policy disposition",
@@ -12164,7 +12310,8 @@
       "summary": "Model analysis summary",
       "summaryHint": "This summary is model analysis. Risk classification and policy disposition follow the policy result above.",
       "rawVerdict": "View original model verdict",
-      "verdictHint": "The model verdict is not the tenant risk classification or confirmation that disposition has been executed."
+      "verdictHint": "The model verdict is not the tenant risk classification or confirmation that disposition has been executed.",
+      "threatScoreHint": "Threat score converted from the tenant policy thresholds frozen at detection time; out of 100"
     },
     "sourceTargets": {
       "mail": {
@@ -12189,7 +12336,7 @@
         "web_fetch": "Web fetch",
         "get_sender_history": "Sender history",
         "search_similar_messages": "Similar messages",
-        "get_attachment_findings": "Attachment findings",
+        "get_attachment_scan_evidence": "Attachment findings",
         "lookup_domain_age": "Domain age",
         "inspect_tls_cert": "TLS certificate inspection",
         "dig": "DNS query",
@@ -12197,6 +12344,55 @@
         "check_rbl_blocklist": "RBL lookup"
       },
       "mailIdentity": "Mail identity"
+    },
+    "gapsGroups": {
+      "unobserved": "Not checked",
+      "omitted": "Omitted or truncated",
+      "other": "Other coverage limits"
+    },
+    "toolObs": {
+      "scoreValue": "{score} pts",
+      "features": "Matched features",
+      "noFeatures": "No suspicious features matched",
+      "checks": "Structural checks",
+      "trusted": "Trusted-domain check",
+      "structure": "URL structure",
+      "observation": "Observation",
+      "yes": "Yes",
+      "no": "No",
+      "none": "None",
+      "fields": {
+        "input_url": "Input URL",
+        "normalized_url": "Normalized URL",
+        "scheme": "Scheme",
+        "host": "Host",
+        "host_depth": "Subdomain depth",
+        "port": "Port",
+        "path": "Path",
+        "query": "Query string",
+        "fragment": "Fragment",
+        "suspicious_indicators": "Suspicious indicators",
+        "indicator_weights": "Indicator weights",
+        "url_risk_summary": "Score summary",
+        "matched_suspicious_host_keywords": "Suspicious host keywords",
+        "matched_suspicious_path_keywords": "Suspicious path keywords",
+        "matched_suspicious_path_signals": "Suspicious path signals",
+        "matched_suspicious_suffixes": "Suspicious suffixes",
+        "matched_redirect_params": "Redirect parameters",
+        "matched_sensitive_query_params": "Sensitive query parameters",
+        "has_base64_like_segment": "Base64-like segment",
+        "has_hex_like_segment": "Hex-like segment",
+        "has_long_subdomain_label": "Overlong subdomain label",
+        "trusted_domain_allowlist_loaded": "Allowlist loaded",
+        "trusted_domain_match": "Trusted-domain match",
+        "matched_trusted_domain": "Matched trusted domain",
+        "trusted_domain_match_type": "Match type",
+        "trusted_domain_source": "Allowlist source",
+        "trusted_domain_allowlist_error": "Allowlist load error",
+        "url_risk_score": "Risk score",
+        "url_risk_level": "Risk level"
+      },
+      "unknown": "Unknown"
     }
   },
   "ruleEffectiveness": {
@@ -12208,6 +12404,8 @@
       "forbiddenDescription": "Your account lacks statistics permission. Please contact an administrator.",
       "loadFailedTitle": "Failed to load rule effectiveness statistics",
       "loadFailedDescription": "The service is temporarily unavailable or a network error occurred. Please retry later.",
+      "timeoutTitle": "Rule effectiveness request timed out",
+      "timeoutDescription": "The service did not respond within 30 seconds. The network may be unstable or the data volume large. Please try again later.",
       "retry": "Reload",
       "retrying": "Retrying…"
     },
@@ -12217,7 +12415,8 @@
       "avgObservedDays": "Avg. Observed Duration",
       "pendingReviewCount": "Policies Pending Promotion",
       "vsPrevious": "vs previous",
-      "days": "days"
+      "days": "days",
+      "scopeHint": "Metrics below are summarized for the selected time range"
     },
     "filter": {
       "timeRange": {
@@ -12233,7 +12432,9 @@
           "invalid": "Please select a start and end date",
           "order": "End date cannot be earlier than start date",
           "tooLong": "Range cannot exceed {max} days"
-        }
+        },
+        "label": "Custom statistics date range",
+        "placeholder": "Select statistics dates"
       },
       "modules": {
         "label": "Policy Module",
@@ -12242,13 +12443,30 @@
         "phishing_detection": "Phishing Detection Agent",
         "sender_filter": "Sender lists",
         "similar_detection_similar_email": "Similar email detection",
-        "similar_detection_same_subject": "Same subject detection"
+        "similar_detection_same_subject": "Same subject detection",
+        "behavior_control": "Sending behavior control",
+        "content_rules": "Content rules",
+        "recipient_check": "Recipient check",
+        "intent_engine": "Intent engine",
+        "attachment_security": "Attachment security",
+        "advanced_filter_rules": "Advanced filter rules",
+        "selectedCount": "{count} policy modules selected"
       },
       "durationBucket": {
         "label": "Observed Duration",
         "lt7": "Under 7 days",
         "7to30": "7-30 days",
         "gt30": "Over 30 days"
+      },
+      "timeRangeLabel": "Statistics time range",
+      "timeRangeValue": "Statistics time range: {range}",
+      "stages": {
+        "label": "Policy stage",
+        "all": "All stages",
+        "stage2": "Stage 2: Sender and recipient policies",
+        "stage3": "Stage 3: Content",
+        "stage4": "Stage 4: Intelligent analysis",
+        "stage5": "Stage 5: Comprehensive policies"
       }
     },
     "wouldBeActions": {
@@ -12268,7 +12486,7 @@
       "protocolCheckPtr": "PTR Check",
       "formatCheck": "Basic Format Checks",
       "formatCheckMailfromEmpty": "Empty MAIL FROM",
-      "formatCheckMailfromInvalid": "Invalid MAIL FROM Format",
+      "formatCheckMailfromInvalid": "Invalid MAIL FROM",
       "formatCheckEnvelopeMismatch": "Envelope Header Mismatch",
       "displayNameSpoofing": "Display Name Spoofing Detection",
       "similarDomain": "Similar Domain Detection",
@@ -12279,8 +12497,37 @@
       "directionSend": "Outbound Direction",
       "directionInternal": "Internal Direction",
       "aggregateScope": "All Directions Aggregated",
+      "similarDirectionReceive": "Inbound Direction",
+      "similarDirectionSend": "Outbound Direction",
+      "similarDirectionInternal": "Intra-domain Direction",
       "phishingDetection": "Phishing Detection Agent",
-      "senderFilter": "Sender lists"
+      "phishingRuntimePolicy": "Runtime Policy",
+      "phishingRiskPolicy": "Risk Disposition Policy",
+      "phishingAdmissionRule": "Admission Rule",
+      "phishingSuspicious": "Suspicious",
+      "phishingLow": "Low risk",
+      "phishingMedium": "Medium risk",
+      "phishingHigh": "High risk",
+      "senderFilter": "Sender lists",
+      "behaviorControl": "Sending behavior control",
+      "contentRules": "Content rules",
+      "recipientCheck": "Recipient check",
+      "intentEngine": "Intent engine",
+      "attachmentSecurity": "Attachment security",
+      "advancedFilterRules": "Advanced filter rules",
+      "recipientLimit": "Count Limit Policy",
+      "recipientExistence": "Existence Verification Policy",
+      "attachment_antivirus": "Antivirus Engine",
+      "attachment_image_detection": "Image Recognition",
+      "attachment_encrypted": "Encrypted Attachments",
+      "intentDirection_receive": "Inbound Direction",
+      "intentDirection_send": "Outbound Direction",
+      "intentDirection_internal": "Internal Direction",
+      "intent_porn_gambling": "Porn/Gambling",
+      "intent_political": "Political/Subversive",
+      "intent_phishing": "Phishing",
+      "intent_spam": "Spam",
+      "intent_subscription": "Subscription"
     },
     "timeoutAlert": {
       "warning": "{count} policies have been in observe mode for over {days} days and are pending promotion evaluation.",
@@ -12330,7 +12577,115 @@
         "proceed": "Proceed",
         "enabled": "Enabled",
         "disabled": "Disabled",
-        "unset": "Not set"
+        "unset": "Not set",
+        "unavailable": {
+          "snapshot": "The configuration snapshot is missing or damaged; change details are unavailable",
+          "accessDenied": "You do not have permission to view these change details",
+          "notFound": "The version does not exist or has been removed; change details are unavailable",
+          "loadFailed": "Change details could not be loaded",
+          "difference": "The version difference could not be calculated; change details are unavailable"
+        }
+      },
+      "versionHistoryLabels": {
+        "configuredValue": "Configured",
+        "valueSeparator": ", ",
+        "headerMarkEntry": "{name}: {value}",
+        "fieldLabels": {
+          "action": "Action",
+          "detectionWindow": "Detection window",
+          "similarityThreshold": "Similarity threshold",
+          "triggerCount": "Trigger count",
+          "maxRecipientsPerWindow": "Maximum recipients per window",
+          "observationMode": "Observation mode",
+          "detectionMode": "Detection mode",
+          "directions": "Detection directions",
+          "ignoreCase": "Ignore letter case",
+          "ignoreReplyForwardPrefix": "Ignore Re:/Fwd: prefixes",
+          "ignoreNumbers": "Ignore numbers",
+          "similarSubject": "Similar-subject matching",
+          "subjectMarkEnabled": "Subject marking",
+          "subjectMarkPosition": "Subject mark position",
+          "subjectMarkContent": "Subject mark text",
+          "subjectPrefixMarkContent": "Subject prefix mark text",
+          "subjectSuffixMarkContent": "Subject suffix mark text",
+          "headerMarkEnabled": "Header marking",
+          "headerName": "Header name",
+          "headerValue": "Header value",
+          "headerMarks": "Header marks",
+          "bodyMarkEnabled": "Body marking",
+          "bodyMarkContent": "Body mark text",
+          "bodyPrefixMarkContent": "Body prefix mark text",
+          "bodySuffixMarkContent": "Body suffix mark text",
+          "condition": "Match condition",
+          "stage": "Processing stage",
+          "priority": "Priority",
+          "tags": "Tags",
+          "effectiveStart": "Effective from",
+          "effectiveEnd": "Effective until",
+          "runMode": "Run mode",
+          "observationAction": "Observation action",
+          "observationMark": "Observation marking",
+          "realtimeWait": "Real-time wait (minutes)",
+          "backgroundRecheck": "Background recheck (minutes)",
+          "continueAfterTimeout": "Continue in background after timeout",
+          "riskLevel": "Risk level",
+          "confidenceMin": "Minimum confidence",
+          "confidenceMax": "Maximum confidence",
+          "upperInclusive": "Includes upper bound",
+          "lowRiskCutoff": "Low-risk cutoff",
+          "mediumRiskCutoff": "Medium-risk cutoff",
+          "highRiskCutoff": "High-risk cutoff",
+          "baseDisposition": "Base disposition",
+          "markPositions": "Mark positions",
+          "markText": "Mark text",
+          "admissionRuleEnabled": "Admission rule status",
+          "admissionFilterEnabled": "Scope filtering",
+          "recipientGroups": "Recipient groups",
+          "recipientDepartments": "Recipient departments",
+          "recipientAddresses": "Recipient addresses",
+          "recipientTags": "Recipient tags",
+          "senderGroups": "Sender groups",
+          "senderDepartments": "Sender departments",
+          "senderAddresses": "Sender addresses",
+          "requireUrl": "Message contains a URL",
+          "maxMessageSize": "Maximum message size (KB)",
+          "senderFirstSeen": "First contact between sender and recipient",
+          "requireQrCode": "Message contains a QR code",
+          "requireExecutable": "Message contains an executable",
+          "formatVersion": "Configuration format version",
+          "policyFeature": "Policy module",
+          "policySubfeature": "Detection category",
+          "policyItem": "Detection item",
+          "configurationSource": "Configuration source",
+          "detectionType": "Detection type",
+          "mailDirection": "Mail direction",
+          "other": "Other setting"
+        },
+        "valueLabels": {
+          "observe": "Observation mode",
+          "realtime": "Real-time detection",
+          "aggregate": "Aggregate all directions",
+          "separate": "Detect each direction separately",
+          "receive": "Receiving direction",
+          "send": "Sending direction",
+          "inbound": "Inbound",
+          "outbound": "Outbound",
+          "internal": "Internal",
+          "prefix": "Prefix",
+          "suffix": "Suffix",
+          "subjectPrefix": "Subject prefix",
+          "subject": "Subject",
+          "header": "Header",
+          "body": "Body",
+          "suspicious": "Suspicious",
+          "low": "Low risk",
+          "medium": "Medium risk",
+          "high": "High risk",
+          "block": "Reject",
+          "review": "Review",
+          "markDelivery": "Mark and deliver",
+          "threshold": "Threshold mode"
+        }
       },
       "col": {
         "module": "Policy Module",
@@ -12360,7 +12715,8 @@
         "module_level_only": "Module-level attribution only",
         "unsupported_configured_action": "Proceed or unknown configured action; risk unavailable",
         "inconsistent_outcomes": "Outcome data is incomplete"
-      }
+      },
+      "observingTotal": "{count} policies currently in observation"
     },
     "modules": {
       "sender_filter": "Sender lists"
@@ -12368,6 +12724,8 @@
     "quality": {
       "incomplete": "Data is incomplete. Collection began: {since}; {pending} pending, {excluded} unattributable events.",
       "unavailable": "Modules unavailable in this product edition are excluded."
-    }
+    },
+    "tenantContext": "Operating as administrator of tenant {tenant}",
+    "currentTenant": "current tenant"
   }
 }

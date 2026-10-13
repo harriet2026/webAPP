@@ -150,6 +150,8 @@ export interface MailLogReleaseRef {
 }
 
 export interface MailLogDetail {
+  /** Owning tenant from the mail log, used for exact configuration drill-down. */
+  tenant_id?: number | null;
   id: number;
   message_id: string;
   message_uuid: string;
@@ -176,6 +178,7 @@ export interface MailLogDetail {
   subject: string;
   content?: string;
   html_content?: string;
+  attachment_count?: number | null;
   attachments?: AttachmentInfo[];
   urls?: string[];
 
